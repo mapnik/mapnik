@@ -46,7 +46,7 @@ public:
     ~feature_generator();
     bool generate(std::string & geojson, mapnik::feature_impl const& f);
 private:
-    boost::scoped_ptr<feature_generator_grammar<sink_type> > grammar_;
+    const boost::scoped_ptr<feature_generator_grammar<sink_type> > grammar_;
 };
 
 class MAPNIK_DECL geometry_generator : private mapnik::noncopyable
@@ -57,7 +57,7 @@ public:
     ~geometry_generator();
     bool generate(std::string & geojson, mapnik::geometry_container const& g);
 private:
-    boost::scoped_ptr<multi_geometry_generator_grammar<sink_type> > grammar_;
+    const boost::scoped_ptr<multi_geometry_generator_grammar<sink_type> > grammar_;
 };
 
 #else

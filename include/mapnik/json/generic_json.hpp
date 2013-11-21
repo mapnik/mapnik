@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,39 +20,36 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_FEATURE_COLLECTION_PARSER_HPP
-#define MAPNIK_FEATURE_COLLECTION_PARSER_HPP
+#ifndef MAPNIK_GENERIC_JSON_HPP
+#define MAPNIK_GENERIC_JSON_HPP
 
-// mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/noncopyable.hpp>
-#include <mapnik/unicode.hpp>
-
-// boost
-#include <boost/scoped_ptr.hpp>
-
-// stl
-#include <vector>
+#include <boost/variant.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 namespace mapnik { namespace json {
 
-template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
-template <typename Iterator> struct generic_json;
+namespace qi = boost::spirit::qi;
+namespace standard_wide =  boost::spirit::standard_wide;
+using standard_wide::space_type;
 
 template <typename Iterator>
-class MAPNIK_DECL feature_collection_parser : private mapnik::noncopyable
+struct generic_json
 {
-    typedef Iterator iterator_type;
-    typedef mapnik::feature_impl feature_type;
-public:
-    feature_collection_parser(generic_json<Iterator> & json, mapnik::context_ptr const& ctx, mapnik::transcoder const& tr);
-    ~feature_collection_parser();
-    bool parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features);
-private:
-    const boost::scoped_ptr<feature_collection_grammar<iterator_type,feature_type> > grammar_;
+    qi::rule<Iterator,space_type> value;
+    qi::symbols<char const, char const> unesc_char;
+    qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
+    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
+    qi::rule<Iterator,std::string(), space_type> string_;
+    qi::rule<Iterator,space_type> key_value;
+    qi::rule<Iterator,boost::variant<value_null,bool,
+                                     value_integer,value_double>(),space_type> number;
+    qi::rule<Iterator,space_type> object;
+    qi::rule<Iterator,space_type> array;
+    qi::rule<Iterator,space_type> pairs;
+    qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
 };
+
 
 }}
 
-#endif //MAPNIK_FEATURE_COLLECTION_PARSER_HPP
+#endif // MAPNIK_GENERIC_JSON_HPP

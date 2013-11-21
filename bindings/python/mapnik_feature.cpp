@@ -41,6 +41,7 @@
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/feature_parser.hpp>
 #include <mapnik/json/geojson_generator.hpp>
+#include <mapnik/json/generic_json.hpp>
 
 // stl
 #include <stdexcept>
@@ -72,7 +73,8 @@ mapnik::feature_ptr from_geojson_impl(std::string const& json, mapnik::context_p
 {
     mapnik::transcoder tr("utf8");
     mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-    mapnik::json::feature_parser<std::string::const_iterator> parser(tr);
+    mapnik::json::generic_json<std::string::const_iterator> json_base;
+    mapnik::json::feature_parser<std::string::const_iterator> parser(json_base, tr);
     if (!parser.parse(json.begin(), json.end(), *feature))
     {
         throw std::runtime_error("Failed to parse geojson feature");

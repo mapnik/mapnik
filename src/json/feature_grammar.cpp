@@ -33,8 +33,9 @@
 namespace mapnik { namespace json {
 
 template <typename Iterator, typename FeatureType>
-feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const& tr)
+feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & json,  mapnik::transcoder const& tr)
     : feature_grammar::base_type(feature,"feature"),
+      json_(json),
       put_property_(put_property(tr))
 {
     using qi::lit;
@@ -66,37 +67,37 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
     using phoenix::construct;
 
     // generic json types
-    value =  object | array | string_
-        | number
+    json_.value =  json_.object | json_.array | json_.string_
+        | json_.number
         ;
 
-    pairs = key_value % lit(',')
+    json_.pairs = json_.key_value % lit(',')
         ;
 
-    key_value = (string_ >> lit(':') >> value)
+    json_.key_value = (json_.string_ >> lit(':') >> json_.value)
         ;
 
-    object = lit('{')
-        >> *pairs
+    json_.object = lit('{')
+        >> *json_.pairs
         >> lit('}')
         ;
-    array = lit('[')
-        >> value >> *(lit(',') >> value)
+    json_.array = lit('[')
+        >> json_.value >> *(lit(',') >> json_.value)
         >> lit(']')
         ;
 // https://github.com/mapnik/mapnik/issues/1342
 #if BOOST_VERSION >= 104700
-    number %= strict_double
+    json_.number %= json_.strict_double
 #else
-    number = strict_double
+    json_.number = json_.strict_double
 #endif
-        | int__
+        | json_.int__
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]
         ;
 
-    unesc_char.add
+    json_.unesc_char.add
         ("\\\"", '\"') // quotation mark
         ("\\\\", '\\') // reverse solidus
         ("\\/", '/')   // solidus
@@ -107,10 +108,10 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         ("\\t", '\t')  // tab
         ;
 #if BOOST_VERSION > 104200
-    string_ %= lit('"') >> no_skip[*(unesc_char | "\\u" >> hex4 | (char_ - lit('"')))] >> lit('"')
+    json_.string_ %= lit('"') >> no_skip[*(json_.unesc_char | "\\u" >> json_.hex4 | (char_ - lit('"')))] >> lit('"')
         ;
 #else
-    string_ %= lit('"') >> lexeme[*(unesc_char | "\\u" >> hex4 | (char_ - lit('"')))] >> lit('"')
+    json_.string_ %= lit('"') >> lexeme[*(json_.unesc_char | "\\u" >> json_.hex4 | (char_ - lit('"')))] >> lit('"')
         ;
 #endif
     // geojson types
@@ -121,7 +122,8 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         ;
 
     feature = lit('{')
-        >> (feature_type | (lit("\"geometry\"") > lit(':') > geometry_grammar_(extract_geometry_(_r1))) | properties(_r1) | key_value) % lit(',')
+        >> (feature_type | (lit("\"geometry\"") >> lit(':')
+                            >> geometry_grammar_(extract_geometry_(_r1))) | properties(_r1) | json_.key_value) % lit(',')
         >> lit('}')
         ;
 
@@ -129,10 +131,10 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         >> lit(':') >> (lit('{') >>  attributes(_r1) >> lit('}')) | lit("null")
         ;
 
-    attributes = (string_ [_a = _1] >> lit(':') >> attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
+    attributes = (json_.string_ [_a = _1] >> lit(':') >> attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
-    attribute_value %= number | string_  ;
+    attribute_value %= json_.number | json_.string_  ;
 
     feature.name("Feature");
     properties.name("Properties");

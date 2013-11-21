@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
+#include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/feature.hpp>
 
@@ -53,14 +54,15 @@ struct generate_id
     mutable int id_;
 };
 
+
 template <typename Iterator, typename FeatureType>
 struct feature_collection_grammar :
     qi::grammar<Iterator, std::vector<feature_ptr>(), space_type>
 {
-    feature_collection_grammar(context_ptr const& ctx, mapnik::transcoder const& tr)
-        : feature_collection_grammar::base_type(feature_collection,"feature-collection"),
+    feature_collection_grammar( generic_json<Iterator> & json, context_ptr const& ctx, mapnik::transcoder const& tr)
+        : feature_collection_grammar::base_type(start,"start"),
+          feature_g(json,tr),
           ctx_(ctx),
-          feature_g(tr),
           generate_id_(1)
     {
         using qi::lit;
@@ -74,27 +76,38 @@ struct feature_collection_grammar :
         using phoenix::new_;
         using phoenix::val;
 
-        feature_collection = lit('{') >> (type | features) % lit(",") >> lit('}')
+        start = feature_collection | feature_from_geometry(_val) | feature(_val)
             ;
 
-        type = lit("\"type\"") > lit(":") > lit("\"FeatureCollection\"")
+        feature_collection = lit('{') >> (type | features) % lit(',') >> lit('}')
+            ;
+
+        type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
             ;
 
         features = lit("\"features\"")
-            > lit(":")
-            > lit('[')
-            > -(feature(_val) % lit(','))
-            > lit(']')
+            >> lit(':')
+            >> lit('[')
+            >> -(feature(_val) % lit(','))
+            >> lit(']')
             ;
 
         feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
             >> feature_g(*_a)[push_back(_r1,_a)]
             ;
 
+        feature_from_geometry =
+            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
+            >> geometry_g(extract_geometry_(*_a)) [push_back(_r1, _a)]
+            ;
+
+        start.name("start");
         type.name("type");
         features.name("features");
         feature.name("feature");
+        feature_from_geometry.name("feature-from-geometry");
         feature_g.name("feature-grammar");
+        geometry_g.name("geometry-grammar");
 
         qi::on_error<qi::fail>
             (
@@ -104,17 +117,21 @@ struct feature_collection_grammar :
                 << qi::_4
                 << phoenix::val(" here: \"")
                 << construct<std::string>(qi::_3, qi::_2)
-                << phoenix::val("\"")
+                << phoenix::val('\"')
                 << std::endl
                 );
     }
 
+    feature_grammar<Iterator,FeatureType> feature_g;
+    geometry_grammar<Iterator> geometry_g;
+    phoenix::function<extract_geometry> extract_geometry_;
     context_ptr ctx_;
-    qi::rule<Iterator, std::vector<feature_ptr>(), space_type> feature_collection; // START
+    qi::rule<Iterator, std::vector<feature_ptr>(), space_type> start; // START
+    qi::rule<Iterator, std::vector<feature_ptr>(), space_type> feature_collection;
     qi::rule<Iterator, space_type> type;
     qi::rule<Iterator, std::vector<feature_ptr>(), space_type> features;
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(std::vector<feature_ptr>&), space_type> feature;
-    feature_grammar<Iterator,FeatureType> feature_g;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(std::vector<feature_ptr>&), space_type> feature_from_geometry;
     boost::phoenix::function<generate_id> generate_id_;
 };
 

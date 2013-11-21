@@ -49,6 +49,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/json/feature_collection_parser.hpp>
+#include <mapnik/json/generic_json.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -131,7 +132,8 @@ geojson_datasource::geojson_datasource(parameters const& params)
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
     mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-    mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(ctx,*tr_);
+    mapnik::json::generic_json<boost::spirit::multi_pass<base_iterator_type> > json;
+    mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(json, ctx,*tr_);
     bool result = p.parse(begin,end, features_);
     if (!result)
     {
