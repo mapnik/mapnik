@@ -194,7 +194,7 @@ void render_with_detector(
     unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector);
+    mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector,scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
