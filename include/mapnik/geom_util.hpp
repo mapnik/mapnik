@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
+#include <mapnik/geometry.hpp> // for eGeomType (TODO: avoid this interdependence)
 
 // boost
 #include <boost/tuple/tuple.hpp>
