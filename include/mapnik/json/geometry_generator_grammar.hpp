@@ -79,15 +79,6 @@ struct get_first
     }
 };
 
-struct get_size
-{
-    typedef unsigned result_type;
-    result_type operator() (geometry_type const& geom) const
-    {
-        return geom.size();
-    }
-};
-
 struct multi_geometry_type
 {
     typedef std::tuple<unsigned,bool>  result_type;
