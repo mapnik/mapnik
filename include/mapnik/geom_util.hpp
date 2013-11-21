@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/geometry.hpp> // for eGeomType (TODO: avoid this interdependence)
+#include <mapnik/geometry.hpp> // for geometry_type::types (TODO: avoid this interdependence)
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -420,7 +420,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         return false;
     }
     unsigned count = 0;
-    mapnik::eGeomType geom_type = static_cast<mapnik::eGeomType>(path.type());
+    mapnik::geometry_type::types geom_type = static_cast<mapnik::geometry_type::types>(path.type());
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         if (command == SEG_CLOSE)
@@ -436,7 +436,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         }
         switch(geom_type)
         {
-        case mapnik::Polygon:
+        case mapnik::geometry_type::types::Polygon:
         {
             if ((((y1 <= y) && (y < y0)) ||
                  ((y0 <= y) && (y < y1))) &&
@@ -444,7 +444,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
                 inside=!inside;
             break;
         }
-        case mapnik::LineString:
+        case mapnik::geometry_type::types::LineString:
         {
             double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
             if (distance < tol)
