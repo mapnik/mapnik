@@ -177,6 +177,27 @@ struct multi_geometry_type
         return std::tuple<unsigned,bool>(type, collection);
     }
 };
+
+
+struct not_empty
+{
+    template <typename T>
+    struct result { typedef bool type; };
+
+    bool operator() (geometry_container const& cont) const
+    {
+        geometry_container::const_iterator itr = cont.begin();
+        geometry_container::const_iterator end = cont.end();
+
+        for (; itr!=end; ++itr)
+        {
+            if (itr->size() > 0) return true;
+        }
+        return false;
+    }
+};
+
+
 #endif
 
 
