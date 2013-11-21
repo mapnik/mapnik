@@ -78,7 +78,7 @@ geometry_grammar<Iterator>::geometry_grammar()
     geometry = (lit('{')[_a = 0 ]
                 >> lit("\"type\"") >> lit(':') >> geometry_dispatch[_a = _1] // <---- should be Nabialek trick!
                 >> lit(',')
-                >> (lit("\"coordinates\"") > lit(':') > (lit("null") | coordinates(_r1,_a))
+                >> (lit("\"coordinates\"") > lit(':') > coordinates(_r1,_a)
                     |
                     lit("\"geometries\"") > lit(':')
                     >> lit('[') >> geometry_collection(_r1) >> lit(']'))
