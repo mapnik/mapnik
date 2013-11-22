@@ -33,6 +33,7 @@
 // boost
 #include <memory>
 
+
 // stl
 #include <string>
 
@@ -60,10 +61,10 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     // not able to compile make_shared used within a constructor
     text_symbolizer(text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
     text_symbolizer(expression_ptr name, std::string const& face_name,
-                    float size, color const& fill,
+                    double size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
         );
-    text_symbolizer(expression_ptr name, float size, color const& fill,
+    text_symbolizer(expression_ptr name, double size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
         );
     text_symbolizer(text_symbolizer const& rhs);
@@ -90,8 +91,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_character_spacing(double spacing);
     double get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
     void set_label_spacing(double spacing);
-    double get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
-    void set_label_position_tolerance(double tolerance);
+    unsigned get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
+    void set_label_position_tolerance(unsigned tolerance);
     bool get_force_odd_labels() const func_deprecated; // try render an odd amount of labels
     void set_force_odd_labels(bool force);
     double get_max_char_angle_delta() const func_deprecated; // maximum change in angle between adjacent characters
@@ -115,8 +116,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_vertical_alignment(vertical_alignment_e valign);
     vertical_alignment_e get_vertical_alignment() const func_deprecated;
     void set_displacement(double x, double y);
-    void set_displacement(position const& p);
-    position const& get_displacement() const func_deprecated;
+    void set_displacement(pixel_position const& p);
+    pixel_position const& get_displacement() const func_deprecated;
     void set_avoid_edges(bool avoid);
     bool get_avoid_edges() const func_deprecated;
     void set_minimum_distance(double distance);

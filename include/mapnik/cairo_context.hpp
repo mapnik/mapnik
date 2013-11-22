@@ -33,6 +33,9 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 
@@ -317,9 +320,9 @@ public:
     void translate(double x, double y);
     void save();
     void restore();
-    void show_glyph(unsigned long index, double x, double y);
-    void glyph_path(unsigned long index, double x, double y);
-    void add_text(text_path const& path,
+    void show_glyph(unsigned long index, pixel_position const& pos);
+    void glyph_path(unsigned long index, pixel_position const& pos);
+    void add_text(glyph_positions_ptr pos,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> & font_manager,
                   double scale_factor = 1.0);

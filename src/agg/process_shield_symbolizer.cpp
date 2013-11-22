@@ -21,15 +21,10 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_util.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
-#include <mapnik/pixel_position.hpp>
-#include <mapnik/text/face.hpp>
-
-// boost
+#include <mapnik/text/renderer.hpp>
 
 namespace mapnik {
 
@@ -39,42 +34,24 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
     box2d<double> clip_box = clipping_extent();
-    shield_symbolizer_helper<face_manager<freetype_engine>,
-        label_collision_detector4> helper(
+    text_symbolizer_helper helper(
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
             t_, font_manager_, *detector_,
             clip_box);
 
-    text_renderer<T> ren(*current_buffer_,
-                         font_manager_,
-                         sym.get_halo_rasterizer(),
-                         sym.comp_op(),
-                         scale_factor_);
+    agg_text_renderer<T> ren(*current_buffer_, sym.get_halo_rasterizer(), sym.comp_op(), scale_factor_, font_manager_.get_stroker());
 
-    while (helper.next())
+    placements_list const& placements = helper.get();
+    for (glyph_positions_ptr glyphs : placements)
     {
-        placements_type const& placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
-        {
-            // get_marker_position returns (minx,miny) corner position,
-            // while (currently only) agg_renderer::render_marker newly
-            // expects center position;
-            // until all renderers and shield_symbolizer_helper are
-            // modified accordingly, we must adjust the position here
-            pixel_position pos = helper.get_marker_position(placements[ii]);
-            pos.x += 0.5 * helper.get_marker_width();
-            pos.y += 0.5 * helper.get_marker_height();
-            render_marker(pos,
-                          helper.get_marker(),
-                          helper.get_image_transform(),
-                          sym.get_opacity(),
-                          sym.comp_op());
-
-            ren.prepare_glyphs(placements[ii]);
-            ren.render(placements[ii].center);
-        }
+        if (glyphs->marker())
+            render_marker(glyphs->marker_pos(),
+                          *(glyphs->marker()->marker),
+                          glyphs->marker()->transform,
+                          sym.get_opacity(), sym.comp_op());
+        ren.render(*glyphs);
     }
 }
 

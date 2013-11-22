@@ -27,7 +27,6 @@
 //boost
 #include <boost/property_tree/ptree.hpp>
 
-
 namespace mapnik
 {
 
@@ -99,6 +98,8 @@ text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_
     {
         if (itr->is_text() || !itr->is("Placement")) continue;
         text_symbolizer_properties &p = list->add();
+        p.format = std::make_shared<char_properties>(*(p.format)); //Make a deep copy
+        //TODO: This needs a real copy constructor for text_symbolizer_properties
         p.from_xml(*itr, fontsets);
 //TODO:        if (strict_ &&
 //                !p.format.fontset.size())

@@ -76,10 +76,10 @@ bool shield_symbolizer::get_unlock_image() const
 
 void shield_symbolizer::set_shield_displacement(double shield_dx,double shield_dy)
 {
-    shield_displacement_ = std::make_pair(shield_dx, shield_dy);
+    shield_displacement_.set(shield_dx, shield_dy);
 }
 
-position const& shield_symbolizer::get_shield_displacement() const
+pixel_position const& shield_symbolizer::get_shield_displacement() const
 {
     return shield_displacement_;
 }

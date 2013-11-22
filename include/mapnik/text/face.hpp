@@ -19,77 +19,35 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef MAPNIK_FACE_HPP
+#define MAPNIK_FACE_HPP
 
-
-#ifndef MAPNIK_FONT_UTIL_HPP
-#define MAPNIK_FONT_UTIL_HPP
-
-// mapnik
+//mapnik
+#include <mapnik/text/glyph_info.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
-
-#include <string>
 
 // freetype2
 extern "C"
 {
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include FT_GLYPH_H
 #include FT_STROKER_H
 }
 
+//stl
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace mapnik
 {
-struct char_properties;
-
-struct glyph_t : mapnik::noncopyable
-{
-    FT_Glyph image;
-    char_properties *properties;
-    glyph_t(FT_Glyph image_, char_properties *properties_)
-        : image(image_),
-        properties(properties_) {}
-    ~glyph_t()
-    {
-        FT_Done_Glyph(image);
-    }
-};
-
-
-// FT_Stroker wrapper
-class stroker : mapnik::noncopyable
-{
-public:
-    explicit stroker(FT_Stroker s)
-        : s_(s) {}
-
-    void init(double radius)
-    {
-        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
-                       FT_STROKER_LINECAP_ROUND,
-                       FT_STROKER_LINEJOIN_ROUND,
-                       0);
-    }
-
-    FT_Stroker const& get() const
-    {
-        return s_;
-    }
-
-    ~stroker()
-    {
-        FT_Stroker_Done(s_);
-    }
-private:
-    FT_Stroker s_;
-};
-
 
 class font_face : mapnik::noncopyable
 {
 public:
-    font_face(FT_Face face)
-        : face_(face) {}
+    font_face(FT_Face face);
 
     std::string family_name() const
     {
@@ -101,45 +59,59 @@ public:
         return std::string(face_->style_name);
     }
 
-    FT_GlyphSlot glyph() const
-    {
-        return face_->glyph;
-    }
-
     FT_Face get_face() const
     {
         return face_;
     }
 
-    unsigned get_char(unsigned c) const
-    {
-        return FT_Get_Char_Index(face_, c);
-    }
+    double get_char_height() const;
 
-    bool set_pixel_sizes(unsigned size)
-    {
-        if (! FT_Set_Pixel_Sizes( face_, 0, size ))
-            return true;
-        return false;
-    }
+    bool set_character_sizes(double size);
 
-    bool set_character_sizes(double size)
-    {
-        if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
-            return true;
-        return false;
-    }
+    void glyph_dimensions(glyph_info &glyph) const;
 
-    ~font_face()
-    {
-        FT_Done_Face(face_);
-    }
+    ~font_face();
 
 private:
     FT_Face face_;
+    mutable std::map<glyph_index_t, glyph_info> dimension_cache_;
+    mutable double char_height_;
+};
+typedef std::shared_ptr<font_face> face_ptr;
+
+
+class MAPNIK_DECL font_face_set : private mapnik::noncopyable
+{
+public:
+    typedef std::vector<face_ptr>::iterator iterator;
+    font_face_set(void) : faces_(){}
+
+    void add(face_ptr face);
+    void set_character_sizes(double size);
+
+    unsigned size() const { return faces_.size(); }
+    iterator begin() { return faces_.begin(); }
+    iterator end() { return faces_.end(); }
+private:
+    std::vector<face_ptr> faces_;
+};
+typedef std::shared_ptr<font_face_set> face_set_ptr;
+
+
+// FT_Stroker wrapper
+class stroker : mapnik::noncopyable
+{
+public:
+    explicit stroker(FT_Stroker s)
+        : s_(s) {}
+    ~stroker();
+
+    void init(double radius);
+    FT_Stroker const& get() const { return s_; }
+private:
+    FT_Stroker s_;
 };
 
-}
+} //ns mapnik
 
-
-#endif // MAPNIK_FONT_UTIL_HPP
+#endif // FACE_HPP

@@ -33,7 +33,7 @@ namespace mapnik
 typedef std::pair<double,double> dimension_type;
 
 class MAPNIK_DECL text_placements;
-/** Generate a possible placement and store results of placement_finder.
+/** Generate a possible placement.
  * This placement has first to be tested by placement_finder to verify it
  * can actually be used.
  */
@@ -58,16 +58,7 @@ public:
 
     /** Scale factor used by the renderer. */
     double scale_factor;
-    /** Set scale factor. */
-    void set_scale_factor(double factor) { scale_factor = factor; }
-    /** Get scale factor. */
-    double get_scale_factor() const { return scale_factor; }
-    /** Get label spacing taking the scale factor into account. */
-    double get_actual_label_spacing() const { return scale_factor * properties.label_spacing; }
-    /** Get minimum distance taking the scale factor into account. */
-    double get_actual_minimum_distance() const { return scale_factor * properties.minimum_distance; }
-    /** Get minimum padding taking the scale factor into account. */
-    double get_actual_minimum_padding() const { return scale_factor * properties.minimum_padding; }
+
 };
 
 typedef std::shared_ptr<text_placement_info> text_placement_info_ptr;

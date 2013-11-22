@@ -46,7 +46,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/marker_cache.hpp> // for known_svg_prefix_
-
+#include <mapnik/pixel_position.hpp>
 
 using mapnik::symbolizer;
 using mapnik::rule;
@@ -66,28 +66,26 @@ using mapnik::path_expression_ptr;
 using mapnik::guess_type;
 using mapnik::expression_ptr;
 using mapnik::parse_path;
-using mapnik::position;
-
 
 namespace {
 using namespace boost::python;
 
 tuple get_shield_displacement(const shield_symbolizer& s)
 {
-    position const& pos = s.get_shield_displacement();
-    return boost::python::make_tuple(pos.first, pos.second);
+    mapnik::pixel_position const& pos = s.get_shield_displacement();
+    return boost::python::make_tuple(pos.x, pos.y);
 }
 
 void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
 {
-    s.get_placement_options()->defaults.displacement.first = extract<double>(arg[0]);
-    s.get_placement_options()->defaults.displacement.second = extract<double>(arg[1]);
+    s.get_placement_options()->defaults.displacement.x = extract<double>(arg[0]);
+    s.get_placement_options()->defaults.displacement.y = extract<double>(arg[1]);
 }
 
 tuple get_text_displacement(const shield_symbolizer& t)
 {
-    position const& pos = t.get_placement_options()->defaults.displacement;
-    return boost::python::make_tuple(pos.first, pos.second);
+    mapnik::pixel_position const& pos = t.get_placement_options()->defaults.displacement;
+    return boost::python::make_tuple(pos.x, pos.y);
 }
 
 void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)

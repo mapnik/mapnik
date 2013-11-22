@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 #define TEXT_PROPERTIES_HPP
 
 // mapnik
+#include <mapnik/text/char_properties_ptr.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/value.hpp>
@@ -31,6 +32,7 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/text/formatting/base.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // stl
 #include <map>
@@ -67,14 +69,12 @@ struct MAPNIK_DECL char_properties
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     double text_opacity;
-    bool wrap_before;
     unsigned wrap_char;
     text_transform_e text_transform; //Per expression
     color fill;
     color halo_fill;
     double halo_radius;
 };
-
 
 enum label_placement_enum
 {
@@ -120,8 +120,19 @@ enum justify_alignment
 
 DEFINE_ENUM(justify_alignment_e, justify_alignment);
 
-typedef std::pair<double, double> position;
-class processed_text;
+enum text_upright
+{
+    UPRIGHT_AUTO,
+    UPRIGHT_LEFT,
+    UPRIGHT_RIGHT,
+    UPRIGHT_LEFT_ONLY,
+    UPRIGHT_RIGHT_ONLY,
+    text_upright_MAX
+};
+
+DEFINE_ENUM(text_upright_e, text_upright);
+
+class text_layout;
 
 
 /** Contains all text symbolizer properties which are not directly related to text formatting. */
@@ -136,7 +147,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     /** Takes a feature and produces formated text as output.
      * The output object has to be created by the caller and passed in for thread safety.
      */
-    void process(processed_text &output, feature_impl const& feature) const;
+    void process(text_layout &output, feature_impl const& feature) const;
     /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Sets new format tree. */
@@ -149,7 +160,7 @@ struct MAPNIK_DECL text_symbolizer_properties
 
     //Per symbolizer options
     expression_ptr orientation;
-    position displacement;
+    pixel_position displacement;
     label_placement_e label_placement;
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
@@ -170,8 +181,11 @@ struct MAPNIK_DECL text_symbolizer_properties
     bool largest_bbox_only;
     double text_ratio;
     double wrap_width;
+    bool wrap_before;
+    bool rotate_displacement;
+    text_upright_e upright;
     /** Default values for char_properties. */
-    char_properties format;
+    char_properties_ptr format;
 private:
     /** A tree of formatting::nodes which contain text and formatting information. */
     formatting::node_ptr tree_;

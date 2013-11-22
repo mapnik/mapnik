@@ -32,7 +32,6 @@
 namespace mapnik {
 
 class feature_impl;
-class processed_text;
 class xml_node;
 struct char_properties;
 
@@ -41,7 +40,7 @@ class MAPNIK_DECL expression_format: public node {
 public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties const& p, feature_impl const& feature, processed_text &output) const;
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const;
     virtual void add_expressions(expression_set &output) const;
 
     void set_child(node_ptr child);
@@ -52,7 +51,6 @@ public:
     expression_ptr character_spacing;
     expression_ptr line_spacing;
     expression_ptr text_opacity;
-    expression_ptr wrap_before;
     expression_ptr wrap_char;
     expression_ptr fill;
     expression_ptr halo_fill;

@@ -285,11 +285,6 @@ class _Color(Color,_injector):
     def __repr__(self):
         return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
 
-class _ProcessedText(ProcessedText, _injector):
-    def append(self, properties, text):
-        #More pythonic name
-        self.push_back(properties, text)
-
 class _Symbolizers(Symbolizers,_injector):
 
     def __getitem__(self, idx):

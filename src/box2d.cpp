@@ -361,9 +361,34 @@ bool box2d<T>::valid() const
 }
 
 template <typename T>
+void box2d<T>::move(T x, T y)
+{
+    minx_ += x;
+    maxx_ += x;
+    miny_ += y;
+    maxy_ += y;
+}
+
+template <typename T>
 box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
 {
     expand_to_include(other);
+    return *this;
+}
+
+template <typename T>
+box2d<T> box2d<T>::operator+ (T other) const
+{
+    return box2d<T>(minx_ - other, miny_ - other, maxx_ + other, maxy_ + other);
+}
+
+template <typename T>
+box2d<T>& box2d<T>::operator+= (T other)
+{
+    minx_ -= other;
+    miny_ -= other;
+    maxx_ += other;
+    maxy_ += other;
     return *this;
 }
 

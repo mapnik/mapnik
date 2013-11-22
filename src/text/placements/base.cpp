@@ -19,9 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+// mapnik
 #include <mapnik/text/placements/base.hpp>
 
 namespace mapnik {
+
 text_placements::text_placements() : defaults()
 {
 }
@@ -39,7 +41,7 @@ text_placement_info::text_placement_info(text_placements const* parent,
     : properties(parent->defaults),
       scale_factor(scale_factor_)
 {
-
+    properties.format = std::make_shared<char_properties>(*(properties.format));
 }
 
 } //ns mapnik

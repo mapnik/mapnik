@@ -35,7 +35,7 @@ class MAPNIK_DECL list_node: public node {
 public:
     list_node() : node(), children_() {}
     virtual void to_xml(boost::property_tree::ptree &xml) const;
-    virtual void apply(char_properties const& p, feature_impl const& feature, processed_text &output) const;
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const;
     virtual void add_expressions(expression_set &output) const;
 
     void push_back(node_ptr n);
@@ -49,4 +49,3 @@ protected:
 } //ns mapnik
 
 #endif // FORMATTING_LIST_HPP
-

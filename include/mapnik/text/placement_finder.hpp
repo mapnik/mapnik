@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,146 +19,95 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
 #ifndef MAPNIK_PLACEMENT_FINDER_HPP
 #define MAPNIK_PLACEMENT_FINDER_HPP
 
-// mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/text_path.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/ctrans.hpp>
+//mapnik
+#include <mapnik/box2d.hpp>
+#include <mapnik/pixel_position.hpp>
+#include <mapnik/text/layout.hpp>
+#include <mapnik/text/placements/base.hpp>
+#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/rotation.hpp>
 #include <mapnik/noncopyable.hpp>
-
-// agg
-#include "agg_conv_clip_polyline.h"
-
-// stl
-#include <queue>
 
 namespace mapnik
 {
 
-class text_placement_info;
-class string_info;
-class text_path;
-
-typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
-typedef coord_transform<CoordTransform,geometry_type> PathType;
-
+class label_collision_detector4;
 typedef label_collision_detector4 DetectorType;
 
+class feature_impl;
+class vertex_cache;
 
-template <typename DetectorT>
 class placement_finder : mapnik::noncopyable
 {
 public:
-    placement_finder(text_placement_info const& placement_info,
-                     string_info const& info,
-                     DetectorT & detector,
-                     box2d<double> const& extent);
+    placement_finder(feature_impl const& feature,
+                        DetectorType & detector,
+                        box2d<double> const& extent,
+                        text_placement_info_ptr placement_info,
+                        face_manager_freetype & font_manager,
+                        double scale_factor);
 
-    // Try place a single label at the given point. */
-    void find_point_placement(double pos_x, double pos_y, double angle=0.0);
-
-    // Iterate over the given path, placing point labels with respect to label_spacing. */
+    /** Try to place a single label at the given point. */
+    bool find_point_placement(pixel_position const& pos);
+    /** Iterate over the given path, placing line-following labels or point labels with respect to label_spacing. */
     template <typename T>
-    void find_point_placements(T & path);
+    bool find_line_placements(T & path, bool points);
+    /** Try next position alternative from placement_info. */
+    bool next_position();
 
-    // Iterate over the given path, placing line-following labels with respect to label_spacing. */
-    template <typename T>
-    void find_line_placements(T & path);
+    placements_list const& placements() const { return placements_; }
 
-    // Add placements to detector. */
-    void update_detector();
-
-    // Remove old placements. */
-    void clear_placements();
-
-    inline placements_type const& get_results() { return placements_; }
-
-    std::vector<box2d<double> > & additional_boxes() { return additional_boxes_;}
-    std::vector<box2d<double> > const& additional_boxes() const { return additional_boxes_;}
-
-    void set_collect_extents(bool collect) { collect_extents_ = collect; }
-    bool get_collect_extents() const { return collect_extents_; }
-
-    box2d<double> const& get_extents() const { return extents_; }
-
+    void set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
 private:
-    ///Helpers for find_line_placement
-
-    ///Returns a possible placement on the given line, does not test for collisions
-    //index: index of the node the current line ends on
-    //distance: distance along the given index that the placement should start at, this includes the offset,
-    //          as such it may be > or < the length of the current line, so this must be checked for
-    //orientation: if set to != 0 the placement will be attempted with the given orientation
-    //             otherwise it will autodetect the orientation.
-    //             If >= 50% of the characters end up upside down, it will be retried the other way.
-    //             RETURN: 1/-1 depending which way up the string ends up being.
-    std::unique_ptr<text_path> get_placement_offset(std::vector<vertex2d> const& path_positions,
-                                                  std::vector<double> const& path_distances,
-                                                  int & orientation, std::size_t index, double distance);
-
-    ///Tests whether the given text_path be placed without a collision
-    // Returns true if it can
-    // NOTE: This edits p.envelopes so it can be used afterwards (you must clear it otherwise)
-    bool test_placement(std::unique_ptr<text_path> const& current_placement, int orientation);
-
-    ///Does a line-circle intersect calculation
-    // NOTE: Follow the strict pre conditions
-    // Pre Conditions: x1,y1 is within radius distance of cx,cy. x2,y2 is outside radius distance of cx,cy
-    //                 This means there is exactly one intersect point
-    // Result is returned in ix, iy
-    void find_line_circle_intersection(
-        double cx, double cy, double radius,
-        double x1, double y1, double x2, double y2,
-        double & ix, double & iy);
-
-    void find_line_breaks();
-    void init_string_size();
     void init_alignment();
-    void adjust_position(text_path *current_placement);
-    void add_line(double width, double height, bool first_line);
+    pixel_position alignment_offset() const;
+    double jalign_offset(double line_width) const;
 
-    ///General Internals
-    DetectorT & detector_;
-    box2d<double> const& dimensions_;
-    string_info const& info_;
-    text_symbolizer_properties const& p;
-    text_placement_info const& pi;
-    // Length of the longest line after linebreaks.
-    // Before find_line_breaks() this is the total length of the string.
-    double string_width_;
-    // Height of the string after linebreaks.
-    // Before find_line_breaks() this is the total length of the string.
-    double string_height_;
-    // Height of the tallest font in the first line not including line spacing.
-    // Used to determine the correct offset for the first line.
-    double first_line_space_;
+    bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
+    /** Moves dx pixels but makes sure not to fall of the end. */
+    void path_move_dx(vertex_cache &pp);
+    /** Normalize angle in range [-pi, +pi]. */
+    static double normalize_angle(double angle);
+    /** Adjusts user defined spacing to place an integer number of labels. */
+    double get_spacing(double path_length, double layout_width) const;
+    /** Checks for collision. */
+    bool collision(box2d<double> const& box) const;
+    /** Adds marker to glyph_positions and to collision detector. Returns false if there is a collision. */
+    bool add_marker(glyph_positions_ptr glyphs, pixel_position const& pos) const;
+    /** Maps upright==auto, left_only and right_only to left,right to simplify processing.
+        angle = angle of at start of line (to estimate best option for upright==auto) */
+    text_upright_e simplify_upright(text_upright_e upright, double angle) const;
+    box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
+    feature_impl const& feature_;
+    DetectorType &detector_;
+    box2d<double> const& extent_;
+    // Precalculated values for maximum performance
+    rotation orientation_;
+    text_layout layout_;
+    text_placement_info_ptr info_;
+    bool valid_;
+
     vertical_alignment_e valign_;
-    horizontal_alignment_e halign_;
+    /** Horizontal alignment for point placements. */
+    horizontal_alignment_e halign_point_;
+    /** Horizontal alignment for line placements. */
+    horizontal_alignment_e halign_line_;
     justify_alignment_e jalign_;
-    std::vector<std::size_t> line_breaks_;
-    std::vector<std::pair<double, double> > line_sizes_;
-    std::queue< box2d<double> > envelopes_;
-    // Used to return all placements found. */
-    placements_type placements_;
-    // Bounding box of all texts placed. */
-    box2d<double> extents_;
-    // Collect a bounding box of all texts placed. */
-    bool collect_extents_;
+    double scale_factor_;
 
-    // Additional boxes to take into account when finding placement.
-    // Used for finding line placements where multiple placements are returned.
-    // Boxes are relative to starting point of current placement.
-    // Only used for point placements!
-    std::vector<box2d<double> > additional_boxes_;
+    placements_list placements_;
+
+    //ShieldSymbolizer
+    bool has_marker_;
+    marker_info_ptr marker_;
+    box2d<double> marker_box_;
+    bool marker_unlocked_;
+    pixel_position marker_displacement_;
 };
-}
 
+}//ns mapnik
 
-#endif // MAPNIK_PLACEMENT_FINDER_HPP
+#endif // PLACEMENT_FINDER_HPP

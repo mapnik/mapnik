@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,10 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/layout.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/processed_text.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text/formatting/text.hpp>
@@ -31,11 +31,70 @@
 #include <mapnik/config_error.hpp>
 
 // boost
+
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
 {
 using boost::optional;
+
+
+static const char * label_placement_strings[] = {
+    "point",
+    "line",
+    "vertex",
+    "interior",
+    ""
+};
+IMPLEMENT_ENUM(label_placement_e, label_placement_strings)
+
+static const char * vertical_alignment_strings[] = {
+    "top",
+    "middle",
+    "bottom",
+    "auto",
+    ""
+};
+IMPLEMENT_ENUM(vertical_alignment_e, vertical_alignment_strings)
+
+static const char * horizontal_alignment_strings[] = {
+    "left",
+    "middle",
+    "right",
+    "auto",
+    ""
+};
+IMPLEMENT_ENUM(horizontal_alignment_e, horizontal_alignment_strings)
+
+static const char * justify_alignment_strings[] = {
+    "left",
+    "center", // not 'middle' in order to match CSS
+    "right",
+    "auto",
+    ""
+};
+IMPLEMENT_ENUM(justify_alignment_e, justify_alignment_strings)
+
+static const char * text_transform_strings[] = {
+    "none",
+    "uppercase",
+    "lowercase",
+    "capitalize",
+    ""
+};
+IMPLEMENT_ENUM(text_transform_e, text_transform_strings)
+
+
+static const char * text_upright_strings[] = {
+    "auto",
+    "left",
+    "right",
+    "left_only",
+    "right_only",
+    ""
+};
+IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
+
 
 text_symbolizer_properties::text_symbolizer_properties() :
     orientation(),
@@ -56,13 +115,16 @@ text_symbolizer_properties::text_symbolizer_properties() :
     largest_bbox_only(true),
     text_ratio(0.0),
     wrap_width(0.0),
-    format(),
+    wrap_before(false),
+    rotate_displacement(false),
+    upright(UPRIGHT_AUTO),
+    format(std::make_shared<char_properties>()),
     tree_()
 {
 
 }
 
-void text_symbolizer_properties::process(processed_text &output, feature_impl const& feature) const
+void text_symbolizer_properties::process(text_layout &output, feature_impl const& feature) const
 {
     output.clear();
     if (tree_) {
@@ -92,6 +154,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (text_ratio_) text_ratio = *text_ratio_;
     optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
     if (wrap_width_) wrap_width = *wrap_width_;
+    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
+    if (wrap_before_) wrap_before = *wrap_before_;
     optional<double> label_position_tolerance_ = sym.get_opt_attr<double>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
@@ -119,10 +183,14 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (jalign_) jalign = *jalign_;
     optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
     if (orientation_) orientation = *orientation_;
+    optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
+    if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
+    optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");
+    if (upright_) upright = *upright_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
-    if (dx) displacement.first = *dx;
+    if (dx) displacement.x = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
-    if (dy) displacement.second = *dy;
+    if (dy) displacement.y = *dy;
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
@@ -134,7 +202,7 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
         set_old_style_expression(*name_);
     }
 
-    format.from_xml(sym, fontsets);
+    format->from_xml(sym, fontsets);
     formatting::node_ptr n(formatting::node::from_xml(sym));
     if (n) set_format_tree(n);
 }
@@ -151,13 +219,13 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
         }
     }
 
-    if (displacement.first != dfl.displacement.first || explicit_defaults)
+    if (displacement.x != dfl.displacement.x || explicit_defaults)
     {
-        set_attr(node, "dx", displacement.first);
+        set_attr(node, "dx", displacement.x);
     }
-    if (displacement.second != dfl.displacement.second || explicit_defaults)
+    if (displacement.y != dfl.displacement.y || explicit_defaults)
     {
-        set_attr(node, "dy", displacement.second);
+        set_attr(node, "dy", displacement.y);
     }
     if (label_placement != dfl.label_placement || explicit_defaults)
     {
@@ -174,6 +242,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (wrap_width != dfl.wrap_width || explicit_defaults)
     {
         set_attr(node, "wrap-width", wrap_width);
+    }
+    if (wrap_before != dfl.wrap_before || explicit_defaults)
+    {
+        set_attr(node, "wrap-before", wrap_before);
     }
     if (label_position_tolerance != dfl.label_position_tolerance || explicit_defaults)
     {
@@ -223,7 +295,15 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "vertical-alignment", valign);
     }
-    format.to_xml(node, explicit_defaults, dfl.format);
+    if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
+    {
+        set_attr(node, "rotate-displacement", rotate_displacement);
+    }
+    if (upright != dfl.upright || explicit_defaults)
+    {
+        set_attr(node, "upright", upright);
+    }
+    format->to_xml(node, explicit_defaults, *(dfl.format));
     if (tree_) tree_->to_xml(node);
 }
 
@@ -246,7 +326,6 @@ char_properties::char_properties() :
     character_spacing(0),
     line_spacing(0),
     text_opacity(1.0),
-    wrap_before(false),
     wrap_char(' '),
     text_transform(NONE),
     fill(color(0,0,0)),
@@ -268,8 +347,6 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
     if (halo_fill_) halo_fill = *halo_fill_;
     optional<double> halo_radius_ = sym.get_opt_attr<double>("halo-radius");
     if (halo_radius_) halo_radius = *halo_radius_;
-    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
-    if (wrap_before_) wrap_before = *wrap_before_;
     optional<text_transform_e> tconvert_ = sym.get_opt_attr<text_transform_e>("text-transform");
     if (tconvert_) text_transform = *tconvert_;
     optional<double> line_spacing_ = sym.get_opt_attr<double>("line-spacing");
@@ -333,10 +410,6 @@ void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_de
     if (halo_fill != dfl.halo_fill || explicit_defaults)
     {
         set_attr(node, "halo-fill", halo_fill);
-    }
-    if (wrap_before != dfl.wrap_before || explicit_defaults)
-    {
-        set_attr(node, "wrap-before", wrap_before);
     }
     if (wrap_char != dfl.wrap_char || explicit_defaults)
     {
