@@ -2,13 +2,15 @@ language: cpp
 
 compiler:
  - gcc
+ - clang
 
 before_install:
  - sudo add-apt-repository -y ppa:mapnik/boost
- - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+ - if [ "${CXX}" = 'g++' ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi;
  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
  - sudo apt-get update
- - sudo apt-get install gcc-4.7 g++-4.7 make libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev postgresql-server-dev*
+ - if [ "${CXX}" = 'g++' ]; then sudo apt-get install gcc-4.7 g++-4.7; fi;
+ - sudo apt-get install make libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev postgresql-server-dev*
  - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.24.tar.bz2
  - tar xf harfbuzz-0.9.24.tar.bz2
  - cd harfbuzz-0.9.24
@@ -17,19 +19,20 @@ before_install:
  - cd ../
 
 install:
- - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.7" && export CC="gcc-4.7"; fi; ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS=python BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True || cat config.log
+ - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.7" && export CC="gcc-4.7"; fi;
+ - ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True || cat config.log
  - JOBS=1 make
 
 env:
-  - TESTS_TO_RUN=python
-  - TESTS_TO_RUN=cpp
-  - TESTS_TO_RUN=visual
+  - TESTS_TO_RUN=python BINDINGS=python CPP_TEST=false BENCHMARK=false
+  - TESTS_TO_RUN=visual BINDINGS=python CPP_TEST=false BENCHMARK=false
+  - TESTS_TO_RUN=cpp BINDINGS=none CPP_TEST=true BENCHMARK=true
 
 before_script:
  - make test-$TESTS_TO_RUN
 
 script:
- - make bench
+ - if [ "${BENCHMARK}" = true ]; then make bench; fi;
 
 notifications:
   irc:
