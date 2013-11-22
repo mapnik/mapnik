@@ -5,11 +5,18 @@ compiler:
  - clang
 
 before_install:
- - sudo add-apt-repository -y ppa:mapnik/boost
+ # we need at least g++-4.7 for c++11 features
  - if [ "${CXX}" = 'g++' ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi;
+ # we need at least clang++-3.2 for c++11 features
+ - if [ "${CXX}" = 'clang++' ]; sudo apt-add-repository ppa:timchen119/llvm; fi;
+ # grab more recent gdal/proj
  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+ # more recent boost
+ - sudo add-apt-repository -y ppa:mapnik/boost
  - sudo apt-get update
+ # upgrade compilers
  - if [ "${CXX}" = 'g++' ]; then sudo apt-get install gcc-4.7 g++-4.7; fi;
+ - if [ "${CXX}" = 'clang++' ]; then sudo apt-get install clang++; fi;
  - sudo apt-get install make libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev postgresql-server-dev*
  - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.24.tar.bz2
  - tar xf harfbuzz-0.9.24.tar.bz2
