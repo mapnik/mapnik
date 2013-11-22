@@ -22,13 +22,73 @@
 #ifndef MAPNIK_PIXEL_POSITION_HPP
 #define MAPNIK_PIXEL_POSITION_HPP
 
-// Store a pixel position.
+// stl
+#include <iomanip>
+
+namespace mapnik
+{
+
+struct rotation;
 struct pixel_position
 {
     double x;
     double y;
     pixel_position(double x_, double y_) : x(x_), y(y_) { }
     pixel_position() : x(0), y(0) { }
+    pixel_position operator+ (pixel_position const& other) const
+    {
+        return pixel_position(x + other.x, y + other.y);
+    }
+
+    pixel_position operator- (pixel_position const& other) const
+    {
+        return pixel_position(x - other.x, y - other.y);
+    }
+
+    pixel_position operator* (double other) const
+    {
+        return pixel_position(x * other, y * other);
+    }
+
+    void set(double x_, double y_)
+    {
+        x = x_;
+        y = y_;
+    }
+
+    void clear()
+    {
+        x = 0;
+        y = 0;
+    }
+
+    pixel_position rotate(rotation const& rot) const;
+    pixel_position operator~() const
+    {
+        return pixel_position(x, -y);
+    }
 };
+
+inline pixel_position operator* (double factor, pixel_position const& pos)
+{
+    return pixel_position(factor * pos.x, factor * pos.y);
+}
+
+template <class charT, class traits>
+inline std::basic_ostream<charT,traits>&
+operator << (std::basic_ostream<charT,traits>& out,
+             const pixel_position& e)
+{
+    std::basic_ostringstream<charT,traits> s;
+    s.copyfmt(out);
+    s.width(0);
+    s << '(' << std::fixed << std::setprecision(16)
+      << e.x << ", " << e.y << ')';
+    out << s.str();
+    return out;
+}
+
+}
+
 
 #endif // MAPNIK_PIXEL_POSITION_HPP

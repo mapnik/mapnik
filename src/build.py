@@ -57,7 +57,7 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype',env['ICU_LIB_NAME'],filesystem,system,regex]
+lib_env['LIBS'] = ['freetype',env['ICU_LIB_NAME'],filesystem,system,regex,'harfbuzz', 'harfbuzz-icu']
 
 if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
    lib_env['LIBS'].append('proj')
@@ -164,7 +164,6 @@ source = Split(
     parse_transform.cpp
     palette.cpp
     path_expression_grammar.cpp
-    text/placement_finder.cpp
     plugin.cpp
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
@@ -182,7 +181,6 @@ source = Split(
     memory_datasource.cpp
     stroke.cpp
     symbolizer.cpp
-    text/symbolizer_helpers.cpp
     unicode.cpp
     markers_symbolizer.cpp
     raster_colorizer.cpp
@@ -202,7 +200,16 @@ source = Split(
     json/feature_parser.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
-    text/processed_text.cpp
+    text/vertex_cache.cpp
+    text/layout.cpp
+    text/text_line.cpp
+    text/itemizer.cpp
+    text/scrptrun.cpp
+    text/face.cpp
+    text/placement_finder.cpp
+    text/renderer.cpp
+    text/symbolizer_helpers.cpp
+    text/text_properties.cpp
     text/formatting/base.cpp
     text/formatting/expression.cpp
     text/formatting/list.cpp
@@ -214,7 +221,6 @@ source = Split(
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/simple.cpp
-    text/text_properties.cpp
     xml_tree.cpp
     config_error.cpp
     color_factory.cpp

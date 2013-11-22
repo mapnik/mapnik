@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,50 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CHAR_INFO_HPP
-#define MAPNIK_CHAR_INFO_HPP
+#ifndef CHAR_PROPERTIES_PTR_HPP
+#define CHAR_PROPERTIES_PTR_HPP
 
 #include <memory>
 
-namespace mapnik {
-struct char_properties;
-
-class char_info
+namespace mapnik
 {
-public:
-    char_info(unsigned c_, double width_, double ymax_, double ymin_, double line_height_)
-        :  c(c_),
-           width(width_),
-           line_height(line_height_),
-           ymin(ymin_),
-           ymax(ymax_),
-           avg_height(ymax - ymin),
-           format()
-    {
-    }
-
-    char_info()
-        :  c(0),
-           width(0),
-           line_height(0),
-           ymin(0),
-           ymax(0),
-           avg_height(0),
-           format()
-    {
-    }
-
-    double height() const { return ymax-ymin; }
-
-    unsigned c;
-    double width;
-    double line_height;
-    double ymin;
-    double ymax;
-    double avg_height;
-    char_properties *format;
-
-};
+struct char_properties;
+typedef std::shared_ptr<char_properties> char_properties_ptr;
 }
 
-#endif //MAPNIK_CHAR_INFO_HPP
+#endif // CHAR_PROPERTIES_PTR_HPP

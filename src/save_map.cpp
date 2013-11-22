@@ -228,19 +228,19 @@ public:
             set_attr(sym_node, "unlock-image", sym.get_unlock_image());
         }
 
-        if (sym.get_placement_options()->defaults.format.text_opacity !=
-                dfl.get_placement_options()->defaults.format.text_opacity || explicit_defaults_)
+        if (sym.get_placement_options()->defaults.format->text_opacity !=
+                dfl.get_placement_options()->defaults.format->text_opacity || explicit_defaults_)
         {
-            set_attr(sym_node, "text-opacity", sym.get_placement_options()->defaults.format.text_opacity);
+            set_attr(sym_node, "text-opacity", sym.get_placement_options()->defaults.format->text_opacity);
         }
-        position displacement = sym.get_shield_displacement();
-        if (displacement.first != dfl.get_shield_displacement().first || explicit_defaults_)
+        pixel_position displacement = sym.get_shield_displacement();
+        if (displacement.x != dfl.get_shield_displacement().x || explicit_defaults_)
         {
-            set_attr(sym_node, "shield-dx", displacement.first);
+            set_attr(sym_node, "shield-dx", displacement.x);
         }
-        if (displacement.second != dfl.get_shield_displacement().second || explicit_defaults_)
+        if (displacement.y != dfl.get_shield_displacement().y || explicit_defaults_)
         {
-            set_attr(sym_node, "shield-dy", displacement.second);
+            set_attr(sym_node, "shield-dy", displacement.y);
         }
         if (sym.get_image_transform())
         {

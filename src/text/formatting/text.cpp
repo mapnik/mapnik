@@ -25,12 +25,15 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/processed_text.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/text/layout.hpp>
+
+//boost
+
 
 // boost
 #include <boost/property_tree/ptree.hpp>
+
 
 namespace mapnik
 {
@@ -51,26 +54,26 @@ node_ptr text_node::from_xml(xml_node const& xml)
     return std::make_shared<text_node>(xml.get_value<expression_ptr>());
 }
 
-void text_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
+void text_node::apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
 {
     mapnik::value_unicode_string text_str = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_).to_unicode();
-    if (p.text_transform == UPPERCASE)
+    if (p->text_transform == UPPERCASE)
     {
         text_str = text_str.toUpper();
     }
-    else if (p.text_transform == LOWERCASE)
+    else if (p->text_transform == LOWERCASE)
     {
         text_str = text_str.toLower();
     }
 #if !UCONFIG_NO_BREAK_ITERATION
-    else if (p.text_transform == CAPITALIZE)
+    else if (p->text_transform == CAPITALIZE)
     {
         // note: requires BreakIterator support in ICU which is optional
         text_str = text_str.toTitle(NULL);
     }
 #endif
     if (text_str.length() > 0) {
-        output.push_back(p, text_str);
+        output.add_text(text_str, p);
     }
 }
 

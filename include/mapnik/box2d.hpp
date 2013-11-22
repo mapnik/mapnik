@@ -97,12 +97,15 @@ public:
     void pad(T padding);
     bool from_string(std::string const& str);
     bool valid() const;
+    void move(T x, T y);
 
     // define some operators
     box2d_type& operator+=(box2d_type const& other);
     box2d_type& operator*=(T);
     box2d_type& operator/=(T);
     T operator[](int index) const;
+    box2d_type operator +(T other) const; //enlarge box by given amount
+    box2d_type& operator +=(T other); //enlarge box by given amount
 
     // compute the bounding box of this one transformed
     box2d_type  operator* (agg::trans_affine const& tr) const;

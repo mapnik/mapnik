@@ -23,7 +23,6 @@
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/text_path.hpp>
 #include <mapnik/font_set.hpp>
 
 #include <cairo-ft.h>
@@ -221,7 +220,7 @@ void cairo_context::set_line_width(double width)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::set_dash(dash_array const& dashes, double scale_factor)
+void cairo_context::set_dash(dash_array const &dashes, double scale_factor)
 {
     std::valarray<double> d(dashes.size() * 2);
     dash_array::const_iterator itr = dashes.begin();
@@ -404,100 +403,80 @@ void cairo_context::restore()
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::show_glyph(unsigned long index, double x, double y)
+void cairo_context::show_glyph(unsigned long index, pixel_position const& pos)
 {
     cairo_glyph_t glyph;
     glyph.index = index;
-    glyph.x = x;
-    glyph.y = y;
+    glyph.x = pos.x;
+    glyph.y = pos.y;
 
     cairo_show_glyphs(cairo_.get(), &glyph, 1);
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::glyph_path(unsigned long index, double x, double y)
+void cairo_context::glyph_path(unsigned long index, pixel_position const& pos)
 {
     cairo_glyph_t glyph;
     glyph.index = index;
-    glyph.x = x;
-    glyph.y = y;
+    glyph.x = pos.x;
+    glyph.y = pos.y;
 
     cairo_glyph_path(cairo_.get(), &glyph, 1);
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_text(text_path const& path,
+void cairo_context::add_text(glyph_positions_ptr pos,
                              cairo_face_manager & manager,
                              face_manager<freetype_engine> & font_manager,
                              double scale_factor)
 {
-    double sx = path.center.x;
-    double sy = path.center.y;
+    pixel_position const& base = pos->get_base_point();
 
-    path.rewind();
-
-    for (std::size_t iii = 0; iii < path.num_nodes(); ++iii)
+    //Render halo
+    glyph_positions::const_iterator itr, end = pos->end();
+    for (itr = pos->begin(); itr != end; itr++)
     {
-        char_info_ptr c;
-        double x, y, angle;
+        glyph_info const& glyph = *(itr->glyph);
+        double text_size = glyph.format->text_size * scale_factor;
+        glyph.face->set_character_sizes(text_size);
 
-        path.vertex(c, x, y, angle);
+        cairo_matrix_t matrix;
+        matrix.xx = text_size * itr->rot.cos;
+        matrix.xy = text_size * itr->rot.sin;
+        matrix.yx = text_size * -itr->rot.sin;
+        matrix.yy = text_size * itr->rot.cos;
+        matrix.x0 = 0;
+        matrix.y0 = 0;
 
-        face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
-        double text_size = c->format->text_size * scale_factor;
-        faces->set_character_sizes(text_size);
+        set_font_matrix(matrix);
+        set_font_face(manager, glyph.face);
 
-        glyph_ptr glyph = faces->get_glyph(c->c);
-
-        if (glyph)
-        {
-            cairo_matrix_t matrix;
-            matrix.xx = text_size * std::cos(angle);
-            matrix.xy = text_size * std::sin(angle);
-            matrix.yx = text_size * -std::sin(angle);
-            matrix.yy = text_size * std::cos(angle);
-            matrix.x0 = 0;
-            matrix.y0 = 0;
-            set_font_matrix(matrix);
-            set_font_face(manager, glyph->get_face());
-            glyph_path(glyph->get_index(), sx + x, sy - y);
-            set_line_width(2.0 * c->format->halo_radius * scale_factor);
-            set_line_join(ROUND_JOIN);
-            set_color(c->format->halo_fill);
-            stroke();
-        }
+        glyph_path(glyph.glyph_index, base + ~(itr->pos + glyph.offset.rotate(itr->rot)));
+        set_line_width(2.0 * glyph.format->halo_radius * scale_factor);
+        set_line_join(ROUND_JOIN);
+        set_color(glyph.format->halo_fill);
+        stroke();
     }
-
-    path.rewind();
-
-    for (std::size_t iii = 0; iii < path.num_nodes(); ++iii)
+    //Render text
+    for (itr = pos->begin(); itr != end; itr++)
     {
-        char_info_ptr c;
-        double x, y, angle;
+        glyph_info const& glyph = *(itr->glyph);
+        double text_size = glyph.format->text_size * scale_factor;
+        glyph.face->set_character_sizes(text_size);
 
-        path.vertex(c, x, y, angle);
+        cairo_matrix_t matrix;
+        matrix.xx = text_size * itr->rot.cos;
+        matrix.xy = text_size * itr->rot.sin;
+        matrix.yx = text_size * -itr->rot.sin;
+        matrix.yy = text_size * itr->rot.cos;
+        matrix.x0 = 0;
+        matrix.y0 = 0;
 
-        face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
-        double text_size = c->format->text_size * scale_factor;
-        faces->set_character_sizes(text_size);
-
-        glyph_ptr glyph = faces->get_glyph(c->c);
-
-        if (glyph)
-        {
-            cairo_matrix_t matrix;
-            matrix.xx = text_size * std::cos(angle);
-            matrix.xy = text_size * std::sin(angle);
-            matrix.yx = text_size * -std::sin(angle);
-            matrix.yy = text_size * std::cos(angle);
-            matrix.x0 = 0;
-            matrix.y0 = 0;
-            set_font_matrix(matrix);
-            set_font_face(manager, glyph->get_face());
-            set_color(c->format->fill);
-            show_glyph(glyph->get_index(), sx + x, sy - y);
-        }
+        set_font_matrix(matrix);
+        set_font_face(manager, glyph.face);
+        set_color(glyph.format->fill);
+        show_glyph(glyph.glyph_index, base + ~(itr->pos + glyph.offset.rotate(itr->rot)));
     }
+}
 
-}
-}
+} //ns mapnik

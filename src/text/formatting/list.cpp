@@ -32,7 +32,6 @@ namespace mapnik {
 using boost::property_tree::ptree;
 
 namespace formatting {
-/************************************************************/
 
 void list_node::to_xml(boost::property_tree::ptree & xml) const
 {
@@ -43,7 +42,7 @@ void list_node::to_xml(boost::property_tree::ptree & xml) const
 }
 
 
-void list_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
+void list_node::apply(char_properties_ptr p, feature_impl const& feature, text_layout & output) const
 {
     for (node_ptr const& node : children_)
     {
