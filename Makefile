@@ -49,10 +49,10 @@ test-local:
 	make test
 
 test-visual:
-	$(shell source ./localize.sh && python tests/visual_tests/test.py -q)
+	bash -c "source ./localize.sh && python tests/visual_tests/test.py -q"
 
 test-python:
-	$(shell source ./localize.sh && python tests/run_tests.py -q)
+	bash -c "source ./localize.sh && python tests/run_tests.py -q"
 
 test-cpp:
 	./tests/cpp_tests/run
@@ -60,7 +60,7 @@ test-cpp:
 check: test-local
 
 bench:
-	LOCALIZE=true ./benchmark/run
+	./benchmark/run
 
 demo:
 	cd demo/c++; ./rundemo `mapnik-config --prefix`
