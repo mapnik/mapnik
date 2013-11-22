@@ -859,6 +859,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_png", &has_png, "Get png read/write support status");
     def("has_tiff", &has_tiff, "Get tiff read/write support status");
     def("has_webp", &has_webp, "Get webp read/write support status");
+    def("has_svg_renderer", &has_svg_renderer, "Get svg_renderer status");
     def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
