@@ -49,10 +49,10 @@ void handle_args(int argc, char** argv, mapnik::parameters & params)
     if (argc > 0) {
         for (int i=1;i<argc;++i) {
             std::string opt(argv[i]);
-            // parse --foo bar / -foo bar syntax
-            if (!opt.empty() && opt[0] != '-') {
+            // parse --foo bar
+            if (!opt.empty() && (opt.find("--") != 0)) {
                 std::string key = std::string(argv[i-1]);
-                if (!key.empty() && key[0] == '-') {
+                if (!key.empty() && (key.find("--") == 0)) {
                     key = key.substr(key.find_first_not_of("-"));
                     params[key] = opt;
                 }
@@ -61,14 +61,22 @@ void handle_args(int argc, char** argv, mapnik::parameters & params)
     }
 }
 
-#define BENCHMARK(test_class,name) \
-    int main(int argc, char** argv)      \
-    {                                    \
-        mapnik::parameters params;       \
-        benchmark::handle_args(argc,argv,params);   \
-        test_class test_runner(params);        \
-        return run(test_runner,name);    \
-    }                                    \
+#define BENCHMARK(test_class,name)                      \
+    int main(int argc, char** argv)                     \
+    {                                                   \
+        try                                             \
+        {                                               \
+            mapnik::parameters params;                  \
+            benchmark::handle_args(argc,argv,params);   \
+            test_class test_runner(params);             \
+            return run(test_runner,name);               \
+        }                                               \
+        catch (std::exception const& ex)                \
+        {                                               \
+            std::clog << ex.what() << "\n";             \
+            return -1;                                  \
+        }                                               \
+    }                                                   \
 
 template <typename T>
 int run(T const& test_runner, std::string const& name)
