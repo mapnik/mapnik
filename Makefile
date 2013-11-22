@@ -1,11 +1,5 @@
 UNAME := $(shell uname)
-LINK_FIX=LD_LIBRARY_PATH
-ifeq ($(UNAME), Darwin)
-	LINK_FIX=DYLD_LIBRARY_PATH
-else
-endif
-
-OS:=$(shell uname -s)
+OS := $(shell uname -s)
 
 ifeq ($(JOBS),)
 	JOBS:=1
@@ -49,25 +43,26 @@ uninstall:
 	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@ ./run_tests
+	./run_tests
 
 test-local:
-	@echo "*** Boostrapping local test environment..."
-	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
-	export PATH=`pwd`/utils/mapnik-config/:${PATH} && \
-	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
-	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
-	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
 	make test
 
-bench:
-	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
-	./benchmark/run
+test-visual:
+	$(shell source ./localize.sh && python tests/visual_tests/test.py -q)
+
+test-python:
+	$(shell source ./localize.sh && python tests/run_tests.py -q)
+
+test-cpp:
+	./tests/cpp_tests/run
 
 check: test-local
 
+bench:
+	LOCALIZE=true ./benchmark/run
+
 demo:
-	@echo "*** Running rundemo.cpp…"
 	cd demo/c++; ./rundemo `mapnik-config --prefix`
 
 pep8:

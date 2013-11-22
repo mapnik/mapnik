@@ -2000,7 +2000,7 @@ if not HELP_REQUESTED:
         SConscript('benchmark/build.py')
 
     # install pkg-config script and mapnik-config script
-    SConscript('utils/mapnik-config/build.py')
+    SConscript('bin/build.py')
 
     # write the viewer.ini file
     SConscript('demo/viewer/build.py')

@@ -2,6 +2,8 @@
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 cd ../
+source ./localize.sh
+
 BASE=./benchmark/out
 function run {
     ${BASE}/$1 --threads 0 --iterations $3;
