@@ -24,9 +24,9 @@ install:
  - JOBS=1 make
 
 env:
-  - TESTS_TO_RUN=python BINDINGS=python CPP_TEST=false BENCHMARK=false
-  - TESTS_TO_RUN=visual BINDINGS=python CPP_TEST=false BENCHMARK=false
-  - TESTS_TO_RUN=cpp BINDINGS=none CPP_TEST=true BENCHMARK=true
+  - TESTS_TO_RUN=python BINDINGS=python CPP_TESTS=false BENCHMARK=false
+  - TESTS_TO_RUN=visual BINDINGS=python CPP_TESTS=false BENCHMARK=false
+  - TESTS_TO_RUN=cpp BINDINGS=none CPP_TESTS=true BENCHMARK=true
 
 before_script:
  - make test-$TESTS_TO_RUN
