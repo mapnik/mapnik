@@ -27,7 +27,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         expected = 'images/support/mapnik-layer-buffer-size.png'
         im.save(actual)
         expected_im = mapnik.Image.open(expected)
-        eq_(im.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
+        eq_(im.tostring('png32'),expected_im.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
 
 
 if __name__ == "__main__":

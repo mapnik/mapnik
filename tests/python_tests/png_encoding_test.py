@@ -53,8 +53,8 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-            eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+            eq_(mapnik.Image.open(actual).tostring('png32'),
+                mapnik.Image.open(expected).tostring('png32'),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
         for opt in opts:
@@ -65,8 +65,8 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-            eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+            eq_(mapnik.Image.open(actual).tostring('png32'),
+                mapnik.Image.open(expected).tostring('png32'),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
     def test_transparency_levels():

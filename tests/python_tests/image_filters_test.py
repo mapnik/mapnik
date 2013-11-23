@@ -55,7 +55,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
                 im.save(expected)
             expected_im = mapnik.Image.open(expected)
             # compare them
-            if im.tostring() == expected_im.tostring():
+            if im.tostring('png32') == expected_im.tostring('png32'):
                 successes.append(name)
             else:
                 fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))

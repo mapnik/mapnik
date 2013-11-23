@@ -98,7 +98,7 @@ def test_compare_images():
             a.save(expected)
         expected_im = mapnik.Image.open(expected)
         # compare them
-        if a.tostring() == expected_im.tostring():
+        if a.tostring('png32') == expected_im.tostring('png32'):
             successes.append(name)
         else:
             fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
@@ -110,7 +110,7 @@ def test_compare_images():
     # TODO - write test to ensure the image is 99% the same.
     #expected_b = mapnik.Image.open('./images/support/b.png')
     #b.save('/tmp/mapnik-comp-op-test-original-mask.png')
-    #eq_(b.tostring(),expected_b.tostring(), '/tmp/mapnik-comp-op-test-original-mask.png is no longer equivalent to original mask: ./images/support/b.png')
+    #eq_(b.tostring('png32'),expected_b.tostring('png32'), '/tmp/mapnik-comp-op-test-original-mask.png is no longer equivalent to original mask: ./images/support/b.png')
 
 def test_pre_multiply_status():
     b = mapnik.Image.open('./images/support/b.png')
@@ -172,7 +172,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
                 im.save(expected)
             expected_im = mapnik.Image.open(expected)
             # compare them
-            if im.tostring() == expected_im.tostring():
+            if im.tostring('png32') == expected_im.tostring('png32'):
                 successes.append(name)
             else:
                 fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
@@ -190,7 +190,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         expected = 'images/support/mapnik-style-level-opacity.png'
         im.save(actual)
         expected_im = mapnik.Image.open(expected)
-        eq_(im.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
+        eq_(im.tostring('png32'),expected_im.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
 
 def test_rounding_and_color_expectations():
     m = mapnik.Map(1,1)
