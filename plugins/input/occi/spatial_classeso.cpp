@@ -97,7 +97,7 @@ void *SDOPointType::readSQL(void *ctxOCCI_)
     {
         delete objOCCI_;
         excep.setErrorCtx(ctxOCCI_);
-        return (void *)NULL;
+        return (void *)nullptr;
     }
     return (void *)objOCCI_;
 }
@@ -264,7 +264,7 @@ void *SDOGeometry::readSQL(void *ctxOCCI_)
     {
         delete objOCCI_;
         excep.setErrorCtx(ctxOCCI_);
-        return (void *)NULL;
+        return (void *)nullptr;
     }
     return (void *)objOCCI_;
 }

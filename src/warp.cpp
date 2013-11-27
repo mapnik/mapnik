@@ -75,7 +75,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
             ts.backward(&xs(i,j), &ys(i,j));
         }
     }
-    prj_trans.backward(xs.getData(), ys.getData(), NULL, mesh_nx*mesh_ny);
+    prj_trans.backward(xs.getData(), ys.getData(), nullptr, mesh_nx*mesh_ny);
 
     // Initialize AGG objects
     typedef agg::pixfmt_rgba32_pre pixfmt;

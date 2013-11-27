@@ -32,12 +32,12 @@ struct weighted_vertex : private mapnik::noncopyable
     weighted_vertex(vertex2d coord_) :
         coord(coord_),
         weight(std::numeric_limits<double>::infinity()),
-        prev(NULL),
-        next(NULL) {}
+        prev(nullptr),
+        next(nullptr) {}
 
     double nominalWeight()
     {
-        if (prev == NULL || next == NULL || coord.cmd != SEG_LINETO) {
+        if (prev == nullptr || next == nullptr || coord.cmd != SEG_LINETO) {
             return std::numeric_limits<double>::infinity();
         }
         vertex2d const& A = prev->coord;
@@ -392,8 +392,8 @@ private:
         VertexSet v;
         for (VertexList::iterator i = v_list.begin(); i != v_list.end(); ++i)
         {
-            (*i)->prev = i == v_list.begin() ? NULL : *(i - 1);
-            (*i)->next = i + 1 == v_list.end() ? NULL : *(i + 1);
+            (*i)->prev = i == v_list.begin() ? nullptr : *(i - 1);
+            (*i)->next = i + 1 == v_list.end() ? nullptr : *(i + 1);
             (*i)->weight = (*i)->nominalWeight();
             v.insert(*i);
         }

@@ -163,7 +163,7 @@ void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr 
     for (int i = 0; i < num_geometries; ++i)
     {
         OGRGeometry* g = geom->getGeometryRef(i);
-        if (g != NULL)
+        if (g != nullptr)
         {
             convert_geometry(g, feature);
         }

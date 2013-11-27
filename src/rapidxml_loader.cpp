@@ -1,5 +1,3 @@
-
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -44,7 +42,7 @@ namespace mapnik
 class rapidxml_loader : mapnik::noncopyable
 {
 public:
-    rapidxml_loader(const char *encoding = NULL) :
+    rapidxml_loader(const char *encoding = nullptr) :
         filename_()
     {
 

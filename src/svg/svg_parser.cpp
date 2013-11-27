@@ -1054,7 +1054,7 @@ svg_parser::~svg_parser() {}
 void svg_parser::parse(std::string const& filename)
 {
     xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
-    if (reader == NULL)
+    if (reader == nullptr)
     {
         MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
     }
@@ -1066,9 +1066,9 @@ void svg_parser::parse(std::string const& filename)
 
 void svg_parser::parse_from_string(std::string const& svg)
 {
-    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),NULL,NULL,
+    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),nullptr,nullptr,
         (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
-    if (reader == NULL)
+    if (reader == nullptr)
     {
         MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
     }

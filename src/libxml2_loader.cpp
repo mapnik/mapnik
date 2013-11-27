@@ -46,7 +46,7 @@ namespace mapnik
 class libxml2_loader : mapnik::noncopyable
 {
 public:
-    libxml2_loader(const char *encoding = NULL, int options = DEFAULT_OPTIONS, const char *url = NULL) :
+    libxml2_loader(const char *encoding = nullptr, int options = DEFAULT_OPTIONS, const char *url = nullptr) :
         ctx_(0),
         encoding_(encoding),
         options_(options),

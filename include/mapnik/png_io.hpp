@@ -146,7 +146,7 @@ void save_as_png(T1 & file,
         row_pointers[i] = (png_bytep)image.getRow(i);
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
-    png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, NULL);
+    png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 

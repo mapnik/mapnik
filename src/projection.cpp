@@ -50,8 +50,8 @@ namespace mapnik {
 projection::projection(std::string const& params, bool defer_proj_init)
     : params_(params),
       defer_proj_init_(defer_proj_init),
-      proj_(NULL),
-      proj_ctx_(NULL)
+      proj_(nullptr),
+      proj_ctx_(nullptr)
 {
     boost::optional<bool> is_known = is_known_geographic(params_);
     if (is_known){
@@ -72,8 +72,8 @@ projection::projection(projection const& rhs)
     : params_(rhs.params_),
       defer_proj_init_(rhs.defer_proj_init_),
       is_geographic_(rhs.is_geographic_),
-      proj_(NULL),
-      proj_ctx_(NULL)
+      proj_(nullptr),
+      proj_ctx_(nullptr)
 {
     if (!defer_proj_init_) init_proj4();
 }

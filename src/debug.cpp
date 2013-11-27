@@ -91,7 +91,7 @@ std::string logger::str()
         logger::format_env_check_ = false;
 
         const char* log_format = getenv("MAPNIK_LOG_FORMAT");
-        if (log_format != NULL)
+        if (log_format != nullptr)
         {
             logger::format_ = log_format;
         }

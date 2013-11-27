@@ -54,7 +54,7 @@ osm_datasource::osm_datasource(const parameters& params)
       type_(datasource::Vector),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8"))
 {
-    osm_data_ = NULL;
+    osm_data_ = nullptr;
     std::string osm_filename = *params.get<std::string>("file", "");
     std::string parser = *params.get<std::string>("parser", "libxml2");
     std::string url = *params.get<std::string>("url", "");
@@ -66,7 +66,7 @@ osm_datasource::osm_datasource(const parameters& params)
         // if we supplied a url and a bounding box, load from the url
         MAPNIK_LOG_DEBUG(osm) << "osm_datasource: loading_from_url url=" << url << ",bbox=" << bbox;
 
-        if ((osm_data_ = dataset_deliverer::load_from_url(url, bbox, parser)) == NULL)
+        if ((osm_data_ = dataset_deliverer::load_from_url(url, bbox, parser)) == nullptr)
         {
             throw datasource_exception("Error loading from URL");
         }
@@ -74,7 +74,7 @@ osm_datasource::osm_datasource(const parameters& params)
     else if (osm_filename != "")
     {
         // if we supplied a filename, load from file
-        if ((osm_data_ = dataset_deliverer::load_from_file(osm_filename, parser)) == NULL)
+        if ((osm_data_ = dataset_deliverer::load_from_file(osm_filename, parser)) == nullptr)
         {
             std::string s("OSM Plugin: Error loading from file '");
             s += osm_filename + "'";

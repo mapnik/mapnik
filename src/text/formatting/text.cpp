@@ -69,7 +69,7 @@ void text_node::apply(char_properties_ptr p, feature_impl const& feature, text_l
     else if (p->text_transform == CAPITALIZE)
     {
         // note: requires BreakIterator support in ICU which is optional
-        text_str = text_str.toTitle(NULL);
+        text_str = text_str.toTitle(nullptr);
     }
 #endif
     if (text_str.length() > 0) {

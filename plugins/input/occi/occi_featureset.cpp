@@ -62,7 +62,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  bool use_connection_pool,
                                  bool use_wkb,
                                  unsigned prefetch_rows)
-    : rs_(NULL),
+    : rs_(nullptr),
       tr_(new transcoder(encoding)),
       feature_id_(1),
       ctx_(ctx),
@@ -85,7 +85,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
     {
         MAPNIK_LOG_ERROR(occi) << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage();
 
-        rs_ = NULL;
+        rs_ = nullptr;
     }
 }
 
@@ -95,7 +95,7 @@ occi_featureset::~occi_featureset()
 
 feature_ptr occi_featureset::next()
 {
-    while (rs_ != NULL && rs_->next() == oracle::occi::ResultSet::DATA_AVAILABLE)
+    while (rs_ != nullptr && rs_->next() == oracle::occi::ResultSet::DATA_AVAILABLE)
     {
         feature_ptr feature(feature_factory::create(ctx_, feature_id_));
 

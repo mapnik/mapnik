@@ -85,7 +85,7 @@ namespace mapnik {  namespace sqlite {
             {
                 if (sqlite3_bind_null(stmt_, index_) != SQLITE_OK)
                 {
-                    std::cerr << "cannot bind NULL\n";
+                    std::cerr << "cannot bind nullptr\n";
                     return false;
                 }
                 return true;

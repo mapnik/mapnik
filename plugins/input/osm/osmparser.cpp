@@ -6,17 +6,17 @@
 #include <cassert>
 #include <mapnik/util/conversions.hpp>
 
-osm_item* osmparser::cur_item=NULL;
+osm_item* osmparser::cur_item=nullptr;
 mapnik::value_integer osmparser::curID=0;
 bool osmparser::in_node=false, osmparser::in_way=false;
-osm_dataset* osmparser::components=NULL;
+osm_dataset* osmparser::components=nullptr;
 std::string osmparser::error="";
 std::map<mapnik::value_integer,osm_node*> osmparser::tmp_node_store=std::map<mapnik::value_integer,osm_node*>();
 
 void osmparser::processNode(xmlTextReaderPtr reader)
 {
     xmlChar *name = xmlTextReaderName(reader);
-    if(name==NULL)
+    if(name==nullptr)
         name=xmlStrdup(BAD_CAST "--");
 
     switch(xmlTextReaderNodeType(reader))
@@ -127,7 +127,7 @@ bool osmparser::parse(osm_dataset *ds,char* data, int nbytes)
     // libxml2.html, converted from Objective-C to straight C
 
     components=ds;
-    xmlTextReaderPtr reader = xmlReaderForMemory(data,nbytes,NULL,NULL,0);
+    xmlTextReaderPtr reader = xmlReaderForMemory(data,nbytes,nullptr,nullptr,0);
     int ret=do_parse(reader);
     xmlFreeTextReader(reader);
     return (ret==0) ? true:false;
@@ -137,7 +137,7 @@ bool osmparser::parse(osm_dataset *ds,char* data, int nbytes)
 int osmparser::do_parse(xmlTextReaderPtr reader)
 {
     int ret=-1;
-    if(reader!=NULL)
+    if(reader!=nullptr)
     {
         ret = xmlTextReaderRead(reader);
         while(ret==1)

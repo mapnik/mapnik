@@ -389,7 +389,7 @@ public:
      * @param index The index of the layer to query from.
      * @param x The x coordinate where to query.
      * @param y The y coordinate where to query.
-     * @return A Mapnik Featureset if successful otherwise will return NULL.
+     * @return A Mapnik Featureset if successful otherwise will return nullptr.
      */
     featureset_ptr query_point(unsigned index, double x, double y) const;
 
@@ -402,7 +402,7 @@ public:
      * @param index The index of the layer to query from.
      * @param x The x coordinate where to query.
      * @param y The y coordinate where to query.
-     * @return A Mapnik Featureset if successful otherwise will return NULL.
+     * @return A Mapnik Featureset if successful otherwise will return nullptr.
      */
     featureset_ptr query_map_point(unsigned index, double x, double y) const;
 

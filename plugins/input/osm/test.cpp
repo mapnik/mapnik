@@ -11,7 +11,7 @@ int main(int argc,char* argv[])
         bounds b = dataset.get_bounds();
         osm_item *item;
         dataset.rewind();
-        while((item=dataset.next_item())!=NULL)
+        while((item=dataset.next_item())!=nullptr)
         {
             std::cerr << item->to_string() << endl;
         }

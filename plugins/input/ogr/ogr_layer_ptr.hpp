@@ -36,8 +36,8 @@ class ogr_layer_ptr
 {
 public:
     ogr_layer_ptr()
-        : datasource_(NULL),
-          layer_(NULL),
+        : datasource_(nullptr),
+          layer_(nullptr),
           owns_layer_(false),
           is_valid_(false)
     {
@@ -50,13 +50,13 @@ public:
 
     void free_layer()
     {
-        if (owns_layer_ && layer_ != NULL && datasource_ != NULL)
+        if (owns_layer_ && layer_ != nullptr && datasource_ != nullptr)
         {
             datasource_->ReleaseResultSet(layer_);
         }
 
-        datasource_ = NULL;
-        layer_ = NULL;
+        datasource_ = nullptr;
+        layer_ = nullptr;
         layer_name_ = "";
         owns_layer_ = false;
         is_valid_ = false;
@@ -122,8 +122,8 @@ public:
         // http://trac.osgeo.org/gdal/wiki/rfc29_desired_fields
         // http://trac.osgeo.org/gdal/wiki/rfc28_sqlfunc
 
-        OGRGeometry* spatial_filter = NULL;
-        const char* sql_dialect = NULL;
+        OGRGeometry* spatial_filter = nullptr;
+        const char* sql_dialect = nullptr;
         OGRLayer* ogr_layer = datasource_->ExecuteSQL(layer_sql.c_str(), spatial_filter, sql_dialect);
 
         if (ogr_layer)

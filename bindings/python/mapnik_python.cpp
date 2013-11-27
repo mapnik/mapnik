@@ -159,7 +159,7 @@ void register_cairo()
 #else
     Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import(const_cast<char *>("cairo"), const_cast<char *>("CAPI"));
 #endif
-    if (Pycairo_CAPI == NULL) return;
+    if (Pycairo_CAPI == nullptr) return;
 
     boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());
     boost::python::converter::registry::insert(&extract_context, boost::python::type_id<PycairoContext>());
@@ -503,7 +503,7 @@ bool has_pycairo()
 #else
     Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import(const_cast<char *>("cairo"), const_cast<char *>("CAPI"));
 #endif
-    if (Pycairo_CAPI == NULL){
+    if (Pycairo_CAPI == nullptr){
         /*
           Case where pycairo support has been compiled into
           mapnik but at runtime the cairo python module

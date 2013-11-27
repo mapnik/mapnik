@@ -104,7 +104,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
         layer_.SetNextByIndex (pos);
 
         OGRFeature *poFeature = layer_.GetNextFeature();
-        if (poFeature == NULL)
+        if (poFeature == nullptr)
         {
             return feature_ptr();
         }

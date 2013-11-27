@@ -31,14 +31,14 @@
 #include "dataset_deliverer.h"
 #include "basiccurl.h"
 
-osm_dataset * dataset_deliverer::dataset = NULL;
+osm_dataset * dataset_deliverer::dataset = nullptr;
 std::string dataset_deliverer::last_bbox = "";
 std::string dataset_deliverer::last_filename = "";
 
 osm_dataset* dataset_deliverer::load_from_file(const string& file, const string& parser)
 {
     // Only actually load from file if we haven't done so already
-    if (dataset == NULL)
+    if (dataset == nullptr)
     {
         if (!mapnik::util::exists(file))
         {
@@ -48,7 +48,7 @@ osm_dataset* dataset_deliverer::load_from_file(const string& file, const string&
         dataset = new osm_dataset;
         if (dataset->load(file.c_str(), parser) == false)
         {
-            return NULL;
+            return nullptr;
         }
 
         atexit(dataset_deliverer::release);
@@ -59,7 +59,7 @@ osm_dataset* dataset_deliverer::load_from_file(const string& file, const string&
         dataset = new osm_dataset;
         if (dataset->load(file.c_str(), parser) == false)
         {
-            return NULL;
+            return nullptr;
         }
         last_filename = file;
     }
@@ -68,12 +68,12 @@ osm_dataset* dataset_deliverer::load_from_file(const string& file, const string&
 
 osm_dataset* dataset_deliverer::load_from_url(const string& url, const string& bbox, const string& parser)
 {
-    if (dataset == NULL)
+    if (dataset == nullptr)
     {
         dataset = new osm_dataset;
         if (dataset->load_from_url(url.c_str(), bbox, parser) == false)
         {
-            return NULL;
+            return nullptr;
         }
 
         atexit(dataset_deliverer::release);
@@ -87,7 +87,7 @@ osm_dataset* dataset_deliverer::load_from_url(const string& url, const string& b
         dataset->clear();
         if (dataset->load_from_url(url.c_str(), bbox, parser) == false)
         {
-            return NULL;
+            return nullptr;
         }
 
         last_bbox = bbox;

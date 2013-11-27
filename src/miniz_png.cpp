@@ -45,8 +45,8 @@ namespace mapnik { namespace MiniZ {
 
 PNGWriter::PNGWriter(int level, int strategy)
 {
-    buffer = NULL;
-    compressor = NULL;
+    buffer = nullptr;
+    compressor = nullptr;
 
     if (level == -1)
     {
@@ -63,22 +63,22 @@ PNGWriter::PNGWriter(int level, int strategy)
     else if (strategy == Z_FIXED) flags |= TDEFL_FORCE_ALL_STATIC_BLOCKS;
 
     buffer = (tdefl_output_buffer *)MZ_MALLOC(sizeof(tdefl_output_buffer));
-    if (buffer == NULL)
+    if (buffer == nullptr)
     {
         throw std::bad_alloc();
     }
 
-    buffer->m_pBuf = NULL;
+    buffer->m_pBuf = nullptr;
     buffer->m_capacity = 8192;
     buffer->m_expandable = MZ_TRUE;
     buffer->m_pBuf = (mz_uint8 *)MZ_MALLOC(buffer->m_capacity);
-    if (buffer->m_pBuf == NULL)
+    if (buffer->m_pBuf == nullptr)
     {
         throw std::bad_alloc();
     }
 
     compressor = (tdefl_compressor *)MZ_MALLOC(sizeof(tdefl_compressor));
-    if (compressor == NULL)
+    if (compressor == nullptr)
     {
         throw std::bad_alloc();
     }
@@ -256,7 +256,7 @@ void PNGWriter::writeIDAT(T const& image)
         }
     }
 
-    status = tdefl_compress_buffer(compressor, NULL, 0, TDEFL_FINISH);
+    status = tdefl_compress_buffer(compressor, nullptr, 0, TDEFL_FINISH);
     if (status != TDEFL_STATUS_DONE)
     {
         throw std::runtime_error("failed to compress image");
@@ -303,7 +303,7 @@ void PNGWriter::writeIDATStripAlpha(T const& image) {
 
     MZ_FREE(scanline);
 
-    status = tdefl_compress_buffer(compressor, NULL, 0, TDEFL_FINISH);
+    status = tdefl_compress_buffer(compressor, nullptr, 0, TDEFL_FINISH);
     if (status != TDEFL_STATUS_DONE) throw std::runtime_error("failed to compress image");
 
     finishChunk(IDAT);

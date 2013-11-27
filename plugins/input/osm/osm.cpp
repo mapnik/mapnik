@@ -62,7 +62,7 @@ bool osm_dataset::load_from_url(std::string const& url,
 
         CURL_LOAD_DATA* resp = grab_http_response(str.str().c_str());
 
-        if (resp != NULL)
+        if (resp != nullptr)
         {
             char *blx = new char[resp->nbytes + 1];
             std::memcpy(blx, resp->data, resp->nbytes);
@@ -91,7 +91,7 @@ void osm_dataset::clear()
     for (unsigned int count = 0; count < ways.size(); ++count)
     {
         delete ways[count];
-        ways[count] = NULL;
+        ways[count] = nullptr;
     }
     ways.clear();
 
@@ -99,7 +99,7 @@ void osm_dataset::clear()
     for (unsigned int count = 0; count < nodes.size(); ++count)
     {
         delete nodes[count];
-        nodes[count] = NULL;
+        nodes[count] = nullptr;
     }
     nodes.clear();
 
@@ -142,7 +142,7 @@ osm_node* osm_dataset::next_node()
     {
         return *(node_i++);
     }
-    return NULL;
+    return nullptr;
 }
 
 osm_way* osm_dataset::next_way()
@@ -151,16 +151,16 @@ osm_way* osm_dataset::next_way()
     {
         return *(way_i++);
     }
-    return NULL;
+    return nullptr;
 }
 
 osm_item* osm_dataset::next_item()
 {
-    osm_item* item = NULL;
+    osm_item* item = nullptr;
     if (next_item_mode == Node)
     {
         item = next_node();
-        if (item == NULL)
+        if (item == nullptr)
         {
             next_item_mode = Way;
             rewind_ways();
@@ -226,7 +226,7 @@ std::string osm_way::to_string()
 
     for (unsigned int count = 0; count < nodes.size(); ++count)
     {
-        if (nodes[count] != NULL)
+        if (nodes[count] != nullptr)
         {
             strm << nodes[count]->id << " ";
         }

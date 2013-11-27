@@ -112,7 +112,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     if (! driver.empty())
     {
         OGRSFDriver * ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
-        if (ogr_driver && ogr_driver != NULL)
+        if (ogr_driver && ogr_driver != nullptr)
         {
             dataset_ = ogr_driver->Open((dataset_name_).c_str(), FALSE);
         }
@@ -382,7 +382,7 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                     //layer->ResetReading();
                     layer->SetNextByIndex(0);
                     OGRFeature *poFeature;
-                    while ((poFeature = layer->GetNextFeature()) != NULL)
+                    while ((poFeature = layer->GetNextFeature()) != nullptr)
                     {
                         OGRGeometry* geom = poFeature->GetGeometryRef();
                         if (geom && ! geom->IsEmpty())

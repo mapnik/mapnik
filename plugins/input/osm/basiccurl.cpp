@@ -37,13 +37,13 @@ CURL_LOAD_DATA* grab_http_response(const char* url)
         curl_easy_cleanup(curl);
         return data;
     }
-    return NULL;
+    return nullptr;
 }
 
 CURL_LOAD_DATA* do_grab(CURL* curl,const char* url)
 {
     CURL_LOAD_DATA* data = (CURL_LOAD_DATA*)malloc(sizeof(CURL_LOAD_DATA));
-    data->data = NULL;
+    data->data = nullptr;
     data->nbytes = 0;
 
     curl_easy_setopt(curl, CURLOPT_URL, url);

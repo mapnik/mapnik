@@ -196,7 +196,7 @@ namespace mapnik {
 #ifdef MAPNIK_LOG
             base_log(const char* object_name)
             {
-                if (object_name != NULL)
+                if (object_name != nullptr)
                 {
                     object_name_ = object_name;
                 }
@@ -265,7 +265,7 @@ namespace mapnik {
 
             base_log_always(const char* object_name)
             {
-                if (object_name != NULL)
+                if (object_name != nullptr)
                 {
                     object_name_ = object_name;
                 }

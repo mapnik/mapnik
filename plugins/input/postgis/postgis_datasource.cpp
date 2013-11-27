@@ -191,7 +191,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         if (srid_ == 0)
                         {
                             const char* srid_c = rs->getValue("srid");
-                            if (srid_c != NULL)
+                            if (srid_c != nullptr)
                             {
                                 int result = 0;
                                 const char * end = srid_c + std::strlen(srid_c);
@@ -223,7 +223,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     if (rs->next())
                     {
                         const char* srid_c = rs->getValue("srid");
-                        if (srid_c != NULL)
+                        if (srid_c != nullptr)
                         {
                             int result = 0;
                             const char * end = srid_c + std::strlen(srid_c);

@@ -68,7 +68,7 @@ ogr_featureset::~ogr_featureset()
 feature_ptr ogr_featureset::next()
 {
     OGRFeature *poFeature;
-    while ((poFeature = layer_.GetNextFeature()) != NULL)
+    while ((poFeature = layer_.GetNextFeature()) != nullptr)
     {
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
