@@ -25,7 +25,6 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/graphics.hpp>
-
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>
@@ -41,10 +40,10 @@
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/pixel_position.hpp>
-
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
+// agg
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
@@ -63,8 +62,8 @@
 namespace mapnik
 {
 
-template <typename T>
-agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+template <typename T0, typename T1>
+agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
@@ -76,7 +75,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       scale_factor_(scale_factor),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(std::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+      detector_(std::make_shared<detector_type>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
       ras_ptr(new rasterizer),
       query_extent_(),
       gamma_method_(GAMMA_POWER),
@@ -85,8 +84,8 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
     setup(m);
 }
 
-template <typename T>
-agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+template <typename T0, typename T1>
+agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
@@ -98,17 +97,17 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
       scale_factor_(scale_factor),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(std::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
-      ras_ptr(new rasterizer),
-      query_extent_(),
-      gamma_method_(GAMMA_POWER),
-      gamma_(1.0)
+    detector_(std::make_shared<detector_type>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+    ras_ptr(new rasterizer),
+    query_extent_(),
+    gamma_method_(GAMMA_POWER),
+    gamma_(1.0)
 {
     setup(m);
 }
 
-template <typename T>
-agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, std::shared_ptr<label_collision_detector4> detector,
+template <typename T0, typename T1>
+agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1> detector,
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
@@ -130,8 +129,8 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, std::shared_ptr<label_co
     setup(m);
 }
 
-template <typename T>
-void agg_renderer<T>::setup(Map const &m)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::setup(Map const &m)
 {
     boost::optional<color> const& bg = m.background();
     if (bg)
@@ -176,18 +175,18 @@ void agg_renderer<T>::setup(Map const &m)
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
-template <typename T>
-agg_renderer<T>::~agg_renderer() {}
+template <typename T0, typename T1>
+agg_renderer<T0,T1>::~agg_renderer() {}
 
-template <typename T>
-void agg_renderer<T>::start_map_processing(Map const& map)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
-template <typename T>
-void agg_renderer<T>::end_map_processing(Map const& )
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::end_map_processing(Map const& )
 {
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
@@ -196,8 +195,8 @@ void agg_renderer<T>::end_map_processing(Map const& )
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
-template <typename T>
-void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing layer=" << lay.name();
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- datasource=" << lay.datasource().get();
@@ -216,14 +215,14 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
     }
 }
 
-template <typename T>
-void agg_renderer<T>::end_layer_processing(layer const&)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::end_layer_processing(layer const&)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
 }
 
-template <typename T>
-void agg_renderer<T>::start_style_processing(feature_type_style const& st)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing style";
     if (st.comp_op() || st.image_filters().size() > 0 || st.get_opacity() < 1)
@@ -273,8 +272,8 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
     }
 }
 
-template <typename T>
-void agg_renderer<T>::end_style_processing(feature_type_style const& st)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
 {
     if (style_level_compositing_)
     {
@@ -312,8 +311,8 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
 
-template <typename T>
-void agg_renderer<T>::render_marker(pixel_position const& pos,
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
                                     marker const& marker,
                                     agg::trans_affine const& tr,
                                     double opacity,
@@ -434,14 +433,14 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
     }
 }
 
-template <typename T>
-void agg_renderer<T>::painted(bool painted)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::painted(bool painted)
 {
     pixmap_.painted(painted);
 }
 
-template <typename T>
-void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {
     agg::rendering_buffer buf(current_buffer_->raw_data(),
@@ -451,8 +450,8 @@ void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
     debug_draw_box(buf, box, x, y, angle);
 }
 
-template <typename T> template <typename R>
-void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
+template <typename T0, typename T1> template <typename R>
+void agg_renderer<T0,T1>::debug_draw_box(R& buf, box2d<double> const& box,
                                      double x, double y, double angle)
 {
     typedef agg::pixfmt_rgba32_pre pixfmt;
@@ -489,8 +488,8 @@ void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
     agg::render_scanlines(*ras_ptr, sl_line, ren);
 }
 
-template <typename T>
-void agg_renderer<T>::draw_geo_extent(box2d<double> const& extent, mapnik::color const& color)
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::draw_geo_extent(box2d<double> const& extent, mapnik::color const& color)
 {
     box2d<double> box = t_.forward(extent);
     double x0 = box.minx();

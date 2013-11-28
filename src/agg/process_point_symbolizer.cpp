@@ -27,7 +27,7 @@
 #include <mapnik/image_util.hpp>
 
 #include <mapnik/geom_util.hpp>
-#include <mapnik/point_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
@@ -45,13 +45,12 @@
 
 namespace mapnik {
 
-template <typename T>
-void agg_renderer<T>::process(point_symbolizer const& sym,
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::process(point_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
-
+    std::string filename = get<std::string>(sym, keys::file, feature);
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
@@ -64,11 +63,19 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
+        double opacity = get<double>(sym,keys::opacity,feature, 1.0);
+        bool allow_overlap = get<bool>(sym, keys::allow_overlap, feature, false);
+        bool ignore_placement = get<bool>(sym, keys::ignore_placement, feature, false);
+        point_placement_enum placement= get<point_placement_enum>(sym, keys::point_placement_type, feature, CENTROID_POINT_PLACEMENT);
+        composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+
         box2d<double> const& bbox = (*marker)->bounding_box();
         coord2d center = bbox.center();
 
         agg::trans_affine tr;
-        evaluate_transform(tr, feature, sym.get_image_transform());
+        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+        if (image_transform) evaluate_transform(tr, feature, *image_transform);
+
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
@@ -79,7 +86,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double x;
             double y;
             double z=0;
-            if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
+            if (placement == CENTROID_POINT_PLACEMENT)
             {
                 if (!label::centroid(geom, x, y))
                     return;
@@ -93,22 +100,21 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
             label_ext.re_center(x,y);
-            if (sym.get_allow_overlap() ||
+            if (allow_overlap ||
                 detector_->has_placement(label_ext))
             {
 
                 render_marker(pixel_position(x, y),
                               **marker,
                               tr,
-                              sym.get_opacity(),
-                              sym.comp_op());
+                              opacity,
+                              comp_op);
 
-                if (!sym.get_ignore_placement())
+                if (!ignore_placement)
                     detector_->insert(label_ext);
             }
         }
     }
-
 }
 
 template void agg_renderer<image_32>::process(point_symbolizer const&,

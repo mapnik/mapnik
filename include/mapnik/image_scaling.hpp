@@ -63,9 +63,9 @@ void scale_image_agg(Image & target,
                       scaling_method_e scaling_method,
                       double image_ratio_x,
                       double image_ratio_y,
-                      double x_off_f=0,
-                      double y_off_f=0,
-                      double filter_radius=2);
+                      double x_off_f,
+                      double y_off_f,
+                      double filter_factor);
 
 template <typename Image>
 void scale_image_bilinear_old(Image & target,

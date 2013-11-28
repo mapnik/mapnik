@@ -36,7 +36,7 @@
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 
 // agg
@@ -58,8 +58,8 @@
 
 namespace mapnik {
 
-template <typename T>
-void agg_renderer<T>::process(markers_symbolizer const& sym,
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                               feature_impl & feature,
                               proj_transform const& prj_trans)
 {
@@ -72,23 +72,27 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef label_collision_detector4 detector_type;
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
 
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+    std::string filename = get<std::string>(sym, keys::file, feature, "shape://ellipse");
+    bool clip = get<value_bool>(sym, keys::clip, feature, false);
+    double smooth = get<value_double>(sym, keys::smooth, feature, false);
 
     // https://github.com/mapnik/mapnik/issues/1316
     bool snap_pixels = !mapnik::marker_cache::instance().is_uri(filename);
-
     if (!filename.empty())
     {
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
         if (mark && *mark)
         {
             ras_ptr->reset();
-            if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+            double gamma = get<value_double>(sym, keys::gamma, feature, 1.0);
+            gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, GAMMA_POWER);
+            if (gamma != gamma_ || gamma_method != gamma_method_)
             {
-                ras_ptr->gamma(agg::gamma_power());
-                gamma_method_ = GAMMA_POWER;
-                gamma_ = 1.0;
+                set_gamma_method(ras_ptr, gamma, gamma_method);
+                gamma_method_ = gamma_method;
+                gamma_ = gamma;
             }
+
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
             box2d<double> clip_box = clipping_extent();
             if ((*mark)->is_vector())
@@ -105,8 +109,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                      rasterizer,
                                      detector_type > dispatch_type;
                 boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
-                expression_ptr const& width_expr = sym.get_width();
-                expression_ptr const& height_expr = sym.get_height();
+
+                auto width_expr = get_optional<expression_ptr>(sym, keys::width);
+                auto height_expr = get_optional<expression_ptr>(sym, keys::height);
 
                 // special case for simple ellipse markers
                 // to allow for full control over rx/ry dimensions
@@ -120,7 +125,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
-                    evaluate_transform(tr, feature, sym.get_image_transform());
+                    auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+                    if (image_transform) evaluate_transform(tr, feature, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
@@ -138,7 +144,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
                         if (type == geometry_type::types::Polygon)
@@ -149,14 +155,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         // don't clip if type==Point
                     }
                     converter.template set<transform_tag>(); //always transform
-                    if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+                    if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                     apply_markers_multi(feature, converter, sym);
                 }
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
                     setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
-                    evaluate_transform(tr, feature, sym.get_image_transform());
+                    auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+                    if (image_transform) evaluate_transform(tr, feature, *image_transform);
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
@@ -178,7 +185,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
                         if (type == geometry_type::types::Polygon)
@@ -189,14 +196,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         // don't clip if type==Point
                     }
                     converter.template set<transform_tag>(); //always transform
-                    if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+                    if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                     apply_markers_multi(feature, converter, sym);
                 }
             }
             else // raster markers
             {
                 setup_transform_scaling(tr, (*mark)->width(), (*mark)->height(), feature, sym);
-                evaluate_transform(tr, feature, sym.get_image_transform());
+                auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+                if (image_transform) evaluate_transform(tr, feature, *image_transform);
                 box2d<double> const& bbox = (*mark)->bounding_box();
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
@@ -216,7 +224,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
                     converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
 
-                if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {
                     geometry_type::types type = feature.paths()[0].type();
                     if (type == geometry_type::types::Polygon)
@@ -227,7 +235,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     // don't clip if type==geometry_type::types::Point
                 }
                 converter.template set<transform_tag>(); //always transform
-                if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+                if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                 apply_markers_multi(feature, converter, sym);
             }
         }

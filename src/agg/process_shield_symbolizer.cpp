@@ -21,15 +21,18 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
+#include <mapnik/pixel_position.hpp>
 #include <mapnik/text/renderer.hpp>
 
 namespace mapnik {
 
-template <typename T>
-void  agg_renderer<T>::process(shield_symbolizer const& sym,
+template <typename T0, typename T1>
+void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
@@ -41,7 +44,15 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             t_, font_manager_, *detector_,
             clip_box);
 
-    agg_text_renderer<T> ren(*current_buffer_, sym.get_halo_rasterizer(), sym.comp_op(), scale_factor_, font_manager_.get_stroker());
+    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, HALO_RASTERIZER_FULL);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+    agg_text_renderer<T0> ren(*current_buffer_,
+                             halo_rasterizer,
+                             comp_op,
+                             scale_factor_,
+                             font_manager_.get_stroker());
+
+    double opacity = get<double>(sym,keys::opacity,feature, 1.0);
 
     placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
@@ -50,7 +61,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             render_marker(glyphs->marker_pos(),
                           *(glyphs->marker()->marker),
                           glyphs->marker()->transform,
-                          sym.get_opacity(), sym.comp_op());
+                          opacity, comp_op);
         ren.render(*glyphs);
     }
 }

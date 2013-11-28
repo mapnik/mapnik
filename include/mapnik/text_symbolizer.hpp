@@ -24,6 +24,7 @@
 #define MAPNIK_TEXT_SYMBOLIZER_HPP
 
 // mapnik
+ /*
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -32,6 +33,7 @@
 
 // boost
 #include <memory>
+
 
 
 // stl
@@ -145,5 +147,5 @@ private:
     halo_rasterizer_e halo_rasterizer_;
 };
 }
-
+*/
 #endif // MAPNIK_TEXT_SYMBOLIZER_HPP

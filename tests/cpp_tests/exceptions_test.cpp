@@ -2,7 +2,6 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <mapnik/projection.hpp>
-#include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/graphics.hpp>
@@ -45,7 +44,7 @@ int main(int argc, char** argv)
     mapnik::Map map(256,256);
     mapnik::rule r;
     r.set_filter(mapnik::parse_expression("[foo]='bar'"));
-    r.append(mapnik::markers_symbolizer());
+    r.append(std::move(mapnik::markers_symbolizer()));
     mapnik::feature_type_style style;
     style.add_rule(r);
     map.insert_style("style",style);
@@ -62,7 +61,7 @@ int main(int argc, char** argv)
             l.set_datasource(ds);
             l.add_style("style");
             mapnik::Map m = map;
-            m.addLayer(l);
+            m.add_layer(l);
             m.zoom_all();
             mapnik::image_32 im(m.width(),m.height());
             mapnik::agg_renderer<mapnik::image_32> ren(m,im);

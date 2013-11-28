@@ -27,21 +27,11 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/expression_string.hpp>
 
-// all symbolizers
-#include <mapnik/building_symbolizer.hpp>
-#include <mapnik/line_symbolizer.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/polygon_symbolizer.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/raster_symbolizer.hpp>
-#include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/text_symbolizer.hpp>
-#include <mapnik/markers_symbolizer.hpp>
-#include <mapnik/debug_symbolizer.hpp>
+// boost
+#include <memory>
+#include <boost/concept_check.hpp>
 
 // stl
-#include <memory>
 #include <limits>
 
 namespace mapnik
@@ -63,7 +53,7 @@ rule::rule(std::string const& name,
       min_scale_(min_scale_denominator),
       max_scale_(max_scale_denominator),
       syms_(),
-      filter_(std::make_shared<expr_node>(true)),
+      filter_(std::make_shared<mapnik::expr_node>(true)),
       else_filter_(false),
       also_filter_(false)  {}
 
@@ -78,10 +68,9 @@ rule::rule(rule const& rhs)
 {
 }
 
-rule& rule::operator=(rule const& rhs)
+rule& rule::operator=(rule rhs)
 {
-    rule tmp(rhs);
-    swap(tmp);
+    swap(rhs);
     return *this;
 }
 
@@ -131,9 +120,9 @@ std::string const& rule::get_name() const
     return name_;
 }
 
-void rule::append(symbolizer const& sym)
+void rule::append(symbolizer && sym)
 {
-    syms_.push_back(sym);
+    syms_.push_back(std::move(sym));
 }
 
 void rule::remove_at(size_t index)

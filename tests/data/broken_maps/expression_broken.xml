@@ -2,7 +2,7 @@
 <Map minimum-version="0.7.2">
     <Style name="some_style">
         <Rule>
-            <Filter>[mapnik:geometry] = foobar </Filter> 
+            <Filter>[mapnik:geometry] = 1' </Filter>
         </Rule>
     </Style>
 </Map>

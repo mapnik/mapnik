@@ -29,6 +29,7 @@
 #include <mapnik/text/formatting/text.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // boost
 
@@ -38,7 +39,7 @@ namespace mapnik
 {
 using boost::optional;
 
-
+/*
 static const char * label_placement_strings[] = {
     "point",
     "line",
@@ -95,6 +96,7 @@ static const char * text_upright_strings[] = {
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
 
+*/
 
 text_symbolizer_properties::text_symbolizer_properties() :
     orientation(),

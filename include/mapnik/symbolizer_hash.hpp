@@ -34,30 +34,31 @@ namespace mapnik {
 struct symbolizer_hash
 {
     template <typename T>
-    static std::size_t value(T const& /*sym*/)
+    static std::size_t value(T const& sym)
     {
         return 0;
     }
+
     // specialisation for polygon_symbolizer
-    static std::size_t value(polygon_symbolizer const& sym)
-    {
-        std::size_t seed = geometry_type::types::Polygon;
-        boost::hash_combine(seed, sym.get_fill().rgba());
-        boost::hash_combine(seed, sym.get_opacity());
-        return seed;
-    }
+    //static std::size_t value(polygon_symbolizer const& sym)
+    // {
+    //   std::size_t seed = geometry_type::types::Polygon;
+    //   boost::hash_combine(seed, sym.get_fill().rgba());
+    //   boost::hash_combine(seed, sym.get_opacity());
+    //   return seed;
+    //}
 
     // specialisation for line_symbolizer
-    static std::size_t value(line_symbolizer const& sym)
-    {
-        std::size_t seed = geometry_type::types::LineString;
-        boost::hash_combine(seed, sym.get_stroke().get_color().rgba());
-        boost::hash_combine(seed, sym.get_stroke().get_width());
-        boost::hash_combine(seed, sym.get_stroke().get_opacity());
-        boost::hash_combine(seed, static_cast<int>(sym.get_stroke().get_line_cap()));
-        boost::hash_combine(seed, static_cast<int>(sym.get_stroke().get_line_join()));
-        return seed;
-    }
+    //static std::size_t value(line_symbolizer const& sym)
+    //{
+    //   std::size_t seed = geometry_type::types::LineString;
+    //   boost::hash_combine(seed, sym.get_stroke().get_color().rgba());
+    //   boost::hash_combine(seed, sym.get_stroke().get_width());
+    //   boost::hash_combine(seed, sym.get_stroke().get_opacity());
+    //   boost::hash_combine(seed, static_cast<int>(sym.get_stroke().get_line_cap()));
+    //   boost::hash_combine(seed, static_cast<int>(sym.get_stroke().get_line_join()));
+    //   return seed;
+    //}
 };
 
 }

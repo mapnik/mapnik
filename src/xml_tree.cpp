@@ -28,11 +28,6 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/line_symbolizer.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>

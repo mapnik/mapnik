@@ -104,21 +104,21 @@ Map::~Map() {}
 Map& Map::operator=(Map const& rhs)
 {
     if (this==&rhs) return *this;
-    width_=rhs.width_;
-    height_=rhs.height_;
-    srs_=rhs.srs_;
+    width_= rhs.width_;
+    height_= rhs.height_;
+    srs_ = rhs.srs_;
     buffer_size_ = rhs.buffer_size_;
-    background_=rhs.background_;
-    background_image_=rhs.background_image_;
-    background_image_comp_op_=rhs.background_image_comp_op_;
-    background_image_opacity_=rhs.background_image_opacity_;
-    styles_=rhs.styles_;
+    background_ = rhs.background_;
+    background_image_ = rhs.background_image_;
+    background_image_comp_op_ = rhs.background_image_comp_op_;
+    background_image_opacity_ = rhs.background_image_opacity_;
+    styles_ = rhs.styles_;
     fontsets_ = rhs.fontsets_;
-    layers_=rhs.layers_;
-    aspectFixMode_=rhs.aspectFixMode_;
-    maximum_extent_=rhs.maximum_extent_;
-    base_path_=rhs.base_path_;
-    extra_params_=rhs.extra_params_;
+    layers_ = rhs.layers_;
+    aspectFixMode_ = rhs.aspectFixMode_;
+    maximum_extent_ = rhs.maximum_extent_;
+    base_path_ = rhs.base_path_;
+    extra_params_ = rhs.extra_params_;
     return *this;
 }
 
@@ -180,7 +180,7 @@ bool Map::insert_fontset(std::string const& name, font_set const& fontset)
     return fontsets_.insert(make_pair(name, fontset)).second;
 }
 
-boost::optional<font_set const&>  Map::find_fontset(std::string const& name) const
+boost::optional<font_set const&> Map::find_fontset(std::string const& name) const
 {
     std::map<std::string,font_set>::const_iterator itr = fontsets_.find(name);
     if (itr != fontsets_.end())
@@ -204,12 +204,12 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-void Map::addLayer(layer const& l)
+void Map::add_layer(layer const& l)
 {
     layers_.push_back(l);
 }
 
-void Map::removeLayer(size_t index)
+void Map::remove_layer(size_t index)
 {
     layers_.erase(layers_.begin()+index);
 }
@@ -220,12 +220,12 @@ void Map::remove_all()
     styles_.clear();
 }
 
-layer const& Map::getLayer(size_t index) const
+layer const& Map::get_layer(size_t index) const
 {
     return layers_[index];
 }
 
-layer& Map::getLayer(size_t index)
+layer& Map::get_layer(size_t index)
 {
     return layers_[index];
 }

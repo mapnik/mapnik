@@ -27,15 +27,11 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_pixel.hpp>
 #endif
-
-#include <mapnik/noncopyable.hpp>
-
-// boost
-
 
 // agg
 #include "agg_path_storage.h"

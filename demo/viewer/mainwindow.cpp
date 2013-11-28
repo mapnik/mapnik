@@ -53,6 +53,13 @@
 #include "layerdelegate.hpp"
 #include "about_dialog.hpp"
 
+// boost
+#define BOOST_CHRONO_HEADER_ONLY
+#include <boost/chrono/process_cpu_clocks.hpp>
+#include <boost/chrono.hpp>
+#include <boost/algorithm/string.hpp>
+
+
 MainWindow::MainWindow()
     : filename_(),
       default_extent_(-20037508.3428,-20037508.3428,20037508.3428,20037508.3428)
@@ -189,7 +196,11 @@ void MainWindow::load_map_file(QString const& filename)
     mapWidget_->setMap(map);
     try
     {
+        boost::chrono::process_cpu_clock::time_point start = boost::chrono::process_cpu_clock::now();
         mapnik::load_map(*map,filename.toStdString());
+        boost::chrono::process_cpu_clock::duration elapsed = boost::chrono::process_cpu_clock::now() - start;
+        std::clog << "loading map took: " << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed) << "\n";
+
     }
     catch (mapnik::config_error & ex)
     {
@@ -440,4 +451,9 @@ void MainWindow::zoom_all()
         mapnik::box2d<double> const& ext = map_ptr->get_current_extent();
         mapWidget_->zoomToBox(ext);
     }
+}
+
+std::shared_ptr<mapnik::Map> MainWindow::get_map()
+{
+    return mapWidget_->getMap();
 }

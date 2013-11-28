@@ -263,7 +263,7 @@ void scale_image_agg(Image & target,
                      double image_ratio_y,
                      double x_off_f,
                      double y_off_f,
-                     double filter_radius)
+                     double filter_factor)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
@@ -344,11 +344,11 @@ void scale_image_agg(Image & target,
     case SCALING_MITCHELL:
         filter.calculate(agg::image_filter_mitchell(), true); break;
     case SCALING_SINC:
-        filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
+        filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
     case SCALING_LANCZOS:
-        filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
+        filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
     case SCALING_BLACKMAN:
-        filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
+        filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
     }
     // details on various resampling considerations
     // http://old.nabble.com/Re%3A-Newbie---texture-p5057255.html
@@ -375,7 +375,7 @@ template void scale_image_agg<image_data_32>(image_data_32& target,
                                              double image_ratio_y,
                                              double x_off_f,
                                              double y_off_f,
-                                             double filter_radius);
+                                             double filter_factor);
 
 template void scale_image_bilinear_old<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 

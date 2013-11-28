@@ -189,7 +189,7 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
     {
         QPixmap pix(16,16);
         QPainter painter(&pix);
-        mapnik::color const& fill = sym.get_fill();
+        mapnik::color const& fill = mapnik::get<mapnik::color>(sym, mapnik::keys::fill);
         QBrush brush(QColor(fill.red(),fill.green(),fill.blue(),fill.alpha()));
         painter.fillRect(0, 0, 16, 16, brush);
         return QIcon(pix);
@@ -215,10 +215,10 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
         QPixmap pix(48,16);
         pix.fill();
         QPainter painter(&pix);
-        mapnik::stroke const&  strk = sym.get_stroke();
-        mapnik::color const& col = strk.get_color();
+        //mapnik::stroke const&  strk = sym.get_stroke();
+        mapnik::color const& col = mapnik::get<mapnik::color>(sym, mapnik::keys::stroke);
         QPen pen(QColor(col.red(),col.green(),col.blue(),col.alpha()));
-        pen.setWidth(strk.get_width());
+        pen.setWidth(mapnik::get<double>(sym, mapnik::keys::width));
         painter.setPen(pen);
         painter.drawLine(0,7,47,7);
         //painter.drawLine(7,15,12,0);

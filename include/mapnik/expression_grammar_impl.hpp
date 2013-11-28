@@ -85,6 +85,8 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
     using qi::double_;
     using qi::hex;
     using qi::omit;
+    using qi::alpha;
+    using qi::alnum;
     using standard_wide::char_;
     using standard_wide::no_case;
 
@@ -114,16 +116,16 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
 
     regex_match_expr = lit(".match")
         >> lit('(')
-        >> ustring [_val = _1]
+        >> quoted_ustring [_val = _1]
         >> lit(')')
         ;
 
     regex_replace_expr =
         lit(".replace")
         >> lit('(')
-        >> ustring           [_a = _1]
+        >> quoted_ustring           [_a = _1]
         >> lit(',')
-        >> ustring           [_b = _1]
+        >> quoted_ustring           [_b = _1]
         >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
         ;
 
@@ -162,10 +164,13 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         | no_case[lit("false")] [_val = false]
         | no_case[lit("null")] [_val = value_null() ]
         | no_case[geom_type][_val = _1 ]
-        | ustring [_val = unicode_(_1) ]
+        | quoted_ustring [_val = unicode_(_1)]
         | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
+        | global_attr [_val = construct<mapnik::global_attribute>( _1 )]
+        | lit("not") >> expr [_val =  !_1]
         | '(' >> expr [_val = _1 ] >> ')'
+        | ustring[_val = unicode_(_1)] // if we get here then try parsing as unquoted string
         ;
 
     unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
@@ -174,16 +179,19 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         ;
 
 #if BOOST_VERSION > 104500
+    ustring %= no_skip[alpha >> *alnum];
     quote_char %= char_('\'') | char_('"');
-    ustring %= omit[quote_char[_a = _1]]
+    quoted_ustring %= omit[quote_char[_a = _1]]
         >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
         >> lit(_a);
     attr %= '[' >> no_skip[+~char_(']')] >> ']';
+    global_attr %= '@' >> no_skip[+char_];
 #else
-    ustring %= lit('\'')
+    quoted_ustring %= lit('\'')
         >> *(unesc_char | "\\x" >> hex | (char_ - lit('\'')))
         >> lit('\'');
     attr %= '[' >> lexeme[+(char_ - ']')] >> ']';
+    global_attr %= '@' >> lexime[+char_];
 #endif
 
 }

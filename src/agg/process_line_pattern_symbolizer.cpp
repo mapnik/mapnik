@@ -29,7 +29,7 @@
 #include <mapnik/agg_pattern_source.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/parse_path.hpp>
@@ -84,11 +84,12 @@ private:
 
 namespace mapnik {
 
-template <typename T>
-void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
+template <typename T0, typename T1>
+void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
+
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
@@ -99,7 +100,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
 
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    std::string filename = get<std::string>(sym, keys::file, feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
     if (!mark) return;
@@ -113,9 +114,16 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
+
+    bool clip = get<value_bool>(sym, keys::clip, feature);
+    //double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0); TODO
+    double offset = get<value_double>(sym, keys::offset, feature, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, agg::comp_op_src_over));
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 
@@ -125,17 +133,18 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     rasterizer_type ras(ren);
 
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform());
+    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (transform) evaluate_transform(tr, feature, *transform);
 
     box2d<double> clip_box = clipping_extent();
-    if (sym.clip())
+    if (clip)
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
         double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (std::fabs(sym.offset()) > 0)
-            padding *= std::fabs(sym.offset()) * 1.2;
+        if (std::fabs(offset) > 0)
+            padding *= std::fabs(offset) * 1.2;
         padding *= scale_factor_;
         clip_box.pad(padding);
     }
@@ -145,12 +154,12 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(clip_box,ras,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
+    if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
-    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
-    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     for (geometry_type & geom : feature.paths())
     {

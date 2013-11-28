@@ -44,11 +44,12 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/segment.hpp>
-#include <mapnik/text/symbolizer_helpers.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/text_path.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -60,7 +61,6 @@
 #include <cairo-version.h>
 
 // boost
-
 #include <boost/math/special_functions/round.hpp>
 
 // agg
@@ -711,7 +711,8 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    text_symbolizer_helper helper(
+    shield_symbolizer_helper<face_manager<freetype_engine>,
+        label_collision_detector4> helper(
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
@@ -720,16 +721,21 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(sym.comp_op());
 
-    placements_list const& placements = helper.get();
-    for (glyph_positions_ptr const& glyphs : placements)
+    while (helper.next())
     {
-        if (glyphs->marker())
+        placements_type const& placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            render_marker(glyphs->marker_pos(),
-                      *(glyphs->marker()->marker), glyphs->marker()->transform,
-                      sym.get_opacity());
+            pixel_position pos = helper.get_marker_position(placements[ii]);
+            pos.x += 0.5 * helper.get_marker_width();
+            pos.y += 0.5 * helper.get_marker_height();
+            render_marker(pos,
+                          helper.get_marker(),
+                          helper.get_image_transform(),
+                          sym.get_opacity());
+
+            context_.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
         }
-        context_.add_text(glyphs, face_manager_, font_manager_, scale_factor_);
     }
 }
 
@@ -1272,7 +1278,8 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    text_symbolizer_helper helper(
+    text_symbolizer_helper<face_manager<freetype_engine>,
+        label_collision_detector4> helper(
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
@@ -1281,10 +1288,13 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(sym.comp_op());
 
-    placements_list const& placements = helper.get();
-    for (glyph_positions_ptr const& glyphs : placements)
+    while (helper.next())
     {
-        context_.add_text(glyphs, face_manager_, font_manager_, scale_factor_);
+        placements_type const& placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
+        {
+            context_.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
+        }
     }
 }
 

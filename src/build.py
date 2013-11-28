@@ -121,7 +121,6 @@ else: # unix, non-macos
 source = Split(
     """
     fs.cpp
-    debug_symbolizer.cpp
     request.cpp
     well_known_srs.cpp
     params.cpp
@@ -134,7 +133,6 @@ source = Split(
     image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
-    building_symbolizer.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
@@ -155,8 +153,6 @@ source = Split(
     image_reader.cpp
     image_util.cpp
     layer.cpp
-    line_symbolizer.cpp
-    line_pattern_symbolizer.cpp
     map.cpp
     load_map.cpp
     memory.cpp
@@ -165,13 +161,8 @@ source = Split(
     palette.cpp
     path_expression_grammar.cpp
     plugin.cpp
-    point_symbolizer.cpp
-    polygon_pattern_symbolizer.cpp
-    polygon_symbolizer.cpp
     rule.cpp
     save_map.cpp
-    shield_symbolizer.cpp
-    text_symbolizer.cpp
     wkb.cpp
     projection.cpp
     proj_transform.cpp
@@ -179,12 +170,10 @@ source = Split(
     scale_denominator.cpp
     simplify.cpp
     memory_datasource.cpp
-    stroke.cpp
     symbolizer.cpp
+    symbolizer_keys.cpp
     unicode.cpp
-    markers_symbolizer.cpp
     raster_colorizer.cpp
-    raster_symbolizer.cpp
     wkt/wkt_factory.cpp
     wkt/wkt_generator.cpp
     mapped_memory_cache.cpp

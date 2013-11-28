@@ -25,13 +25,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/building_symbolizer.hpp>
 #include <mapnik/expression.hpp>
-
-// boost
-
 
 // stl
 #include <deque>
@@ -49,8 +46,8 @@
 namespace mapnik
 {
 
-template <typename T>
-void agg_renderer<T>::process(building_symbolizer const& sym,
+template <typename T0,typename T1>
+void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
@@ -62,33 +59,28 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
 
-    color const& fill_  = sym.get_fill();
-    unsigned r=fill_.red();
-    unsigned g=fill_.green();
-    unsigned b=fill_.blue();
-    unsigned a=fill_.alpha();
+    double opacity = get<value_double>(sym,keys::fill_opacity,feature, 1.0);
+    color const& fill = get<mapnik::color>(sym, keys::fill, feature);
+    unsigned r=fill.red();
+    unsigned g=fill.green();
+    unsigned b=fill.blue();
+    unsigned a=fill.alpha();
     renderer ren(renb);
     agg::scanline_u8 sl;
 
     ras_ptr->reset();
-    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    double gamma = get<value_double>(sym, keys::gamma, feature, 1.0);
+    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, GAMMA_POWER);
+    if (gamma != gamma_ || gamma_method != gamma_method_)
     {
-        ras_ptr->gamma(agg::gamma_power());
-        gamma_method_ = GAMMA_POWER;
-        gamma_ = 1.0;
+        set_gamma_method(ras_ptr, gamma, gamma_method);
+        gamma_method_ = gamma_method;
+        gamma_ = gamma;
     }
 
-    double height = 0.0;
-    expression_ptr height_expr = sym.height();
-    if (height_expr)
+    double height = get<double>(sym, keys::height,0.0) * scale_factor_;
+    for (auto const& geom : feature.paths())
     {
-        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
-        height = result.to_double() * scale_factor_;
-    }
-
-    for (std::size_t i=0;i<feature.num_geometries();++i)
-    {
-        geometry_type const& geom = feature.get_geometry(i);
         if (geom.size() > 2)
         {
             const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
@@ -129,7 +121,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 
                 path_type faces_path (t_,*faces,prj_trans);
                 ras_ptr->add_path(faces_path);
-                ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+                ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
                 agg::render_scanlines(*ras_ptr, sl, ren);
                 ras_ptr->reset();
                 //
@@ -163,13 +155,13 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             agg::conv_stroke<path_type> stroke(path);
             stroke.width(scale_factor_);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
             path_type roof_path (t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
-            ren.color(agg::rgba8_pre(r, g, b, int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
 
         }

@@ -62,9 +62,9 @@ void export_rule()
     implicitly_convertible<text_symbolizer,symbolizer>();
     implicitly_convertible<markers_symbolizer,symbolizer>();
 
-    class_<rule::symbolizers>("Symbolizers",init<>("TODO"))
-        .def(vector_indexing_suite<rule::symbolizers>())
-        ;
+    //class_<rule::symbolizers>("Symbolizers",init<>("TODO"))
+    //    .def(vector_indexing_suite<rule::symbolizers>())
+    //    ;
 
     class_<rule>("Rule",init<>("default constructor"))
         .def(init<std::string const&,

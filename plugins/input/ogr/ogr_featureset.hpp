@@ -40,6 +40,11 @@ class ogr_featureset : public mapnik::Featureset
 public:
     ogr_featureset(mapnik::context_ptr const& ctx,
                    OGRLayer & layer,
+                   OGRGeometry & extent,
+                   std::string const& encoding);
+
+    ogr_featureset(mapnik::context_ptr const& ctx,
+                   OGRLayer & layer,
                    mapnik::box2d<double> const& extent,
                    std::string const& encoding);
 

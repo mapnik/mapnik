@@ -23,8 +23,6 @@
 #include "boost_std_shared_shim.hpp"
 
 // boost
-#include <boost/python/suite/indexing/indexing_suite.hpp>
-//#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>

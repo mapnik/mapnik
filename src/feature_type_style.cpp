@@ -53,14 +53,13 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
       opacity_(rhs.opacity_)
-{
-}
+{}
 
 feature_type_style& feature_type_style::operator=(feature_type_style const& other)
 {
     if (this == &other) return *this;
     rules_ = other.rules_;
-    filters_ = other.filters_;
+    filters_= other.filters_;
     direct_filters_ = other.direct_filters_;
     comp_op_ = other.comp_op_;
     opacity_ = other.opacity_;

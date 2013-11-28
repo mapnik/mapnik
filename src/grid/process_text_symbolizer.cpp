@@ -21,9 +21,10 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/text/symbolizer_helpers.hpp>
-#include <mapnik/text/renderer.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/font_util.hpp>
 
 namespace mapnik {
 
@@ -32,22 +33,32 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    text_symbolizer_helper helper(
+    text_symbolizer_helper<face_manager<freetype_engine>,
+        label_collision_detector4> helper(
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_ * (1.0/pixmap_.get_resolution()),
             t_, font_manager_, *detector_,
             query_extent_);
+    bool placement_found = false;
 
-    grid_text_renderer<T> ren(pixmap_, sym.comp_op(), scale_factor_);
+    text_renderer<T> ren(pixmap_,
+                         font_manager_,
+                         sym.get_halo_rasterizer(),
+                         sym.comp_op(),
+                         scale_factor_);
 
-    placements_list const& placements = helper.get();
-    if (!placements.size()) return;
-    for (glyph_positions_ptr glyphs : placements)
-    {
-        ren.render(*glyphs, feature.id());
+    while (helper.next()) {
+        placement_found = true;
+        placements_type const& placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
+        {
+            ren.prepare_glyphs(placements[ii]);
+            ren.render_id(feature.id(), placements[ii].center);
+        }
     }
-    pixmap_.add_feature(feature);
+    if (placement_found) pixmap_.add_feature(feature);
+
 }
 
 template void grid_renderer<grid>::process(text_symbolizer const&,
@@ -55,3 +66,4 @@ template void grid_renderer<grid>::process(text_symbolizer const&,
                                            proj_transform const&);
 
 }
+

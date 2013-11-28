@@ -27,17 +27,7 @@
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/symbolizer.hpp>  // for transform_list_ptr
-#include <mapnik/building_symbolizer.hpp>
-#include <mapnik/line_symbolizer.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/polygon_symbolizer.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/raster_symbolizer.hpp>
-#include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/text_symbolizer.hpp>
-#include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp> // for rule::symbolizers
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
 #include <mapnik/expression_node_types.hpp>
@@ -45,6 +35,7 @@
 #include <mapnik/parse_path.hpp>  // for path_processor_type
 #include <mapnik/path_expression.hpp>  // for path_expression_ptr
 #include <mapnik/text/placements/base.hpp>  // for text_placements
+#include <mapnik/image_scaling.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
@@ -61,18 +52,23 @@ struct expression_attributes : boost::static_visitor<void>
     explicit expression_attributes(Container& names)
         : names_(names) {}
 
-    void operator() (value_type const& /*x*/) const
+    void operator() (value_type const& ) const
     {
     }
 
-    void operator() (geometry_type_attribute const& /*type*/) const
+    void operator() (geometry_type_attribute const&) const
     {
-        // do nothing
+        // no-op
     }
 
     void operator() (attribute const& attr) const
     {
         names_.insert(attr.name());
+    }
+
+    void operator() (global_attribute const& attr) const
+    {
+        // no-op
     }
 
     template <typename Tag>
@@ -118,110 +114,123 @@ struct symbolizer_attributes : public boost::static_visitor<>
     {
         expression_set::const_iterator it;
         expression_set expressions;
-        sym.get_placement_options()->add_expressions(expressions);
-        for (it=expressions.begin(); it != expressions.end(); it++)
+        get<mapnik::text_placements_ptr>(sym, keys::text_placements_)->add_expressions(expressions);
+        for (it=expressions.begin(); it != expressions.end(); ++it)
         {
             if (*it) boost::apply_visitor(f_attr, **it);
         }
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
     }
 
     void operator () (point_symbolizer const& sym)
     {
-        path_expression_ptr const& filename_expr = sym.get_filename();
+        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
         if (filename_expr)
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
+        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
     }
 
     void operator () (line_symbolizer const& sym)
     {
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
     }
 
     void operator () (line_pattern_symbolizer const& sym)
     {
-        path_expression_ptr const& filename_expr = sym.get_filename();
+        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
         if (filename_expr)
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
+        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
     }
 
     void operator () (polygon_symbolizer const& sym)
     {
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
     }
 
     void operator () (polygon_pattern_symbolizer const& sym)
     {
-        path_expression_ptr const& filename_expr = sym.get_filename();
+        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
         if (filename_expr)
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
+        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
     }
 
     void operator () (shield_symbolizer const& sym)
     {
         expression_set::const_iterator it;
         expression_set expressions;
-        sym.get_placement_options()->add_expressions(expressions);
-        for (it=expressions.begin(); it != expressions.end(); it++)
+        get<mapnik::text_placements_ptr>(sym, keys::text_placements_)->add_expressions(expressions);
+        for (it=expressions.begin(); it != expressions.end(); ++it)
         {
             if (*it) boost::apply_visitor(f_attr, **it);
         }
 
-        path_expression_ptr const& filename_expr = sym.get_filename();
+        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
         if (filename_expr)
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
+
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
+        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
     }
 
     void operator () (markers_symbolizer const& sym)
     {
-        expression_ptr const& height_expr = sym.get_height();
+        expression_ptr const& height_expr = get<mapnik::expression_ptr>(sym,keys::height);
         if (height_expr)
         {
             boost::apply_visitor(f_attr,*height_expr);
         }
-        expression_ptr const& width_expr = sym.get_width();
+        expression_ptr const& width_expr = get<mapnik::expression_ptr>(sym,keys::width);
         if (width_expr)
         {
             boost::apply_visitor(f_attr,*width_expr);
         }
-        path_expression_ptr const& filename_expr = sym.get_filename();
+        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
         if (filename_expr)
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
+        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
     }
 
     void operator () (building_symbolizer const& sym)
     {
-        expression_ptr const& height_expr = sym.height();
+        expression_ptr const& height_expr = get<mapnik::expression_ptr>(sym,keys::height);
         if (height_expr)
         {
             boost::apply_visitor(f_attr,*height_expr);
         }
-        collect_transform(sym.get_transform());
+        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
     }
 
     void operator () (raster_symbolizer const& sym)
     {
-        filter_factor_ = sym.calculate_filter_factor();
+        boost::optional<double> filter_factor = get_optional<double>(sym, keys::filter_factor);
+        if (filter_factor)
+        {
+            filter_factor_ = *filter_factor;
+        }
+        else
+        {
+            boost::optional<scaling_method_e> scaling_method = get_optional<scaling_method_e>(sym, keys::scaling);
+            if (scaling_method && *scaling_method != SCALING_NEAR)
+            {
+                filter_factor_ = 2;
+            }
+        }
     }
 
 private:

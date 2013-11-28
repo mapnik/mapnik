@@ -205,24 +205,24 @@ public:
     /*! \brief Add a layer to the map.
      *  @param l The layer to add.
      */
-    void addLayer(layer const& l);
+    void add_layer(layer const& l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
      *  @return Constant layer.
      */
-    layer const& getLayer(size_t index) const;
+    layer const& get_layer(size_t index) const;
 
     /*! \brief Get a layer.
      *  @param index layer number.
      *  @return Non-constant layer.
      */
-    layer& getLayer(size_t index);
+    layer& get_layer(size_t index);
 
     /*! \brief Remove a layer.
      *  @param index layer number.
      */
-    void removeLayer(size_t index);
+    void remove_layer(size_t index);
 
     /*! \brief Get all layers.
      *  @return Constant layers.

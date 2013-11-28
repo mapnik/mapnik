@@ -24,7 +24,7 @@
 #define SVG_OUTPUT_GRAMMARS_HPP
 
 // mapnik
-#include <mapnik/stroke.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // fwd declare
 namespace mapnik { namespace svg {

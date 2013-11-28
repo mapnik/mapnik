@@ -43,7 +43,7 @@ expression_ptr parse_expression(std::string const& str, std::string const& encod
 expression_ptr parse_expression(std::string const& str,
                                 mapnik::expression_grammar<std::string::const_iterator> const& g)
 {
-    expression_ptr node = std::make_shared<expr_node>();
+    auto node = std::make_shared<expr_node>();
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
     bool r = boost::spirit::qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, *node);

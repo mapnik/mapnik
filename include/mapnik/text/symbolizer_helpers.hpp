@@ -23,8 +23,7 @@
 #define SYMBOLIZER_HELPERS_HPP
 
 //mapnik
-#include <mapnik/text_symbolizer.hpp>
-#include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
@@ -68,7 +67,7 @@ public:
     placements_list const& get();
 protected:
     bool next_point_placement();
-    bool next_line_placement();
+    bool next_line_placement(bool clipped);
     void initialize_geometries();
     void initialize_points();
 

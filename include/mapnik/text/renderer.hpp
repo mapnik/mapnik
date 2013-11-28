@@ -23,14 +23,11 @@
 #ifndef MAPNIK_TEXT_RENDERER_HPP
 #define MAPNIK_TEXT_RENDERER_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/text_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>
-
-//TODO: Find a better place for halo_rasterizer_e!
-//TODO: Halo rasterizer selection should go to text_properties because it might make sense to use a different rasterizer for different fonts
 
 // freetype2
 extern "C"

@@ -185,9 +185,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         int im_width = int(width_res * intersect.width() + 0.5);
         int im_height = int(height_res * intersect.height() + 0.5);
 
-        double sym_downsample_factor = q.get_filter_factor();
-        im_width = int(im_width * sym_downsample_factor + 0.5);
-        im_height = int(im_height * sym_downsample_factor + 0.5);
+        double filter_factor = q.get_filter_factor();
+        im_width = int(im_width * filter_factor + 0.5);
+        im_height = int(im_height * filter_factor + 0.5);
 
         // case where we need to avoid upsampling so that the
         // image can be later scaled within raster_symbolizer
@@ -199,7 +199,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
         if (im_width > 0 && im_height > 0)
         {
-            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, im_width, im_height);
+            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, im_width, im_height, filter_factor);
             feature->set_raster(raster);
             mapnik::image_data_32 & image = raster->data_;
             image.set(0xffffffff);

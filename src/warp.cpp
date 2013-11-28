@@ -51,7 +51,6 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                                 proj_transform const& prj_trans,
                                 double offset_x, double offset_y,
                                 unsigned mesh_size,
-                                double filter_radius,
                                 scaling_method_e scaling_method)
 {
     CoordTransform ts(source.data_.width(), source.data_.height(),
@@ -137,11 +136,11 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     case SCALING_MITCHELL:
         filter.calculate(agg::image_filter_mitchell(), true); break;
     case SCALING_SINC:
-        filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
+        filter.calculate(agg::image_filter_sinc(source.get_filter_factor()), true); break;
     case SCALING_LANCZOS:
-        filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
+        filter.calculate(agg::image_filter_lanczos(source.get_filter_factor()), true); break;
     case SCALING_BLACKMAN:
-        filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
+        filter.calculate(agg::image_filter_blackman(source.get_filter_factor()), true); break;
     }
 
     // Project mesh cells into target interpolating raster inside each one

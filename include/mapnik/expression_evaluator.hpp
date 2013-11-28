@@ -77,6 +77,11 @@ struct evaluate : boost::static_visitor<T1>
         return attr.value<value_type,feature_type>(feature_);
     }
 
+    value_type operator() (global_attribute const& attr) const
+    {
+        return value_type();// shouldn't get here ?  //attr.value<value_type,feature_type>(feature_);
+    }
+
     value_type operator() (geometry_type_attribute const& geom) const
     {
         return geom.value<value_type,feature_type>(feature_);

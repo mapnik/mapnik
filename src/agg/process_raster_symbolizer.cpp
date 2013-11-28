@@ -26,7 +26,7 @@
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/raster_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_data.hpp>
@@ -43,12 +43,10 @@
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 
-
 namespace mapnik {
 
-
-template <typename T>
-void agg_renderer<T>::process(raster_symbolizer const& sym,
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
@@ -56,7 +54,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
     if (source)
     {
         // If there's a colorizer defined, use it to color the raster in-place
-        raster_colorizer_ptr colorizer = sym.get_colorizer();
+        raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym, keys::colorizer);
         if (colorizer)
             colorizer->colorize(source,feature);
 
@@ -71,11 +69,12 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
         {
-            raster target(target_ext, raster_width,raster_height);
-            scaling_method_e scaling_method = sym.get_scaling_method();
-            double filter_radius = sym.calculate_filter_factor();
+            raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
+            scaling_method_e scaling_method = get<scaling_method_e>(sym, keys::scaling, feature, SCALING_NEAR);
+            double opacity = get<double>(sym,keys::opacity,feature, 1.0);
+            composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
             bool premultiply_source = !source->premultiplied_alpha_;
-            boost::optional<bool> is_premultiplied = sym.premultiplied();
+            auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied);
             if (is_premultiplied)
             {
                 if (*is_premultiplied) premultiply_source = false;
@@ -94,11 +93,14 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             {
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
-                reproject_and_scale_raster(target, *source, prj_trans,
-                                 offset_x, offset_y,
-                                 sym.get_mesh_size(),
-                                 filter_radius,
-                                 scaling_method);
+                unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, 16));
+                reproject_and_scale_raster(target,
+                                           *source,
+                                           prj_trans,
+                                           offset_x,
+                                           offset_y,
+                                           mesh_size,
+                                           scaling_method);
             }
             else
             {
@@ -120,11 +122,11 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                                                    image_ratio_y,
                                                    0.0,
                                                    0.0,
-                                                   filter_radius);
+                                                   source->get_filter_factor());
                 }
             }
             composite(current_buffer_->data(), target.data_,
-                      sym.comp_op(), sym.get_opacity(),
+                      comp_op, opacity,
                       start_x, start_y, false);
         }
     }

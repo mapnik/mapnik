@@ -58,7 +58,6 @@ void export_python();
 void export_expression();
 void export_rule();
 void export_style();
-void export_stroke();
 void export_feature();
 void export_featureset();
 void export_fontset();
@@ -108,7 +107,6 @@ void export_wkt_reader();
 
 namespace mapnik {
     class font_set;
-    class stroke;
     class layer;
     class color;
     class label_collision_detector4;
@@ -565,7 +563,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_rule();
     export_style();
     export_layer();
-    export_stroke();
     export_datasource_cache();
     export_symbolizer();
     export_markers_symbolizer();
@@ -860,12 +857,10 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_png", &has_png, "Get png read/write support status");
     def("has_tiff", &has_tiff, "Get tiff read/write support status");
     def("has_webp", &has_webp, "Get webp read/write support status");
-    def("has_svg_renderer", &has_svg_renderer, "Get svg_renderer status");
     def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
 
-    python_optional<mapnik::stroke>();
     python_optional<mapnik::font_set>();
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();

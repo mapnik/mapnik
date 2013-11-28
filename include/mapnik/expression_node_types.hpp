@@ -167,13 +167,14 @@ struct regex_replace_node;
 
 typedef mapnik::value value_type;
 
-typedef boost::mpl::vector24<
+typedef boost::mpl::vector25<
 value_null,
 value_bool,
 value_integer,
 value_double,
 value_unicode_string,
 attribute,
+global_attribute,
 geometry_type_attribute,
 boost::recursive_wrapper<unary_node<tags::negate> >,
 boost::recursive_wrapper<binary_node<tags::plus> >,
