@@ -133,9 +133,9 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       font_engine_(std::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
-      clip_extent_(-m.buffer_size(), -m.buffer_size(),
-                   m.width() + m.buffer_size(), m.height() + m.buffer_size()),
-      detector_(std::make_shared<label_collision_detector4>(clip_extent_))
+      detector_(std::make_shared<label_collision_detector4>(
+                  box2d<double>(-m.buffer_size(), -m.buffer_size(),
+                                m.width() + m.buffer_size(), m.height() + m.buffer_size())))
 {
     setup(m);
 }
@@ -155,9 +155,9 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       font_engine_(std::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
-      clip_extent_(-m.buffer_size(), -m.buffer_size(),
-                   m.width() + m.buffer_size(), m.height() + m.buffer_size()),
-      detector_(std::make_shared<label_collision_detector4>(clip_extent_))
+      detector_(std::make_shared<label_collision_detector4>(
+                  box2d<double>(-m.buffer_size(), -m.buffer_size(),
+                                m.width() + m.buffer_size(), m.height() + m.buffer_size())))
 {
     setup(m);
 }
@@ -177,8 +177,6 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       font_engine_(std::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
-      clip_extent_(-m.buffer_size(), -m.buffer_size(),
-                   m.width() + m.buffer_size(), m.height() + m.buffer_size()),
       detector_(detector)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << m.scale();
