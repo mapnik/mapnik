@@ -147,6 +147,7 @@ protected:
     std::shared_ptr<freetype_engine> font_engine_;
     face_manager<freetype_engine> font_manager_;
     cairo_face_manager face_manager_;
+    box2d<double> clip_extent_;
     std::shared_ptr<label_collision_detector4> detector_;
     box2d<double> query_extent_;
     void setup(Map const& m);
