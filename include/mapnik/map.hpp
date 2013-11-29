@@ -43,7 +43,7 @@ namespace mapnik
 class feature_type_style;
 class CoordTransform;
 
-class MAPNIK_DECL Map
+class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
 public:
 
