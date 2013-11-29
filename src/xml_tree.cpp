@@ -32,6 +32,8 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
+// stl
+#include <type_traits>
 
 namespace mapnik
 {
@@ -48,7 +50,7 @@ struct name_trait
     // if you get here you are probably using a new type
     // in the XML file. Just add a name trait for the new
     // type below.
-    BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+    static_assert( sizeof(T) == 0, "missing name_trait for the type");
 };
 
 #define DEFINE_NAME_TRAIT( type, type_name )                            \
