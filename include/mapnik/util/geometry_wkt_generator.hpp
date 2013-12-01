@@ -204,8 +204,7 @@ template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
         karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
-    typedef GeometryContainer geometry_contaner;
-    typedef boost::remove_pointer<typename geometry_container::value_type>::type geometry_type;
+    typedef typename boost::remove_pointer<typename GeometryContainer::value_type>::type geometry_type;
 
     wkt_multi_generator();
     // rules
