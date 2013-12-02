@@ -478,8 +478,6 @@ void cairo_context::add_text(glyph_positions_ptr path,
         if (glyph.format)
         {
             format = glyph.format;
-            // Settings have changed.
-            halo_radius = format->halo_radius * scale_factor;
         }
 
         face_set_ptr faces = font_manager.get_face_set(format->face_name, format->fontset);

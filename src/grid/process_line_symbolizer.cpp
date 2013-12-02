@@ -27,7 +27,6 @@
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 
-#include <mapnik/line_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 // agg
@@ -66,20 +65,27 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    stroke const& stroke_ = sym.get_stroke();
-
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform());
+    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (transform) { evaluate_transform(tr, feature, *transform); }
 
     box2d<double> clipping_extent = query_extent_;
-    if (sym.clip())
+
+    bool clip = get<value_bool>(sym, keys::clip, feature, true);
+    double width = get<value_double>(sym, keys::stroke_width, feature, 1.0);
+    double offset = get<value_double>(sym, keys::offset, feature, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    bool has_dash = has_key<dash_array>(sym, keys::stroke_dasharray);
+
+    if (clip)
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
-        double half_stroke = stroke_.get_width()/2.0;
+        double half_stroke = width/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (std::fabs(sym.offset()) > 0)
-            padding *= std::fabs(sym.offset()) * 1.2;
+        if (std::fabs(offset) > 0)
+            padding *= std::fabs(offset) * 1.2;
         padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
@@ -87,13 +93,13 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
-    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+    if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
-    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
-    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-    if (stroke_.has_dash()) converter.set<dash_tag>();
+    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    if (has_dash) converter.set<dash_tag>();
     converter.set<stroke_tag>(); //always stroke
 
     for ( geometry_type & geom : feature.paths())
