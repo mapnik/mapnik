@@ -43,6 +43,7 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/util/timer.hpp>
 #endif
 
 // qt
@@ -192,10 +193,8 @@ void MainWindow::load_map_file(QString const& filename)
     mapWidget_->setMap(map);
     try
     {
-        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+        mapnik::auto_cpu_timer t(std::clog, "loading map took: ");
         mapnik::load_map(*map,filename.toStdString());
-        std::chrono::duration<double,std::milli> elapsed = std::chrono::system_clock::now() - start;
-        std::clog << "loading map took: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << "  milliseconds" << std::endl;
     }
     catch (mapnik::config_error & ex)
     {

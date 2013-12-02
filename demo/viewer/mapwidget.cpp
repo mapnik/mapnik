@@ -20,7 +20,6 @@
 
 #include <QtGui>
 
-#include <chrono>
 #include <boost/bind.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
@@ -32,6 +31,7 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/util/timer.hpp>
 
 #ifdef HAVE_CAIRO
 // cairo
@@ -501,10 +501,8 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
     try
     {
-        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+        mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
         ren.apply();
-        std::chrono::duration<double,std::milli> elapsed = std::chrono::system_clock::now() - start;
-        std::clog << "rendering took: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << "  milliseconds" << std::endl;
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
@@ -536,11 +534,10 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
     mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
-
-    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
-    renderer.apply();
-    std::chrono::duration<double,std::milli> elapsed = std::chrono::system_clock::now() - start;
-    std::clog << "rendering took: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << "  milliseconds" << std::endl;
+    {
+        mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
+        renderer.apply();
+    }
     image_32 buf(image_surface);
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());
