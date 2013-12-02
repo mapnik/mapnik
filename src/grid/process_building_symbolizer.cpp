@@ -28,7 +28,6 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/building_symbolizer.hpp>
 #include <mapnik/expression.hpp>
 
 // boost
@@ -65,14 +64,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    double height = 0.0;
-    expression_ptr height_expr = sym.height();
-    if (height_expr)
-    {
-        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
-        height = result.to_double() * scale_factor_;
-    }
-
+    double height = get<value_double>(sym, keys::height,feature, 0.0);
     for (std::size_t i=0;i<feature.num_geometries();++i)
     {
         geometry_type & geom = feature.get_geometry(i);

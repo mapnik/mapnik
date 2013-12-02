@@ -200,7 +200,8 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
                                                    data,
                                                    SCALING_NEAR,
                                                    ratio,
-                                                   ratio);
+                                                   ratio,
+                                                   0.0, 0.0, 1.0); // TODO: is 1.0 a valid default here, and do we even care in grid_renderer what the image looks like?
             pixmap_.set_rectangle(feature.id(), target,
                                   boost::math::iround(pos.x - cx),
                                   boost::math::iround(pos.y - cy));

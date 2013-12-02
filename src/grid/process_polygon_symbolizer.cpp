@@ -29,7 +29,6 @@
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/polygon_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 // agg
@@ -55,18 +54,23 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     ras_ptr->reset();
 
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform());
+    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (geom_transform) evaluate_transform(tr, feature, *geom_transform);
+
+    bool clip = get<value_bool>(sym, keys::clip, feature, true);
+    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, 0.0);
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
-    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
 
     for ( geometry_type & geom : feature.paths())

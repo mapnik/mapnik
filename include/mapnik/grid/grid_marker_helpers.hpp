@@ -24,7 +24,7 @@
 #define MAPNIK_GRID_MARKER_HELPERS_HPP
 
 // mapnik
-#include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
@@ -76,7 +76,12 @@ struct raster_markers_rasterizer_dispatch_grid
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_e placement_method = sym_.get_marker_placement();
+        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
+        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, false);
+        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, false);
+        double spacing = get<double>(sym_, keys::spacing, 100.0);
+        double max_error = get<double>(sym_, keys::max_error, 0.2);
+
         box2d<double> bbox_(0,0, src_.width(),src_.height());
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == geometry_type::types::Point)
@@ -101,11 +106,11 @@ struct raster_markers_rasterizer_dispatch_grid
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
-            if (sym_.get_allow_overlap() ||
+            if (allow_overlap ||
                 detector_.has_placement(transformed_bbox))
             {
                 render_raster_marker(matrix);
-                if (!sym_.get_ignore_placement())
+                if (!ignore_placement)
                 {
                     detector_.insert(transformed_bbox);
                 }
@@ -119,11 +124,11 @@ struct raster_markers_rasterizer_dispatch_grid
         else
         {
             markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
-                                                                      sym_.get_spacing() * scale_factor_,
-                                                                      sym_.get_max_error(),
-                                                                      sym_.get_allow_overlap());
+                                                                      spacing * scale_factor_,
+                                                                      max_error,
+                                                                      allow_overlap);
             double x, y, angle;
-            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
+            while (placement.get_point(x, y, angle, ignore_placement))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -214,7 +219,13 @@ struct vector_markers_rasterizer_dispatch_grid
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_e placement_method = sym_.get_marker_placement();
+        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
+        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, false);
+        double spacing = get<double>(sym_, keys::spacing, 100.0);
+        double max_error = get<double>(sym_, keys::max_error, 0.2);
+        double opacity = get<double>(sym_,keys::opacity, 1.0);
+        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, false);
+
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == geometry_type::types::Point)
         {
@@ -238,11 +249,11 @@ struct vector_markers_rasterizer_dispatch_grid
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
-            if (sym_.get_allow_overlap() ||
+            if (allow_overlap ||
                 detector_.has_placement(transformed_bbox))
             {
-                svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, sym_.get_opacity(), bbox_);
-                if (!sym_.get_ignore_placement())
+                svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
+                if (!ignore_placement)
                 {
                     detector_.insert(transformed_bbox);
                 }
@@ -256,16 +267,16 @@ struct vector_markers_rasterizer_dispatch_grid
         else
         {
             markers_placement<T, Detector> placement(path, bbox_, marker_trans_, detector_,
-                                                     sym_.get_spacing() * scale_factor_,
-                                                     sym_.get_max_error(),
-                                                     sym_.get_allow_overlap());
+                                                     spacing * scale_factor_,
+                                                     max_error,
+                                                     allow_overlap);
             double x, y, angle;
-            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
+            while (placement.get_point(x, y, angle, ignore_placement))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x, y);
-                svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, sym_.get_opacity(), bbox_);
+                svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
                 if (!placed_)
                 {
                     pixmap_.add_feature(feature_);
