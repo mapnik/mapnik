@@ -54,11 +54,7 @@
 #include "about_dialog.hpp"
 
 // boost
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono/process_cpu_clocks.hpp>
-#include <boost/chrono.hpp>
 #include <boost/algorithm/string.hpp>
-
 
 MainWindow::MainWindow()
     : filename_(),
@@ -189,18 +185,17 @@ void MainWindow::save()
 
 void MainWindow::load_map_file(QString const& filename)
 {
-    std::cout<<"loading "<< filename.toStdString() << std::endl;
+    std::cout << "loading "<< filename.toStdString() << std::endl;
     unsigned width = mapWidget_->width();
     unsigned height = mapWidget_->height();
     std::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height));
     mapWidget_->setMap(map);
     try
     {
-        boost::chrono::process_cpu_clock::time_point start = boost::chrono::process_cpu_clock::now();
+        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
         mapnik::load_map(*map,filename.toStdString());
-        boost::chrono::process_cpu_clock::duration elapsed = boost::chrono::process_cpu_clock::now() - start;
-        std::clog << "loading map took: " << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed) << "\n";
-
+        std::chrono::duration<double,std::milli> elapsed = std::chrono::system_clock::now() - start;
+        std::clog << "loading map took: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << "  milliseconds" << std::endl;
     }
     catch (mapnik::config_error & ex)
     {
