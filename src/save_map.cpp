@@ -334,32 +334,25 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
         }
     }
 
-    rules::const_iterator it = style.get_rules().begin();
-    rules::const_iterator end = style.get_rules().end();
-    for (; it != end; ++it)
+    for (auto const& r : style.get_rules())
     {
-        serialize_rule( style_node, * it , explicit_defaults);
+        serialize_rule( style_node, r , explicit_defaults);
     }
 
 }
 
-void serialize_fontset( ptree & map_node, Map::const_fontset_iterator fontset_it )
+void serialize_fontset( ptree & map_node, std::string const& name, font_set const& fontset)
 {
-    font_set const& fontset = fontset_it->second;
-    std::string const& name = fontset_it->first;
-
     ptree & fontset_node = map_node.push_back(
         ptree::value_type("FontSet", ptree()))->second;
 
     set_attr(fontset_node, "name", name);
 
-    std::vector<std::string>::const_iterator it = fontset.get_face_names().begin();
-    std::vector<std::string>::const_iterator end = fontset.get_face_names().end();
-    for (; it != end; ++it)
+    for (auto const& name : fontset.get_face_names())
     {
         ptree & font_node = fontset_node.push_back(
             ptree::value_type("Font", ptree()))->second;
-        set_attr(font_node, "face-name", *it);
+        set_attr(font_node, "face-name", name);
     }
 
 }
@@ -369,15 +362,13 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
     ptree & datasource_node = layer_node.push_back(
         ptree::value_type("Datasource", ptree()))->second;
 
-    parameters::const_iterator it = datasource->params().begin();
-    parameters::const_iterator end = datasource->params().end();
-    for (; it != end; ++it)
+    for ( auto const& p : datasource->params())
     {
         boost::property_tree::ptree & param_node = datasource_node.push_back(
             boost::property_tree::ptree::value_type("Parameter",
                                                     boost::property_tree::ptree()))->second;
-        param_node.put("<xmlattr>.name", it->first );
-        param_node.put_value( it->second );
+        param_node.put("<xmlattr>.name", p.first );
+        param_node.put_value( p.second );
 
     }
 }
@@ -418,16 +409,14 @@ void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
         ptree & params_node = map_node.push_back(
             ptree::value_type("Parameters", ptree()))->second;
 
-        parameters::const_iterator it = params.begin();
-        parameters::const_iterator end = params.end();
-        for (; it != end; ++it)
+        for (auto const& p : params)
         {
             boost::property_tree::ptree & param_node = params_node.push_back(
                 boost::property_tree::ptree::value_type("Parameter",
                                                         boost::property_tree::ptree()))->second;
-            param_node.put("<xmlattr>.name", it->first );
-            param_node.put_value( it->second );
-            boost::apply_visitor(serialize_type(param_node),it->second);
+            param_node.put("<xmlattr>.name", p.first );
+            param_node.put_value( p.second );
+            boost::apply_visitor(serialize_type(param_node),p.second);
         }
     }
 }
@@ -498,13 +487,12 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr( layer_node, "maximum-extent", s.str() );
     }
 
-    std::vector<std::string> const& style_names = layer.styles();
-    for (unsigned i = 0; i < style_names.size(); ++i)
+    for (auto const& name : layer.styles())
     {
         boost::property_tree::ptree & style_node = layer_node.push_back(
             boost::property_tree::ptree::value_type("StyleName",
                                                     boost::property_tree::ptree()))->second;
-        style_node.put_value( style_names[i] );
+        style_node.put_value(name);
     }
 
     datasource_ptr datasource = layer.datasource();
@@ -568,13 +556,10 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         set_attr( map_node, "maximum-extent", s.str() );
     }
 
+
+    for (auto const& kv : map.fontsets())
     {
-        Map::const_fontset_iterator it = map.fontsets().begin();
-        Map::const_fontset_iterator end = map.fontsets().end();
-        for (; it != end; ++it)
-        {
-            serialize_fontset( map_node, it);
-        }
+        serialize_fontset( map_node, kv.first, kv.second);
     }
 
     serialize_parameters( map_node, map.get_extra_parameters());
