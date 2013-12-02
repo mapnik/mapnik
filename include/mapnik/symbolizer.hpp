@@ -39,6 +39,7 @@
 #include <mapnik/raster_colorizer.hpp>
 // stl
 #include <type_traits>
+#include <algorithm>
 #include <memory>
 #include <vector>
 #include <string>
@@ -98,6 +99,12 @@ struct  MAPNIK_DECL symbolizer_base
     typedef std::map<key_type, value_type> cont_type;
     cont_type properties;
 };
+
+inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
+{
+    return lhs.properties.size() == rhs.properties.size() &&
+        std::equal(lhs.properties.begin(), lhs.properties.end(), rhs.properties.begin());
+}
 
 template <typename T>
 struct evaluate_path_wrapper
