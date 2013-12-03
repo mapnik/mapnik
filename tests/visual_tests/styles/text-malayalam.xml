@@ -6,13 +6,14 @@
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
 	    <StyleName>My Style</StyleName>
 	    <Datasource>
-		<Parameter name="type">csv</Parameter>
-		<Parameter name="file">../data/points.csv</Parameter>
+    		<Parameter name="type">csv</Parameter>
+    		<Parameter name="file">../data/points.csv</Parameter>
+            <Parameter name="extent">-1,-1,1,1</Parameter>
 	    </Datasource>
     </Layer>
     <Style name="My Style">
 	<Rule>
-	    <Filter>[nr] = "5"</Filter>
+	    <Filter>[nr] = 5</Filter>
 	    <TextSymbolizer face-name="Rachana Book" size="30" placement="point" dy="0">"ഇന്ത്യ"</TextSymbolizer>
 	</Rule>
     </Style>
