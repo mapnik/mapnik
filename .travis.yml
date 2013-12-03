@@ -1,5 +1,8 @@
 language: cpp
 
+addons:
+  postgresql: "9.3"
+
 compiler:
  - clang
  - gcc
