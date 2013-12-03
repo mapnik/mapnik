@@ -922,6 +922,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         point_symbolizer symbol;
         if (allow_overlap)
@@ -956,7 +957,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             ensure_exists(filename);
             symbol.set_filename( parse_path(filename, sym.get_tree().path_expr_grammar) );
 
-            optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
             if (image_transform_wkt)
             {
                 mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
