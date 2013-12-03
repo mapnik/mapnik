@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
-<Map background-color="white" srs="+proj=latlong +datum=WGS84" font-directory="/usr/share/fonts/truetype/malayalam-fonts/">
+<Map background-color="white" srs="+proj=latlong +datum=WGS84"
+     font-directory="../fonts/Rachana/">
+
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
 	    <StyleName>My Style</StyleName>
 	    <Datasource>
@@ -11,7 +13,7 @@
     <Style name="My Style">
 	<Rule>
 	    <Filter>[nr] = "5"</Filter>
-	    <TextSymbolizer face-name="Rachana Regular" size="30" placement="point" dy="0">"ഇന്ത്യ"</TextSymbolizer>
+	    <TextSymbolizer face-name="Rachana Book" size="30" placement="point" dy="0">"ഇന്ത്യ"</TextSymbolizer>
 	</Rule>
     </Style>
 </Map>
