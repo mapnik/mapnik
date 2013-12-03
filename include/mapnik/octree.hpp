@@ -300,7 +300,7 @@ public:
             palette.push_back(rgb(byte(itr->reds/float(count)),
                                   byte(itr->greens/float(count)),
                                   byte(itr->blues/float(count))));
-            itr->index = palette.size() - 1;
+            itr->index = static_cast<unsigned>(palette.size()) - 1;
         }
         for (unsigned i=0; i < 8 ;++i)
         {

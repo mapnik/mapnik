@@ -1,0 +1,21 @@
+<Map
+    background-color="green"
+    background-image="../../data/images/checker.jpg"
+    background-image-opacity=".5"
+    background-image-comp-op="soft-light"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/line-offset.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <LinePatternSymbolizer file="../../data/raster/white-alpha.png" comp-op="difference"/>
+        </Rule>
+    </Style>
+
+</Map>

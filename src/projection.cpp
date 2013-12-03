@@ -26,6 +26,9 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/well_known_srs.hpp>
 
+// stl
+#include <stdexcept>
+
 #ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>

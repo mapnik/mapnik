@@ -27,15 +27,15 @@
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 //stl
 #include <vector>
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
-// uci
-#include <unicode/unistr.h>
 
 namespace mapnik
 {
@@ -45,10 +45,10 @@ class string_info : private mapnik::noncopyable
 protected:
     typedef std::vector<char_info> characters_t;
     characters_t characters_;
-    UnicodeString text_;
+    mapnik::value_unicode_string text_;
     bool is_rtl;
 public:
-    string_info(UnicodeString const& text)
+    string_info(mapnik::value_unicode_string const& text)
         : characters_(),
           text_(text),
           is_rtl(false)
@@ -69,12 +69,12 @@ public:
         characters_.push_back(info);
     }
 
-    void add_text(UnicodeString text)
+    void add_text(mapnik::value_unicode_string const& text)
     {
         text_ += text;
     }
 
-    unsigned num_characters() const
+    std::size_t num_characters() const
     {
         return characters_.size();
     }
@@ -89,23 +89,24 @@ public:
         return is_rtl;
     }
 
-    char_info const& at(unsigned i) const
+    char_info const& at(std::size_t i) const
     {
         return characters_[i];
     }
 
-    char_info const& operator[](unsigned i) const
+    char_info const& operator[](std::size_t i) const
     {
         return at(i);
     }
 
-    UnicodeString const& get_string() const
+    mapnik::value_unicode_string const& get_string() const
     {
         return text_;
     }
 
     bool has_line_breaks() const
     {
+        // uint16_t
         UChar break_char = '\n';
         return (text_.indexOf(break_char) >= 0);
     }
@@ -184,7 +185,7 @@ public:
     }
 
     /** Number of nodes. */
-    int num_nodes() const
+    std::size_t num_nodes() const
     {
         return nodes_.size();
     }
@@ -197,6 +198,8 @@ public:
 };
 
 typedef boost::shared_ptr<text_path> text_path_ptr;
+typedef boost::ptr_vector<text_path> placements_type;
+
 }
 
 #endif // MAPNIK_TEXT_PATH_HPP

@@ -32,12 +32,19 @@
 
 
 // mapnik
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/feature_factory.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/json/feature_parser.hpp>
 #include <mapnik/json/geojson_generator.hpp>
+#include <mapnik/json/generic_json.hpp>
+
+// stl
+#include <stdexcept>
 
 namespace {
 
@@ -47,18 +54,32 @@ using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
-mapnik::geometry_type const& (mapnik::feature_impl::*get_geometry_by_const_ref)(unsigned) const = &mapnik::feature_impl::get_geometry;
+mapnik::geometry_type const& (mapnik::feature_impl::*get_geometry_by_const_ref)(std::size_t) const = &mapnik::feature_impl::get_geometry;
 boost::ptr_vector<mapnik::geometry_type> const& (mapnik::feature_impl::*get_paths_by_const_ref)() const = &mapnik::feature_impl::paths;
 
 void feature_add_geometries_from_wkb(mapnik::feature_impl &feature, std::string wkb)
 {
-    geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size());
+    bool result = geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size());
+    if (!result) throw std::runtime_error("Failed to parse WKB");
 }
 
 void feature_add_geometries_from_wkt(mapnik::feature_impl &feature, std::string wkt)
 {
     bool result = mapnik::from_wkt(wkt, feature.paths());
     if (!result) throw std::runtime_error("Failed to parse WKT");
+}
+
+mapnik::feature_ptr from_geojson_impl(std::string const& json, mapnik::context_ptr const& ctx)
+{
+    mapnik::transcoder tr("utf8");
+    mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+    mapnik::json::generic_json<std::string::const_iterator> json_base;
+    mapnik::json::feature_parser<std::string::const_iterator> parser(json_base, tr);
+    if (!parser.parse(json.begin(), json.end(), *feature))
+    {
+        throw std::runtime_error("Failed to parse geojson feature");
+    }
+    return feature;
 }
 
 std::string feature_to_geojson(mapnik::feature_impl const& feature)
@@ -103,14 +124,14 @@ boost::python::dict attributes(mapnik::feature_impl const& f)
 
 } // end anonymous namespace
 
-struct UnicodeString_from_python_str
+struct unicode_string_from_python_str
 {
-    UnicodeString_from_python_str()
+    unicode_string_from_python_str()
     {
         boost::python::converter::registry::push_back(
             &convertible,
             &construct,
-            boost::python::type_id<UnicodeString>());
+            boost::python::type_id<mapnik::value_unicode_string>());
     }
 
     static void* convertible(PyObject* obj_ptr)
@@ -150,9 +171,9 @@ struct UnicodeString_from_python_str
         }
         if (value == 0) boost::python::throw_error_already_set();
         void* storage = (
-            (boost::python::converter::rvalue_from_python_storage<UnicodeString>*)
+            (boost::python::converter::rvalue_from_python_storage<mapnik::value_unicode_string>*)
             data)->storage.bytes;
-        new (storage) UnicodeString(value);
+        new (storage) mapnik::value_unicode_string(value);
         data->convertible = storage;
     }
 };
@@ -201,7 +222,7 @@ void export_feature()
     implicitly_convertible<mapnik::value_bool,mapnik::value>();
 
     // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
-    UnicodeString_from_python_str();
+    unicode_string_from_python_str();
     value_null_from_python();
 
     class_<context_type,context_ptr,boost::noncopyable>
@@ -229,5 +250,7 @@ void export_feature()
         .def("__len__", &mapnik::feature_impl::size)
         .def("context",&mapnik::feature_impl::context)
         .def("to_geojson",&feature_to_geojson)
+        .def("from_geojson",from_geojson_impl)
+        .staticmethod("from_geojson")
         ;
 }

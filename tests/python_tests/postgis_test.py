@@ -3,7 +3,7 @@
 from nose.tools import *
 import atexit
 import time
-from utilities import execution_path
+from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
@@ -152,6 +152,18 @@ INSERT INTO test10(gid, bool_field, geom) values (2, FALSE, ST_MakePoint(1,1));
 INSERT INTO test10(gid, bool_field, geom) values (3, null, ST_MakePoint(1,1));
 '''
 
+insert_table_11 = """
+CREATE TABLE test11(gid serial PRIMARY KEY, label varchar(40), geom geometry);
+INSERT INTO test11(label,geom) values ('label_1',GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test11(label,geom) values ('label_2',GeomFromEWKT('SRID=4326;POINT(-2 2)'));
+INSERT INTO test11(label,geom) values ('label_3',GeomFromEWKT('SRID=4326;MULTIPOINT(2 1,1 2)'));
+INSERT INTO test11(label,geom) values ('label_4',GeomFromEWKT('SRID=4326;LINESTRING(0 0,1 1,1 2)'));
+INSERT INTO test11(label,geom) values ('label_5',GeomFromEWKT('SRID=4326;MULTILINESTRING((1 0,0 1,3 2),(3 2,5 4))'));
+INSERT INTO test11(label,geom) values ('label_6',GeomFromEWKT('SRID=4326;POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))'));
+INSERT INTO test11(label,geom) values ('label_7',GeomFromEWKT('SRID=4326;MULTIPOLYGON(((1 1,3 1,3 3,1 3,1 1),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))'));
+INSERT INTO test11(label,geom) values ('label_8',GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POLYGON((1 1, 2 1, 2 2, 1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))'));
+"""
+
 
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
@@ -169,6 +181,7 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_8),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_9),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_10),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_11),silent=False)
 
 def postgis_takedown():
     pass
@@ -475,16 +488,20 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             max_size=20,
                             geometry_field='geom')
         fs = ds.all_features()
+        eq_(len(fs),8)
 
     def test_threaded_create(NUM_THREADS=100):
         # run one to start before thread loop
         # to ensure that a throw stops the test
         # from running all threads
         create_ds()
+        runs = 0
         for i in range(NUM_THREADS):
             t = threading.Thread(target=create_ds)
             t.start()
             t.join()
+            runs +=1
+        eq_(runs,NUM_THREADS)
 
     def create_ds_and_error():
         try:
@@ -492,7 +509,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                                 table='asdfasdfasdfasdfasdf',
                                 max_size=20)
             fs = ds.all_features()
-        except: pass
+        except Exception, e:
+            eq_('in executeQuery' in str(e),True)
 
     def test_threaded_create2(NUM_THREADS=10):
         for i in range(NUM_THREADS):
@@ -574,7 +592,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] = true").evaluate(feat),False)
         eq_(mapnik.Expression("[name] = false").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),True)
-        eq_(mapnik.Expression("[name] != ''").evaluate(feat),True)
+        # https://github.com/mapnik/mapnik/issues/1859
+        eq_(mapnik.Expression("[name] != ''").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != null").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
@@ -620,7 +639,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)  # in 2.1.x used to be False
-        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)  # in 2.1.x used to be False
+        # https://github.com/mapnik/mapnik/issues/1859
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True) # in 2.1.x used to be False
@@ -654,8 +674,92 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         fs = ds.featureset()
         feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
 
+    def test_psql_error_should_not_break_connection_pool():
+        # Bad request, will trigger an error when returning result
+        ds_bad = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table="""(SELECT geom as geom,label::int from test11) as failure_table""",
+                            max_async_connection=5,geometry_field='geom',srid=4326)
+
+        # Good request
+        ds_good = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table="test",
+                            max_async_connection=5,geometry_field='geom',srid=4326)
+
+        # This will/should trigger a PSQL error
+        failed = False
+        try:
+            fs = ds_bad.featureset()
+            for feature in fs:
+                pass
+        except RuntimeError:
+            failed = True
+
+        eq_(failed,True)
+
+        # Should be ok
+        fs = ds_good.featureset()
+        count = 0
+        for feature in fs:
+            count += 1
+        eq_(count,8)
+
+
+    def test_psql_error_should_give_back_connections_opened_for_lower_layers_to_the_pool():
+        map1 = mapnik.Map(600,300)
+        s = mapnik.Style()
+        r = mapnik.Rule()
+        r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#f2eff9')))
+        s.rules.append(r)
+        map1.append_style('style',s)
+
+        # This layer will fail after a while
+        buggy_s = mapnik.Style()
+        buggy_r = mapnik.Rule()
+        buggy_r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#ff0000')))
+        buggy_r.filter = mapnik.Filter("[fips] = 'FR'")
+        buggy_s.rules.append(buggy_r)
+        map1.append_style('style for buggy layer',buggy_s)
+        buggy_layer = mapnik.Layer('this layer is buggy at runtime')
+        # We ensure the query wille be long enough
+        buggy_layer.datasource = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(SELECT geom as geom, pg_sleep(0.1), fips::int from world_merc) as failure_tabl',
+            max_async_connection=2, max_size=2,asynchronous_request = True, geometry_field='geom')
+        buggy_layer.styles.append('style for buggy layer')
+
+        # The query for this layer will be sent, then the previous layer will raise an exception before results are read
+        forced_canceled_layer = mapnik.Layer('this layer will be canceled when an exception stops map rendering')
+        forced_canceled_layer.datasource = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc',
+            max_async_connection=2, max_size=2, asynchronous_request = True, geometry_field='geom')
+        forced_canceled_layer.styles.append('style')
+
+        map1.layers.append(buggy_layer)
+        map1.layers.append(forced_canceled_layer)
+        map1.zoom_all()
+        map2 = mapnik.Map(600,300)
+        map2.background = mapnik.Color('steelblue')
+        s = mapnik.Style()
+        r = mapnik.Rule()
+        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
+        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
+        s.rules.append(r)
+        map2.append_style('style',s)
+        layer1 = mapnik.Layer('layer1')
+        layer1.datasource = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc',
+            max_async_connection=2, max_size=2, asynchronous_request = True, geometry_field='geom')
+        layer1.styles.append('style')
+        map2.layers.append(layer1)
+        map2.zoom_all()
+
+        # We expect this to trigger a PSQL error
+        try:
+            mapnik.render_to_file(map1,'world.png', 'png')
+            # Test must fail if error was not raised just above
+            eq_(False,True)
+        except RuntimeError:
+            pass
+        # This used to raise an exception before correction of issue 2042
+        mapnik.render_to_file(map2,'world2.png', 'png')
+
+
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

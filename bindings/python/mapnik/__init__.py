@@ -43,6 +43,10 @@ import itertools
 import os
 import sys
 import warnings
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 def bootstrap_env():
     """
@@ -255,6 +259,12 @@ class _Projection(Projection,_injector):
         """
         return inverse_(obj,self)
 
+class _Feature(Feature,_injector):
+    __geo_interface__ = property(lambda self: json.loads(self.to_geojson()))
+
+class _Path(Path,_injector):
+    __geo_interface__ = property(lambda self: json.loads(self.to_geojson()))
+
 class _Datasource(Datasource,_injector):
 
     def all_features(self,fields=None):
@@ -338,6 +348,53 @@ def Shapefile(**keywords):
 
     """
     keywords['type'] = 'shape'
+    return CreateDatasource(keywords)
+
+def CSV(**keywords):
+    """Create a CSV Datasource.
+
+    Required keyword arguments:
+      file -- path to csv
+
+    Optional keyword arguments:
+      inline -- inline CSV string (if provided 'file' argument will be ignored and non-needed)
+      base -- path prefix (default None)
+      encoding -- file encoding (default 'utf-8')
+      row_limit -- integer limit of rows to return (default: 0)
+      strict -- throw an error if an invalid row is encountered
+      escape -- The escape character to use for parsing data
+      quote -- The quote character to use for parsing data
+      separator -- The separator character to use for parsing data
+      headers -- A comma separated list of header names that can be set to add headers to data that lacks them
+      filesize_max -- The maximum filesize in MB that will be accepted
+
+    >>> from mapnik import CSV
+    >>> csv = CSV(file='test.csv')
+
+    >>> from mapnik import CSV
+    >>> csv = CSV(inline='''wkt,Name\n"POINT (120.15 48.47)","Winthrop, WA"''')
+
+    For more information see https://github.com/mapnik/mapnik/wiki/CSV-Plugin
+
+    """
+    keywords['type'] = 'csv'
+    return CreateDatasource(keywords)
+
+def GeoJSON(**keywords):
+    """Create a GeoJSON Datasource.
+
+    Required keyword arguments:
+      file -- path to json
+
+    Optional keyword arguments:
+      encoding -- file encoding (default 'utf-8')
+      base -- path prefix (default None)
+
+    >>> from mapnik import GeoJSON
+    >>> geojson = GeoJSON(file='test.json')
+
+    """
+    keywords['type'] = 'geojson'
     return CreateDatasource(keywords)
 
 def PostGIS(**keywords):

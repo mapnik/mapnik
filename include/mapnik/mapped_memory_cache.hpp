@@ -30,16 +30,14 @@
 
 // boost
 #include <boost/unordered_map.hpp>
-#include <boost/interprocess/mapped_region.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/interprocess/interprocess_fwd.hpp>
 
 namespace mapnik
 {
 
-using namespace boost::interprocess;
-
-typedef boost::shared_ptr<mapped_region> mapped_region_ptr;
+typedef boost::shared_ptr<boost::interprocess::mapped_region> mapped_region_ptr;
 
 class MAPNIK_DECL mapped_memory_cache :
         public singleton<mapped_memory_cache, CreateStatic>,

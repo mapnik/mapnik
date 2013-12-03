@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/json/generic_json.hpp>
 
 // spirit::qi
 #include <boost/variant/static_visitor.hpp>
@@ -66,6 +67,30 @@ public:
     mapnik::transcoder const& tr_;
 };
 
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+struct put_property
+{
+    typedef void result_type;
+    explicit put_property(mapnik::transcoder const& tr)
+        : tr_(tr) {}
+    template <typename T0,typename T1, typename T2>
+    result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
+    {
+        feature.put_new(key, boost::apply_visitor(attribute_value_visitor(tr_),val));
+    }
+    mapnik::transcoder const& tr_;
+};
+
+struct extract_geometry
+{
+    typedef  boost::ptr_vector<mapnik::geometry_type>& result_type;
+    template <typename T>
+    result_type operator() (T & feature) const
+    {
+        return feature.paths();
+    }
+};
+#else
 struct put_property
 {
     template <typename T0,typename T1, typename T2>
@@ -100,28 +125,18 @@ struct extract_geometry
         return feature.paths();
     }
 };
+#endif
 
 template <typename Iterator, typename FeatureType>
 struct feature_grammar :
-    qi::grammar<Iterator, void(FeatureType&),
-                space_type>
+        qi::grammar<Iterator, void(FeatureType&),
+        space_type>
 {
-    feature_grammar(mapnik::transcoder const& tr);
+    feature_grammar(generic_json<Iterator> & json, mapnik::transcoder const& tr);
 
     // start
     // generic JSON
-    qi::rule<Iterator,space_type> value;
-    qi::symbols<char const, char const> unesc_char;
-    qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
-    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
-    qi::rule<Iterator,std::string(), space_type> string_;
-    qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,boost::variant<value_null,bool,
-                                     value_integer,value_double>(),space_type> number;
-    qi::rule<Iterator,space_type> object;
-    qi::rule<Iterator,space_type> array;
-    qi::rule<Iterator,space_type> pairs;
-    qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+    generic_json<Iterator> & json_;
 
     // geoJSON
     qi::rule<Iterator,void(FeatureType&),space_type> feature; // START

@@ -134,7 +134,7 @@ namespace agg
         static AGG_INLINE void blend_pix(value_type* p,
                                          unsigned cr, unsigned cg, unsigned cb,
                                          unsigned alpha,
-                                         unsigned cover=0)
+                                         unsigned /*cover*/=0)
         {
             calc_type r = p[Order::R];
             calc_type g = p[Order::G];
@@ -363,7 +363,7 @@ namespace agg
             p[Order::R] = (value_type)(p[Order::R] + ((sr * d1a + base_mask) >> base_shift));
             p[Order::G] = (value_type)(p[Order::G] + ((sg * d1a + base_mask) >> base_shift));
             p[Order::B] = (value_type)(p[Order::B] + ((sb * d1a + base_mask) >> base_shift));
-            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            p[Order::A] = (value_type)(p[Order::A] + ((sa * d1a + base_mask) >> base_shift));
         }
     };
 
@@ -686,9 +686,9 @@ namespace agg
             }
             if(sa)
             {
-                calc_type dr = p[Order::R] - sr;
-                calc_type dg = p[Order::G] - sg;
-                calc_type db = p[Order::B] - sb;
+                calc_type dr = (sr > p[Order::R]) ? 0 : p[Order::R] - sr;
+                calc_type dg = (sg > p[Order::G]) ? 0 : p[Order::G] - sg;
+                calc_type db = (sb > p[Order::B]) ? 0 : p[Order::B] - sb;
                 p[Order::R] = (dr > base_mask) ? 0 : dr;
                 p[Order::G] = (dg > base_mask) ? 0 : dg;
                 p[Order::B] = (db > base_mask) ? 0 : db;
@@ -1444,68 +1444,8 @@ namespace agg
         }
     };
 
-    // colorize alpha values
-    // TODO - consider moving to image-filters:
-    // https://github.com/mapnik/mapnik/issues/1371
-    /*
-    template <typename ColorT, typename Order>
-    struct comp_op_rgba_colorize_alpha
-    {
-        typedef ColorT color_type;
-        typedef Order order_type;
-        typedef typename color_type::value_type value_type;
-        typedef typename color_type::calc_type calc_type;
-        typedef typename color_type::long_type long_type;
-        enum base_scale_e
-        {
-            base_shift = color_type::base_shift,
-            base_mask  = color_type::base_mask
-        };
-
-        static AGG_INLINE void blend_pix(value_type* p,
-                                         // source rgb
-                                         unsigned sr, unsigned sg, unsigned sb,
-                                         // source alpha and opacity
-                                         unsigned sa, unsigned cover)
-        {
-            if(cover < 255)
-            {
-                sr = (sr * cover + 255) >> 8;
-                sg = (sg * cover + 255) >> 8;
-                sb = (sb * cover + 255) >> 8;
-                sa = (sa * cover + 255) >> 8;
-            }
-            if (sa > 0)
-            {
-                p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
-                p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
-                p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
-                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
-                // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
-                if (p[Order::A] < 64) {
-                    p[Order::G] = ((p[Order::A] - 64) * 4);
-                    p[Order::B] = 255;
-                }
-                if (p[Order::A] >= 64 && p[Order::A] < 128) {
-                    p[Order::G] = 255;
-                    p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
-                }
-                if (p[Order::A] >= 128 && p[Order::A] < 192) {
-                    p[Order::R] = ((p[Order::A] - 128) * 4);
-                    p[Order::G] = 255;
-                }
-                if (p[Order::A] >= 192) {
-                    p[Order::R] = 255;
-                    p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
-                }
-            }
-        }
-    };
-    */
-
     // grain extract (GIMP)
     // E = I - M + 128
-
     template <typename ColorT, typename Order>
     struct comp_op_rgba_grain_extract
     {

@@ -42,12 +42,14 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/json/feature_collection_parser.hpp>
+#include <mapnik/json/generic_json.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -81,7 +83,7 @@ struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeTyp
         return mapnik::String;
     }
 
-    mapnik::eAttributeType operator() (UnicodeString const& /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_unicode_string const& /*val*/) const
     {
         return mapnik::String;
     }
@@ -105,6 +107,12 @@ geojson_datasource::geojson_datasource(parameters const& params)
 {
     if (file_.empty()) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
+    boost::optional<std::string> base = params.get<std::string>("base");
+    if (base)
+    {
+        file_ = *base + "/" + file_;
+    }
+
     typedef std::istreambuf_iterator<char> base_iterator_type;
 
 #if defined (_WINDOWS)
@@ -112,6 +120,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
 #else
     std::ifstream is(file_.c_str(),std::ios_base::in | std::ios_base::binary);
 #endif
+    if (!is.is_open())
+    {
+        throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + file_ + "'");
+    }
+
     boost::spirit::multi_pass<base_iterator_type> begin =
         boost::spirit::make_default_multi_pass(base_iterator_type(is));
 
@@ -119,7 +132,8 @@ geojson_datasource::geojson_datasource(parameters const& params)
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
     mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-    mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(ctx,*tr_);
+    mapnik::json::generic_json<boost::spirit::multi_pass<base_iterator_type> > json;
+    mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(json, ctx,*tr_);
     bool result = p.parse(begin,end, features_);
     if (!result)
     {
@@ -128,9 +142,9 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
     bool first = true;
     std::size_t count=0;
-    BOOST_FOREACH (mapnik::feature_ptr f, features_)
+    BOOST_FOREACH (mapnik::feature_ptr const& f, features_)
     {
-        mapnik::box2d<double> const& box = f->envelope();
+        mapnik::box2d<double> box = f->envelope();
         if (first)
         {
             extent_ = box;

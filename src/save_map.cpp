@@ -115,6 +115,11 @@ public:
             ptree::value_type("LinePatternSymbolizer",
                               ptree()))->second;
 
+        if (sym.offset() != 0.0 || explicit_defaults_ )
+        {
+            set_attr( sym_node, "offset", sym.offset() );
+        }
+
         add_image_attributes( sym_node, sym );
         serialize_symbolizer_base(sym_node, sym);
     }
@@ -190,8 +195,7 @@ public:
 
         if (sym.get_colorizer())
         {
-            serialize_raster_colorizer(sym_node, sym.get_colorizer(),
-                                       explicit_defaults_);
+            serialize_raster_colorizer(sym_node, sym.get_colorizer());
         }
 
         boost::optional<bool> premultiplied = sym.premultiplied();
@@ -352,13 +356,16 @@ public:
     }
 
     template <typename Symbolizer>
+#ifdef MAPNIK_DEBUG
     void operator () ( Symbolizer const& sym)
     {
-        // not-supported
-#ifdef MAPNIK_DEBUG
         MAPNIK_LOG_WARN(save_map) << typeid(sym).name() << " is not supported";
-#endif
     }
+#else
+    void operator () ( Symbolizer const& /*sym*/)
+    {
+    }
+#endif
 
 private:
     serialize_symbolizer();
@@ -394,16 +401,23 @@ private:
     }
 
     void serialize_raster_colorizer(ptree & sym_node,
-                                    raster_colorizer_ptr const& colorizer,
-                                    bool explicit_defaults)
+                                    raster_colorizer_ptr const& colorizer)
     {
         ptree & col_node = sym_node.push_back(
             ptree::value_type("RasterColorizer", ptree() ))->second;
-
-        set_attr(col_node, "default-mode", colorizer->get_default_mode());
-        set_attr(col_node, "default-color", colorizer->get_default_color());
-        set_attr(col_node, "epsilon", colorizer->get_epsilon());
-
+        raster_colorizer dfl;
+        if (colorizer->get_default_mode() != dfl.get_default_mode() || explicit_defaults_)
+        {
+            set_attr(col_node, "default-mode", colorizer->get_default_mode());
+        }
+        if (colorizer->get_default_color() != dfl.get_default_color() || explicit_defaults_)
+        {
+            set_attr(col_node, "default-color", colorizer->get_default_color());
+        }
+        if (colorizer->get_epsilon() != dfl.get_epsilon() || explicit_defaults_)
+        {
+            set_attr(col_node, "epsilon", colorizer->get_epsilon());
+        }
         unsigned i;
         colorizer_stops const &stops = colorizer->get_stops();
         for (i=0; i<stops.size(); i++) {
@@ -414,7 +428,6 @@ private:
             if (stops[i].get_label()!=std::string(""))
                 set_attr(stop_node, "label", stops[i].get_label());
         }
-
     }
 
     void add_image_attributes(ptree & node, symbolizer_with_image const& sym)
@@ -673,22 +686,22 @@ public:
     serialize_type( boost::property_tree::ptree & node):
         node_(node) {}
 
-    void operator () ( mapnik::value_integer val ) const
+    void operator () ( mapnik::value_integer /*val*/ ) const
     {
         node_.put("<xmlattr>.type", "int" );
     }
 
-    void operator () ( mapnik::value_double val ) const
+    void operator () ( mapnik::value_double /*val*/ ) const
     {
         node_.put("<xmlattr>.type", "float" );
     }
 
-    void operator () ( std::string const& val ) const
+    void operator () ( std::string const& /*val*/ ) const
     {
         node_.put("<xmlattr>.type", "string" );
     }
 
-    void operator () ( mapnik::value_null val ) const
+    void operator () ( mapnik::value_null /*val*/ ) const
     {
         node_.put("<xmlattr>.type", "string" );
     }
@@ -817,6 +830,19 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     {
         set_attr( map_node, "background-image", *image_filename );
     }
+
+    composite_mode_e comp_op = map.background_image_comp_op();
+    if (comp_op != src_over || explicit_defaults)
+    {
+        set_attr(map_node, "background-image-comp-op", *comp_op_to_string(comp_op));
+    }
+
+    double opacity = map.background_image_opacity();
+    if (opacity != 1.0 || explicit_defaults)
+    {
+        set_attr(map_node, "background-image-opacity", opacity);
+    }
+
 
     int buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)

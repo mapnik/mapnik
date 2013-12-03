@@ -66,7 +66,6 @@ private:
     double dy_;
     int nbands_;
     bool shared_dataset_;
-    double filter_factor_;
     boost::optional<double> nodata_value_;
 };
 

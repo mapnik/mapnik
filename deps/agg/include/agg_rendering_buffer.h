@@ -186,10 +186,11 @@ namespace agg
 
             T** rows = &m_rows[0];
 
-            while(height--)
+            while(height > 0)
             {
                 *rows++ = row_ptr;
                 row_ptr += stride;
+                --height;
             }
         }
 

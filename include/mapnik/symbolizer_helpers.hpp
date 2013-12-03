@@ -28,9 +28,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/processed_text.hpp>
+#include <mapnik/text_path.hpp>
 
 //boost
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -47,10 +48,7 @@ namespace mapnik {
 
 namespace mapnik {
 
-typedef boost::ptr_vector<text_path> placements_type;
-template <typename DetectorT> class placement_finder;
-
-/** Helper object that does all the TextSymbolizer placment finding
+/** Helper object that does all the TextSymbolizer placement finding
  * work except actually rendering the object. */
 template <typename FaceManagerT, typename DetectorT>
 class text_symbolizer_helper
@@ -65,34 +63,14 @@ public:
                            CoordTransform const& t,
                            FaceManagerT &font_manager,
                            DetectorT &detector,
-                           box2d<double> const& query_extent)
-        : sym_(sym),
-          feature_(feature),
-          prj_trans_(prj_trans),
-          t_(t),
-          font_manager_(font_manager),
-          detector_(detector),
-          dims_(0, 0, width, height),
-          query_extent_(query_extent),
-          text_(font_manager, scale_factor),
-          angle_(0.0),
-          placement_valid_(false),
-          points_on_line_(false),
-          finder_()
-    {
-        initialize_geometries();
-        if (!geometries_to_process_.size()) return;
-        placement_ = sym_.get_placement_options()->get_placement_info(scale_factor);
-        next_placement();
-        initialize_points();
-    }
+                           box2d<double> const& query_extent);
 
-    /** Return next placement.
-     * If no more placements are found returns null pointer.
-     */
+    ~text_symbolizer_helper();
+    // Return next placement.
+    // If no more placements are found returns null pointer.
     bool next();
 
-    /** Get current placement. next() has to be called before! */
+    // Get current placement. next() has to be called before!
     placements_type const& placements() const;
 protected:
     bool next_point_placement();
@@ -113,28 +91,26 @@ protected:
     box2d<double> const& query_extent_;
     //Processing
     processed_text text_;
-    /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
-    /** Remaining geometries to be processed. */
+    // Using list instead of vector, because we delete random elements and need iterators to stay valid.
+    // Remaining geometries to be processed.
     std::list<geometry_type*> geometries_to_process_;
-    /** Geometry currently being processed. */
+    // Geometry currently being processed.
     std::list<geometry_type*>::iterator geo_itr_;
-    /** Remaining points to be processed. */
+    // Remaining points to be processed.
     std::list<position> points_;
-    /** Point currently being processed. */
+    // Point currently being processed.
     std::list<position>::iterator point_itr_;
-    /** Text rotation. */
+    // Text rotation.
     double angle_;
-    /** Text + formatting. */
-    string_info *info_;
-    /** Did last call to next_placement return true? */
+    // Did last call to next_placement return true?
     bool placement_valid_;
-    /** Use point placement. Otherwise line placement is used. */
+    // Use point placement. Otherwise line placement is used.
     bool point_placement_;
-    /** Place text at points on a line instead of following the line (used for ShieldSymbolizer) .*/
+    // Place text at points on a line instead of following the line (used for ShieldSymbolizer).
     bool points_on_line_;
 
     text_placement_info_ptr placement_;
-    boost::shared_ptr<placement_finder<DetectorT> > finder_;
+    boost::scoped_ptr<placement_finder<DetectorT> > finder_;
 };
 
 template <typename FaceManagerT, typename DetectorT>
@@ -193,7 +169,6 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::info_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;

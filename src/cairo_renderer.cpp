@@ -77,6 +77,7 @@
 
 // stl
 #include <deque>
+#include <cmath>
 
 namespace mapnik
 {
@@ -354,7 +355,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
         height = result.to_double() * scale_factor_;
     }
 
-    for (unsigned i = 0; i < feature.num_geometries(); ++i)
+    for (std::size_t i = 0; i < feature.num_geometries(); ++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
 
@@ -568,14 +569,14 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             }
             if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                cairo_gradient g(attr.fill_gradient,attr.fill_opacity*opacity);
+                cairo_gradient g(attr.fill_gradient,attr.fill_opacity * attr.opacity * opacity);
 
                 context.set_gradient(g,bbox);
                 context.fill();
             }
             else if(attr.fill_flag)
             {
-                double fill_opacity = attr.fill_opacity * opacity * attr.fill_color.opacity();
+                double fill_opacity = attr.fill_opacity * attr.opacity * opacity * attr.fill_color.opacity();
                 context.set_color(attr.fill_color.r/255.0,attr.fill_color.g/255.0,
                                   attr.fill_color.b/255.0, fill_opacity);
                 context.fill();
@@ -591,13 +592,13 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
                 context.set_miter_limit(attr.miter_limit);
-                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity*opacity);
+                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity * attr.opacity * opacity);
                 context.set_gradient(g,bbox);
                 context.stroke();
             }
             else if (attr.stroke_flag)
             {
-                double stroke_opacity = attr.stroke_opacity * opacity * attr.stroke_color.opacity();
+                double stroke_opacity = attr.stroke_opacity * attr.opacity * opacity * attr.stroke_color.opacity();
                 context.set_color(attr.stroke_color.r/255.0,attr.stroke_color.g/255.0,
                                   attr.stroke_color.b/255.0, stroke_opacity);
                 context.set_line_width(attr.stroke_width);
@@ -673,7 +674,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
 
-        for (unsigned i = 0; i < feature.num_geometries(); ++i)
+        for (std::size_t i = 0; i < feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
             double x;
@@ -760,7 +761,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     pattern.set_filter(CAIRO_FILTER_BILINEAR);
     context_.set_line_width(height * scale_factor_);
 
-    for (unsigned i = 0; i < feature.num_geometries(); ++i)
+    for (std::size_t i = 0; i < feature.num_geometries(); ++i)
     {
         geometry_type & geom = feature.get_geometry(i);
 
@@ -784,8 +785,8 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                 {
                     double dx = x - x0;
                     double dy = y - y0;
-                    double angle = atan2(dy, dx);
-                    double offset = fmod(length, width);
+                    double angle = std::atan2(dy, dx);
+                    double offset = std::fmod(length, width);
 
                     cairo_matrix_t matrix;
                     cairo_matrix_init_identity(&matrix);
@@ -816,8 +817,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    //typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    //typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
     cairo_save_restore guard(context_);
     context_.set_operator(sym.comp_op());
@@ -1031,7 +1032,7 @@ struct markers_dispatch
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -1119,7 +1120,7 @@ struct markers_dispatch_2
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 coord2d center = bbox_.center();
                 agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);

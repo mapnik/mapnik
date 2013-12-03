@@ -54,6 +54,7 @@ private:
     boost::optional<color> background_;
     image_data_32 data_;
     bool painted_;
+    bool premultiplied_;
 public:
     image_32(int width,int height);
     image_32(image_32 const& rhs);
@@ -70,6 +71,11 @@ public:
     bool painted() const
     {
         return painted_;
+    }
+
+    bool premultiplied() const
+    {
+        return premultiplied_;
     }
 
     inline void clear()
@@ -129,59 +135,6 @@ public:
         if (checkBounds(x,y))
         {
             data_(x,y)=rgba;
-        }
-    }
-    inline void blendPixel(int x,int y,unsigned int rgba1,int t)
-    {
-        blendPixel2(x,y,rgba1,t,1.0);  // do not change opacity
-    }
-
-    inline void blendPixel2(int x,int y,unsigned int rgba1,int t,double opacity)
-    {
-        if (checkBounds(x,y))
-        {
-            unsigned rgba0 = data_(x,y);
-#ifdef MAPNIK_BIG_ENDIAN
-            unsigned a1 = (unsigned)((rgba1 & 0xff) * opacity) & 0xff; // adjust for desired opacity
-            a1 = (t*a1) / 255;
-            if (a1 == 0) return;
-            unsigned r1 = (rgba1 >> 24) & 0xff;
-            unsigned g1 = (rgba1 >> 16 ) & 0xff;
-            unsigned b1 = (rgba1 >> 8) & 0xff;
-
-            unsigned a0 = (rgba0 & 0xff);
-            unsigned r0 = ((rgba0 >> 24 ) & 0xff) * a0;
-            unsigned g0 = ((rgba0 >> 16 ) & 0xff) * a0;
-            unsigned b0 = ((rgba0 >> 8) & 0xff) * a0;
-
-            a0 = ((a1 + a0) << 8) - a0*a1;
-
-            r0 = ((((r1 << 8) - r0) * a1 + (r0 << 8)) / a0);
-            g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
-            b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
-            a0 = a0 >> 8;
-            data_(x,y)= (a0)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
-#else
-            unsigned a1 = (unsigned)(((rgba1 >> 24) & 0xff) * opacity) & 0xff; // adjust for desired opacity
-            a1 = (t*a1) / 255;
-            if (a1 == 0) return;
-            unsigned r1 = rgba1 & 0xff;
-            unsigned g1 = (rgba1 >> 8 ) & 0xff;
-            unsigned b1 = (rgba1 >> 16) & 0xff;
-
-            unsigned a0 = (rgba0 >> 24) & 0xff;
-            unsigned r0 = (rgba0 & 0xff) * a0;
-            unsigned g0 = ((rgba0 >> 8 ) & 0xff) * a0;
-            unsigned b0 = ((rgba0 >> 16) & 0xff) * a0;
-
-            a0 = ((a1 + a0) << 8) - a0*a1;
-
-            r0 = ((((r1 << 8) - r0) * a1 + (r0 << 8)) / a0);
-            g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
-            b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
-            a0 = a0 >> 8;
-            data_(x,y)= (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
-#endif
         }
     }
 

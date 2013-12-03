@@ -27,6 +27,7 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/xml_node.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -53,7 +54,7 @@ node_ptr text_node::from_xml(xml_node const& xml)
 
 void text_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
 {
-    UnicodeString text_str = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_).to_unicode();
+    mapnik::value_unicode_string text_str = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_).to_unicode();
     if (p.text_transform == UPPERCASE)
     {
         text_str = text_str.toUpper();
@@ -62,10 +63,13 @@ void text_node::apply(char_properties const& p, feature_impl const& feature, pro
     {
         text_str = text_str.toLower();
     }
+#if !UCONFIG_NO_BREAK_ITERATION
     else if (p.text_transform == CAPITALIZE)
     {
+        // note: requires BreakIterator support in ICU which is optional
         text_str = text_str.toTitle(NULL);
     }
+#endif
     if (text_str.length() > 0) {
         output.push_back(p, text_str);
     }

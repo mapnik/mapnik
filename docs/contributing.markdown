@@ -48,12 +48,11 @@ Mapnik is licensed LGPL, which means that you are a free to use the code in any 
 
 ## Copyright
 
-Mapnik is an open source project and will always be, proudly, an open source project. Your contributions to Mapnik should be motivated by (amount other things) your desire to contribute to a community effort and by the knowledge that your open code will stay that way.
+Mapnik is an open source project and will always be. Your contributions to Mapnik should be motivated by your desire to contribute to a community effort and by the knowledge that your open code will stay that way.
 
 Artem, as the founder and leader of the Mapnik project, is the primary copyright holder and therefore also the primary contact for any current or future license questions around Mapnik. It is important that the copyright holder is respected, trusted, and known to the community so maintaining copyright with Artem is key to maintaining the project as open source.
 
-Therefore, convention is that all new files created by any core developers or patch
-authors should have a copyright declaration like:
+Therefore all files created by any core developers or patch authors should have a copyright declaration like:
 
     /*****************************************************************************
      *

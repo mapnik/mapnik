@@ -12,6 +12,7 @@
 #include <sstream>
 #include <cstdio>
 #include <set>
+#include <stdexcept>
 
 // boost
 #include <boost/version.hpp>
@@ -27,9 +28,10 @@
 using namespace boost::chrono;
 using namespace mapnik;
 
-static unsigned test_num = 1;
 static bool dry_run = false;
-static std::set<int> test_set;
+typedef std::set<int> set_type;
+static set_type test_set;
+static set_type::key_type test_num = 1;
 
 typedef process_cpu_clock clock_type;
 typedef clock_type::duration dur;
@@ -87,7 +89,7 @@ void benchmark(T & test_runner, std::string const& name)
     {
         std::clog << "test runner did not complete: " << ex.what() << "\n";
     }
-    test_num++;
+    ++test_num;
 }
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
@@ -264,7 +266,7 @@ struct test5
         s.resize(s.capacity());
         while (true)
         {
-            size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val_));
+            size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val));
             if (n2 <= s.size())
             {
                 s.resize(n2);
@@ -407,209 +409,88 @@ struct test8
     }
 };
 
-#include <mapnik/rule_cache.hpp>
-
-#if BOOST_VERSION >= 105300
-#include <boost/container/vector.hpp>
-#include <boost/move/utility.hpp>
-
-class rule_cache_move
-{
-private:
-    BOOST_MOVABLE_BUT_NOT_COPYABLE(rule_cache_move)
-public:
-    typedef std::vector<rule const*> rule_ptrs;
-    rule_cache_move()
-     : if_rules_(),
-       else_rules_(),
-       also_rules_() {}
-
-    rule_cache_move(BOOST_RV_REF(rule_cache_move) rhs) // move ctor
-        :  if_rules_(boost::move(rhs.if_rules_)),
-           else_rules_(boost::move(rhs.else_rules_)),
-           also_rules_(boost::move(rhs.also_rules_))
-    {}
-
-    rule_cache_move& operator=(BOOST_RV_REF(rule_cache_move) rhs) // move assign
-    {
-        std::swap(if_rules_, rhs.if_rules_);
-        std::swap(else_rules_,rhs.else_rules_);
-        std::swap(also_rules_, rhs.also_rules_);
-        return *this;
-   }
-
-    void add_rule(rule const& r)
-    {
-        if (r.has_else_filter())
-        {
-            else_rules_.push_back(&r);
-        }
-        else if (r.has_also_filter())
-        {
-            also_rules_.push_back(&r);
-        }
-        else
-        {
-            if_rules_.push_back(&r);
-        }
-    }
-
-    rule_ptrs const& get_if_rules() const
-    {
-        return if_rules_;
-    }
-
-    rule_ptrs const& get_else_rules() const
-    {
-        return else_rules_;
-    }
-
-    rule_ptrs const& get_also_rules() const
-    {
-        return also_rules_;
-    }
-
-private:
-    rule_ptrs if_rules_;
-    rule_ptrs else_rules_;
-    rule_ptrs also_rules_;
-};
-
-struct test9
-{
-    unsigned iter_;
-    unsigned threads_;
-    unsigned num_rules_;
-    unsigned num_styles_;
-    std::vector<rule> rules_;
-    explicit test9(unsigned iterations,
-                   unsigned threads,
-                   unsigned num_rules,
-                   unsigned num_styles) :
-      iter_(iterations),
-      threads_(threads),
-      num_rules_(num_rules),
-      num_styles_(num_styles),
-      rules_() {
-          mapnik::rule r("test");
-          for (unsigned i=0;i<num_rules_;++i) {
-              rules_.push_back(r);
-          }
-      }
-
-    bool validate()
-    {
-        return true;
-    }
-    void operator()()
-    {
-         for (unsigned i=0;i<iter_;++i) {
-             boost::container::vector<rule_cache_move> rule_caches;
-             for (unsigned i=0;i<num_styles_;++i) {
-                 rule_cache_move rc;
-                 for (unsigned i=0;i<num_rules_;++i) {
-                     rc.add_rule(rules_[i]);
-                 }
-                 rule_caches.push_back(boost::move(rc));
-             }
-         }
-    }
-};
-
-#endif
-
-class rule_cache_heap
-{
-public:
-    typedef std::vector<rule const*> rule_ptrs;
-    rule_cache_heap()
-     : if_rules_(),
-       else_rules_(),
-       also_rules_() {}
-
-    void add_rule(rule const& r)
-    {
-        if (r.has_else_filter())
-        {
-            else_rules_.push_back(&r);
-        }
-        else if (r.has_also_filter())
-        {
-            also_rules_.push_back(&r);
-        }
-        else
-        {
-            if_rules_.push_back(&r);
-        }
-    }
-
-    rule_ptrs const& get_if_rules() const
-    {
-        return if_rules_;
-    }
-
-    rule_ptrs const& get_else_rules() const
-    {
-        return else_rules_;
-    }
-
-    rule_ptrs const& get_also_rules() const
-    {
-        return also_rules_;
-    }
-
-private:
-    rule_ptrs if_rules_;
-    rule_ptrs else_rules_;
-    rule_ptrs also_rules_;
-};
-
-struct test10
-{
-    unsigned iter_;
-    unsigned threads_;
-    unsigned num_rules_;
-    unsigned num_styles_;
-    std::vector<rule> rules_;
-    explicit test10(unsigned iterations,
-                   unsigned threads,
-                   unsigned num_rules,
-                   unsigned num_styles) :
-      iter_(iterations),
-      threads_(threads),
-      num_rules_(num_rules),
-      num_styles_(num_styles),
-      rules_() {
-          mapnik::rule r("test");
-          for (unsigned i=0;i<num_rules_;++i) {
-              rules_.push_back(r);
-          }
-      }
-
-    bool validate()
-    {
-        return true;
-    }
-    void operator()()
-    {
-         for (unsigned i=0;i<iter_;++i) {
-             boost::ptr_vector<rule_cache_heap> rule_caches;
-             for (unsigned i=0;i<num_styles_;++i) {
-                 std::auto_ptr<rule_cache_heap> rc(new rule_cache_heap);
-                 for (unsigned i=0;i<num_rules_;++i) {
-                     rc->add_rule(rules_[i]);
-                 }
-                 rule_caches.push_back(rc);
-             }
-         }
-    }
-};
-
-
+#include "agg_conv_clip_polygon.h"
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/util/geometry_to_wkt.hpp>
+#include <mapnik/geometry.hpp>
+
+#include "agg_conv_clip_polygon.h"
+
+struct test11a
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string wkt_in_;
+    mapnik::box2d<double> extent_;
+    typedef agg::conv_clip_polygon<mapnik::geometry_type> conv_clip;
+    test11a(unsigned iterations,
+           unsigned threads,
+           std::string wkt_in,
+           mapnik::box2d<double> const& extent)
+        : iter_(iterations),
+          threads_(threads),
+          wkt_in_(wkt_in),
+          extent_(extent) {
+
+    }
+
+    bool validate()
+    {
+        std::string expected_wkt("Polygon((181 286.666667,233 454,315 340,421 446,463 324,559 466,631 321.320755,631 234.386861,528 178,394 229,329 138,212 134,183 228,200 264,181 238.244444),(313 190,440 256,470 248,510 305,533 237,613 263,553 397,455 262,405 378,343 287,249 334,229 191,313 190,313 190))");
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        BOOST_FOREACH (geometry_type & geom , paths)
+        {
+            conv_clip clipped(geom);
+            clipped.clip_box(
+                        extent_.minx(),
+                        extent_.miny(),
+                        extent_.maxx(),
+                        extent_.maxy());
+            unsigned cmd;
+            double x,y;
+            mapnik::geometry_type geom2(mapnik::Polygon);
+            while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
+                geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
+            }
+            std::string wkt;
+            bool result = mapnik::util::to_wkt(wkt,geom2);
+            if (result) {
+                return (wkt == expected_wkt);
+            }
+        }
+        return false;
+    }
+    void operator()()
+    {
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        for (unsigned i=0;i<iter_;++i)
+        {
+            BOOST_FOREACH (geometry_type & geom , paths)
+            {
+                conv_clip clipped(geom);
+                clipped.clip_box(
+                            extent_.minx(),
+                            extent_.miny(),
+                            extent_.maxx(),
+                            extent_.maxy());
+                unsigned cmd;
+                double x,y;
+                while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {}
+            }
+        }
+    }
+};
+
 #include "agg_conv_clipper.h"
 #include "agg_path_storage.h"
-#include <mapnik/geometry.hpp>
 
 struct test11
 {
@@ -631,7 +512,39 @@ struct test11
 
     bool validate()
     {
-        return true;
+        std::string expected_wkt("Polygon((212 134,329 138,394 229,528 178,631 234.4,631 321.3,559 466,463 324,421 446,315 340,233 454,181 286.7,181 238.2,200 264,183 228),(313 190,229 191,249 334,343 287,405 378,455 262,553 397,613 263,533 237,510 305,470 248,440 256))");
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        agg::path_storage ps;
+        ps.move_to(extent_.minx(), extent_.miny());
+        ps.line_to(extent_.minx(), extent_.maxy());
+        ps.line_to(extent_.maxx(), extent_.maxy());
+        ps.line_to(extent_.maxx(), extent_.miny());
+        ps.close_polygon();
+        BOOST_FOREACH (geometry_type & geom , paths)
+        {
+            poly_clipper clipped(geom,ps,
+                                 agg::clipper_and,
+                                 agg::clipper_non_zero,
+                                 agg::clipper_non_zero,
+                                 1);
+            clipped.rewind(0);
+            unsigned cmd;
+            double x,y;
+            mapnik::geometry_type geom2(mapnik::Polygon);
+            while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
+                geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
+            }
+            std::string wkt;
+            bool result = mapnik::util::to_wkt(wkt,geom2);
+            if (result) {
+                return (wkt == expected_wkt);
+            }
+        }
+        return false;
     }
     void operator()()
     {
@@ -646,18 +559,19 @@ struct test11
         ps.line_to(extent_.maxx(), extent_.maxy());
         ps.line_to(extent_.maxx(), extent_.miny());
         ps.close_polygon();
-        for (unsigned i=0;i<iter_;++i) {
-            BOOST_FOREACH( geometry_type & geom, paths)
+        for (unsigned i=0;i<iter_;++i)
+        {
+            BOOST_FOREACH (geometry_type & geom , paths)
             {
                 poly_clipper clipped(geom,ps,
-                    agg::clipper_and,
-                    agg::clipper_non_zero,
-                    agg::clipper_non_zero,
-                    1);
+                                     agg::clipper_and,
+                                     agg::clipper_non_zero,
+                                     agg::clipper_non_zero,
+                                     1);
                 clipped.rewind(0);
                 unsigned cmd;
                 double x,y;
-                while ((cmd = geom.vertex(&x, &y)) != SEG_END) {}
+                while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {}
             }
         }
     }
@@ -670,7 +584,6 @@ struct test12
     unsigned iter_;
     unsigned threads_;
     std::string wkt_in_;
-
     mapnik::box2d<double> extent_;
     typedef mapnik::polygon_clipper<mapnik::geometry_type> poly_clipper;
     test12(unsigned iterations,
@@ -686,7 +599,28 @@ struct test12
 
     bool validate()
     {
-        return true;
+        std::string expected_wkt("Polygon((181 286.666667,233 454,315 340,421 446,463 324,559 466,631 321.320755,631 234.386861,528 178,394 229,329 138,212 134,183 228,200 264,181 238.244444,181 286.666667),(313 190,440 256,470 248,510 305,533 237,613 263,553 397,455 262,405 378,343 287,249 334,229 191,313 190))");
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        BOOST_FOREACH ( geometry_type & geom , paths)
+        {
+            poly_clipper clipped(extent_, geom);
+            unsigned cmd;
+            double x,y;
+            mapnik::geometry_type geom2(mapnik::Polygon);
+            while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
+                geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
+            }
+            std::string wkt;
+            bool result = mapnik::util::to_wkt(wkt,geom2);
+            if (result) {
+                return (wkt == expected_wkt);
+            }
+        }
+        return false;
     }
     void operator()()
     {
@@ -697,12 +631,12 @@ struct test12
         }
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH( geometry_type & geom, paths)
+            BOOST_FOREACH ( geometry_type & geom , paths)
             {
                 poly_clipper clipped(extent_, geom);
                 unsigned cmd;
                 double x,y;
-                while ((cmd = geom.vertex(&x, &y)) != SEG_END) {}
+                while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {}
             }
         }
     }
@@ -732,11 +666,58 @@ struct test13
         unsigned long count = 0;
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH( std::string const& name, mapnik::freetype_engine::face_names())
+            BOOST_FOREACH( std::string const& name , mapnik::freetype_engine::face_names())
             {
                 mapnik::face_ptr f = engine.create_face(name);
                 if (f) ++count;
             }
+        }
+    }
+};
+
+#include <mapnik/map.hpp>
+#include <mapnik/load_map.hpp>
+#include <mapnik/agg_renderer.hpp>
+#include <mapnik/datasource_cache.hpp>
+
+struct test14
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string xml_;
+    mapnik::box2d<double> extent_;
+    test14(unsigned iterations,
+           unsigned threads,
+           std::string const& xml,
+           mapnik::box2d<double> const& extent)
+        : iter_(iterations),
+          threads_(threads),
+          xml_(xml),
+          extent_(extent)
+    {}
+
+    bool validate()
+    {
+        mapnik::Map m(256,256);
+        mapnik::load_map(m,xml_);
+        m.zoom_to_box(extent_);
+        mapnik::image_32 im(m.width(),m.height());
+        mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+        ren.apply();
+        //mapnik::save_to_file(im,"test.png");
+        return true;
+    }
+
+    void operator()()
+    {
+        mapnik::Map m(256,256);
+        mapnik::load_map(m,xml_);
+        m.zoom_to_box(extent_);
+        for (unsigned i=0;i<iter_;++i)
+        {
+            mapnik::image_32 im(m.width(),m.height());
+            mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+            ren.apply();
         }
     }
 };
@@ -751,11 +732,12 @@ int main( int argc, char** argv)
             } else if (opt[0] != '-') {
                 int arg;
                 if (mapnik::util::string2int(opt,arg)) {
-                    test_set.insert(arg);
+                    test_set.insert(static_cast<unsigned>(arg));
                 }
             }
         }
     }
+    mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
     try
     {
         std::cout << "starting benchmark…\n";
@@ -796,17 +778,17 @@ int main( int argc, char** argv)
         }
 
         {
-            test3 runner(1000000,10);
+            test3 runner(100000,10);
             benchmark(runner,"double to string conversion with std::ostringstream");
         }
 
         {
-            test4 runner(1000000,10);
+            test4 runner(100000,10);
             benchmark(runner,"double to string conversion with mapnik::util_to_string");
         }
 
         {
-            test5 runner(1000000,10);
+            test5 runner(100000,10);
             benchmark(runner,"double to string conversion with snprintf");
         }
 
@@ -856,18 +838,26 @@ int main( int argc, char** argv)
             benchmark(runner,"expression parsing by re-using grammar");
         }
 
-        {
-#if BOOST_VERSION >= 105300
-            test9 runner(1000,10,200,50);
-            benchmark(runner,"rule caching using boost::move");
-#else
-            std::clog << "not running: 'rule caching using boost::move'\n";
-#endif
-        }
+        // TODO - consider bring back rule cache benchmarks after c++11 is in master
+        // previously test 9/10
+
+        // polygon/rect clipping
+        // IN : POLYGON ((155 203, 233 454, 315 340, 421 446, 463 324, 559 466, 665 253, 528 178, 394 229, 329 138, 212 134, 183 228, 200 264, 155 203),(313 190, 440 256, 470 248, 510 305, 533 237, 613 263, 553 397, 455 262, 405 378, 343 287, 249 334, 229 191, 313 190))
+        // RECT : POLYGON ((181 106, 181 470, 631 470, 631 106, 181 106))
+        // OUT (expected)
+        // POLYGON ((181 286.6666666666667, 233 454, 315 340, 421 446, 463 324, 559 466, 631 321.3207547169811, 631 234.38686131386862, 528 178, 394 229, 329 138, 212 134, 183 228, 200 264, 181 238.24444444444444, 181 286.6666666666667),(313 190, 440 256, 470 248, 510 305, 533 237, 613 263, 553 397, 455 262, 405 378, 343 287, 249 334, 229 191, 313 190))
+
+        mapnik::box2d<double> clipping_box(181,106,631,470);
 
         {
-            test10 runner(1000,10,200,50);
-            benchmark(runner,"rule caching using heap allocation");
+            std::string filename_("benchmark/data/polygon.wkt");
+            std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+            if (!in.is_open())
+                throw std::runtime_error("could not open: '" + filename_ + "'");
+            std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
+                       (std::istreambuf_iterator<char>()) );
+            test11a runner(10000,10,wkt_in,clipping_box);
+            benchmark(runner,"clipping polygon with conv_clip_polygon");
         }
 
         {
@@ -877,32 +867,61 @@ int main( int argc, char** argv)
                 throw std::runtime_error("could not open: '" + filename_ + "'");
             std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                        (std::istreambuf_iterator<char>()) );
-            mapnik::box2d<double> clipping_box(0,0,40,40);
-
-            test11 runner(100000,10,wkt_in,clipping_box);
+            test11 runner(10000,10,wkt_in,clipping_box);
             benchmark(runner,"clipping polygon with agg_conv_clipper");
         }
 
-        {
 
+        {
             std::string filename_("benchmark/data/polygon.wkt");
             std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
             if (!in.is_open())
                 throw std::runtime_error("could not open: '" + filename_ + "'");
             std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                        (std::istreambuf_iterator<char>()) );
-            mapnik::box2d<double> clipping_box(0,0,40,40);
-
-            test12 runner(100000,10,wkt_in,clipping_box);
+            test12 runner(10000,10,wkt_in,clipping_box);
             benchmark(runner,"clipping polygon with mapnik::polygon_clipper");
         }
 
         {
-            mapnik::freetype_engine::register_fonts("./fonts", true);
-            unsigned face_count = mapnik::freetype_engine::face_names().size();
+            bool success = mapnik::freetype_engine::register_fonts("./fonts", true);
+            if (!success) {
+               std::clog << "warning, did not register any new fonts!\n";
+            }
+            std::size_t face_count = mapnik::freetype_engine::face_names().size();
             test13 runner(1000,10);
-            benchmark(runner, (boost::format("font_engihe: created %ld faces in ") % (face_count * 1000 * 10)).str());
+            benchmark(runner, (boost::format("font_engine: created %ld faces in ") % (face_count * 1000 * 10)).str());
         }
+
+        {
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_clip.xml",
+                          mapnik::box2d<double>(-20037508.3428,-8317435.0606,20037508.3428,18399242.7298));
+            benchmark(runner, "rendering polygon with clipping at full extent");
+        }
+
+        {
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_no_clip.xml",
+                          mapnik::box2d<double>(-20037508.3428,-8317435.0606,20037508.3428,18399242.7298));
+            benchmark(runner, "rendering polygon without clipping at full extent");
+        }
+
+        {
+            // note: bbox below is for 16/10491/22911.png
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_clip.xml",
+                          mapnik::box2d<double>(-13622912.929097254,6026906.8062295765,-13621689.93664469,6028129.79868214));
+            benchmark(runner, "rendering polygon with clipping at z16 extent");
+        }
+
+        {
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_no_clip.xml",
+                          mapnik::box2d<double>(-13622912.929097254,6026906.8062295765,-13621689.93664469,6028129.79868214));
+            benchmark(runner, "rendering polygon without clipping at z16 extent");
+        }
+
         std::cout << "...benchmark done\n";
         return 0;
     }

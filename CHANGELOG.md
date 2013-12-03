@@ -6,13 +6,112 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 2.3.0
+
+Released ...
+
+(Packaged from ...)
+
+Summary: TODO
+
+- Added missing support for `geometry-transform` in `line-pattern` and `polygon-pattern` symbolizers (#2065)
+
+- Dropped support for Sun compiler
+
+- Upgraded unifont to `unifont-6.3.20131020`
+
+- CSV Plugin: added the ability to pass an `extent` in options
+
+- Fixed crash when rendering to cairo context from python (#2031)
+
+- Moved `label-position-tolerance` from unsigned type to double
+
+- Default PNG encoding method when `png` is supplied is now `png8:m=h`, so paletted png using hextree color quantization (#2028)
+  Use `png32` now for full color png. More details at https://github.com/mapnik/mapnik/wiki/Image-IO.
+
+- Added support for more seamless blurring by rendering to a larger internal image to avoid edge effects (#1478)
+
+- Fixed rendering of large shapes at high zoom levels, which might dissapear due to integer overflow. This
+  bug was previously fixable when geometries were clipped, but would, until now, re-appear if clipping was turned
+  off for a symbolizer (#2000)
+
+- Added single color argument support to `colorize-alpha` to allow colorizing alpha with one color.
+
+- Added `color-to-alpha` `image-filter` to allow for applying alpha in proportion to color similiarity (#2023)
+
+- Added Async support to PostGIS plugin - https://github.com/mapnik/mapnik/wiki/PostGIS-Async
+
+- Fixed alpha handling bug with `comp-op:dst-over` (#1995)
+
+- Fixed alpha handling bug with building-fill-opacity (#2011)
+
+- Optimized mapnik.Path.to_wkb
+
+- Python: added `__geo_interface__` to mapnik.Feature and mapnik.Path (#2009)
+
+- Python: Exposed optimized WKTReader for parsing WKT into geometry paths (6bfbb53)
+
+- Optimized expression evaluation of text by avoiding extra copy (1dd1275)
+
+- Added Map level `background-image-comp-op` to control the compositing operation used to blend the 
+`background-image` onto the `background-color`. Has no meaning if `background-color` or `background-image`
+are not set. (#1966)
+
+- Added Map level `background-image-opacity` to dynamically set the opacity of the `background-image` (#1966)
+
+- Removed `RENDERING_STATS` compile option since it should be replaced with a better solution (#1956)
+
+- Added support to experimental `svg_renderer` for grouping layers for inkscape and illustrator (#1917)
+
+- Fixed compile of python bindings against Python 3.x
+
+- Optimized SVG loading by improving color parsing speed (#1918)
+
+- Fixed startup problem when fonts cannot be read due to lacking permissions (#1919)
+
+- Fixed bad behavior when negative image dimensions are requested (#1927)
+
+- Fixed handling of `marker-ignore-placement:true` when `marker-placement:line` (#1931)
+
+- Fixed handling of svg `opacity` in Cairo renderer (#1943)
+
+- Fixed handling of SVG files which contain empty `<g>` (#1944)
+
+- Fixed various 32bit test failures
+
+- Fixed compile against icu when by using `U_NAMESPACE_QUALIFIER`
+
+- Fixed missing support for using PathExpression in `marker-file` (#1952)
+
+- Added support for `line-pattern-offset` (#1991)
+
+- Added support for building on Android (tested with `android-ndk-r9`)
+
+- Added support for compiling with both -ansi (aka -std=c++98) and -std=c++11
+
+- Added support for compiling and linking on OS X against libc++
+
+- Fixed regression in handling `F` type dbf fields, introduced in v2.2.0.
+
+- Added the ability to create a mapnik Feature from a geojson feature with `mapnik.Feature.from_geojson` in python.
+
+- Added to python bindings: `has_tiff`, `has_png`, `has_webp`, `has_proj4`, `has_svg_renderer`, and `has_grid_renderer`
+
+- Made it possible to disable compilation of `grid_renderer` with `./configure GRID_RENDERER=False` (#1962)
+
+- Added `premultiplied` property on mapnik::image_32 / mapnik.Image to enable knowledge of premultiplied status of image buffer.
+
+- Added `webp` image encoding and decoding support (#1955)
+
+- Added `scale-hsla` image-filter that allows scaling colors in HSL color space. RGB is converted to HSL (hue-saturation-lightness) and then each value (and the original alpha value) is stretched based on the specified scaling values. An example syntax is `scale-hsla(0,1,0,1,0,1,0,1)` which means no change because the full range will be kept (0 for lowest, 1 for highest). Other examples are: 1) `scale-hsla(0,0,0,1,0,1,0,1)` which would force all colors to be red in hue in the same way `scale-hsla(1,1,0,1,0,1,0,1)` would, 2) `scale-hsla(0,1,1,1,0,1,0,1)` which would cause all colors to become fully saturated, 3) `scale-hsla(0,1,1,1,0,1,.5,1)` which would force no colors to be any more transparent than half, and 4) `scale-hsla(0,1,1,1,0,1,0,.5)` which would force all colors to be at least half transparent. (#1954)
+
 ## 2.2.0
 
-Released ---
+Released June 3rd, 2013
 
-(Packaged from ---)
+(Packaged from 9231205)
 
-Summary: The 2.2.0 release is the fastest running and most stable release in the history of Mapnik. The code line represents development in the master branch since the release of 2.1.0 in Aug 2012 and therefore includes nearly a year of bugfixes and low level optimizations. Shapefile and PostGIS datasources have benefited from numerous stability fixes, 64 bit integer support has been added to support OSM data, and many rendering fixes have landed for high quality output when using a rendering `scale_factor`. Many critical code paths have been optimized extensively include raster rendering, xml map loading, string to number conversion, vector reprojection when using `epsg:4326` and `epsg:3857`, `hextree` encoding, halo rendering, and rendering when using a custom `gamma`. Mapnik 2.2 also compiles faster than previous releases in the 2.x series and drops several unneeded and hard to install dependencies.
+Summary: The 2.2.0 release is primarily a performance and stability release. The code line represents development in the master branch since the release of 2.1.0 in Aug 2012 and therefore includes nearly a year of bug-fixes and optimizations. Nearly 500 new tests have been added bring the total coverage to 925. Shapefile and PostGIS datasources have benefited from numerous stability fixes, 64 bit integer support has been added to support OSM data in the grid renderer and in attribute filtering, and many fixes have landed for higher quality output when using a custom `scale_factor` during rendering. Critical code paths have been optimized include raster rendering, xml map loading, string to number conversion, vector reprojection when using `epsg:4326` and `epsg:3857`, `hextree` encoding, halo rendering, and rendering when using a custom `gamma`. Mapnik 2.2 also compiles faster than previous releases in the 2.x series and drops several unneeded and hard to install dependencies making builds on OS X and Windows easier than any previous release.
 
 - Removed 3 depedencies without loosing any functionality: `ltdl`, `cairomm` and `libsigc++` (#1804,#806,#1681)
 
@@ -21,6 +120,14 @@ Summary: The 2.2.0 release is the fastest running and most stable release in the
 - Added the ability to disable the need for various dependencies: `proj4`, `libpng`, `libtiff`, `libjpeg`
 
 - Added faster reprojection support between `epsg:3857` and `epsg:4326` (#1705,#1703,#1579)
+
+- Added `colorize-alpha` image filter that applies user provided color gradients based on level of alpha.
+  Accepts one or more colors separated by commas. Each color can be paired with an `offset` value separated
+  by a space that is either `0-100%` or `0.0-1.0`. An `offset` of `0` is implied and the default. For background
+  on where this design came from see http://www.w3.org/TR/SVG/pservers.html#GradientStops. A simple example
+  of colorizing alpha into a "rainbow" is `colorize-alpha(blue,cyan,lightgreen, yellow, orange, red)`. An example of
+  using offsets and the variety of supported color encodings is to produce a ramp which sharp contrast between `blue`
+  and `cyan` is `colorize-alpha(blue 30%, cyan, yellow 0.7 , rgb(0%,80%,0%) 90%)` (#1371).
 
 - Fixed concurrency problem when using cursors in postgis plugin (#1823,#1588)
 
@@ -31,6 +138,12 @@ Summary: The 2.2.0 release is the fastest running and most stable release in the
 - Fixed potential crash in wkb parsing when postgis returns null geometry (#1843)
 
 - Fixed blurry rendering of image and SVG icons (#1316)
+
+- Added detection of invalid srs values when loading xml (#646)
+
+- Added support for specifying a base_path as a third, optional argument to load_xml
+
+- Removed muffling of projection errors while rendering (#646)
 
 - Improved logging system (https://github.com/mapnik/mapnik/wiki/Logging)
 
@@ -227,9 +340,9 @@ Released Aug 23, 2012
 
 - Improved logging/debugging system with release logs and file redirection (https://github.com/mapnik/mapnik/wiki/Runtime-Logging) (#937 and partially #986, #467)
 
-- GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
+- GDAL: allow setting `nodata` value on the fly (will override value if `nodata` is set in data) (#1161)
 
-- GDAL: respect nodata for paletted/colormapped images (#1160)
+- GDAL: respect `nodata` for paletted/colormapped images (#1160)
 
 - PostGIS: Added a new option called `autodetect_key_field` (by default false) that if true will
   trigger autodetection of the table primary key allowing for feature.id() to represent
@@ -366,7 +479,7 @@ Released September 26, 2011
   cannot possibly be projected into the map srs or the user wishes to control map bounds without
   modifying the extents of each layer.
 
-- Support for NODATA values with grey and rgb images in GDAL plugin (#727)
+- Support for `nodata` values with grey and rgb images in GDAL plugin (#727)
 
 - Print warning if invalid XML property names are used (#110)
 

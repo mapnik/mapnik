@@ -48,31 +48,39 @@ Mapnik Core depends on:
       - regex (optionally built with icu regex support)
       - program_options (optionally for mapnik command line programs)
  * libicuuc >= 4.0 (ideally >= 4.2) - International Components for Unicode
- * libpng >= 1.2.x - PNG graphics
- * libjpeg - JPEG graphics
- * libtiff - TIFF graphics 
  * libz - Zlib compression
  * libfreetype - Freetype2 for font support (Install requires freetype-config)
  * libxml2 - XML parsing (Install requires xml2-config)
- * libproj - PROJ.4 projection library
+
+Mapnik Core optionally depends on:
+
+ * libpng >= 1.2.x - PNG graphics (Default enabled, if found)
+ * libjpeg - JPEG graphics (Default enabled, if found)
+ * libtiff - TIFF graphics (Default enabled, if found)
+ * libwebp - WEBP graphics  (Default enabled, if found)
+ * libproj - PROJ.4 projection library (Default enabled, if found)
 
 Mapnik Python bindings depend on:
 
  * Python 2.5-2.7 or >= 3.2 
  * Boost python
+ * simplejson module if using <= 2.5
 
-Note: Python3k is supported, see: https://github.com/mapnik/mapnik/wiki/Python3k
+Note: Python 3.x is supported, see: https://github.com/mapnik/mapnik/wiki/Python3k
 
-Optional dependencies:
+Additional optional dependencies:
 
  * Cairo >= 1.6.0 - Graphics library for output formats like PDF, PS, and SVG
     - pkg-config - Required for building with cairo support
     - pycairo - Python bindings for cairo
- * libpq - PostgreSQL libraries (For PostGIS plugin support)
+ * PostgreSQL (for PostGIS plugin support)
+    - libpq - PostreSQL libraries
+    - pg_config - PostgreSQL installation capabilities
  * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
  * libocci - Oracle input plugin support
  * libcurl - OSM input plugin support
+ * librasterlite - Rasterlite input plugin support
 
 Instructions for installing many of these dependencies on
 various platforms can be found at the Mapnik Wiki:

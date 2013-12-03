@@ -48,57 +48,6 @@
 // stl
 #include <limits>
 
-namespace {
-
-    struct deepcopy_symbolizer : public boost::static_visitor<>
-    {
-        void operator () (mapnik::raster_symbolizer & sym) const
-        {
-            mapnik::raster_colorizer_ptr old_colorizer = sym.get_colorizer();
-            mapnik::raster_colorizer_ptr new_colorizer = mapnik::raster_colorizer_ptr();
-            new_colorizer->set_stops(old_colorizer->get_stops());
-            new_colorizer->set_default_mode(old_colorizer->get_default_mode());
-            new_colorizer->set_default_color(old_colorizer->get_default_color());
-            new_colorizer->set_epsilon(old_colorizer->get_epsilon());
-            sym.set_colorizer(new_colorizer);
-        }
-
-        void operator () (mapnik::text_symbolizer & sym) const
-        {
-            copy_text_ptr(sym);
-        }
-
-        void operator () (mapnik::shield_symbolizer & sym) const
-        {
-            copy_text_ptr(sym);
-        }
-
-        void operator () (mapnik::building_symbolizer & sym) const
-        {
-            copy_height_ptr(sym);
-        }
-
-        template <typename T> void operator () (T &sym) const
-        {
-            boost::ignore_unused_variable_warning(sym);
-        }
-
-        template <class T>
-        void copy_text_ptr(T & sym) const
-        {
-            boost::ignore_unused_variable_warning(sym);
-            MAPNIK_LOG_WARN(rule) << "rule: deep copying TextSymbolizers is broken!";
-        }
-
-        template <class T>
-        void copy_height_ptr(T & sym) const
-        {
-            std::string height_expr = mapnik::to_expression_string(*sym.height());
-            sym.set_height(mapnik::parse_expression(height_expr,"utf8"));
-        }
-    };
-
-}
 namespace mapnik
 {
 
@@ -107,7 +56,7 @@ rule::rule()
       min_scale_(0),
       max_scale_(std::numeric_limits<double>::infinity()),
       syms_(),
-      filter_(boost::make_shared<mapnik::expr_node>(true)),
+      filter_(boost::make_shared<expr_node>(true)),
       else_filter_(false),
       also_filter_(false) {}
 
@@ -122,27 +71,15 @@ rule::rule(std::string const& name,
       else_filter_(false),
       also_filter_(false)  {}
 
-rule::rule(const rule& rhs, bool deep_copy)
+rule::rule(rule const& rhs)
     : name_(rhs.name_),
       min_scale_(rhs.min_scale_),
       max_scale_(rhs.max_scale_),
       syms_(rhs.syms_),
-      filter_(rhs.filter_),
+      filter_(boost::make_shared<expr_node>(*rhs.filter_)),
       else_filter_(rhs.else_filter_),
       also_filter_(rhs.also_filter_)
 {
-    if (deep_copy) {
-
-        std::string expr = to_expression_string(*filter_);
-        filter_ = parse_expression(expr,"utf8");
-        symbolizers::const_iterator it  = syms_.begin();
-        symbolizers::const_iterator end = syms_.end();
-
-        for(; it != end; ++it)
-        {
-            boost::apply_visitor(deepcopy_symbolizer(),*it);
-        }
-    }
 }
 
 rule& rule::operator=(rule const& rhs)
@@ -264,11 +201,6 @@ void rule::set_also(bool also_filter)
 bool rule::has_also_filter() const
 {
     return also_filter_;
-}
-
-bool rule::active(double scale) const
-{
-    return ( !syms_.empty() && scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
 }
 
 }

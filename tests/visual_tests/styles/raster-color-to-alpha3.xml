@@ -1,0 +1,20 @@
+<Map srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over"
+ background-color="steelblue"
+>
+
+<Style name="style" image-filters="color-to-alpha(black)">
+  <Rule>
+    <RasterSymbolizer opacity="1" scaling="quadric"/>
+  </Rule>
+</Style>
+<Layer name="raster"
+  srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+    <StyleName>style</StyleName>
+    <Datasource>
+       <!-- https://github.com/mapnik/mapnik/issues/1471 -->
+       <Parameter name="file">../../data/raster/transp.tiff</Parameter>
+       <Parameter name="type">gdal</Parameter>
+    </Datasource>
+  </Layer>
+
+</Map>

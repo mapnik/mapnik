@@ -1,14 +1,15 @@
-#include <boost/version.hpp>
-#include <boost/filesystem/convenience.hpp>
-namespace fs = boost::filesystem;
-using fs::path;
-namespace sys = boost::system;
-
-#include <boost/detail/lightweight_test.hpp>
-#include <iostream>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/util/fs.hpp>
+#include <mapnik/debug.hpp>
+
+#include <boost/version.hpp>
+#include <boost/detail/lightweight_test.hpp>
+
+#include <iostream>
 #include <vector>
 #include <algorithm>
+
+#include "utils.hpp"
 
 int main(int argc, char** argv)
 {
@@ -21,10 +22,15 @@ int main(int argc, char** argv)
 
     try
     {
+        mapnik::logger logger;
+        logger.set_severity(mapnik::logger::none);
+
+        BOOST_TEST(set_working_dir(args));
+
         std::string fontdir("fonts/");
 
-        BOOST_TEST( fs::exists( fontdir ) );
-        BOOST_TEST( fs::is_directory( fontdir ) );
+        BOOST_TEST( mapnik::util::exists( fontdir ) );
+        BOOST_TEST( mapnik::util::is_directory( fontdir ) );
 
         std::vector<std::string> face_names;
 

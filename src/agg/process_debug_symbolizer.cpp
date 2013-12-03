@@ -63,7 +63,7 @@ void agg_renderer<T>::process(debug_symbolizer const& sym,
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
-        for (unsigned i=0; i<feature.num_geometries(); ++i)
+        for (std::size_t i=0; i<feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
             double x;

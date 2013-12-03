@@ -2,14 +2,16 @@
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
+#include <boost/version.hpp>
 
 // stl
-#include <exception>
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -21,6 +23,7 @@
 //#include "agg_path_storage.h"
 //#include "agg_conv_clipper.h"
 
+#include "utils.hpp"
 
 template <typename T>
 std::string dump_path(T & path)
@@ -87,6 +90,9 @@ int main(int argc, char** argv)
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
     try {
+
+        BOOST_TEST(set_working_dir(args));
+
         std::string filename("tests/cpp_tests/data/cases.txt");
         std::ifstream stream(filename.c_str(),std::ios_base::in | std::ios_base::binary);
         if (!stream.is_open())
@@ -108,7 +114,7 @@ int main(int argc, char** argv)
             parse_geom(geom,parts[1]);
             //std::clog << dump_path(geom) << "\n";
             // third part is expected, clipped geometry
-            BOOST_TEST_EQ(clip_line(bbox,geom),parts[2]);
+            BOOST_TEST_EQ(clip_line(bbox,geom),mapnik::util::trim_copy(parts[2]));
         }
         stream.close();
     }

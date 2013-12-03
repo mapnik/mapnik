@@ -1,5 +1,11 @@
 #include <boost/version.hpp>
+#include <boost/detail/lightweight_test.hpp>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include "utils.hpp"
 
+#if BOOST_VERSION >= 104700
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
@@ -8,17 +14,12 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/well_known_srs.hpp>
-
-#if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/util/geometry_to_svg.hpp>
-#endif
 
-#include <boost/detail/lightweight_test.hpp>
-#include <iostream>
-#include <vector>
-#include <algorithm>
+// stl
+#include <stdexcept>
 
 struct output_geometry_backend
 {
@@ -123,6 +124,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 
     return boost::optional<std::string>();
 }
+#endif
 
 int main(int argc, char** argv)
 {
@@ -132,6 +134,10 @@ int main(int argc, char** argv)
         args.push_back(argv[i]);
     }
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
+    BOOST_TEST(set_working_dir(args));
+
+#if BOOST_VERSION >= 104700
 
     // LineString/bbox clipping
     {
@@ -170,6 +176,9 @@ int main(int argc, char** argv)
         BOOST_TEST_EQ(*result,std::string("Polygon((50 50,50 100,75 150,125 150,150 100,150 50,50 50))"));
     }
 #endif
+
+#endif
+
     if (!::boost::detail::test_errors())
     {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";

@@ -37,6 +37,58 @@ namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+struct push_vertex
+{
+    typedef void result_type;
+
+    template <typename T0,typename T1, typename T2, typename T3>
+    result_type operator() (T0 c, T1 path, T2 x, T3 y) const
+    {
+        BOOST_ASSERT( path!=0 );
+        path->push_vertex(x,y,c);
+    }
+};
+
+struct close_path
+{
+    typedef void result_type;
+
+    template <typename T>
+    result_type operator() (T path) const
+    {
+        BOOST_ASSERT( path!=0 );
+        if (path->size() > 2u) // to form a polygon ring we need at least 3 vertices
+        {
+            path->close_path();
+        }
+    }
+};
+
+struct cleanup
+{
+    typedef void result_type;
+    template <typename T0>
+    void operator() (T0 & path) const
+    {
+        if (path) delete path, path=0;
+    }
+};
+
+struct where_message
+{
+    typedef std::string result_type;
+
+    template <typename Iterator>
+    std::string operator() (Iterator first, Iterator last, std::size_t size) const
+    {
+        std::string str(first, last);
+        if (str.length() > size)
+            return str.substr(0, size) + "..." ;
+        return str;
+    }
+};
+#else
 struct push_vertex
 {
     template <typename T0,typename T1, typename T2, typename T3>
@@ -65,8 +117,11 @@ struct close_path
     void operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
-        path->close_path();
-    }
+        if (path->size() > 2u) // to form a polygon ring we need at least 3 vertices
+        {
+            path->close_path();
+        }
+   }
 };
 
 struct cleanup
@@ -101,12 +156,13 @@ struct where_message
         return str;
     }
 };
+#endif
 
 
 template <typename Iterator>
 struct geometry_grammar :
         qi::grammar<Iterator,qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& )
-                   , space_type>
+        , space_type>
 {
     geometry_grammar();
     qi::rule<Iterator, qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry;

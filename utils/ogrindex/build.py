@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,6 @@ program_env['LIBS'] = [env['PLUGINS']['ogr']['lib']]
 program_env['LIBS'].append('mapnik')
 program_env['LIBS'].append(env['ICU_LIB_NAME'])
 program_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
-program_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])
 program_env['LIBS'].append('boost_program_options%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':

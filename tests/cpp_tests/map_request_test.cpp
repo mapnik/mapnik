@@ -21,6 +21,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "utils.hpp"
+
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
     using namespace mapnik;
@@ -66,10 +68,15 @@ int main(int argc, char** argv)
         args.push_back(argv[i]);
     }
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
-
+    // TODO - re-enable if we can control the freetype/cairo versions used
+    // https://github.com/mapnik/mapnik/issues/1868
+    /*
     std::string expected("./tests/cpp_tests/support/map-request-marker-text-line-expected.png");
     std::string expected_cairo("./tests/cpp_tests/support/map-request-marker-text-line-expected-cairo.png");
     try {
+
+        BOOST_TEST(set_working_dir(args));
+
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         mapnik::freetype_engine::register_fonts("./fonts", true );
         mapnik::Map m(256,256);
@@ -150,6 +157,7 @@ int main(int argc, char** argv)
     } catch (std::exception const& ex) {
         std::clog << ex.what() << "\n";
     }
+    */
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ Map Request rendering hook: \x1b[1;32m✓ \x1b[0m\n";

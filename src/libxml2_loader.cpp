@@ -28,15 +28,16 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/noncopyable.hpp>
-
-// boost
-#include <boost/filesystem/operations.hpp>
+#include <mapnik/util/fs.hpp>
 
 // libxml
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/parserInternals.h>
 #include <libxml/xinclude.h>
+
+// stl
+#include <stdexcept>
 
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 
@@ -69,8 +70,7 @@ public:
 
     void load(std::string const& filename, xml_node &node)
     {
-        boost::filesystem::path path(filename);
-        if (!boost::filesystem::exists(path))
+        if (!mapnik::util::exists(filename))
         {
             throw config_error(std::string("Could not load map file: File does not exist"), 0, filename);
         }
@@ -102,8 +102,7 @@ public:
     {
         if (!base_path.empty())
         {
-            boost::filesystem::path path(base_path);
-            if (!boost::filesystem::exists(path)) {
+            if (!mapnik::util::exists(base_path)) {
                 throw config_error(std::string("Could not locate base_path '") +
                                    base_path + "': file or directory does not exist");
             }

@@ -30,7 +30,9 @@ extern "C"
 }
 // boost
 #include <boost/scoped_array.hpp>
+// iostreams
 #include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
 namespace mapnik
@@ -40,7 +42,7 @@ template <typename T>
 class png_reader : public image_reader
 {
     typedef T source_type;
-    typedef boost::iostreams::stream<source_type> ifstream;
+    typedef boost::iostreams::stream<source_type> input_stream;
 
     struct png_struct_guard
     {
@@ -59,14 +61,14 @@ class png_reader : public image_reader
 private:
 
     source_type source_;
-    ifstream stream_;
+    input_stream stream_;
     unsigned width_;
     unsigned height_;
     int bit_depth_;
     int color_type_;
 public:
     explicit png_reader(std::string const& file_name);
-    explicit png_reader(char const* data, std::size_t size);
+    png_reader(char const* data, std::size_t size);
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
@@ -95,12 +97,12 @@ const bool registered2 = register_image_reader("png", create_png_reader2);
 }
 
 
-void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
+void user_error_fn(png_structp /*png_ptr*/, png_const_charp error_msg)
 {
-    throw image_reader_exception("failed to read invalid png");
+    throw image_reader_exception(std::string("failed to read invalid png: '") + error_msg + "'");
 }
 
-void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
+void user_warning_fn(png_structp /*png_ptr*/, png_const_charp warning_msg)
 {
     MAPNIK_LOG_DEBUG(png_reader) << "libpng warning: '" << warning_msg << "'";
 }
@@ -108,9 +110,10 @@ void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
 template <typename T>
 void png_reader<T>::png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-    ifstream * fin = reinterpret_cast<ifstream*>(png_get_io_ptr(png_ptr));
+    input_stream * fin = reinterpret_cast<input_stream*>(png_get_io_ptr(png_ptr));
     fin->read(reinterpret_cast<char*>(data), length);
-    if (fin->gcount() != static_cast<std::streamsize>(length))
+    std::streamsize read_count = fin->gcount();
+    if (read_count < 0 || static_cast<png_size_t>(read_count) != length)
     {
         png_error(png_ptr, "Read Error");
     }
@@ -125,8 +128,8 @@ png_reader<T>::png_reader(std::string const& file_name)
       bit_depth_(0),
       color_type_(0)
 {
-
-    if (!stream_) throw image_reader_exception("cannot open image file "+ file_name);
+    if (!source_.is_open()) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
+    if (!stream_) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
     init();
 }
 
@@ -140,7 +143,7 @@ png_reader<T>::png_reader(char const* data, std::size_t size)
       color_type_(0)
 {
 
-    if (!stream_) throw image_reader_exception("cannot open image stream");
+    if (!stream_) throw image_reader_exception("PNG reader: cannot open image stream");
     init();
 }
 
@@ -157,12 +160,12 @@ void png_reader<T>::init()
     stream_.read(reinterpret_cast<char*>(header),8);
     if ( stream_.gcount() != 8)
     {
-        throw image_reader_exception("Could not read image");
+        throw image_reader_exception("PNG reader: Could not read image");
     }
     int is_png=!png_sig_cmp(header,0,8);
     if (!is_png)
     {
-        throw image_reader_exception(" File or steam is not a png");
+        throw image_reader_exception("File or stream is not a png");
     }
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);

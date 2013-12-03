@@ -15,11 +15,11 @@
         </Rule>
         <Rule>
             <Filter>[ref]=1 or [ref]=3</Filter>
-            <TextSymbolizer size="14" fill="#000" spacing="1" placement="line" face-name="DejaVu Sans Book" halo-radius="1" dy="-10">'Some Text'</TextSymbolizer>
+            <TextSymbolizer size="14" fill="#000" spacing="1" placement="line" face-name="DejaVu Sans Book" halo-radius="1" dy="-10" vertical-alignment="middle">'Some Text'</TextSymbolizer>
         </Rule>
         <Rule>
             <Filter>[ref]=2 or [ref]=4</Filter>
-            <TextSymbolizer size="14" fill="#000" spacing="1" placement="line" face-name="DejaVu Sans Book" halo-radius="1" dy="10">'Some Text'</TextSymbolizer>
+            <TextSymbolizer size="14" fill="#000" spacing="1" placement="line" face-name="DejaVu Sans Book" halo-radius="1" dy="10" vertical-alignment="middle">'Some Text'</TextSymbolizer>
         </Rule>
         <Rule>
             <Filter>[name]</Filter>

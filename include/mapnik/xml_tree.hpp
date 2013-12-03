@@ -33,9 +33,6 @@
 #include <mapnik/css_color_grammar.hpp>
 #include <mapnik/unicode.hpp>
 
-// boost
-#include <boost/format.hpp>
-
 //stl
 #include <string>
 

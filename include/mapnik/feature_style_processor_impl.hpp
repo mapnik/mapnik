@@ -33,7 +33,6 @@
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
-#include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/layer.hpp>
@@ -41,26 +40,19 @@
 #include <mapnik/rule_cache.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/util/featureset_buffer.hpp>
 
 // boost
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/foreach.hpp>
-#include <boost/concept_check.hpp>
 
 // stl
 #include <vector>
-
-
-#if defined(RENDERING_STATS)
-#include <mapnik/timer.hpp>
-#include <iomanip>
-#include <sstream>
-#endif
+#include <stdexcept>
 
 namespace mapnik
 {
@@ -81,11 +73,8 @@ template <> // No-op specialization
 struct process_impl<false>
 {
     template <typename T0, typename T1, typename T2, typename T3>
-    static void process(T0 & ren, T1 const& sym, T2 & f, T3 const& tr)
+    static void process(T0 & /*ren*/, T1 const& /*sym*/, T2 & /*f*/, T3 const& /*tr*/)
     {
-        boost::ignore_unused_variable_warning(ren);
-        boost::ignore_unused_variable_warning(f);
-        boost::ignore_unused_variable_warning(tr);
 #ifdef MAPNIK_DEBUG
         std::clog << "NO-OP ...\n";
 #endif
@@ -137,13 +126,31 @@ struct has_process
         );
 };
 
+// Store material for layer rendering in a two step process
+struct layer_rendering_material {
+        layer const& lay_;
+        projection const& proj0_;
+        projection proj1_;
+        box2d<double> layer_ext2_;
+        std::vector<feature_type_style const*> active_styles_;
+        std::vector<featureset_ptr> featureset_ptr_list_;
+        boost::ptr_vector<rule_cache> rule_caches_;
+
+        layer_rendering_material(layer const& lay, projection const& dest) :
+               lay_(lay),
+               proj0_(dest),
+               proj1_(lay.srs(),true) {}
+};
+
+typedef boost::shared_ptr<layer_rendering_material> layer_rendering_material_ptr;
+
+
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
-    : m_(m),
-      scale_factor_(scale_factor)
+    : m_(m)
 {
     // https://github.com/mapnik/mapnik/issues/1100
-    if (scale_factor_ <= 0)
+    if (scale_factor <= 0)
     {
         throw std::runtime_error("scale_factor must be greater than 0.0");
     }
@@ -152,52 +159,61 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 template <typename Processor>
 void feature_style_processor<Processor>::apply(double scale_denom)
 {
-#if defined(RENDERING_STATS)
-    std::clog << "\n//-- starting rendering timer...\n";
-    mapnik::progress_timer t(std::clog, "total map rendering");
-#endif
-
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
 
-    try
+    projection proj(m_.srs(),true);
+    if (scale_denom <= 0.0)
+        scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
+    scale_denom *= p.scale_factor();
+
+    // Asynchronous query supports:
+    // This is a two steps process,
+    // first we setup all queries at layer level
+    // in a second time, we fetch the results and
+    // do the actual rendering
+
+    std::vector<layer_rendering_material_ptr> mat_list;
+
+    // Define processing context map used by datasources
+    // implementing asynchronous queries
+    feature_style_context_map ctx_map;
+
+    BOOST_FOREACH ( layer const& lyr, m_.layers() )
     {
-        projection proj(m_.srs(),true);
-        if (scale_denom <= 0.0)
-            scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-        scale_denom *= scale_factor_;
-
-        BOOST_FOREACH ( layer const& lyr, m_.layers() )
+        if (lyr.visible(scale_denom))
         {
-            if (lyr.visible(scale_denom))
-            {
-                std::set<std::string> names;
-                apply_to_layer(lyr,
-                               p,
-                               proj,
-                               m_.scale(),
-                               scale_denom,
-                               m_.width(),
-                               m_.height(),
-                               m_.get_current_extent(),
-                               m_.buffer_size(),
-                               names);
+            std::set<std::string> names;
+            layer_rendering_material_ptr mat = boost::make_shared<layer_rendering_material>(lyr, proj);
 
+            prepare_layer(*mat,
+                    ctx_map,
+                    p,
+                    m_.scale(),
+                    scale_denom,
+                    m_.width(),
+                    m_.height(),
+                    m_.get_current_extent(),
+                    m_.buffer_size(),
+                    names);
+
+            // Store active material
+            if (!mat->active_styles_.empty())
+            {
+                mat_list.push_back(mat);
             }
         }
     }
-    catch (proj_init_error const& ex)
+
+    BOOST_FOREACH ( layer_rendering_material_ptr mat, mat_list )
     {
-        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
+        if (!mat->active_styles_.empty())
+        {
+            render_material(*mat,p);
+        }
     }
 
     p.end_map_processing(m_);
-
-#if defined(RENDERING_STATS)
-    t.stop();
-    std::clog << "//-- rendering timer stopped...\n\n";
-#endif
-
 }
 
 template <typename Processor>
@@ -207,36 +223,33 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr,
 {
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
-    try
-    {
-        projection proj(m_.srs(),true);
-        if (scale_denom <= 0.0)
-            scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-        scale_denom *= scale_factor_;
+    projection proj(m_.srs(),true);
+    if (scale_denom <= 0.0)
+        scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
+    scale_denom *= p.scale_factor();
 
-        if (lyr.visible(scale_denom))
-        {
-            apply_to_layer(lyr,
-                           p,
-                           proj,
-                           m_.scale(),
-                           scale_denom,
-                           m_.width(),
-                           m_.height(),
-                           m_.get_current_extent(),
-                           m_.buffer_size(),
-                           names);
-        }
-    }
-    catch (proj_init_error const& ex)
+    if (lyr.visible(scale_denom))
     {
-        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
+        apply_to_layer(lyr,
+                       p,
+                       proj,
+                       m_.scale(),
+                       scale_denom,
+                       m_.width(),
+                       m_.height(),
+                       m_.get_current_extent(),
+                       m_.buffer_size(),
+                       names);
     }
     p.end_map_processing(m_);
 }
 
+/*!
+ * \brief render a layer given a projection and scale.
+ */
 template <typename Processor>
-void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Processor & p,
+void feature_style_processor<Processor>::apply_to_layer(layer const& lay,
+                                                        Processor & p,
                                                         projection const& proj0,
                                                         double scale,
                                                         double scale_denom,
@@ -246,40 +259,60 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                                                         int buffer_size,
                                                         std::set<std::string>& names)
 {
+    feature_style_context_map ctx_map;
+    layer_rendering_material  mat(lay, proj0);
+
+    prepare_layer(mat,
+                  ctx_map,
+                  p,
+                  scale,
+                  scale_denom,
+                  width,
+                  height,
+                  extent,
+                  buffer_size,
+                  names);
+
+    if (!mat.active_styles_.empty())
+    {
+        render_material(mat,p);
+    }
+}
+
+template <typename Processor>
+void feature_style_processor<Processor>::prepare_layer(layer_rendering_material & mat,
+                                                       feature_style_context_map & ctx_map,
+                                                       Processor & p,
+                                                       double scale,
+                                                       double scale_denom,
+                                                       unsigned width,
+                                                       unsigned height,
+                                                       box2d<double> const& extent,
+                                                       int buffer_size,
+                                                       std::set<std::string>& names)
+{
+    layer const& lay = mat.lay_;
+
     std::vector<std::string> const& style_names = lay.styles();
 
     unsigned int num_styles = style_names.size();
     if (! num_styles)
     {
-        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No style for layer=" << lay.name();
-
+        MAPNIK_LOG_DEBUG(feature_style_processor)
+          << "feature_style_processor: No style for layer=" << lay.name();
         return;
     }
 
     mapnik::datasource_ptr ds = lay.datasource();
     if (! ds)
     {
-        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No datasource for layer=" << lay.name();
-
+        MAPNIK_LOG_DEBUG(feature_style_processor)
+          << "feature_style_processor: No datasource for layer=" << lay.name();
         return;
     }
 
-#if defined(RENDERING_STATS)
-    progress_timer layer_timer(std::clog, "rendering total for layer: '" + lay.name() + "'");
-#endif
-
-    projection proj1(lay.srs(),true);
-    proj_transform prj_trans(proj0,proj1);
-
-#if defined(RENDERING_STATS)
-    if (! prj_trans.equal())
-    {
-        std::clog << "notice: reprojecting layer: '" << lay.name() << "' from/to:\n\t'"
-                  << lay.srs() << "'\n\t'"
-                  << m_.srs() << "'\n";
-    }
-#endif
-
+    processor_context_ptr current_ctx = ds->get_context(ctx_map);
+    proj_transform prj_trans(mat.proj0_,mat.proj1_);
 
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
@@ -299,7 +332,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
-    if (maximum_extent) {
+    if (maximum_extent)
+    {
         buffered_query_ext.clip(*maximum_extent);
     }
 
@@ -337,6 +371,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         early_return = true;
     }
 
+    std::vector<feature_type_style const*> & active_styles = mat.active_styles_;
+
     if (early_return)
     {
         // check for styles needing compositing operations applied
@@ -348,19 +384,16 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             {
                 continue;
             }
+
             if (style->comp_op() || style->image_filters().size() > 0)
             {
                 if (style->active(scale_denom))
                 {
-                    // trigger any needed compositing ops
-                    p.start_style_processing(*style);
-                    p.end_style_processing(*style);
+                    // we'll have to handle compositing ops
+                    active_styles.push_back(&(*style));
                 }
             }
         }
-#if defined(RENDERING_STATS)
-        layer_timer.discard();
-#endif
         return;
     }
 
@@ -371,7 +404,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         query_ext.clip(*maximum_extent);
     }
 
-    box2d<double> layer_ext2 = lay.envelope();
+    box2d<double> & layer_ext2 = mat.layer_ext2_;
+
+    layer_ext2 = lay.envelope();
     if (fw_success)
     {
         if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))
@@ -390,17 +425,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     p.start_layer_processing(lay, layer_ext2);
 
-    double qw = query_ext.width()>0 ? query_ext.width() : 1;
-    double qh = query_ext.height()>0 ? query_ext.height() : 1;
-    query::resolution_type res(width/qw,
-                               height/qh);
-
-    query q(layer_ext,res,scale_denom,extent);
-    std::vector<feature_type_style const*> active_styles;
+    boost::ptr_vector<rule_cache> & rule_caches = mat.rule_caches_;
     attribute_collector collector(names);
-    double filt_factor = 1.0;
-    directive_collector d_collector(filt_factor);
-    boost::ptr_vector<rule_cache> rule_caches;
 
     // iterate through all named styles collecting active styles and attribute names
     BOOST_FOREACH(std::string const& style_name, style_names)
@@ -424,11 +450,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             {
                 rc->add_rule(r);
                 active_rules = true;
-                if (ds->type() == datasource::Vector)
-                {
-                    collector(r);
-                }
-                // TODO - in the future rasters should be able to be filtered.
+                collector(r);
             }
         }
         if (active_rules)
@@ -439,139 +461,180 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     }
 
     // Don't even try to do more work if there are no active styles.
-    if (active_styles.size() > 0)
+    if (active_styles.empty())
     {
-        if (p.attribute_collection_policy() == COLLECT_ALL)
-        {
-            layer_descriptor lay_desc = ds->get_descriptor();
-            BOOST_FOREACH(attribute_descriptor const& desc, lay_desc.get_descriptors())
-            {
-                q.add_property_name(desc.get_name());
-            }
-        }
-        else
-        {
-            BOOST_FOREACH(std::string const& name, names)
-            {
-                q.add_property_name(name);
-            }
-        }
-
-        // Update filter_factor for all enabled raster layers.
-        BOOST_FOREACH (feature_type_style const* style, active_styles)
-        {
-            BOOST_FOREACH(rule const& r, style->get_rules())
-            {
-                if (r.active(scale_denom) &&
-                    ds->type() == datasource::Raster &&
-                    ds->params().get<double>("filter_factor",0.0) == 0.0)
-                {
-                    BOOST_FOREACH (rule::symbolizers::value_type sym,  r.get_symbolizers())
-                    {
-                        // if multiple raster symbolizers, last will be respected
-                        // should we warn or throw?
-                        boost::apply_visitor(d_collector,sym);
-                    }
-                    q.set_filter_factor(filt_factor);
-                }
-            }
-        }
-
-        // Also query the group by attribute
-        std::string group_by = lay.group_by();
-        if (group_by != "")
-        {
-            q.add_property_name(group_by);
-        }
-
-        bool cache_features = lay.cache_features() && active_styles.size() > 1;
-
-        // Render incrementally when the column that we group by
-        // changes value.
-        if (group_by != "")
-        {
-            featureset_ptr features = ds->features(q);
-            if (features) {
-                // Cache all features into the memory_datasource before rendering.
-                memory_datasource cache(ds->type(),false);
-                feature_ptr feature, prev;
-
-                while ((feature = features->next()))
-                {
-                    if (prev && prev->get(group_by) != feature->get(group_by))
-                    {
-                        // We're at a value boundary, so render what we have
-                        // up to this point.
-                        int i = 0;
-                        BOOST_FOREACH (feature_type_style const* style, active_styles)
-                        {
-                            render_style(lay, p, style, rule_caches[i], style_names[i],
-                                         cache.features(q), prj_trans);
-                            i++;
-                        }
-                        cache.clear();
-                    }
-                    cache.push(feature);
-                    prev = feature;
-                }
-
-                int i = 0;
-                BOOST_FOREACH (feature_type_style const* style, active_styles)
-                {
-                    render_style(lay, p, style, rule_caches[i], style_names[i],
-                                 cache.features(q), prj_trans);
-                    i++;
-                }
-            }
-        }
-        else if (cache_features)
-        {
-            memory_datasource cache(ds->type(),false);
-            featureset_ptr features = ds->features(q);
-            if (features) {
-                // Cache all features into the memory_datasource before rendering.
-                feature_ptr feature;
-                while ((feature = features->next()))
-                {
-                    cache.push(feature);
-                }
-            }
-            int i = 0;
-            BOOST_FOREACH (feature_type_style const* style, active_styles)
-            {
-                render_style(lay, p, style, rule_caches[i], style_names[i],
-                             cache.features(q), prj_trans);
-                i++;
-            }
-        }
-        // We only have a single style and no grouping.
-        else
-        {
-            int i = 0;
-            BOOST_FOREACH (feature_type_style const* style, active_styles)
-            {
-                render_style(lay, p, style, rule_caches[i], style_names[i],
-                             ds->features(q), prj_trans);
-                i++;
-            }
-        }
+        return;
     }
 
-#if defined(RENDERING_STATS)
-    layer_timer.stop();
-#endif
+    double qw = query_ext.width()>0 ? query_ext.width() : 1;
+    double qh = query_ext.height()>0 ? query_ext.height() : 1;
+    query::resolution_type res(width/qw,
+                               height/qh);
 
-    p.end_layer_processing(lay);
+    query q(layer_ext,res,scale_denom,extent);
+
+    if (p.attribute_collection_policy() == COLLECT_ALL)
+    {
+        layer_descriptor lay_desc = ds->get_descriptor();
+        BOOST_FOREACH(attribute_descriptor const& desc, lay_desc.get_descriptors())
+        {
+            q.add_property_name(desc.get_name());
+        }
+    }
+    else
+    {
+        BOOST_FOREACH(std::string const& name, names)
+        {
+            q.add_property_name(name);
+        }
+    }
+    q.set_filter_factor(collector.get_filter_factor());
+
+    // Also query the group by attribute
+    std::string const& group_by = lay.group_by();
+    if (!group_by.empty())
+    {
+        q.add_property_name(group_by);
+    }
+
+    bool cache_features = lay.cache_features() && active_styles.size() > 1;
+
+    std::vector<featureset_ptr> & featureset_ptr_list = mat.featureset_ptr_list_;
+    if (!group_by.empty() || cache_features)
+    {
+        featureset_ptr_list.push_back(ds->features_with_context(q,current_ctx));
+    }
+    else
+    {
+        for(std::size_t i = 0; i < active_styles.size(); ++i)
+        {
+            featureset_ptr_list.push_back(ds->features_with_context(q,current_ctx));
+        }
+    }
 }
 
 
 template <typename Processor>
+void feature_style_processor<Processor>::render_material(layer_rendering_material & mat,
+                                                         Processor & p )
+{
+    std::vector<feature_type_style const*> & active_styles = mat.active_styles_;
+    std::vector<featureset_ptr> & featureset_ptr_list = mat.featureset_ptr_list_;
+    if (featureset_ptr_list.empty())
+    {
+        // The datasource wasn't queried because of early return
+        // but we have to apply compositing operations on styles
+        BOOST_FOREACH (feature_type_style const* style, active_styles)
+        {
+            p.start_style_processing(*style);
+            p.end_style_processing(*style);
+        }
+        return;
+    }
+    
+    p.start_layer_processing(mat.lay_, mat.layer_ext2_);
+
+    layer const& lay = mat.lay_;
+
+    boost::ptr_vector<rule_cache> & rule_caches = mat.rule_caches_;
+
+    proj_transform prj_trans(mat.proj0_,mat.proj1_);
+
+    bool cache_features = lay.cache_features() && active_styles.size() > 1;
+
+    datasource_ptr ds = lay.datasource();
+    std::string group_by = lay.group_by();
+
+    // Render incrementally when the column that we group by changes value.
+    if (!group_by.empty())
+    {
+        featureset_ptr features = *featureset_ptr_list.begin();
+        if (features)
+        {
+            // Cache all features into the memory_datasource before rendering.
+            boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
+            feature_ptr feature, prev;
+
+            while ((feature = features->next()))
+            {
+                if (prev && prev->get(group_by) != feature->get(group_by))
+                {
+                    // We're at a value boundary, so render what we have
+                    // up to this point.
+                    std::size_t i = 0;
+                    BOOST_FOREACH (feature_type_style const* style, active_styles)
+                    {
+
+                        cache->prepare();
+                        render_style(p, style,
+                                     rule_caches[i],
+                                     cache,
+                                     prj_trans);
+                        ++i;
+                    }
+                    cache->clear();
+                }
+                cache->push(feature);
+                prev = feature;
+            }
+
+            std::size_t i = 0;
+            BOOST_FOREACH (feature_type_style const* style, active_styles)
+            {
+                cache->prepare();
+                render_style(p, style, rule_caches[i], cache, prj_trans);
+                ++i;
+            }
+            cache->clear();
+        }
+    }
+    else if (cache_features)
+    {
+        boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
+        featureset_ptr features = *featureset_ptr_list.begin();
+        if (features)
+        {
+            // Cache all features into the memory_datasource before rendering.
+            feature_ptr feature;
+            while ((feature = features->next()))
+            {
+
+                cache->push(feature);
+            }
+        }
+        std::size_t i = 0;
+        BOOST_FOREACH (feature_type_style const* style, active_styles)
+        {
+            cache->prepare();
+            render_style(p, style,
+                         rule_caches[i],
+                         cache, prj_trans);
+            ++i;
+        }
+    }
+    // We only have a single style and no grouping.
+    else
+    {
+        std::size_t i = 0;
+        std::vector<featureset_ptr>::iterator featuresets = featureset_ptr_list.begin();
+        BOOST_FOREACH (feature_type_style const* style, active_styles)
+        {
+            featureset_ptr features = *featuresets++;
+            render_style(p, style,
+                         rule_caches[i],
+                         features,
+                         prj_trans);
+            ++i;
+        }
+    }
+    p.end_layer_processing(mat.lay_);
+}
+
+template <typename Processor>
 void feature_style_processor<Processor>::render_style(
-    layer const& lay,
     Processor & p,
     feature_type_style const* style,
     rule_cache const& rc,
-    std::string const& style_name,
     featureset_ptr features,
     proj_transform const& prj_trans)
 {
@@ -581,49 +644,24 @@ void feature_style_processor<Processor>::render_style(
         p.end_style_processing(*style);
         return;
     }
-
-#if defined(RENDERING_STATS)
-    std::ostringstream s1;
-    s1 << "rendering style for layer: '" << lay.name()
-       << "' and style '" << style_name << "'";
-    mapnik::progress_timer style_timer(std::clog, s1.str());
-
-    int feature_processed_count = 0;
-    int feature_count = 0;
-#endif
-
     feature_ptr feature;
+    bool was_painted = false;
     while ((feature = features->next()))
     {
-#if defined(RENDERING_STATS)
-        feature_count++;
-        bool feat_processed = false;
-#endif
-
         bool do_else = true;
         bool do_also = false;
-
         BOOST_FOREACH(rule const* r, rc.get_if_rules() )
         {
-            expression_ptr const& expr=r->get_filter();
+            expression_ptr const& expr = r->get_filter();
             value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(*feature),*expr);
             if (result.to_bool())
             {
-#if defined(RENDERING_STATS)
-                feat_processed = true;
-#endif
-
-                p.painted(true);
-
+                was_painted = true;
                 do_else=false;
                 do_also=true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
-
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
                 {
-
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
                         boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
@@ -641,15 +679,8 @@ void feature_style_processor<Processor>::render_style(
         {
             BOOST_FOREACH( rule const* r, rc.get_else_rules() )
             {
-#if defined(RENDERING_STATS)
-                feat_processed = true;
-#endif
-
-                p.painted(true);
-
+                was_painted = true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -663,15 +694,8 @@ void feature_style_processor<Processor>::render_style(
         {
             BOOST_FOREACH( rule const* r, rc.get_also_rules() )
             {
-#if defined(RENDERING_STATS)
-                feat_processed = true;
-#endif
-
-                p.painted(true);
-
+                was_painted = true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -681,32 +705,8 @@ void feature_style_processor<Processor>::render_style(
                 }
             }
         }
-#if defined(RENDERING_STATS)
-        if (feat_processed)
-            feature_processed_count++;
-#endif
     }
-
-#if defined(RENDERING_STATS)
-    style_timer.stop();
-
-    // done with style
-    std::ostringstream s;
-    if (feature_count > 0)
-    {
-        double perc_processed = ((double)feature_processed_count/(double)feature_count)*100.0;
-
-        s << "percent rendered: " << perc_processed << "% - " << feature_processed_count
-          << " rendered for " << feature_count << " queried for ";
-        s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << style_name << "'\n";
-    }
-    else
-    {
-        s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << style_name << "'\n";
-    }
-    std::clog << s.str();
-    style_timer.discard();
-#endif
+    p.painted(was_painted);
     p.end_style_processing(*style);
 }
 

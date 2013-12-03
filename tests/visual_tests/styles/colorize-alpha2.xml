@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map[]>
+<Map>
+
+  <Style name="countries">
+    <Rule>
+      <PolygonSymbolizer fill-opacity=".9" gamma=".65"/>
+    </Rule>
+  </Style>
+
+  <Style name="style" image-filters="colorize-alpha(blue 100%, cyan, yellow 0.7, rgb(0%,80%,0%) 90%)">
+    <Rule>
+      <PointSymbolizer  file="../../data/images/marker.png" allow-overlap="true"   />
+    </Rule>
+  </Style>
+
+  <Layer name="world">
+      <StyleName>countries</StyleName>
+      <Datasource>
+          <Parameter name="file">../../data/shp/ne_110m_admin_0_countries.shp</Parameter>
+          <Parameter name="type">shape</Parameter>
+      </Datasource>
+  </Layer>
+
+  <Layer name="style">
+      <StyleName>style</StyleName>
+      <Datasource>
+          <Parameter name="inline">
+                  x,y
+                  -170,20
+                  -122,48
+                  -122.2,48.2
+                  -122.2,48.2
+                  -122.3,48.3
+                  -122.1,48.4
+                  -122.1,48.2
+                  -115,36
+                  90,30
+                  0,0
+                  1,1
+                  10,10
+                  -10,-10
+                  -20,-20
+          </Parameter>
+         <Parameter name="type">csv</Parameter>
+      </Datasource>
+  </Layer>
+
+</Map>

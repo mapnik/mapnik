@@ -47,9 +47,29 @@ struct evaluate : boost::static_visitor<T1>
     explicit evaluate(feature_type const& f)
         : feature_(f) {}
 
-    value_type operator() (value_type x) const
+    value_integer operator() (value_integer val) const
     {
-        return x;
+        return val;
+    }
+
+    value_double operator() (value_double val) const
+    {
+        return val;
+    }
+
+    value_bool operator() (value_bool val) const
+    {
+        return val;
+    }
+
+    value_null operator() (value_null val) const
+    {
+        return val;
+    }
+
+    value_unicode_string const& operator() (value_unicode_string const& str) const
+    {
+        return str;
     }
 
     value_type operator() (attribute const& attr) const

@@ -132,6 +132,26 @@ public:
         return DEFAULT;
     }
 
+    inline double scale_factor() const
+    {
+        return scale_factor_;
+    }
+
+    inline box2d<double> clipping_extent() const
+    {
+        if (t_.offset() > 0)
+        {
+            box2d<double> box = query_extent_;
+            double scale = static_cast<double>(query_extent_.width())/static_cast<double>(width_);
+            // 3 is used here because at least 3 was needed for the 'style-level-compositing-tiled-0,1' visual test to pass
+            // TODO - add more tests to hone in on a more robust #
+            scale *= t_.offset()*3;
+            box.pad(scale);
+            return box;
+        }
+        return query_extent_;
+    }
+
 protected:
     template <typename R>
     void debug_draw_box(R& buf, box2d<double> const& extent,
@@ -144,14 +164,14 @@ private:
     buffer_type & pixmap_;
     boost::shared_ptr<buffer_type> internal_buffer_;
     boost::shared_ptr<buffer_type> internal_buffer2_;
-    mutable buffer_type * current_buffer_;
     mutable buffer_type * current_layer_buffer_;
+    mutable buffer_type * current_buffer_;
+    CoordTransform t_;
     mutable bool style_level_compositing_;
     mutable bool layer_level_opacity_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;
-    CoordTransform t_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
     boost::shared_ptr<label_collision_detector4> detector_;

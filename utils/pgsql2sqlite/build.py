@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2009 Artem Pavlenko, Dane Springmeyer
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 # 
+
 
 import os
 from copy import copy
@@ -36,6 +37,7 @@ source = Split(
     )
 
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+program_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 if env['HAS_CAIRO']:
     program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
@@ -58,7 +60,12 @@ if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
 
 if env['RUNTIME_LINK'] == 'static':
-    libraries.extend(['ldap','pam','ssl','crypto','krb5'])
+    if env['PLATFORM'] == 'Darwin':
+        libraries.extend(['ldap', 'pam', 'ssl', 'crypto', 'krb5'])
+    else:
+        # TODO - parse back into libraries variable
+        program_env.ParseConfig('pg_config --libs')
+        libraries.append('dl')
 
 pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries, LINKFLAGS=linkflags)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))

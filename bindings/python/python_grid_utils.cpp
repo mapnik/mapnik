@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // boost
 #include <boost/python.hpp>
 #include <boost/scoped_array.hpp>
@@ -36,8 +38,10 @@
 #include <mapnik/value_error.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-#include "mapnik_value_converter.hpp"
 #include "python_grid_utils.hpp"
+
+// stl
+#include <stdexcept>
 
 namespace mapnik {
 
@@ -469,3 +473,5 @@ boost::python::dict render_grid(mapnik::Map const& map,
 }
 
 }
+
+#endif

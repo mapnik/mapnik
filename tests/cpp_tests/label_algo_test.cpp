@@ -34,13 +34,26 @@ int main(int argc, char** argv)
     // line with two verticies
     mapnik::geometry_type line(mapnik::LineString);
     line.move_to(0,0);
-    line.move_to(50,50);
+    line.line_to(50,50);
     BOOST_TEST( mapnik::label::centroid(line, x, y) );
     BOOST_TEST( x == 25 );
     BOOST_TEST( y == 25 );
 
     // TODO - centroid and interior should be equal but they appear not to be (check largest)
     // MULTIPOLYGON(((-52 40,-60 32,-68 40,-60 48,-52 40)),((-60 50,-80 30,-100 49.9999999999999,-80.0000000000001 70,-60 50)),((-52 60,-60 52,-68 60,-60 68,-52 60)))
+
+    // hit tests
+    mapnik::geometry_type pt_hit(mapnik::Point);
+    pt_hit.move_to(10,10);
+    BOOST_TEST( mapnik::label::hit_test(pt_hit, 10, 10, 0.1) );
+    BOOST_TEST( !mapnik::label::hit_test(pt_hit, 9, 9, 0) );
+    BOOST_TEST( mapnik::label::hit_test(pt_hit, 9, 9, 1.5) );
+    mapnik::geometry_type line_hit(mapnik::LineString);
+    line_hit.move_to(0,0);
+    line_hit.line_to(50,50);
+    BOOST_TEST( mapnik::label::hit_test(line_hit, 0, 0, 0.001) );
+    BOOST_TEST( !mapnik::label::hit_test(line_hit, 1, 1, 0) );
+    BOOST_TEST( mapnik::label::hit_test(line_hit, 1, 1, 1.001) );
 
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";

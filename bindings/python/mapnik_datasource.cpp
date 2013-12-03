@@ -22,17 +22,13 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
 #include <boost/noncopyable.hpp>
 
 // stl
-#include <sstream>
 #include <vector>
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/coord.hpp>
-#include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature_layer_desc.hpp>
@@ -61,7 +57,11 @@ boost::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
             PyObject* temp = PyUnicode_AsUTF8String(obj.ptr());
             if (temp)
             {
+#if PY_VERSION_HEX >= 0x03000000
+                char* c_str = PyBytes_AsString(temp);
+#else
                 char* c_str = PyString_AsString(temp);
+#endif
                 params[key] = std::string(c_str);
                 Py_DecRef(temp);
             }

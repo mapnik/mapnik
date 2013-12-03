@@ -1,29 +1,13 @@
 #coding=utf8
 import os
 import mapnik
-from utilities import execution_path
+from utilities import execution_path, run_all
 from nose.tools import *
 
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
-
-def test_gen_map():
-    mapxmlfile = '../data/good_maps/raster_colorizer.xml'
-    mapxmloutputfile = 'raster_colorizer_test_save.xml'
-    outputfile = 'raster_colorizer_test.png'
-
-    m = mapnik.Map(800, 600)
-    try:
-        mapnik.load_map(m, mapxmlfile)
-        mapnik.save_map(m, mapxmloutputfile)
-        m.zoom_all()
-        mapnik.render_to_file(m, outputfile)
-    except RuntimeError,e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(str(e))
 
 #test discrete colorizer mode
 def test_get_color_discrete():
@@ -103,4 +87,4 @@ def test_stop_label():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

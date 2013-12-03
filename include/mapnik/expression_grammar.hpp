@@ -49,13 +49,13 @@ struct unicode_impl
     template <typename T>
     struct result
     {
-        typedef UnicodeString type;
+        typedef mapnik::value_unicode_string type;
     };
 
     explicit unicode_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
-    UnicodeString operator()(std::string const& str) const
+    mapnik::value_unicode_string operator()(std::string const& str) const
     {
         return tr_.transcode(str.c_str());
     }
@@ -65,7 +65,11 @@ struct unicode_impl
 
 struct regex_match_impl
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T>
+#else
     template <typename T0, typename T1>
+#endif
     struct result
     {
         typedef expr_node type;
@@ -82,7 +86,12 @@ struct regex_match_impl
 
 struct regex_replace_impl
 {
+
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T>
+#else
     template <typename T0, typename T1, typename T2>
+#endif
     struct result
     {
         typedef expr_node type;
@@ -116,8 +125,13 @@ struct integer_parser
     typedef qi::int_parser<T,10,1,-1> type;
 };
 
+#ifdef __GNUC__
+template <typename Iterator>
+struct MAPNIK_DECL expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
+#else
 template <typename Iterator>
 struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
+#endif
 {
     typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
 

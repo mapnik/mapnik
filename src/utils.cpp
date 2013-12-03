@@ -25,7 +25,7 @@
 #include <mapnik/utils.hpp>
 #include <string>
 #include <vector>
-
+#define NOMINMAX
 #include <windows.h>
 
 namespace mapnik {

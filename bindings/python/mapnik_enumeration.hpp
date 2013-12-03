@@ -22,6 +22,11 @@
 #ifndef MAPNIK_PYTHON_BINDING_ENUMERATION_INCLUDED
 #define MAPNIK_PYTHON_BINDING_ENUMERATION_INCLUDED
 
+#include <boost/python/converter/registered.hpp>  // for registered
+#include <boost/python/enum.hpp>        // for enum_
+#include <boost/python/implicit.hpp>    // for implicitly_convertible
+#include <boost/python/to_python_converter.hpp>
+
 namespace mapnik {
 
 template <typename EnumWrapper>

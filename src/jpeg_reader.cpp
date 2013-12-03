@@ -162,8 +162,7 @@ void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
     if (count <= 0) return; //A zero or negative skip count should be treated as a no-op.
     jpeg_stream_wrapper* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
 
-    if (wrap->manager.bytes_in_buffer > 0u
-        && static_cast<unsigned long>(count) < wrap->manager.bytes_in_buffer)
+    if (wrap->manager.bytes_in_buffer > 0 && count < static_cast<long>(wrap->manager.bytes_in_buffer))
     {
         wrap->manager.bytes_in_buffer -= count;
         wrap->manager.next_input_byte = &wrap->buffer[BUF_SIZE - wrap->manager.bytes_in_buffer];
@@ -178,7 +177,7 @@ void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
 }
 
 template <typename T>
-void jpeg_reader<T>::term (j_decompress_ptr cinfo)
+void jpeg_reader<T>::term (j_decompress_ptr /*cinfo*/)
 {
 // no-op
 }
@@ -191,7 +190,7 @@ void jpeg_reader<T>::attach_stream (j_decompress_ptr cinfo, input_stream* in)
         cinfo->src = (struct jpeg_source_mgr *)
             (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT, sizeof(jpeg_stream_wrapper));
     }
-    typename jpeg_reader::jpeg_stream_wrapper * src = reinterpret_cast<typename jpeg_reader::jpeg_stream_wrapper*> (cinfo->src);
+    jpeg_reader::jpeg_stream_wrapper * src = reinterpret_cast<jpeg_reader::jpeg_stream_wrapper*> (cinfo->src);
     src->manager.init_source = init_source;
     src->manager.fill_input_buffer = fill_input_buffer;
     src->manager.skip_input_data = skip;
@@ -203,15 +202,16 @@ void jpeg_reader<T>::attach_stream (j_decompress_ptr cinfo, input_stream* in)
 }
 
 template <typename T>
-void jpeg_reader<T>::on_error(j_common_ptr cinfo)
+void jpeg_reader<T>::on_error(j_common_ptr /*cinfo*/)
 {
-    throw image_reader_exception("JPEG Reader: libjpeg could not read image");
 }
 
 template <typename T>
 void jpeg_reader<T>::on_error_message(j_common_ptr cinfo)
 {
-    // used to supress jpeg from printing to stderr
+    char buffer[JMSG_LENGTH_MAX];
+    (*cinfo->err->format_message)(cinfo, buffer);
+    throw image_reader_exception(std::string("JPEG Reader: libjpeg could not read image: ") + buffer);
 }
 
 template <typename T>

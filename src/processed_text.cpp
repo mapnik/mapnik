@@ -23,11 +23,12 @@
 #include <mapnik/processed_text.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/value_types.hpp>
 
 namespace mapnik
 {
 
-void processed_text::push_back(char_properties const& properties, UnicodeString const& text)
+void processed_text::push_back(char_properties const& properties, mapnik::value_unicode_string const& text)
 {
     expr_list_.push_back(processed_expression(properties, text));
 }
@@ -55,7 +56,7 @@ void processed_text::clear()
 }
 
 
-string_info &processed_text::get_string_info()
+string_info const& processed_text::get_string_info()
 {
     info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
     expression_list::iterator itr = expr_list_.begin();

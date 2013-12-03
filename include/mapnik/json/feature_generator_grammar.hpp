@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/json/geometry_generator_grammar.hpp>
@@ -120,7 +121,7 @@ struct utf8
     template <typename T>
     struct result { typedef std::string type; };
 
-    std::string operator() (UnicodeString const& ustr) const
+    std::string operator() (mapnik::value_unicode_string const& ustr) const
     {
         std::string result;
         to_utf8(ustr,result);
@@ -187,8 +188,6 @@ struct feature_generator_grammar:
         using boost::spirit::karma::lit;
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::bool_;
-        //using boost::spirit::karma::int_;
-        //using boost::spirit::karma::long_long;
         using boost::spirit::karma::double_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
@@ -232,7 +231,7 @@ struct feature_generator_grammar:
     karma::rule<OutputIterator, pair_type()> pair;
     karma::rule<OutputIterator, void(mapnik::value const&)> value;
     karma::rule<OutputIterator, mapnik::value_null()> value_null_;
-    karma::rule<OutputIterator, UnicodeString()> ustring;
+    karma::rule<OutputIterator, mapnik::value_unicode_string()> ustring;
     typename karma::int_generator<mapnik::value_integer,10, false> int__;
     // phoenix functions
     phoenix::function<get_id> id_;

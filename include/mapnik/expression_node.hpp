@@ -24,6 +24,7 @@
 #define MAPNIK_EXPRESSION_NODE_HPP
 
 // mapnik
+#include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/expression_node_types.hpp>
@@ -87,7 +88,7 @@ struct binary_node
 
 struct regex_match_node
 {
-    regex_match_node (expr_node const& a, UnicodeString const& ustr);
+    regex_match_node (expr_node const& a, mapnik::value_unicode_string const& ustr);
     expr_node expr;
     boost::u32regex pattern;
 };
@@ -95,10 +96,10 @@ struct regex_match_node
 
 struct regex_replace_node
 {
-    regex_replace_node (expr_node const& a, UnicodeString const& ustr, UnicodeString const& f);
+    regex_replace_node (expr_node const& a, mapnik::value_unicode_string const& ustr, mapnik::value_unicode_string const& f);
     expr_node expr;
     boost::u32regex pattern;
-    UnicodeString format;
+    mapnik::value_unicode_string format;
 };
 
 #else
@@ -138,27 +139,27 @@ inline expr_node& operator- (expr_node& expr)
     return expr = unary_node<tags::negate>(expr);
 }
 
-inline expr_node & operator += ( expr_node &left ,const expr_node &right)
+inline expr_node & operator += ( expr_node &left, expr_node const& right)
 {
     return left =  binary_node<tags::plus>(left,right);
 }
 
-inline expr_node & operator -= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator -= ( expr_node &left, expr_node const& right)
 {
     return left =  binary_node<tags::minus>(left,right);
 }
 
-inline expr_node & operator *= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator *= ( expr_node &left , expr_node const& right)
 {
     return left =  binary_node<tags::mult>(left,right);
 }
 
-inline expr_node & operator /= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator /= ( expr_node &left , expr_node const& right)
 {
     return left =  binary_node<tags::div>(left,right);
 }
 
-inline expr_node & operator %= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator %= ( expr_node &left , expr_node const& right)
 {
     return left = binary_node<tags::mod>(left,right);
 }

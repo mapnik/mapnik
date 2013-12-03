@@ -37,6 +37,7 @@
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
+#include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
 #include "agg_blur.h"
@@ -401,39 +402,31 @@ template <typename Src>
 void apply_filter(Src & src, agg_stack_blur const& op)
 {
     agg::rendering_buffer buf(src.raw_data(),src.width(),src.height(), src.width() * 4);
-    agg::pixfmt_rgba32 pixf(buf);
+    agg::pixfmt_rgba32_pre pixf(buf);
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
 }
 
+inline double channel_delta(double source, double match)
+{
+    if (source > match) return (source - match) / (1.0 - match);
+    if (source < match) return (match - source) / match;
+    return (source - match);
+}
+
+inline uint8_t apply_alpha_shift(double source, double match, double alpha)
+{
+    source = (((source - match) / alpha) + match) * alpha;
+    return static_cast<uint8_t>(std::floor((source*255.0)+.5));
+}
+
 template <typename Src>
-void apply_filter(Src & src, colorize_alpha const& op)
+void apply_filter(Src & src, color_to_alpha const& op)
 {
     using namespace boost::gil;
-
-    agg::gradient_lut<agg::color_interpolator<agg::rgba8> > grad_lut;
-    grad_lut.remove_all();
-    std::size_t size = op.size();
-    if (size < 2) return;
-
-    double step = 1.0/(size-1);
-    double offset = 0.0;
-    BOOST_FOREACH( mapnik::filter::color_stop const& stop, op)
-    {
-        mapnik::color const& c = stop.color;
-        double stop_offset = stop.offset;
-        if (stop_offset == 0)
-        {
-            stop_offset = offset;
-        }
-        grad_lut.add_color(stop_offset, agg::rgba(c.red()/256.0,
-                                                  c.green()/256.0,
-                                                  c.blue()/256.0,
-                                                  c.alpha()/256.0));
-        offset += step;
-    }
-    grad_lut.build_lut();
-
     rgba8_view_t src_view = rgba8_view(src);
+    double cr = static_cast<double>(op.color.red())/255.0;
+    double cg = static_cast<double>(op.color.green())/255.0;
+    double cb = static_cast<double>(op.color.blue())/255.0;
     for (int y=0; y<src_view.height(); ++y)
     {
         rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
@@ -443,49 +436,155 @@ void apply_filter(Src & src, colorize_alpha const& op)
             uint8_t & g = get_color(src_it[x], green_t());
             uint8_t & b = get_color(src_it[x], blue_t());
             uint8_t & a = get_color(src_it[x], alpha_t());
-            if ( a > 0)
+            double sr = static_cast<double>(r)/255.0;
+            double sg = static_cast<double>(g)/255.0;
+            double sb = static_cast<double>(b)/255.0;
+            double sa = static_cast<double>(a)/255.0;
+            // demultiply
+            if (sa <= 0.0)
             {
-                agg::rgba8 c = grad_lut[a];
-                r = (c.r * a + 255) >> 8;
-                g = (c.g * a + 255) >> 8;
-                b = (c.b * a + 255) >> 8;
-#if 0
-                // rainbow
-                r = 0;
-                g = 0;
-                b = 0;
-                if (a < 64)
-                {
-                    g = a * 4;
-                    b = 255;
-                }
-                else if (a >= 64 && a < 128)
-                {
-                    g = 255;
-                    b = 255 - ((a - 64) * 4);
-                }
-                else if (a >= 128 && a < 192)
-                {
-                    r = (a - 128) * 4;
-                    g = 255;
-                }
-                else // >= 192
-                {
-                    r = 255;
-                    g = 255 - ((a - 192) * 4);
-                }
-                r = (r * a + 255) >> 8;
-                g = (g * a + 255) >> 8;
-                b = (b * a + 255) >> 8;
-#endif
+                r = g = b = 0;
+                continue;
+            }
+            else
+            {
+                sr /= sa;
+                sg /= sa;
+                sb /= sa;
+            }
+            // get that maximum color difference
+            double xa = std::max(channel_delta(sr,cr),std::max(channel_delta(sg,cg),channel_delta(sb,cb)));
+            if (xa > 0)
+            {
+                // apply difference to each channel, returning premultiplied
+                // TODO - experiment with difference in hsl color space
+                r = apply_alpha_shift(sr,cr,xa);
+                g = apply_alpha_shift(sg,cg,xa);
+                b = apply_alpha_shift(sb,cb,xa);
+                // combine new alpha with original
+                xa *= sa;
+                a = static_cast<uint8_t>(std::floor((xa*255.0)+.5));
+                // all color values must be <= alpha
+                if (r>a) r=a;
+                if (g>a) g=a;
+                if (b>a) b=a;
+            }
+            else
+            {
+                r = g = b = a = 0;
             }
         }
     }
 }
 
-/*
 template <typename Src>
-void apply_filter(Src & src, hsla const& transform)
+void apply_filter(Src & src, colorize_alpha const& op)
+{
+    using namespace boost::gil;
+    std::size_t size = op.size();
+    if (op.size() == 1)
+    {
+        // no interpolation if only one stop
+        mapnik::filter::color_stop const& stop = op[0];
+        mapnik::color const& c = stop.color;
+        rgba8_view_t src_view = rgba8_view(src);
+        for (int y=0; y<src_view.height(); ++y)
+        {
+            rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+            for (int x=0; x<src_view.width(); ++x)
+            {
+                uint8_t & r = get_color(src_it[x], red_t());
+                uint8_t & g = get_color(src_it[x], green_t());
+                uint8_t & b = get_color(src_it[x], blue_t());
+                uint8_t & a = get_color(src_it[x], alpha_t());
+                if ( a > 0)
+                {
+                    r = (c.red() * a + 255) >> 8;
+                    g = (c.green() * a + 255) >> 8;
+                    b = (c.blue() * a + 255) >> 8;
+                }
+            }
+        }
+    }
+    else if (size > 1)
+    {
+        // interpolate multiple stops
+        agg::gradient_lut<agg::color_interpolator<agg::rgba8> > grad_lut;
+        double step = 1.0/(size-1);
+        double offset = 0.0;
+        BOOST_FOREACH( mapnik::filter::color_stop const& stop, op)
+        {
+            mapnik::color const& c = stop.color;
+            double stop_offset = stop.offset;
+            if (stop_offset == 0)
+            {
+                stop_offset = offset;
+            }
+            grad_lut.add_color(stop_offset, agg::rgba(c.red()/256.0,
+                                                      c.green()/256.0,
+                                                      c.blue()/256.0,
+                                                      c.alpha()/256.0));
+            offset += step;
+        }
+        if (grad_lut.build_lut())
+        {
+            rgba8_view_t src_view = rgba8_view(src);
+            for (int y=0; y<src_view.height(); ++y)
+            {
+                rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+                for (int x=0; x<src_view.width(); ++x)
+                {
+                    uint8_t & r = get_color(src_it[x], red_t());
+                    uint8_t & g = get_color(src_it[x], green_t());
+                    uint8_t & b = get_color(src_it[x], blue_t());
+                    uint8_t & a = get_color(src_it[x], alpha_t());
+                    if ( a > 0)
+                    {
+                        agg::rgba8 c = grad_lut[a];
+                        r = (c.r * a + 255) >> 8;
+                        g = (c.g * a + 255) >> 8;
+                        b = (c.b * a + 255) >> 8;
+                        if (r>a) r=a;
+                        if (g>a) g=a;
+                        if (b>a) b=a;
+        #if 0
+                        // rainbow
+                        r = 0;
+                        g = 0;
+                        b = 0;
+                        if (a < 64)
+                        {
+                            g = a * 4;
+                            b = 255;
+                        }
+                        else if (a >= 64 && a < 128)
+                        {
+                            g = 255;
+                            b = 255 - ((a - 64) * 4);
+                        }
+                        else if (a >= 128 && a < 192)
+                        {
+                            r = (a - 128) * 4;
+                            g = 255;
+                        }
+                        else // >= 192
+                        {
+                            r = 255;
+                            g = 255 - ((a - 192) * 4);
+                        }
+                        r = (r * a + 255) >> 8;
+                        g = (g * a + 255) >> 8;
+                        b = (b * a + 255) >> 8;
+        #endif
+                    }
+                }
+            }
+        }
+    }
+}
+
+template <typename Src>
+void apply_filter(Src & src, scale_hsla const& transform)
 {
     using namespace boost::gil;
     bool tinting = !transform.is_identity();
@@ -504,79 +603,75 @@ void apply_filter(Src & src, hsla const& transform)
                 uint8_t & g = get_color(src_it[x], green_t());
                 uint8_t & b = get_color(src_it[x], blue_t());
                 uint8_t & a = get_color(src_it[x], alpha_t());
-                double a2 = a/255.0;
-                double a1 = a2;
-                if (set_alpha && a2 > 0.01)
+                double r2 = static_cast<double>(r)/255.0;
+                double g2 = static_cast<double>(g)/255.0;
+                double b2 = static_cast<double>(b)/255.0;
+                double a2 = static_cast<double>(a)/255.0;
+                // demultiply
+                if (a2 <= 0.0)
+                {
+                    r = g = b = 0;
+                    continue;
+                }
+                else
+                {
+                    r2 /= a2;
+                    g2 /= a2;
+                    b2 /= a2;
+                }
+                if (set_alpha)
                 {
                     a2 = transform.a0 + (a2 * (transform.a1 - transform.a0));
-                    a = static_cast<unsigned>(std::floor((a2 * 255.0) +.5));
-                    if (a > 255) a = 255;
-                    if (a < 0) a = 0;
+                    if (a2 <= 0)
+                    {
+                        r = g = b = a = 0;
+                        continue;
+                    }
+                    else if (a2 > 1)
+                    {
+                        a2 = 1;
+                        a = 255;
+                    }
+                    else
+                    {
+                        a = static_cast<uint8_t>(std::floor((a2 * 255.0) +.5));
+                    }
                 }
-                if (tinting && a2 > 0.01)
+                if (tinting)
                 {
                     double h;
                     double s;
                     double l;
-                    // demultiply
-                    if (a1 <= 0.0)
-                    {
-                        r = g = b = 0;
-                        continue;
-                    }
-                    else if (a1 < 1)
-                    {
-                        r /= a1;
-                        g /= a1;
-                        b /= a1;
-                    }
-                    rgb2hsl(r,g,b,h,s,l);
+                    rgb2hsl(r2,g2,b2,h,s,l);
                     double h2 = transform.h0 + (h * (transform.h1 - transform.h0));
                     double s2 = transform.s0 + (s * (transform.s1 - transform.s0));
                     double l2 = transform.l0 + (l * (transform.l1 - transform.l0));
-                    if (h2 > 1) { std::clog << "h2: " << h2 << "\n"; h2 = 1; }
-                    else if (h2 < 0) { std::clog << "h2: " << h2 << "\n"; h2 = 0; }
-                    if (s2 > 1) { std::clog << "h2: " << h2 << "\n"; s2 = 1; }
-                    else if (s2 < 0) { std::clog << "s2: " << s2 << "\n"; s2 = 0; }
-                    if (l2 > 1) { std::clog << "h2: " << h2 << "\n"; l2 = 1; }
-                    else if (l2 < 0) { std::clog << "l2: " << l2 << "\n"; l2 = 0; }
-                    hsl2rgb(h2,s2,l2,r,g,b);
-                    // premultiply
-                    // we only work with premultiplied source,
-                    // thus all color values must be <= alpha
-                    r *= a2;
-                    g *= a2;
-                    b *= a2;
+                    if (h2 > 1) { h2 = 1; }
+                    else if (h2 < 0) { h2 = 0; }
+                    if (s2 > 1) { s2 = 1; }
+                    else if (s2 < 0) { s2 = 0; }
+                    if (l2 > 1) { l2 = 1; }
+                    else if (l2 < 0) { l2 = 0; }
+                    hsl2rgb(h2,s2,l2,r2,g2,b2);
                 }
-                else
-                {
-                    // demultiply
-                    if (a1 <= 0.0)
-                    {
-                        r = g = b = 0;
-                        continue;
-                    }
-                    else if (a1 < 1)
-                    {
-                        r /= a1;
-                        g /= a1;
-                        b /= a1;
-                    }
-                    // premultiply
-                    // we only work with premultiplied source,
-                    // thus all color values must be <= alpha
-                    r *= a2;
-                    g *= a2;
-                    b *= a2;
-                }
+                // premultiply
+                r2 *= a2;
+                g2 *= a2;
+                b2 *= a2;
+                r = static_cast<uint8_t>(std::floor((r2*255.0)+.5));
+                g = static_cast<uint8_t>(std::floor((g2*255.0)+.5));
+                b = static_cast<uint8_t>(std::floor((b2*255.0)+.5));
+                // all color values must be <= alpha
+                if (r>a) r=a;
+                if (g>a) g=a;
+                if (b>a) b=a;
             }
         }
     }
 }
-*/
 
 template <typename Src>
-void apply_filter(Src & src, gray const& op)
+void apply_filter(Src & src, gray const& /*op*/)
 {
     using namespace boost::gil;
 
@@ -626,14 +721,14 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
 }
 
 template <typename Src>
-void apply_filter(Src & src, x_gradient const& op)
+void apply_filter(Src & src, x_gradient const& /*op*/)
 {
     double_buffer<Src> tb(src);
     x_gradient_impl(tb.src_view, tb.dst_view);
 }
 
 template <typename Src>
-void apply_filter(Src & src, y_gradient const& op)
+void apply_filter(Src & src, y_gradient const& /*op*/)
 {
     double_buffer<Src> tb(src);
     x_gradient_impl(rotated90ccw_view(tb.src_view),
@@ -641,7 +736,7 @@ void apply_filter(Src & src, y_gradient const& op)
 }
 
 template <typename Src>
-void apply_filter(Src & src, invert const& op)
+void apply_filter(Src & src, invert const& /*op*/)
 {
     using namespace boost::gil;
 
@@ -678,6 +773,21 @@ struct filter_visitor : boost::static_visitor<void>
     }
 
     Src & src_;
+};
+
+struct filter_radius_visitor : boost::static_visitor<void>
+{
+    int & radius_;
+    filter_radius_visitor(int & radius)
+        : radius_(radius) {}
+    template <typename T>
+    void operator () (T const& /*filter*/) {}
+
+    void operator () (agg_stack_blur const& op)
+    {
+        if (static_cast<int>(op.rx) > radius_) radius_ = static_cast<int>(op.rx);
+        if (static_cast<int>(op.ry) > radius_) radius_ = static_cast<int>(op.ry);
+    }
 };
 
 }}

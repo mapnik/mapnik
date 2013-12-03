@@ -44,7 +44,6 @@ bool feature_generator::generate(std::string & geojson, mapnik::feature_impl con
     return karma::generate(sink, *grammar_,f);
 }
 
-
 geometry_generator::geometry_generator()
     : grammar_(new multi_geometry_generator_grammar<sink_type>()) {}
 
@@ -62,7 +61,7 @@ bool geometry_generator::generate(std::string & geojson, mapnik::geometry_contai
 
 #include <string>
 #include <sstream>
-#include <exception>
+#include <stdexcept>
 
 namespace  mapnik { namespace json {
 

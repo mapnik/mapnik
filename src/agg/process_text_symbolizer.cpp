@@ -35,13 +35,14 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
+    box2d<double> clip_box = clipping_extent();
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
             width_,height_,
             scale_factor_,
             t_, font_manager_, *detector_,
-            query_extent_);
+            clip_box);
 
     text_renderer<T> ren(*current_buffer_,
                          font_manager_,

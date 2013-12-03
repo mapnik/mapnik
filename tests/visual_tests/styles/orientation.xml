@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/points.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <Filter>[nr] = 1</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/> 
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 2</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 3</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 4</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45" dy="10">"Line&#10;break"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 5</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45" dy="10">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 6</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90" dy="10">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 7</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180" dy="10">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 8</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="0" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 9</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 10</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
+        </Rule>
+    </Style>
+
+</Map>

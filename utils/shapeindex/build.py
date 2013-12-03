@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,7 @@
 
 import os
 import glob
+from copy import copy
 
 Import ('env')
 
@@ -37,9 +38,12 @@ source += program_env.Object('box2d-static', '#src/box2d.cpp')
 headers = ['#plugins/input/shape'] + env['CPPPATH'] 
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
-libraries =  [boost_program_options, boost_filesystem, boost_system]
+libraries =  ['mapnik', boost_program_options, boost_system]
+if env['RUNTIME_LINK'] == 'static':
+    libraries.extend(copy(env['LIBMAPNIK_LIBS']))
+    if env['PLATFORM'] == 'Linux':
+        libraries.append('dl')
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])

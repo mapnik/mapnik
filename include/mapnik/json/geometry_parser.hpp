@@ -49,7 +49,7 @@ public:
     ~geometry_parser();
     bool parse(iterator_type first, iterator_type last, boost::ptr_vector<mapnik::geometry_type>&);
 private:
-    boost::scoped_ptr<geometry_grammar<iterator_type> > grammar_;
+    const boost::scoped_ptr<geometry_grammar<iterator_type> > grammar_;
 };
 
 }}

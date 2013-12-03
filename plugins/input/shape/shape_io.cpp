@@ -27,7 +27,6 @@
 #include <mapnik/datasource.hpp>
 
 // boost
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 using mapnik::datasource_exception;

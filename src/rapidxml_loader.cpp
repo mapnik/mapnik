@@ -104,8 +104,7 @@ public:
 
 //        if (!base_path.empty())
 //        {
-//            boost::filesystem::path path(base_path);
-//            if (!boost::filesystem::exists(path)) {
+//            if (!mapnik::util::exists(base_path)) {
 //                throw config_error(std::string("Could not locate base_path '") +
 //                                   base_path + "': file or directory does not exist");
 //            }

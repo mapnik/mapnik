@@ -28,6 +28,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
 // stl
 #include <iterator>
@@ -82,7 +83,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             extract<std::string> ex0(obj);
             extract<mapnik::value_integer> ex1(obj);
             extract<double> ex2(obj);
-            extract<UnicodeString> ex3(obj);
+            extract<mapnik::value_unicode_string> ex3(obj);
 
             // TODO - this is never hit - we need proper python string -> std::string to get invoked here
             if (ex0.check())
@@ -175,7 +176,7 @@ mapnik::value_holder get_param(mapnik::parameter const& p, int index)
     }
 }
 
-boost::shared_ptr<mapnik::parameter> create_parameter(UnicodeString const& key, mapnik::value_holder const& value)
+boost::shared_ptr<mapnik::parameter> create_parameter(mapnik::value_unicode_string const& key, mapnik::value_holder const& value)
 {
     std::string key_utf8;
     mapnik::to_utf8(key, key_utf8);
@@ -184,7 +185,7 @@ boost::shared_ptr<mapnik::parameter> create_parameter(UnicodeString const& key, 
 
 // needed for Python_Unicode to std::string (utf8) conversion
 
-boost::shared_ptr<mapnik::parameter> create_parameter_from_string(UnicodeString const& key, UnicodeString const& ustr)
+boost::shared_ptr<mapnik::parameter> create_parameter_from_string(mapnik::value_unicode_string const& key, mapnik::value_unicode_string const& ustr)
 {
     std::string key_utf8;
     std::string ustr_utf8;

@@ -22,12 +22,10 @@
 
 // mapnik
 #include <mapnik/expression_grammar_impl.hpp>
-
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 template struct mapnik::expression_grammar<std::string::const_iterator>;
 

@@ -3,8 +3,7 @@
 
 import os
 from nose.tools import *
-from utilities import execution_path
-from utilities import Todo
+from utilities import execution_path, run_all
 import tempfile
 
 import mapnik
@@ -35,6 +34,7 @@ def test_line_pattern():
     eq_(s.filename, '../data/images/dummy.png')
     eq_(s.smooth,0.0)
     eq_(s.transform,'')
+    eq_(s.offset,0.0)
     eq_(s.comp_op,mapnik.CompositeOp.src_over)
     eq_(s.clip,True)
 
@@ -336,6 +336,9 @@ def test_map_init():
     eq_(m.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     eq_(m.base, '')
     eq_(m.maximum_extent, None)
+    eq_(m.background_image, None)
+    eq_(m.background_image_comp_op, mapnik.CompositeOp.src_over)
+    eq_(m.background_image_opacity, 1.0)
 
     m = mapnik.Map(256, 256, '+proj=latlong')
     eq_(m.srs, '+proj=latlong')
@@ -565,4 +568,4 @@ def test_rule_init():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

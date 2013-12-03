@@ -30,6 +30,9 @@
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 
+// stl
+#include <stdexcept>
+
 namespace mapnik { namespace json {
 
 #if BOOST_VERSION >= 104700

@@ -30,6 +30,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // ogr
@@ -42,22 +43,6 @@ using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
-
-
-ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
-                               OGRLayer & layer,
-                               OGRGeometry & extent,
-                               std::string const& encoding)
-    : ctx_(ctx),
-      layer_(layer),
-      layerdef_(layer.GetLayerDefn()),
-      tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn ()),
-      count_(0)
-
-{
-    layer_.SetSpatialFilter (&extent);
-}
 
 ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
                                OGRLayer & layer,
@@ -129,8 +114,7 @@ feature_ptr ogr_featureset::next()
             case OFTString:
             case OFTWideString:     // deprecated !
             {
-                UnicodeString ustr = tr_->transcode(poFeature->GetFieldAsString(i));
-                feature->put( fld_name, ustr);
+                feature->put( fld_name, tr_->transcode(poFeature->GetFieldAsString(i)));
                 break;
             }
 

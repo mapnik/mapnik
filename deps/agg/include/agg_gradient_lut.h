@@ -137,7 +137,7 @@ namespace agg
         //--------------------------------------------------------------------
         void remove_all();
         void add_color(double offset, const color_type& color);
-        void build_lut();
+        bool build_lut();
 
         // Size-index Interface. This class can be used directly as the 
         // ColorF in span_gradient. All it needs is two access methods 
@@ -202,7 +202,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class T, unsigned S>
-    void gradient_lut<T,S>::build_lut()
+    bool gradient_lut<T,S>::build_lut()
     {
         quick_sort(m_color_profile, offset_less);
         m_color_profile.cut_at(remove_duplicates(m_color_profile, offset_equal));
@@ -234,7 +234,9 @@ namespace agg
             {
                 m_color_lut[end] = c;
             }
+            return true;
         }
+        return false;
     }
 }
 

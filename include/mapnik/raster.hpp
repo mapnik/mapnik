@@ -28,6 +28,9 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/noncopyable.hpp>
 
+ // boost
+#include <boost/optional.hpp>
+
 namespace mapnik {
 class raster : private mapnik::noncopyable
 {
@@ -35,11 +38,22 @@ public:
     box2d<double> ext_;
     image_data_32 data_;
     bool premultiplied_alpha_;
+    boost::optional<double> nodata_;
     raster(box2d<double> const& ext, unsigned width, unsigned height, bool premultiplied_alpha = false)
         : ext_(ext),
           data_(width,height),
           premultiplied_alpha_(premultiplied_alpha)
     {}
+
+    void set_nodata(double nodata)
+    {
+        nodata_ = nodata;
+    }
+
+    boost::optional<double> const& nodata() const
+    {
+        return nodata_;
+    }
 };
 }
 

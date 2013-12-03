@@ -23,7 +23,9 @@
 // TODO https://github.com/mapnik/mapnik/issues/1658
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 105200
+#ifndef BOOST_SPIRIT_USE_PHOENIX_V3
 #define BOOST_SPIRIT_USE_PHOENIX_V3
+#endif
 #endif
 
 // mapnik
@@ -35,13 +37,18 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
+// stl
+#include <stdexcept>
+
 namespace mapnik { namespace json {
 
 #if BOOST_VERSION >= 104700
 
     template <typename Iterator>
-    feature_collection_parser<Iterator>::feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr)
-        : grammar_(new feature_collection_grammar<iterator_type,feature_type>(ctx,tr)) {}
+    feature_collection_parser<Iterator>::feature_collection_parser(generic_json<Iterator> & json,
+                                                                   mapnik::context_ptr const& ctx,
+                                                                   mapnik::transcoder const& tr)
+        : grammar_(new feature_collection_grammar<iterator_type,feature_type>(json, ctx,tr)) {}
 
     template <typename Iterator>
     feature_collection_parser<Iterator>::~feature_collection_parser() {}
@@ -65,4 +72,3 @@ namespace mapnik { namespace json {
     template class feature_collection_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
 
 }}
-

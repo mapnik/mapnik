@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, contains_word, get_unique_colors
+from utilities import execution_path, run_all, contains_word, get_unique_colors
 
 import os, mapnik
 
@@ -90,7 +90,7 @@ def test_dataraster_query_point():
 
 def test_load_save_map():
     map = mapnik.Map(256,256)
-    in_map = "../data/good_maps/raster_symbolizer.xml"
+    in_map = "../visual_tests/styles/raster_symbolizer.xml"
     try:
         mapnik.load_map(map, in_map)
 
@@ -195,4 +195,4 @@ def test_raster_warping_does_not_overclip_source():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

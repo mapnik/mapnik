@@ -76,7 +76,7 @@ public:
                 }
                 else
                 {
-                    for (unsigned i=0; i<(*pos_)->num_geometries();++i)
+                    for (std::size_t i=0; i<(*pos_)->num_geometries();++i)
                     {
                         geometry_type & geom = (*pos_)->get_geometry(i);
                         if (bbox_.intersects(geom.envelope()))

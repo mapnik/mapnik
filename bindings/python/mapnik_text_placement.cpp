@@ -24,19 +24,15 @@
 #include <boost/noncopyable.hpp>
 
 #include <mapnik/text_properties.hpp>
-#include <mapnik/text_placements/simple.hpp>
-#include <mapnik/text_placements/list.hpp>
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/formatting/expression_format.hpp>
 #include <mapnik/processed_text.hpp>
-#include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
 
 #include "mapnik_enumeration.hpp"
 #include "mapnik_threads.hpp"
-#include "python_optional.hpp"
 
 using namespace mapnik;
 
@@ -53,7 +49,47 @@ using namespace mapnik;
 */
 
 namespace {
+
 using namespace boost::python;
+
+// This class works around a feature in boost python.
+// See http://osdir.com/ml/python.c++/2003-11/msg00158.html
+
+template <typename T,
+          typename X1 = boost::python::detail::not_specified,
+          typename X2 = boost::python::detail::not_specified,
+          typename X3 = boost::python::detail::not_specified>
+class class_with_converter : public boost::python::class_<T, X1, X2, X3>
+{
+public:
+    typedef class_with_converter<T,X1,X2,X3> self;
+    // Construct with the class name, with or without docstring, and default __init__() function
+    class_with_converter(char const* name, char const* doc = 0) : boost::python::class_<T, X1, X2, X3>(name, doc)  { }
+
+    // Construct with class name, no docstring, and an uncallable __init__ function
+    class_with_converter(char const* name, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, y) { }
+
+    // Construct with class name, docstring, and an uncallable __init__ function
+    class_with_converter(char const* name, char const* doc, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, doc, y) { }
+
+    // Construct with class name and init<> function
+    template <class DerivedT> class_with_converter(char const* name, boost::python::init_base<DerivedT> const& i)
+        : boost::python::class_<T, X1, X2, X3>(name, i) { }
+
+    // Construct with class name, docstring and init<> function
+    template <class DerivedT>
+    inline class_with_converter(char const* name, char const* doc, boost::python::init_base<DerivedT> const& i)
+        : boost::python::class_<T, X1, X2, X3>(name, doc, i) { }
+
+    template <class D>
+    self& def_readwrite_convert(char const* name, D const& d, char const* /*doc*/=0)
+    {
+        this->add_property(name,
+                           boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
+                           boost::python::make_setter(d, boost::python::default_call_policies()));
+        return *this;
+    }
+};
 
 boost::python::tuple get_displacement(text_symbolizer_properties const& t)
 {
@@ -194,12 +230,15 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
     ListNodeWrap(object l) : formatting::list_node(), wrapper<formatting::list_node>()
     {
         stl_input_iterator<formatting::node_ptr> begin(l), end;
-        children_.insert(children_.end(), begin, end);
+        while (begin != end)
+        {
+           children_.push_back(*begin);
+           ++begin;
+        }
     }
 
     /* TODO: Add constructor taking variable number of arguments.
        http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function */
-
 
     virtual void apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
     {

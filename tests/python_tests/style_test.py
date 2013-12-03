@@ -3,6 +3,7 @@
 
 import os
 from nose.tools import *
+from utilities import execution_path, run_all
 import mapnik
 
 def test_style_init():
@@ -14,4 +15,4 @@ def test_style_init():
    eq_(s.image_filters,"")
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

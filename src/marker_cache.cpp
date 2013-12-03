@@ -31,10 +31,10 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/assert.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 
@@ -162,8 +162,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
         // otherwise assume file-based
         else
         {
-            boost::filesystem::path path(uri);
-            if (!exists(path))
+            if (!mapnik::util::exists(uri))
             {
                 MAPNIK_LOG_ERROR(marker_cache) << "Marker does not exist: " << uri;
                 return result;

@@ -126,7 +126,7 @@ public:
         return (const char*) sqlite3_column_text (stmt_, col);
     }
 
-    const void* column_blob (int col, int& bytes)
+    const char* column_blob (int col, int& bytes)
     {
         bytes = sqlite3_column_bytes (stmt_, col);
         return (const char*) sqlite3_column_blob (stmt_, col);

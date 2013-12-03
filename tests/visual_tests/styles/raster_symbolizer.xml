@@ -1,0 +1,35 @@
+<Map background-color="white" srs="+init=epsg:32630" minimum-version="0.7.2">
+
+  <Style name="two-value">
+    <Rule>
+      <RasterSymbolizer opacity="1">
+        <RasterColorizer default-mode="discrete" default-color="#000000">
+          <stop value="0" color="yellow"/>
+          <stop value="26" color="purple"/>
+         </RasterColorizer>
+      </RasterSymbolizer>
+    </Rule>
+  </Style>
+
+  <Style name="ramped">
+    <Rule>
+      <RasterSymbolizer>
+        <RasterColorizer default-mode="linear" default-color="#000000">
+          <stop value="0" color="red"/>
+          <stop value="26" color="green"/>
+         </RasterColorizer>
+      </RasterSymbolizer>
+    </Rule>
+  </Style>
+
+  <Layer name="dataraster" srs="+init=epsg:32630">
+      <StyleName>ramped</StyleName>
+      <Datasource>
+          <!-- get stats on this file with gdalinfo ../raster/dataraster.tif -stats -->
+          <Parameter name="file">../../data/raster/dataraster.tif</Parameter>
+          <Parameter name="type">gdal</Parameter>
+          <Parameter name="band">1</Parameter>
+      </Datasource>
+  </Layer>
+
+</Map>

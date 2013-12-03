@@ -67,21 +67,21 @@ public:
     context()
         : mapping_() {}
 
-    size_type push(key_type const& name)
+    inline size_type push(key_type const& name)
     {
         size_type index = mapping_.size();
         mapping_.insert(std::make_pair(name, index));
         return index;
     }
 
-    void add(key_type const& name, size_type index)
+    inline void add(key_type const& name, size_type index)
     {
         mapping_.insert(std::make_pair(name, index));
     }
 
-    size_type size() const { return mapping_.size(); }
-    const_iterator begin() const { return mapping_.begin();}
-    const_iterator end() const { return mapping_.end();}
+    inline size_type size() const { return mapping_.size(); }
+    inline const_iterator begin() const { return mapping_.begin();}
+    inline const_iterator end() const { return mapping_.end();}
 
 private:
     map_type mapping_;
@@ -114,18 +114,18 @@ public:
     inline void set_id(mapnik::value_integer id) { id_ = id;}
 
     template <typename T>
-    void put(context_type::key_type const& key, T const& val)
+    inline void put(context_type::key_type const& key, T const& val)
     {
         put(key,value(val));
     }
 
     template <typename T>
-    void put_new(context_type::key_type const& key, T const& val)
+    inline void put_new(context_type::key_type const& key, T const& val)
     {
         put_new(key,value(val));
     }
 
-    void put(context_type::key_type const& key, value const& val)
+    inline void put(context_type::key_type const& key, value const& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end()
@@ -139,7 +139,7 @@ public:
         }
     }
 
-    void put_new(context_type::key_type const& key, value const& val)
+    inline void put_new(context_type::key_type const& key, value const& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end()
@@ -155,12 +155,12 @@ public:
         }
     }
 
-    bool has_key(context_type::key_type const& key) const
+    inline bool has_key(context_type::key_type const& key) const
     {
         return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
     }
 
-    value_type const& get(context_type::key_type const& key) const
+    inline value_type const& get(context_type::key_type const& key) const
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
@@ -169,74 +169,76 @@ public:
             return default_value;
     }
 
-    value_type const& get(std::size_t index) const
+    inline value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
             return data_[index];
         return default_value;
     }
 
-    std::size_t size() const
+    inline std::size_t size() const
     {
         return data_.size();
     }
 
-    cont_type const& get_data() const
+    inline cont_type const& get_data() const
     {
         return data_;
     }
 
-    void set_data(cont_type const& data)
+    inline void set_data(cont_type const& data)
     {
         data_ = data;
     }
 
-    context_ptr context()
+    inline context_ptr context()
     {
         return ctx_;
     }
 
-    boost::ptr_vector<geometry_type> const& paths() const
+    inline boost::ptr_vector<geometry_type> const& paths() const
     {
         return geom_cont_;
     }
 
-    boost::ptr_vector<geometry_type> & paths()
+    inline boost::ptr_vector<geometry_type> & paths()
     {
         return geom_cont_;
     }
 
-    void add_geometry(geometry_type * geom)
+    inline void add_geometry(geometry_type * geom)
     {
         geom_cont_.push_back(geom);
     }
 
-    unsigned num_geometries() const
+    inline std::size_t num_geometries() const
     {
         return geom_cont_.size();
     }
 
-    geometry_type const& get_geometry(unsigned index) const
+    inline geometry_type const& get_geometry(std::size_t index) const
     {
         return geom_cont_[index];
     }
 
-    geometry_type& get_geometry(unsigned index)
+    inline geometry_type& get_geometry(std::size_t index)
     {
         return geom_cont_[index];
     }
 
-    box2d<double> envelope() const
+    inline box2d<double> envelope() const
     {
         // TODO - cache this
         box2d<double> result;
+        bool first = true;
         for (unsigned i=0;i<num_geometries();++i)
         {
             geometry_type const& geom = get_geometry(i);
-            if (i==0)
+            if (first)
             {
                 box2d<double> box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+                first = false;
             }
             else
             {
@@ -246,22 +248,22 @@ public:
         return result;
     }
 
-    raster_ptr const& get_raster() const
+    inline raster_ptr const& get_raster() const
     {
         return raster_;
     }
 
-    void set_raster(raster_ptr const& raster)
+    inline void set_raster(raster_ptr const& raster)
     {
         raster_ = raster;
     }
 
-    feature_kv_iterator begin() const
+    inline feature_kv_iterator begin() const
     {
         return feature_kv_iterator(*this,true);
     }
 
-    feature_kv_iterator end() const
+    inline feature_kv_iterator end() const
     {
         return feature_kv_iterator(*this);
     }

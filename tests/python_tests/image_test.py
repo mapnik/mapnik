@@ -5,12 +5,27 @@ import sys
 import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
+
 
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
+
+def test_image_premultiply():
+    im = mapnik.Image(256,256)
+    eq_(im.premultiplied(),False)
+    im.premultiply()
+    eq_(im.premultiplied(),True)
+    im.demultiply()
+    eq_(im.premultiplied(),False)
+
+# Disabled for now since this breaks hard if run against
+# a mapnik version that does not have the fix
+#@raises(RuntimeError)
+#def test_negative_image_dimensions():
+    #im = mapnik.Image(-40,40)
 
 def test_tiff_round_trip():
     filepath = '/tmp/mapnik-tiff-io.tiff'
@@ -57,11 +72,11 @@ def test_image_open_from_string():
     eq_(len(mapnik.Image.fromstring(im1.tostring('jpeg')).tostring()),length)
     eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('png'))).tostring()),length)
     eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('jpeg'))).tostring()),length)
-    
+
     # TODO - https://github.com/mapnik/mapnik/issues/1831
     eq_(len(mapnik.Image.fromstring(im1.tostring('tiff')).tostring()),length)
     eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('tiff'))).tostring()),length)
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

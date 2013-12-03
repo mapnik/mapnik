@@ -22,7 +22,6 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -34,7 +33,6 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature_type_style.hpp>
-//#include <mapnik/util/deepcopy.hpp>
 #include "mapnik_enumeration.hpp"
 
 using mapnik::color;
@@ -90,17 +88,6 @@ mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x
     unsigned idx = index;
     return m.query_map_point(idx, x, y);
 }
-
-// deepcopy
-/*
-mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
-{
-    // FIXME: ignore memo for now
-    mapnik::Map result;
-    mapnik::util::deepcopy(m, result);
-    return result;
-}
-*/
 
 void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> > const& box)
 {
@@ -382,7 +369,6 @@ void export_map()
              ">>> m.zoom_to_box(extent)\n"
             )
 
-        //.def("__deepcopy__",&map_deepcopy)
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",
@@ -421,6 +407,22 @@ void export_map()
                       "\n"
                       "Usage:\n"
                       ">>> m.background_image = '/path/to/image.png'\n"
+            )
+
+        .add_property("background_image_comp_op",&Map::background_image_comp_op,
+                      &Map::set_background_image_comp_op,
+                      "The background image compositing operation.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.background_image_comp_op = mapnik.CompositeOp.src_over\n"
+            )
+
+        .add_property("background_image_opacity",&Map::background_image_opacity,
+                      &Map::set_background_image_opacity,
+                      "The background image opacity.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.background_image_opacity = 1.0\n"
             )
 
         .add_property("base",

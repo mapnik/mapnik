@@ -42,7 +42,7 @@ struct accumulate_extent
 
     void operator() (feature_ptr feat)
     {
-        for (unsigned i=0;i<feat->num_geometries();++i)
+        for (std::size_t i=0;i<feat->num_geometries();++i)
         {
             geometry_type & geom = feat->get_geometry(i);
             if ( first_ )

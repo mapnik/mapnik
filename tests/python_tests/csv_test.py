@@ -7,13 +7,18 @@ from nose.tools import *
 from utilities import execution_path
 
 import os, mapnik
-# make the tests silent since we intentially test error conditions that are noisy
-mapnik.logger.set_severity(mapnik.severity_type.None)
+
+default_logging_severity = mapnik.logger.get_severity()
 
 def setup():
+    # make the tests silent since we intentially test error conditions that are noisy
+    mapnik.logger.set_severity(mapnik.severity_type.None)
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
+
+def teardown():
+    mapnik.logger.set_severity(default_logging_severity)
 
 if 'csv' in mapnik.DatasourceCache.plugin_names():
 
@@ -535,7 +540,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         feat = fs.next()
         eq_(feat['bigint'],2147483648)
         feat = fs.next()
-        eq_(feat['bigint'],sys.maxint)
         eq_(feat['bigint'],9223372036854775807)
         eq_(feat['bigint'],0x7FFFFFFFFFFFFFFF)
         desc = ds.describe()
@@ -565,6 +569,17 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
         eq_(len(ds.all_features()),8)
+
+    def test_manually_supplied_extent(**kwargs):
+        csv_string = '''
+           wkt,Name
+          '''
+        ds = mapnik.Datasource(**{"type":"csv","extent":"-180,-90,180,90","inline":csv_string})
+        b = ds.envelope()
+        eq_(b.minx,-180)
+        eq_(b.miny,-90)
+        eq_(b.maxx,180)
+        eq_(b.maxy,90)
 
 if __name__ == "__main__":
     setup()

@@ -40,12 +40,15 @@
 namespace mapnik { namespace wkt {
 
     using namespace boost::spirit;
-    using namespace boost::fusion;
     using namespace boost::phoenix;
 
     struct push_vertex
     {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+        template <typename T>
+#else
         template <typename T0,typename T1, typename T2, typename T3>
+#endif
         struct result
         {
             typedef void type;

@@ -145,7 +145,7 @@ public:
     rule(std::string const& name,
          double min_scale_denominator = 0,
          double max_scale_denominator = std::numeric_limits<double>::infinity());
-    rule(const rule& rhs, bool deep_copy = false);
+    rule(rule const& rhs);
 
     rule& operator=(rule const& rhs);
     bool operator==(rule const& other);
@@ -168,7 +168,10 @@ public:
     bool has_else_filter() const;
     void set_also(bool also_filter);
     bool has_also_filter() const;
-    bool active(double scale) const;
+    inline bool active(double scale) const
+    {
+        return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6 && !syms_.empty());
+    }
 
 private:
 

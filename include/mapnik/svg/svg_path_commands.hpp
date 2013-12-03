@@ -45,7 +45,12 @@ inline double deg2rad(double deg)
 template <typename PathType>
 struct move_to
 {
+
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1>
+#endif
     struct result
     {
         typedef void type;
@@ -66,7 +71,11 @@ struct move_to
 template <typename PathType>
 struct hline_to
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1>
+#endif
     struct result
     {
         typedef void type;
@@ -88,7 +97,11 @@ struct hline_to
 template <typename PathType>
 struct vline_to
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1>
+#endif
     struct result
     {
         typedef void type;
@@ -109,7 +122,11 @@ struct vline_to
 template <typename PathType>
 struct line_to
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1>
+#endif
     struct result
     {
         typedef void type;
@@ -131,7 +148,11 @@ struct line_to
 template <typename PathType>
 struct curve4
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1, typename T2, typename T3>
+#endif
     struct result
     {
         typedef void type;
@@ -156,7 +177,11 @@ struct curve4
 template <typename PathType>
 struct curve4_smooth
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1, typename T2>
+#endif
     struct result
     {
         typedef void type;
@@ -178,7 +203,11 @@ struct curve4_smooth
 template <typename PathType>
 struct curve3
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1, typename T2>
+#endif
     struct result
     {
         typedef void type;
@@ -201,7 +230,11 @@ struct curve3
 template <typename PathType>
 struct curve3_smooth
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1>
+#endif
     struct result
     {
         typedef void type;
@@ -223,7 +256,11 @@ struct curve3_smooth
 template <typename PathType>
 struct arc_to
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T0>
+#else
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
+#endif
     struct result
     {
         typedef void type;

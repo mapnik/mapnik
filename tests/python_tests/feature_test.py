@@ -3,6 +3,7 @@
 import itertools
 import unittest
 from nose.tools import *
+from utilities import execution_path, run_all
 
 import mapnik
 from binascii import unhexlify
@@ -10,6 +11,12 @@ from binascii import unhexlify
 def test_default_constructor():
     f = mapnik.Feature(mapnik.Context(),1)
     eq_(f is not None,True)
+
+def test_feature_geo_interface():
+    ctx = mapnik.Context()
+    feat = mapnik.Feature(ctx,1)
+    feat.add_geometries_from_wkt('Point (0 0)')
+    eq_(feat.__geo_interface__['geometry'],{u'type': u'Point', u'coordinates': [0, 0]})
 
 def test_python_extended_constructor():
     context = mapnik.Context()
@@ -89,4 +96,4 @@ def test_feature_expression_evaluation_attr_with_spaces():
     eq_(expr.evaluate(f),True)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

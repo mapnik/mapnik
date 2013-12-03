@@ -45,10 +45,9 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
-// agg
-#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_scanline_u.h"
 #include "agg_image_filters.h"
 #include "agg_trans_bilinear.h"
@@ -73,12 +72,12 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       internal_buffer2_(),
       current_layer_buffer_(&pixmap),
       current_buffer_(&pixmap),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       style_level_compositing_(false),
       layer_level_opacity_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
@@ -98,11 +97,11 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
       internal_buffer2_(),
       current_layer_buffer_(&pixmap),
       current_buffer_(&pixmap),
+      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
@@ -123,11 +122,11 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
       internal_buffer2_(),
       current_layer_buffer_(&pixmap),
       current_buffer_(&pixmap),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
       detector_(detector),
@@ -170,13 +169,13 @@ void agg_renderer<T>::setup(Map const &m)
             if ( w > 0 && h > 0)
             {
                 // repeat background-image both vertically and horizontally
-                unsigned x_steps = unsigned(std::ceil(width_/double(w)));
-                unsigned y_steps = unsigned(std::ceil(height_/double(h)));
+                unsigned x_steps = static_cast<unsigned>(std::ceil(width_/double(w)));
+                unsigned y_steps = static_cast<unsigned>(std::ceil(height_/double(h)));
                 for (unsigned x=0;x<x_steps;++x)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, false);
+                        composite(pixmap_.data(),*bg_image, m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h, false);
                     }
                 }
             }
@@ -200,7 +199,7 @@ void agg_renderer<T>::end_map_processing(Map const& )
 {
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
+    agg::pixfmt_rgba32_pre pixf(buf);
     pixf.demultiply();
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
@@ -271,9 +270,27 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 
     if (style_level_compositing_)
     {
-        if (!internal_buffer_)
+        int radius = 0;
+        mapnik::filter::filter_radius_visitor visitor(radius);
+        BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.image_filters())
         {
-            internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
+            boost::apply_visitor(visitor, filter_tag);
+        }
+        if (radius > t_.offset())
+        {
+            t_.set_offset(radius);
+        }
+        int offset = t_.offset();
+        unsigned target_width = width_;
+        unsigned target_height = height_;
+        target_width = width_ + (offset * 2);
+        target_height = height_ + (offset * 2);
+        ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
+        if (!internal_buffer_ ||
+           (internal_buffer_->width() < target_width ||
+            internal_buffer_->height() < target_height))
+        {
+            internal_buffer_ = boost::make_shared<buffer_type>(target_width,target_height);
         }
         else
         {
@@ -284,6 +301,8 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
     else
     {
         current_buffer_ = current_layer_buffer_;
+        t_.set_offset(0);
+        ras_ptr->clip_box(0,0,width_,height_);
     }
 }
 
@@ -302,14 +321,19 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
                 boost::apply_visitor(visitor, filter_tag);
             }
         }
-
         if (st.comp_op())
         {
-            composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), st.get_opacity(), 0, 0, false);
+            composite(pixmap_.data(), current_buffer_->data(),
+                      *st.comp_op(), st.get_opacity(),
+                      -t_.offset(),
+                      -t_.offset(), false);
         }
         else if (blend_from || st.get_opacity() < 1)
         {
-            composite(pixmap_.data(),current_buffer_->data(), src_over, st.get_opacity(), 0, 0, false);
+            composite(pixmap_.data(), current_buffer_->data(),
+                      src_over, st.get_opacity(),
+                      -t_.offset(),
+                      -t_.offset(), false);
         }
     }
     // apply any 'direct' image filters
@@ -330,7 +354,6 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
@@ -345,7 +368,10 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
         gamma_ = 1.0;
     }
     agg::scanline_u8 sl;
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),
+                              current_buffer_->width(),
+                              current_buffer_->height(),
+                              current_buffer_->width() * 4);
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
@@ -451,7 +477,10 @@ template <typename T>
 void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),
+                              current_buffer_->width(),
+                              current_buffer_->height(),
+                              current_buffer_->width() * 4);
     debug_draw_box(buf, box, x, y, angle);
 }
 
@@ -459,7 +488,7 @@ template <typename T> template <typename R>
 void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::pixfmt_rgba32_pre pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
@@ -489,7 +518,7 @@ void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
     // render the outline
     ras_ptr->reset();
     ras_ptr->add_path(sbox);
-    ren.color(agg::rgba8(0x33, 0x33, 0xff, 0xcc)); // blue is fine
+    ren.color(agg::rgba8_pre(0x33, 0x33, 0xff, 0xcc)); // blue is fine
     agg::render_scanlines(*ras_ptr, sl_line, ren);
 }
 

@@ -39,6 +39,7 @@
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
+#include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
@@ -54,11 +55,11 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef coord_transform<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;
+    typedef agg::renderer_base<agg::pixfmt_rgba32_pre> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
+    agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
 
     color const& fill_  = sym.get_fill();
@@ -85,7 +86,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
         height = result.to_double() * scale_factor_;
     }
 
-    for (unsigned i=0;i<feature.num_geometries();++i)
+    for (std::size_t i=0;i<feature.num_geometries();++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
         if (geom.size() > 2)
@@ -131,7 +132,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 
                 path_type faces_path (t_,*faces,prj_trans);
                 ras_ptr->add_path(faces_path);
-                ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+                ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
                 agg::render_scanlines(*ras_ptr, sl, ren);
                 ras_ptr->reset();
                 //
@@ -165,13 +166,13 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             agg::conv_stroke<path_type> stroke(path);
             stroke.width(scale_factor_);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
             path_type roof_path (t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
-            ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(r, g, b, int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
 
         }

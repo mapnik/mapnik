@@ -55,9 +55,9 @@ layer::layer(const layer& rhs)
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
       ds_(rhs.ds_),
-      opacity_(rhs.opacity_),
       buffer_size_(rhs.buffer_size_),
-      maximum_extent_(rhs.maximum_extent_) {}
+      maximum_extent_(rhs.maximum_extent_),
+      opacity_(rhs.opacity_) {}
 
 layer& layer::operator=(layer const& rhs)
 {
@@ -239,7 +239,7 @@ bool layer::cache_features() const
     return cache_features_;
 }
 
-void layer::set_group_by(std::string column)
+void layer::set_group_by(std::string const& column)
 {
     group_by_ = column;
 }

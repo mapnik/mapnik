@@ -27,9 +27,19 @@ namespace mapnik
 {
 
 line_pattern_symbolizer::line_pattern_symbolizer(path_expression_ptr file)
-    : symbolizer_with_image(file), symbolizer_base() {}
+    : symbolizer_with_image(file), symbolizer_base(), offset_(0.0) {}
 
 line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)
-    : symbolizer_with_image(rhs), symbolizer_base(rhs) {}
+    : symbolizer_with_image(rhs), symbolizer_base(rhs), offset_(rhs.offset_) {}
+
+double line_pattern_symbolizer::offset() const
+{
+    return offset_;
+}
+
+void line_pattern_symbolizer::set_offset(double offset)
+{
+    offset_=offset;
+}
 
 }

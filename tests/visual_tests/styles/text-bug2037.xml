@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+            <StyleName>My Style</StyleName>
+            <Datasource>
+                <Parameter name="type">csv</Parameter>
+                <Parameter name="file">../data/points.csv</Parameter>
+            </Datasource>
+    </Layer>
+    <Style name="My Style">
+        <Rule>
+            <Filter>[nr] = 3</Filter>
+            <TextSymbolizer wrap-width="20" face-name="DejaVu Sans Book" size="9"  wrap-before="true">"abcdef&#10;ghijkl&#10;mnopq&#10;stuv&#10;wxyz"</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 4</Filter>
+            <TextSymbolizer wrap-width="20" face-name="DejaVu Sans Book" size="9" wrap-before="false">"abcdef&#10;ghijkl&#10;mnopq&#10;stuv&#10;wxyz"</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 7</Filter>
+            <TextSymbolizer wrap-width="30" face-name="DejaVu Sans Book" size="9" wrap-before="true">"Some test text with&#10;forced&#10;line breaks"</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 8</Filter>
+            <TextSymbolizer wrap-width="30" face-name="DejaVu Sans Book" size="9" wrap-before="false">"Some test text with&#10;forced&#10;line breaks"</TextSymbolizer>
+        </Rule>
+
+    </Style>
+</Map>

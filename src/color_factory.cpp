@@ -27,7 +27,6 @@
 #include <mapnik/css_color_grammar.hpp>
 
 // boost
-#include <boost/format.hpp>
 #include <boost/version.hpp>
 
 // stl

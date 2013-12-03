@@ -34,7 +34,6 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/foreach.hpp>
 
@@ -97,8 +96,7 @@ double get_total_distance(T & shape_path)
 }
 
 template <typename DetectorT>
-placement_finder<DetectorT>::placement_finder(feature_impl const& feature,
-                                              text_placement_info const& placement_info,
+placement_finder<DetectorT>::placement_finder(text_placement_info const& placement_info,
                                               string_info const& info,
                                               DetectorT & detector,
                                               box2d<double> const& extent)
@@ -191,7 +189,7 @@ void placement_finder<DetectorT>::init_string_size()
 {
     // Get total string size
     if (!info_.num_characters()) return; //At least one character is required
-    for (unsigned i = 0; i < info_.num_characters(); i++)
+    for (std::size_t i = 0; i < info_.num_characters(); i++)
     {
         char_info const& ci = info_.at(i);
         if (!ci.width || !ci.line_height) continue; //Skip empty chars (add no character_spacing for them)
@@ -240,7 +238,7 @@ void placement_finder<DetectorT>::find_line_breaks()
         double word_height = 0.0;
         //line_width and word_width include char width + spacing, but not the spacing after the last char
 
-        for (unsigned int ii = 0; ii < info_.num_characters(); ii++)
+        for (std::size_t ii = 0; ii < info_.num_characters(); ii++)
         {
             char_info const& ci = info_.at(ii);
             unsigned c = ci.c;
@@ -392,8 +390,8 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     adjust_position(current_placement.get());
 
     // presets for first line
-    unsigned int line_number = 0;
-    unsigned int index_to_wrap_at = line_breaks_[0];
+    std::size_t line_number = 0;
+    std::size_t index_to_wrap_at = line_breaks_[0];
     double line_width = line_sizes_[0].first;
     double line_height = line_sizes_[0].second;
 
@@ -421,7 +419,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     // save each character rendering position and build envelope as go thru loop
     std::queue< box2d<double> > c_envelopes;
 
-    for (unsigned i = 0; i < info_.num_characters(); i++)
+    for (std::size_t i = 0; i < info_.num_characters(); i++)
     {
         char_info const& ci = info_.at(i);
 
@@ -615,7 +613,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 
 
     first = true;
-    for (unsigned index = 0; index < path_positions.size(); index++) //For each node in the shape
+    for (std::size_t index = 0; index < path_positions.size(); index++) //For each node in the shape
     {
         cmd = path_positions[index].cmd;
         new_x = path_positions[index].x;
@@ -652,7 +650,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                         {
                             //Average the angle of all characters and then offset them all by that angle
                             double anglesum = 0;
-                            for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
+                            for (std::size_t i = 0; i < current_placement->nodes_.size(); i++)
                             {
                                 double angle = current_placement->nodes_[i].angle;
                                 //Normalize angle in range -PI ... PI
@@ -666,7 +664,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                             double sina = orientation * std::sin(anglesum);
 
                             //Offset all the characters by this angle
-                            for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
+                            for (std::size_t i = 0; i < current_placement->nodes_.size(); i++)
                             {
                                 current_placement->nodes_[i].pos.x -=
                                     pi.get_scale_factor() * displacement * sina;
@@ -713,7 +711,7 @@ template <typename DetectorT>
 std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::vector<vertex2d> const& path_positions,
                                                                            std::vector<double> const& path_distances,
                                                                            int & orientation,
-                                                                           unsigned index,
+                                                                           std::size_t index,
                                                                            double distance)
 {
     //Check that the given distance is on the given index and find the correct index and distance if not
@@ -735,7 +733,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         return std::auto_ptr<text_path>(NULL);
 
     //Keep track of the initial index,distance incase we need to re-call get_placement_offset
-    const unsigned initial_index = index;
+    const std::size_t initial_index = index;
     const double initial_distance = distance;
 
     double old_x = path_positions[index-1].x;
@@ -765,9 +763,9 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
     if (!orientation_forced)
         orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
 
-    unsigned upside_down_char_count = 0; //Count of characters that are placed upside down.
+    std::size_t upside_down_char_count = 0; //Count of characters that are placed upside down.
 
-    for (unsigned i = 0; i < info_.num_characters(); ++i)
+    for (std::size_t i = 0; i < info_.num_characters(); ++i)
     {
         // grab the next character according to the orientation
         char_info const &ci = orientation > 0 ? info_.at(i) : info_.at(info_.num_characters() - i - 1);
@@ -910,7 +908,7 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
 {
     //Create and test envelopes
     bool status = true;
-    for (unsigned i = 0; i < info_.num_characters(); ++i)
+    for (std::size_t i = 0; i < info_.num_characters(); ++i)
     {
         //TODO: I think this can be simplified by taking the char_info from vertex() but this needs to be carefully tested!
         // grab the next character according to the orientation

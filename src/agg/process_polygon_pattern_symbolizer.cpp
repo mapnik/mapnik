@@ -40,6 +40,7 @@
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 // for polygon_pattern_symbolizer
@@ -59,7 +60,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
     if (sym.get_gamma() != gamma_ || sym.get_gamma_method() != gamma_method_)
     {
@@ -90,16 +91,16 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
 
     if (!pat) return;
+    box2d<double> clip_box = clipping_extent();
 
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
 
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32,
+    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
                                      wrap_x_type,
                                      wrap_y_type> img_source_type;
 
@@ -117,7 +118,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
     agg::rendering_buffer pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
-    agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
+    agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
     pattern_alignment_e align = sym.get_alignment();
@@ -131,12 +132,12 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         if (feature.num_geometries() > 0)
         {
             clipped_geometry_type clipped(feature.get_geometry(0));
-            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+            clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
             path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
-        offset_x = unsigned(width_ - x0);
-        offset_y = unsigned(height_ - y0);
+        offset_x = unsigned(current_buffer_->width() - x0);
+        offset_y = unsigned(current_buffer_->height() - y0);
     }
 
     span_gen_type sg(img_src, offset_x, offset_y);
@@ -147,13 +148,14 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,simplify_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clip_box,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
     if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
+    converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 

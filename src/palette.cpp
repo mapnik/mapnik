@@ -26,6 +26,7 @@
 // stl
 #include <sstream>
 #include <iomanip>
+#include <iterator>
 
 namespace mapnik
 {
@@ -81,8 +82,8 @@ bool rgba_palette::valid() const
 
 std::string rgba_palette::to_string() const
 {
-    unsigned length = rgb_pal_.size();
-    unsigned alphaLength = alpha_pal_.size();
+    size_t length = rgb_pal_.size();
+    size_t alphaLength = alpha_pal_.size();
     std::ostringstream str("");
     str << "[Palette " << length;
     if (length == 1)
@@ -125,7 +126,7 @@ unsigned char rgba_palette::quantize(unsigned val) const
         // find closest match based on mean of r,g,b,a
         std::vector<rgba>::const_iterator pit =
             std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
-        index = pit - sorted_pal_.begin();
+        index = std::distance(sorted_pal_.begin(),pit);
         if (index == sorted_pal_.size()) index--;
 
         dr = sorted_pal_[index].r - c.r;

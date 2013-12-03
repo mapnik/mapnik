@@ -38,6 +38,7 @@
 // agg
 #include "agg_ellipse.h"
 #include "agg_basics.h"
+#include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
@@ -142,7 +143,7 @@ struct vector_markers_rasterizer_dispatch
             double x = 0;
             double y = 0;
             double angle = 0;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -245,7 +246,7 @@ struct raster_markers_rasterizer_dispatch
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle,sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);

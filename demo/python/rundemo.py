@@ -330,27 +330,41 @@ mapnik.render(m, im)
 
 # Save image to files
 images_ = []
-im.save('demo.png', 'png') # true-colour RGBA
-images_.append('demo.png')
+if mapnik.has_png():
+    im.save('demo.png', 'png') # true-colour RGBA
+    images_.append('demo.png')
 
-# old behavior, now can do 'png8:c=256'
-im.save('demo256.png', 'png256') # save to palette based (max 256 colours) png
-images_.append('demo256.png')
+    # old behavior, now can do 'png8:c=256'
+    im.save('demo256.png', 'png256') # save to palette based (max 256 colours) png
+    images_.append('demo256.png')
 
-im.save('demo64_binary_transparency.png', 'png8:c=64:t=1')
-images_.append('demo64_binary_transparency.png')
+    im.save('demo64_binary_transparency.png', 'png8:c=64:t=1')
+    images_.append('demo64_binary_transparency.png')
 
-im.save('demo128_colors_hextree_no_alpha.png', 'png8:c=100:m=h:t=0')
-images_.append('demo128_colors_hextree_no_alpha.png')
+    im.save('demo128_colors_hextree_no_alpha.png', 'png8:c=100:m=h:t=0')
+    images_.append('demo128_colors_hextree_no_alpha.png')
 
-im.save('demo_high.jpg', 'jpeg100')
-images_.append('demo_high.jpg')
+if mapnik.has_jpeg():
+    im.save('demo_high.jpg', 'jpeg100')
+    images_.append('demo_high.jpg')
 
-im.save('demo_low.jpg', 'jpeg50')
-images_.append('demo_low.jpg')
+    im.save('demo_low.jpg', 'jpeg50')
+    images_.append('demo_low.jpg')
 
-im.save('demo.tif', 'tiff')
-images_.append('demo.tif')
+if mapnik.has_tiff():
+    im.save('demo.tif', 'tiff')
+    images_.append('demo.tif')
+
+if mapnik.has_webp():
+    im.save('demo.webp', 'webp') # default quality is 90
+    images_.append('demo.webp')
+
+    im.save('demo_highest.webp', 'webp:quality=100')
+    images_.append('demo_med.webp')
+
+    im.save('demo_low.webp', 'webp:quality=50')
+    images_.append('demo_low.webp')
+
 
 # Render cairo examples
 if HAS_PYCAIRO_MODULE and mapnik.has_pycairo():
