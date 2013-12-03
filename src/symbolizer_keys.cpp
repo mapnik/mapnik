@@ -26,7 +26,7 @@
 #include <mapnik/simplify.hpp>
 
 // boost
-#include "boost/algorithm/string/replace.hpp"  // for replace
+#include <boost/algorithm/string/replace.hpp>  // for replace
 
 namespace mapnik {
 
