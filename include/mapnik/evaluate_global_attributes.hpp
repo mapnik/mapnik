@@ -182,7 +182,7 @@ struct assign_value<expression_ptr,Attributes> : boost::static_visitor<>
 };
 
 }
-struct evaluate_global_attributes
+struct evaluate_global_attributes : mapnik::noncopyable
 {
     template <typename Attributes>
     struct evaluator : boost::static_visitor<>
@@ -224,7 +224,7 @@ struct evaluate_global_attributes
     };
 
     template <typename Attributes>
-    void apply(Map & m, Attributes const& attributes)
+    static void apply(Map & m, Attributes const& attributes)
     {
         for ( auto & val :  m.styles() )
         {
