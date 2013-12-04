@@ -106,15 +106,11 @@ private:
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
     void parse_debug_symbolizer(rule & rule, xml_node const& sym);
-
     bool parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     void parse_stroke(symbolizer_base & symbol, xml_node const & sym);
-
     void ensure_font_face(std::string const& face_name);
     void find_unused_nodes(xml_node const& root);
     void find_unused_nodes_recursive(xml_node const& node, std::string & error_text);
-
-
     std::string ensure_relative_to_xml(boost::optional<std::string> const& opt_path);
     void ensure_exists(std::string const& file_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
@@ -1298,9 +1294,16 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & sym)
     if (stroke) put(symbol, keys::stroke, *stroke);
 
     // stroke-width
-    optional<double> width = sym.get_opt_attr<double>("stroke-width");
-    if (width) put(symbol, keys::stroke_width, *width);
-
+    try
+    {
+        optional<double> width = sym.get_opt_attr<double>("stroke-width");
+        if (width) put(symbol, keys::stroke_width, *width);
+    }
+    catch (...)
+    {
+        optional<expression_ptr> width = sym.get_opt_attr<expression_ptr>("stroke-width");
+        if (width) put(symbol, keys::stroke_width, *width);
+    }
     // stroke-opacity
     optional<double> opacity = sym.get_opt_attr<double>("stroke-opacity");
     if (opacity) put(symbol, keys::stroke_opacity, *opacity);
@@ -1396,12 +1399,17 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
     {
         polygon_symbolizer poly_sym;
         // fill
-        optional<color> fill = sym.get_opt_attr<color>("fill");
-        //optional<expression_ptr> fill = sym.get_opt_attr<expression_ptr>("fill");
-        if (fill)
+        try
         {
-            put(poly_sym, keys::fill, *fill);
+            optional<color> fill = sym.get_opt_attr<color>("fill");
+            if (fill) put(poly_sym, keys::fill, *fill);
         }
+        catch (...)
+        {
+            optional<expression_ptr> fill = sym.get_opt_attr<expression_ptr>("fill");
+            if (fill) put(poly_sym, keys::fill, *fill);
+        }
+
         // fill-opacity
         optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
         if (opacity) put(poly_sym, keys::fill_opacity, *opacity);
