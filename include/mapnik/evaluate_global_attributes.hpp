@@ -54,7 +54,7 @@ struct evaluate_expression : boost::static_visitor<T>
 
     value_type operator() (attribute const& attr) const
     {
-        throw std::runtime_error("can't evaluate attributes in this context");
+        throw std::runtime_error("can't evaluate feature attributes in this context");
     }
 
     value_type operator() (global_attribute const& attr) const
@@ -69,7 +69,7 @@ struct evaluate_expression : boost::static_visitor<T>
 
     value_type operator() (geometry_type_attribute const& geom) const
     {
-        throw std::runtime_error("can't evaluate attributes in this context");
+        throw std::runtime_error("can't evaluate geometry_type attributes in this context");
     }
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
