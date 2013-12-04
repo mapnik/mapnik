@@ -851,6 +851,25 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
     }
 }
 
+// helper method
+template <typename Symbolizer, typename T>
+void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const & node)
+{
+    typedef T value_type;
+    std::string const& name = std::get<0>(get_meta(key));
+    try
+    {
+        optional<value_type> val = node.get_opt_attr<value_type>(name);
+        if (val) put(sym, key, *val);
+    }
+    catch (config_error const&)
+    {
+        // try parser as an expression
+        optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+        if (val) put(sym, key, *val);
+    }
+}
+
 void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
 {
     optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
@@ -880,8 +899,9 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
         put(sym, keys::geometry_transform, tl);
     }
 
-    optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
-    if (clip) put(sym, keys::clip, *clip);
+    // clip
+    set_symbolizer_property<symbolizer_base, boolean>(sym, keys::clip, pt);
+
     // simplify algorithm
     optional<std::string> simplify_algorithm_name = pt.get_opt_attr<std::string>("simplify-algorithm");
     if (simplify_algorithm_name)
@@ -898,12 +918,9 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     }
 
     // simplify value
-    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify");
-    if (simplify_tolerance) put(sym, keys::simplify_tolerance,*simplify_tolerance);
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::simplify_tolerance, pt);
     // smooth value
-    optional<double> smooth = pt.get_opt_attr<double>("smooth");
-    if (smooth) put(sym, keys::smooth, *smooth);
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::smooth, pt);
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
@@ -1289,24 +1306,12 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
 void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & sym)
 {
-    // stroke color
-    optional<color> stroke = sym.get_opt_attr<color>("stroke");
-    if (stroke) put(symbol, keys::stroke, *stroke);
-
+    // stroke
+    set_symbolizer_property<symbolizer_base,color>(symbol, keys::stroke, sym);
     // stroke-width
-    try
-    {
-        optional<double> width = sym.get_opt_attr<double>("stroke-width");
-        if (width) put(symbol, keys::stroke_width, *width);
-    }
-    catch (...)
-    {
-        optional<expression_ptr> width = sym.get_opt_attr<expression_ptr>("stroke-width");
-        if (width) put(symbol, keys::stroke_width, *width);
-    }
+    set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_width, sym);
     // stroke-opacity
-    optional<double> opacity = sym.get_opt_attr<double>("stroke-opacity");
-    if (opacity) put(symbol, keys::stroke_opacity, *opacity);
+    set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_opacity, sym);
 
     // stroke-linejoin
     optional<line_join_e> line_join = sym.get_opt_attr<line_join_e>("stroke-linejoin");
@@ -1368,64 +1373,49 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & sym)
     if (miterlimit) put(symbol, keys::stroke_miterlimit, *miterlimit);
 }
 
-void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_line_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
-        line_symbolizer symbol;
-        parse_stroke(symbol, sym);
-
-        // offset value
-        optional<double> offset = sym.get_opt_attr<double>("offset");
-        if (offset) put(symbol, keys::offset, *offset);
-
-        optional<line_rasterizer_e> rasterizer = sym.get_opt_attr<line_rasterizer_e>("rasterizer");
-        if (rasterizer) put(symbol, keys::line_rasterizer, line_rasterizer_enum(*rasterizer));
-
-        parse_symbolizer_base(symbol, sym);
-        rule.append(std::move(symbol));
+        line_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        // stroke parameters
+        parse_stroke(sym, node);
+        // offset
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
+        // rasterizer
+        optional<line_rasterizer_e> rasterizer = node.get_opt_attr<line_rasterizer_e>("rasterizer");
+        if (rasterizer) put(sym, keys::line_rasterizer, line_rasterizer_enum(*rasterizer));
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-
-void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
-        polygon_symbolizer poly_sym;
+        polygon_symbolizer sym;
+        parse_symbolizer_base(sym, node);
         // fill
-        try
-        {
-            optional<color> fill = sym.get_opt_attr<color>("fill");
-            if (fill) put(poly_sym, keys::fill, *fill);
-        }
-        catch (...)
-        {
-            optional<expression_ptr> fill = sym.get_opt_attr<expression_ptr>("fill");
-            if (fill) put(poly_sym, keys::fill, *fill);
-        }
-
+        set_symbolizer_property<symbolizer_base,color>(sym, keys::fill, node);
         // fill-opacity
-        optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
-        if (opacity) put(poly_sym, keys::fill_opacity, *opacity);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::fill_opacity, node);
         // gamma
-        optional<double> gamma = sym.get_opt_attr<double>("gamma");
-        if (gamma) put(poly_sym, keys::gamma, *gamma);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::gamma, node);
         // gamma method
-        optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
-        if (gamma_method) put(poly_sym, keys::gamma_method, gamma_method_enum(*gamma_method));
-
-        parse_symbolizer_base(poly_sym, sym);
-        rule.append(std::move(poly_sym));
+        optional<gamma_method_e> gamma_method = node.get_opt_attr<gamma_method_e>("gamma-method");
+        if (gamma_method) put(sym, keys::gamma_method, gamma_method_enum(*gamma_method));
+        //
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
