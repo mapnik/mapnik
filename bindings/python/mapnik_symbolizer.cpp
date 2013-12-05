@@ -75,6 +75,7 @@ using namespace boost::python;
 
 void __setitem__(mapnik::symbolizer_base & sym, std::string const& name, mapnik::symbolizer_base::value_type const& val)
 {
+    //std::cerr << "__setitem__ " << typeid(val).name() << std::endl;
     put(sym, mapnik::get_key(name), val);
 }
 
@@ -116,10 +117,11 @@ struct symbolizer_to_json : public boost::static_visitor<std::string>
         bool first = true;
         for (auto const& prop : sym.properties)
         {
+            auto const& meta = mapnik::get_meta(prop.first);
             if (first) first = false;
             else ss << ",";
-            ss << "\"" <<  std::get<0>(get_meta(prop.first)) << "\":";
-            ss << "\"<property-value-fixme>\""; //prop.second ; FIXME
+            ss << "\"" <<  std::get<0>(meta) << "\":";
+            ss << boost::apply_visitor(mapnik::symbolizer_property_value_string<mapnik::property_meta_type>(meta),prop.second);
         }
         ss << "}}";
         return ss.str();
@@ -206,6 +208,7 @@ void export_symbolizer()
 {
     using namespace boost::python;
 
+    implicitly_convertible<mapnik::enumeration_wrapper, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<std::string, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::color, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::expression_ptr, mapnik::symbolizer_base::value_type>();
