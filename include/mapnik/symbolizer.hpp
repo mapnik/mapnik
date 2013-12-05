@@ -312,7 +312,8 @@ struct extract_raw_value : public boost::static_visitor<T1>
 template <typename T>
 void put(symbolizer_base & sym, keys key, T const& val)
 {
-    detail::put_impl<T, std::is_enum<T>::value >::apply(sym, key, val);
+    constexpr bool enum_ = std::is_enum<T>::value;
+    detail::put_impl<T, enum_ >::apply(sym, key, val);
 }
 
 template <typename T>
