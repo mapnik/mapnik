@@ -25,6 +25,9 @@
 
 // mapnik
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/transform_processor.hpp>
+#include <mapnik/expression_string.hpp>
+
 // boost
 #include <boost/variant/apply_visitor.hpp>
 
@@ -122,6 +125,85 @@ std::string symbolizer_name(symbolizer const& sym)
     std::string type = boost::apply_visitor( detail::symbolizer_name_impl(), sym);
     return type;
 }
+
+
+template <typename Meta>
+class symbolizer_property_value_string : public boost::static_visitor<std::string>
+{
+public:
+    symbolizer_property_value_string (Meta const& meta)
+        : meta_(meta) {}
+
+    std::string operator() ( mapnik::enumeration_wrapper const& e) const
+    {
+        std::stringstream ss;
+        auto const& convert_fun_ptr(std::get<2>(meta_));
+        if ( convert_fun_ptr )
+        {
+            ss << convert_fun_ptr(e);
+        }
+        return ss.str();
+    }
+
+    std::string operator () ( path_expression_ptr const& expr) const
+    {
+        if (expr)
+        {
+            return path_processor::to_string(*expr);
+        }
+        return std::string();
+    }
+
+    std::string operator () (text_placements_ptr const& expr) const
+    {
+        return std::string("\"<fixme-text-placement-ptr>\"");
+    }
+
+    std::string operator () (raster_colorizer_ptr const& expr) const
+    {
+        return std::string("\"<fixme-raster-colorizer-ptr>\"");
+    }
+
+    std::string operator () (transform_type const& expr) const
+    {
+        if (expr)
+        {
+            return transform_processor_type::to_string(*expr);
+        }
+        return std::string();
+    }
+
+    std::string operator () (expression_ptr const& expr) const
+    {
+        if (expr)
+        {
+            return mapnik::to_expression_string(*expr);
+        }
+        return std::string();
+    }
+
+    std::string operator () (dash_array const& dash) const
+    {
+        std::ostringstream ss;
+        for (std::size_t i = 0; i < dash.size(); ++i)
+        {
+            ss << dash[i].first << ", " << dash[i].second;
+            if ( i + 1 < dash.size() ) ss << ",";
+        }
+        return ss.str();
+    }
+
+    template <typename T>
+    std::string operator () ( T const& val ) const
+    {
+        std::ostringstream ss;
+        ss << val;
+        return ss.str();
+    }
+
+private:
+    Meta const& meta_;
+};
 
 };
 
