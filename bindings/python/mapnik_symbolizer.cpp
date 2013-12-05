@@ -47,6 +47,8 @@
 #include <mapnik/value_error.hpp>
 #include <mapnik/marker_cache.hpp> // for known_svg_prefix_
 
+// stl
+#include <sstream>
 
 using mapnik::symbolizer;
 using mapnik::point_symbolizer;
@@ -71,50 +73,6 @@ using mapnik::parse_path;
 namespace {
 using namespace boost::python;
 
-/*
-tuple get_shield_displacement(const shield_symbolizer& s)
-{
-    mapnik::pixel_position const& pos = s.get_shield_displacement();
-    return boost::python::make_tuple(pos.x, pos.y);
-}
-
-void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
-{
-    s.get_placement_options()->defaults.displacement.x = extract<double>(arg[0]);
-    s.get_placement_options()->defaults.displacement.y = extract<double>(arg[1]);
-}
-
-tuple get_text_displacement(const shield_symbolizer& t)
-{
-    mapnik::pixel_position const& pos = t.get_placement_options()->defaults.displacement;
-    return boost::python::make_tuple(pos.x, pos.y);
-}
-
-void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)
-{
-    t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
-}
-
-void set_marker_type(mapnik::markers_symbolizer & symbolizer, std::string const& marker_type)
-{
-    std::string filename;
-    if (marker_type == "ellipse")
-    {
-        filename = mapnik::marker_cache::instance().known_svg_prefix_ + "ellipse";
-    }
-    else if (marker_type == "arrow")
-    {
-        filename = mapnik::marker_cache::instance().known_svg_prefix_ + "arrow";
-    }
-    else
-    {
-        throw mapnik::value_error("Unknown marker-type: '" + marker_type + "'");
-    }
-    symbolizer.set_filename(parse_path(filename));
-}
-
-*/
-
 void __setitem__(mapnik::symbolizer_base & sym, std::string const& name, mapnik::symbolizer_base::value_type const& val)
 {
     put(sym, mapnik::get_key(name), val);
@@ -124,8 +82,8 @@ struct extract_python_object : public boost::static_visitor<boost::python::objec
 {
     typedef boost::python::object result_type;
 
-    template <typename T2>
-    auto operator() (T2 const& val) const -> result_type
+    template <typename T>
+    auto operator() (T const& val) const -> result_type
     {
         return result_type(val); // wrap into python object
     }
@@ -143,6 +101,34 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
     //mapnik::property_meta_type const& meta = mapnik::get_meta(key);
     //return boost::apply_visitor(extract_python_object(), std::get<1>(meta));
     return boost::python::object();
+}
+
+struct symbolizer_to_json : public boost::static_visitor<std::string>
+{
+    typedef std::string result_type;
+
+    template <typename T>
+    auto operator() (T const& sym) const -> result_type
+    {
+        std::stringstream ss;
+        ss << "{\"type\":\"" << mapnik::symbolizer_traits<T>::name() << "\",";
+        ss << "\"properties\":{";
+        bool first = true;
+        for (auto const& prop : sym.properties)
+        {
+            if (first) first = false;
+            else ss << ",";
+            ss << "\"" <<  std::get<0>(get_meta(prop.first)) << "\":";
+            ss << "\"<property-value-fixme>\""; //prop.second ; FIXME
+        }
+        ss << "}}";
+        return ss.str();
+    }
+};
+
+std::string __str__(mapnik::symbolizer const& sym)
+{
+    return boost::apply_visitor(symbolizer_to_json(), sym);
 }
 
 std::string get_symbolizer_type(symbolizer const& sym)
@@ -214,18 +200,6 @@ std::size_t hash_impl(symbolizer const& sym)
     return boost::apply_visitor(symbolizer_hash_visitor(), sym);
 }
 
-template <typename T>
-std::string get_file_impl(T const& sym)
-{
-    return path_processor_type::to_string(*sym.get_filename());
-}
-
-template <typename T>
-void set_file_impl(T & sym, std::string const& file_expr)
-{
-    sym.set_filename(parse_path(file_expr));
-}
-
 }
 
 void export_symbolizer()
@@ -274,6 +248,7 @@ void export_symbolizer()
         .def("__setattr__",&__setitem__)
         .def("__getitem__",&__getitem__)
         .def("__getattr__",&__getitem__)
+        .def("__str__", &__str__)
         ;
 }
 
