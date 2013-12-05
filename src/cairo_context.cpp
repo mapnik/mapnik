@@ -499,4 +499,28 @@ void cairo_context::add_text(glyph_positions_ptr path,
     }
 
 }
+
+cairo_face_manager::cairo_face_manager(std::shared_ptr<freetype_engine> font_engine)
+  : font_engine_(font_engine)
+{
+}
+
+cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
+{
+    cairo_face_cache::iterator itr = cache_.find(face);
+    cairo_face_ptr entry;
+
+    if (itr != cache_.end())
+    {
+        entry = itr->second;
+    }
+    else
+    {
+        entry = std::make_shared<cairo_face>(font_engine_, face);
+        cache_.insert(std::make_pair(face, entry));
+    }
+
+    return entry;
+}
+
 }
