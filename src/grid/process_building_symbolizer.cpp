@@ -56,7 +56,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     typedef coord_transform<CoordTransform,geometry_type> path_type;
     agg::scanline_bin sl;
 
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
 
     grid_renderer_base_type renb(pixf);
@@ -103,7 +103,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                 faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
                 faces->line_to(std::get<0>(seg),std::get<1>(seg) + height);
 
-                path_type faces_path (t_,*faces,prj_trans);
+                path_type faces_path (common_.t_,*faces,prj_trans);
                 ras_ptr->add_path(faces_path);
                 ren.color(color_type(feature.id()));
                 agg::render_scanlines(*ras_ptr, sl, ren);
@@ -129,14 +129,14 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                     roof->line_to(x,y+height);
                 }
             }
-            path_type path(t_,*frame,prj_trans);
+            path_type path(common_.t_,*frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
-            path_type roof_path (t_,*roof,prj_trans);
+            path_type roof_path (common_.t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);

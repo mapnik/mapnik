@@ -75,11 +75,11 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 
         agg::trans_affine tr;
         if (img_transform) { evaluate_transform(tr, feature, *img_transform); }
-        tr = agg::trans_affine_scaling(scale_factor_) * tr;
+        tr = agg::trans_affine_scaling(common_.scale_factor_) * tr;
 
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
-        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_) ;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common_.scale_factor_) ;
 
         for (std::size_t i=0; i<feature.num_geometries(); ++i)
         {
@@ -99,10 +99,10 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             }
 
             prj_trans.backward(x,y,z);
-            t_.forward(&x,&y);
+            common_.t_.forward(&x,&y);
             label_ext.re_center(x,y);
             if (allow_overlap ||
-                detector_->has_placement(label_ext))
+                common_.detector_->has_placement(label_ext))
             {
 
                 render_marker(feature,
@@ -114,7 +114,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
                               comp_op);
 
                 if (!ignore_placement)
-                    detector_->insert(label_ext);
+                    common_.detector_->insert(label_ext);
             }
         }
     }

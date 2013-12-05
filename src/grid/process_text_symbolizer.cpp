@@ -36,17 +36,17 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 {
     text_symbolizer_helper helper(
             sym, feature, prj_trans,
-            width_, height_,
-            scale_factor_ * (1.0/pixmap_.get_resolution()),
-            t_, font_manager_, *detector_,
-            query_extent_);
+            common_.width_, common_.height_,
+            common_.scale_factor_ * (1.0/pixmap_.get_resolution()),
+            common_.t_, common_.font_manager_, *common_.detector_,
+            common_.query_extent_);
     bool placement_found = false;
 
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
 
     grid_text_renderer<T> ren(pixmap_,
                               comp_op,
-                              scale_factor_);
+                              common_.scale_factor_);
 
     placements_list const& placements = helper.get();
     value_integer feature_id = feature.id();

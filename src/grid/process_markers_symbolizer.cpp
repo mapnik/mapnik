@@ -100,7 +100,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
             if (geom_transform) { evaluate_transform(geom_tr, feature, *geom_transform); }
 
-            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution()));
+            agg::trans_affine tr = agg::trans_affine_scaling(common_.scale_factor_*(1.0/pixmap_.get_resolution()));
             auto img_transform = get_optional<transform_type>(sym, keys::image_transform);
 
             if ((*mark)->is_vector())
@@ -140,20 +140,20 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
-                    buf_type render_buf(pixmap_.raw_data(), width_, height_, width_);
+                    buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
                     dispatch_type rasterizer_dispatch(render_buf,
                                                       svg_renderer,
                                                       *ras_ptr,
                                                       bbox,
                                                       marker_trans,
                                                       sym,
-                                                      *detector_,
-                                                      scale_factor_,
+                                                      *common_.detector_,
+                                                      common_.scale_factor_,
                                                       feature,
                                                       pixmap_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(common_.query_extent_, rasterizer_dispatch, sym,common_.t_,prj_trans,tr,common_.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -183,20 +183,20 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
-                    buf_type render_buf(pixmap_.raw_data(), width_, height_, width_);
+                    buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
                     dispatch_type rasterizer_dispatch(render_buf,
                                                       svg_renderer,
                                                       *ras_ptr,
                                                       bbox,
                                                       marker_trans,
                                                       sym,
-                                                      *detector_,
-                                                      scale_factor_,
+                                                      *common_.detector_,
+                                                      common_.scale_factor_,
                                                       feature,
                                                       pixmap_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(common_.query_extent_, rasterizer_dispatch, sym,common_.t_,prj_trans,tr,common_.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -230,19 +230,19 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                                             renderer_type,
                                                             detector_type,
                                                             mapnik::grid > dispatch_type;
-                buf_type render_buf(pixmap_.raw_data(), width_, height_, width_);
+                buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
                 dispatch_type rasterizer_dispatch(render_buf,
                                                   *ras_ptr,
                                                   **marker,
                                                   marker_trans,
                                                   sym,
-                                                  *detector_,
-                                                  scale_factor_,
+                                                  *common_.detector_,
+                                                  common_.scale_factor_,
                                                   feature,
                                                   pixmap_);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    converter(common_.query_extent_, rasterizer_dispatch, sym,common_.t_,prj_trans,tr,common_.scale_factor_);
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {
                     geometry_type::types type = feature.paths()[0].type();
