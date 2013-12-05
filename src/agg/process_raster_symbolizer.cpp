@@ -60,7 +60,7 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
 
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
-        box2d<double> ext = t_.forward(target_ext);
+        box2d<double> ext = common_.t_.forward(target_ext);
         int start_x = static_cast<int>(std::floor(ext.minx()+.5));
         int start_y = static_cast<int>(std::floor(ext.miny()+.5));
         int end_x = static_cast<int>(std::floor(ext.maxx()+.5));

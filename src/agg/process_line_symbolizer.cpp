@@ -106,7 +106,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum>(sym, keys::line_rasterizer, feature, RASTERIZER_FULL);
     if (clip)
     {
-        double padding = static_cast<double>(query_extent_.width()/pixmap_.width());
+        double padding = static_cast<double>(common_.query_extent_.width()/pixmap_.width());
         double half_stroke = 0.5 * width;
         if (half_stroke > 1)
         {
@@ -117,7 +117,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
             padding *= std::fabs(offset) * 1.2;
         }
 
-        padding *= scale_factor_;
+        padding *= common_.scale_factor_;
         clip_box.pad(padding);
         // debugging
         //box2d<double> inverse = query_extent_;
@@ -129,7 +129,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     {
         typedef agg::renderer_outline_aa<renderer_base> renderer_type;
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-        agg::line_profile_aa profile(width * scale_factor_, agg::gamma_power(gamma));
+        agg::line_profile_aa profile(width * common_.scale_factor_, agg::gamma_power(gamma));
         renderer_type ren(renb, profile);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
         rasterizer_type ras(ren);
@@ -137,7 +137,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clip_box,ras,sym,t_,prj_trans,tr,scale_factor_);
+            converter(clip_box,ras,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -157,7 +157,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     {
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clip_box,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
 
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform

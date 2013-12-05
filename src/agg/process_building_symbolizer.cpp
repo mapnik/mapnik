@@ -78,7 +78,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    double height = get<double>(sym, keys::height,0.0) * scale_factor_;
+    double height = get<double>(sym, keys::height,0.0) * common_.scale_factor_;
     for (auto const& geom : feature.paths())
     {
         if (geom.size() > 2)
@@ -119,7 +119,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
                 faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
                 faces->line_to(std::get<0>(seg),std::get<1>(seg) + height);
 
-                path_type faces_path (t_,*faces,prj_trans);
+                path_type faces_path (common_.t_,*faces,prj_trans);
                 ras_ptr->add_path(faces_path);
                 ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
                 agg::render_scanlines(*ras_ptr, sl, ren);
@@ -151,15 +151,15 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
                 }
             }
 
-            path_type path(t_,*frame,prj_trans);
+            path_type path(common_.t_,*frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
-            stroke.width(scale_factor_);
+            stroke.width(common_.scale_factor_);
             ras_ptr->add_path(stroke);
             ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
-            path_type roof_path (t_,*roof,prj_trans);
+            path_type roof_path (common_.t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);

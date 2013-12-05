@@ -93,7 +93,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                 gamma_ = gamma;
             }
 
-            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
+            agg::trans_affine tr = agg::trans_affine_scaling(common_.scale_factor_);
             box2d<double> clip_box = clipping_extent();
             if ((*mark)->is_vector())
             {
@@ -138,12 +138,12 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                                                       bbox,
                                                       marker_trans,
                                                       sym,
-                                                      *detector_,
-                                                      scale_factor_,
+                                                      *common_.detector_,
+                                                      common_.scale_factor_,
                                                       snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(clip_box, rasterizer_dispatch, sym,common_.t_,prj_trans,tr,common_.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -179,12 +179,12 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                                                       bbox,
                                                       marker_trans,
                                                       sym,
-                                                      *detector_,
-                                                      scale_factor_,
+                                                      *common_.detector_,
+                                                      common_.scale_factor_,
                                                       snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(clip_box, rasterizer_dispatch, sym,common_.t_,prj_trans,tr,common_.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -217,12 +217,12 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                                                   **marker,
                                                   marker_trans,
                                                   sym,
-                                                  *detector_,
-                                                  scale_factor_,
+                                                  *common_.detector_,
+                                                  common_.scale_factor_,
                                                   true /*snap rasters no matter what*/);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    converter(clip_box, rasterizer_dispatch, sym,common_.t_,prj_trans,tr,common_.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {

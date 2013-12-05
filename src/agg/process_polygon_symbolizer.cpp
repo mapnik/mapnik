@@ -67,7 +67,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clip_box,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
 
     bool clip = get<value_bool>(sym, keys::clip, feature, true);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, 0.0);
