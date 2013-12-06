@@ -56,6 +56,7 @@
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
+#include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
 // cairo
 #include <cairo.h>
@@ -561,71 +562,17 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature);
-    double opacity = get<double>(sym, keys::opacity, feature, 1.0);
-    point_placement_enum placement = get<point_placement_enum>(sym, keys::point_placement_type, feature, CENTROID_POINT_PLACEMENT);
-    bool allow_overlap = get<bool>(sym, keys::allow_overlap, feature, false);
-    bool ignore_placement = get<bool>(sym, keys::ignore_placement, feature, false);
-    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
 
-    boost::optional<marker_ptr> marker;
-    if ( !filename.empty() )
-    {
-        marker = marker_cache::instance().find(filename, true);
-    }
-    else
-    {
-        marker.reset(std::make_shared<mapnik::marker>());
-    }
-
-
-    if (marker)
-    {
-        box2d<double> const& bbox = (*marker)->bounding_box();
-        coord2d center = bbox.center();
-
-        agg::trans_affine tr;
-        if (geom_transform) { evaluate_transform(tr, feature, *geom_transform); }
-
-        agg::trans_affine_translation recenter(-center.x, -center.y);
-        agg::trans_affine recenter_tr = recenter * tr;
-        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common_.scale_factor_);
-
-        for (std::size_t i = 0; i < feature.num_geometries(); ++i)
-        {
-            geometry_type const& geom = feature.get_geometry(i);
-            double x;
-            double y;
-            double z = 0;
-
-            if (placement == CENTROID_POINT_PLACEMENT)
-            {
-                if (!label::centroid(geom, x, y))
-                    return;
-            }
-            else
-            {
-                if (!label::interior_position(geom ,x, y))
-                    return;
-            }
-
-            prj_trans.backward(x, y, z);
-            common_.t_.forward(&x, &y);
-            label_ext.re_center(x,y);
-            if (allow_overlap ||
-                common_.detector_->has_placement(label_ext))
-            {
-                render_marker(pixel_position(x,y),**marker, tr, opacity);
-
-                if (!ignore_placement)
-                    common_.detector_->insert(label_ext);
-            }
-        }
-    }
+    render_point_symbolizer(
+        sym, feature, prj_trans, common_,
+        [&](pixel_position const& pos, marker const& marker, 
+            agg::trans_affine const& tr, double opacity) {
+            render_marker(pos, marker, tr, opacity);
+        });
 }
 
 void cairo_renderer_base::process(shield_symbolizer const& sym,
