@@ -147,11 +147,12 @@ public:
 
     std::string operator () ( path_expression_ptr const& expr) const
     {
+        std::ostringstream ss;
         if (expr)
         {
-            return path_processor::to_string(*expr);
+            ss << '\"' << path_processor::to_string(*expr) << '\"';
         }
-        return std::string();
+        return ss.str();
     }
 
     std::string operator () (text_placements_ptr const& expr) const
@@ -166,20 +167,29 @@ public:
 
     std::string operator () (transform_type const& expr) const
     {
+        std::ostringstream ss;
         if (expr)
         {
-            return transform_processor_type::to_string(*expr);
+            ss << '\"' << transform_processor_type::to_string(*expr) << '\"';
         }
-        return std::string();
+        return ss.str();
     }
 
     std::string operator () (expression_ptr const& expr) const
     {
+        std::ostringstream ss;
         if (expr)
         {
-            return mapnik::to_expression_string(*expr);
+            ss << '\"' << mapnik::to_expression_string(*expr) <<  '\"';
         }
-        return std::string();
+        return ss.str();
+    }
+
+    std::string operator () (color const& c) const
+    {
+        std::ostringstream ss;
+        ss << '\"' << c << '\"';
+        return ss.str();
     }
 
     std::string operator () (dash_array const& dash) const
@@ -188,7 +198,7 @@ public:
         for (std::size_t i = 0; i < dash.size(); ++i)
         {
             ss << dash[i].first << ", " << dash[i].second;
-            if ( i + 1 < dash.size() ) ss << ",";
+            if ( i + 1 < dash.size() ) ss << ',';
         }
         return ss.str();
     }
