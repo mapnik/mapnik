@@ -424,8 +424,6 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         }
     }
 
-    p.start_layer_processing(lay, layer_ext2);
-
     std::vector<rule_cache> & rule_caches = mat.rule_caches_;
     attribute_collector collector(names);
 
