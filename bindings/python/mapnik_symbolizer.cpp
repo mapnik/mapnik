@@ -227,6 +227,7 @@ void export_symbolizer()
         .def("__getitem__",&__getitem__)
         .def("__getattr__",&__getitem__)
         .def("__str__", &__str__)
+        .def(self == self) // __eq__
         ;
 }
 
