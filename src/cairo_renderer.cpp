@@ -59,6 +59,7 @@
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
+#include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 
 // cairo
 #include <cairo.h>
@@ -267,42 +268,23 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
+    typedef vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
+                             CoordTransform, proj_transform, agg::trans_affine,
+                             conv_types> vertex_converter_type;
+
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
-    mapnik::color fill = get<mapnik::color>(sym, keys::fill, feature, mapnik::color(128,128,128));
-    double opacity = get<double>(sym, keys::fill_opacity, feature, 1.0);
-    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    bool clip = get<bool>(sym, keys::clip, feature, false);
-    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<double>(sym, keys::smooth, feature, 0.0);
-
     context_.set_operator(comp_op);
-    context_.set_color(fill, opacity);
 
-    agg::trans_affine tr;
-    if (geom_transform) { evaluate_transform(tr, feature, *geom_transform); }
-
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
-    vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr,1.0);
-
-    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
-    converter.set<transform_tag>(); //always transform
-    converter.set<affine_transform_tag>();
-    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
-    for ( geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            converter.apply(geom);
-        }
-    }
-    // fill polygon
-    context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
-    context_.fill();
+    render_polygon_symbolizer<vertex_converter_type>(
+        sym, feature, prj_trans, common_, common_.query_extent_, context_,
+        [&](color const &fill, double opacity) {
+            context_.set_color(fill, opacity);
+            // fill polygon
+            context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
+            context_.fill();
+        });
 }
 
 void cairo_renderer_base::process(building_symbolizer const& sym,
@@ -768,11 +750,12 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    cairo_save_restore guard(context_);
+
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
         [&](raster &target, composite_mode_e comp_op, double opacity, 
             int start_x, int start_y) {
-            cairo_save_restore guard(context_);
             context_.set_operator(comp_op);
             context_.add_image(start_x, start_y, target.data_, opacity);
         });
