@@ -61,6 +61,7 @@ using mapnik::shield_symbolizer;
 using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
 using mapnik::markers_symbolizer;
+using mapnik::debug_symbolizer;
 using mapnik::symbolizer_base;
 using mapnik::color;
 using mapnik::path_processor_type;
@@ -171,6 +172,12 @@ std::size_t hash_impl(symbolizer const& sym)
     return boost::apply_visitor(symbolizer_hash_visitor(), sym);
 }
 
+template <typename T>
+std::size_t hash_impl_2(T const& sym)
+{
+    return mapnik::symbolizer_hash::value<T>(sym);
+}
+
 struct extract_underlying_type_visitor : boost::static_visitor<boost::python::object>
 {
     template <typename T>
@@ -229,6 +236,7 @@ void export_shield_symbolizer()
     using namespace boost::python;
     class_< shield_symbolizer, bases<text_symbolizer> >("ShieldSymbolizer",
                                                         init<>("Default ctor"))
+        .def("__hash__",hash_impl_2<shield_symbolizer>)
         ;
 
 }
@@ -239,6 +247,7 @@ void export_polygon_symbolizer()
 
     class_<polygon_symbolizer, bases<symbolizer_base> >("PolygonSymbolizer",
                                                         init<>("Default ctor"))
+        .def("__hash__",hash_impl_2<polygon_symbolizer>)
         ;
 
 }
@@ -254,9 +263,9 @@ void export_polygon_pattern_symbolizer()
 
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
                                        init<>("Default ctor"))
+        .def("__hash__",hash_impl_2<polygon_pattern_symbolizer>)
         ;
 }
-
 
 void export_raster_symbolizer()
 {
@@ -278,6 +287,7 @@ void export_point_symbolizer()
 
     class_<point_symbolizer, bases<symbolizer_base> >("PointSymbolizer",
                              init<>("Default Point Symbolizer - 4x4 black square"))
+        .def("__hash__",hash_impl_2<point_symbolizer>)
         ;
 }
 
@@ -299,6 +309,7 @@ void export_markers_symbolizer()
 
     class_<markers_symbolizer, bases<symbolizer_base> >("MarkersSymbolizer",
                                init<>("Default Markers Symbolizer - circle"))
+        .def("__hash__",hash_impl_2<markers_symbolizer>)
         ;
 }
 
@@ -313,6 +324,7 @@ void export_line_symbolizer()
 
     class_<line_symbolizer, bases<symbolizer_base> >("LineSymbolizer",
                             init<>("Default LineSymbolizer - 1px solid black"))
+        .def("__hash__",hash_impl_2<line_symbolizer>)
         ;
 }
 
@@ -322,6 +334,7 @@ void export_line_pattern_symbolizer()
 
     class_<line_pattern_symbolizer, bases<symbolizer_base> >("LinePatternSymbolizer",
                                     init<> ("Default LinePatternSymbolizer"))
+        .def("__hash__",hash_impl_2<line_pattern_symbolizer>)
         ;
 }
 
@@ -334,8 +347,9 @@ void export_debug_symbolizer()
         .value("VERTEX",mapnik::DEBUG_SYM_MODE_VERTEX)
         ;
 
-    class_<mapnik::debug_symbolizer, bases<symbolizer_base> >("DebugSymbolizer",
+    class_<debug_symbolizer, bases<symbolizer_base> >("DebugSymbolizer",
                              init<>("Default debug Symbolizer"))
+        .def("__hash__",hash_impl_2<debug_symbolizer>)
         ;
 }
 
@@ -345,6 +359,7 @@ void export_building_symbolizer()
 
     class_<building_symbolizer, bases<symbolizer_base> >("BuildingSymbolizer",
                                init<>("Default BuildingSymbolizer"))
+        .def("__hash__",hash_impl_2<building_symbolizer>)
         ;
 
 }
