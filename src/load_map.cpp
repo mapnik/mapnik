@@ -73,7 +73,13 @@ namespace mapnik
 {
 using boost::optional;
 
-class map_parser : mapnik::noncopyable {
+constexpr unsigned name2int(const char *str, int off = 0)
+{
+    return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ str[off];
+}
+
+class map_parser : mapnik::noncopyable
+{
 public:
     map_parser(bool strict, std::string const& filename = "") :
         strict_(strict),
@@ -476,19 +482,17 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         }
 
         // rules
-        xml_node::const_iterator ruleIter = sty.begin();
-        xml_node::const_iterator endRule = sty.end();
-
-        for (; ruleIter!=endRule; ++ruleIter)
+        for (auto const& rule_ : sty)
         {
-            if (ruleIter->is("Rule"))
+            if (rule_.is("Rule"))
             {
-                parse_rule(style, *ruleIter);
+                parse_rule(style, rule_);
             }
         }
-
         map.insert_style(name, style);
-    } catch (config_error const& ex) {
+    }
+    catch (config_error const& ex)
+    {
         ex.append_context(std::string("in style '") + name + "'", sty);
         throw;
     }
@@ -751,91 +755,92 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
     }
 }
 
-void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
+void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
 {
     std::string name;
     try
     {
-        name = r.get_attr("name", std::string());
+        name = node.get_attr("name", std::string());
         rule rule(name);
 
-        xml_node const* child = r.get_opt_child("Filter");
+        xml_node const* child = node.get_opt_child("Filter");
         if (child)
         {
             rule.set_filter(child->get_value<expression_ptr>());
         }
 
-        if (r.has_child("ElseFilter"))
+        if (node.has_child("ElseFilter"))
         {
             rule.set_else(true);
         }
 
-        if (r.has_child("AlsoFilter"))
+        if (node.has_child("AlsoFilter"))
         {
             rule.set_also(true);
         }
 
-        child = r.get_opt_child("MinScaleDenominator");
+        child = node.get_opt_child("MinScaleDenominator");
         if (child)
         {
             rule.set_min_scale(child->get_value<double>());
         }
 
-        child = r.get_opt_child("MaxScaleDenominator");
+        child = node.get_opt_child("MaxScaleDenominator");
         if (child)
         {
             rule.set_max_scale(child->get_value<double>());
         }
 
-        xml_node::const_iterator symIter = r.begin();
-        xml_node::const_iterator endSym = r.end();
-
-        for(;symIter != endSym; ++symIter)
+        for (auto const& sym_node : node)
         {
-
-            if (symIter->is("PointSymbolizer"))
+            switch (name2int(sym_node.name().c_str()))
             {
-                parse_point_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("LinePatternSymbolizer"))
-            {
-                parse_line_pattern_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("PolygonPatternSymbolizer"))
-            {
-                parse_polygon_pattern_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("TextSymbolizer"))
-            {
-                parse_text_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("ShieldSymbolizer"))
-            {
-                parse_shield_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("LineSymbolizer"))
-            {
-                parse_line_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("PolygonSymbolizer"))
-            {
-                parse_polygon_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("BuildingSymbolizer"))
-            {
-                parse_building_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("RasterSymbolizer"))
-            {
-                parse_raster_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("MarkersSymbolizer"))
-            {
-                parse_markers_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("DebugSymbolizer"))
-            {
-                parse_debug_symbolizer(rule, *symIter);
+            case name2int("PointSymbolizer"):
+                parse_point_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("LinePatternSymbolizer"):
+                parse_line_pattern_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("PolygonPatternSymbolizer"):
+                parse_polygon_pattern_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("TextSymbolizer"):
+                parse_text_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("ShieldSymbolizer"):
+                parse_shield_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("LineSymbolizer"):
+                parse_line_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("PolygonSymbolizer"):
+                parse_polygon_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("BuildingSymbolizer"):
+                parse_building_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("RasterSymbolizer"):
+                parse_raster_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("MarkersSymbolizer"):
+                parse_markers_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            case name2int("DebugSymbolizer"):
+                parse_debug_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
+            default:
+                break;
             }
         }
         style.add_rule(rule);
@@ -845,7 +850,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
     {
         if (!name.empty())
         {
-            ex.append_context(std::string("in rule '") + name + "'", r);
+            ex.append_context(std::string("in rule '") + name + "'", node);
         }
         throw;
     }
@@ -1693,30 +1698,30 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
 {
     if (!node.processed())
     {
-        if (node.is_text()) {
+        if (node.is_text())
+        {
             error_message += "\n* text '" + node.text() + "'";
-        } else {
+        }
+        else
+        {
             error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
         }
         return; //All attributes and children are automatically unprocessed, too.
     }
-    xml_node::attribute_map const& attr = node.get_attributes();
-    xml_node::attribute_map::const_iterator aitr = attr.begin();
-    xml_node::attribute_map::const_iterator aend = attr.end();
-    for (;aitr!=aend; aitr++)
+    xml_node::attribute_map const& attrs = node.get_attributes();
+    for (auto const& attr : attrs)
     {
-        if (!aitr->second.processed)
+        if (!attr.second.processed)
         {
-            error_message += "\n* attribute '" + aitr->first +
-                "' with value '" + aitr->second.value +
+            error_message += "\n* attribute '" + attr.first +
+                "' with value '" + attr.second.value +
                 "' at line " + node.line_to_string();
         }
     }
-    xml_node::const_iterator itr = node.begin();
-    xml_node::const_iterator end = node.end();
-    for (; itr!=end; itr++)
+
+    for (auto const& child_node : node)
     {
-        find_unused_nodes_recursive(*itr, error_message);
+        find_unused_nodes_recursive(child_node, error_message);
     }
 }
 
