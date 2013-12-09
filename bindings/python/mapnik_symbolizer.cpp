@@ -318,10 +318,29 @@ void export_markers_symbolizer()
 void export_line_symbolizer()
 {
     using namespace boost::python;
+
     mapnik::enumeration_<mapnik::line_rasterizer_e>("line_rasterizer")
         .value("FULL",mapnik::RASTERIZER_FULL)
         .value("FAST",mapnik::RASTERIZER_FAST)
         ;
+
+    mapnik::enumeration_<mapnik::line_cap_e>("stroke_linecap",
+                             "The possible values for a line cap used when drawing\n"
+                             "with a stroke.\n")
+        .value("BUTT_CAP",mapnik::BUTT_CAP)
+        .value("SQUARE_CAP",mapnik::SQUARE_CAP)
+        .value("ROUND_CAP",mapnik::ROUND_CAP)
+        ;
+
+    mapnik::enumeration_<mapnik::line_join_e>("stroke_linejoin",
+                                      "The possible values for the line joining mode\n"
+                                      "when drawing with a stroke.\n")
+        .value("MITER_JOIN",mapnik::MITER_JOIN)
+        .value("MITER_REVERT_JOIN",mapnik::MITER_REVERT_JOIN)
+        .value("ROUND_JOIN",mapnik::ROUND_JOIN)
+        .value("BEVEL_JOIN",mapnik::BEVEL_JOIN)
+        ;
+
 
     class_<line_symbolizer, bases<symbolizer_base> >("LineSymbolizer",
                             init<>("Default LineSymbolizer - 1px solid black"))
