@@ -157,56 +157,6 @@ std::string get_symbolizer_type(symbolizer const& sym)
     return mapnik::symbolizer_name(sym); // FIXME - do we need this ?
 }
 
-const point_symbolizer& point_(symbolizer const& sym )
-{
-    return boost::get<point_symbolizer>(sym);
-}
-
-const line_symbolizer& line_( const symbolizer& sym )
-{
-    return boost::get<line_symbolizer>(sym);
-}
-
-const polygon_symbolizer& polygon_( const symbolizer& sym )
-{
-    return boost::get<polygon_symbolizer>(sym);
-}
-
-const raster_symbolizer& raster_( const symbolizer& sym )
-{
-    return boost::get<raster_symbolizer>(sym);
-}
-
-const text_symbolizer& text_( const symbolizer& sym )
-{
-    return boost::get<text_symbolizer>(sym);
-}
-
-const shield_symbolizer& shield_( const symbolizer& sym )
-{
-    return boost::get<shield_symbolizer>(sym);
-}
-
-const line_pattern_symbolizer& line_pattern_( const symbolizer& sym )
-{
-    return boost::get<line_pattern_symbolizer>(sym);
-}
-
-const polygon_pattern_symbolizer& polygon_pattern_( const symbolizer& sym )
-{
-    return boost::get<polygon_pattern_symbolizer>(sym);
-}
-
-const building_symbolizer& building_( const symbolizer& sym )
-{
-    return boost::get<building_symbolizer>(sym);
-}
-
-const markers_symbolizer& markers_( const symbolizer& sym )
-{
-    return boost::get<markers_symbolizer>(sym);
-}
-
 struct symbolizer_hash_visitor : public boost::static_visitor<std::size_t>
 {
     template <typename T>
@@ -219,6 +169,20 @@ struct symbolizer_hash_visitor : public boost::static_visitor<std::size_t>
 std::size_t hash_impl(symbolizer const& sym)
 {
     return boost::apply_visitor(symbolizer_hash_visitor(), sym);
+}
+
+struct extract_underlying_type_visitor : boost::static_visitor<boost::python::object>
+{
+    template <typename T>
+    boost::python::object operator() (T const& sym) const
+    {
+        return boost::python::object(sym);
+    }
+};
+
+boost::python::object extract_underlying_type(symbolizer const& sym)
+{
+    return boost::apply_visitor(extract_underlying_type_visitor(), sym);
 }
 
 }
@@ -235,7 +199,6 @@ void export_symbolizer()
     implicitly_convertible<mapnik::expression_ptr, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::enumeration_wrapper, mapnik::symbolizer_base::value_type>();
 
-
     enum_<mapnik::keys>("keys")
         .value("gamma", mapnik::keys::gamma)
         .value("gamma_method",mapnik::keys::gamma_method)
@@ -244,26 +207,7 @@ void export_symbolizer()
     class_<symbolizer>("Symbolizer",no_init)
         .def("type",get_symbolizer_type)
         .def("__hash__",hash_impl)
-        .def("point",point_,
-             return_value_policy<copy_const_reference>())
-        .def("line",line_,
-             return_value_policy<copy_const_reference>())
-        .def("line_pattern",line_pattern_,
-             return_value_policy<copy_const_reference>())
-        .def("polygon",polygon_,
-             return_value_policy<copy_const_reference>())
-        .def("polygon_pattern",polygon_pattern_,
-             return_value_policy<copy_const_reference>())
-        .def("raster",raster_,
-             return_value_policy<copy_const_reference>())
-        .def("shield",shield_,
-             return_value_policy<copy_const_reference>())
-        .def("text",text_,
-             return_value_policy<copy_const_reference>())
-        .def("building",building_,
-             return_value_policy<copy_const_reference>())
-        .def("markers",markers_,
-             return_value_policy<copy_const_reference>())
+        .def("extract", extract_underlying_type)
         ;
 
     class_<symbolizer_base::value_type>("NumericWrapper")
