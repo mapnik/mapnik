@@ -72,11 +72,30 @@ using mapnik::parse_path;
 
 namespace {
 using namespace boost::python;
-
 void __setitem__(mapnik::symbolizer_base & sym, std::string const& name, mapnik::symbolizer_base::value_type const& val)
 {
-    //std::cerr << "__setitem__ " << typeid(val).name() << std::endl;
     put(sym, mapnik::get_key(name), val);
+}
+
+std::shared_ptr<mapnik::symbolizer_base::value_type> numeric_wrapper(const object& arg)
+{
+    std::shared_ptr<mapnik::symbolizer_base::value_type> result;
+    if (PyBool_Check(arg.ptr()))
+    {
+        mapnik::value_bool val = extract<mapnik::value_bool>(arg);
+        result.reset(new mapnik::symbolizer_base::value_type(val));
+    }
+    else if (PyFloat_Check(arg.ptr()))
+    {
+        mapnik::value_double val = extract<mapnik::value_double>(arg);
+        result.reset(new mapnik::symbolizer_base::value_type(val));
+    }
+    else
+    {
+        mapnik::value_integer val = extract<mapnik::value_integer>(arg);
+        result.reset(new mapnik::symbolizer_base::value_type(val));
+    }
+    return result;
 }
 
 struct extract_python_object : public boost::static_visitor<boost::python::object>
@@ -208,13 +227,14 @@ void export_symbolizer()
 {
     using namespace boost::python;
 
-    implicitly_convertible<mapnik::enumeration_wrapper, mapnik::symbolizer_base::value_type>();
+    //implicitly_convertible<mapnik::value_bool, mapnik::symbolizer_base::value_type>();
+    implicitly_convertible<mapnik::value_integer, mapnik::symbolizer_base::value_type>();
+    implicitly_convertible<mapnik::value_double, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<std::string, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::color, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::expression_ptr, mapnik::symbolizer_base::value_type>();
-    implicitly_convertible<mapnik::value_integer, mapnik::symbolizer_base::value_type>();
-    implicitly_convertible<mapnik::value_double, mapnik::symbolizer_base::value_type>();
-    implicitly_convertible<mapnik::value_bool, mapnik::symbolizer_base::value_type>();
+    implicitly_convertible<mapnik::enumeration_wrapper, mapnik::symbolizer_base::value_type>();
+
 
     enum_<mapnik::keys>("keys")
         .value("gamma", mapnik::keys::gamma)
@@ -244,6 +264,10 @@ void export_symbolizer()
              return_value_policy<copy_const_reference>())
         .def("markers",markers_,
              return_value_policy<copy_const_reference>())
+        ;
+
+    class_<symbolizer_base::value_type>("NumericWrapper")
+        .def("__init__", make_constructor(numeric_wrapper))
         ;
 
     class_<symbolizer_base>("SymbolizerBase",no_init)
