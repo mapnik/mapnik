@@ -932,7 +932,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
         optional<double> opacity = sym.get_opt_attr<double>("opacity");
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         point_symbolizer symbol;
@@ -1506,18 +1505,15 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         optional<boolean> premultiplied = sym.get_opt_attr<boolean>("premultiplied");
         if (premultiplied) put(raster_sym, keys::premultiplied, *premultiplied);
 
-        xml_node::const_iterator cssIter = sym.begin();
-        xml_node::const_iterator endCss = sym.end();
-
         bool found_colorizer = false;
-        for(; cssIter != endCss; ++cssIter)
+        for ( auto const& css : sym)
         {
-            if (cssIter->is("RasterColorizer"))
+            if (css.is("RasterColorizer"))
             {
                 found_colorizer = true;
                 raster_colorizer_ptr colorizer = std::make_shared<raster_colorizer>();
                 put(raster_sym, keys::colorizer, colorizer);
-                if (parse_raster_colorizer(colorizer, *cssIter))
+                if (parse_raster_colorizer(colorizer, css))
                     put(raster_sym, keys::colorizer, colorizer);
             }
         }
