@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
-<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+<Map background-color="white" srs="+proj=latlong +datum=WGS84"
+     font-directory="../fonts/KhmerOS/">
+
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
             <StyleName>My Style</StyleName>
             <Datasource>
@@ -13,23 +15,23 @@
             <PointSymbolizer/>
         </Rule>
         <Rule>
-            <Filter>[nr] = "1"</Filter>
+            <Filter>[nr] = 1</Filter>
             <TextSymbolizer face-name="Khmer OS Regular" size="20" placement="point" dy="16">"ព្រះរាជាណាចក្រកម្ពុជា"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = "3"</Filter>
+            <Filter>[nr] = 3</Filter>
             <TextSymbolizer face-name="Khmer OS Regular" size="20" placement="point" dy="16">"ស្ត្រី"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = "5"</Filter>
+            <Filter>[nr] = 5</Filter>
             <TextSymbolizer face-name="Khmer OS Regular" size="20" placement="point" dy="16">"ផ្លូវ ១២៣"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = "7"</Filter>
+            <Filter>[nr] = 7</Filter>
             <TextSymbolizer face-name="Khmer OS Regular" size="20" placement="point" dy="-16">"ផផ្ទះសំណាក់​សណ្ឋាគារ​មាស"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = "9"</Filter>
+            <Filter>[nr] = 9</Filter>
             <TextSymbolizer face-name="Khmer OS Regular" size="20" placement="point" dy="16">"ផ្លូវ១២៣"</TextSymbolizer>
         </Rule>
     </Style>

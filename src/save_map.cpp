@@ -122,7 +122,7 @@ template <typename Meta>
 class serialize_symbolizer_property : public boost::static_visitor<>
 {
 public:
-    serialize_symbolizer_property(Meta  meta,
+    serialize_symbolizer_property(Meta const& meta,
                                   boost::property_tree::ptree & node)
         : meta_(meta),
           node_(node) {}
@@ -194,7 +194,7 @@ public:
     }
 
 private:
-    Meta  meta_;
+    Meta const& meta_;
     boost::property_tree::ptree & node_;
 };
 

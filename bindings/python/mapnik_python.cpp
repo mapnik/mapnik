@@ -98,6 +98,7 @@ void export_wkt_reader();
 #include "python_grid_utils.hpp"
 #endif
 #include "mapnik_value_converter.hpp"
+#include "mapnik_enumeration_wrapper_converter.hpp"
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
 #include <mapnik/marker_cache.hpp>
@@ -877,4 +878,5 @@ BOOST_PYTHON_MODULE(_mapnik)
     register_ptr_to_python<mapnik::path_expression_ptr>();
     to_python_converter<mapnik::value_holder,mapnik_param_to_python>();
     to_python_converter<mapnik::value,mapnik_value_to_python>();
+    to_python_converter<mapnik::enumeration_wrapper,mapnik_enumeration_wrapper_to_python>();
 }

@@ -153,9 +153,8 @@ files = {
     'text-bug2037': {'sizes': [(800, 300)], 'bbox': default_text_box},
     'text-expressionformat-color': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
-    # Disabled by default as the required font isn't shipped with mapnik
-    #'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
-    #'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     'tiff-alpha-gdal': {'sizes':[(600,400)]},
     'tiff-alpha-broken-assoc-alpha-gdal': {'sizes':[(600,400)]},
@@ -335,7 +334,7 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
     postfix = "%s-%d-%d-%s" % (filename, width, height, scale_factor)
 
     try:
-        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
+        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), True)
         if bbox is not None:
             m.zoom_to_box(bbox)
         else:

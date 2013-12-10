@@ -38,12 +38,12 @@ namespace boost { namespace python {
             return ::PyLong_FromLongLong(val);
         }
 
-        PyObject * operator() (double val) const
+        PyObject * operator() (mapnik::value_double val) const
         {
             return ::PyFloat_FromDouble(val);
         }
 
-        PyObject * operator() (bool val) const
+        PyObject * operator() (mapnik::value_bool val) const
         {
             return ::PyBool_FromLong(val);
         }
