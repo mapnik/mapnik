@@ -33,8 +33,8 @@ void svg_renderer<T>::process(polygon_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    path_attributes_.set_fill_color(sym.get_fill());
-    path_attributes_.set_fill_opacity(sym.get_opacity());
+    path_attributes_.set_fill_color(get<mapnik::color>(sym, keys::fill, mapnik::color(128,128,128)));
+    path_attributes_.set_fill_opacity(get<value_double>(sym,keys::fill_opacity, 1.0));
 }
 
 template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
