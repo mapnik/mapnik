@@ -100,6 +100,30 @@ struct  MAPNIK_DECL symbolizer_base
     cont_type properties;
 };
 
+// symbolizer properties target types
+enum class property_types : std::uint8_t
+{
+    target_bool = 1,
+    target_double,
+    target_integer,
+    target_color,
+    target_comp_op,
+    target_line_cap,
+    target_line_join,
+    target_line_rasterizer,
+    target_halo_rasterizer,
+    target_point_placement,
+    target_pattern_alignment,
+    target_debug_symbolizer_mode,
+    target_marker_placement,
+    target_marker_multi_policy,
+    target_string,
+    target_transform,
+    target_placement,
+    target_dash_array,
+    target_colorizer
+};
+
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
 {
     return lhs.properties.size() == rhs.properties.size() &&
@@ -376,7 +400,7 @@ constexpr auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
     return static_cast<typename std::underlying_type<Enum>::type>(e);
 }
 
-typedef std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)> > property_meta_type;
+typedef std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types> property_meta_type;
 property_meta_type const& get_meta(mapnik::keys key);
 mapnik::keys get_key(std::string const& name);
 
