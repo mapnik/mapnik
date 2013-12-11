@@ -30,6 +30,7 @@
 
 // mapnik
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_utils.hpp>
 #include <mapnik/json/generic_json.hpp>
 
 namespace mapnik { namespace json {
@@ -63,8 +64,7 @@ struct json_value_visitor : boost::static_visitor<>
 
     void operator() (std::string const& val) const
     {
-        std::cerr << std::get<0>(get_meta(key_)) << ":" << val <<  std::endl;
-        put<std::string>(sym_, key_, val);
+        set_property(sym_, key_, val);
     }
 
     template <typename T>
