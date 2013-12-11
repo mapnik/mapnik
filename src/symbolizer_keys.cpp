@@ -101,13 +101,13 @@ mapnik::keys get_key(std::string const& name)
 {
    std::string name_copy(name);
    boost::algorithm::replace_all(name_copy,"_","-");
-   for (unsigned i=0;i<static_cast<unsigned>(keys::MAX_SYMBOLIZER_KEY);++i)
+   for (unsigned i=0; i< to_integral(keys::MAX_SYMBOLIZER_KEY) ; ++i)
    {
-        property_meta_type const& item = key_meta[i];
-        if (name_copy == std::get<0>(item))
-        {
-            return static_cast<mapnik::keys>(i);
-        }
+       property_meta_type const& item = key_meta[i];
+       if (name_copy == std::get<0>(item))
+       {
+           return static_cast<mapnik::keys>(i);
+       }
    }
    throw std::runtime_error("no key found for '" + name + "'");
    return static_cast<mapnik::keys>(0);

@@ -370,10 +370,15 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     return boost::optional<T>();
 }
 
+template<typename Enum>
+constexpr auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
+{
+    return static_cast<typename std::underlying_type<Enum>::type>(e);
+}
+
 typedef std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)> > property_meta_type;
 property_meta_type const& get_meta(mapnik::keys key);
 mapnik::keys get_key(std::string const& name);
-
 
 // concrete symbolizer types
 struct MAPNIK_DECL point_symbolizer : public symbolizer_base {};
