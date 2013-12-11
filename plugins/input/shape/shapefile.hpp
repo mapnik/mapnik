@@ -167,7 +167,7 @@ public:
         if (memory)
         {
             mapped_region_ = *memory;
-            file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+            file_.buffer(static_cast<char*>(mapped_region_->get_address()),mapped_region_->get_size());
         }
         else
         {
