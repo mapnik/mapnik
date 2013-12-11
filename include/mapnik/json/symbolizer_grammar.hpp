@@ -40,6 +40,44 @@ namespace fusion = boost::fusion;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
+template <typename Symbolizer>
+struct json_value_visitor : boost::static_visitor<>
+{
+    json_value_visitor(Symbolizer & sym, mapnik::keys key)
+        : sym_(sym), key_(key) {}
+
+    void operator() (value_bool val) const
+    {
+        put<value_bool>(sym_, key_, val);
+    }
+
+    void operator() (value_integer val) const
+    {
+        put<value_integer>(sym_, key_, val);
+    }
+
+    void operator() (value_double val) const
+    {
+        put<value_double>(sym_, key_, val);
+    }
+
+    void operator() (std::string const& val) const
+    {
+        std::cerr << std::get<0>(get_meta(key_)) << ":" << val <<  std::endl;
+        put<std::string>(sym_, key_, val);
+    }
+
+    template <typename T>
+    void operator() (T const& val) const
+    {
+        std::cerr << std::get<0>(get_meta(key_)) << ":" << val <<  std::endl;
+        //put<T>(sym_, key_, val);
+    }
+
+    Symbolizer & sym_;
+    keys key_;
+};
+
 template <typename T>
 struct put_property_visitor : boost::static_visitor<>
 {
@@ -51,8 +89,7 @@ struct put_property_visitor : boost::static_visitor<>
     template <typename Symbolizer>
     void operator() (Symbolizer & sym) const
     {
-        std::cerr << std::get<0>(get_meta(key_)) << ":" << val_ << std::endl;
-        // put<value_type>(sym, key_, val_);
+        boost::apply_visitor(json_value_visitor<Symbolizer>(sym, key_), val_);
     }
 
     keys key_;
@@ -62,8 +99,6 @@ struct put_property_visitor : boost::static_visitor<>
 struct put_property
 {
     typedef void result_type;
-    //explicit put_property(mapnik::transcoder const& tr)
-    //    : tr_(tr) {}
     template <typename T0,typename T1, typename T2>
     result_type operator() (T0 & sym, T1 const& name, T2 const& val) const
     {
@@ -76,12 +111,12 @@ struct put_property
             std::cerr <<  err.what() << std::endl;
         }
     }
-//    mapnik::transcoder const& tr_;
 };
 
 template <typename Iterator>
 struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 {
+    typedef boost::variant<value_null,value_bool,value_integer,value_double, std::string> json_value_type;
     symbolizer_grammar(generic_json<Iterator> & json)
         : symbolizer_grammar::base_type(sym, "symbolizer"),
           json_(json)
@@ -171,7 +206,7 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
     // symbolizer
     qi::rule<Iterator, space_type, mapnik::symbolizer()> sym;
     qi::rule<Iterator,qi::locals<std::string>, void(mapnik::symbolizer&),space_type> property;
-    qi::rule<Iterator,boost::variant<value_null,value_bool,value_integer,value_double, std::string>, space_type> property_value;
+    qi::rule<Iterator, space_type, json_value_type()> property_value;
 
     phoenix::function<put_property> put_property_;
     // error
