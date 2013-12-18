@@ -58,7 +58,6 @@ static void shape_text(text_line & line,
     const std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> buffer(hb_buffer_create(),hb_buffer_deleter);
     hb_buffer_set_unicode_funcs(buffer.get(), hb_icu_get_unicode_funcs());
     hb_buffer_pre_allocate(buffer.get(), length);
-    const char* const shapers[]  = { "ot", "fallback", NULL };
 
     for (auto const& text_item : list)
     {
@@ -74,7 +73,7 @@ static void shape_text(text_line & line,
             hb_buffer_set_script(buffer.get(), hb_icu_script_to_script(text_item.script));
             face_ptr const& face = *face_itr;
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
-            hb_shape_full(font, buffer.get(), NULL, 0, shapers);
+            hb_shape(font, buffer.get(), NULL, 0);
             hb_font_destroy(font);
 
             unsigned num_glyphs = hb_buffer_get_length(buffer.get());
