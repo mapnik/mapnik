@@ -24,9 +24,10 @@
 #define MAPNIK_SYMBOLIZER_UTILS_HPP
 
 // mapnik
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/transform_processor.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/transform_processor.hpp>
+#include <mapnik/color_factory.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // boost
 #include <boost/variant/apply_visitor.hpp>
@@ -180,7 +181,7 @@ public:
         std::ostringstream ss;
         if (expr)
         {
-            ss << '\"' << mapnik::to_expression_string(*expr) <<  '\"';
+            ss << '\"' << "FIXME" /*mapnik::to_expression_string(*expr)*/ <<  '\"';
         }
         return ss.str();
     }
@@ -215,6 +216,92 @@ private:
     Meta const& meta_;
 };
 
+struct symbolizer_to_json : public boost::static_visitor<std::string>
+{
+    typedef std::string result_type;
+
+    template <typename T>
+    auto operator() (T const& sym) const -> result_type
+    {
+        std::stringstream ss;
+        ss << "{\"type\":\"" << mapnik::symbolizer_traits<T>::name() << "\",";
+        ss << "\"properties\":{";
+        bool first = true;
+        for (auto const& prop : sym.properties)
+        {
+            auto const& meta = mapnik::get_meta(prop.first);
+            if (first) first = false;
+            else ss << ",";
+            ss << "\"" <<  std::get<0>(meta) << "\":";
+            ss << boost::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta),prop.second);
+        }
+        ss << "}}";
+        return ss.str();
+    }
 };
+
+namespace {
+
+template <typename Symbolizer, typename T>
+struct set_property_impl
+{
+    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    {
+        std::cerr << "do nothing" << std::endl;
+    }
+};
+
+template <typename Symbolizer>
+struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_color> >
+{
+    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    {
+        put(sym, key, mapnik::parse_color(val));
+    }
+};
+
+template <typename Symbolizer>
+struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double> >
+{
+    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    {
+        std::cerr << " expects double" << std::endl;
+    }
+};
+
+template <typename Symbolizer>
+struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >
+{
+    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    {
+        std::cerr << " expects bool" << std::endl;
+    }
+};
+
+}
+
+template <typename Symbolizer, typename T>
+inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
+{
+    switch (std::get<3>(get_meta(key)))
+    {
+    case property_types::target_bool:
+        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >::apply(sym,key,val);
+        break;
+    case property_types::target_integer:
+        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_integer> >::apply(sym,key,val);
+        break;
+    case property_types::target_double:
+        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double> >::apply(sym,key,val);
+        break;
+    case property_types::target_color:
+        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_color> >::apply(sym,key,val);
+        break;
+    default:
+        break;
+    }
+}
+
+}
 
 #endif // MAPNIK_SYMBOLIZER_UTILS_HPP

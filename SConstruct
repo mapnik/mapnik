@@ -1160,6 +1160,7 @@ if not preconfigured:
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
+        DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
         DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
     env.Append(CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)

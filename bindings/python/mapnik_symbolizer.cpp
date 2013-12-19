@@ -124,33 +124,9 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
     return boost::python::object();
 }
 
-struct symbolizer_to_json : public boost::static_visitor<std::string>
-{
-    typedef std::string result_type;
-
-    template <typename T>
-    auto operator() (T const& sym) const -> result_type
-    {
-        std::stringstream ss;
-        ss << "{\"type\":\"" << mapnik::symbolizer_traits<T>::name() << "\",";
-        ss << "\"properties\":{";
-        bool first = true;
-        for (auto const& prop : sym.properties)
-        {
-            auto const& meta = mapnik::get_meta(prop.first);
-            if (first) first = false;
-            else ss << ",";
-            ss << "\"" <<  std::get<0>(meta) << "\":";
-            ss << boost::apply_visitor(mapnik::symbolizer_property_value_string<mapnik::property_meta_type>(meta),prop.second);
-        }
-        ss << "}}";
-        return ss.str();
-    }
-};
-
 std::string __str__(mapnik::symbolizer const& sym)
 {
-    return boost::apply_visitor(symbolizer_to_json(), sym);
+    return boost::apply_visitor(mapnik::symbolizer_to_json(), sym);
 }
 
 std::string get_symbolizer_type(symbolizer const& sym)

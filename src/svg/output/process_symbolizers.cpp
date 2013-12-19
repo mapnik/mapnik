@@ -59,7 +59,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     // process each symbolizer to collect its (path) information.
     // path information (attributes from line_ and polygon_ symbolizers)
     // is collected with the path_attributes_ data member.
-    for (symbolizer const& sym : syms)
+    for (auto const& sym : syms)
     {
         if (is_path_based(sym))
         {
@@ -71,9 +71,8 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
-        for(std::size_t i=0; i<feature.num_geometries(); ++i)
+        for (auto & geom : feature.paths())
         {
-            geometry_type & geom = feature.get_geometry(i);
             if(geom.size() > 0)
             {
                 path_type path(common_.t_, geom, prj_trans);

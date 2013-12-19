@@ -23,7 +23,7 @@ int main(int argc, char** argv)
         BOOST_TEST_EQ(policy_in,MARKER_WHOLE_MULTI);
         markers_symbolizer sym;
         put(sym, keys::markers_multipolicy, policy_in);
-        BOOST_TEST_EQ(sym.properties.count(keys::markers_multipolicy),1);
+        BOOST_TEST_EQ(sym.properties.count(keys::markers_multipolicy),static_cast<unsigned long>(1));
         marker_multi_policy_enum policy_out = get<mapnik::marker_multi_policy_enum>(sym, keys::markers_multipolicy);
         BOOST_TEST_EQ(policy_out,MARKER_WHOLE_MULTI);
     } catch (...) {

@@ -83,7 +83,6 @@ void svg_renderer<T>::end_map_processing(Map const& map)
 {
     // generate SVG root element closing tag.
     generator_.generate_closing_root();
-
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: End map processing";
 }
 
