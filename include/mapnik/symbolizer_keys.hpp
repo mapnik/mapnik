@@ -78,6 +78,10 @@ enum class keys : std::uint8_t
     point_placement_type,
     colorizer,
     halo_transform,
+    num_columns,
+    start_column,
+    repeat_key,
+    group_properties,
     MAX_SYMBOLIZER_KEY
 };
 
