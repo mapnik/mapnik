@@ -1025,7 +1025,7 @@ def register_plugins(path=None):
             path = inputpluginspath
     DatasourceCache.register_datasources(path)
 
-def register_fonts(path=None,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
+def register_fonts(path=None,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont','.woff']):
     """Recursively register fonts using path argument as base directory"""
     if not path:
        if os.environ.has_key('MAPNIK_FONT_DIRECTORY'):
