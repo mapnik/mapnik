@@ -38,32 +38,18 @@ template <typename T>
 svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
     feature_style_processor<svg_renderer>(m, scale_factor),
     output_iterator_(output_iterator),
-    width_(m.width()),
-    height_(m.height()),
-    scale_factor_(scale_factor),
-    t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
-    font_engine_(),
-    font_manager_(font_engine_),
-    detector_(std::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
     generator_(output_iterator),
-    query_extent_(),
-    painted_(false)
+    painted_(false),
+    common_(m, offset_x, offset_y, m.width(), m.height(), scale_factor)
 {}
 
 template <typename T>
 svg_renderer<T>::svg_renderer(Map const& m, request const& req, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
     feature_style_processor<svg_renderer>(m, scale_factor),
     output_iterator_(output_iterator),
-    width_(req.width()),
-    height_(req.height()),
-    scale_factor_(scale_factor),
-    t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
-    font_engine_(),
-    font_manager_(font_engine_),
-    detector_(std::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
     generator_(output_iterator),
-    query_extent_(),
-    painted_(false)
+    painted_(false),
+    common_(req, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {}
 
 template <typename T>
@@ -80,14 +66,14 @@ void svg_renderer<T>::start_map_processing(Map const& map)
     // generate SVG root element opening tag.
     // the root element defines the size of the image,
     // which is taken from the map's dimensions.
-    svg::root_output_attributes root_attributes(width_, height_);
+    svg::root_output_attributes root_attributes(common_.width_, common_.height_);
     generator_.generate_opening_root(root_attributes);
 
     boost::optional<color> const& bgcolor = map.background();
     if(bgcolor)
     {
         // generate background color as a rectangle that spans the whole image.
-        svg::rect_output_attributes bg_attributes(0, 0, width_, height_, *bgcolor);
+        svg::rect_output_attributes bg_attributes(0, 0, common_.width_, common_.height_, *bgcolor);
         generator_.generate_rect(bg_attributes);
     }
 }

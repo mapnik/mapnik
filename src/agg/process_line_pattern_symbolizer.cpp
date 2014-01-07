@@ -139,20 +139,20 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     box2d<double> clip_box = clipping_extent();
     if (clip)
     {
-        double padding = (double)(query_extent_.width()/pixmap_.width());
+        double padding = (double)(common_.query_extent_.width()/pixmap_.width());
         double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         if (std::fabs(offset) > 0)
             padding *= std::fabs(offset) * 1.2;
-        padding *= scale_factor_;
+        padding *= common_.scale_factor_;
         clip_box.pad(padding);
     }
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clip_box,ras,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clip_box,ras,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

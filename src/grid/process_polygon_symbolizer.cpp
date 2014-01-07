@@ -30,6 +30,7 @@
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
@@ -50,51 +51,32 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
     typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
+    typedef vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
+                             CoordTransform, proj_transform, agg::trans_affine, 
+                             conv_types> vertex_converter_type;
 
     ras_ptr->reset();
 
-    agg::trans_affine tr;
-    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (geom_transform) evaluate_transform(tr, feature, *geom_transform);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, true);
-    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, 0.0);
+    render_polygon_symbolizer<vertex_converter_type>(
+      sym, feature, prj_trans, common_, common_.query_extent_, *ras_ptr,
+      [&](color const &, double) {
+        pixfmt_type pixf(buf);
+        
+        grid_renderer_base_type renb(pixf);
+        renderer_type ren(renb);
+        
+        // render id
+        ren.color(color_type(feature.id()));
+        agg::scanline_bin sl;
+        ras_ptr->filling_rule(agg::fill_even_odd);
+        agg::render_scanlines(*ras_ptr, sl, ren);
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
-    vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
-
-    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
-    converter.set<transform_tag>(); //always transform
-    converter.set<affine_transform_tag>();
-    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
-
-    for ( geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            converter.apply(geom);
-        }
-    }
-
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    pixfmt_type pixf(buf);
-
-    grid_renderer_base_type renb(pixf);
-    renderer_type ren(renb);
-
-    // render id
-    ren.color(color_type(feature.id()));
-    agg::scanline_bin sl;
-    ras_ptr->filling_rule(agg::fill_even_odd);
-    agg::render_scanlines(*ras_ptr, sl, ren);
-
-    // add feature properties to grid cache
-    pixmap_.add_feature(feature);
+        // add feature properties to grid cache
+        pixmap_.add_feature(feature);
+      });
 }
 
 

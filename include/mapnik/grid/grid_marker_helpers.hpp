@@ -73,6 +73,14 @@ struct raster_markers_rasterizer_dispatch_grid
         //pixf_.comp_op(static_cast<agg::comp_op_e>(sym_.comp_op()));
     }
 
+    raster_markers_rasterizer_dispatch_grid(raster_markers_rasterizer_dispatch_grid &&d) 
+      : buf_(d.buf_), pixf_(d.pixf_), renb_(d.renb_), ras_(d.ras_), src_(d.src_), 
+        marker_trans_(d.marker_trans_), sym_(d.sym_), detector_(d.detector_), 
+        scale_factor_(d.scale_factor_), feature_(d.feature_), pixmap_(d.pixmap_),
+        placed_(d.placed_)
+    {
+    }
+
     template <typename T>
     void add_path(T & path)
     {
@@ -185,23 +193,26 @@ private:
 template <typename BufferType, typename SvgRenderer, typename Rasterizer, typename Detector, typename PixMapType>
 struct vector_markers_rasterizer_dispatch_grid
 {
-    typedef typename SvgRenderer::renderer_base renderer_base;
-    typedef typename renderer_base::pixfmt_type pixfmt_type;
+    typedef typename SvgRenderer::renderer_base         renderer_base;
+    typedef typename SvgRenderer::vertex_source_type    vertex_source_type;
+    typedef typename SvgRenderer::attribute_source_type attribute_source_type;
+    typedef typename renderer_base::pixfmt_type         pixfmt_type;
 
     vector_markers_rasterizer_dispatch_grid(BufferType & render_buffer,
-                                SvgRenderer & svg_renderer,
-                                Rasterizer & ras,
-                                box2d<double> const& bbox,
-                                agg::trans_affine const& marker_trans,
-                                markers_symbolizer const& sym,
-                                Detector & detector,
-                                double scale_factor,
-                                mapnik::feature_impl & feature,
-                                PixMapType & pixmap)
+                                            vertex_source_type &path,
+                                            const attribute_source_type &attrs,
+                                            Rasterizer & ras,
+                                            box2d<double> const& bbox,
+                                            agg::trans_affine const& marker_trans,
+                                            markers_symbolizer const& sym,
+                                            Detector & detector,
+                                            double scale_factor,
+                                            mapnik::feature_impl & feature,
+                                            PixMapType & pixmap)
         : buf_(render_buffer),
         pixf_(buf_),
         renb_(pixf_),
-        svg_renderer_(svg_renderer),
+        svg_renderer_(path, attrs),
         ras_(ras),
         bbox_(bbox),
         marker_trans_(marker_trans),
@@ -214,6 +225,14 @@ struct vector_markers_rasterizer_dispatch_grid
     {
         // TODO
         //pixf_.comp_op(static_cast<agg::comp_op_e>(sym_.comp_op()));
+    }
+
+    vector_markers_rasterizer_dispatch_grid(vector_markers_rasterizer_dispatch_grid &&d)
+      : buf_(d.buf_), pixf_(d.pixf_), svg_renderer_(std::move(d.svg_renderer_)), ras_(d.ras_),
+        bbox_(d.bbox_), marker_trans_(d.marker_trans_), sym_(d.sym_), detector_(d.detector_),
+        scale_factor_(d.scale_factor_), feature_(d.feature_), pixmap_(d.pixmap_),
+        placed_(d.placed_)
+    {
     }
 
     template <typename T>
@@ -290,7 +309,7 @@ private:
     BufferType & buf_;
     pixfmt_type pixf_;
     renderer_base renb_;
-    SvgRenderer & svg_renderer_;
+    SvgRenderer svg_renderer_;
     Rasterizer & ras_;
     box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;

@@ -39,9 +39,9 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
     box2d<double> clip_box = clipping_extent();
     text_symbolizer_helper helper(
             sym, feature, prj_trans,
-            width_, height_,
-            scale_factor_,
-            t_, font_manager_, *detector_,
+            common_.width_, common_.height_,
+            common_.scale_factor_,
+            common_.t_, common_.font_manager_, *common_.detector_,
             clip_box);
 
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, HALO_RASTERIZER_FULL);
@@ -49,8 +49,8 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
     agg_text_renderer<T0> ren(*current_buffer_,
                              halo_rasterizer,
                              comp_op,
-                             scale_factor_,
-                             font_manager_.get_stroker());
+                             common_.scale_factor_,
+                             common_.font_manager_.get_stroker());
 
     double opacity = get<double>(sym,keys::opacity,feature, 1.0);
 

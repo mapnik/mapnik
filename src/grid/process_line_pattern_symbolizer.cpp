@@ -76,7 +76,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
                                simplify_tag, smooth_tag, stroke_tag> conv_types;
     agg::scanline_bin sl;
 
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
 
     grid_renderer_base_type renb(pixf);
@@ -90,16 +90,16 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) { evaluate_transform(tr, feature, *transform); }
 
-    box2d<double> clipping_extent = query_extent_;
+    box2d<double> clipping_extent = common_.query_extent_;
     if (clip)
     {
-        double padding = (double)(query_extent_.width()/pixmap_.width());
+        double padding = (double)(common_.query_extent_.width()/pixmap_.width());
         double half_stroke = stroke_width/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         if (std::fabs(offset) > 0)
             padding *= std::fabs(offset) * 1.2;
-        padding *= scale_factor_;
+        padding *= common_.scale_factor_;
         clipping_extent.pad(padding);
     }
     
@@ -116,7 +116,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clipping_extent,*ras_ptr,line,t_,prj_trans,tr,scale_factor_);
+        converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset

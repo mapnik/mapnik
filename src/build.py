@@ -213,6 +213,7 @@ source = Split(
     xml_tree.cpp
     config_error.cpp
     color_factory.cpp
+    renderer_common.cpp
     """
     )
 

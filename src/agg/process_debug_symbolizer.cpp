@@ -57,8 +57,8 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
 
     if (mode == DEBUG_SYM_MODE_COLLISION)
     {
-        typename detector_type::query_iterator itr = detector_->begin();
-        typename detector_type::query_iterator end = detector_->end();
+        typename detector_type::query_iterator itr = common_.detector_->begin();
+        typename detector_type::query_iterator end = common_.detector_->end();
         for ( ;itr!=end; ++itr)
         {
             draw_rect(pixmap_, itr->box);
@@ -77,7 +77,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
             {
                 if (cmd == SEG_CLOSE) continue;
                 prj_trans.backward(x,y,z);
-                t_.forward(&x,&y);
+                common_.t_.forward(&x,&y);
                 pixmap_.setPixel(x,y,0xff0000ff);
                 pixmap_.setPixel(x-1,y-1,0xff0000ff);
                 pixmap_.setPixel(x+1,y+1,0xff0000ff);

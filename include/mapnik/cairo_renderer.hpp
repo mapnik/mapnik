@@ -37,6 +37,7 @@
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/renderer_common.hpp>
 
 // cairo
 #include <cairo.h>
@@ -128,7 +129,7 @@ public:
 
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
     }
 
     void render_marker(pixel_position const& pos,
@@ -140,15 +141,8 @@ public:
 protected:
     Map const& m_;
     cairo_context context_;
-    unsigned width_;
-    unsigned height_;
-    double scale_factor_;
-    CoordTransform t_;
-    std::shared_ptr<freetype_engine> font_engine_;
-    face_manager<freetype_engine> font_manager_;
+    renderer_common common_;
     cairo_face_manager face_manager_;
-    std::shared_ptr<label_collision_detector4> detector_;
-    box2d<double> query_extent_;
     void setup(Map const& m);
 };
 

@@ -77,7 +77,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
@@ -96,7 +96,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
 
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
 
     grid_renderer_base_type renb(pixf);

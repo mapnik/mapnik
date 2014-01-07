@@ -142,7 +142,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         {
             clipped_geometry_type clipped(feature.get_geometry(0));
             clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
-            path_type path(t_,clipped,prj_trans);
+            path_type path(common_.t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
         offset_x = unsigned(current_buffer_->width() - x0);
@@ -161,7 +161,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clip_box,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

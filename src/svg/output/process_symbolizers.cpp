@@ -75,7 +75,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
         {
             if(geom.size() > 0)
             {
-                path_type path(t_, geom, prj_trans);
+                path_type path(common_.t_, geom, prj_trans);
                 generator_.generate_path(path, path_attributes_);
             }
         }
