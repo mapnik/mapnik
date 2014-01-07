@@ -140,7 +140,7 @@ public:
 
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
     }
 
     inline OutputIterator& get_output_iterator()
