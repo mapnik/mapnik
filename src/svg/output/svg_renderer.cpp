@@ -49,7 +49,7 @@ svg_renderer<T>::svg_renderer(Map const& m, request const& req, T & output_itera
     output_iterator_(output_iterator),
     generator_(output_iterator),
     painted_(false),
-    common(req, offset_x, offset_y, req.width(), req.height(), scale_factor)
+    common_(req, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {}
 
 template <typename T>
