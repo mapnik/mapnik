@@ -46,11 +46,11 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     vertex_converter_type converter(clip_box, ras, sym, common.t_, prj_trans, tr,
                                     common.scale_factor_);
 
-    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
-    converter.set<transform_tag>(); //always transform
-    converter.set<affine_transform_tag>();
-    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    if (prj_trans.equal() && clip) converter.template set<clip_poly_tag>(); //optional clip (default: true)
+    converter.template set<transform_tag>(); //always transform
+    converter.template set<affine_transform_tag>();
+    if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
     for (geometry_type & geom : feature.paths())
     {
