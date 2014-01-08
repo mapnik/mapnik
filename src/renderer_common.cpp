@@ -66,4 +66,9 @@ renderer_common::renderer_common(request const &req, unsigned offset_x, unsigned
                                       req.width() + req.buffer_size() ,req.height() + req.buffer_size())))
 {}
 
+renderer_common::renderer_common(renderer_common const &other)
+    : renderer_common(other.width_, other.height_, other.scale_factor_,
+                      CoordTransform(other.t_), other.detector_)
+{}
+
 }

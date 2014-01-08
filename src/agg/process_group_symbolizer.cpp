@@ -29,11 +29,16 @@
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/text/layout.hpp>
 #include <mapnik/group/group_layout_manager.hpp>
+#include <mapnik/text/layout.hpp>
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/label_collision_detector.hpp>
+
+#include <mapnik/renderer_common/process_point_symbolizer.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -45,6 +50,168 @@
 #include <boost/variant/apply_visitor.hpp>
 
 namespace mapnik {
+
+/* General:
+ *
+ * The approach here is to run the normal symbolizers, but in
+ * a 'virtual' blank environment where the changes that they
+ * make are recorded (the detector, the render_* calls).
+ *
+ * The recorded boxes are then used to lay out the items and
+ * the offsets from old to new positions can be used to perform
+ * the actual rendering calls.
+ *
+ * This should allow us to re-use as much as possible of the
+ * existing symbolizer layout and rendering code while still
+ * being able to interpose our own decisions about whether
+ * a collision has occured or not.
+ */
+
+/**
+ * Thunk for rendering a particular instance of a point - this
+ * stores all the arguments necessary to re-render this point
+ * symbolizer at a later time.
+ */
+struct point_render_thunk
+{
+    pixel_position pos_;
+    marker_ptr marker_;
+    agg::trans_affine tr_;
+    double opacity_;
+    composite_mode_e comp_op_;
+
+    point_render_thunk(pixel_position const &pos, marker const &m,
+                       agg::trans_affine const &tr, double opacity,
+                       composite_mode_e comp_op)
+        : pos_(pos), marker_(std::make_shared<marker>(m)),
+          tr_(tr), opacity_(opacity), comp_op_(comp_op)
+    {}
+};
+
+struct text_render_thunk
+{
+    placements_list placements_;
+    halo_rasterizer_enum halo_rasterizer_;
+    composite_mode_e comp_op_;
+    
+    text_render_thunk(placements_list const &placements,
+                      halo_rasterizer_enum halo_rasterizer,
+                      composite_mode_e comp_op)
+        : placements_(placements), halo_rasterizer_(halo_rasterizer),
+          comp_op_(comp_op)
+    {}
+};
+
+// Variant type for render thunks to allow us to re-render them
+// via a static visitor later.
+typedef boost::variant<point_render_thunk,
+                       text_render_thunk> render_thunk;
+typedef std::shared_ptr<render_thunk> render_thunk_ptr;
+typedef std::list<render_thunk_ptr> render_thunk_list;
+
+/**
+ * Visitor to extract the bounding boxes associated with placing
+ * a symbolizer at a fake, virtual point - not real geometry.
+ *
+ * The bounding boxes can be used for layout, and the thunks are
+ * used to re-render at locations according to the group layout.
+ */
+struct extract_bboxes : public boost::static_visitor<>
+{
+    extract_bboxes(box2d<double> &box,
+                   render_thunk_list &thunks,
+                   mapnik::feature_impl &feature,
+                   proj_transform const &prj_trans,
+                   renderer_common const &common,
+                   text_layout const &text,
+                   box2d<double> const &clipping_extent)
+        : box_(box), thunks_(thunks), feature_(feature), prj_trans_(prj_trans),
+          common_(common), text_(text), clipping_extent_(clipping_extent)
+    {}
+
+    void operator()(point_symbolizer const &sym) const
+    {
+        // create an empty detector, so we are sure we won't hit
+        // anything
+        renderer_common common(common_);
+        common.detector_->clear();
+
+        composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, src_over);
+
+        render_point_symbolizer(
+            sym, feature_, prj_trans_, common,
+            [&](pixel_position const &pos, marker const &marker,
+                agg::trans_affine const &tr, double opacity) {
+                point_render_thunk thunk(pos, marker, tr, opacity, comp_op);
+                thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
+            });
+
+        update_box(*common.detector_);
+    }
+
+    void operator()(text_symbolizer const &sym) const
+    {
+        // create an empty detector, so we are sure we won't hit
+        // anything
+        renderer_common common(common_);
+        common.detector_->clear();
+
+        box2d<double> clip_box = clipping_extent_;
+        text_symbolizer_helper helper(
+            sym, feature_, prj_trans_,
+            common.width_, common.height_,
+            common.scale_factor_,
+            common.t_, common.font_manager_, *common.detector_,
+            clip_box);
+
+        halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, HALO_RASTERIZER_FULL);
+        composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, src_over);
+        
+        placements_list const& placements = helper.get();
+        text_render_thunk thunk(placements, halo_rasterizer, comp_op);
+        thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
+
+        update_box(*common.detector_);
+    }
+
+    template <typename T>
+    void operator()(T const &sym) const
+    {
+        // TODO: warning if unimplemented?
+    }
+
+private:
+    box2d<double> &box_;
+    render_thunk_list &thunks_;
+    mapnik::feature_impl &feature_;
+    proj_transform const &prj_trans_;
+    renderer_common const &common_;
+    text_layout const &text_;
+    box2d<double> clipping_extent_;
+
+    void update_box(label_collision_detector4 &detector) const
+    {
+        for (auto const &label : detector)
+        {
+            box_.expand_to_include(label.box);
+        }
+    }
+};
+
+geometry_type *origin_point(proj_transform const &prj_trans, 
+                            renderer_common const &common)
+{
+    // note that we choose a point in the middle of the screen to
+    // try to ensure that we don't get edge artefacts due to any
+    // symbolizers with avoid-edges set: only the avoid-edges of
+    // the group symbolizer itself should matter.
+    double x = common.width_ / 2.0, y = common.height_ / 2.0, z = 0.0;
+    common.t_.backward(&x, &y);
+    prj_trans.forward(x, y, z);
+    geometry_type *geom = new geometry_type(geometry_type::Point);
+    geom->move_to(x, y);
+    return geom;
+}
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
@@ -145,6 +312,12 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
             sub_feature = feature_ptr(&feature);
         }
 
+        // add a single point geometry at pixel origin
+        sub_feature->add_geometry(origin_point(prj_trans, common_));
+
+        // get the layout for this set of properties
+        group_layout const &layout = props->get_layout();
+
         for (auto const& rule : props->get_rules())
         {
              if (boost::apply_visitor(evaluate<Feature,value_type>(*sub_feature),
@@ -155,9 +328,14 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
 
                 // construct a bounding box around all symbolizers for the matched rule
                 bound_box bounds;
+                render_thunk_list thunks;
+                extract_bboxes extractor(bounds, thunks, *sub_feature, prj_trans,
+                                         common_, text, clipping_extent());
+
                 for (auto const& sym : *rule)
                 {
                     // TODO: construct layout and obtain bounding box
+                    boost::apply_visitor(extractor, sym);
                 }
 
                 // add the bounding box to the layout manager

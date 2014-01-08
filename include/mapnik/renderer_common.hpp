@@ -46,6 +46,7 @@ struct renderer_common
                        std::shared_ptr<label_collision_detector4> detector);
     renderer_common(request const &req, unsigned offset_x, unsigned offset_y, 
                        unsigned width, unsigned height, double scale_factor);
+    renderer_common(const renderer_common &);
 
     unsigned width_;
     unsigned height_;
