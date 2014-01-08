@@ -30,6 +30,7 @@
 #include <mapnik/text/layout.hpp>
 #include <mapnik/group/group_layout_manager.hpp>
 #include <mapnik/text/layout.hpp>
+#include <mapnik/text/renderer.hpp>
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -175,7 +176,7 @@ struct extract_bboxes : public boost::static_visitor<>
     }
 
     template <typename T>
-    void operator()(T const &sym) const
+    void operator()(T const &) const
     {
         // TODO: warning if unimplemented?
     }
@@ -196,6 +197,69 @@ private:
             box_.expand_to_include(label.box);
         }
     }
+};
+
+/**
+ * Render a thunk which was frozen from a previous call to 
+ * extract_bboxes. We should now have a new offset at which
+ * to render it, and the boxes themselves should already be
+ * in the detector from the placement_finder.
+ */
+struct thunk_renderer : public boost::static_visitor<>
+{
+    typedef agg_renderer<image_32> renderer_type;
+    typedef typename renderer_type::buffer_type buffer_type;
+    typedef agg_text_renderer<buffer_type> text_renderer_type;
+
+    thunk_renderer(renderer_type &ren,
+                   buffer_type *buf,
+                   renderer_common &common,
+                   layout_offset const &offset)
+        : ren_(ren), buf_(buf), common_(common), offset_(offset)
+    {}
+
+    void operator()(point_render_thunk const &thunk) const
+    {
+        pixel_position new_pos(thunk.pos_.x + offset_.x, thunk.pos_.y + offset_.y);
+        ren_.render_marker(new_pos, *thunk.marker_, thunk.tr_, thunk.opacity_,
+                           thunk.comp_op_);
+    }
+
+    void operator()(text_render_thunk const &thunk) const
+    {
+        text_renderer_type ren(*buf_, thunk.halo_rasterizer_, thunk.comp_op_,
+                               common_.scale_factor_, common_.font_manager_.get_stroker());
+        for (glyph_positions_ptr glyphs : thunk.placements_)
+        {
+            // move the glyphs to the correct offset
+            pixel_position const &base_point = glyphs->get_base_point();
+            pixel_position new_base_point(base_point.x + offset_.x, base_point.y + offset_.y);
+            glyphs->set_base_point(new_base_point);
+
+            // update the position of any marker
+            marker_info_ptr marker_info = glyphs->marker();
+            if (marker_info)
+            {
+                pixel_position const &marker_pos = glyphs->marker_pos();
+                pixel_position new_marker_pos(marker_pos.x + offset_.x, marker_pos.y + offset_.y);
+                glyphs->set_marker(marker_info, new_marker_pos);
+            }
+
+            ren.render(*glyphs);
+        }
+    }
+
+    template <typename T>
+    void operator()(T const &) const
+    {
+        // TODO: warning if unimplemented?
+    }
+
+private:
+    renderer_type &ren_;
+    buffer_type *buf_;
+    renderer_common &common_;
+    layout_offset offset_;
 };
 
 geometry_type *origin_point(proj_transform const &prj_trans, 
@@ -263,6 +327,10 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
     // keep track of the sub features that we'll want to symbolize
     // along with the group rules that they matched
     std::vector< std::pair<group_rule_ptr, feature_ptr> > matches;
+    // keep track of which lists of render thunks correspond to
+    // entries in the group_layout_manager.
+    std::vector<render_thunk_list> layout_thunks;
+    size_t num_layout_thunks = 0;
 
     // layout manager to store and arrange bboxes of matched features
     group_layout_manager layout_manager(props->get_layout(), pixel_position(common_.width_ / 2.0, common_.height_ / 2.0));
@@ -340,7 +408,34 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
 
                 // add the bounding box to the layout manager
                 layout_manager.add_member_bound_box(bounds);
+                layout_thunks.emplace_back(std::move(thunks));
+                ++num_layout_thunks;
                 break;
+            }
+        }
+    }
+
+    // TODO: run placement_finder to get placements
+
+    // NOTE that the placement finder will have already inserted bboxes
+    // for the found placements, so we don't need to do that again.
+
+    // TODO: foreach placement
+    {
+        pixel_position pos; // <-- pixel position given by placement_finder
+        for (size_t layout_i = 0; layout_i < num_layout_thunks; ++layout_i)
+        {
+            layout_offset offset = layout_manager.offset_at(layout_i);
+            // to get actual placement, need to shift original bbox by layout
+            // offset and placement finder position (assuming origin of
+            // layout offsets is 0,0.
+            offset += layout_offset(pos.x, pos.y);
+
+            thunk_renderer ren(*this, current_buffer_, common_, offset);
+
+            for (render_thunk_ptr &thunk : layout_thunks[layout_i])
+            {
+                boost::apply_visitor(ren, *thunk);
             }
         }
     }
