@@ -213,7 +213,8 @@ files = {
     'colorize-alpha3':{'sizes':[(512,512)]},
     'image-filters-galore':{'sizes':[(512,512)]},
     'image-filters-multi-blur':{'sizes':[(512,512)]},
-    'line-opacity-multi-render':{'sizes':[(512,512)]}
+    'line-opacity-multi-render':{'sizes':[(512,512)]},
+    'marker-vs-point':{'sizes':[(512,512)]}
     }
 
 class Reporting:
