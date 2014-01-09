@@ -67,8 +67,16 @@ renderer_common::renderer_common(request const &req, unsigned offset_x, unsigned
 {}
 
 renderer_common::renderer_common(renderer_common const &other)
-    : renderer_common(other.width_, other.height_, other.scale_factor_,
-                      CoordTransform(other.t_), other.detector_)
-{}
+   : width_(other.width_),
+     height_(other.height_),
+     scale_factor_(other.scale_factor_),
+     shared_font_engine_(other.shared_font_engine_),
+     font_engine_(*shared_font_engine_),
+     font_manager_(font_engine_),
+     query_extent_(),
+     t_(other.t_),
+     detector_(other.detector_)
+{
+}
 
 }

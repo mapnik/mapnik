@@ -93,16 +93,51 @@ struct point_render_thunk
 
 struct text_render_thunk
 {
-    placements_list placements_;
     halo_rasterizer_enum halo_rasterizer_;
     composite_mode_e comp_op_;
+
+    // need to keep these around, annoyingly, as the glyph_position
+    // struct keeps a pointer to the glyph_info, so we have to
+    // ensure the lifetime is the same.
+    placements_list placements_;
+    std::shared_ptr<std::vector<glyph_info> > glyphs_;
     
     text_render_thunk(placements_list const &placements,
                       halo_rasterizer_enum halo_rasterizer,
                       composite_mode_e comp_op)
-        : placements_(placements), halo_rasterizer_(halo_rasterizer),
-          comp_op_(comp_op)
-    {}
+        : halo_rasterizer_(halo_rasterizer), comp_op_(comp_op),
+          placements_(), glyphs_(std::make_shared<std::vector<glyph_info> >())
+    {
+        std::vector<glyph_info> &glyph_vec = *glyphs_;
+
+        size_t glyph_count = 0;
+        for (glyph_positions_ptr positions : placements)
+        {
+            glyph_count += std::distance(positions->begin(), positions->end());
+        }
+        glyph_vec.reserve(glyph_count);
+
+        for (glyph_positions_ptr positions : placements)
+        {
+            glyph_positions_ptr new_positions = std::make_shared<glyph_positions>();
+            new_positions->reserve(std::distance(positions->begin(), positions->end()));
+            glyph_positions &new_pos = *new_positions;
+
+            new_pos.set_base_point(positions->get_base_point());
+            if (positions->marker())
+            {
+                new_pos.set_marker(positions->marker(), positions->marker_pos());
+            }
+
+            for (glyph_position const &pos : *positions)
+            {
+                glyph_vec.push_back(*pos.glyph);
+                new_pos.push_back(glyph_vec.back(), pos.pos, pos.rot);
+            }
+
+            placements_.push_back(new_positions);
+        }
+    }
 };
 
 // Variant type for render thunks to allow us to re-render them
@@ -137,7 +172,7 @@ struct extract_bboxes : public boost::static_visitor<>
         // create an empty detector, so we are sure we won't hit
         // anything
         renderer_common common(common_);
-        common.detector_->clear();
+        common.detector_ = std::make_shared<label_collision_detector4>(common_.detector_->extent());
 
         composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, src_over);
 
@@ -157,7 +192,7 @@ struct extract_bboxes : public boost::static_visitor<>
         // create an empty detector, so we are sure we won't hit
         // anything
         renderer_common common(common_);
-        common.detector_->clear();
+        common.detector_ = std::make_shared<label_collision_detector4>(common_.detector_->extent());
 
         box2d<double> clip_box = clipping_extent_;
         text_symbolizer_helper helper(
@@ -172,7 +207,7 @@ struct extract_bboxes : public boost::static_visitor<>
         
         placements_list const& placements = helper.get();
         text_render_thunk thunk(placements, halo_rasterizer, comp_op);
-        thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
+        thunks_.push_back(std::make_shared<render_thunk>(thunk));
 
         update_box(*common.detector_);
     }
@@ -254,7 +289,7 @@ struct thunk_renderer : public boost::static_visitor<>
                 glyphs->set_marker(marker_info, new_marker_pos);
             }
 
-            //ren.render(*glyphs);  // <--- TODO: This causes seg fault?
+            ren.render(*glyphs);
         }
     }
 
