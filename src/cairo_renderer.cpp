@@ -53,6 +53,10 @@
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/feature_factory.hpp>
+#include <mapnik/attribute_collector.hpp>
+#include <mapnik/group/group_layout_manager.hpp>
+#include <mapnik/group/group_symbolizer_helper.hpp>
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
@@ -60,7 +64,7 @@
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
-
+#include <mapnik/renderer_common/process_group_symbolizer.hpp>
 // cairo
 #include <cairo.h>
 #include <cairo-ft.h>
@@ -1006,6 +1010,79 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     {
         context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
     }
+}
+
+namespace {
+
+/**
+ * Render a thunk which was frozen from a previous call to 
+ * extract_bboxes. We should now have a new offset at which
+ * to render it, and the boxes themselves should already be
+ * in the detector from the placement_finder.
+ */
+struct thunk_renderer : public boost::static_visitor<>
+{
+    typedef cairo_renderer_base renderer_type;
+
+    thunk_renderer(renderer_type &ren,
+                   cairo_context &context,
+                   cairo_face_manager &face_manager,
+                   renderer_common &common,
+                   pixel_position const &offset)
+        : ren_(ren), context_(context), face_manager_(face_manager),
+          common_(common), offset_(offset)
+    {}
+
+    void operator()(point_render_thunk const &thunk) const
+    {
+        pixel_position new_pos(thunk.pos_.x + offset_.x, thunk.pos_.y + offset_.y);
+        ren_.render_marker(new_pos, *thunk.marker_, thunk.tr_, thunk.opacity_,
+                           thunk.comp_op_);
+    }
+
+    void operator()(text_render_thunk const &thunk) const
+    {
+        cairo_save_restore guard(context_);
+        context_.set_operator(thunk.comp_op_);
+
+        render_offset_placements(
+            thunk.placements_,
+            offset_,
+            [&] (glyph_positions_ptr glyphs) {
+                context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
+            });
+    }
+
+    template <typename T>
+    void operator()(T const &) const
+    {
+        // TODO: warning if unimplemented?
+    }
+
+private:
+    renderer_type &ren_;
+    cairo_context &context_;
+    cairo_face_manager &face_manager_;
+    renderer_common &common_;
+    pixel_position offset_;
+};
+
+} // anonymous namespace
+
+void cairo_renderer_base::process(group_symbolizer const& sym,
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
+{
+    render_group_symbolizer(
+        sym, feature, prj_trans, common_.query_extent_, common_,
+        [&](render_thunk_list const& thunks, pixel_position const& render_offset)
+        {
+            thunk_renderer ren(*this, context_, face_manager_, common_, render_offset);
+            for (render_thunk_ptr const& thunk : thunks)
+            {
+                boost::apply_visitor(ren, *thunk);
+            }
+        });
 }
 
 template class cairo_renderer<cairo_surface_ptr>;
