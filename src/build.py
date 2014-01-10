@@ -240,6 +240,7 @@ source = Split(
     config_error.cpp
     color_factory.cpp
     renderer_common.cpp
+    renderer_common/process_group_symbolizer.cpp
     """
     )
 

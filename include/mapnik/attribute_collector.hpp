@@ -50,6 +50,8 @@
 
 namespace mapnik {
 
+class group_attribute_collector;
+
 template <typename Container>
 struct expression_attributes : boost::static_visitor<void>
 {
@@ -92,13 +94,28 @@ private:
     Container& names_;
 };
 
+class group_attribute_collector : public mapnik::noncopyable
+{
+private:
+    std::set<std::string>& names_;
+    bool expand_index_columns_;
+public:
+    group_attribute_collector(std::set<std::string>& names,
+                              bool expand_index_columns)
+        : names_(names),
+          expand_index_columns_(expand_index_columns) {}
+
+    void operator() (group_symbolizer const& sym);
+};
+
 struct symbolizer_attributes : public boost::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
         : names_(names),
           filter_factor_(filter_factor),
-          f_attr(names) {}
+          f_attr(names),
+          g_attr(names, true) {}
 
     template <typename T>
     void operator () (T const&) const {}
@@ -226,12 +243,16 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
     }
 
-    void operator () (group_symbolizer const& sym);
+    void operator () (group_symbolizer const& sym)
+    {
+        g_attr(sym);
+    }
 
 private:
     std::set<std::string>& names_;
     double & filter_factor_;
     expression_attributes<std::set<std::string> > f_attr;
+    group_attribute_collector g_attr;
     void collect_transform(transform_list_ptr const& trans_expr)
     {
         if (trans_expr)
@@ -275,7 +296,8 @@ public:
     }
 };
 
-inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
+
+inline void group_attribute_collector::operator() (group_symbolizer const& sym)
 {
     // find all column names referenced in the group symbolizer
     std::set<std::string> group_columns;
@@ -294,7 +316,10 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
     if (props) {
         for (auto const& rule : props->get_rules())
         {
+            // note that this recurses down on to the symbolizer
+            // internals too, so we get all free variables.
             column_collector(*rule);
+            // still need to collect repeat key columns
             if (rule->get_repeat_key())
             {
                 boost::apply_visitor(rk_attr, *(rule->get_repeat_key()));
@@ -305,14 +330,14 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
     // get indexed column names
     for (auto const& col_name : group_columns)
     {
-        if (col_name.find('%') != std::string::npos)
+        if (expand_index_columns_ && col_name.find('%') != std::string::npos)
         {
             // Note: ignore column name if it is '%' by itself.
             // '%' is a special case to access the index value itself,
             // rather than acessing indexed columns from data source.
             if (col_name.size() > 1)
             {
-                // indexed column name. add column name for each index value.
+                // Indexed column name. add column name for each index value.
                 int start = get<value_integer>(sym, keys::start_column);
                 int end = start + get<value_integer>(sym, keys::num_columns);
                 for (int col_idx = start; col_idx < end; ++col_idx)
@@ -325,7 +350,8 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
         }
         else
         {
-            // non indexed column name. insert as is.
+            // This is not an indexed column, or we are ignoring indexes.
+            // Insert the name as is.
             names_.insert(col_name);
         }
     }
