@@ -1085,6 +1085,75 @@ void cairo_renderer_base::process(group_symbolizer const& sym,
         });
 }
 
+namespace {
+
+// special implementation of the box drawing so that it's pixel-aligned
+void render_debug_box(cairo_context &context, box2d<double> const& b)
+{
+    cairo_save_restore guard(context);
+    double minx = std::floor(b.minx()) + 0.5;
+    double miny = std::floor(b.miny()) + 0.5;
+    double maxx = std::floor(b.maxx()) + 0.5;
+    double maxy = std::floor(b.maxy()) + 0.5;
+    context.move_to(minx, miny);
+    context.line_to(minx, maxy);
+    context.line_to(maxx, maxy);
+    context.line_to(maxx, miny);
+    context.close_path();
+    context.stroke();
+}
+
+} // anonymous namespace
+
+void cairo_renderer_base::process(debug_symbolizer const& sym,
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
+{
+    typedef label_collision_detector4 detector_type;
+    cairo_save_restore guard(context_);
+
+    debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, DEBUG_SYM_MODE_COLLISION);
+
+    context_.set_operator(src_over);
+    context_.set_color(mapnik::color(255, 0, 0), 1.0);
+    context_.set_line_join(MITER_JOIN);
+    context_.set_line_cap(BUTT_CAP);
+    context_.set_miter_limit(4.0);
+    context_.set_line_width(1.0);
+
+    if (mode == DEBUG_SYM_MODE_COLLISION)
+    {
+        typename detector_type::query_iterator itr = common_.detector_->begin();
+        typename detector_type::query_iterator end = common_.detector_->end();
+        for ( ;itr!=end; ++itr)
+        {
+            render_debug_box(context_, itr->box);
+        }
+    }
+    else if (mode == DEBUG_SYM_MODE_VERTEX)
+    {
+        for (auto const& geom : feature.paths())
+        {
+            double x;
+            double y;
+            double z = 0;
+            geom.rewind(0);
+            unsigned cmd = 1;
+            while ((cmd = geom.vertex(&x, &y)) != mapnik::SEG_END)
+            {
+                if (cmd == SEG_CLOSE) continue;
+                prj_trans.backward(x,y,z);
+                common_.t_.forward(&x,&y);
+                context_.move_to(std::floor(x) - 0.5, std::floor(y) + 0.5);
+                context_.line_to(std::floor(x) + 1.5, std::floor(y) + 0.5);
+                context_.move_to(std::floor(x) + 0.5, std::floor(y) - 0.5);
+                context_.line_to(std::floor(x) + 0.5, std::floor(y) + 1.5);
+                context_.stroke();
+            }
+        }
+    }
+}
+
 template class cairo_renderer<cairo_surface_ptr>;
 template class cairo_renderer<cairo_ptr>;
 }
