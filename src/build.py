@@ -353,6 +353,7 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/process_raster_symbolizer.cpp
     svg/output/process_shield_symbolizer.cpp
     svg/output/process_text_symbolizer.cpp
+    svg/output/process_group_symbolizer.cpp
     """)
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')
