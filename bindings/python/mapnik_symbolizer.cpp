@@ -46,6 +46,9 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/marker_cache.hpp> // for known_svg_prefix_
+#include <mapnik/group/group_layout.hpp>
+#include <mapnik/group/group_rule.hpp>
+#include <mapnik/group/group_symbolizer_properties.hpp>
 
 // stl
 #include <sstream>
@@ -62,6 +65,7 @@ using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
 using mapnik::markers_symbolizer;
 using mapnik::debug_symbolizer;
+using mapnik::group_symbolizer;
 using mapnik::symbolizer_base;
 using mapnik::color;
 using mapnik::path_processor_type;
@@ -181,6 +185,7 @@ void export_symbolizer()
     implicitly_convertible<mapnik::color, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::expression_ptr, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::enumeration_wrapper, mapnik::symbolizer_base::value_type>();
+    implicitly_convertible<std::shared_ptr<mapnik::group_symbolizer_properties>, mapnik::symbolizer_base::value_type>();
 
     enum_<mapnik::keys>("keys")
         .value("gamma", mapnik::keys::gamma)
@@ -356,6 +361,68 @@ void export_building_symbolizer()
     class_<building_symbolizer, bases<symbolizer_base> >("BuildingSymbolizer",
                                init<>("Default BuildingSymbolizer"))
         .def("__hash__",hash_impl_2<building_symbolizer>)
+        ;
+
+}
+
+namespace {
+
+void group_symbolizer_properties_set_layout_simple(mapnik::group_symbolizer_properties &p,
+                                                   mapnik::simple_row_layout &s)
+{
+    p.set_layout(s);
+}
+
+void group_symbolizer_properties_set_layout_pair(mapnik::group_symbolizer_properties &p,
+                                                 mapnik::pair_layout &s)
+{
+    p.set_layout(s);
+}
+
+std::shared_ptr<mapnik::group_rule> group_rule_construct1(mapnik::expression_ptr p)
+{
+    return std::make_shared<mapnik::group_rule>(p, mapnik::expression_ptr());
+}
+
+} // anonymous namespace
+
+void export_group_symbolizer()
+{
+    using namespace boost::python;
+    using mapnik::group_rule;
+    using mapnik::simple_row_layout;
+    using mapnik::pair_layout;
+    using mapnik::group_symbolizer_properties;
+
+    class_<group_rule, std::shared_ptr<group_rule> >("GroupRule",
+                                                     init<expression_ptr, expression_ptr>())
+        .def("__init__", boost::python::make_constructor(group_rule_construct1))
+        .def("append", &group_rule::append)
+        .def("set_filter", &group_rule::set_filter)
+        .def("set_repeat_key", &group_rule::set_repeat_key)
+        ;
+
+    class_<simple_row_layout>("SimpleRowLayout")
+        .def("item_margin", &simple_row_layout::get_item_margin)
+        .def("set_item_margin", &simple_row_layout::set_item_margin)
+        ;
+
+    class_<pair_layout>("PairLayout")
+        .def("item_margin", &simple_row_layout::get_item_margin)
+        .def("set_item_margin", &simple_row_layout::set_item_margin)
+        .def("max_difference", &pair_layout::get_max_difference)
+        .def("set_max_difference", &pair_layout::set_max_difference)
+        ;
+
+    class_<group_symbolizer_properties, std::shared_ptr<group_symbolizer_properties> >("GroupSymbolizerProperties")
+        .def("add_rule", &group_symbolizer_properties::add_rule)
+        .def("set_layout", &group_symbolizer_properties_set_layout_simple)
+        .def("set_layout", &group_symbolizer_properties_set_layout_pair)
+        ;
+
+    class_<group_symbolizer, bases<symbolizer_base> >("GroupSymbolizer",
+                                                      init<>("Default GroupSymbolizer"))
+        .def("__hash__",hash_impl_2<group_symbolizer>)
         ;
 
 }
