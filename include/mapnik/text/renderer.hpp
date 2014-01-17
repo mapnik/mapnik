@@ -28,6 +28,8 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>
+// agg
+#include <agg_trans_affine.h>
 
 // freetype2
 extern "C"
@@ -49,8 +51,8 @@ struct glyph_t
         : image(image_), properties(properties_) {}
 
     glyph_t( glyph_t && other) noexcept
-        : image(other.image),
-          properties(std::move(other.properties))
+    : image(other.image),
+        properties(std::move(other.properties))
     {
         other.image = nullptr;
     }
@@ -69,6 +71,8 @@ public:
                    composite_mode_e comp_op = src_over,
                    double scale_factor=1.0,
                    stroker_ptr stroker=stroker_ptr());
+    void set_transform(agg::trans_affine const& transform);
+    void set_halo_transform(agg::trans_affine const& halo_transform);
 protected:
     typedef std::vector<glyph_t> glyph_vector;
     void prepare_glyphs(glyph_positions const& positions);
@@ -77,6 +81,8 @@ protected:
     double scale_factor_;
     glyph_vector glyphs_;
     stroker_ptr stroker_;
+    agg::trans_affine transform_;
+    agg::trans_affine halo_transform_;
 };
 
 template <typename T>

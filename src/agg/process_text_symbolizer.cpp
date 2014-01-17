@@ -52,6 +52,13 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
                              common_.scale_factor_,
                              common_.font_manager_.get_stroker());
 
+    agg::trans_affine halo_transform;
+    auto transform = get_optional<transform_type>(sym, keys::halo_transform);
+    if (transform)
+    {
+        evaluate_transform(halo_transform, feature, *transform);
+        ren.set_halo_transform(halo_transform);
+    }
     placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
     {

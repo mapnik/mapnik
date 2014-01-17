@@ -36,8 +36,20 @@ text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e com
       comp_op_(comp_op),
       scale_factor_(scale_factor),
       glyphs_(),
-      stroker_(stroker)
+      stroker_(stroker),
+      transform_(),
+      halo_transform_()
 {}
+
+void text_renderer::set_transform(agg::trans_affine const& transform)
+{
+    transform_ = transform;
+}
+
+void text_renderer::set_halo_transform(agg::trans_affine const& halo_transform)
+{
+    halo_transform_ = halo_transform;
+}
 
 void text_renderer::prepare_glyphs(glyph_positions const& positions)
 {
@@ -109,15 +121,33 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;
+    FT_Vector start_halo;
     int height = pixmap_.height();
     pixel_position const& base_point = pos.get_base_point();
 
     start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
     start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
-
+    start_halo = start;
+    start.x += transform_.tx * 64;
+    start.y += transform_.ty * 64;
+    start_halo.x += halo_transform_.tx * 64;
+    start_halo.y += halo_transform_.ty * 64;
     //render halo
     double halo_radius = 0;
     char_properties_ptr format;
+
+    FT_Matrix halo_matrix;
+    halo_matrix.xx = halo_transform_.sx  * 0x10000L;
+    halo_matrix.xy = halo_transform_.shx * 0x10000L;
+    halo_matrix.yy = halo_transform_.sy  * 0x10000L;
+    halo_matrix.yx = halo_transform_.shy * 0x10000L;
+
+    FT_Matrix matrix;
+    matrix.xx = transform_.sx  * 0x10000L;
+    matrix.xy = transform_.shx * 0x10000L;
+    matrix.yy = transform_.sy  * 0x10000L;
+    matrix.yx = transform_.shy * 0x10000L;
+
     for (auto const& glyph : glyphs_)
     {
         if (glyph.properties)
@@ -132,7 +162,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         error = FT_Glyph_Copy(glyph.image, &g);
         if (!error)
         {
-            FT_Glyph_Transform(g,0,&start);
+            FT_Glyph_Transform(g, &halo_matrix, &start_halo);
             if (rasterizer_ == HALO_RASTERIZER_FULL)
             {
                 stroker_->init(halo_radius);
@@ -176,7 +206,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         {
             format = glyph.properties;
         }
-        FT_Glyph_Transform(glyph.image, 0, &start);
+        FT_Glyph_Transform(glyph.image, &matrix, &start);
         error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL,0,1);
         if (!error)
         {

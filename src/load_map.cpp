@@ -1210,6 +1210,18 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
         put<text_placements_ptr>(text_symbol, keys::text_placements_, placement_finder);
         optional<halo_rasterizer_e> halo_rasterizer_ = sym.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
         if (halo_rasterizer_) put(text_symbol, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
+
+        optional<std::string> halo_transform_wkt = sym.get_opt_attr<std::string>("halo-transform");
+        if (halo_transform_wkt)
+        {
+            mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
+            if (!mapnik::parse_transform(*tl, *halo_transform_wkt, sym.get_tree().transform_expr_grammar))
+            {
+                throw mapnik::config_error("Failed to parse halo-transform: '" + *halo_transform_wkt + "'");
+            }
+            put(text_symbol, keys::halo_transform, tl);
+        }
+
         rule.append(std::move(text_symbol));
     }
     catch (config_error const& ex)
