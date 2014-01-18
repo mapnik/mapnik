@@ -1,0 +1,17 @@
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="steelblue">
+<Style name="heat">
+  <Rule>
+    <RasterSymbolizer opacity="1" scaling="bilinear"/>
+  </Rule>
+</Style>
+<Layer name="heat"
+  srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>heat</StyleName>
+    <Datasource>
+       <Parameter name="file">../data/aerial_rgba.tiff</Parameter>
+       <Parameter name="type">gdal</Parameter>
+       <Parameter name="nodata">255</Parameter>
+       <Parameter name="nodata_tolerance">5</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
