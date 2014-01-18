@@ -14,6 +14,12 @@ Released ...
 
 Summary: TODO
 
+- GDAL plugin: Added back support for user driven `nodata` on rgb(a) images (#2023)
+
+- GDAL plugin: Allowed nodata to override alpha band if set on rgba images (#2023)
+
+- GDAL plugin: Added `nodata_tolerance` option to set nearby pixels transparent (has similar effect to the `nearblack` program) (#2023)
+
 - Added support for web fonts: .woff format (#2113)
 
 - Added missing support for `geometry-transform` in `line-pattern` and `polygon-pattern` symbolizers (#2065)
