@@ -216,7 +216,8 @@ files = {
     'line-opacity-multi-render':{'sizes':[(512,512)]},
     'tiff-nodata-rgb':{'sizes':[(512,512)]},
     'tiff-nodata-rgba':{'sizes':[(512,512)]},
-    'tiff-nodata-tolerance':{'sizes':[(512,512)]}
+    'tiff-nodata-tolerance':{'sizes':[(512,512)]},
+    'tiff-nodata-edge-rgba':{'sizes':[(512,512)]}
     }
 
 class Reporting:
