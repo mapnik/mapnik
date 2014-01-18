@@ -217,6 +217,7 @@ files = {
     'tiff-nodata-rgb':{'sizes':[(512,512)]},
     'tiff-nodata-rgba':{'sizes':[(512,512)]},
     'tiff-nodata-tolerance':{'sizes':[(512,512)]},
+    'tiff-nodata-edge-rgba':{'sizes':[(512,512)]},
     'marker-vs-point':{'sizes':[(512,512)]}
     }
 
