@@ -1,0 +1,17 @@
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="steelblue">
+<Style name="heat">
+  <Rule>
+    <RasterSymbolizer opacity="1" scaling="bilinear"/>
+  </Rule>
+</Style>
+<Layer name="heat"
+  srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>heat</StyleName>
+    <Datasource>
+       <!-- created with nearblack -o r.tif -of GTiff -white tests/visual_tests/data/heat.tif -setmask  tests/visual_tests/data/heat_rgb.tif -->
+       <Parameter name="file">../data/heat_rgb.tif</Parameter>
+       <Parameter name="type">gdal</Parameter>
+       <Parameter name="nodata">255</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
