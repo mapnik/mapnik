@@ -77,7 +77,8 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
       desc_(*params.get<std::string>("type"), "utf-8"),
-      nodata_value_(params.get<double>("nodata"))
+      nodata_value_(params.get<double>("nodata")),
+      nodata_tolerance_(*params.get<double>("nodata_tolerance",1e-12))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 
@@ -132,16 +133,28 @@ gdal_datasource::gdal_datasource(parameters const& params)
         tr[3] = extent_.maxy();
         tr[4] = 0;
         tr[5] = -extent_.height() / (double)height_;
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource extent override gives Geotransform="
+                               << tr[0] << "," << tr[1] << ","
+                               << tr[2] << "," << tr[3] << ","
+                               << tr[4] << "," << tr[5];
     }
     else
     {
-        dataset->GetGeoTransform(tr);
+        if (dataset->GetGeoTransform(tr) != CPLE_None)
+        {
+            MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource GetGeotransform failure gives="
+                                   << tr[0] << "," << tr[1] << ","
+                                   << tr[2] << "," << tr[3] << ","
+                                   << tr[4] << "," << tr[5];
+        }
+        else
+        {
+            MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform="
+                                   << tr[0] << "," << tr[1] << ","
+                                   << tr[2] << "," << tr[3] << ","
+                                   << tr[4] << "," << tr[5];
+        }
     }
-
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform="
-                           << tr[0] << "," << tr[1] << ","
-                           << tr[2] << "," << tr[3] << ","
-                           << tr[4] << "," << tr[5];
 
     // TODO - We should throw for true non-north up images, but the check
     // below is clearly too restrictive.
@@ -228,7 +241,8 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               nbands_,
                                               dx_,
                                               dy_,
-                                              nodata_value_));
+                                              nodata_value_,
+                                              nodata_tolerance_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -249,5 +263,6 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
                                               nbands_,
                                               dx_,
                                               dy_,
-                                              nodata_value_));
+                                              nodata_value_,
+                                              nodata_tolerance_));
 }
