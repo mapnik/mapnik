@@ -73,6 +73,7 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".pfa")) ||
         boost::algorithm::ends_with(fn,std::string(".pfb")) ||
         boost::algorithm::ends_with(fn,std::string(".ttc")) ||
+        boost::algorithm::ends_with(fn,std::string(".woff"))||
         // Plus OSX custom ext
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }

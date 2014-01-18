@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Added support for web fonts: .woff format (#2113)
+
 - Added missing support for `geometry-transform` in `line-pattern` and `polygon-pattern` symbolizers (#2065)
 
 - Dropped support for Sun compiler
