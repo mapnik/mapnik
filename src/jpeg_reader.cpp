@@ -168,7 +168,7 @@ void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
     }
     else
     {
-        wrap->stream->seekg(count, std::ios_base::cur);
+        wrap->stream->seekg(count - wrap->manager.bytes_in_buffer, std::ios_base::cur);
         // trigger buffer fill
         wrap->manager.next_input_byte = 0;
         wrap->manager.bytes_in_buffer = 0; //bytes_in_buffer may be zero on return.
