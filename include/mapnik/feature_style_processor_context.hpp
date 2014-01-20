@@ -24,7 +24,6 @@
 #define FEATURE_STYLE_PROCESSOR_CONTEXT_HPP
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // stl
