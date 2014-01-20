@@ -45,10 +45,10 @@ CONFIG_MAPNIK_DEFINES='%(defines)s'
 CONFIG_MAPNIK_LIBNAME='%(mapnik_libname)s'
 CONFIG_MAPNIK_LIBPATH="%(mapnik_libpath)s"
 CONFIG_DEP_LIBS='%(dep_libs)s'
-CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
+CONFIG_MAPNIK_LDFLAGS="%(ldflags)s"
 CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg"
-CONFIG_DEP_INCLUDES='%(dep_includes)s'
-CONFIG_CXXFLAGS='%(cxxflags)s'
+CONFIG_DEP_INCLUDES="%(dep_includes)s"
+CONFIG_CXXFLAGS="%(cxxflags)s"
 CONFIG_CXX='%(cxx)s'
 
 '''
@@ -105,12 +105,12 @@ else:
 # for fonts and input plugins we should try
 # to store the relative path, if feasible
 fontspath = config_env['MAPNIK_FONTS']
-lib_root = os.path.join(config_env['INSTALL_PREFIX'], config_env['LIBDIR_SCHEMA'])
+lib_root = os.path.join(config_env['PREFIX'], config_env['LIBDIR_SCHEMA'])
 if lib_root in fontspath:
-    fontspath = "${CONFIG_PREFIX}/" + os.path.relpath(fontspath,config_env['INSTALL_PREFIX'])
+    fontspath = "${CONFIG_PREFIX}/" + os.path.relpath(fontspath,config_env['PREFIX'])
 inputpluginspath = config_env['MAPNIK_INPUT_PLUGINS']
 if lib_root in inputpluginspath:
-    inputpluginspath = "${CONFIG_PREFIX}/" + os.path.relpath(inputpluginspath,config_env['INSTALL_PREFIX'])
+    inputpluginspath = "${CONFIG_PREFIX}/" + os.path.relpath(inputpluginspath,config_env['PREFIX'])
 
 lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 
