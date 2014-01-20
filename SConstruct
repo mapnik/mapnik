@@ -928,7 +928,11 @@ int main()
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
-        context.env.AppendUnique(LIBS='icudata')
+        # re-order icu libs to ensure linux linker is happy
+        for lib_name in ['icui18n',env['ICU_LIB_NAME'],'icudata']:
+            if lib_name in context.env['LIBS']:
+                context.env['LIBS'].remove(lib_name)
+            context.env.Append(LIBS=lib_name)
     ret = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
@@ -1363,7 +1367,6 @@ if not preconfigured:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
         # we need libicui18n if using static boost libraries, so it is
         # important to try this check with the library linked
-        env.AppendUnique(LIBS='icui18n')
         if conf.boost_regex_has_icu():
             # TODO - should avoid having this be globally defined...
             env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')
