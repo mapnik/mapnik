@@ -55,6 +55,11 @@ link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or
 if link_all_libs:
     py_env.AppendUnique(LIBS=env['LIBMAPNIK_LIBS'])
 
+# even though boost_thread is no longer used in mapnik core
+# we need to link in for boost_python to avoid missing symbol: _ZN5boost6detail12get_tss_dataEPKv / boost::detail::get_tss_data
+py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
+
+# note: on linux -lrt must be linked after thread to avoid: undefined symbol: clock_gettime
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     py_env.AppendUnique(LIBS='rt')
 
@@ -177,7 +182,6 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
         py_env.ParseConfig('pkg-config --cflags pycairo')
         py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
 
-py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
 py_env.Append(LINKFLAGS=python_link_flag)
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LDMODULEPREFIX='', LDMODULESUFFIX='.so')
 
