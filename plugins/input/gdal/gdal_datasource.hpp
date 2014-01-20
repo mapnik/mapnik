@@ -67,6 +67,7 @@ private:
     int nbands_;
     bool shared_dataset_;
     boost::optional<double> nodata_value_;
+    double nodata_tolerance_;
 };
 
 #endif // GDAL_DATASOURCE_HPP

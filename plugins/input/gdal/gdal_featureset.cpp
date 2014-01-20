@@ -32,7 +32,7 @@
 // boost
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
-
+#include <boost/variant/apply_visitor.hpp>
 // stl
 #include <cmath>
 
@@ -61,7 +61,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int nbands,
                                  double dx,
                                  double dy,
-                                 boost::optional<double> const& nodata)
+                                 boost::optional<double> const& nodata,
+                                 double nodata_tolerance)
     : dataset_(dataset),
       ctx_(boost::make_shared<mapnik::context_type>()),
       band_(band),
@@ -73,6 +74,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       dy_(dy),
       nbands_(nbands),
       nodata_value_(nodata),
+      nodata_tolerance_(nodata_tolerance),
       first_(true)
 {
     ctx_->push("nodata");
@@ -90,23 +92,8 @@ feature_ptr gdal_featureset::next()
     if (first_)
     {
         first_ = false;
-
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Next feature in Dataset=" << &dataset_;
-
-        query *q = boost::get<query>(&gquery_);
-        if (q)
-        {
-            return get_feature(*q);
-        }
-        else
-        {
-            coord2d *p = boost::get<coord2d>(&gquery_);
-            if (p)
-            {
-                return get_feature_at_point(*p);
-            }
-        }
-        // should never reach here
+        return boost::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
 }
@@ -201,9 +188,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         int im_width = int(width_res * intersect.width() + 0.5);
         int im_height = int(height_res * intersect.height() + 0.5);
 
-        double sym_downsample_factor = q.get_filter_factor();
-        im_width = int(im_width * sym_downsample_factor + 0.5);
-        im_height = int(im_height * sym_downsample_factor + 0.5);
+        double filter_factor = q.get_filter_factor();
+        im_width = int(im_width * filter_factor + 0.5);
+        im_height = int(im_height * filter_factor + 0.5);
 
         // case where we need to avoid upsampling so that the
         // image can be later scaled within raster_symbolizer
@@ -303,13 +290,13 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing rgb bands...";
                     raster_nodata = red->GetNoDataValue(&raster_has_nodata);
                     GDALColorTable *color_table = red->GetColorTable();
-                    if (!alpha && raster_has_nodata && !color_table)
+                    bool has_nodata = nodata_value_ || raster_has_nodata;
+                    if (has_nodata && !color_table)
                     {
+                        double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
                         // read the data in and create an alpha channel from the nodata values
-                        // NOTE: we intentionally ignore user supplied nodata value since it only
-                        // works for grayscale images or a single band (as a double)
-                        // TODO - we assume here the nodata value for the red band applies to all band
-                        // but that may not always be the case: http://trac.osgeo.org/gdal/ticket/2734
+                        // TODO - we assume here the nodata value for the red band applies to all bands
+                        // more details about this at http://trac.osgeo.org/gdal/ticket/2734
                         float* imageData = (float*)image.getBytes();
                         red->RasterIO(GF_Read, x_off, y_off, width, height,
                                       imageData, image.width(), image.height(),
@@ -317,7 +304,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         int len = image.width() * image.height();
                         for (int i = 0; i < len; ++i)
                         {
-                            if (std::fabs(raster_nodata - imageData[i]) < 1e-12)
+                            if (std::fabs(apply_nodata - imageData[i]) < nodata_tolerance_)
                             {
                                 *reinterpret_cast<unsigned *>(&imageData[i]) = 0;
                             }
@@ -352,7 +339,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         int len = image.width() * image.height();
                         for (int i = 0; i < len; ++i)
                         {
-                            if (std::fabs(apply_nodata - imageData[i]) < 1e-12)
+                            if (std::fabs(apply_nodata - imageData[i]) < nodata_tolerance_)
                             {
                                 *reinterpret_cast<unsigned *>(&imageData[i]) = 0;
                             }
@@ -396,12 +383,15 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 if (alpha)
                 {
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: processing alpha band...";
-                    if (raster_has_nodata)
+                    if (!raster_has_nodata)
                     {
-                        MAPNIK_LOG_ERROR(gdal) << "warning: alpha channel being used instead of nodata value";
+                        alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 3,
+                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                     }
-                    alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 3,
-                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                    else
+                    {
+                        MAPNIK_LOG_ERROR(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of alpha band";
+                    }
                 }
             }
             // set nodata value to be used in raster colorizer

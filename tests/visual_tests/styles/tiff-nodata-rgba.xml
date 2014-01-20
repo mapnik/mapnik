@@ -1,0 +1,16 @@
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="steelblue">
+<Style name="heat">
+  <Rule>
+    <RasterSymbolizer opacity="1" scaling="bilinear"/>
+  </Rule>
+</Style>
+<Layer name="heat"
+  srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>heat</StyleName>
+    <Datasource>
+       <!-- created with gdal_translate tests/visual_tests/data/heat.tif -a_nodata 255 tests/visual_tests/data/heat_nodata.tif -->
+       <Parameter name="file">../data/heat_nodata.tif</Parameter>
+       <Parameter name="type">gdal</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
