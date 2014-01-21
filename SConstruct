@@ -386,6 +386,7 @@ opts.AddVariables(
     BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'True'),
     ('FRAMEWORK_SEARCH_PATH','Custom framework search path on Mac OS X', ''),
     BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
+    BoolVariable('ENABLE_SONAME', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
