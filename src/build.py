@@ -100,12 +100,14 @@ if env['PLATFORM'] == 'Darwin':
     if env['FULL_LIB_PATH']:
         lib_path = '%s/%s' % (env['MAPNIK_LIB_BASE'],mapnik_libname)
     else:
-        lib_path = mapnik_libname
+        lib_path = '@loader_path/'+libmapnik_libname
     mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
     _d = {'version':env['MAPNIK_VERSION_STRING'].replace('-pre','')}
     mapnik_lib_link_flag += ' -current_version %(version)s -compatibility_version %(version)s' % _d
 else: # unix, non-macos
-    mapnik_libname = env.subst(env['MAPNIK_LIB_NAME']) + (".%d.%d" % (int(ABI_VERSION[0]),int(ABI_VERSION[1])))
+    mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
+    if env['ENABLE_SONAME']:
+        mapnik_libname = env.subst(env['MAPNIK_LIB_NAME']) + (".%d.%d" % (int(ABI_VERSION[0]),int(ABI_VERSION[1])))
     if env['PLATFORM'] == 'SunOS':
         if env['CXX'].startswith('CC'):
             mapnik_lib_link_flag += ' -R. -h %s' % mapnik_libname
@@ -113,7 +115,13 @@ else: # unix, non-macos
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
     else: # Linux and others
         lib_env['LIBS'].append('dl')
-        mapnik_lib_link_flag += ' -Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
+        mapnik_lib_link_flag += ' -Wl,-rpath-link,.'
+        if env['ENABLE_SONAME']:
+            mapnik_lib_link_flag += ' -Wl,-soname,%s' % mapnik_libname
+        if env['FULL_LIB_PATH']:
+            mapnik_lib_link_flag += ' -Wl,-rpath=%s' % env['MAPNIK_LIB_BASE']
+        else:
+            mapnik_lib_link_flag += ' -Wl,-z,origin -Wl,-rpath=\$$ORIGIN'
 
 source = Split(
     """
