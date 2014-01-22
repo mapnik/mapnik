@@ -395,7 +395,7 @@ env['LIBMAPNIK_DEFINES'] = libmapnik_defines
 
 mapnik = None
 
-if env['PLATFORM'] == 'Darwin':
+if env['PLATFORM'] == 'Darwin' or not env['ENABLE_SONAME']:
     target_path = env['MAPNIK_LIB_BASE_DEST']
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if env['LINKING'] == 'static':
