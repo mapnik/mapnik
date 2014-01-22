@@ -391,6 +391,7 @@ opts.AddVariables(
     BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'True'),
     ('FRAMEWORK_SEARCH_PATH','Custom framework search path on Mac OS X', ''),
     BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
+    BoolVariable('ENABLE_SONAME', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
@@ -928,7 +929,11 @@ int main()
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
-        context.env.AppendUnique(LIBS='icudata')
+        # re-order icu libs to ensure linux linker is happy
+        for lib_name in ['icui18n',env['ICU_LIB_NAME'],'icudata']:
+            if lib_name in context.env['LIBS']:
+                context.env['LIBS'].remove(lib_name)
+            context.env.Append(LIBS=lib_name)
     ret = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
@@ -1363,7 +1368,6 @@ if not preconfigured:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
         # we need libicui18n if using static boost libraries, so it is
         # important to try this check with the library linked
-        env.AppendUnique(LIBS='icui18n')
         if conf.boost_regex_has_icu():
             # TODO - should avoid having this be globally defined...
             env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')

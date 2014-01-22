@@ -4,11 +4,8 @@ from copy import copy
 
 Import ('env')
 
-filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-system = 'boost_system%s' % env['BOOST_APPEND']
-regex = 'boost_regex%s' % env['BOOST_APPEND']
-libraries =  copy(env['LIBMAPNIK_LIBS'])
-libraries.append('mapnik')
+libraries = ['mapnik']
+libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 
 for cpp_test in glob.glob('*_test.cpp'):
     test_program = env.Program(cpp_test.replace('.cpp',''), [cpp_test], LIBS=libraries)
