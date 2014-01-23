@@ -100,7 +100,7 @@ if env['PLATFORM'] == 'Darwin':
     if env['FULL_LIB_PATH']:
         lib_path = '%s/%s' % (env['MAPNIK_LIB_BASE'],mapnik_libname)
     else:
-        lib_path = '@loader_path/'+libmapnik_libname
+        lib_path = '@loader_path/'+mapnik_libname
     mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
     _d = {'version':env['MAPNIK_VERSION_STRING'].replace('-pre','')}
     mapnik_lib_link_flag += ' -current_version %(version)s -compatibility_version %(version)s' % _d
@@ -385,7 +385,7 @@ env['LIBMAPNIK_DEFINES'] = libmapnik_defines
 
 mapnik = None
 
-if env['PLATFORM'] == 'Darwin':
+if env['PLATFORM'] == 'Darwin' or not env['ENABLE_SONAME']:
     target_path = env['MAPNIK_LIB_BASE_DEST']
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if env['LINKING'] == 'static':

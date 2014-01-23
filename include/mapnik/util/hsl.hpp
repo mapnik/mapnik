@@ -23,7 +23,7 @@
 #ifndef MAPNIK_HSL_HPP
 #define MAPNIK_HSL_HPP
 
-#include <cmath>
+#include <algorithm>
 
 namespace mapnik {
 
