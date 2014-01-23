@@ -321,7 +321,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
