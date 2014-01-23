@@ -335,7 +335,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    bool clip = get<bool>(sym, keys::clip, feature, false);
+    bool clip = get<bool>(sym, keys::clip, feature, true);
     double offset = get<double>(sym, keys::offset, feature, 0.0);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, 0.0);
     double smooth = get<double>(sym, keys::smooth, feature, 0.0);
