@@ -52,21 +52,32 @@ libmapnik_defines = copy(lib_env['CPPDEFINES'])
 
 ABI_VERSION = env['ABI_VERSION']
 
+enabled_imaging_libraries = []
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
+thread = 'boost_thread%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype',env['ICU_LIB_NAME'],filesystem,system,regex]
+# note: order matters on linux: see lorder | tsort
+lib_env['LIBS'] = [filesystem,
+                   regex,
+                   thread
+                  ]
 
-if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
-   lib_env['LIBS'].append('proj')
+if env['HAS_CAIRO']:
+    lib_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
 
-enabled_imaging_libraries = []
+# maybe bz2
+if len(env['EXTRA_FREETYPE_LIBS']):
+    lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
 if '-DHAVE_PNG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('png')
    enabled_imaging_libraries.append('png_reader.cpp')
+
+if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
+   lib_env['LIBS'].append('proj')
 
 if '-DHAVE_TIFF' in env['CPPDEFINES']:
    lib_env['LIBS'].append('tiff')
@@ -76,27 +87,28 @@ if '-DHAVE_WEBP' in env['CPPDEFINES']:
    lib_env['LIBS'].append('webp')
    enabled_imaging_libraries.append('webp_reader.cpp')
 
-if '-DHAVE_JPEG' in env['CPPDEFINES']:
-   lib_env['LIBS'].append('jpeg')
-   enabled_imaging_libraries.append('jpeg_reader.cpp')
-
-if len(env['EXTRA_FREETYPE_LIBS']):
-    lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
-
 lib_env['LIBS'].append('xml2')
-lib_env['LIBS'].append('z')
-
-if env['THREADING'] == 'multi':
-    lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
 
 if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
     lib_env['LIBS'].append('icui18n')
 
-if env['RUNTIME_LINK'] == 'static':
-    if 'icuuc' in env['ICU_LIB_NAME']:
-        lib_env['LIBS'].append('icudata')
-else:
+lib_env['LIBS'].append(system)
+
+if '-DHAVE_JPEG' in env['CPPDEFINES']:
+   lib_env['LIBS'].append('jpeg')
+   enabled_imaging_libraries.append('jpeg_reader.cpp')
+
+lib_env['LIBS'].append(env['ICU_LIB_NAME'])
+
+lib_env['LIBS'].append('freetype')
+
+if env['RUNTIME_LINK'] == 'static' and 'icuuc' in env['ICU_LIB_NAME']:
+    lib_env['LIBS'].append('icudata')
+
+if env['RUNTIME_LINK'] != 'static':
     lib_env['LIBS'].insert(0, 'agg')
+
+lib_env['LIBS'].append('z')
 
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
@@ -263,7 +275,6 @@ if env['PLUGIN_LINKING'] == 'static':
 
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
-    lib_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
     lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     libmapnik_defines.append('-DHAVE_CAIRO')
     lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
