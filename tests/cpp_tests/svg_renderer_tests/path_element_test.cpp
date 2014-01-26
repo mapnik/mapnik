@@ -135,7 +135,7 @@ void prepare_map(Map& m)
         layer lyr("Provinces");
         lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("provinces");
-        m.addLayer(lyr);
+        m.add_layer(lyr);
     }
 
     // Drainage
@@ -146,7 +146,7 @@ void prepare_map(Map& m)
         layer lyr("Quebec Hydrography");
         lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("drainage");
-        m.addLayer(lyr);
+        m.add_layer(lyr);
     }
 
     {
@@ -157,7 +157,7 @@ void prepare_map(Map& m)
         layer lyr("Ontario Hydrography");
         lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("drainage");
-        m.addLayer(lyr);
+        m.add_layer(lyr);
     }
 
     // Provincial boundaries
@@ -168,7 +168,7 @@ void prepare_map(Map& m)
         layer lyr("Provincial borders");
         lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("provlines");
-        m.addLayer(lyr);
+        m.add_layer(lyr);
     }
 
     // Roads
@@ -184,7 +184,7 @@ void prepare_map(Map& m)
         lyr.add_style("highway-border");
         lyr.add_style("highway-fill");
 
-        m.addLayer(lyr);
+        m.add_layer(lyr);
     }
 }
 
