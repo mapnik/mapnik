@@ -58,6 +58,7 @@
 
 // stl
 #include <stdexcept>
+#include <array>
 
 namespace mapnik {
 
