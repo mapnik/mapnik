@@ -204,8 +204,8 @@ void prepare_map(Map & m)
 
         layer lyr("Provinces");
         lyr.set_datasource(datasource_cache::instance().create(p));
-        lyr.add_style("provinces");
         lyr.set_srs(srs_lcc);
+        lyr.add_style("provinces");
         m.add_layer(lyr);
     }
 
@@ -260,6 +260,7 @@ void prepare_map(Map & m)
 
         m.add_layer(lyr);
     }
+
     // popplaces
     {
         parameters p;

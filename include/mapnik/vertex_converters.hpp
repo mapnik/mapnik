@@ -38,7 +38,6 @@
 // fusion
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/container/vector.hpp>
-#include <boost/array.hpp>
 
 // mapnik
 #include <mapnik/agg_helpers.hpp>
@@ -59,6 +58,7 @@
 
 // stl
 #include <stdexcept>
+#include <array>
 
 namespace mapnik {
 
@@ -323,7 +323,7 @@ struct dispatcher
         dispatch<begin,end,Geometry>(geom, boost::false_type());
     }
 
-    boost::array<unsigned, boost::mpl::size<conv_types>::value> vec_;
+    std::array<unsigned, boost::mpl::size<conv_types>::value> vec_;
     args_type args_;
 };
 }
