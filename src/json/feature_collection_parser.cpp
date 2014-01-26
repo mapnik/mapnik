@@ -59,7 +59,8 @@ namespace mapnik { namespace json {
     {
 #if BOOST_VERSION >= 104700
         using namespace boost::spirit;
-        return qi::phrase_parse(first, last, *grammar_, standard_wide::space, features);
+        standard_wide::space_type space;
+        return qi::phrase_parse(first, last, *grammar_, space, features);
 #else
         std::ostringstream s;
         s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;

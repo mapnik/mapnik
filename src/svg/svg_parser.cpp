@@ -80,10 +80,12 @@ struct key_value_sequence_ordered
     key_value_sequence_ordered()
         : key_value_sequence_ordered::base_type(query)
     {
-        query =  pair >> *( qi::lit(';') >> pair);
+        qi::lit_type lit;
+        qi::char_type char_;
+        query =  pair >> *( lit(';') >> pair);
         pair  =  key >> -(':' >> value);
-        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9-");
-        value = +(qi::char_ - qi::lit(';'));
+        key   =  char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-");
+        value = +(char_ - lit(';'));
     }
 
     qi::rule<Iterator, pairs_type(), SkipType> query;
@@ -108,6 +110,7 @@ agg::rgba8 parse_color(const char* str)
 double parse_double(const char* str)
 {
     using namespace boost::spirit::qi;
+    qi::double_type double_;
     double val = 0.0;
     parse(str, str + std::strlen(str),double_,val);
     return val;
@@ -121,7 +124,9 @@ double parse_double_optional_percent(const char* str, bool &percent)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
-    using qi::_1;
+    qi::_1_type _1;
+    qi::double_type double_;
+    qi::char_type char_;
 
     double val = 0.0;
     char unit='\0';

@@ -471,9 +471,10 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             std::string filter_str = *direct_filters;
             std::string::const_iterator itr = filter_str.begin();
             std::string::const_iterator end = filter_str.end();
+            boost::spirit::qi::ascii::space_type space;
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           sty.get_tree().image_filters_grammar,
-                                                          boost::spirit::qi::ascii::space,
+                                                          space,
                                                           style.direct_image_filters());
             if (!result || itr!=end)
             {

@@ -58,12 +58,12 @@ namespace util {
 
 using namespace boost::spirit;
 
-BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_)
+BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_type())
 #ifdef BIGINT
-BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long)
+BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long_type())
 #endif
-BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
-BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
+BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_type())
+BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_type())
 
 struct bool_symbols : qi::symbols<char,bool>
 {
@@ -82,75 +82,85 @@ struct bool_symbols : qi::symbols<char,bool>
 
 bool string2bool(const char * iter, const char * end, bool & result)
 {
-    using boost::spirit::qi::no_case;
-    bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
+    boost::spirit::qi::no_case_type no_case;
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,no_case[bool_symbols()],space,result);
     return r && (iter == end);
 }
 
 bool string2bool(std::string const& value, bool & result)
 {
-    using boost::spirit::qi::no_case;
+    boost::spirit::qi::no_case_type no_case;
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],space,result);
     return r && (str_beg == str_end);
 }
 
 bool string2int(const char * iter, const char * end, int & result)
 {
-    bool r = qi::phrase_parse(iter,end,INTEGER,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,INTEGER,space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, int & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,INTEGER,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,INTEGER,space,result);
     return r && (str_beg == str_end);
 }
 
 #ifdef BIGINT
 bool string2int(const char * iter, const char * end, mapnik::value_integer & result)
 {
-    bool r = qi::phrase_parse(iter,end,LONGLONG,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,LONGLONG,space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, mapnik::value_integer & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,space,result);
     return r && (str_beg == str_end);
 }
 #endif
 
 bool string2double(std::string const& value, double & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,DOUBLE,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,DOUBLE,space,result);
     return r && (str_beg == str_end);
 }
 
 bool string2double(const char * iter, const char * end, double & result)
 {
-    bool r = qi::phrase_parse(iter,end,DOUBLE,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,DOUBLE,space,result);
     return r && (iter == end);
 }
 
 bool string2float(std::string const& value, float & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,FLOAT,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,FLOAT,space,result);
     return r && (str_beg == str_end);
 }
 
 bool string2float(const char * iter, const char * end, float & result)
 {
-    bool r = qi::phrase_parse(iter,end,FLOAT,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,FLOAT,space,result);
     return r && (iter == end);
 }
 

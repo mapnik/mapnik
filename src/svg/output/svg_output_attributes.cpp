@@ -22,6 +22,7 @@
  *****************************************************************************/
 
 // mapnik
+#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 
 namespace mapnik { namespace svg {

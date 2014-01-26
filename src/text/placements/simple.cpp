@@ -39,9 +39,7 @@ namespace mapnik
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 using phoenix::push_back;
-using boost::spirit::ascii::space;
 using phoenix::ref;
-using qi::_1;
 
 bool text_placement_info_simple::next()
 {
@@ -140,10 +138,13 @@ void text_placements_simple::set_positions(std::string positions)
         }
 
     } direction_name;
+    boost::spirit::ascii::space_type space;
+    qi::_1_type _1;
+    qi::float_type float_;
 
     std::string::iterator first = positions.begin(),  last = positions.end();
     qi::phrase_parse(first, last,
-                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
+                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> float_[push_back(phoenix::ref(text_sizes_), _1)]),
                      space
         );
     if (first != last)

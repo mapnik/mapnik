@@ -342,9 +342,9 @@ void box2d<T>::pad(T padding)
 template <typename T>
 bool box2d<T>::from_string(std::string const& str)
 {
-    using boost::spirit::qi::lit;
-    using boost::spirit::qi::double_;
-    using boost::spirit::ascii::space;
+    boost::spirit::qi::lit_type lit;
+    boost::spirit::qi::double_type double_;
+    boost::spirit::ascii::space_type space;
     bool r = boost::spirit::qi::phrase_parse(str.begin(),
                                              str.end(),
                                              double_ >> -lit(',') >> double_ >> -lit(',')

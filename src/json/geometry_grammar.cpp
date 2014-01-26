@@ -41,20 +41,18 @@ geometry_grammar<Iterator>::geometry_grammar()
     : geometry_grammar::base_type(geometry,"geometry")
 {
 
-    using qi::lit;
-    using qi::int_;
-    using qi::double_;
-    using qi::_val;
-    using qi::_1;
-    using qi::_2;
-    using qi::_3;
-    using qi::_4;
-    using qi::_a;
-    using qi::_b;
-    using qi::_r1;
-    using qi::_r2;
-    using qi::eps;
-    using qi::_pass;
+    qi::lit_type lit;
+    qi::int_type int_;
+    qi::double_type double_;
+    qi::_1_type _1;
+    qi::_2_type _2;
+    qi::_3_type _3;
+    qi::_4_type _4;
+    qi::_a_type _a;
+    qi::_r1_type _r1;
+    qi::_r2_type _r2;
+    qi::eps_type eps;
+    qi::_pass_type _pass;
     using qi::fail;
     using qi::on_error;
     using boost::phoenix::new_;

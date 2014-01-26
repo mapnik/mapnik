@@ -50,7 +50,8 @@ bool geometry_parser<Iterator>::parse(iterator_type first, iterator_type last, b
 {
 #if BOOST_VERSION >= 104700
     using namespace boost::spirit;
-    return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(path)), standard_wide::space);
+    standard_wide::space_type space;
+    return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(path)), space);
 #else
     std::ostringstream s;
     s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
