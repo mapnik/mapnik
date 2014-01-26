@@ -64,6 +64,7 @@ namespace mapnik { namespace svg {
         template <typename PathType>
         void generate_path(PathType const& path, path_output_attributes const& path_attributes)
         {
+            karma::lit_type lit;
             util::svg_generator<OutputIterator,PathType> svg_path_grammer;
             karma::generate(output_iterator_, lit("<path ") << svg_path_grammer, path);
             path_attributes_grammar attributes_grammar;

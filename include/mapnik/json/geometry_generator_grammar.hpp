@@ -231,14 +231,15 @@ struct geometry_generator_grammar :
     geometry_generator_grammar()
         : geometry_generator_grammar::base_type(coordinates)
     {
-        using boost::spirit::karma::uint_;
-        using boost::spirit::bool_;
-        using boost::spirit::karma::_val;
-        using boost::spirit::karma::_1;
-        using boost::spirit::karma::lit;
-        using boost::spirit::karma::_a;
-        using boost::spirit::karma::_r1;
-        using boost::spirit::karma::eps;
+        boost::spirit::karma::uint_type uint_;
+        boost::spirit::bool_type bool_;
+        boost::spirit::karma::_val_type _val;
+        boost::spirit::karma::_1_type _1;
+        boost::spirit::karma::lit_type lit;
+        boost::spirit::karma::_a_type _a;
+        boost::spirit::karma::_r1_type _r1;
+        boost::spirit::karma::eps_type eps;
+        boost::spirit::karma::string_type kstring;
 
         coordinates =  point | linestring | polygon
             ;
@@ -266,7 +267,7 @@ struct geometry_generator_grammar :
             ;
 
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
-                           << karma::string[ if_ (_r1 > 1) [_1 = "],["]
+                           << kstring[ if_ (_r1 > 1) [_1 = "],["]
                                              .else_[_1 = '[' ]]
                            |
                            &uint_(mapnik::SEG_LINETO)
@@ -308,13 +309,14 @@ struct multi_geometry_generator_grammar :
     multi_geometry_generator_grammar()
         : multi_geometry_generator_grammar::base_type(start)
     {
-        using boost::spirit::karma::lit;
-        using boost::spirit::karma::eps;
-        using boost::spirit::karma::_val;
-        using boost::spirit::karma::_1;
-        using boost::spirit::karma::_a;
-        using boost::spirit::karma::_r1;
-        using boost::spirit::bool_;
+        boost::spirit::karma::uint_type uint_;
+        boost::spirit::bool_type bool_;
+        boost::spirit::karma::_val_type _val;
+        boost::spirit::karma::_1_type _1;
+        boost::spirit::karma::lit_type lit;
+        boost::spirit::karma::_a_type _a;
+        boost::spirit::karma::eps_type eps;
+        boost::spirit::karma::string_type kstring;
 
         geometry_types.add
             (mapnik::geometry_type::types::Point,"\"Point\"")
@@ -338,9 +340,9 @@ struct multi_geometry_generator_grammar :
         geometry = ( &bool_(true)[_1 = not_empty_(_val)] << lit("{\"type\":")
                      << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = multi_type_(_val)]
                      << lit(",\"coordinates\":")
-                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
+                     << kstring[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
                      << coordinates
-                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
+                     << kstring[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
                      << lit('}')) | lit("null")
             ;
 

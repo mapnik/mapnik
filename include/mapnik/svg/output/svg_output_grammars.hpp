@@ -100,18 +100,19 @@ struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
     explicit svg_path_attributes_grammar()
         : svg_path_attributes_grammar::base_type(svg_path_attributes)
     {
-        using karma::double_;
-        using karma::string;
-        using repository::confix;
+        karma::lit_type lit;
+        karma::double_type double_;
+        karma::string_type kstring;
+        repository::confix_type confix;
 
         svg_path_attributes =
-            lit("fill=") << confix('"', '"')[string]
+            lit("fill=") << confix('"', '"')[kstring]
                          << lit(" fill-opacity=") << confix('"', '"')[double_]
-                         << lit(" stroke=") << confix('"', '"')[string]
+                         << lit(" stroke=") << confix('"', '"')[kstring]
                          << lit(" stroke-opacity=") << confix('"', '"')[double_]
                          << lit(" stroke-width=") << confix('"', '"')[double_ << lit("px")]
-                         << lit(" stroke-linecap=") << confix('"', '"')[string]
-                         << lit(" stroke-linejoin=") << confix('"', '"')[string]
+                         << lit(" stroke-linecap=") << confix('"', '"')[kstring]
+                         << lit(" stroke-linejoin=") << confix('"', '"')[kstring]
                          << lit(" stroke-dashoffset=") << confix('"', '"')[double_ << lit("px")];
     }
 
@@ -124,8 +125,9 @@ struct svg_path_dash_array_grammar : karma::grammar<OutputIterator, mapnik::dash
     explicit svg_path_dash_array_grammar()
         : svg_path_dash_array_grammar::base_type(svg_path_dash_array)
     {
-        using karma::double_;
-        using repository::confix;
+        karma::double_type double_;
+        karma::lit_type lit;
+        repository::confix_type confix;
 
         svg_path_dash_array =
             lit("stroke-dasharray=")
@@ -142,16 +144,17 @@ struct svg_rect_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
     explicit svg_rect_attributes_grammar()
         : svg_rect_attributes_grammar::base_type(svg_rect_attributes)
     {
-        using karma::int_;
-        using karma::string;
-        using repository::confix;
+        karma::lit_type lit;
+        karma::int_type int_;
+        karma::string_type kstring;
+        repository::confix_type confix;
 
         svg_rect_attributes =
             lit("x=") << confix('"', '"')[int_]
                       << lit(" y=") << confix('"', '"')[int_]
                       << lit(" width=") << confix('"', '"')[int_ << lit("px")]
                       << lit(" height=") << confix('"', '"')[int_ << lit("px")]
-                      << lit(" fill=") << confix('"', '"')[string];
+                      << lit(" fill=") << confix('"', '"')[kstring];
     }
 
     karma::rule<OutputIterator, mapnik::svg::rect_output_attributes()> svg_rect_attributes;
@@ -163,16 +166,17 @@ struct svg_root_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
     explicit svg_root_attributes_grammar()
         : svg_root_attributes_grammar::base_type(svg_root_attributes)
     {
-        using karma::int_;
-        using karma::string;
-        using karma::double_;
-        using repository::confix;
+        karma::lit_type lit;
+        karma::int_type int_;
+        karma::string_type kstring;
+        karma::double_type double_;
+        repository::confix_type confix;
 
         svg_root_attributes =
             lit("width=") << confix('"', '"')[int_ << lit("px")]
                           << lit(" height=") << confix('"', '"')[int_ << lit("px")]
                           << " version=" << confix('"', '"')[double_]
-                          << " xmlns=" << confix('"', '"')[string]
+                          << " xmlns=" << confix('"', '"')[kstring]
                           << lit(" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"");
     }
 

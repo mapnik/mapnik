@@ -184,16 +184,24 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 double val = 0.0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                if (qi::phrase_parse(itr,end,double_,ascii::space,val))
+                ascii::space_type space;
+                qi::double_type double_;
+                if (qi::phrase_parse(itr,end,double_,space,val))
+                {
                     f.put(name,val);
+                }
             }
             else
             {
                 mapnik::value_integer val = 0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                if (qi::phrase_parse(itr,end,int_,ascii::space,val))
+                ascii::space_type space;
+                qi::int_type int_;
+                if (qi::phrase_parse(itr,end,int_,space,val))
+                {
                     f.put(name,val);
+                }
             }
             break;
         }

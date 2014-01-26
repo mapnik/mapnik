@@ -34,18 +34,18 @@ template <typename Iterator>
 topojson_grammar<Iterator>::topojson_grammar()
     : topojson_grammar::base_type(topology, "topojson")
 {
-    using qi::lit;
-    using qi::double_;
-    using qi::int_;
-    using qi::no_skip;
-    using qi::omit;
-    using qi::_val;
-    using qi::_1;
-    using qi::_2;
-    using qi::_3;
-    using qi::_4;
-    using qi::fail;
-    using qi::on_error;
+    qi::lit_type lit;
+    qi::double_type double_;
+    qi::int__type int_;
+    qi::no_skip_type no_skip;
+    qi::omit_type omit;
+    qi::_val_type _val;
+    qi::_1_type _1;
+    qi::_2_type _2;
+    qi::_3_type _3;
+    qi::_4_type _4;
+    qi::fail_type fail;
+    qi::on_error_type on_error;
 
     using standard_wide::char_;
     using phoenix::construct;

@@ -166,11 +166,12 @@ namespace mapnik { namespace util {
         svg_generator()
             : svg_generator::base_type(svg)
         {
-            using boost::spirit::karma::uint_;
-            using boost::spirit::karma::_val;
-            using boost::spirit::karma::_1;
-            using boost::spirit::karma::lit;
-            using boost::spirit::karma::_a;
+            boost::spirit::karma::uint_type uint_;
+            boost::spirit::karma::_val_type _val;
+            boost::spirit::karma::_1_type _1;
+            boost::spirit::karma::lit_type lit;
+            boost::spirit::karma::_a_type _a;
+            boost::spirit::karma::string_type kstring;
 
             svg = point | linestring | polygon
                 ;
@@ -194,7 +195,7 @@ namespace mapnik { namespace util {
                 ;
 
             svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
-                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ].else_[_1 =""]])
+                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << kstring [if_(_a == 1) [_1 = "L" ].else_[_1 =""]])
                          << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
                 ;
 
