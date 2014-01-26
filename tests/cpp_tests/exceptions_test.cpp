@@ -62,7 +62,7 @@ int main(int argc, char** argv)
             l.set_datasource(ds);
             l.add_style("style");
             mapnik::Map m = map;
-            m.addLayer(l);
+            m.add_layer(l);
             m.zoom_all();
             mapnik::image_32 im(m.width(),m.height());
             mapnik::agg_renderer<mapnik::image_32> ren(m,im);

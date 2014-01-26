@@ -745,7 +745,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 }
             }
         }
-        map.addLayer(lyr);
+        map.add_layer(lyr);
     }
     catch (config_error const& ex)
     {

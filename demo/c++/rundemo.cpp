@@ -191,7 +191,7 @@ int main ( int argc , char** argv)
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provinces");
             lyr.set_srs(srs_lcc);
-            m.addLayer(lyr);
+            m.add_layer(lyr);
         }
 
         // Drainage
@@ -203,7 +203,7 @@ int main ( int argc , char** argv)
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.set_srs(srs_lcc);
             lyr.add_style("drainage");
-            m.addLayer(lyr);
+            m.add_layer(lyr);
         }
 
         {
@@ -214,7 +214,7 @@ int main ( int argc , char** argv)
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.set_srs(srs_lcc);
             lyr.add_style("drainage");
-            m.addLayer(lyr);
+            m.add_layer(lyr);
         }
 
         // Provincial boundaries
@@ -226,7 +226,7 @@ int main ( int argc , char** argv)
             lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provlines");
-            m.addLayer(lyr);
+            m.add_layer(lyr);
         }
 
         // Roads
@@ -243,7 +243,7 @@ int main ( int argc , char** argv)
             lyr.add_style("highway-border");
             lyr.add_style("highway-fill");
 
-            m.addLayer(lyr);
+            m.add_layer(lyr);
         }
         // popplaces
         {
@@ -255,7 +255,7 @@ int main ( int argc , char** argv)
             lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("popplaces");
-            m.addLayer(lyr);
+            m.add_layer(lyr);
         }
 
         m.zoom_to_box(box2d<double>(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855));

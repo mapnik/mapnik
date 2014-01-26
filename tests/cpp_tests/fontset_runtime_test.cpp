@@ -56,7 +56,7 @@ int main(int argc, char** argv)
         mapnik::layer lyr("layer");
         lyr.set_datasource(ds);
         lyr.add_style("style");
-        m.addLayer(lyr);
+        m.add_layer(lyr);
         mapnik::feature_type_style the_style;
         mapnik::rule the_rule;
         mapnik::text_symbolizer text_sym(mapnik::parse_expression("[name]"),10,mapnik::color(0,0,0));

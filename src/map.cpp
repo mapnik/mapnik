@@ -204,12 +204,12 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-void Map::addLayer(layer const& l)
+void Map::add_layer(layer const& l)
 {
     layers_.push_back(l);
 }
 
-void Map::removeLayer(size_t index)
+void Map::remove_layer(size_t index)
 {
     layers_.erase(layers_.begin()+index);
 }
@@ -220,12 +220,12 @@ void Map::remove_all()
     styles_.clear();
 }
 
-layer const& Map::getLayer(size_t index) const
+layer const& Map::get_layer(size_t index) const
 {
     return layers_[index];
 }
 
-layer& Map::getLayer(size_t index)
+layer& Map::get_layer(size_t index)
 {
     return layers_[index];
 }
