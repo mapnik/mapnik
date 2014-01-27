@@ -44,20 +44,20 @@ color::color(std::string const& str)
 std::string color::to_string() const
 {
     namespace karma = boost::spirit::karma;
-    using boost::spirit::karma::_1;
-    using boost::spirit::karma::eps;
-    using boost::spirit::karma::double_;
-    using boost::spirit::karma::string;
+    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::eps_type eps;
+    boost::spirit::karma::double_type double_;
+    boost::spirit::karma::string_type kstring;
     boost::spirit::karma::uint_generator<uint8_t,10> color_generator;
     std::string str;
     std::back_insert_iterator<std::string> sink(str);
     karma::generate(sink,
                     // begin grammar
-                    string[ phoenix::if_(alpha()==255) [_1="rgb("].else_[_1="rgba("]]
+                    kstring[ phoenix::if_(alpha()==255) [_1="rgb("].else_[_1="rgba("]]
                     << color_generator[_1 = red()] << ','
                     << color_generator[_1 = green()] << ','
                     << color_generator[_1 = blue()]
-                    << string[ phoenix::if_(alpha()==255) [_1 = ')'].else_[_1 =',']]
+                    << kstring[ phoenix::if_(alpha()==255) [_1 = ')'].else_[_1 =',']]
                     << eps(alpha()<255) << double_ [_1 = alpha()/255.0]
                     << ')'
                     // end grammar
@@ -68,10 +68,10 @@ std::string color::to_string() const
 std::string color::to_hex_string() const
 {
     namespace karma = boost::spirit::karma;
-    using boost::spirit::karma::_1;
-    using boost::spirit::karma::hex;
-    using boost::spirit::karma::eps;
-    using boost::spirit::karma::right_align;
+    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::hex_type hex;
+    boost::spirit::karma::eps_type eps;
+    boost::spirit::karma::right_align_type right_align;
     std::string str;
     std::back_insert_iterator<std::string> sink(str);
     karma::generate(sink,

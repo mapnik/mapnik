@@ -44,9 +44,10 @@ wkt_parser::wkt_parser()
 bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
     using namespace boost::spirit;
+    ascii::space_type space;
     iterator_type first = wkt.begin();
     iterator_type last =  wkt.end();
-    return qi::phrase_parse(first, last, *grammar_, ascii::space, paths);
+    return qi::phrase_parse(first, last, *grammar_, space, paths);
 }
 #endif
 

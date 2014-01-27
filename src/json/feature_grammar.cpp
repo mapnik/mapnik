@@ -38,30 +38,26 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & 
       json_(json),
       put_property_(put_property(tr))
 {
-    using qi::lit;
-    using qi::long_long;
-    using qi::double_;
+    qi::lit_type lit;
+    qi::long_long_type long_long;
+    qi::double_type double_;
 #if BOOST_VERSION > 104200
-    using qi::no_skip;
+    qi::no_skip_type no_skip;
 #else
-    using qi::lexeme;
+    qi::lexeme_type lexeme;
 #endif
-    using standard_wide::char_;
-    using qi::_val;
-    using qi::_1;
-    using qi::_2;
-    using qi::_3;
-    using qi::_4;
-    using qi::_a;
-    using qi::_b;
-    using qi::_r1;
-    using qi::_r2;
+    standard_wide::char_type char_;
+    qi::_val_type _val;
+    qi::_1_type _1;
+    qi::_2_type _2;
+    qi::_3_type _3;
+    qi::_4_type _4;
+    qi::_a_type _a;
+    qi::_r1_type _r1;
+    qi::eps_type eps;
+
     using qi::fail;
     using qi::on_error;
-    using qi::_pass;
-    using qi::eps;
-    using qi::raw;
-
     using phoenix::new_;
     using phoenix::push_back;
     using phoenix::construct;

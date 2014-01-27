@@ -147,8 +147,11 @@ struct escaped_string
     escaped_string()
         : escaped_string::base_type(esc_str)
     {
-        using boost::spirit::karma::maxwidth;
-        using boost::spirit::karma::right_align;
+        karma::lit_type lit;
+        karma::_r1_type _r1;
+        karma::hex_type hex;
+        karma::right_align_type right_align;
+        karma::print_type kprint;
 
         esc_char.add
             ('"', "\\\"")
@@ -160,11 +163,11 @@ struct escaped_string
             ('\t', "\\t")
             ;
 
-        esc_str =   karma::lit(karma::_r1)
+        esc_str =   lit(_r1)
             << *(esc_char
-                 | karma::print
-                 | "\\u" << right_align(4,karma::lit('0'))[karma::hex])
-            <<  karma::lit(karma::_r1)
+                 | kprint
+                 | "\\u" << right_align(4,lit('0'))[hex])
+            <<  lit(_r1)
             ;
     }
 
@@ -185,15 +188,15 @@ struct feature_generator_grammar:
         , quote_("\"")
 
     {
-        using boost::spirit::karma::lit;
-        using boost::spirit::karma::uint_;
-        using boost::spirit::karma::bool_;
-        using boost::spirit::karma::double_;
-        using boost::spirit::karma::_val;
-        using boost::spirit::karma::_1;
-        using boost::spirit::karma::_r1;
-        using boost::spirit::karma::string;
-        using boost::spirit::karma::eps;
+        boost::spirit::karma::lit_type lit;
+        boost::spirit::karma::uint_type uint_;
+        boost::spirit::karma::bool_type bool_;
+        boost::spirit::karma::double_type double_;
+        boost::spirit::karma::_val_type _val;
+        boost::spirit::karma::_1_type _1;
+        boost::spirit::karma::_r1_type _r1;
+        boost::spirit::karma::string_type kstring;
+        boost::spirit::karma::eps_type eps;
 
         feature = lit("{\"type\":\"Feature\",\"id\":")
             << uint_[_1 = id_(_val)]
@@ -208,7 +211,7 @@ struct feature_generator_grammar:
             ;
 
         pair = lit('"')
-            << string[_1 = phoenix::at_c<0>(_val)] << lit('"')
+            << kstring[_1 = phoenix::at_c<0>(_val)] << lit('"')
             << lit(':')
             << value(phoenix::at_c<1>(_val))
             ;
@@ -216,7 +219,7 @@ struct feature_generator_grammar:
         value = (value_null_| bool_ | int__ | double_ | ustring)[_1 = value_base_(_r1)]
             ;
 
-        value_null_ = string[_1 = "null"]
+        value_null_ = kstring[_1 = "null"]
             ;
 
         ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]

@@ -207,18 +207,18 @@ namespace mapnik { namespace svg {
               scale_action(process_scale<TransformType>(tr)),
               skew_action(process_skew<TransformType>(tr))
         {
-            using qi::_1;
-            using qi::_2;
-            using qi::_3;
-            using qi::_4;
-            using qi::_5;
-            using qi::_6;
-            using qi::_a;
-            using qi::_b;
-            using qi::_c;
-            using qi::_val;
-            using qi::double_;
-            using qi::no_case;
+            qi::_1_type _1;
+            qi::_2_type _2;
+            qi::_3_type _3;
+            qi::_4_type _4;
+            qi::_5_type _5;
+            qi::_6_type _6;
+            qi::_a_type _a;
+            qi::_b_type _b;
+            qi::_c_type _c;
+            qi::lit_type lit;
+            qi::double_type double_;
+            qi::no_case_type no_case;
 
             start =  +transform_ ;
 

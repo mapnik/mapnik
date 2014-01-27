@@ -38,14 +38,14 @@ css_color_grammar<Iterator>::css_color_grammar()
     : css_color_grammar::base_type(css_color)
 
 {
-    using qi::lit;
-    using qi::_val;
-    using qi::double_;
-    using qi::_1;
-    using qi::_a;
-    using qi::_b;
-    using qi::_c;
-    using ascii::no_case;
+    qi::lit_type lit;
+    qi::_val_type _val;
+    qi::double_type double_;
+    qi::_1_type _1;
+    qi::_a_type _a;
+    qi::_b_type _b;
+    qi::_c_type _c;
+    ascii::no_case_type no_case;
     using phoenix::at_c;
 
     css_color %= rgba_color

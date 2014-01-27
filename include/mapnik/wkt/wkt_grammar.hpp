@@ -99,9 +99,17 @@ namespace mapnik { namespace wkt {
         wkt_grammar()
             : wkt_grammar::base_type(geometry_tagged_text)
         {
-            using qi::no_case;
-            using qi::_1;
-            using qi::_2;
+            qi::_r1_type _r1;
+            qi::_r2_type _r2;
+            qi::_pass_type _pass;
+            qi::eps_type eps;
+            qi::_val_type _val;
+            qi::lit_type lit;
+            qi::no_case_type no_case;
+            qi::double_type double_;
+            qi::_1_type _1;
+            qi::_2_type _2;
+            qi::_a_type _a;
             using boost::phoenix::push_back;
 
             geometry_tagged_text = point_tagged_text
@@ -223,9 +231,8 @@ struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::
     wkt_collection_grammar()
         :  wkt_collection_grammar::base_type(start)
     {
-        using qi::_1;
-        using qi::_val;
-        using qi::no_case;
+        qi::lit_type lit;
+        qi::no_case_type no_case;
         using boost::phoenix::push_back;
         start = wkt | no_case[lit("GEOMETRYCOLLECTION")]
             >> (lit("(") >> wkt % lit(",") >> lit(")"));

@@ -177,7 +177,8 @@ topojson_datasource::topojson_datasource(parameters const& params)
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
     mapnik::topojson::topojson_grammar<boost::spirit::multi_pass<base_iterator_type> > g;
-    bool result = boost::spirit::qi::phrase_parse(begin, end, g, boost::spirit::standard_wide::space, topo_);
+    boost::spirit::standard_wide::space_type space;
+    bool result = boost::spirit::qi::phrase_parse(begin, end, g, space, topo_);
     if (!result)
     {
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + file_ + "'");

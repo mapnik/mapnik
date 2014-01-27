@@ -42,6 +42,7 @@ namespace mapnik { namespace svg {
     template <typename OutputIterator>
     void svg_generator<OutputIterator>::generate_header()
     {
+        karma::lit_type lit;
         karma::generate(output_iterator_, lit("<?xml version=\"1.0\" standalone=\"no\"?>\n"));
         karma::generate(output_iterator_, lit("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"));
     }
@@ -50,12 +51,14 @@ namespace mapnik { namespace svg {
     void svg_generator<OutputIterator>::generate_opening_root(root_output_attributes const& root_attributes)
     {
         root_attributes_grammar attributes_grammar;
+        karma::lit_type lit;
         karma::generate(output_iterator_, lit("<svg ") << attributes_grammar << lit(">\n"), root_attributes);
     }
 
     template <typename OutputIterator>
     void svg_generator<OutputIterator>::generate_closing_root()
     {
+        karma::lit_type lit;
         karma::generate(output_iterator_, lit("</svg>"));
     }
 
@@ -63,6 +66,7 @@ namespace mapnik { namespace svg {
     void svg_generator<OutputIterator>::generate_rect(rect_output_attributes const& rect_attributes)
     {
         rect_attributes_grammar attributes_grammar;
+        karma::lit_type lit;
         karma::generate(output_iterator_, lit("<rect ") << attributes_grammar << lit("/>\n"), rect_attributes);
     }
 
@@ -70,6 +74,7 @@ namespace mapnik { namespace svg {
     void svg_generator<OutputIterator>::generate_opening_group(mapnik::value_integer val)
     {
         std::string string_val;
+        karma::lit_type lit;
         mapnik::util::to_string(string_val,val);
         karma::generate(output_iterator_, lit("<g id=\"")
                                             << lit(string_val)
@@ -84,6 +89,7 @@ namespace mapnik { namespace svg {
     template <typename OutputIterator>
     void svg_generator<OutputIterator>::generate_opening_group(std::string const& val)
     {
+        karma::lit_type lit;
         karma::generate(output_iterator_, lit("<g id=\"")
                                             << lit(val)
                                             << lit("\"")
@@ -97,6 +103,7 @@ namespace mapnik { namespace svg {
     template <typename OutputIterator>
     void svg_generator<OutputIterator>::generate_closing_group()
     {
+        karma::lit_type lit;
         karma::generate(output_iterator_, lit("</g>\n"));
     }
 
