@@ -48,10 +48,10 @@ path_expression_ptr parse_path(std::string const& str,
                                path_expression_grammar<std::string::const_iterator> const& g)
 {
     path_expression path;
-
+    boost::spirit::standard_wide::space_type space;
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, path);
+    bool r = qi::phrase_parse(itr, end, g, space, path);
     if (r  && itr == end)
     {
         return std::make_shared<path_expression>(path); //path;

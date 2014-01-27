@@ -20,10 +20,6 @@
  *
  *****************************************************************************/
 
-#include <boost/version.hpp>
-
-#if BOOST_VERSION >= 104700
-
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/geometry_wkt_generator.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
@@ -58,35 +54,35 @@ template <typename OutputIterator, typename Geometry>
 wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
     : wkt_generator::base_type(wkt)
 {
-    using boost::spirit::karma::uint_;
-    using boost::spirit::karma::_val;
-    using boost::spirit::karma::_1;
-    using boost::spirit::karma::lit;
-    using boost::spirit::karma::_a;
-    using boost::spirit::karma::_b;
-    using boost::spirit::karma::_c;
-    using boost::spirit::karma::_r1;
-    using boost::spirit::karma::eps;
-    using boost::spirit::karma::string;
+    boost::spirit::karma::uint_type uint_;
+    boost::spirit::karma::_val_type _val;
+    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::lit_type lit;
+    boost::spirit::karma::_a_type _a;
+    boost::spirit::karma::_b_type _b;
+    boost::spirit::karma::_c_type _c;
+    boost::spirit::karma::_r1_type _r1;
+    boost::spirit::karma::eps_type eps;
+    boost::spirit::karma::string_type kstring;
 
     wkt = point | linestring | polygon
         ;
 
     point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
-        << string[ phoenix::if_ (single) [_1 = "Point("]
+        << kstring[ phoenix::if_ (single) [_1 = "Point("]
                    .else_[_1 = "("]]
         << point_coord [_1 = _first(_val)] << lit(')')
         ;
 
     linestring = &uint_(mapnik::geometry_type::types::LineString)[_1 = _type(_val)]
-        << string[ phoenix::if_ (single) [_1 = "LineString("]
+        << kstring[ phoenix::if_ (single) [_1 = "LineString("]
                    .else_[_1 = "("]]
         << coords
         << lit(')')
         ;
 
     polygon = &uint_(mapnik::geometry_type::types::Polygon)[_1 = _type(_val)]
-        << string[ phoenix::if_ (single) [_1 = "Polygon("]
+        << kstring[ phoenix::if_ (single) [_1 = "Polygon("]
                    .else_[_1 = "("]]
         << coords2
         << lit("))")
@@ -97,7 +93,7 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
 
     polygon_coord %= ( &uint_(mapnik::SEG_MOVETO)
                        << eps[_r1 += 1][_a  = _x(_val)][ _b = _y(_val)]
-                       << string[ if_ (_r1 > 1) [_1 = "),("]
+                       << kstring[ if_ (_r1 > 1) [_1 = "),("]
                                   .else_[_1 = "("]]
                        |
                        &uint_(mapnik::SEG_LINETO)
@@ -119,11 +115,11 @@ template <typename OutputIterator, typename GeometryContainer>
 wkt_multi_generator<OutputIterator, GeometryContainer>::wkt_multi_generator()
     : wkt_multi_generator::base_type(wkt)
 {
-    using boost::spirit::karma::lit;
-    using boost::spirit::karma::eps;
-    using boost::spirit::karma::_val;
-    using boost::spirit::karma::_1;
-    using boost::spirit::karma::_a;
+    boost::spirit::karma::lit_type lit;
+    boost::spirit::karma::eps_type eps;
+    boost::spirit::karma::_val_type _val;
+    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::_a_type _a;
 
     geometry_types.add
         (mapnik::geometry_type::types::Point,"Point")
@@ -171,5 +167,3 @@ bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
 }
 
 }}
-
-#endif

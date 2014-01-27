@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-#include <boost/version.hpp>
-
 // mapnik
 #include <mapnik/json/feature_parser.hpp>
 #include <mapnik/json/feature_grammar.hpp>
@@ -32,28 +30,19 @@
 
 namespace mapnik { namespace json {
 
-#if BOOST_VERSION >= 104700
-
     template <typename Iterator>
     feature_parser<Iterator>::feature_parser(generic_json<Iterator> & json, mapnik::transcoder const& tr)
         : grammar_(new feature_grammar<iterator_type,feature_type>(json, tr)) {}
 
     template <typename Iterator>
     feature_parser<Iterator>::~feature_parser() {}
-#endif
 
     template <typename Iterator>
     bool feature_parser<Iterator>::parse(iterator_type first, iterator_type last, mapnik::feature_impl & f)
     {
-#if BOOST_VERSION >= 104700
         using namespace boost::spirit;
-        return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(f)), standard_wide::space);
-#else
-        std::ostringstream s;
-        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-        throw std::runtime_error("mapnik::feature_parser::parse() requires at least boost 1.47 while your build was compiled against boost " + s.str());
-        return false;
-#endif
+        standard_wide::space_type space;
+        return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(f)), space);
     }
 
 template class feature_parser<std::string::const_iterator>;

@@ -1,11 +1,9 @@
-#include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include "utils.hpp"
 
-#if BOOST_VERSION >= 104700
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
@@ -124,7 +122,6 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 
     return boost::optional<std::string>();
 }
-#endif
 
 int main(int argc, char** argv)
 {
@@ -136,8 +133,6 @@ int main(int argc, char** argv)
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
     BOOST_TEST(set_working_dir(args));
-
-#if BOOST_VERSION >= 104700
 
     // LineString/bbox clipping
     {
@@ -177,15 +172,11 @@ int main(int argc, char** argv)
     }
 #endif
 
-#endif
-
     if (!::boost::detail::test_errors())
     {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ geometry conversions: \x1b[1;32m✓ \x1b[0m\n";
-#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
-#endif
     }
     else
     {

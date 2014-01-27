@@ -48,13 +48,6 @@ if env['RUNTIME_LINK'] == 'static':
 plugin_env.Append(LIBS=env['PLUGINS']['ogr']['lib'])
 libraries = copy(plugin_env['LIBS'])
 
-if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
-    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-    if boost_version_from_header < 46:
-        # avoid ubuntu issue with boost interprocess:
-        # https://github.com/mapnik/mapnik/issues/1082
-        cxxflags.append('-fpermissive')
-
 plugin_env.Append(CXXFLAGS=cxxflags)
 
 if env['PLUGIN_LINKING'] == 'shared':

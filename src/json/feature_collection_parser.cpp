@@ -20,20 +20,11 @@
  *
  *****************************************************************************/
 
-// TODO https://github.com/mapnik/mapnik/issues/1658
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 105200
-#ifndef BOOST_SPIRIT_USE_PHOENIX_V3
-#define BOOST_SPIRIT_USE_PHOENIX_V3
-#endif
-#endif
-
 // mapnik
 #include <mapnik/json/feature_collection_parser.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 
 // boost
-#include <boost/version.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
@@ -41,8 +32,6 @@
 #include <stdexcept>
 
 namespace mapnik { namespace json {
-
-#if BOOST_VERSION >= 104700
 
     template <typename Iterator>
     feature_collection_parser<Iterator>::feature_collection_parser(generic_json<Iterator> & json,
@@ -52,20 +41,13 @@ namespace mapnik { namespace json {
 
     template <typename Iterator>
     feature_collection_parser<Iterator>::~feature_collection_parser() {}
-#endif
 
     template <typename Iterator>
     bool feature_collection_parser<Iterator>::parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features)
     {
-#if BOOST_VERSION >= 104700
         using namespace boost::spirit;
-        return qi::phrase_parse(first, last, *grammar_, standard_wide::space, features);
-#else
-        std::ostringstream s;
-        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-        throw std::runtime_error("mapnik::feature_collection_parser::parse() requires at least boost 1.47 while your build was compiled against boost " + s.str());
-        return false;
-#endif
+        standard_wide::space_type space;
+        return qi::phrase_parse(first, last, *grammar_, space, features);
     }
 
     template class feature_collection_parser<std::string::const_iterator> ;

@@ -65,12 +65,14 @@ struct feature_collection_grammar :
           ctx_(ctx),
           generate_id_(1)
     {
-        using qi::lit;
-        using qi::eps;
-        using qi::_a;
-        using qi::_b;
-        using qi::_val;
-        using qi::_r1;
+        qi::lit_type lit;
+        qi::eps_type eps;
+        qi::_4_type _4;
+        qi::_3_type _2;
+        qi::_2_type _3;
+        qi::_a_type _a;
+        qi::_val_type _val;
+        qi::_r1_type _r1;
         using phoenix::push_back;
         using phoenix::construct;
         using phoenix::new_;
@@ -114,9 +116,9 @@ struct feature_collection_grammar :
                 feature_collection
                 , std::clog
                 << phoenix::val("Error parsing GeoJSON ")
-                << qi::_4
+                << _4
                 << phoenix::val(" here: \"")
-                << construct<std::string>(qi::_3, qi::_2)
+                << construct<std::string>(_3, _2)
                 << phoenix::val('\"')
                 << std::endl
                 );

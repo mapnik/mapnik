@@ -33,8 +33,6 @@
 
 namespace mapnik { namespace json {
 
-#if BOOST_VERSION >= 104700
-
 template <typename OutputIterator> struct feature_generator_grammar;
 template <typename OutputIterator> struct multi_geometry_generator_grammar;
 
@@ -60,27 +58,6 @@ private:
     const std::unique_ptr<multi_geometry_generator_grammar<sink_type> > grammar_;
 };
 
-#else
-
-class MAPNIK_DECL feature_generator : private mapnik::noncopyable
-{
-public:
-    feature_generator() {}
-    ~feature_generator() {}
-    bool generate(std::string & geojson, mapnik::feature_impl const& f);
-};
-
-class MAPNIK_DECL geometry_generator : private mapnik::noncopyable
-{
-public:
-    geometry_generator() {}
-    ~geometry_generator() {}
-    bool generate(std::string & geojson, mapnik::geometry_container const& g);
-};
-
-#endif
-
 }}
 
-
-#endif //MAPNIK_GEOJSON_GENERATOR_HPP
+#endif // MAPNIK_GEOJSON_GENERATOR_HPP

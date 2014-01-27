@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-// boost
-#include <boost/version.hpp>
-
 // mapnik
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
@@ -32,11 +29,9 @@
 #include <sstream>
 #include <stdexcept>
 
-
 namespace mapnik
 {
 
-#if BOOST_VERSION >= 104700
 wkt_parser::wkt_parser()
     : grammar_(new mapnik::wkt::wkt_collection_grammar<iterator_type>)
 {}
@@ -44,23 +39,16 @@ wkt_parser::wkt_parser()
 bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
     using namespace boost::spirit;
+    ascii::space_type space;
     iterator_type first = wkt.begin();
     iterator_type last =  wkt.end();
-    return qi::phrase_parse(first, last, *grammar_, ascii::space, paths);
+    return qi::phrase_parse(first, last, *grammar_, space, paths);
 }
-#endif
 
 bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
-#if BOOST_VERSION >= 104700
     wkt_parser parser;
     return parser.parse(wkt,paths);
-#else
-    std::ostringstream s;
-    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-    throw std::runtime_error("mapnik::from_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());
-    return false;
-#endif
 }
 
 }

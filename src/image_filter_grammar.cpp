@@ -23,9 +23,6 @@
 // mapnik
 #include <mapnik/image_filter_grammar.hpp>
 
-// boost
-#include <boost/version.hpp>
-
 // spirit
 #include <boost/spirit/include/phoenix.hpp>
 
@@ -38,34 +35,27 @@ template <typename Iterator, typename ContType>
 image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     : image_filter_grammar::base_type(start)
 {
-    using qi::lit;
-    using qi::_val;
-    using qi::_1;
-    using qi::_a;
-    using qi::_b;
-    using qi::_c;
-    using qi::_d;
-    using qi::_e;
-    using qi::_f;
-    using qi::_g;
-    using qi::_h;
-    using qi::_r1;
-    using qi::eps;
-    using qi::char_;
-    using qi::lexeme;
-    using qi::double_;
-    using boost::spirit::ascii::string;
+    qi::lit_type lit;
+    qi::_val_type _val;
+    qi::_1_type _1;
+    qi::_a_type _a;
+    qi::_b_type _b;
+    qi::_c_type _c;
+    qi::_d_type _d;
+    qi::_e_type _e;
+    qi::_f_type _f;
+    qi::_g_type _g;
+    qi::_h_type _h;
+    qi::_r1_type _r1;
+    qi::eps_type eps;
+    qi::char_type char_;
+    qi::double_type double_;
+    qi::no_skip_type no_skip;
     using phoenix::push_back;
     using phoenix::construct;
     using phoenix::at_c;
-#if BOOST_VERSION >= 104700
-    using qi::no_skip;
     start = -(filter % no_skip[*char_(", ")])
         ;
-#else
-    start = -(filter)
-        ;
-#endif
 
     filter =
         lit("emboss") >> no_args [push_back(_val,construct<mapnik::filter::emboss>())]

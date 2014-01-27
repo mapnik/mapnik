@@ -352,36 +352,13 @@ if env['SVG_RENDERER']: # svg backend
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')
 
-if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
-    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-    if boost_version_from_header < 46:
-        # avoid ubuntu issue with boost interprocess:
-        # https://github.com/mapnik/mapnik/issues/1001
-        env4 = lib_env.Clone()
-        env4.Append(CXXFLAGS = '-fpermissive')
-        cpp ='mapped_memory_cache.cpp'
-        source.remove(cpp)
-        if env['LINKING'] == 'static':
-            source.insert(0,env4.StaticObject(cpp))
-        else:
-            source.insert(0,env4.SharedObject(cpp))
-
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     source += Split(
         """
         libxml2_loader.cpp
         """)
-    env2 = lib_env.Clone()
-    env2.Append(CPPDEFINES = '-DHAVE_LIBXML2')
+    lib_env.Append(CPPDEFINES = '-DHAVE_LIBXML2')
     libmapnik_defines.append('-DHAVE_LIBXML2')
-    fixup = ['libxml2_loader.cpp']
-    for cpp in fixup:
-        if cpp in source:
-            source.remove(cpp)
-        if env['LINKING'] == 'static':
-            source.insert(0,env2.StaticObject(cpp))
-        else:
-            source.insert(0,env2.SharedObject(cpp))
 else:
     source += Split(
         """

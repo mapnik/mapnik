@@ -100,7 +100,8 @@ public:
         double x = 0;
         double y = 0;
         rewind(0);
-        for (size_type i = 0; i < size(); ++i)
+        size_type geom_size = size();
+        for (size_type i = 0; i < geom_size; ++i)
         {
             unsigned cmd = vertex(&x,&y);
             if (cmd == SEG_CLOSE) continue;

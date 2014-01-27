@@ -1,3 +1,4 @@
+#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #define BOOST_TEST_MODULE root_element_test
 
 /*

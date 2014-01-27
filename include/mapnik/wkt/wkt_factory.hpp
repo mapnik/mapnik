@@ -32,16 +32,12 @@
 // boost
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <boost/version.hpp>
-
 // stl
 #include <string>
 
 namespace mapnik {
 
 MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
-
-#if BOOST_VERSION >= 104700
 
 class MAPNIK_DECL wkt_parser : mapnik::noncopyable
 {
@@ -52,8 +48,6 @@ public:
 private:
     const std::unique_ptr<mapnik::wkt::wkt_collection_grammar<iterator_type> > grammar_;
 };
-
-#endif
 
 }
 

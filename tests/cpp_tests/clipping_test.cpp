@@ -7,7 +7,6 @@
 // boost
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/version.hpp>
 
 // stl
 #include <stdexcept>
@@ -126,9 +125,7 @@ int main(int argc, char** argv)
     {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ clipping: \x1b[1;32m✓ \x1b[0m\n";
-#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
-#endif
     }
     else
     {

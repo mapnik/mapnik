@@ -45,13 +45,6 @@ libraries.append('boost_system%s' % env['BOOST_APPEND'])
 cppdefines = []
 cxxflags = []
 
-if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
-    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-    if boost_version_from_header < 46:
-        # avoid ubuntu issue with boost interprocess:
-        # https://github.com/mapnik/mapnik/issues/1082
-        cxxflags.append('-fpermissive')
-
 plugin_env.Append(CXXFLAGS=cxxflags)
 plugin_env.Append(CPPDEFINES=cppdefines)
 

@@ -24,7 +24,6 @@
 #include <mapnik/transform_expression_grammar.hpp>
 
 // boost
-#include <boost/version.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
@@ -39,14 +38,17 @@ transform_expression_grammar<Iterator>::transform_expression_grammar(expression_
         : transform_expression_grammar::base_type(start)
 {
     using boost::phoenix::construct;
-    using qi::_a; using qi::_1; using qi::_4;
-    using qi::_b; using qi::_2; using qi::_5;
-    using qi::_c; using qi::_3; using qi::_6;
-    using qi::_val;
-    using qi::char_;
-    using qi::double_;
-    using qi::lit;
-    using qi::no_case;
+    qi::_1_type _1;
+    qi::_4_type _4;
+    qi::_2_type _2;
+    qi::_5_type _5;
+    qi::_3_type _3;
+    qi::_6_type _6;
+    qi::_val_type _val;
+    qi::char_type char_;
+    qi::double_type double_;
+    qi::lit_type lit;
+    qi::no_case_type no_case;
 
     // [http://www.w3.org/TR/SVG/coords.html#TransformAttribute]
 
@@ -55,13 +57,8 @@ transform_expression_grammar<Iterator>::transform_expression_grammar(expression_
     // the order provided.  The individual transform definitions are
     // separated by whitespace and/or a comma.
 
-#if BOOST_VERSION > 104200
-    using qi::no_skip;
+    qi::no_skip_type no_skip;
     start = transform_ % no_skip[char_(", ")] ;
-#else
-    using qi::lexeme;
-    start = transform_ % lexeme[char_(", ")] ;
-#endif
 
     transform_ = matrix | translate | scale | rotate | skewX | skewY ;
 

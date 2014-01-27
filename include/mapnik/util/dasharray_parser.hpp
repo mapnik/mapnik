@@ -33,30 +33,22 @@ namespace mapnik { namespace util {
 template <typename Iterator>
 bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharray)
 {
-    using qi::double_;
-    using qi::phrase_parse;
-    using qi::_1;
-    using qi::lit;
-    using qi::char_;
-#if BOOST_VERSION > 104200
-    using qi::no_skip;
-#else
-    using qi::lexeme;
-#endif
+    qi::double_type double_;
+    qi::_1_type _1;
+    qi::lit_type lit;
+    qi::char_type char_;
+    qi::ascii::space_type space;
+    qi::no_skip_type no_skip;
     using phoenix::push_back;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
     // no support for 'percentage' as viewport is unknown at load_map
     //
-    bool r = phrase_parse(first, last,
+    bool r = qi::phrase_parse(first, last,
                           (double_[push_back(phoenix::ref(dasharray), _1)] %
-#if BOOST_VERSION > 104200
                           no_skip[char_(", ")]
-#else
-                          lexeme[char_(", ")]
-#endif
                           | lit("none")),
-                          qi::ascii::space);
+                          space);
     if (first != last)
     {
         return false;

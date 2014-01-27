@@ -36,13 +36,13 @@ template <typename Iterator>
 path_expression_grammar<Iterator>::path_expression_grammar()
     : path_expression_grammar::base_type(expr)
 {
-    using boost::phoenix::construct;
-    using standard_wide::char_;
-    using qi::_1;
-    using qi::_val;
-    using qi::lit;
-    using qi::lexeme;
+    standard_wide::char_type char_;
+    qi::_1_type _1;
+    qi::_val_type _val;
+    qi::lit_type lit;
+    qi::lexeme_type lexeme;
     using phoenix::push_back;
+    using boost::phoenix::construct;
     
     expr =
         * (
