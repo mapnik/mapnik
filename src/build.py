@@ -367,17 +367,8 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
         """
         libxml2_loader.cpp
         """)
-    env2 = lib_env.Clone()
-    env2.Append(CPPDEFINES = '-DHAVE_LIBXML2')
+    lib_env.Append(CPPDEFINES = '-DHAVE_LIBXML2')
     libmapnik_defines.append('-DHAVE_LIBXML2')
-    fixup = ['libxml2_loader.cpp']
-    for cpp in fixup:
-        if cpp in source:
-            source.remove(cpp)
-        if env['LINKING'] == 'static':
-            source.insert(0,env2.StaticObject(cpp))
-        else:
-            source.insert(0,env2.SharedObject(cpp))
 else:
     source += Split(
         """
