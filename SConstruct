@@ -1769,10 +1769,6 @@ if not preconfigured:
         # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
         common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
-        # https://github.com/mapnik/mapnik/issues/1835
-        if sys.platform == 'darwin' and env['CXX'] == 'g++':
-            common_cxx_flags += '-fpermissive '
-
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
         else:
