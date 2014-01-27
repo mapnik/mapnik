@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 // mapnik
-#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/conversions.hpp>

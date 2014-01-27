@@ -36,18 +36,16 @@ topojson_grammar<Iterator>::topojson_grammar()
 {
     qi::lit_type lit;
     qi::double_type double_;
-    qi::int__type int_;
+    qi::int_type int_;
     qi::no_skip_type no_skip;
     qi::omit_type omit;
     qi::_val_type _val;
-    qi::_1_type _1;
     qi::_2_type _2;
     qi::_3_type _3;
     qi::_4_type _4;
-    qi::fail_type fail;
-    qi::on_error_type on_error;
-
-    using standard_wide::char_;
+    standard_wide::char_type char_;
+    using qi::fail;
+    using qi::on_error;
     using phoenix::construct;
 
     // generic json types

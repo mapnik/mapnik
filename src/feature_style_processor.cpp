@@ -21,15 +21,6 @@
  *****************************************************************************/
 
 // mapnik
-#if defined(SVG_RENDERER)
-// FIXME: workaround incompatibility of karma with -DBOOST_SPIRIT_NO_PREDEFINED_TERMINALS=1
-/*
-boost/spirit/repository/home/karma/directive/confix.hpp:49:23: error: no member named
-      'confix' in namespace 'boost::spirit::repository'
-    using repository::confix;
-*/
-#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
-#endif
 
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/agg_renderer.hpp>

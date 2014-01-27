@@ -20,14 +20,6 @@
  *
  *****************************************************************************/
 
-// FIXME: workaround incompatibility of karma with -DBOOST_SPIRIT_NO_PREDEFINED_TERMINALS=1
-/*
-boost/spirit/repository/home/karma/directive/confix.hpp:49:23: error: no member named
-      'confix' in namespace 'boost::spirit::repository'
-    using repository::confix;
-*/
-#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
-
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
