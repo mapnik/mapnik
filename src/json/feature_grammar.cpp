@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 104700
-
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/json/feature_grammar.hpp>
@@ -41,11 +38,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & 
     qi::lit_type lit;
     qi::long_long_type long_long;
     qi::double_type double_;
-#if BOOST_VERSION > 104200
     qi::no_skip_type no_skip;
-#else
-    qi::lexeme_type lexeme;
-#endif
     standard_wide::char_type char_;
     qi::_val_type _val;
     qi::_1_type _1;
@@ -81,12 +74,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & 
         >> json_.value >> *(lit(',') >> json_.value)
         >> lit(']')
         ;
-// https://github.com/mapnik/mapnik/issues/1342
-#if BOOST_VERSION >= 104700
     json_.number %= json_.strict_double
-#else
-    json_.number = json_.strict_double
-#endif
         | json_.int__
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
@@ -103,15 +91,11 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & 
         ("\\r", '\r')  // carrige return
         ("\\t", '\t')  // tab
         ;
-#if BOOST_VERSION > 104200
+
     json_.string_ %= lit('"') >> no_skip[*(json_.unesc_char | "\\u" >> json_.hex4 | (char_ - lit('"')))] >> lit('"')
         ;
-#else
-    json_.string_ %= lit('"') >> lexeme[*(json_.unesc_char | "\\u" >> json_.hex4 | (char_ - lit('"')))] >> lit('"')
-        ;
-#endif
-    // geojson types
 
+    // geojson types
     feature_type = lit("\"type\"")
         >> lit(':')
         >> lit("\"Feature\"")
@@ -154,5 +138,3 @@ template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik
 template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::feature_impl>;
 
 }}
-
-#endif

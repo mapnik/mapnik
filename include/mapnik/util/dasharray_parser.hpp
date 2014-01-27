@@ -38,11 +38,7 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
     qi::lit_type lit;
     qi::char_type char_;
     qi::ascii::space_type space;
-#if BOOST_VERSION > 104200
     qi::no_skip_type no_skip;
-#else
-    qi::lexeme_type lexeme;
-#endif
     using phoenix::push_back;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
@@ -50,11 +46,7 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
     //
     bool r = qi::phrase_parse(first, last,
                           (double_[push_back(phoenix::ref(dasharray), _1)] %
-#if BOOST_VERSION > 104200
                           no_skip[char_(", ")]
-#else
-                          lexeme[char_(", ")]
-#endif
                           | lit("none")),
                           space);
     if (first != last)

@@ -23,9 +23,6 @@
 // mapnik
 #include <mapnik/image_filter_grammar.hpp>
 
-// boost
-#include <boost/version.hpp>
-
 // spirit
 #include <boost/spirit/include/phoenix.hpp>
 
@@ -53,17 +50,12 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     qi::eps_type eps;
     qi::char_type char_;
     qi::double_type double_;
+    qi::no_skip_type no_skip;
     using phoenix::push_back;
     using phoenix::construct;
     using phoenix::at_c;
-#if BOOST_VERSION >= 104700
-    qi::no_skip_type no_skip;
     start = -(filter % no_skip[*char_(", ")])
         ;
-#else
-    start = -(filter)
-        ;
-#endif
 
     filter =
         lit("emboss") >> no_args [push_back(_val,construct<mapnik::filter::emboss>())]

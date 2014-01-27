@@ -24,7 +24,6 @@
 #include <mapnik/transform_expression_grammar.hpp>
 
 // boost
-#include <boost/version.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
@@ -58,13 +57,8 @@ transform_expression_grammar<Iterator>::transform_expression_grammar(expression_
     // the order provided.  The individual transform definitions are
     // separated by whitespace and/or a comma.
 
-#if BOOST_VERSION > 104200
     qi::no_skip_type no_skip;
     start = transform_ % no_skip[char_(", ")] ;
-#else
-    qi::lexeme_type lexeme;
-    start = transform_ % lexeme[char_(", ")] ;
-#endif
 
     transform_ = matrix | translate | scale | rotate | skewX | skewY ;
 

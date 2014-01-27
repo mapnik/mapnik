@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 104700
-
 // mapnik
 #include <mapnik/json/geometry_grammar.hpp>
 
@@ -165,5 +162,3 @@ template struct mapnik::json::geometry_grammar<std::string::const_iterator>;
 template struct mapnik::json::geometry_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
 
 }}
-
-#endif

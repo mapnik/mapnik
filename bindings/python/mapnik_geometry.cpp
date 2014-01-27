@@ -38,11 +38,9 @@
 #include <mapnik/json/geojson_generator.hpp>
 
 #include <boost/version.hpp>
-#if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/util/geometry_to_svg.hpp>
-#endif
 
 // stl
 #include <stdexcept>
@@ -132,7 +130,6 @@ inline std::string boost_version()
     return s.str();
 }
 
-#if BOOST_VERSION >= 104700
 PyObject* to_wkb( geometry_type const& geom, mapnik::util::wkbByteOrder byte_order)
 {
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
@@ -151,16 +148,7 @@ PyObject* to_wkb( geometry_type const& geom, mapnik::util::wkbByteOrder byte_ord
         Py_RETURN_NONE;
     }
 }
-#else
-PyObject* to_wkb( geometry_type const& geom)
-{
-    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost "
-                             + boost_version());
-}
-#endif
 
-
-#if BOOST_VERSION >= 104700
 PyObject* to_wkb2( path_type const& p, mapnik::util::wkbByteOrder byte_order)
 {
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(p,byte_order);
@@ -179,18 +167,9 @@ PyObject* to_wkb2( path_type const& p, mapnik::util::wkbByteOrder byte_order)
         Py_RETURN_NONE;
     }
 }
-#else
-PyObject* to_wkb2( path_type const& p)
-{
-    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost "
-                             + boost_version());
-}
-#endif
-
 
 std::string to_wkt( geometry_type const& geom)
 {
-#if BOOST_VERSION >= 104700
     std::string wkt; // Use Python String directly ?
     bool result = mapnik::util::to_wkt(wkt,geom);
     if (!result)
@@ -198,15 +177,10 @@ std::string to_wkt( geometry_type const& geom)
         throw std::runtime_error("Generate WKT failed");
     }
     return wkt;
-#else
-    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost "
-                             + boost_version());
-#endif
 }
 
 std::string to_wkt2( path_type const& geom)
 {
-#if BOOST_VERSION >= 104700
     std::string wkt; // Use Python String directly ?
     bool result = mapnik::util::to_wkt(wkt,geom);
     if (!result)
@@ -214,10 +188,6 @@ std::string to_wkt2( path_type const& geom)
         throw std::runtime_error("Generate WKT failed");
     }
     return wkt;
-#else
-    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost "
-                             + boost_version());
-#endif
 }
 
 std::string to_geojson( path_type const& geom)
@@ -233,8 +203,6 @@ std::string to_geojson( path_type const& geom)
 
 std::string to_svg( geometry_type const& geom)
 {
-
-#if BOOST_VERSION >= 104700
     std::string svg; // Use Python String directly ?
     bool result = mapnik::util::to_svg(svg,geom);
     if (!result)
@@ -242,17 +210,12 @@ std::string to_svg( geometry_type const& geom)
         throw std::runtime_error("Generate SVG failed");
     }
     return svg;
-#else
-    throw std::runtime_error("mapnik::to_svg() requires at least boost 1.47 while your build was compiled against boost "
-                             + boost_version());
-#endif
 }
 
 /*
 // https://github.com/mapnik/mapnik/issues/1437
 std::string to_svg2( path_type const& geom)
 {
-#if BOOST_VERSION >= 104700
     std::string svg; // Use Python String directly ?
     bool result = mapnik::util::to_svg(svg,geom);
     if (!result)
@@ -260,10 +223,6 @@ std::string to_svg2( path_type const& geom)
         throw std::runtime_error("Generate WKT failed");
     }
     return svg;
-#else
-    throw std::runtime_error("mapnik::to_svg() requires at least boost 1.47 while your build was compiled against boost "
-                             + boost_version());
-#endif
 }*/
 
 
@@ -277,12 +236,10 @@ void export_geometry()
         .value("Polygon",mapnik::geometry_type::types::Polygon)
         ;
 
-#if BOOST_VERSION >= 104700
     enum_<mapnik::util::wkbByteOrder>("wkbByteOrder")
         .value("XDR",mapnik::util::wkbXDR)
         .value("NDR",mapnik::util::wkbNDR)
         ;
-#endif
 
     using mapnik::geometry_type;
     class_<geometry_type, std::shared_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)

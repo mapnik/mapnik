@@ -39,17 +39,11 @@
         boost::spirit::domain_::domain, name##_expr_type);      \
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
 
-// karma is used by default unless
-// the boost version is too old
+// karma is used by default
 #define MAPNIK_KARMA_TO_STRING
 
 #ifdef MAPNIK_KARMA_TO_STRING
-  #include <boost/version.hpp>
-  #if BOOST_VERSION < 104500
-    #undef MAPNIK_KARMA_TO_STRING
-  #else
-    #include <boost/spirit/include/karma.hpp>
-  #endif
+  #include <boost/spirit/include/karma.hpp>
 #endif
 
 namespace mapnik {

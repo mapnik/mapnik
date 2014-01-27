@@ -22,12 +22,6 @@
 
 // NOTE: This is an implementation header file and is only meant to be included
 //    from implementation files. It therefore doesn't have an include guard.
-
-// boost
-#include <boost/version.hpp>
-
-#if BOOST_VERSION >= 104500
-
 #include <mapnik/css_color_grammar.hpp>
 
 namespace mapnik
@@ -98,5 +92,3 @@ css_color_grammar<Iterator>::css_color_grammar()
 }
 
 }
-
-#endif

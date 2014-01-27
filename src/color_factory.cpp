@@ -26,9 +26,6 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/css_color_grammar.hpp>
 
-// boost
-#include <boost/version.hpp>
-
 namespace mapnik {
 
 color parse_color(std::string const& str)
@@ -44,23 +41,9 @@ color parse_color(std::string const& str,
     std::string::const_iterator first = str.begin();
     std::string::const_iterator last =  str.end();
     boost::spirit::ascii::space_type space;
-    // boost 1.41 -> 1.44 compatibility, to be removed in mapnik 2.1 (dane)
-#if BOOST_VERSION >= 104500
     bool result = boost::spirit::qi::phrase_parse(first, last, g,
                                                   space,
                                                   c);
-#else
-    mapnik::css css_;
-    bool result = boost::spirit::qi::phrase_parse(first, last, g,
-                                                  space, 
-                                                  css_);
-    c.set_red(css_.r);
-    c.set_green(css_.g);
-    c.set_blue(css_.b);
-    c.set_alpha(css_.a);
-    
-#endif
-
     if (result && (first == last))
     {
         return c;

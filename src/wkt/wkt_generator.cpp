@@ -20,10 +20,6 @@
  *
  *****************************************************************************/
 
-#include <boost/version.hpp>
-
-#if BOOST_VERSION >= 104700
-
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/geometry_wkt_generator.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
@@ -171,5 +167,3 @@ bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
 }
 
 }}
-
-#endif
