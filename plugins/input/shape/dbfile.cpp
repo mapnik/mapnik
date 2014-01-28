@@ -38,6 +38,7 @@
 
 // stl
 #include <string>
+#include <cstring>
 #include <stdexcept>
 
 dbf_file::dbf_file()
@@ -223,7 +224,7 @@ void dbf_file::read_header()
         skip(22);
         std::streampos offset=0;
         char name[11];
-        memset(&name,0,11);
+        std::memset(&name,0,11);
         fields_.reserve(num_fields_);
         for (int i=0;i<num_fields_;++i)
         {

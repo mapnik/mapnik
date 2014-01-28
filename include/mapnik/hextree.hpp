@@ -33,6 +33,7 @@
 
 // stl
 #include <vector>
+#include <cstring>
 #include <set>
 #include <algorithm>
 #include <cmath>
@@ -68,7 +69,7 @@ class hextree : private mapnik::noncopyable
               pixel_count(0),
               children_count(0)
         {
-            memset(&children_[0],0,sizeof(children_));
+            std::memset(&children_[0],0,sizeof(children_));
         }
 
         ~node ()
