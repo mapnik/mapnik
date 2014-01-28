@@ -14,10 +14,10 @@ endif
 all: mapnik
 
 install:
-	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
+	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
+	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
 clean:
 	@python scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
