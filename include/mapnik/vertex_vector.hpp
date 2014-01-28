@@ -43,8 +43,6 @@ template <typename T>
 class vertex_vector : private mapnik::noncopyable
 {
     typedef T coord_type;
-    typedef vertex<coord_type,2> vertex_type;
-
     enum block_e {
         block_shift = 8,
         block_size  = 1<<block_shift,
