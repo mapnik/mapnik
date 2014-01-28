@@ -109,9 +109,11 @@ struct not_empty
     typedef bool result_type;
     result_type operator() (geometry_container const& cont) const
     {
-        for (auto const& geom : cont)
+        geometry_container::const_iterator itr = cont.begin();
+        geometry_container::const_iterator end = cont.end();
+        for ( ; itr != end; ++itr)
         {
-            if (geom.size() > 0) return true;
+            if (itr->size() > 0) return true;
         }
         return false;
     }
