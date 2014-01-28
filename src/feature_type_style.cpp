@@ -55,14 +55,9 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
       opacity_(rhs.opacity_)
 {}
 
-feature_type_style& feature_type_style::operator=(feature_type_style const& other)
+feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 {
-    if (this == &other) return *this;
-    rules_ = other.rules_;
-    filters_= other.filters_;
-    direct_filters_ = other.direct_filters_;
-    comp_op_ = other.comp_op_;
-    opacity_ = other.opacity_;
+    std::swap(*this, rhs);
     return *this;
 }
 

@@ -65,7 +65,7 @@ private:
 public:
     feature_type_style();
     feature_type_style(feature_type_style const& rhs);
-    feature_type_style& operator=(feature_type_style const& rhs);
+    feature_type_style& operator=(feature_type_style rhs);
 
     void add_rule(rule const& rule);
     rules const& get_rules() const;
