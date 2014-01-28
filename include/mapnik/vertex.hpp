@@ -35,6 +35,7 @@ enum CommandType {
     SEG_CLOSE = (0x40 | 0x0f)
 };
 
+
 template <typename T,int dim>
 struct vertex {
     typedef T coord_type;
@@ -65,15 +66,27 @@ struct vertex<T,2>
           y(coord_type(rhs.y)),
           cmd(rhs.cmd) {}
 
-    template <typename T2> vertex<T,2> operator=(const vertex<T2,2>& rhs)
+
+    vertex<T,2>& operator=(vertex<T,2> rhs)
     {
-        if (&cmd != &rhs.cmd)
-        {
-            x = coord_type(rhs.x);
-            y = coord_type(rhs.y);
-            cmd = rhs.cmd;
-        }
+        swap(rhs);
         return *this;
+    }
+
+    template <typename T2>
+    vertex<T,2>& operator=(vertex<T2,2> const& rhs)
+    {
+        vertex<T,2> tmp(rhs);
+        swap(tmp);
+        return *this;
+    }
+
+private:
+    void swap(vertex<T,2> & rhs)
+    {
+        std::swap(this->x,rhs.x);
+        std::swap(this->y,rhs.y);
+        std::swap(this->cmd,rhs.cmd);
     }
 };
 
