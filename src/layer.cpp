@@ -57,7 +57,7 @@ layer::layer(const layer& rhs)
       buffer_size_(rhs.buffer_size_),
       maximum_extent_(rhs.maximum_extent_) {}
 
-layer& layer::operator=(layer rhs) noexcept
+layer& layer::operator=(layer rhs)
 {
     std::swap(*this, rhs);
     return *this;

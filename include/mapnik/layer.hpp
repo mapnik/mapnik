@@ -48,7 +48,7 @@ public:
           std::string const& srs=MAPNIK_LONGLAT_PROJ);
 
     layer(layer const& l);
-    layer& operator=(layer rhs) noexcept;
+    layer& operator=(layer rhs);
     bool operator==(layer const& other) const;
 
     /*!
