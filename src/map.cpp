@@ -101,24 +101,9 @@ Map::Map(Map const& rhs)
 
 Map::~Map() {}
 
-Map& Map::operator=(Map const& rhs)
+Map& Map::operator=(Map rhs)
 {
-    if (this==&rhs) return *this;
-    width_= rhs.width_;
-    height_= rhs.height_;
-    srs_ = rhs.srs_;
-    buffer_size_ = rhs.buffer_size_;
-    background_ = rhs.background_;
-    background_image_ = rhs.background_image_;
-    background_image_comp_op_ = rhs.background_image_comp_op_;
-    background_image_opacity_ = rhs.background_image_opacity_;
-    styles_ = rhs.styles_;
-    fontsets_ = rhs.fontsets_;
-    layers_ = rhs.layers_;
-    aspectFixMode_ = rhs.aspectFixMode_;
-    maximum_extent_ = rhs.maximum_extent_;
-    base_path_ = rhs.base_path_;
-    extra_params_ = rhs.extra_params_;
+    std::swap(*this, rhs);
     return *this;
 }
 

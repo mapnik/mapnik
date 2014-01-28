@@ -123,7 +123,7 @@ public:
      *  TODO: to be documented
      *
      */
-    Map& operator=(Map const& rhs);
+    Map& operator=(Map rhs);
 
     /*! \brief Get all styles
      * @return Const reference to styles
