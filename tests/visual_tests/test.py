@@ -95,6 +95,7 @@ files = {
     'lines-4': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-5': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-6': {'sizes': sizes_few_square,'bbox':default_text_box},
+    'lines-7': {'sizes': sizes_few_square,'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
     'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
     'collision': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
