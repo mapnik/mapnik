@@ -59,6 +59,14 @@ public:
         : x(type(rhs.x)),
           y(type(rhs.y)) {}
 
+
+    coord<T,2>& operator=(coord<T,2> rhs)
+    {
+        std::swap(this->x, rhs.x);
+        std::swap(this->y, rhs.y);
+        return *this;
+    }
+
     template <typename T2>
     coord<T,2>& operator=(const coord<T2,2>& rhs)
     {
