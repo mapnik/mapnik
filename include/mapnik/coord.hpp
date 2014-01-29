@@ -54,11 +54,19 @@ public:
         : x(),y() {}
     coord(T x_,T y_)
         : x(x_),y(y_) {}
+
+    coord(coord<T,2> const& rhs)
+        : x(rhs.x),
+          y(rhs.y) {}
+
     template <typename T2>
-    coord (const coord<T2,2>& rhs)
+    coord (coord<T2,2> const& rhs)
         : x(type(rhs.x)),
           y(type(rhs.y)) {}
 
+    coord(coord<T,2> && rhs) noexcept
+        : x(std::move(rhs.x)),
+          y(std::move(rhs.y)) {}
 
     coord<T,2>& operator=(coord<T,2> rhs)
     {
@@ -146,6 +154,11 @@ public:
         : x(type(rhs.x)),
           y(type(rhs.y)),
           z(type(rhs.z)) {}
+
+    coord(coord<T,3> && rhs) noexcept
+        : x(std::move(rhs.x)),
+          y(std::move(rhs.y)),
+          z(std::move(rhs.z)) {}
 
     coord<T,3> operator=(coord<T,3> rhs)
     {
