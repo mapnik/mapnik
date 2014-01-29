@@ -30,7 +30,6 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <iostream>
 
 namespace mapnik
 {
