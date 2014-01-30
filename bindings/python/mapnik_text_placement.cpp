@@ -97,12 +97,12 @@ public:
     }
 };
 
-boost::python::tuple get_displacement(text_symbolizer_properties const& t)
+boost::python::tuple get_displacement(text_layout_properties const& t)
 {
     return boost::python::make_tuple(t.displacement.x, t.displacement.y);
 }
 
-void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
+void set_displacement(text_layout_properties &t, boost::python::tuple arg)
 {
     if (len(arg) != 2)
     {
@@ -117,7 +117,6 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
     double y = extract<double>(arg[1]);
     t.displacement.set(x, y);
 }
-
 
 struct NodeWrap: formatting::node, wrapper<formatting::node>
 {
@@ -399,13 +398,7 @@ void export_text_placement()
     class_with_converter<text_symbolizer_properties>
         ("TextSymbolizerProperties")
         .def_readwrite_convert("label_placement", &text_symbolizer_properties::label_placement)
-        .def_readwrite_convert("horizontal_alignment", &text_symbolizer_properties::halign)
-        .def_readwrite_convert("justify_alignment", &text_symbolizer_properties::jalign)
-        .def_readwrite_convert("vertical_alignment", &text_symbolizer_properties::valign)
-        .def_readwrite("orientation", &text_symbolizer_properties::orientation)
-        .add_property("displacement",
-                      &get_displacement,
-                      &set_displacement)
+        .def_readwrite_convert("upright", &text_symbolizer_properties::upright)
         .def_readwrite("label_spacing", &text_symbolizer_properties::label_spacing)
         .def_readwrite("label_position_tolerance", &text_symbolizer_properties::label_position_tolerance)
         .def_readwrite("avoid_edges", &text_symbolizer_properties::avoid_edges)
@@ -416,9 +409,7 @@ void export_text_placement()
         .def_readwrite("force_odd_labels", &text_symbolizer_properties::force_odd_labels)
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
         .def_readwrite("largest_bbox_only", &text_symbolizer_properties::largest_bbox_only)
-        .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
-        .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
-        .def_readwrite("wrap_before", &text_symbolizer_properties::wrap_before)
+        .def_readwrite("layout_defaults", &text_symbolizer_properties::layout_defaults)
         .def_readwrite("format", &text_symbolizer_properties::format)
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
@@ -430,6 +421,17 @@ void export_text_placement()
        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
     ;
 
+    class_with_converter<text_layout_properties>
+        ("TextLayoutProperties")
+        .def_readwrite_convert("horizontal_alignment", &text_layout_properties::halign)
+        .def_readwrite_convert("justify_alignment", &text_layout_properties::jalign)
+        .def_readwrite_convert("vertical_alignment", &text_layout_properties::valign)
+        .def_readwrite("text_ratio", &text_layout_properties::text_ratio)
+        .def_readwrite("wrap_width", &text_layout_properties::wrap_width)
+        .def_readwrite("wrap_before", &text_layout_properties::wrap_before)
+        .def_readwrite("orientation", &text_layout_properties::orientation)
+        .def_readwrite("rotate_displacement", &text_layout_properties::rotate_displacement)
+        .add_property("displacement", &get_displacement, &set_displacement);
 
     class_with_converter<char_properties>
         ("CharProperties")

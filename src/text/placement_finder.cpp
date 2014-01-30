@@ -154,16 +154,16 @@ bool placement_finder::next_position()
     }
 
     info_->properties.process(layout_, feature_);
-    layout_.layout(info_->properties.wrap_width * scale_factor_, info_->properties.text_ratio, info_->properties.wrap_before);
+    layout_.layout(info_->properties.layout_defaults->wrap_width * scale_factor_, info_->properties.layout_defaults->text_ratio, info_->properties.layout_defaults->wrap_before);
 
-    if (info_->properties.orientation)
+    if (info_->properties.layout_defaults->orientation)
     {
         // https://github.com/mapnik/mapnik/issues/1352
         mapnik::evaluate<feature_impl, value_type> evaluator(feature_);
         orientation_.init(
             boost::apply_visitor(
             evaluator,
-            *(info_->properties.orientation)).to_double() * M_PI / 180.0);
+            *(info_->properties.layout_defaults->orientation)).to_double() * M_PI / 180.0);
     }
     else
     {
@@ -175,7 +175,7 @@ bool placement_finder::next_position()
 
 void placement_finder::init_alignment()
 {
-    text_symbolizer_properties const& p = info_->properties;
+    text_layout_properties const& p = *(info_->properties.layout_defaults);
     valign_ = p.valign;
     if (valign_ == V_AUTO)
     {
@@ -271,8 +271,8 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
 
     /* Find text origin. */
-    pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
-    if (info_->properties.rotate_displacement) displacement = displacement.rotate(!orientation_);
+    pixel_position displacement = scale_factor_ * info_->properties.layout_defaults->displacement + alignment_offset();
+    if (info_->properties.layout_defaults->rotate_displacement) displacement = displacement.rotate(!orientation_);
     glyphs->set_base_point(pos + displacement);
     box2d<double> bbox;
     rotated_box2d(bbox, orientation_, layout_.width(), layout_.height());
@@ -347,7 +347,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         double spacing = get_spacing(pp.length(), points ? 0. : layout_.width());
 
-        horizontal_alignment_e halign = info_->properties.halign;
+        horizontal_alignment_e halign = info_->properties.layout_defaults->halign;
         if (halign == H_LEFT)
         {
             // Don't move
@@ -414,7 +414,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
 
     double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-    double offset = alignment_offset().y + info_->properties.displacement.y * scale_factor_ + sign * layout_.height()/2.;
+    double offset = alignment_offset().y + info_->properties.layout_defaults->displacement.y * scale_factor_ + sign * layout_.height()/2.;
 
     glyphs->reserve(layout_.glyphs_count());
 
@@ -499,7 +499,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
 void placement_finder::path_move_dx(vertex_cache &pp)
 {
-    double dx = info_->properties.displacement.x * scale_factor_;
+    double dx = info_->properties.layout_defaults->displacement.x * scale_factor_;
     if (dx != 0.0)
     {
         vertex_cache::state state = pp.save_state();

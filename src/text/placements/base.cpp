@@ -42,6 +42,7 @@ text_placement_info::text_placement_info(text_placements const* parent,
       scale_factor(scale_factor_)
 {
     properties.format = std::make_shared<char_properties>(*(properties.format));
+    properties.layout_defaults = std::make_shared<text_layout_properties>(*(properties.layout_defaults));
 }
 
 } //ns mapnik
