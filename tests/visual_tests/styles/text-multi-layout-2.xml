@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Without unlock-image -->
+<!DOCTYPE Map>
+<Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
+    
+  <Layer name="layer1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>points</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long
+0,0
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="points">
+    <Rule>
+      <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/raster/white-alpha.png"/>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="12" wrap-width="20" horizontal-alignment="left" vertical-alignment="top" placement="point" dx="-12" dy="-10">
+        "upper left corner text here"
+        <Layout horizontal-alignment="right" orientation="10" wrap-width="50" dx="4">
+          <Format face-name="DejaVu Sans Bold" halo-fill="#ffffff" halo-radius="3">"test test"</Format>" test test test"
+        </Layout>
+        <Layout vertical-alignment="bottom" wrap-width="50">"bottom left test text"</Layout>
+        <Layout horizontal-alignment="right" vertical-alignment="bottom" rotate-displacement="true" orientation="-20" dx="15" dy="15">
+          <Format fill="#0000ff">"another string here"</Format>
+        </Layout>
+      </TextSymbolizer>
+    </Rule>
+  </Style>
+  
+  <Layer name="layer2" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>frame</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr
+-1,-1,0
+-1,1,1
+1,-1,2
+1,1,3
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="frame">
+    <Rule>
+      <PointSymbolizer/>
+    </Rule>
+  </Style>
+
+</Map>
+

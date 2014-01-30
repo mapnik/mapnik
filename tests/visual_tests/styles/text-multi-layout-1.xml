@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Without unlock-image -->
+<!DOCTYPE Map>
+<Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
+
+  <Layer name="layer1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>points</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr,ref1,ref2
+-0.33,-0.33,0,test 1,first
+0.33,-0.33,1,test 2,second
+-0.33,0.33,2,test 3,third
+0.33,0.33,3,test 4,fourth
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="points">
+    <Rule>
+      <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/raster/white-alpha.png"/>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="-4" dy="-10">
+        [ref1]
+        <Layout dx="0" dy="8" horizontal-alignment="right">
+          <Format fill="#ff0000">[ref2]</Format>
+        </Layout>
+      </TextSymbolizer>
+      <!-- ShieldSymbolizer face-name="DejaVu Sans Book" dx="15" file="../../data/svg/rect.svg"/ -->
+    </Rule>
+  </Style>
+  
+  <Layer name="layer2" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>frame</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr
+-1,-1,0
+-1,1,1
+1,-1,2
+1,1,3
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="frame">
+    <Rule>
+      <PointSymbolizer/>
+    </Rule>
+  </Style>
+
+</Map>
+
