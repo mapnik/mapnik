@@ -15,8 +15,8 @@ struct rotation
     void init(double angle) { sin = std::sin(angle); cos = std::cos(angle); }
     double sin;
     double cos;
-    rotation operator~() { return rotation(sin, -cos); }
-    rotation operator!() { return rotation(-sin, cos); }
+    rotation operator~() const { return rotation(sin, -cos); }
+    rotation operator!() const { return rotation(-sin, cos); }
 };
 }
 
