@@ -52,7 +52,7 @@ ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn()),
+      fidcolumn_(layer_.GetFIDColumn()), // TODO - unused
       count_(0)
 {
     layer_.SetSpatialFilterRect (extent.minx(),
@@ -67,6 +67,13 @@ ogr_featureset::~ogr_featureset()
 
 feature_ptr ogr_featureset::next()
 {
+    if (count_ == 0)
+    {
+        // Reset the layer reading on the first feature read
+        // this is a hack, but needed due to https://github.com/mapnik/mapnik/issues/2048
+        // Proper solution is to avoid storing layer state in featureset
+        layer_.ResetReading();
+    }
     OGRFeature *poFeature;
     while ((poFeature = layer_.GetNextFeature()) != nullptr)
     {
