@@ -38,6 +38,23 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         eq_(f['Shape_Area'], 1512185733150.0)
         eq_(f['Shape_Leng'], 19218883.724300001)
 
+    def test_shapefile_column_encoding():
+        ds = mapnik.Shapefile(file='../data/shp/column_encoding', encoding='latin1')
+        eq_(ds.fields(),['FIPS', 'REGIÓN'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        fs = ds.features(query)
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['FIPS'],'SP')
+        eq_(feat['REGIÓN'],150)
+        # also check using different method
+        feat = ds.all_features()[0]
+        eq_(feat.id(),1)
+        eq_(feat['FIPS'],'SP')
+        eq_(feat['REGIÓN'],150)
+
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
         ds = mapnik.Shapefile(file='../data/shp/world_merc')

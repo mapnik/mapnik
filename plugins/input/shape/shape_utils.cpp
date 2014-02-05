@@ -29,20 +29,27 @@
 // boost
 #include <boost/algorithm/string.hpp>
 
+using mapnik::transcoder;
+
 void setup_attributes(mapnik::context_ptr const& ctx,
                       std::set<std::string> const& names,
                       std::string const& shape_name,
                       shape_io & shape,
-                      std::vector<int> & attr_ids)
+                      std::vector<int> & attr_ids,
+                      std::string const& encoding)
 {
     std::set<std::string>::const_iterator pos = names.begin();
     std::set<std::string>::const_iterator end = names.end();
+    transcoder *tr_ = new transcoder(encoding);
     for ( ;pos !=end; ++pos)
     {
         bool found_name = false;
         for (int i = 0; i < shape.dbf().num_fields(); ++i)
         {
-            if (shape.dbf().descriptor(i).name_ == *pos)
+            std::string fld_name;
+            UnicodeString ustr=tr_->transcode(shape.dbf().descriptor(i).name_.c_str());
+            ustr.toUTF8String(fld_name);
+            if (fld_name == *pos)
             {
                 ctx->push(*pos);
                 attr_ids.push_back(i);
@@ -59,7 +66,10 @@ void setup_attributes(mapnik::context_ptr const& ctx,
             std::vector<std::string> list;
             for (int i = 0; i < shape.dbf().num_fields(); ++i)
             {
-                list.push_back(shape.dbf().descriptor(i).name_);
+                std::string fld_name;
+                UnicodeString ustr=tr_->transcode(shape.dbf().descriptor(i).name_.c_str());
+                ustr.toUTF8String(fld_name);
+                list.push_back(fld_name);
             }
             s += boost::algorithm::join(list, ",") + ".";
 

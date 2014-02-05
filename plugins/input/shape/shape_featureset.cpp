@@ -55,7 +55,7 @@ shape_featureset<filterT>::shape_featureset(filterT const& filter,
       ctx_(std::make_shared<mapnik::context_type>())
 {
     shape_.shp().skip(100);
-    setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
+    setup_attributes(ctx_, attribute_names, shape_name, shape_, attr_ids_, encoding);
 }
 
 template <typename filterT>
