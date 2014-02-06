@@ -199,7 +199,7 @@ elif env['PLATFORM'] == 'MinGW':
     py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
     py_env.AppendUnique(LIBS = 'python%s' % env['PYTHON_VERSION'])
 
-    _mapnik = py_env.SharedLibrary('mapnik/_mapnik', sources, SHLIBPREFIX='', SHLIBSUFFIX='.pyd',LINKFLAGS=linkflags) 
+    _mapnik = py_env.SharedLibrary('mapnik/_mapnik', sources, SHLIBPREFIX='', SHLIBSUFFIX='.pyd') 
 else:
     py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
     py_env.Append(LINKFLAGS=python_link_flag)

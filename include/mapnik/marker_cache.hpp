@@ -45,7 +45,7 @@ class marker_cache;
 template class MAPNIK_DECL singleton<marker_cache, CreateUsingNew>;
 #endif
 
-typedef boost::shared_ptr<marker> marker_ptr;
+//typedef boost::shared_ptr<marker> marker_ptr;
 
 class MAPNIK_DECL marker_cache :
         public singleton <marker_cache, CreateUsingNew>,

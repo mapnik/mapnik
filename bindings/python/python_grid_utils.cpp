@@ -22,6 +22,8 @@
 
 #if defined(GRID_RENDERER)
 
+#include <cmath>
+
 // boost
 #include <boost/python.hpp>
 

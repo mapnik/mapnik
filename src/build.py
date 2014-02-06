@@ -149,7 +149,7 @@ else: # unix, non-macos
             mapnik_lib_link_flag += ' -R. -h %s' % mapnik_libname
         else:
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
-    else: # Linux and others
+    elif not mingwbuild: # Linux and others
         lib_env['LIBS'].append('dl')
         mapnik_lib_link_flag += ' -Wl,-rpath-link,.'
         if env['ENABLE_SONAME']:

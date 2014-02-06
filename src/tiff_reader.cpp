@@ -169,6 +169,13 @@ image_reader* create_tiff_reader2(char const * data, std::size_t size)
 const bool registered = register_image_reader("tiff",create_tiff_reader);
 const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
 
+#if defined __MINGW__
+template <std::string const&>
+MAPNIK_DECL bool register_image_reader(std::string const& type, image_reader* create_tiff_reader(std::string const&));
+
+template <char const*, std::size_t>
+MAPNIK_DECL bool register_image_reader(std::string const& type, image_reader* create_tiff_reader2(char const*, std::size_t));
+#endif
 }
 
 template <typename T>

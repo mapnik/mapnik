@@ -829,7 +829,7 @@ def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
 
     """
-    context.Message( 'Searching for boost libs and headers... ' )
+    context.Message( 'Searching for boost libs and headers...\n' )
     env = context.env
 
     BOOST_LIB_DIR = None
@@ -847,6 +847,7 @@ def FindBoost(context, prefixes, thread_flag):
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_INCLUDES'])))
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_LIBS'])))
     for searchDir in prefixes:
+        context.Message( 'searching ' + searchDir + '...\n' )
         libItems = glob(os.path.join(searchDir, env['LIBDIR_SCHEMA'], '%s*.*' % search_lib))
         if not libItems:
             libItems = glob(os.path.join(searchDir, 'lib/%s*.*' % search_lib))
@@ -1199,6 +1200,7 @@ if not preconfigured:
 
     if mingwbuild:
         env['PLATFORM'] = "MinGW"
+        BOOST_SEARCH_PREFIXES.append(os.path.realpath(env['PREFIX']))
     else:
         env['PLATFORM'] = platform.uname()[0]
 
@@ -1300,6 +1302,10 @@ if not preconfigured:
 
     if env['SHAPE_MEMORY_MAPPED_FILE']:
         env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
+        
+    if mingwbuild:
+        env.Append(CPPDEFINES = '-D__MINGW__')
+        env.Append(CPPDEFINES = '-DBOOST_USE_WINDOWS_H')
 
     # allow for mac osx /usr/lib/libicucore.dylib compatibility
     # requires custom supplied headers since Apple does not include them
@@ -1876,7 +1882,7 @@ if not preconfigured:
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
-        if env['PLATFORM'] != 'Darwin' and env['CXX'] == 'g++':
+        if env['PLATFORM'] != 'Darwin' and not mingwbuild and env['CXX'] == 'g++':
             env.MergeFlags('-rdynamic')
 
         if env['DEBUG']:
@@ -1888,6 +1894,10 @@ if not preconfigured:
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
         common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+
+        # https://github.com/mapnik/mapnik/issues/1835
+        if (sys.platform == 'darwin' and env['CXX'] == 'g++') or mingwbuild:
+            common_cxx_flags += '-fpermissive '
 
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')

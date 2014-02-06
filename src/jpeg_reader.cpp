@@ -108,6 +108,14 @@ image_reader* create_jpeg_reader2(char const* data, size_t size)
 
 const bool registered  = register_image_reader("jpeg",create_jpeg_reader);
 const bool registered2 = register_image_reader("jpeg",create_jpeg_reader2);
+
+#if defined __MINGW__
+template <std::string const&>
+MAPNIK_DECL bool register_image_reader(std::string const& type, image_reader* create_jpeg_reader(std::string const&));
+
+template <char const*, std::size_t>
+MAPNIK_DECL bool register_image_reader(std::string const& type, image_reader* create_jpeg_reader2(char const*, std::size_t));
+#endif
 }
 
 // ctors
@@ -169,7 +177,7 @@ void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
     }
     else
     {
-        wrap->stream->seekg(count - wrap->manager.bytes_in_buffer, std::ios_base::cur);
+        wrap->stream->seekg(count, std::ios_base::cur);
         // trigger buffer fill
         wrap->manager.next_input_byte = 0;
         wrap->manager.bytes_in_buffer = 0; //bytes_in_buffer may be zero on return.

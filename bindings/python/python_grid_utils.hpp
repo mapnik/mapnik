@@ -21,6 +21,7 @@
  *****************************************************************************/
 #ifndef MAPNIK_PYTHON_BINDING_GRID_UTILS_INCLUDED
 #define MAPNIK_PYTHON_BINDING_GRID_UTILS_INCLUDED
+#include <cmath>
 
 // boost
 #include <boost/python.hpp>

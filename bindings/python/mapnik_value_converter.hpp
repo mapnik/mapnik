@@ -25,6 +25,8 @@
 // mapnik
 #include <mapnik/value.hpp>
 
+#include <cmath>
+
 // boost
 #include <boost/python.hpp>
 #include <boost/implicit_cast.hpp>
