@@ -166,8 +166,7 @@ void datasource_cache::register_datasources(std::string const& str)
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-    // TODO - only push unique paths
-    plugin_directories_.push_back(str);
+    plugin_directories_.insert(str);
     if (mapnik::util::exists(str) && mapnik::util::is_directory(str))
     {
         boost::filesystem::directory_iterator end_itr;
@@ -195,9 +194,15 @@ void datasource_cache::register_datasources(std::string const& str)
 
 bool datasource_cache::register_datasource(std::string const& filename)
 {
-    bool success = false;
     try
     {
+        if (!mapnik::util::exists(filename))
+        {
+            MAPNIK_LOG_ERROR(datasource_cache)
+                    << "Cannot load '"
+                    << filename << "' (plugin does not exist)";
+            return false;
+        }
         boost::shared_ptr<PluginInfo> plugin = boost::make_shared<PluginInfo>(filename,"datasource_name");
         if (plugin->valid())
         {
@@ -213,7 +218,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
                 MAPNIK_LOG_DEBUG(datasource_cache)
                         << "datasource_cache: Registered="
                         << plugin->name();
-                success = true;
+                return true;
             }
         }
         else
@@ -229,7 +234,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
                 << "Exception caught while loading plugin library: "
                 << filename << " (" << ex.what() << ")";
     }
-    return success;
+    return false;
 }
 
 }
