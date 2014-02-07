@@ -135,7 +135,7 @@ DEFINE_ENUM(text_upright_e, text_upright);
 /** Properties for building the layout of a single text placement */
 struct MAPNIK_DECL text_layout_properties
 {
-	text_layout_properties();
+    text_layout_properties();
 
     /** Load all values from XML ptree. */
     void from_xml(xml_node const &sym);

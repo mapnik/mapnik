@@ -73,7 +73,7 @@ void text_layout::add_text(mapnik::value_unicode_string const& str, char_propert
 
 void text_layout::add_child(text_layout_ptr child_layout)
 {
-	child_layout_list_.push_back(child_layout);
+    child_layout_list_.push_back(child_layout);
 }
 
 mapnik::value_unicode_string const& text_layout::text() const
@@ -277,15 +277,15 @@ void text_layout::init_alignment()
     {
         if (p.displacement.x > 0.0)
         {
-        	halign_ = H_RIGHT;
+            halign_ = H_RIGHT;
         }
         else if (p.displacement.x < 0.0)
         {
-        	halign_ = H_LEFT;
+            halign_ = H_LEFT;
         }
         else
         {
-        	halign_ = H_MIDDLE;
+            halign_ = H_MIDDLE;
         }
     }
 
@@ -357,7 +357,7 @@ void layout_container::layout()
     line_count_ = 0;
 
     bool first = true;
-	for (text_layout_ptr const& layout : layouts_)
+    for (text_layout_ptr const& layout : layouts_)
     {
         layout->layout();
 

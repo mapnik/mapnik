@@ -60,7 +60,7 @@ void layout_node::to_xml(ptree &xml) const
 
 node_ptr layout_node::from_xml(xml_node const& xml)
 {
-	layout_node *n = new layout_node();
+    layout_node *n = new layout_node();
     node_ptr np(n);
 
     node_ptr child = node::from_xml(xml);
@@ -82,9 +82,9 @@ node_ptr layout_node::from_xml(xml_node const& xml)
 
 void layout_node::apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
 {
-	text_layout_properties_ptr new_properties = std::make_shared<text_layout_properties>(*output.get_layout_properties());
-	if (dx) new_properties->displacement.x = *dx;
-	if (dy) new_properties->displacement.y = *dy;
+    text_layout_properties_ptr new_properties = std::make_shared<text_layout_properties>(*output.get_layout_properties());
+    if (dx) new_properties->displacement.x = *dx;
+    if (dy) new_properties->displacement.y = *dy;
     if (halign) new_properties->halign = *halign;
     if (valign) new_properties->valign = *valign;
     if (jalign) new_properties->jalign = *jalign;

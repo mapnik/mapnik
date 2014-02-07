@@ -101,7 +101,7 @@ public:
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
 
-	void init_orientation(feature_impl const& feature);
+    void init_orientation(feature_impl const& feature);
 
 private:
     void break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before);
@@ -147,37 +147,37 @@ private:
 class layout_container
 {
 public:
-	layout_container() : glyphs_count_(0), line_count_(0) {}
+    layout_container() : glyphs_count_(0), line_count_(0) {}
 
-	void add(text_layout_ptr layout);
-	void clear();
+    void add(text_layout_ptr layout);
+    void clear();
 
-	void layout();
+    void layout();
 
-	inline size_t size() const { return layouts_.size(); }
+    inline size_t size() const { return layouts_.size(); }
 
-	inline text_layout_vector::const_iterator begin() const { return layouts_.begin(); }
-	inline text_layout_vector::const_iterator end() const { return layouts_.end(); }
+    inline text_layout_vector::const_iterator begin() const { return layouts_.begin(); }
+    inline text_layout_vector::const_iterator end() const { return layouts_.end(); }
 
-	inline mapnik::value_unicode_string const& text() const { return text_; }
+    inline mapnik::value_unicode_string const& text() const { return text_; }
 
-	inline unsigned glyphs_count() const { return glyphs_count_; }
-	inline unsigned line_count() const { return line_count_; }
+    inline unsigned glyphs_count() const { return glyphs_count_; }
+    inline unsigned line_count() const { return line_count_; }
 
-	inline box2d<double> const& bounds() const { return bounds_; }
+    inline box2d<double> const& bounds() const { return bounds_; }
 
-	inline double width() const { return bounds_.width(); }
-	inline double height() const { return bounds_.height(); }
+    inline double width() const { return bounds_.width(); }
+    inline double height() const { return bounds_.height(); }
 
 private:
-	text_layout_vector layouts_;
+    text_layout_vector layouts_;
 
-	mapnik::value_unicode_string text_;
+    mapnik::value_unicode_string text_;
 
-	unsigned glyphs_count_;
-	unsigned line_count_;
+    unsigned glyphs_count_;
+    unsigned line_count_;
 
-	box2d<double> bounds_;
+    box2d<double> bounds_;
 };
 
 }

@@ -179,7 +179,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     bool base_point_set = false;
     for (auto const& layout_ptr : layouts_)
     {
-    	text_layout const& layout = *layout_ptr;
+        text_layout const& layout = *layout_ptr;
         rotation const& orientation = layout.orientation();
 
         /* Find text origin. */
@@ -314,10 +314,10 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
      * IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! *
      ********************************************************************************/
     vertex_cache::scoped_state begin(pp);
-	text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
+    text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
 
-	glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
-	std::vector<box2d<double> > bboxes;
+    glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
+    std::vector<box2d<double> > bboxes;
     glyphs->reserve(layouts_.glyphs_count());
     bboxes.reserve(layouts_.glyphs_count());
 
@@ -396,7 +396,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         if (orientation == UPRIGHT_AUTO)
         {
             //Try again with oposite orientation
-        	begin.restore();
+            begin.restore();
             return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
         }
         //upright==left_only or right_only and more than 50% of characters upside down => no placement
@@ -412,7 +412,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     }
     placements_.push_back(glyphs);
 
-	return true;
+    return true;
 }
 
 void placement_finder::path_move_dx(vertex_cache &pp)

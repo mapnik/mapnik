@@ -63,12 +63,7 @@ public:
 
     void set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
 private:
-    //bool find_point_placement(pixel_position const& pos, bool add_marker, text_layout const& layout, placements_list &placements, std::vector<box2d<double> > &bboxes);
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
-    //bool single_line_placement(vertex_cache &pp, text_upright_e real_orientation, text_layout const& layout,
-    //                           placements_list &placements, std::vector<box2d<double> > &bboxes,
-    //                           int &glyph_count, int &upside_down_glyph_count);
-    bool line_layout_placement();
     /** Moves dx pixels but makes sure not to fall of the end. */
     void path_move_dx(vertex_cache &pp);
     /** Normalize angle in range [-pi, +pi]. */
