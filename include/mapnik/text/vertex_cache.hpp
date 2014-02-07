@@ -131,6 +131,8 @@ public:
     /** Go back to initial state. */
     void reset();
 
+    /** position on this line closest to the target position */
+    double position_closest_to(pixel_position const &target_pos);
 
 private:
     void rewind_subpath();
