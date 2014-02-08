@@ -46,6 +46,7 @@
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/polygon_clipper.hpp>
+#include <mapnik/value_types.hpp>
 
 // agg
 #include "agg_conv_clip_polygon.h"
@@ -97,7 +98,7 @@ struct converter_traits<T,mapnik::smooth_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        geom.smooth_value(get<double>(sym, keys::smooth));
+        geom.smooth_value(get<value_double>(sym, keys::smooth));
     }
 };
 
@@ -111,8 +112,8 @@ struct converter_traits<T,mapnik::simplify_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<int>(sym,keys::simplify_algorithm)));
-        geom.set_simplify_tolerance(get<double>(sym, keys::simplify_tolerance));
+        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(sym,keys::simplify_algorithm)));
+        geom.set_simplify_tolerance(get<value_double>(sym, keys::simplify_tolerance));
     }
 };
 
@@ -165,8 +166,8 @@ struct converter_traits<T, mapnik::stroke_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         set_join_caps(sym, geom);
-        double miterlimit = get<double>(sym, keys::stroke_miterlimit, 4.0);
-        double width = get<double>(sym, keys::stroke_width, 1.0);
+        double miterlimit = get<value_double>(sym, keys::stroke_miterlimit, 4.0);
+        double width = get<value_double>(sym, keys::stroke_width, 1.0);
         geom.generator().miter_limit(miterlimit);
         double scale_factor = boost::fusion::at_c<6>(args);
         geom.generator().width(width * scale_factor);
@@ -244,7 +245,7 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double offset = get<double>(sym, keys::offset);
+        double offset = get<value_double>(sym, keys::offset);
         double scale_factor = boost::fusion::at_c<6>(args);
         geom.set_offset(offset * scale_factor);
     }
@@ -388,7 +389,6 @@ struct vertex_converter : private mapnik::noncopyable
         if (index < disp_.vec_.size())
             disp_.vec_[index]=0;
     }
-
 
     detail::dispatcher<args_type,conv_types> disp_;
 };
