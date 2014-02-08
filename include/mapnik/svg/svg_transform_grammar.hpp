@@ -50,11 +50,7 @@ namespace mapnik { namespace svg {
     template <typename TransformType>
     struct process_matrix
     {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
         template <typename T0>
-#else
-        template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
-#endif
         struct result
         {
             typedef void type;
@@ -74,11 +70,7 @@ namespace mapnik { namespace svg {
     template <typename TransformType>
     struct process_rotate
     {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
         template <typename T0>
-#else
-        template <typename T0, typename T1, typename T2>
-#endif
         struct result
         {
             typedef void type;
@@ -109,11 +101,7 @@ namespace mapnik { namespace svg {
     template <typename TransformType>
     struct process_translate
     {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
         template <typename T0>
-#else
-        template <typename T0, typename T1>
-#endif
         struct result
         {
             typedef void type;
@@ -135,11 +123,7 @@ namespace mapnik { namespace svg {
     template <typename TransformType>
     struct process_scale
     {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
         template <typename T0>
-#else
-        template <typename T0, typename T1>
-#endif
         struct result
         {
             typedef void type;
@@ -162,11 +146,7 @@ namespace mapnik { namespace svg {
     template <typename TransformType>
     struct process_skew
     {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
         template <typename T0>
-#else
-        template <typename T0, typename T1>
-#endif
         struct result
         {
             typedef void type;

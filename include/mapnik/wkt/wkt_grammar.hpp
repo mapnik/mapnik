@@ -44,11 +44,7 @@ namespace mapnik { namespace wkt {
 
     struct push_vertex
     {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
         template <typename T>
-#else
-        template <typename T0,typename T1, typename T2, typename T3>
-#endif
         struct result
         {
             typedef void type;
@@ -233,7 +229,6 @@ struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::
     {
         qi::lit_type lit;
         qi::no_case_type no_case;
-        using boost::phoenix::push_back;
         start = wkt | no_case[lit("GEOMETRYCOLLECTION")]
             >> (lit("(") >> wkt % lit(",") >> lit(")"));
     }

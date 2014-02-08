@@ -29,9 +29,6 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/unicode.hpp>
 
-// boost
-
-
 // stl
 #include <vector>
 
