@@ -89,8 +89,8 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     typedef decltype(rasterizer_dispatch) dispatch_type;
 
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
-                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,common.scale_factor_);
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -121,8 +121,8 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     typedef decltype(rasterizer_dispatch) dispatch_type;
 
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
-                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,common.scale_factor_);
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -150,8 +150,8 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                 typedef decltype(rasterizer_dispatch) dispatch_type;
 
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
-                                 CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,common.scale_factor_);
+                                 CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {

@@ -44,7 +44,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     double opacity = get<value_double>(sym,keys::fill_opacity,feature, 1.0);
 
     vertex_converter_type converter(clip_box, ras, sym, common.t_, prj_trans, tr,
-                                    common.scale_factor_);
+                                    feature,common.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.template set<clip_poly_tag>(); //optional clip (default: true)
     converter.template set<transform_tag>(); //always transform
