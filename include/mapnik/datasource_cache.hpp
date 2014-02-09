@@ -35,6 +35,7 @@
 
 // stl
 #include <map>
+#include <set>
 
 namespace mapnik {
 
@@ -56,7 +57,7 @@ private:
     ~datasource_cache();
     std::map<std::string,std::shared_ptr<PluginInfo> > plugins_;
     bool registered_;
-    std::vector<std::string> plugin_directories_;
+    std::set<std::string> plugin_directories_;
 };
 }
 

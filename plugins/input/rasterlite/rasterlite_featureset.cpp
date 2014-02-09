@@ -31,8 +31,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 
-// boost
-
+#include <cstring>
 
 using mapnik::coord2d;
 using mapnik::box2d;
@@ -122,7 +121,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
                 unsigned char* raster_data = static_cast<unsigned char*>(raster);
                 unsigned char* image_data = image.getBytes();
 
-                memcpy (image_data, raster_data, size);
+                std::memcpy(image_data, raster_data, size);
 
                 feature->set_raster(rasterp);
 
