@@ -43,7 +43,7 @@ text_symbolizer::text_symbolizer(text_placements_ptr placements)
     placement_options_(placements),
     halo_rasterizer_(HALO_RASTERIZER_FULL)
 {
-
+    this->set_clip(false);
 }
 
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name,
@@ -57,6 +57,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
     set_face_name(face_name);
     set_text_size(size);
     set_fill(fill);
+    this->set_clip(false);
 }
 
 text_symbolizer::text_symbolizer(expression_ptr name, double size, color const& fill,
@@ -68,6 +69,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, double size, color const& 
     set_name(name);
     set_text_size(size);
     set_fill(fill);
+    this->set_clip(false);
 }
 
 text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
