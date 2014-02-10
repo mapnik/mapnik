@@ -1,0 +1,91 @@
+<Map
+    background-color="#eee"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="bug">
+        <Rule>
+            <Filter>[id] = 'stroke'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='[value]' />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'stroke-width'</Filter>
+            <LineSymbolizer stroke-width='[value]' stroke='#ff0000' />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'stroke-opacity'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-opacity="[value]" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'offset'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' offset="[value]" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'stroke-dasharray'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-dasharray="[value]" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'stroke-linejoin'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linejoin="[value]" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'stroke-linecap'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linecap="[value]" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'comp-op'</Filter>
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' comp-op="[value]" />
+        </Rule>
+
+        <Rule>
+            <TextSymbolizer face-name='DejaVu Sans Book' dy='-5'>[id]</TextSymbolizer>
+        </Rule>
+    </Style>
+
+    <Style name="frame">
+        <Rule>
+            <PolygonSymbolizer />
+        </Rule>
+    </Style>
+
+    <!-- 
+      frame is a layer with a single polygon that is used to ensure that m.zoom_all() will zoom the
+      map to a reasonable bounding extent to make the test easy to view with tools like nik2img.py
+      (which calls m.zoom_all() by default). Another approach in >= Mapnik 2.3.x is to just sent a
+      manual `extent` for the CSV datasource.
+    -->
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt|name
+Polygon((-180.0 -125.0, -180.0 125.0, 180.0 125.0, 180.0 -125.0, -180.0 -125.0))|bounds
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- 
+      "bug" is a layer that should provide sample data that triggers the bug in question. It is
+      listed after the "frame" layer so that it renders on top and is visible.
+    -->
+
+    <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>bug</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+id|value|wkt
+stroke|#ff0000|LineString(-160 -120,160 -120,160 -100)
+stroke-width|5|LineString(-160 -90,160 -90,160 -70)
+stroke-opacity|0.5|LineString(-160 -60,160 -60,160 -40)
+offset|3|LineString(-160 -30,160 -30,160 -10)
+stroke-dasharray|3,3|LineString(-160 0,160 0,160 20)
+stroke-linejoin|bevel|LineString(-160 30,160 30,160 50)
+stroke-linecap|round|LineString(-160 60,160 60,160 80)
+comp-op|minus|LineString(-160 90,160 90,160 110)
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>
