@@ -3,6 +3,23 @@
 <!DOCTYPE Map>
 <Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
 
+  <Layer name="obstacle" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>obstacle</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr
+-0.4,0.4,0
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="obstacle">
+    <Rule>
+      <PointSymbolizer/>
+    </Rule>
+  </Style>
+
   <Layer name="layer1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>points</StyleName>
     <Datasource>

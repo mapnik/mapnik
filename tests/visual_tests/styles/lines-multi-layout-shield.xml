@@ -14,7 +14,7 @@
 
     <Style name="lines">
         <Rule>
-            <LineSymbolizer stroke-width="8" stroke="red"/>
+            <LineSymbolizer stroke-width="3" stroke="red"/>
         </Rule>
     </Style>
 

@@ -14,15 +14,19 @@
 
     <Style name="lines">
         <Rule>
-            <LineSymbolizer stroke-width="12" stroke="red"/>
+            <LineSymbolizer stroke-width="3" stroke="green"/>
         </Rule>
     </Style>
 
     <Style name="text">
         <Rule>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" spacing="10" max-char-angle-delta="0">
-                <Layout dy="-3" vertical-alignment="top" wrap-width="30">"District of Columbia"</Layout>
-                <Layout dy="5" vertical-alignment="bottom">"District Number Two"</Layout>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" spacing="25" fill="#00ff00" halo-radius="1" halo-fill="rgba(255,255,255,0.6)" max-char-angle-delta="90">
+                <Layout dy="-3" vertical-alignment="top" wrap-width="33" wrap-before="true">
+                    <Format fill="#ff0000">"District One"</Format>
+                </Layout>
+                <Layout dy="5" vertical-alignment="bottom">
+                    <Format fill="#0000ff">"District Two"</Format>
+                </Layout>
             </TextSymbolizer>
         </Rule>
     </Style>
