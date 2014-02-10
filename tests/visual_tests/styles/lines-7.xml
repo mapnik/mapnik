@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<!-- dy and multi lines test -->
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>lines</StyleName>
+        <StyleName>text</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt,nr
+"LINESTRING(-1.000 -1.000, -0.958 -0.646, -0.917 -0.331, -0.875 -0.055, -0.833 0.185, -0.792 0.390, -0.750 0.562, -0.708 0.703, -0.667 0.815, -0.625 0.898, -0.583 0.956, -0.542 0.989, -0.500 1.000, -0.458 0.990, -0.417 0.961, -0.375 0.914, -0.333 0.852, -0.292 0.776, -0.250 0.688, -0.208 0.589, -0.167 0.481, -0.125 0.367, -0.083 0.248, -0.042 0.125, 0.000 0.000, 0.042 -0.125, 0.083 -0.248, 0.125 -0.367, 0.167 -0.481, 0.208 -0.589, 0.250 -0.688, 0.292 -0.776, 0.333 -0.852, 0.375 -0.914, 0.417 -0.961, 0.458 -0.990, 0.500 -1.000, 0.542 -0.989, 0.583 -0.956, 0.625 -0.898, 0.667 -0.815, 0.708 -0.703, 0.750 -0.562, 0.792 -0.390, 0.833 -0.185, 0.875 0.055, 0.917 0.331, 0.958 0.646, 1.000 1.000)",1
+</Parameter>
+        </Datasource>
+    </Layer>
+    
+    <Style name="lines">
+        <Rule>
+            <LineSymbolizer stroke-width="1" stroke="green"/>
+            <LineSymbolizer stroke-width="1" stroke="lightblue" offset="12"/>
+            <LineSymbolizer stroke-width="1" stroke="lightblue" offset="-12"/>
+        </Rule>
+    </Style>
+
+    <Style name="text">
+        <Rule>
+            <!-- note: &#10; is an encoded \n -->
+            <TextSymbolizer face-name="DejaVu Sans Book" size="12" placement="line" spacing="10" max-char-angle-delta="180" dy="0" justify-alignment="center" allow-overlap="true">
+                "u!__|__!u&#10;m!__|__!m&#10;b!__|__!b"
+            </TextSymbolizer>
+       </Rule>
+    </Style>
+
+</Map>

@@ -30,6 +30,7 @@
 
 // stl
 #include <vector>
+#include <cstring>
 #include <deque>
 #include <algorithm>
 
@@ -62,7 +63,7 @@ class octree : private mapnik::noncopyable
                children_count(0),
                index(0)
         {
-            memset(&children_[0],0,sizeof(children_));
+            std::memset(&children_[0],0,sizeof(children_));
         }
 
         ~node()

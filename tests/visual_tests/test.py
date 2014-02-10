@@ -96,6 +96,7 @@ files = {
     'lines-4': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-5': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-6': {'sizes': sizes_few_square,'bbox':default_text_box},
+    'lines-7': {'sizes': sizes_few_square,'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
     'lines-multi-layout-1': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-multi-layout-2': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-multi-layout-3': {'sizes': sizes_few_square,'bbox':default_text_box},
