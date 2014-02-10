@@ -60,8 +60,7 @@ void layout_node::to_xml(ptree &xml) const
 
 node_ptr layout_node::from_xml(xml_node const& xml)
 {
-    layout_node *n = new layout_node();
-    node_ptr np(n);
+    std::shared_ptr<layout_node> n = std::make_shared<layout_node>();
 
     node_ptr child = node::from_xml(xml);
     n->set_child(child);
@@ -77,7 +76,7 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     n->rotate_displacement = xml.get_opt_attr<boolean>("rotate-displacement");
     n->orientation = xml.get_opt_attr<expression_ptr>("orientation");
 
-    return np;
+    return n;
 }
 
 void layout_node::apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
