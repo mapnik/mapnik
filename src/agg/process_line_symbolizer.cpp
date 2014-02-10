@@ -136,8 +136,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         set_join_caps_aa(sym , ras, feature);
 
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
-                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clip_box,ras,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+            converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -156,8 +156,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     else
     {
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
-                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_); 
 
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform

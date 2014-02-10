@@ -115,8 +115,8 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     put<value_double>(line, keys::smooth, value_double(smooth));
 
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,common_.scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset

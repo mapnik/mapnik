@@ -151,8 +151,8 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clip_box,ras,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

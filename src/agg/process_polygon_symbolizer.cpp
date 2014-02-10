@@ -52,7 +52,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     typedef vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
                              CoordTransform, proj_transform, agg::trans_affine, 
-                             conv_types> vertex_converter_type;
+                             conv_types, feature_impl> vertex_converter_type;
 
     ras_ptr->reset();
     double gamma = get<value_double>(sym, keys::gamma, feature, 1.0);

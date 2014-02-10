@@ -271,7 +271,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     typedef vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
                              CoordTransform, proj_transform, agg::trans_affine,
-                             conv_types> vertex_converter_type;
+                             conv_types, feature_impl> vertex_converter_type;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
@@ -376,8 +376,8 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
         clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
@@ -725,8 +725,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr, common_.scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
