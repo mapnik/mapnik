@@ -1,0 +1,71 @@
+<Map
+    background-color="#eee"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="bug">
+        <Rule>
+            <Filter>[id] = 'fill'</Filter>
+            <PolygonSymbolizer fill='[value]' />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'fill-opacity'</Filter>
+            <PolygonSymbolizer fill='#0000ff' fill-opacity='[value]' />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'gamma'</Filter>
+            <PolygonSymbolizer fill='#0000ff' gamma='[value]' />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'comp-op'</Filter>
+            <PolygonSymbolizer fill='#0000ff' comp-op='[value]' />
+        </Rule>
+
+        <Rule>
+            <TextSymbolizer face-name='DejaVu Sans Book' halo-fill='#ffffff' halo-radius='1'>[id]</TextSymbolizer>
+        </Rule>
+    </Style>
+
+    <Style name="frame">
+        <Rule>
+            <PolygonSymbolizer />
+        </Rule>
+    </Style>
+
+    <!-- 
+      frame is a layer with a single polygon that is used to ensure that m.zoom_all() will zoom the
+      map to a reasonable bounding extent to make the test easy to view with tools like nik2img.py
+      (which calls m.zoom_all() by default). Another approach in >= Mapnik 2.3.x is to just sent a
+      manual `extent` for the CSV datasource.
+    -->
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt|name
+Polygon((-180.0 -125.0, -180.0 125.0, 180.0 125.0, 180.0 -125.0, -180.0 -125.0))|bounds
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- 
+      "bug" is a layer that should provide sample data that triggers the bug in question. It is
+      listed after the "frame" layer so that it renders on top and is visible.
+    -->
+
+    <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>bug</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+id|value|wkt
+fill|#0000ff|Polygon((-160 -120,-20 -120,-40 -80,-100 -90,-160 -120))
+fill-opacity|0.5|Polygon((-160 -70,-20 -70,-40 -30,-100 -40,-160 -70))
+gamma|1.0|Polygon((-160 -20,-20 -20,-40 20,-100 10,-160 -20))
+comp-op|minus|Polygon((-160 30,-20 30,-40 70,-100 60,-160 30))
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>
