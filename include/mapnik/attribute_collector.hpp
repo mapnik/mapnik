@@ -90,17 +90,15 @@ private:
 template <typename Container>
 struct extract_attribute_names : boost::static_visitor<void>
 {
-    expression_attributes<std::set<std::string> > f_attr;
-
     explicit extract_attribute_names(Container& names)
         : names_(names),
-          f_attr(names) {}
+          f_attr_(names) {}
 
     void operator() (mapnik::expression_ptr const& expr) const
     {
         if (expr)
         {
-            boost::apply_visitor(f_attr, *expr);
+            boost::apply_visitor(f_attr_, *expr);
         }
     }
     void operator() (mapnik::transform_type const& expr) const
@@ -121,7 +119,7 @@ struct extract_attribute_names : boost::static_visitor<void>
             expr->add_expressions(expressions);
             for (it=expressions.begin(); it != expressions.end(); ++it)
             {
-                if (*it) boost::apply_visitor(f_attr, **it);
+                if (*it) boost::apply_visitor(f_attr_, **it);
             }
         }
     }
@@ -139,22 +137,22 @@ struct extract_attribute_names : boost::static_visitor<void>
 
 private:
     Container& names_;
+    expression_attributes<std::set<std::string> > f_attr_;
 };
 
 struct symbolizer_attributes : public boost::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
-        : names_(names),
-          filter_factor_(filter_factor),
-          f_attrs(names) {}
+        : filter_factor_(filter_factor),
+          f_attrs_(names) {}
 
     template <typename T>
     void operator () (T const& sym)
     {
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(f_attrs, prop.second);
+            boost::apply_visitor(f_attrs_, prop.second);
         }
     }
 
@@ -175,14 +173,13 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(f_attrs, prop.second);
+            boost::apply_visitor(f_attrs_, prop.second);
         }
     }
 
 private:
-    std::set<std::string>& names_;
     double & filter_factor_;
-    extract_attribute_names<std::set<std::string> > f_attrs;
+    extract_attribute_names<std::set<std::string> > f_attrs_;
 };
 
 
@@ -202,11 +199,10 @@ public:
     void operator() (RuleType const& r)
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
-        typename RuleType::symbolizers::const_iterator symIter=symbols.begin();
         symbolizer_attributes s_attr(names_,filter_factor_);
-        while (symIter != symbols.end())
+        for (auto symbol : symbols)
         {
-            boost::apply_visitor(s_attr,*symIter++);
+            boost::apply_visitor(s_attr,symbol);
         }
 
         expression_ptr const& expr = r.get_filter();
