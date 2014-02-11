@@ -62,7 +62,6 @@ struct expression_attributes : boost::static_visitor<void>
     {
         boost::apply_visitor(*this, x.left);
         boost::apply_visitor(*this, x.right);
-
     }
 
     template <typename Tag>
@@ -88,121 +87,75 @@ private:
     Container& names_;
 };
 
+template <typename Container>
+struct extract_attribute_names : boost::static_visitor<void>
+{
+    expression_attributes<std::set<std::string> > f_attr;
+
+    explicit extract_attribute_names(Container& names)
+        : names_(names),
+          f_attr(names) {}
+
+    void operator() (mapnik::expression_ptr const& expr) const
+    {
+        if (expr)
+        {
+            boost::apply_visitor(f_attr, *expr);
+        }
+    }
+    void operator() (mapnik::transform_type const& expr) const
+    {
+        if (expr)
+        {
+            transform_processor_type::collect_attributes(names_, *expr);
+        }
+    }
+
+    void operator() (mapnik::text_placements_ptr const& expr) const
+    {
+        if (expr)
+        {
+            expression_set::const_iterator it;
+            expression_set expressions;
+            // TODO - optimize (dane)
+            expr->add_expressions(expressions);
+            for (it=expressions.begin(); it != expressions.end(); ++it)
+            {
+                if (*it) boost::apply_visitor(f_attr, **it);
+            }
+        }
+    }
+
+    void operator() (mapnik::path_expression_ptr const& expr) const
+    {
+        if (expr)
+        {
+            path_processor_type::collect_attributes(*expr,names_);
+        }
+    }
+
+    template <typename T>
+    void operator() (T const& val) const {}
+
+private:
+    Container& names_;
+};
+
 struct symbolizer_attributes : public boost::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
         : names_(names),
           filter_factor_(filter_factor),
-          f_attr(names) {}
+          f_attrs(names) {}
 
     template <typename T>
-    void operator () (T const&) const {}
-
-    void operator () (text_symbolizer const& sym)
+    void operator () (T const& sym)
     {
-        expression_set::const_iterator it;
-        expression_set expressions;
-        get<mapnik::text_placements_ptr>(sym, keys::text_placements_)->add_expressions(expressions);
-        for (it=expressions.begin(); it != expressions.end(); ++it)
+        for (auto const& prop : sym.properties)
         {
-            if (*it) boost::apply_visitor(f_attr, **it);
+            boost::apply_visitor(f_attrs, prop.second);
         }
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-    }
-
-    void operator () (point_symbolizer const& sym)
-    {
-        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
-    }
-
-    void operator () (line_symbolizer const& sym)
-    {
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-    }
-
-    void operator () (line_pattern_symbolizer const& sym)
-    {
-        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
-    }
-
-    void operator () (polygon_symbolizer const& sym)
-    {
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-    }
-
-    void operator () (polygon_pattern_symbolizer const& sym)
-    {
-        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
-    }
-
-    void operator () (shield_symbolizer const& sym)
-    {
-        expression_set::const_iterator it;
-        expression_set expressions;
-        get<mapnik::text_placements_ptr>(sym, keys::text_placements_)->add_expressions(expressions);
-        for (it=expressions.begin(); it != expressions.end(); ++it)
-        {
-            if (*it) boost::apply_visitor(f_attr, **it);
-        }
-
-        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
-    }
-
-    void operator () (markers_symbolizer const& sym)
-    {
-        expression_ptr const& height_expr = get<mapnik::expression_ptr>(sym,keys::height);
-        if (height_expr)
-        {
-            boost::apply_visitor(f_attr,*height_expr);
-        }
-        expression_ptr const& width_expr = get<mapnik::expression_ptr>(sym,keys::width);
-        if (width_expr)
-        {
-            boost::apply_visitor(f_attr,*width_expr);
-        }
-        path_expression_ptr const& filename_expr = get<mapnik::path_expression_ptr>(sym, keys::file);
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
-        collect_transform(get<mapnik::transform_type>(sym, keys::image_transform));
-    }
-
-    void operator () (building_symbolizer const& sym)
-    {
-        expression_ptr const& height_expr = get<mapnik::expression_ptr>(sym,keys::height);
-        if (height_expr)
-        {
-            boost::apply_visitor(f_attr,*height_expr);
-        }
-        collect_transform(get<mapnik::transform_type>(sym, keys::geometry_transform));
     }
 
     void operator () (raster_symbolizer const& sym)
@@ -220,19 +173,16 @@ struct symbolizer_attributes : public boost::static_visitor<>
                 filter_factor_ = 2;
             }
         }
+        for (auto const& prop : sym.properties)
+        {
+            boost::apply_visitor(f_attrs, prop.second);
+        }
     }
 
 private:
     std::set<std::string>& names_;
     double & filter_factor_;
-    expression_attributes<std::set<std::string> > f_attr;
-    void collect_transform(transform_list_ptr const& trans_expr)
-    {
-        if (trans_expr)
-        {
-            transform_processor_type::collect_attributes(names_, *trans_expr);
-        }
-    }
+    extract_attribute_names<std::set<std::string> > f_attrs;
 };
 
 
