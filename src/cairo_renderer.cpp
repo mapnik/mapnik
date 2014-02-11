@@ -345,8 +345,8 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     line_join_enum stroke_join = get<line_join_enum>(sym, keys::stroke_linejoin, MITER_JOIN);
     line_cap_enum stroke_cap = get<line_cap_enum>(sym, keys::stroke_linecap, BUTT_CAP);
     auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
-    double miterlimit = get<double>(sym, keys::stroke_miterlimit, 4.0);
-    double width = get<double>(sym, keys::stroke_width, 1.0);
+    double miterlimit = get<double>(sym, keys::stroke_miterlimit, feature, 4.0);
+    double width = get<double>(sym, keys::stroke_width, feature, 1.0);
 
 
     context_.set_operator(comp_op);
