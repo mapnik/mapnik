@@ -283,7 +283,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     }
     if (max_char_angle_delta != dfl.max_char_angle_delta || explicit_defaults)
     {
-        set_attr(node, "max-char-angle-delta", max_char_angle_delta);
+        set_attr(node, "max-char-angle-delta", max_char_angle_delta/(M_PI/180));
     }
     if (halign != dfl.halign || explicit_defaults)
     {
