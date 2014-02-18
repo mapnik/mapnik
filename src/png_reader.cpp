@@ -35,6 +35,7 @@ extern "C"
 #include <boost/iostreams/stream.hpp>
 
 // stl
+#include <cstring>
 #include <memory>
 
 namespace mapnik
@@ -158,7 +159,7 @@ template <typename T>
 void png_reader<T>::init()
 {
     png_byte header[8];
-    memset(header,0,8);
+    std::memset(header,0,8);
     stream_.read(reinterpret_cast<char*>(header),8);
     if ( stream_.gcount() != 8)
     {

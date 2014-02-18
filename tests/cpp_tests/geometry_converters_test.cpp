@@ -8,6 +8,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
@@ -57,9 +58,11 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::LineString);
 
     typedef boost::mpl::vector<clip_line_tag> conv_types;
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+    mapnik::feature_impl f(ctx,0);
     vertex_converter<box2d<double>, output_geometry_backend, line_symbolizer,
-        CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
+        CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(bbox, backend, sym, t, prj_trans, tr, f, 1.0);
 
     converter.set<clip_line_tag>();
 
@@ -97,9 +100,11 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::Polygon);
 
     typedef boost::mpl::vector<clip_poly_tag> conv_types;
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+    mapnik::feature_impl f(ctx,0);
     vertex_converter<box2d<double>, output_geometry_backend, polygon_symbolizer,
-        CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
+        CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(bbox, backend, sym, t, prj_trans, tr, f, 1.0);
 
     converter.set<clip_poly_tag>();
 

@@ -24,6 +24,7 @@
 #define MAPNIK_WEBP_IO_HPP
 
 // mapnik
+#include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>
 
 // webp

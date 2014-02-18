@@ -42,7 +42,7 @@ struct quadtree_node
     quadtree_node(const box2d<double>& ext)
         : ext_(ext),data_()
     {
-        memset(children_,0,sizeof(quadtree_node<T>*)*4);
+        std::memset(children_,0,sizeof(quadtree_node<T>*)*4);
     }
 
     ~quadtree_node()
@@ -118,7 +118,7 @@ public:
     void write(std::ostream& out)
     {
         char header[16];
-        memset(header,0,16);
+        std::memset(header,0,16);
         header[0]='m';
         header[1]='a';
         header[2]='p';
@@ -205,10 +205,10 @@ private:
             int shape_count=node->data_.size();
             int recsize=sizeof(box2d<double>) + 3 * sizeof(int) + shape_count * sizeof(T);
             char* node_record=new char[recsize];
-            memset(node_record,0,recsize);
-            memcpy(node_record,&offset,4);
-            memcpy(node_record+4,&node->ext_,sizeof(box2d<double>));
-            memcpy(node_record+36,&shape_count,4);
+            std::memset(node_record,0,recsize);
+            std::memcpy(node_record,&offset,4);
+            std::memcpy(node_record+4,&node->ext_,sizeof(box2d<double>));
+            std::memcpy(node_record+36,&shape_count,4);
             for (int i=0;i<shape_count;++i)
             {
                 memcpy(node_record + 40 + i * sizeof(T),&(node->data_[i]),sizeof(T));
@@ -221,7 +221,7 @@ private:
                     ++num_subnodes;
                 }
             }
-            memcpy(node_record + 40 + shape_count * sizeof(T),&num_subnodes,4);
+            std::memcpy(node_record + 40 + shape_count * sizeof(T),&num_subnodes,4);
             out.write(node_record,recsize);
             delete [] node_record;
 

@@ -23,13 +23,15 @@
 #ifndef MAPNIK_TOPOJSON_GRAMMAR_HPP
 #define MAPNIK_TOPOJSON_GRAMMAR_HPP
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-//
+// mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/json/topology.hpp>
-//
+
+// boost
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+
+// stl
 #include <string>
 
 namespace mapnik { namespace topojson {

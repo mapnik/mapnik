@@ -58,7 +58,6 @@ namespace phoenix = boost::phoenix;
 
 namespace {
 
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
 struct get_type
 {
     typedef int result_type;
@@ -116,81 +115,6 @@ struct not_empty
         return false;
     }
 };
-
-#else
-struct get_type
-{
-    template <typename T>
-    struct result { typedef int type; };
-
-    int operator() (geometry_type const& geom) const
-    {
-        return static_cast<int>(geom.type());
-    }
-};
-
-struct get_first
-{
-    template <typename T>
-    struct result { typedef geometry_type::value_type const type; };
-
-    geometry_type::value_type const operator() (geometry_type const& geom) const
-    {
-        geometry_type::value_type coord;
-        std::get<0>(coord) = geom.vertex(0,&std::get<1>(coord),&std::get<2>(coord));
-        return coord;
-    }
-};
-
-struct multi_geometry_type
-{
-    template <typename T>
-    struct result { typedef std::tuple<unsigned,bool> type; };
-
-    std::tuple<unsigned,bool> operator() (geometry_container const& geom) const
-    {
-        unsigned type = 0u;
-        bool collection = false;
-
-        geometry_container::const_iterator itr = geom.begin();
-        geometry_container::const_iterator end = geom.end();
-
-        for ( ; itr != end; ++itr)
-        {
-            if (type != 0u && static_cast<unsigned>(itr->type()) != type)
-            {
-                collection = true;
-                break;
-            }
-            type = itr->type();
-        }
-        if (geom.size() > 1) type +=3;
-        return std::tuple<unsigned,bool>(type, collection);
-    }
-};
-
-
-struct not_empty
-{
-    template <typename T>
-    struct result { typedef bool type; };
-
-    bool operator() (geometry_container const& cont) const
-    {
-        geometry_container::const_iterator itr = cont.begin();
-        geometry_container::const_iterator end = cont.end();
-
-        for (; itr!=end; ++itr)
-        {
-            if (itr->size() > 0) return true;
-        }
-        return false;
-    }
-};
-
-
-#endif
-
 
 template <typename T>
 struct json_coordinate_policy : karma::real_policies<T>

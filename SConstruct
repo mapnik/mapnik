@@ -400,6 +400,7 @@ opts.AddVariables(
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
+    BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
@@ -767,16 +768,20 @@ def FindBoost(context, prefixes, thread_flag):
     if BOOST_LIB_DIR:
         msg += '\nFound boost libs: %s' % BOOST_LIB_DIR
         env['BOOST_LIBS'] = BOOST_LIB_DIR
-    else:
+    elif not env['BOOST_LIBS']:
         env['BOOST_LIBS'] = '/usr/' + env['LIBDIR_SCHEMA']
         msg += '\nUsing default boost lib dir: %s' % env['BOOST_LIBS']
+    else:
+        msg += '\nUsing boost lib dir: %s' % env['BOOST_LIBS']
 
     if BOOST_INCLUDE_DIR:
         msg += '\nFound boost headers: %s' % BOOST_INCLUDE_DIR
         env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
-    else:
+    elif not env['BOOST_INCLUDES']:
         env['BOOST_INCLUDES'] = '/usr/include'
         msg += '\nUsing default boost include dir: %s' % env['BOOST_INCLUDES']
+    else:
+        msg += '\nUsing boost include dir: %s' % env['BOOST_INCLUDES']
 
     if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
         if BOOST_APPEND:
@@ -1975,6 +1980,8 @@ if not HELP_REQUESTED:
                 SConscript('utils/pgsql2sqlite/build.py')
             if env['SVG2PNG']:
                 SConscript('utils/svg2png/build.py')
+            if env['NIK2IMG']:
+                SConscript('utils/nik2img/build.py')
             # devtools not ready for public
             #SConscript('utils/ogrindex/build.py')
             env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])

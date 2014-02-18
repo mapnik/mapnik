@@ -46,6 +46,7 @@
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/polygon_clipper.hpp>
+#include <mapnik/value_types.hpp>
 
 // agg
 #include "agg_conv_clip_polygon.h"
@@ -97,7 +98,8 @@ struct converter_traits<T,mapnik::smooth_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        geom.smooth_value(get<double>(sym, keys::smooth));
+        auto const& feat = boost::fusion::at_c<6>(args);
+        geom.smooth_value(get<value_double>(sym, keys::smooth, feat));
     }
 };
 
@@ -111,8 +113,9 @@ struct converter_traits<T,mapnik::simplify_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<int>(sym,keys::simplify_algorithm)));
-        geom.set_simplify_tolerance(get<double>(sym, keys::simplify_tolerance));
+        auto const& feat = boost::fusion::at_c<6>(args);
+        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(sym,keys::simplify_algorithm, feat)));
+        geom.set_simplify_tolerance(get<value_double>(sym, keys::simplify_tolerance, feat));
     }
 };
 
@@ -130,7 +133,6 @@ struct converter_traits<T, mapnik::clip_line_tag>
     }
 };
 
-
 template <typename T>
 struct converter_traits<T, mapnik::dash_tag>
 {
@@ -141,7 +143,7 @@ struct converter_traits<T, mapnik::dash_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double scale_factor = boost::fusion::at_c<6>(args);
+        double scale_factor = boost::fusion::at_c<7>(args);
         auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
         if (dash)
         {
@@ -164,15 +166,15 @@ struct converter_traits<T, mapnik::stroke_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        auto const& feat = boost::fusion::at_c<6>(args);
         set_join_caps(sym, geom);
-        double miterlimit = get<double>(sym, keys::stroke_miterlimit, 4.0);
-        double width = get<double>(sym, keys::stroke_width, 1.0);
+        double miterlimit = get<value_double>(sym, keys::stroke_miterlimit, feat, 4.0);
+        double width = get<value_double>(sym, keys::stroke_width, feat, 1.0);
         geom.generator().miter_limit(miterlimit);
-        double scale_factor = boost::fusion::at_c<6>(args);
+        double scale_factor = boost::fusion::at_c<7>(args);
         geom.generator().width(width * scale_factor);
     }
 };
-
 
 template <typename T>
 struct converter_traits<T,mapnik::clip_poly_tag>
@@ -213,7 +215,6 @@ struct converter_traits<T,mapnik::transform_tag>
     }
 };
 
-
 template <typename T>
 struct converter_traits<T,mapnik::affine_transform_tag>
 {
@@ -244,8 +245,9 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double offset = get<double>(sym, keys::offset);
-        double scale_factor = boost::fusion::at_c<6>(args);
+        auto const& feat = boost::fusion::at_c<6>(args);
+        double offset = get<value_double>(sym, keys::offset, feat);
+        double scale_factor = boost::fusion::at_c<7>(args);
         geom.set_offset(offset * scale_factor);
     }
 };
@@ -312,7 +314,6 @@ struct dispatcher
             converter_fwd<boost::mpl::true_::value>::
                 template forward<this_type,Geometry,args_type,conv_tag,Next,End>(*this,geom,args_);
         }
-
     }
 
     template <typename Geometry>
@@ -328,9 +329,7 @@ struct dispatcher
 };
 }
 
-
-
-template <typename B, typename R, typename S, typename T, typename P, typename A, typename C >
+template <typename B, typename R, typename S, typename T, typename P, typename A, typename C, typename F >
 struct vertex_converter : private mapnik::noncopyable
 {
     typedef C conv_types;
@@ -340,6 +339,7 @@ struct vertex_converter : private mapnik::noncopyable
     typedef T trans_type;
     typedef P proj_trans_type;
     typedef A affine_trans_type;
+    typedef F feature_type;
     typedef typename boost::fusion::vector
     <
     bbox_type const&,
@@ -348,18 +348,25 @@ struct vertex_converter : private mapnik::noncopyable
     trans_type const&,
     proj_trans_type const&,
     affine_trans_type const&,
+    feature_type const&,
     double //scale-factor
     > args_type;
 
-    vertex_converter(bbox_type const& b, rasterizer_type & ras,
-                     symbolizer_type const& sym, trans_type & tr,
+    vertex_converter(bbox_type const& b,
+                     rasterizer_type & ras,
+                     symbolizer_type const& sym,
+                     trans_type & tr,
                      proj_trans_type const& prj_trans,
                      affine_trans_type const& affine_trans,
+                     feature_type const& feature,
                      double scale_factor)
-        : disp_(args_type(boost::cref(b), boost::ref(ras),
-                          boost::cref(sym), boost::cref(tr),
+        : disp_(args_type(boost::cref(b),
+                          boost::ref(ras),
+                          boost::cref(sym),
+                          boost::cref(tr),
                           boost::cref(prj_trans),
                           boost::cref(affine_trans),
+                          boost::cref(feature),
                           scale_factor)) {}
 
     template <typename Geometry>
@@ -388,7 +395,6 @@ struct vertex_converter : private mapnik::noncopyable
         if (index < disp_.vec_.size())
             disp_.vec_[index]=0;
     }
-
 
     detail::dispatcher<args_type,conv_types> disp_;
 };

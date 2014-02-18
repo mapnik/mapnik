@@ -275,7 +275,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     typedef vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
                              CoordTransform, proj_transform, agg::trans_affine,
-                             conv_types> vertex_converter_type;
+                             conv_types, feature_impl> vertex_converter_type;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
@@ -349,8 +349,8 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     line_join_enum stroke_join = get<line_join_enum>(sym, keys::stroke_linejoin, MITER_JOIN);
     line_cap_enum stroke_cap = get<line_cap_enum>(sym, keys::stroke_linecap, BUTT_CAP);
     auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
-    double miterlimit = get<double>(sym, keys::stroke_miterlimit, 4.0);
-    double width = get<double>(sym, keys::stroke_width, 1.0);
+    double miterlimit = get<double>(sym, keys::stroke_miterlimit, feature, 4.0);
+    double width = get<double>(sym, keys::stroke_width, feature, 1.0);
 
 
     context_.set_operator(comp_op);
@@ -380,8 +380,8 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
         clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,common_.scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
@@ -729,8 +729,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr, common_.scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
