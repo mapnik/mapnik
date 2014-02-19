@@ -219,7 +219,13 @@ files = {
     'tiff-nodata-rgba':{'sizes':[(512,512)]},
     'tiff-nodata-tolerance':{'sizes':[(512,512)]},
     'tiff-nodata-edge-rgba':{'sizes':[(512,512)]},
-    'marker-vs-point':{'sizes':[(512,512)]}
+    'marker-vs-point':{'sizes':[(512,512)]},
+    'line-symbolizer-expressions':{'sizes':[(256,256)]},
+    'line-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'point-symbolizer-expressions':{'sizes':[(256,256)]},
+    'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
+    'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
     }
 
 class Reporting:
