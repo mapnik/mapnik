@@ -24,6 +24,7 @@
 #include <mapnik/text/formatting/text.hpp>
 #include <mapnik/text/formatting/format.hpp>
 #include <mapnik/text/formatting/expression_format.hpp>
+#include <mapnik/text/formatting/layout.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 
@@ -37,6 +38,7 @@ registry::registry()
     register_name("<xmltext>", &text_node::from_xml);
     register_name("Format", &format_node::from_xml);
     register_name("ExpressionFormat", &expression_format::from_xml);
+    register_name("Layout", &layout_node::from_xml);
 }
 
 void registry::register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite)

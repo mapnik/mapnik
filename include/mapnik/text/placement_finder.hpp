@@ -29,6 +29,7 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/rotation.hpp>
+#include <mapnik/text/vertex_cache.hpp>
 #include <mapnik/noncopyable.hpp>
 
 namespace mapnik
@@ -62,10 +63,6 @@ public:
 
     void set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
 private:
-    void init_alignment();
-    pixel_position alignment_offset() const;
-    double jalign_offset(double line_width) const;
-
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
     /** Moves dx pixels but makes sure not to fall of the end. */
     void path_move_dx(vertex_cache &pp);
@@ -80,23 +77,16 @@ private:
     /** Maps upright==auto, left_only and right_only to left,right to simplify processing.
         angle = angle of at start of line (to estimate best option for upright==auto) */
     text_upright_e simplify_upright(text_upright_e upright, double angle) const;
-    box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
+    box2d<double> get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     feature_impl const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;
-    // Precalculated values for maximum performance
-    rotation orientation_;
-    text_layout layout_;
     text_placement_info_ptr info_;
+    layout_container layouts_;
     bool valid_;
 
-    vertical_alignment_e valign_;
-    /** Horizontal alignment for point placements. */
-    horizontal_alignment_e halign_point_;
-    /** Horizontal alignment for line placements. */
-    horizontal_alignment_e halign_line_;
-    justify_alignment_e jalign_;
     double scale_factor_;
+    face_manager_freetype &font_manager_;
 
     placements_list placements_;
 

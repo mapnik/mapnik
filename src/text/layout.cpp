@@ -22,6 +22,7 @@
 
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text/text_properties.hpp>
+#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
 
 // ICU
@@ -30,7 +31,29 @@
 namespace mapnik
 {
 
-text_layout::text_layout(face_manager_freetype & font_manager, double scale_factor)
+// Output is centered around (0,0)
+static void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_position const& center, double width, double height)
+{
+    double half_width, half_height;
+    if (rot.sin == 0 && rot.cos == 1.)
+    {
+        half_width  = width / 2.;
+        half_height = height / 2.;
+    }
+    else
+    {
+        half_width  = (width * rot.cos + height * rot.sin) /2.;
+        half_height = (width * rot.sin + height * rot.cos) /2.;
+    }
+    box.init(center.x - half_width, center.y - half_height, center.x + half_width, center.y + half_height);
+}
+
+pixel_position pixel_position::rotate(rotation const& rot) const
+{
+    return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
+}
+
+text_layout::text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties_ptr properties)
     : font_manager_(font_manager),
       scale_factor_(scale_factor),
       itemizer_(),
@@ -38,7 +61,8 @@ text_layout::text_layout(face_manager_freetype & font_manager, double scale_fact
       width_(0.0),
       height_(0.0),
       glyphs_count_(0),
-      lines_()
+      lines_(),
+      properties_(properties)
 {
 }
 
@@ -47,20 +71,34 @@ void text_layout::add_text(mapnik::value_unicode_string const& str, char_propert
     itemizer_.add_text(str, format);
 }
 
+void text_layout::add_child(text_layout_ptr child_layout)
+{
+    child_layout_list_.push_back(child_layout);
+}
+
 mapnik::value_unicode_string const& text_layout::text() const
 {
     return itemizer_.text();
 }
 
-void text_layout::layout(double wrap_width, unsigned text_ratio, bool wrap_before)
+void text_layout::layout()
 {
     unsigned num_lines = itemizer_.num_lines();
     for (unsigned i = 0; i < num_lines; ++i)
     {
         std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
         text_line line(line_limits.first, line_limits.second);
-        break_line(line, wrap_width, text_ratio, wrap_before); //Break line if neccessary
+        //Break line if neccessary
+        break_line(line, properties_->wrap_width * scale_factor_, properties_->text_ratio, properties_->wrap_before);
     }
+    init_alignment();
+
+    /* Find text origin. */
+    displacement_ = scale_factor_ * properties_->displacement + alignment_offset();
+    if (properties_->rotate_displacement) displacement_ = displacement_.rotate(!orientation_);
+
+    /* Find layout bounds, expanded for rotation */
+    rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
 }
 
 /* In the Unicode string characters are always stored in logical order.
@@ -189,11 +227,162 @@ void text_layout::clear()
     width_map_.clear();
     width_ = 0.;
     height_ = 0.;
+    child_layout_list_.clear();
 }
 
 void text_layout::shape_text(text_line & line)
 {
     shaper_type::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
+}
+
+void text_layout::init_orientation(feature_impl const& feature)
+{
+    if (properties_->orientation)
+    {
+        // https://github.com/mapnik/mapnik/issues/1352
+        mapnik::evaluate<feature_impl, value_type> evaluator(feature);
+        orientation_.init(
+            boost::apply_visitor(
+            evaluator,
+            *(properties_->orientation)).to_double() * M_PI / 180.0);
+    }
+    else
+    {
+        orientation_.reset();
+    }
+}
+
+void text_layout::init_alignment()
+{
+    text_layout_properties const& p = *(properties_);
+    valign_ = p.valign;
+    if (valign_ == V_AUTO)
+    {
+        if (p.displacement.y > 0.0)
+        {
+            valign_ = V_BOTTOM;
+        }
+        else if (p.displacement.y < 0.0)
+        {
+            valign_ = V_TOP;
+        }
+        else
+        {
+            valign_ = V_MIDDLE;
+        }
+    }
+
+    halign_ = p.halign;
+    if (halign_ == H_AUTO)
+    {
+        if (p.displacement.x > 0.0)
+        {
+            halign_ = H_RIGHT;
+        }
+        else if (p.displacement.x < 0.0)
+        {
+            halign_ = H_LEFT;
+        }
+        else
+        {
+            halign_ = H_MIDDLE;
+        }
+    }
+
+    jalign_ = p.jalign;
+    if (jalign_ == J_AUTO)
+    {
+        if (p.displacement.x > 0.0)
+        {
+            jalign_ = J_LEFT;
+        }
+        else if (p.displacement.x < 0.0)
+        {
+            jalign_ = J_RIGHT;
+        }
+        else
+        {
+            jalign_ = J_MIDDLE;
+        }
+    }
+}
+
+pixel_position text_layout::alignment_offset() const
+{
+    pixel_position result(0,0);
+    // if needed, adjust for desired vertical alignment
+    if (valign_ == V_TOP)
+    {
+        result.y = -0.5 * height();  // move center up by 1/2 the total height
+    }
+    else if (valign_ == V_BOTTOM)
+    {
+        result.y = 0.5 * height();  // move center down by the 1/2 the total height
+    }
+    // set horizontal position to middle of text
+    if (halign_ == H_LEFT)
+    {
+        result.x = -0.5 * width();  // move center left by 1/2 the string width
+    }
+    else if (halign_ == H_RIGHT)
+    {
+        result.x = 0.5 * width();  // move center right by 1/2 the string width
+    }
+    return result;
+}
+
+double text_layout::jalign_offset(double line_width) const
+{
+    if (jalign_ == J_MIDDLE) return -(line_width / 2.0);
+    if (jalign_ == J_LEFT)   return -(width() / 2.0);
+    if (jalign_ == J_RIGHT)  return (width() / 2.0) - line_width;
+    return 0;
+}
+
+void layout_container::add(text_layout_ptr layout)
+{
+    text_ += layout->text();
+    layouts_.push_back(layout);
+
+    for (text_layout_ptr const& child_layout : layout->get_child_layouts())
+    {
+        add(child_layout);
+    }
+}
+
+void layout_container::layout()
+{
+    bounds_.init(0,0,0,0);
+    glyphs_count_ = 0;
+    line_count_ = 0;
+
+    bool first = true;
+    for (text_layout_ptr const& layout : layouts_)
+    {
+        layout->layout();
+
+        glyphs_count_ += layout->glyphs_count();
+        line_count_ += layout->num_lines();
+
+        if (first)
+        {
+            bounds_ = layout->bounds();
+            first = false;
+        }
+        else
+        {
+            bounds_.expand_to_include(layout->bounds());
+        }
+    }
+}
+
+void layout_container::clear()
+{
+    layouts_.clear();
+    text_.remove();
+    bounds_.init(0,0,0,0);
+    glyphs_count_ = 0;
+    line_count_ = 0;
 }
 
 

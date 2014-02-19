@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
+    
+  <Layer name="layer1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>points</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long
+0,0
+      </Parameter>
+    </Datasource>
+  </Layer>
+  
+  <Style name="points">
+    <Rule>
+      <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/raster/white-alpha.png"/>
+      <TextSymbolizer face-name="DejaVu Sans Bold" size="16" wrap-width="60" placement="point" dx="-15" dy="-10">
+        "Symbolizer Base Text"
+        <Format face-name="DejaVu Sans Book" size="12">
+          <Layout orientation="45" dx="25">
+            "Rotated Layout with "
+            <Format fill="blue">
+              "Blue Format Child Node"
+              <Layout vertical-alignment="top" rotate-displacement="true" dy="-5">
+                "Rotated child layout with rotate-displacement"
+              </Layout>
+            </Format>
+          </Layout>
+          <Layout wrap-width="100" wrap-before="true" dy="30">
+            <Format halo-radius="1.5">
+              "South Offset Layout"
+              <Layout dx="30" horizontal-alignment="middle" justify-alignment="center">
+                <Format halo-fill="turquoise">"South offset child layout, centered"</Format>
+              </Layout>
+              <Layout dx="75" wrap-width="20" horizontal-alignment="right" justify-alignment="right">
+                <Format face-name="DejaVu Sans Oblique">"South offset child layout, right"</Format>
+              </Layout>
+            </Format>
+          </Layout>
+        </Format>
+      </TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>
+

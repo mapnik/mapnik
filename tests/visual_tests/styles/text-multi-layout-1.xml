@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
+
+  <Layer name="obstacle" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>obstacle</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr
+-0.5,0.5,0
+0.5,-0.5,1
+0.5,0.5,2
+-0.5,-0.5,3
+0.08,0,4
+-0.08,0,5
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="obstacle">
+    <Rule>
+      <PointSymbolizer file="../../data/svg/crosshair16x16.svg" transform="scale(0.5)"/>
+    </Rule>
+  </Style>
+
+  <Layer name="layer1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>points</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr,ref
+-0.45,-0.45,0,first
+0.45,-0.45,1,second
+0.45,0.45,2,third
+-0.45,0.45,3,fourth
+0,0,4,fifth
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="points">
+    <Rule>
+      <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/raster/white-alpha.png"/>
+      <TextSymbolizer face-name="DejaVu Sans Book" placement="point" placement-type="list" size="16" dx="-4" dy="-8">
+        "test "+[nr]
+        <Layout dx="0" dy="8" horizontal-alignment="right">
+          <Format fill="red">[ref]</Format>
+        </Layout>
+        <Placement size="14" dy="8">
+          "test "+[nr]
+          <Format fill="blue">
+            <Layout dx="0" dy="-8" horizontal-alignment="right">[ref]</Layout>
+          </Format>
+        </Placement>
+        <Placement dx="0" dy="0">
+          "test "+[nr]
+          <Format  fill="yellow">" ("+[ref]+")"</Format>
+        </Placement>
+      </TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>
+
