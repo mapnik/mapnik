@@ -35,7 +35,6 @@
 #include <mapnik/text/formatting/expression_format.hpp>
 #include <mapnik/text/formatting/layout.hpp>
 #include <mapnik/text/layout.hpp>
-#include <mapnik/text_symbolizer.hpp>
 #include <mapnik/symbolizer.hpp>
 
 #include "mapnik_enumeration.hpp"
