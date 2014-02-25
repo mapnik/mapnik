@@ -20,9 +20,8 @@ wkt,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" minimum-distance="50" spacing="100" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="16" placement="point" dy="0" fill="#ffffff">[ref%]</ShieldSymbolizer>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="10">[name%]</TextSymbolizer>
-          <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="0" fill="#ffffff">[ref%]</TextSymbolizer>
         </GroupRule>
       </GroupSymbolizer>
     </Rule>
@@ -45,9 +44,8 @@ wkt,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" minimum-distance="40" spacing="80" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="16" placement="point" dy="0" fill="#ffffff">[ref%]</ShieldSymbolizer>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="10">[name%]</TextSymbolizer>
-          <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="0" fill="#ffffff">[ref%]</TextSymbolizer>
         </GroupRule>
       </GroupSymbolizer>
     </Rule>
@@ -70,9 +68,8 @@ wkt,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" minimum-distance="30" spacing="60" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="16" placement="point" dy="0" fill="#ffffff">[ref%]</ShieldSymbolizer>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="10">[name%]</TextSymbolizer>
-          <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="0" fill="#ffffff">[ref%]</TextSymbolizer>
         </GroupRule>
        </GroupSymbolizer>
        <DebugSymbolizer/>

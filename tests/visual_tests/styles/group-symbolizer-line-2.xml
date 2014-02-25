@@ -25,8 +25,7 @@ wkt,key1,key2
       <GroupSymbolizer start-column="1" num-columns="1" placement="point" avoid-edges="false" minimum-distance="1" spacing="1" repeat-key="[key%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
-          <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="0" fill="#ff0000">[key%]</TextSymbolizer>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="10" placement="point" dy="0" fill="#ff0000">[key%]</ShieldSymbolizer>
         </GroupRule>
       </GroupSymbolizer>
     </Rule>
@@ -51,8 +50,7 @@ wkt,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="1" placement="line" avoid-edges="false" minimum-distance="20" spacing="1" repeat-key="bar">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
-          <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="0" fill="#ffffff">bar</TextSymbolizer>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="10" placement="point" dy="0" fill="#ffffff">bar</ShieldSymbolizer>
         </GroupRule>
       </GroupSymbolizer>
     </Rule>
@@ -77,8 +75,7 @@ wkt,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="1" placement="line" avoid-edges="false" minimum-distance="20" spacing="1" repeat-key="foo">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
-          <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="0" fill="#000000">foo</TextSymbolizer>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="10" placement="point" dy="0" fill="#000000">foo</ShieldSymbolizer>
         </GroupRule>
       </GroupSymbolizer>
     </Rule>

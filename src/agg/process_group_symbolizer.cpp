@@ -74,7 +74,15 @@ struct thunk_renderer : public boost::static_visitor<>
         render_offset_placements(
             thunk.placements_,
             offset_,
-            [&] (glyph_positions_ptr glyphs) {
+            [&] (glyph_positions_ptr glyphs)
+            {
+                if (glyphs->marker())
+                {
+                    ren_.render_marker(glyphs->marker_pos(),
+                                       *(glyphs->marker()->marker),
+                                       glyphs->marker()->transform,
+                                       thunk.opacity_, thunk.comp_op_);
+                }
                 ren.render(*glyphs);
             });
     }

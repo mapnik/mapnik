@@ -86,11 +86,12 @@ struct text_render_thunk
     // ensure the lifetime is the same.
     placements_list placements_;
     std::shared_ptr<std::vector<glyph_info> > glyphs_;
+    double opacity_;
     composite_mode_e comp_op_;
     halo_rasterizer_enum halo_rasterizer_;
 
     text_render_thunk(placements_list const &placements,
-                      composite_mode_e comp_op,
+                      double opacity, composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer);
 };
 
@@ -123,13 +124,17 @@ struct render_thunk_extractor : public boost::static_visitor<>
 
     void operator()(text_symbolizer const &sym) const;
 
+    void operator()(shield_symbolizer const &sym) const;
+
     template <typename T>
     void operator()(T const &) const
     {
         // TODO: warning if unimplemented?
     }
 
-protected:
+private:
+    void extract_text_thunk(text_symbolizer_helper &helper, text_symbolizer const &sym) const;
+
     box2d<double> &box_;
     render_thunk_list &thunks_;
     mapnik::feature_impl &feature_;

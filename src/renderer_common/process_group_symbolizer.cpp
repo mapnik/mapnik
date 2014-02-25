@@ -33,10 +33,10 @@ point_render_thunk::point_render_thunk(pixel_position const &pos, marker const &
 
 
 text_render_thunk::text_render_thunk(placements_list const &placements,
-                                     composite_mode_e comp_op,
+                                     double opacity, composite_mode_e comp_op,
                                      halo_rasterizer_enum halo_rasterizer)
     : placements_(), glyphs_(std::make_shared<std::vector<glyph_info> >()),
-      comp_op_(comp_op), halo_rasterizer_(halo_rasterizer)
+      opacity_(opacity), comp_op_(comp_op), halo_rasterizer_(halo_rasterizer)
 {
     std::vector<glyph_info> &glyph_vec = *glyphs_;
     
@@ -105,11 +105,30 @@ void render_thunk_extractor::operator()(text_symbolizer const &sym) const
         common_.t_, common_.font_manager_, *common_.detector_,
         clip_box);
 
+    extract_text_thunk(helper, sym);
+}
+
+void render_thunk_extractor::operator()(shield_symbolizer const &sym) const
+{
+    box2d<double> clip_box = clipping_extent_;
+    text_symbolizer_helper helper(
+        sym, feature_, prj_trans_,
+        common_.width_, common_.height_,
+        common_.scale_factor_,
+        common_.t_, common_.font_manager_, *common_.detector_,
+        clip_box);
+
+    extract_text_thunk(helper, sym);
+}
+
+void render_thunk_extractor::extract_text_thunk(text_symbolizer_helper &helper, text_symbolizer const &sym) const
+{
+    double opacity = get<double>(sym, keys::opacity, feature_, 1.0);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, src_over);
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, HALO_RASTERIZER_FULL);
 
     placements_list const& placements = helper.get();
-    text_render_thunk thunk(placements, comp_op, halo_rasterizer);
+    text_render_thunk thunk(placements, opacity, comp_op, halo_rasterizer);
     thunks_.push_back(std::make_shared<render_thunk>(thunk));
 
     update_box();
