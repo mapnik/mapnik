@@ -226,6 +226,7 @@ source = Split(
     text/formatting/list.cpp
     text/formatting/text.cpp
     text/formatting/format.cpp
+    text/formatting/layout.cpp
     text/formatting/registry.cpp
     text/placements/registry.cpp
     text/placements/base.cpp

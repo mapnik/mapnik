@@ -33,8 +33,8 @@
 #include <mapnik/text/formatting/list.hpp>
 #include <mapnik/text/formatting/format.hpp>
 #include <mapnik/text/formatting/expression_format.hpp>
+#include <mapnik/text/formatting/layout.hpp>
 #include <mapnik/text/layout.hpp>
-#include <mapnik/text_symbolizer.hpp>
 #include <mapnik/symbolizer.hpp>
 
 #include "mapnik_enumeration.hpp"
@@ -221,6 +221,27 @@ struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expres
     void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
     {
         formatting::expression_format::apply(p, feature, output);
+    }
+};
+
+struct LayoutNodeWrap: formatting::layout_node, wrapper<formatting::layout_node>
+{
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    {
+        if(override o = this->get_override("apply"))
+        {
+            python_block_auto_unblock b;
+            o(ptr(&p), ptr(&feature), ptr(&output));
+        }
+        else
+        {
+            formatting::layout_node::apply(p, feature, output);
+        }
+    }
+
+    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    {
+        formatting::layout_node::apply(p, feature, output);
     }
 };
 

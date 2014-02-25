@@ -180,12 +180,14 @@ template <typename T>
 struct converter_traits<T,mapnik::clip_poly_tag>
 {
     typedef T geometry_type;
-    typedef mapnik::polygon_clipper<geometry_type> conv_type;
+    //typedef mapnik::polygon_clipper<geometry_type> conv_type;
+    typedef typename agg::conv_clip_polygon<geometry_type> conv_type;
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<0> >::type box = boost::fusion::at_c<0>(args);
-        geom.set_clip_box(box);
+        geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
+        //geom.set_clip_box(box);
     }
 };
 
