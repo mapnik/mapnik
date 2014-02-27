@@ -21,6 +21,7 @@
 
 Import ('plugin_base')
 Import ('env')
+from copy import copy
 
 PLUGIN_NAME = 'postgis'
 
@@ -34,9 +35,8 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
+plugin_env['LIBS'] = []
 libraries = ['pq']
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append(env['ICU_LIB_NAME'])
 
 #if env['THREADING'] == 'multi':
 #    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
@@ -49,9 +49,13 @@ if env['RUNTIME_LINK'] == 'static':
     else:
         # TODO - parse back into libraries variable
         plugin_env.ParseConfig('pg_config --libs')
+        if plugin_env['LIBS']:
+            libraries.extend(copy(plugin_env['LIBS']))
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.insert(0,'mapnik')
+    libraries.append(env['ICU_LIB_NAME'])
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                       SHLIBPREFIX='',
