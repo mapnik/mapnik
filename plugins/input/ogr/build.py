@@ -39,19 +39,19 @@ plugin_sources = Split(
 
 cxxflags = []
 plugin_env['LIBS'] = []
+plugin_env.Append(LIBS=env['PLUGINS']['ogr']['lib'])
 
 if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     plugin_env.ParseConfig(cmd)
 
 # Link Library to Dependencies
-plugin_env.Append(LIBS=env['PLUGINS']['ogr']['lib'])
 libraries = copy(plugin_env['LIBS'])
 
 plugin_env.Append(CXXFLAGS=cxxflags)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.insert(0,'mapnik')
     libraries.append(env['ICU_LIB_NAME'])
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
