@@ -602,6 +602,12 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
         set_attr(style_node, "opacity", opacity);
     }
 
+    bool image_filters_inflate = style.image_filters_inflate();
+    if (image_filters_inflate != dfl.image_filters_inflate() || explicit_defaults)
+    {
+        set_attr(style_node, "image-filters-inflate", image_filters_inflate);
+    }
+
     boost::optional<composite_mode_e> comp_op = style.comp_op();
     if (comp_op)
     {

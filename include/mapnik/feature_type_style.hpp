@@ -62,6 +62,7 @@ private:
     // comp-op
     boost::optional<composite_mode_e> comp_op_;
     float opacity_;
+    bool image_filters_inflate_;
 public:
     feature_type_style();
 
@@ -88,6 +89,8 @@ public:
     boost::optional<composite_mode_e> comp_op() const;     
     void set_opacity(float opacity);
     float get_opacity() const;
+    void set_image_filters_inflate(bool inflate);
+    bool image_filters_inflate() const;
 
     ~feature_type_style() {}
 

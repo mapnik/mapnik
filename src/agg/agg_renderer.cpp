@@ -238,31 +238,47 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 
     if (style_level_compositing_)
     {
-        int radius = 0;
-        mapnik::filter::filter_radius_visitor visitor(radius);
-        BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.image_filters())
+        if (st.image_filters_inflate())
         {
-            boost::apply_visitor(visitor, filter_tag);
-        }
-        if (radius > t_.offset())
-        {
-            t_.set_offset(radius);
-        }
-        int offset = t_.offset();
-        unsigned target_width = width_;
-        unsigned target_height = height_;
-        target_width = width_ + (offset * 2);
-        target_height = height_ + (offset * 2);
-        ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
-        if (!internal_buffer_ ||
-           (internal_buffer_->width() < target_width ||
-            internal_buffer_->height() < target_height))
-        {
-            internal_buffer_ = boost::make_shared<buffer_type>(target_width,target_height);
+            int radius = 0;
+            mapnik::filter::filter_radius_visitor visitor(radius);
+            BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.image_filters())
+            {
+                boost::apply_visitor(visitor, filter_tag);
+            }
+            if (radius > t_.offset())
+            {
+                t_.set_offset(radius);
+            }
+            int offset = t_.offset();
+            unsigned target_width = width_;
+            unsigned target_height = height_;
+            target_width = width_ + (offset * 2);
+            target_height = height_ + (offset * 2);
+            ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
+            if (!internal_buffer_ ||
+               (internal_buffer_->width() < target_width ||
+                internal_buffer_->height() < target_height))
+            {
+                internal_buffer_ = boost::make_shared<buffer_type>(target_width,target_height);
+            }
+            else
+            {
+                internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+            }
         }
         else
         {
-            internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+            if (!internal_buffer_)
+            {
+                internal_buffer_ = boost::make_shared<buffer_type>(width_,height_);
+            }
+            else
+            {
+                internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+            }
+            t_.set_offset(0);
+            ras_ptr->clip_box(0,0,width_,height_);
         }
         current_buffer_ = internal_buffer_.get();
     }
