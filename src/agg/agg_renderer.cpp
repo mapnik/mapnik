@@ -241,7 +241,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
         {
             int radius = 0;
             mapnik::filter::filter_radius_visitor visitor(radius);
-            BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.image_filters())
+            for(mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
                 boost::apply_visitor(visitor, filter_tag);
             }
@@ -259,7 +259,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
                (internal_buffer_->width() < target_width ||
                 internal_buffer_->height() < target_height))
             {
-                internal_buffer_ = boost::make_shared<buffer_type>(target_width,target_height);
+                internal_buffer_ = std::make_shared<buffer_type>(target_width,target_height);
             }
             else
             {
@@ -270,7 +270,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
         {
             if (!internal_buffer_)
             {
-                internal_buffer_ = boost::make_shared<buffer_type>(width_,height_);
+                internal_buffer_ = std::make_shared<buffer_type>(width_,height_);
             }
             else
             {
