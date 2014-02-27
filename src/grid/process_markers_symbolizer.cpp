@@ -96,7 +96,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         {
             ras_ptr->reset();
             agg::trans_affine geom_tr;
-            evaluate_transform(geom_tr, feature, sym.get_transform());
+            evaluate_transform(geom_tr, feature, sym.get_transform(), scale_factor_);
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution()));
 
             if ((*mark)->is_vector())

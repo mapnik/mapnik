@@ -55,7 +55,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     ras_ptr->reset();
 
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform(), scale_factor_);
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,

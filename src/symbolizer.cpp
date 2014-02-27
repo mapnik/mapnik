@@ -29,7 +29,7 @@
 namespace mapnik {
 
 void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
-                        transform_list_ptr const& trans_expr)
+                        transform_list_ptr const& trans_expr, double scale_factor)
 {
     if (trans_expr)
     {
@@ -37,7 +37,7 @@ void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
     MAPNIK_LOG_DEBUG(transform) << "transform: evaluate "
                                 << transform_processor_type::to_string(*trans_expr);
 #endif
-        transform_processor_type::evaluate(tr, feature, *trans_expr);
+        transform_processor_type::evaluate(tr, feature, *trans_expr, scale_factor);
     }
 }
 
