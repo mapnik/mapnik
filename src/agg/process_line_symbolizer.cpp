@@ -90,7 +90,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     renderer_base renb(pixf);
 
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform(), scale_factor_);
 
     box2d<double> clip_box = clipping_extent();
     if (sym.clip())

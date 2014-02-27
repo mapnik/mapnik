@@ -50,7 +50,7 @@ typedef transform_list_ptr transform_type;
 class feature_impl;
 
 MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
-                                    transform_type const& trans_expr);
+                                    transform_type const& trans_expr, double scale_factor=1.0);
 
 class MAPNIK_DECL symbolizer_base
 {

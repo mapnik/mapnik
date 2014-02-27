@@ -83,7 +83,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     int stroke_width = (*pat)->width();
 
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform(), scale_factor_);
 
     box2d<double> clipping_extent = query_extent_;
     if (sym.clip())
