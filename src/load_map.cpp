@@ -449,6 +449,12 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             style.set_opacity(*opacity);
         }
 
+        optional<boolean> image_filters_inflate = sty.get_opt_attr<boolean>("image-filters-inflate");
+        if (image_filters_inflate)
+        {
+            style.set_image_filters_inflate(*image_filters_inflate);
+        }
+
         // image filters
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
