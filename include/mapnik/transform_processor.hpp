@@ -176,7 +176,7 @@ struct transform_processor
         double eval(expr_node const& x) const
         {
             mapnik::evaluate<feature_type, value_type> e(feature_);
-            return boost::apply_visitor(e, x).to_double() * scale_factor_;
+            return boost::apply_visitor(e, x).to_double();
         }
 
         double eval(expr_node const& x, double def) const
