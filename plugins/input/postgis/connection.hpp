@@ -85,7 +85,7 @@ public:
 
         PGresult *result = PQexec(conn_, sql.c_str());
         bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
-        PQclear(result);
+        if ( result ) PQclear(result);
         return ok;
     }
 
