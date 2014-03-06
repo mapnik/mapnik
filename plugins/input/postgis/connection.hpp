@@ -127,7 +127,8 @@ public:
         std::string status;
         if (conn_)
         {
-            status = PQerrorMessage(conn_);
+            if ( isOK() ) return PQerrorMessage(conn_);
+            else return "Bad connection";
         }
         else
         {
