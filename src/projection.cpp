@@ -108,7 +108,10 @@ void projection::init_proj4() const
         proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
         if (!proj_)
         {
-            if (proj_ctx_) pj_ctx_free(proj_ctx_);
+            if (proj_ctx_) {
+                pj_ctx_free(proj_ctx_);
+                proj_ctx_ = 0;
+            }
             throw proj_init_error(params_);
         }
 #else
