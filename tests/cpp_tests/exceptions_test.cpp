@@ -31,11 +31,22 @@ int main(int argc, char** argv)
     }
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
+    BOOST_TEST(set_working_dir(args));
     try {
-        BOOST_TEST(set_working_dir(args));
         mapnik::projection srs("foo");
         // to avoid unused variable warning
         srs.params();
+        BOOST_TEST(false);
+    } catch (...) {
+        BOOST_TEST(true);
+    }
+
+    // https://github.com/mapnik/mapnik/issues/2170
+    try {
+        BOOST_TEST(set_working_dir(args));
+        mapnik::projection srs("+proj=longlat foo",true);
+        BOOST_TEST(srs.is_geographic());
+        srs.init_proj4();
         BOOST_TEST(false);
     } catch (...) {
         BOOST_TEST(true);
