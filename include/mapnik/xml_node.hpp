@@ -114,7 +114,7 @@ public:
     boost::optional<T> get_opt_attr(std::string const& name) const;
 
     template <typename T>
-    T get_attr(std::string const& name, T const& default_value) const;
+    T get_attr(std::string const& name, T const& default_opt_value) const;
     template <typename T>
     T get_attr(std::string const& name) const;
 
