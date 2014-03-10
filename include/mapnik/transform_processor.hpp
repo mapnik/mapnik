@@ -107,8 +107,12 @@ struct transform_processor
 
     struct node_evaluator : boost::static_visitor<void>
     {
-        node_evaluator(transform_type& tr, feature_type const& feat)
-            : transform_(tr), feature_(feat) {}
+        node_evaluator(transform_type& tr,
+                       feature_type const& feat,
+                       double scale_factor)
+            : transform_(tr),
+              feature_(feat),
+              scale_factor_(scale_factor) {}
 
         void operator() (identity_node const& node)
         {
@@ -117,26 +121,26 @@ struct transform_processor
 
         void operator() (matrix_node const& node)
         {
-            double a = eval(node.a_);
+            double a = eval(node.a_) * scale_factor_; // scale x;
             double b = eval(node.b_);
             double c = eval(node.c_);
-            double d = eval(node.d_);
-            double e = eval(node.e_);
-            double f = eval(node.f_);
+            double d = eval(node.d_) * scale_factor_; // scale y;
+            double e = eval(node.e_) * scale_factor_; // translate x
+            double f = eval(node.f_) * scale_factor_; // translate y
             transform_.multiply(agg::trans_affine(a, b, c, d, e, f));
         }
 
         void operator() (translate_node const& node)
         {
-            double tx = eval(node.tx_);
-            double ty = eval(node.ty_, 0.0);
+            double tx = eval(node.tx_) * scale_factor_;
+            double ty = eval(node.ty_, 0.0) * scale_factor_;
             transform_.translate(tx, ty);
         }
 
         void operator() (scale_node const& node)
         {
-            double sx = eval(node.sx_);
-            double sy = eval(node.sy_, sx);
+            double sx = eval(node.sx_) * scale_factor_;
+            double sy = eval(node.sy_, sx) * scale_factor_;
             transform_.scale(sx, sy);
         }
 
@@ -182,6 +186,7 @@ struct transform_processor
 
         transform_type& transform_;
         feature_type const& feature_;
+        double scale_factor_;
     };
 
     template <typename Container>
@@ -197,9 +202,9 @@ struct transform_processor
     }
 
     static void evaluate(transform_type& tr, feature_type const& feat,
-                         transform_list const& list)
+                         transform_list const& list, double scale_factor)
     {
-        node_evaluator eval(tr, feat);
+        node_evaluator eval(tr, feat, scale_factor);
 
         #ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(transform) << "transform: begin with " << to_string(matrix_node(tr));

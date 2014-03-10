@@ -72,7 +72,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (geom_transform) evaluate_transform(tr, feature, *geom_transform);
+    if (geom_transform) evaluate_transform(tr, feature, *geom_transform, common_.scale_factor_);
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,

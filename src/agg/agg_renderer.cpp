@@ -215,31 +215,48 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
 
     if (style_level_compositing_)
     {
-        int radius = 0;
-        mapnik::filter::filter_radius_visitor visitor(radius);
-        for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
+        if (st.image_filters_inflate())
         {
-            boost::apply_visitor(visitor, filter_tag);
-        }
-        if (radius > common_.t_.offset())
-        {
-            common_.t_.set_offset(radius);
-        }
-        int offset = common_.t_.offset();
-        unsigned target_width = common_.width_;
-        unsigned target_height = common_.height_;
-        target_width = common_.width_ + (offset * 2);
-        target_height = common_.height_ + (offset * 2);
-        ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
-        if (!internal_buffer_ ||
-           (internal_buffer_->width() < target_width ||
-            internal_buffer_->height() < target_height))
-        {
-            internal_buffer_ = std::make_shared<buffer_type>(target_width,target_height);
+            std::clog << "inflate " << common_.t_.offset() << "\n";
+            int radius = 0;
+            mapnik::filter::filter_radius_visitor visitor(radius);
+            for(mapnik::filter::filter_type const& filter_tag : st.image_filters())
+            {
+                boost::apply_visitor(visitor, filter_tag);
+            }
+            if (radius > common_.t_.offset())
+            {
+                common_.t_.set_offset(radius);
+            }
+            std::clog << "inflate " << common_.t_.offset() << "\n";
+            int offset = common_.t_.offset();
+            unsigned target_width = common_.width_ + (offset * 2);
+            unsigned target_height = common_.height_ + (offset * 2);
+            ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
+            if (!internal_buffer_ ||
+               (internal_buffer_->width() < target_width ||
+                internal_buffer_->height() < target_height))
+            {
+                internal_buffer_ = std::make_shared<buffer_type>(target_width,target_height);
+            }
+            else
+            {
+                internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+            }
         }
         else
         {
-            internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+            if (!internal_buffer_)
+            {
+                internal_buffer_ = std::make_shared<buffer_type>(common_.width_,common_.height_);
+            }
+            else
+            {
+                internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+            }
+            std::clog << "inflate " << common_.t_.offset() << "\n";
+            common_.t_.set_offset(0);
+            ras_ptr->clip_box(0,0,common_.width_,common_.height_);
         }
         current_buffer_ = internal_buffer_.get();
     }

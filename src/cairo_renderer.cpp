@@ -361,7 +361,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     }
 
     agg::trans_affine tr;
-    if (geom_transform) { evaluate_transform(tr, feature, *geom_transform); }
+    if (geom_transform) { evaluate_transform(tr, feature, *geom_transform, common_.scale_factor_); }
 
     box2d<double> clipping_extent = common_.query_extent_;
     if (clip)
@@ -721,7 +721,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     //}
 
     agg::trans_affine tr;
-    if (geom_transform) { evaluate_transform(tr, feature, *geom_transform); }
+    if (geom_transform) { evaluate_transform(tr, feature, *geom_transform, common_.scale_factor_); }
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,

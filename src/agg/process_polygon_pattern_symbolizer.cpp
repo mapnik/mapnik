@@ -156,7 +156,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, *transform);
+    if (transform) evaluate_transform(tr, feature, *transform, common_.scale_factor_);
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,

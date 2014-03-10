@@ -93,7 +93,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, *transform);
+    if (transform) evaluate_transform(tr, feature, *transform, common_.scale_factor_);
 
     box2d<double> clip_box = clipping_extent();
 

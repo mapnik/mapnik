@@ -85,7 +85,7 @@ public:
 
         PGresult *result = PQexec(conn_, sql.c_str());
         bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
-        PQclear(result);
+        if ( result ) PQclear(result);
         return ok;
     }
 
@@ -127,7 +127,8 @@ public:
         std::string status;
         if (conn_)
         {
-            status = PQerrorMessage(conn_);
+            if ( isOK() ) return PQerrorMessage(conn_);
+            else return "Bad connection";
         }
         else
         {

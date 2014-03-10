@@ -43,7 +43,8 @@ feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
     filters_(),
     direct_filters_(),
-    opacity_(1.0f)
+    opacity_(1.0f),
+    image_filters_inflate_(false)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs)
@@ -52,8 +53,9 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
-      opacity_(rhs.opacity_)
-{}
+      image_filters_inflate_(rhs.image_filters_inflate_)
+{
+}
 
 feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 {
@@ -138,5 +140,14 @@ float feature_type_style::get_opacity() const
     return opacity_;
 }
 
+void feature_type_style::set_image_filters_inflate(bool inflate)
+{
+    image_filters_inflate_ = inflate;
+}
+
+bool feature_type_style::image_filters_inflate() const
+{
+    return image_filters_inflate_;
+}
 
 }

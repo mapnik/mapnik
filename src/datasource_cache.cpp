@@ -215,7 +215,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
             {
                 if (plugins_.insert(std::make_pair(plugin->name(),plugin)).second)
                 {
-                    MAPNIK_LOG_ERROR(datasource_cache)
+                    MAPNIK_LOG_DEBUG(datasource_cache)
                             << "datasource_cache: Registered="
                             << plugin->name();
                     return true;

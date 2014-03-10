@@ -97,6 +97,10 @@ void export_style()
                       &feature_type_style::comp_op,
                       &feature_type_style::set_comp_op,
                       "Set/get the comp-op (composite operation) of the style")
+        .add_property("image_filters_inflate",
+                      &feature_type_style::image_filters_inflate,
+                      &feature_type_style::image_filters_inflate,
+                      "Set/get the image_filters_inflate property of the style")
         .add_property("image_filters",
                       get_image_filters,
                       set_image_filters,
