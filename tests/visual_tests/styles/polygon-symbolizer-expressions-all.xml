@@ -15,10 +15,12 @@
             <Filter>[id] = 'gamma'</Filter>
             <PolygonSymbolizer fill='#0000ff' gamma='[value]' />
         </Rule>
+        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
             <PolygonSymbolizer fill='#0000ff' comp-op='[value]' />
         </Rule>
+        -->
 
         <Rule>
             <TextSymbolizer face-name='DejaVu Sans Book' halo-fill='#ffffff' halo-radius='1'>[id]</TextSymbolizer>

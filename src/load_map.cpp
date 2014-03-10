@@ -942,14 +942,12 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
-        optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         point_symbolizer symbol;
         if (allow_overlap) put(symbol, keys::allow_overlap, *allow_overlap);
-        if (opacity) put(symbol, keys::opacity, *opacity);
-        if (ignore_placement) put(symbol,keys::ignore_placement, *ignore_placement);
+        set_symbolizer_property<point_symbolizer,double>(symbol, keys::opacity, sym);
+        set_symbolizer_property<point_symbolizer,boolean>(symbol, keys::ignore_placement, sym);
 
         boost::optional<point_placement_e> placement = sym.get_opt_attr<point_placement_e>("placement");
         if (placement) put(symbol, keys::point_placement_type, point_placement_enum(*placement));
@@ -1041,11 +1039,10 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         }
 
         // overall opacity to be applied to all paths
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
-        if (opacity) put(symbol, keys::opacity, *opacity);
+        set_symbolizer_property<markers_symbolizer,double>(symbol, keys::opacity, sym);
 
-        optional<double> fill_opacity = sym.get_opt_attr<double>("fill-opacity");
-        if (fill_opacity) put(symbol, keys::fill_opacity,*fill_opacity);
+        // fill opacity
+        set_symbolizer_property<markers_symbolizer,double>(symbol, keys::fill_opacity, sym);
 
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
@@ -1070,8 +1067,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         if (allow_overlap) put(symbol, keys::allow_overlap, *allow_overlap);
 
-        optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
-        if (ignore_placement) put(symbol, keys::ignore_placement, *ignore_placement);
+        set_symbolizer_property<markers_symbolizer,boolean>(symbol, keys::ignore_placement, sym);
 
         optional<expression_ptr> width = sym.get_opt_attr<expression_ptr>("width");
         if (width) put(symbol, keys::width, *width );
@@ -1170,8 +1166,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         if (p_alignment) put(symbol, keys::alignment, pattern_alignment_enum(*p_alignment));
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
-        if (opacity) put(symbol, keys::opacity, *opacity);
+        set_symbolizer_property<polygon_pattern_symbolizer,double>(symbol, keys::opacity, sym);
 
         // gamma
         optional<double> gamma = sym.get_opt_attr<double>("gamma");
@@ -1277,12 +1272,10 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         if (shield_dy) put(shield_symbol, keys::shield_dy, *shield_dy);
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
-        if (opacity) put(shield_symbol, keys::opacity , *opacity);
+        set_symbolizer_property<shield_symbolizer,double>(shield_symbol, keys::opacity, sym);
 
         // text-opacity
-        optional<double> text_opacity = sym.get_opt_attr<double>("text-opacity");
-        if (text_opacity) put(shield_symbol, keys::text_opacity, *text_opacity);
+        set_symbolizer_property<shield_symbolizer,double>(shield_symbol, keys::text_opacity, sym);
 
         // unlock_image
         optional<boolean> unlock_image = sym.get_opt_attr<boolean>("unlock-image");
@@ -1454,8 +1447,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
         optional<color> fill = sym.get_opt_attr<color>("fill");
         if (fill) put(building_sym, keys::fill, *fill);
         // fill-opacity
-        optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
-        if (opacity) put(building_sym, keys::fill_opacity, *opacity);
+        set_symbolizer_property<building_symbolizer,double>(building_sym, keys::fill_opacity, sym);
         // height
         optional<expression_ptr> height = sym.get_opt_attr<expression_ptr>("height");
         if (height) put(building_sym, keys::height, *height);

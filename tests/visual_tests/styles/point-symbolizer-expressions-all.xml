@@ -7,26 +7,30 @@
             <Filter>[id] = 'file'</Filter>
             <PointSymbolizer file="[value]" />
         </Rule>
+        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'allow-overlap'</Filter>
             <PointSymbolizer allow-overlap="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
+        -->
         <Rule>
             <Filter>[id] = 'opacity'</Filter>
             <PointSymbolizer opacity="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
         <Rule>
             <Filter>[id] = 'transform'</Filter>
-            <PointSymbolizer transform="[value]" file="../../data/images/crosshair16x16.png" />
+            <PointSymbolizer transform="scale([value],[value])" file="../../data/images/crosshair16x16.png" />
         </Rule>
         <Rule>
             <Filter>[id] = 'ignore-placement'</Filter>
             <PointSymbolizer ignore-placement="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
+        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
             <PointSymbolizer comp-op="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
+        -->
 
         <Rule>
             <TextSymbolizer dy='-16' face-name='DejaVu Sans Book' halo-fill='#ffffff' halo-radius='1'>[id]</TextSymbolizer>
@@ -69,11 +73,11 @@ Polygon((-180.0 -125.0, -180.0 125.0, 180.0 125.0, 180.0 -125.0, -180.0 -125.0))
             <Parameter name="inline">
 id|value|wkt
 file|../../data/images/crosshair16x16.png|Point(-130 -70)
-allow-overlap|../../data/images/crosshair16x16.png|Point(0 -70)
-opacity|../../data/images/crosshair16x16.png|Point(130 -70)
-transform|../../data/images/crosshair16x16.png|Point(-130 30)
-ignore-placement|../../data/images/crosshair16x16.png|Point(0 30)
-comp-op|../../data/images/crosshair16x16.png|Point(130 30)
+allow-overlap|true|Point(0 -70)
+opacity|.5|Point(130 -70)
+transform|1.2|Point(-130 30)
+ignore-placement|true|Point(0 30)
+comp-op|src_over|Point(130 30)
             </Parameter>
         </Datasource>
     </Layer>

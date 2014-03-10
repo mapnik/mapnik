@@ -19,6 +19,7 @@
             <Filter>[id] = 'offset'</Filter>
             <LineSymbolizer stroke-width='5' stroke='#ff0000' offset="[value]" />
         </Rule>
+        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'stroke-dasharray'</Filter>
             <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-dasharray="[value]" />
@@ -35,6 +36,7 @@
             <Filter>[id] = 'comp-op'</Filter>
             <LineSymbolizer stroke-width='5' stroke='#ff0000' comp-op="[value]" />
         </Rule>
+        -->
 
         <Rule>
             <TextSymbolizer face-name='DejaVu Sans Book' dy='-5'>[id]</TextSymbolizer>
