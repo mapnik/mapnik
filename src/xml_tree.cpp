@@ -109,7 +109,7 @@ xml_tree::xml_tree(std::string const& encoding)
     node_.set_processed(true); //root node is always processed
 }
 
-void xml_tree::set_filename(std::string fn)
+void xml_tree::set_filename(std::string const& fn)
 {
     file_ = fn;
 }

@@ -43,7 +43,7 @@ class xml_tree
 {
 public:
     xml_tree(std::string const& encoding="utf8");
-    void set_filename(std::string fn);
+    void set_filename(std::string const& fn);
     std::string const& filename() const;
     xml_node &root();
     xml_node const& root() const;
