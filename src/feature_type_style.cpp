@@ -40,11 +40,13 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 
 feature_type_style::feature_type_style()
-: filter_mode_(FILTER_ALL),
-    filters_(),
-    direct_filters_(),
-    opacity_(1.0f),
-    image_filters_inflate_(false)
+    : rules_(),
+      filter_mode_(FILTER_ALL),
+      filters_(),
+      direct_filters_(),
+      comp_op_(),
+      opacity_(1.0f),
+      image_filters_inflate_(false)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs)
@@ -53,6 +55,7 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
+      opacity_(rhs.opacity_),
       image_filters_inflate_(rhs.image_filters_inflate_)
 {
 }
