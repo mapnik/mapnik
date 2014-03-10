@@ -114,7 +114,7 @@ struct converter_traits<T,mapnik::simplify_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         auto const& feat = boost::fusion::at_c<6>(args);
-        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(sym,keys::simplify_algorithm, feat)));
+        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(sym, keys::simplify_algorithm, feat)));
         geom.set_simplify_tolerance(get<value_double>(sym, keys::simplify_tolerance, feat));
     }
 };
@@ -167,11 +167,11 @@ struct converter_traits<T, mapnik::stroke_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         auto const& feat = boost::fusion::at_c<6>(args);
-        set_join_caps(sym, geom);
+        set_join_caps(sym, geom, feat);
         double miterlimit = get<value_double>(sym, keys::stroke_miterlimit, feat, 4.0);
-        double width = get<value_double>(sym, keys::stroke_width, feat, 1.0);
         geom.generator().miter_limit(miterlimit);
         double scale_factor = boost::fusion::at_c<7>(args);
+        double width = get<value_double>(sym, keys::stroke_width, feat, 1.0);
         geom.generator().width(width * scale_factor);
     }
 };

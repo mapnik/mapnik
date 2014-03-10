@@ -133,7 +133,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         renderer_type ren(renb, profile);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
         rasterizer_type ras(ren);
-        set_join_caps_aa(sym , ras, feature);
+        set_join_caps_aa(sym, ras, feature);
 
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
