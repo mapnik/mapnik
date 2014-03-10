@@ -1216,6 +1216,7 @@ if not preconfigured:
             temp_env = env.Clone()
             temp_env['LIBS'] = []
             try:
+                # TODO - freetype-config accepts --static as of v2.5.3
                 temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
                 if 'bz2' in temp_env['LIBS']:
                     env['EXTRA_FREETYPE_LIBS'].append('bz2')
