@@ -36,7 +36,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
 {
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, *transform);
+    if (transform) evaluate_transform(tr, feature, *transform, common.scale_factor_);
 
     bool clip = get<value_bool>(sym, keys::clip, feature, true);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, 0.0);

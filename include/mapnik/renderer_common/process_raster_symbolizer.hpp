@@ -24,9 +24,6 @@
 #define MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP
 
 // agg
-#include "agg_conv_clip_polyline.h"
-#include "agg_conv_clip_polygon.h"
-#include "agg_conv_smooth_poly1.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 

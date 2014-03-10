@@ -217,7 +217,6 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
     {
         if (st.image_filters_inflate())
         {
-            std::clog << "inflate " << common_.t_.offset() << "\n";
             int radius = 0;
             mapnik::filter::filter_radius_visitor visitor(radius);
             for(mapnik::filter::filter_type const& filter_tag : st.image_filters())
@@ -228,7 +227,6 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             {
                 common_.t_.set_offset(radius);
             }
-            std::clog << "inflate " << common_.t_.offset() << "\n";
             int offset = common_.t_.offset();
             unsigned target_width = common_.width_ + (offset * 2);
             unsigned target_height = common_.height_ + (offset * 2);
@@ -254,7 +252,6 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             {
                 internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
             }
-            std::clog << "inflate " << common_.t_.offset() << "\n";
             common_.t_.set_offset(0);
             ras_ptr->clip_box(0,0,common_.width_,common_.height_);
         }
