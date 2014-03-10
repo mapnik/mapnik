@@ -66,7 +66,7 @@ public:
 
         PGresult *result = PQexec(conn_, "SET DEFAULT_TRANSACTION_READ_ONLY = TRUE;");
         bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
-        PQclear(result);
+        if ( result ) PQclear(result);
         if ( ! ok ) {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
