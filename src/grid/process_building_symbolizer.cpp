@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
@@ -75,20 +76,19 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 
     for (std::size_t i=0;i<feature.num_geometries();++i)
     {
-        geometry_type & geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
         if (geom.size() > 2)
         {
-            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+            const auto frame = std::make_unique<geometry_type>(geometry_type::types::LineString);
+            const auto roof = std::make_unique<geometry_type>(geometry_type::types::Polygon);
             std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
-            unsigned cm = geom.vertex(&x0,&y0);
-            for (unsigned j=1;j<geom.size();++j)
+            double x0 = 0;
+            double y0 = 0;
+            double x,y;
+            geom.rewind(0);
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x(0);
-                double y(0);
-                cm = geom.vertex(&x,&y);
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y);
@@ -98,14 +98,17 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
+                }
                 x0 = x;
                 y0 = y;
             }
             std::sort(face_segments.begin(),face_segments.end(), y_order);
             for ( auto const& seg : face_segments)
             {
-                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+                const auto faces = std::make_unique<geometry_type>(geometry_type::types::Polygon);
                 faces->move_to(std::get<0>(seg),std::get<1>(seg));
                 faces->line_to(std::get<2>(seg),std::get<3>(seg));
                 faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
@@ -122,10 +125,9 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-            for (unsigned j=0;j<geom.size();++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x,y;
-                cm = geom.vertex(&x,&y);
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y+height);
@@ -135,6 +137,11 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                 {
                     frame->line_to(x,y+height);
                     roof->line_to(x,y+height);
+                }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
+                    roof->close_path();
                 }
             }
             path_type path(t_,*frame,prj_trans);

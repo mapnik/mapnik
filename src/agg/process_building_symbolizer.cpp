@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -91,8 +92,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
         geometry_type const& geom = feature.get_geometry(i);
         if (geom.size() > 2)
         {
-            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+            const auto frame = std::make_unique<geometry_type>(geometry_type::types::LineString);
+            const auto roof = std::make_unique<geometry_type>(geometry_type::types::Polygon);
             std::deque<segment_t> face_segments;
             double x0 = 0;
             double y0 = 0;
@@ -121,7 +122,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             std::sort(face_segments.begin(),face_segments.end(), y_order);
             for (auto const& seg : face_segments)
             {
-                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+                const auto faces = std::make_unique<geometry_type>(geometry_type::types::Polygon);
                 faces->move_to(std::get<0>(seg),std::get<1>(seg));
                 faces->line_to(std::get<2>(seg),std::get<3>(seg));
                 faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);

@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
@@ -250,7 +251,7 @@ private:
     {
         double x = read_double();
         double y = read_double();
-        std::unique_ptr<geometry_type> pt(new geometry_type(geometry_type::types::Point));
+        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
         pt->move_to(x, y);
         paths.push_back(pt.release());
     }
@@ -269,7 +270,7 @@ private:
     {
         double x = read_double();
         double y = read_double();
-        std::unique_ptr<geometry_type> pt(new geometry_type(geometry_type::types::Point));
+        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
         pos_ += 8; // double z = read_double();
         pt->move_to(x, y);
         paths.push_back(pt.release());
@@ -292,7 +293,7 @@ private:
         {
             CoordinateArray ar(num_points);
             read_coords(ar);
-            std::unique_ptr<geometry_type> line(new geometry_type(geometry_type::types::LineString));
+            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
             line->move_to(ar[0].x, ar[0].y);
             for (int i = 1; i < num_points; ++i)
             {
@@ -319,7 +320,7 @@ private:
         {
             CoordinateArray ar(num_points);
             read_coords_xyz(ar);
-            std::unique_ptr<geometry_type> line(new geometry_type(geometry_type::types::LineString));
+            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
             line->move_to(ar[0].x, ar[0].y);
             for (int i = 1; i < num_points; ++i)
             {
@@ -345,7 +346,7 @@ private:
         int num_rings = read_integer();
         if (num_rings > 0)
         {
-            std::unique_ptr<geometry_type> poly(new geometry_type(geometry_type::types::Polygon));
+            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
             for (int i = 0; i < num_rings; ++i)
             {
                 int num_points = read_integer();
@@ -381,7 +382,7 @@ private:
         int num_rings = read_integer();
         if (num_rings > 0)
         {
-            std::unique_ptr<geometry_type> poly(new geometry_type(geometry_type::types::Polygon));
+            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
             for (int i = 0; i < num_rings; ++i)
             {
                 int num_points = read_integer();

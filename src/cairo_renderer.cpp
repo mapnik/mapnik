@@ -23,6 +23,7 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>
@@ -361,8 +362,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
         if (geom.size() > 2)
         {
-            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+            const auto frame = std::make_unique<geometry_type>(geometry_type::types::LineString);
+            const auto roof = std::make_unique<geometry_type>(geometry_type::types::Polygon);
             std::deque<segment_t> face_segments;
             double x0 = 0;
             double y0 = 0;
@@ -392,7 +393,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
             for (auto const& seg : face_segments)
             {
-                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+                const auto faces = std::make_unique<geometry_type>(geometry_type::types::Polygon);
                 faces->move_to(std::get<0>(seg), std::get<1>(seg));
                 faces->line_to(std::get<2>(seg), std::get<3>(seg));
                 faces->line_to(std::get<2>(seg), std::get<3>(seg) + height);

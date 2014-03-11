@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 
@@ -165,7 +166,7 @@ webp_reader<T>::webp_reader(std::string const& filename)
     std::size_t file_size = end - beg;
     file.seekg (0, std::ios::beg);
 
-    std::unique_ptr<buffer_policy_type> buffer(new buffer_policy_type(file_size));
+    auto buffer = std::make_unique<buffer_policy_type>(file_size);
     file.read(reinterpret_cast<char*>(buffer->data()), buffer->size());
     if (!file)
     {
