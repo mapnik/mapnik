@@ -49,7 +49,7 @@
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
-const double postgis_datasource::FMAX = std::numeric_limits<double>::max();
+const double postgis_datasource::FMAX = std::numeric_limits<float>::max();
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
