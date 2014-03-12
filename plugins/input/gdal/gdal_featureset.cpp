@@ -449,9 +449,9 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                geometry_type * point = new geometry_type(mapnik::Point);
+                std::auto_ptr<geometry_type> point(new geometry_type(mapnik::Point));
                 point->move_to(pt.x, pt.y);
-                feature->add_geometry(point);
+                feature->add_geometry(point.release());
                 feature->put_new("value",value);
                 if (raster_has_nodata)
                 {
