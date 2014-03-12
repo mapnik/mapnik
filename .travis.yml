@@ -13,7 +13,7 @@ before_install:
  - sudo apt-get install -qq make libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev postgresql-server-dev*
 
 script:
- - ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True && JOBS=2 make
+ - ./configure CXX=${CXX} CC=${CC} DEBUG=True DEMO=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True && JOBS=2 make
  - make test-local
 
 notifications:
