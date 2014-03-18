@@ -2,27 +2,34 @@ language: cpp
 
 compiler:
  - gcc
+ - clang
+
+# http://about.travis-ci.org/blog/2013-11-29-postgresql-92-93-now-available/
+addons:
+  postgresql: "9.3"
 
 before_install:
  # we need at least g++-4.7 for c++11 features
- - if [ "${CXX}" = 'g++' ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi;
+ - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  # grab more recent gdal/proj
  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
  # more recent boost
  - sudo add-apt-repository -y ppa:mapnik/boost
  - sudo apt-get update -y
  # upgrade compilers
- - if [ "${CXX}" = 'g++' ]; then sudo apt-get install -y gcc-4.7 g++-4.7; fi;
- - sudo apt-get install -y make libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev postgresql-server-dev*
+ - sudo apt-get install -y gcc-4.8 g++-4.8; fi;
+ - sudo apt-get install -y make libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
  - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.24.tar.bz2
  - tar xf harfbuzz-0.9.24.tar.bz2
  - cd harfbuzz-0.9.24
  - ./configure && make && sudo make install
  - sudo ldconfig
  - cd ../
+ - createdb template_postgis
+ - psql -c "CREATE EXTENSION postgis" template_postgis
 
 install:
- - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.7" && export CC="gcc-4.7"; fi;
+ - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
  - ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True || cat config.log
  - JOBS=1 make
 
