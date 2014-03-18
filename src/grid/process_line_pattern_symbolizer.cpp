@@ -63,7 +63,6 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
     typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;

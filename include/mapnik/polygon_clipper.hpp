@@ -171,8 +171,10 @@ private:
         }
 
         polygon_2d subject_poly;
-        double x,y;
-        double prev_x, prev_y;
+        double x = 0;
+        double y = 0;
+        double prev_x = 0;
+        double prev_y = 0;
         geom_.rewind(0);
         unsigned ring_count = 0;
         while (true)
