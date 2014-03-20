@@ -610,10 +610,12 @@ def parse_config(context, config, checks='--libs --cflags'):
     if not parsed:
         if config in ('GDAL_CONFIG'):
             # optional deps...
-            env['SKIPPED_DEPS'].append(tool)
+            if tool not in env['SKIPPED_DEPS']:
+                env['SKIPPED_DEPS'].append(tool)
             conf.rollback_option(config)
         else: # freetype and libxml2, not optional
-            env['MISSING_DEPS'].append(tool)
+            if tool not in env['MISSING_DEPS']:
+                env['MISSING_DEPS'].append(tool)
     context.Result( ret )
     return ret
 
@@ -669,7 +671,8 @@ def ogr_enabled(context):
     context.Message( 'Checking if gdal is ogr enabled... ')
     ret = context.TryAction('%s --ogr-enabled' % env['GDAL_CONFIG'])[0]
     if not ret:
-        env['SKIPPED_DEPS'].append('ogr')
+        if 'ogr' not in env['SKIPPED_DEPS']:
+            env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
 
@@ -1385,18 +1388,17 @@ if not preconfigured:
                     conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
                     if conf.ogr_enabled():
-                        if not 'gdal' in env['REQUESTED_PLUGINS']:
-                            conf.parse_config('GDAL_CONFIG',checks='--libs')
+                        if conf.parse_config('GDAL_CONFIG',checks='--libs'):
                             conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                        libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
-                        if libname:
-                            if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
-                                if 'gdal' not in env['SKIPPED_DEPS']:
-                                    env['SKIPPED_DEPS'].append('gdal')
-                                if libname in env['LIBS']:
-                                     env['LIBS'].remove(libname)
-                            else:
-                                details['lib'] = libname
+                            libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
+                            if libname:
+                                if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                                    if 'gdal' not in env['SKIPPED_DEPS']:
+                                        env['SKIPPED_DEPS'].append('gdal')
+                                    if libname in env['LIBS']:
+                                         env['LIBS'].remove(libname)
+                                else:
+                                    details['lib'] = libname
                 elif details['path'] and details['lib'] and details['inc']:
                     backup = env.Clone().Dictionary()
                     # Note, the 'delete_existing' keyword makes sure that these paths are prepended
