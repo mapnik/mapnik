@@ -445,10 +445,19 @@ postgis_datasource::~postgis_datasource()
         CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
         if (pool)
         {
-            shared_ptr<Connection> conn = pool->borrowObject();
-            if (conn)
-            {
-                conn->close();
+            try {
+              shared_ptr<Connection> conn = pool->borrowObject();
+              if (conn)
+              {
+                  conn->close();
+              }
+            } catch (mapnik::datasource_exception const& ex) {
+              // happens when borrowObject tries to
+              // create a new connection and fails.
+              // In turn, new connection would be needed
+              // when our broke and was thus no good to
+              // be borrowed
+              // See https://github.com/mapnik/mapnik/issues/2191
             }
         }
     }
