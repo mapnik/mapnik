@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- AGG renderer: increased `vertex_dist_epsilon` to ensure nearly coincident points are discarded more readily (#2196)
+
 - GDAL plugin: Added back support for user driven `nodata` on rgb(a) images (#2023)
 
 - GDAL plugin: Allowed nodata to override alpha band if set on rgba images (#2023)
