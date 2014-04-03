@@ -53,6 +53,10 @@
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/feature_factory.hpp>
+#include <mapnik/attribute_collector.hpp>
+#include <mapnik/group/group_layout_manager.hpp>
+#include <mapnik/group/group_symbolizer_helper.hpp>
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
@@ -60,7 +64,7 @@
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
-
+#include <mapnik/renderer_common/process_group_symbolizer.hpp>
 // cairo
 #include <cairo.h>
 #include <cairo-ft.h>
@@ -1005,6 +1009,156 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     for (glyph_positions_ptr glyphs : placements)
     {
         context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
+    }
+}
+
+namespace {
+
+/**
+ * Render a thunk which was frozen from a previous call to 
+ * extract_bboxes. We should now have a new offset at which
+ * to render it, and the boxes themselves should already be
+ * in the detector from the placement_finder.
+ */
+struct thunk_renderer : public boost::static_visitor<>
+{
+    typedef cairo_renderer_base renderer_type;
+
+    thunk_renderer(renderer_type &ren,
+                   cairo_context &context,
+                   cairo_face_manager &face_manager,
+                   renderer_common &common,
+                   pixel_position const &offset)
+        : ren_(ren), context_(context), face_manager_(face_manager),
+          common_(common), offset_(offset)
+    {}
+
+    void operator()(point_render_thunk const &thunk) const
+    {
+        pixel_position new_pos(thunk.pos_.x + offset_.x, thunk.pos_.y + offset_.y);
+        ren_.render_marker(new_pos, *thunk.marker_, thunk.tr_, thunk.opacity_,
+                           thunk.comp_op_);
+    }
+
+    void operator()(text_render_thunk const &thunk) const
+    {
+        cairo_save_restore guard(context_);
+        context_.set_operator(thunk.comp_op_);
+
+        render_offset_placements(
+            thunk.placements_,
+            offset_,
+            [&] (glyph_positions_ptr glyphs)
+            {
+                if (glyphs->marker())
+                {
+                    ren_.render_marker(glyphs->marker_pos(),
+                                       *(glyphs->marker()->marker),
+                                       glyphs->marker()->transform,
+                                       thunk.opacity_, thunk.comp_op_);
+                }
+                context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
+            });
+    }
+
+    template <typename T>
+    void operator()(T const &) const
+    {
+        // TODO: warning if unimplemented?
+    }
+
+private:
+    renderer_type &ren_;
+    cairo_context &context_;
+    cairo_face_manager &face_manager_;
+    renderer_common &common_;
+    pixel_position offset_;
+};
+
+} // anonymous namespace
+
+void cairo_renderer_base::process(group_symbolizer const& sym,
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
+{
+    render_group_symbolizer(
+        sym, feature, prj_trans, common_.query_extent_, common_,
+        [&](render_thunk_list const& thunks, pixel_position const& render_offset)
+        {
+            thunk_renderer ren(*this, context_, face_manager_, common_, render_offset);
+            for (render_thunk_ptr const& thunk : thunks)
+            {
+                boost::apply_visitor(ren, *thunk);
+            }
+        });
+}
+
+namespace {
+
+// special implementation of the box drawing so that it's pixel-aligned
+void render_debug_box(cairo_context &context, box2d<double> const& b)
+{
+    cairo_save_restore guard(context);
+    double minx = std::floor(b.minx()) + 0.5;
+    double miny = std::floor(b.miny()) + 0.5;
+    double maxx = std::floor(b.maxx()) + 0.5;
+    double maxy = std::floor(b.maxy()) + 0.5;
+    context.move_to(minx, miny);
+    context.line_to(minx, maxy);
+    context.line_to(maxx, maxy);
+    context.line_to(maxx, miny);
+    context.close_path();
+    context.stroke();
+}
+
+} // anonymous namespace
+
+void cairo_renderer_base::process(debug_symbolizer const& sym,
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
+{
+    typedef label_collision_detector4 detector_type;
+    cairo_save_restore guard(context_);
+
+    debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, DEBUG_SYM_MODE_COLLISION);
+
+    context_.set_operator(src_over);
+    context_.set_color(mapnik::color(255, 0, 0), 1.0);
+    context_.set_line_join(MITER_JOIN);
+    context_.set_line_cap(BUTT_CAP);
+    context_.set_miter_limit(4.0);
+    context_.set_line_width(1.0);
+
+    if (mode == DEBUG_SYM_MODE_COLLISION)
+    {
+        typename detector_type::query_iterator itr = common_.detector_->begin();
+        typename detector_type::query_iterator end = common_.detector_->end();
+        for ( ;itr!=end; ++itr)
+        {
+            render_debug_box(context_, itr->box);
+        }
+    }
+    else if (mode == DEBUG_SYM_MODE_VERTEX)
+    {
+        for (auto const& geom : feature.paths())
+        {
+            double x;
+            double y;
+            double z = 0;
+            geom.rewind(0);
+            unsigned cmd = 1;
+            while ((cmd = geom.vertex(&x, &y)) != mapnik::SEG_END)
+            {
+                if (cmd == SEG_CLOSE) continue;
+                prj_trans.backward(x,y,z);
+                common_.t_.forward(&x,&y);
+                context_.move_to(std::floor(x) - 0.5, std::floor(y) + 0.5);
+                context_.line_to(std::floor(x) + 1.5, std::floor(y) + 0.5);
+                context_.move_to(std::floor(x) + 0.5, std::floor(y) - 0.5);
+                context_.line_to(std::floor(x) + 0.5, std::floor(y) + 1.5);
+                context_.stroke();
+            }
+        }
     }
 }
 

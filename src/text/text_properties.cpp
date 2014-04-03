@@ -138,7 +138,7 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
     return tree_;
 }
 
-void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const & fontsets)
+void text_symbolizer_properties::placement_properties_from_xml(xml_node const &sym)
 {
     optional<label_placement_e> placement_ = sym.get_opt_attr<label_placement_e>("placement");
     if (placement_) label_placement = *placement_;
@@ -163,6 +163,12 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (allow_overlap_) allow_overlap = *allow_overlap_;
     optional<boolean> largest_bbox_only_ = sym.get_opt_attr<boolean>("largest-bbox-only");
     if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
+}
+
+void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const & fontsets)
+{
+    placement_properties_from_xml(sym);
+
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
     optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");

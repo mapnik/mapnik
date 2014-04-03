@@ -233,6 +233,10 @@ files = {
     'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'group-symbolizer-1':{'sizes':[(512,512)]},
+    'group-symbolizer-2':{'sizes':[(512,512)]},
+    'group-symbolizer-line-1':{'sizes':[(512,512)]},
+    'group-symbolizer-line-2':{'sizes':[(512,512)]}
     }
 
 class Reporting:

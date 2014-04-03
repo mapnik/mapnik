@@ -233,10 +233,14 @@ source = Split(
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/simple.cpp
+    group/group_layout_manager.cpp
+    group/group_rule.cpp
+    group/group_symbolizer_helper.cpp
     xml_tree.cpp
     config_error.cpp
     color_factory.cpp
     renderer_common.cpp
+    renderer_common/process_group_symbolizer.cpp
     """
     )
 
@@ -297,6 +301,7 @@ source += Split(
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
+    agg/process_group_symbolizer.cpp
     agg/process_debug_symbolizer.cpp
     """
     )
@@ -326,6 +331,7 @@ if env['GRID_RENDERER']:
         grid/process_raster_symbolizer.cpp
         grid/process_shield_symbolizer.cpp
         grid/process_text_symbolizer.cpp
+        grid/process_group_symbolizer.cpp
         """)
     lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
     libmapnik_defines.append('-DGRID_RENDERER')
@@ -348,6 +354,7 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/process_raster_symbolizer.cpp
     svg/output/process_shield_symbolizer.cpp
     svg/output/process_text_symbolizer.cpp
+    svg/output/process_group_symbolizer.cpp
     """)
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')

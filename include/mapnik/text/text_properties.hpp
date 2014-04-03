@@ -165,6 +165,8 @@ class text_layout;
 struct MAPNIK_DECL text_symbolizer_properties
 {
     text_symbolizer_properties();
+    /** Load only placement related values from XML ptree. */
+    void placement_properties_from_xml(xml_node const &sym);
     /** Load all values from XML ptree. */
     void from_xml(xml_node const &sym, fontset_map const & fontsets);
     /** Save all values to XML ptree (but does not create a new parent node!). */

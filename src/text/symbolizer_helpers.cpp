@@ -40,22 +40,148 @@
 
 namespace mapnik {
 
-template <typename FaceManagerT, typename DetectorT>
-text_symbolizer_helper::text_symbolizer_helper(const text_symbolizer &sym, const feature_impl &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
+base_symbolizer_helper::base_symbolizer_helper(
+        const symbolizer_base &sym, const feature_impl &feature,
+        const proj_transform &prj_trans,
+        unsigned width, unsigned height, double scale_factor,
+        const CoordTransform &t, const box2d<double> &query_extent)
     : sym_(sym),
       feature_(feature),
       prj_trans_(prj_trans),
       t_(t),
       dims_(0, 0, width, height),
       query_extent_(query_extent),
-      points_on_line_(false),
-      placement_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
-      finder_(feature, detector, dims_, placement_, font_manager, scale_factor)
+      scale_factor_(scale_factor),
+      clipped_(mapnik::get<bool>(sym_, keys::clip, feature_, true /*TODO*/)),
+      placement_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return;
-    finder_.next_position();
     initialize_points();
+}
+
+struct largest_bbox_first
+{
+    bool operator() (geometry_type const* g0, geometry_type const* g1) const
+    {
+        box2d<double> b0 = g0->envelope();
+        box2d<double> b1 = g1->envelope();
+        return b0.width()*b0.height() > b1.width()*b1.height();
+    }
+
+};
+
+void base_symbolizer_helper::initialize_geometries()
+{
+    // FIXME
+    bool largest_box_only = false;//get<value_bool>(sym_, keys::largest_box_only);
+    double minimum_path_length = 0; // get<value_double>(sym_, keys::minimum_path_length);
+    for ( auto const& geom :  feature_.paths())
+    {
+        // don't bother with empty geometries
+        if (geom.size() == 0) continue;
+        mapnik::geometry_type::types type = geom.type();
+        if (type == geometry_type::types::Polygon)
+        {
+            if (minimum_path_length > 0)
+            {
+                box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
+                if (gbox.width() < minimum_path_length)
+                {
+                    continue;
+                }
+            }
+        }
+        // TODO - calculate length here as well
+        geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
+    }
+
+    if (largest_box_only)
+    {
+        geometries_to_process_.sort(largest_bbox_first());
+        geo_itr_ = geometries_to_process_.begin();
+        geometries_to_process_.erase(++geo_itr_,geometries_to_process_.end());
+    }
+    geo_itr_ = geometries_to_process_.begin();
+}
+
+void base_symbolizer_helper::initialize_points()
+{
+    label_placement_enum how_placed = placement_->properties.label_placement;
+    if (how_placed == LINE_PLACEMENT)
+    {
+        point_placement_ = false;
+        return;
+    }
+    else
+    {
+        point_placement_ = true;
+    }
+
+    double label_x=0.0;
+    double label_y=0.0;
+    double z=0.0;
+
+    std::list<geometry_type*>::const_iterator itr = geometries_to_process_.begin();
+    std::list<geometry_type*>::const_iterator end = geometries_to_process_.end();
+    for (; itr != end; itr++)
+    {
+        geometry_type const& geom = **itr;
+        if (how_placed == VERTEX_PLACEMENT)
+        {
+            geom.rewind(0);
+            for(unsigned i = 0; i < geom.size(); i++)
+            {
+                geom.vertex(&label_x, &label_y);
+                prj_trans_.backward(label_x, label_y, z);
+                t_.forward(&label_x, &label_y);
+                points_.push_back(pixel_position(label_x, label_y));
+            }
+        }
+        else
+        {
+            // https://github.com/mapnik/mapnik/issues/1423
+            bool success = false;
+            // https://github.com/mapnik/mapnik/issues/1350
+            if (geom.type() == geometry_type::types::LineString)
+            {
+                success = label::middle_point(geom, label_x,label_y);
+            }
+            else if (how_placed == POINT_PLACEMENT)
+            {
+                success = label::centroid(geom, label_x, label_y);
+            }
+            else if (how_placed == INTERIOR_PLACEMENT)
+            {
+                success = label::interior_position(geom, label_x, label_y);
+            }
+            else
+            {
+                MAPNIK_LOG_ERROR(symbolizer_helpers) << "ERROR: Unknown placement type in initialize_points()";
+            }
+            if (success)
+            {
+                prj_trans_.backward(label_x, label_y, z);
+                t_.forward(&label_x, &label_y);
+                points_.push_back(pixel_position(label_x, label_y));
+            }
+        }
+    }
+    point_itr_ = points_.begin();
+}
+
+template <typename FaceManagerT, typename DetectorT>
+text_symbolizer_helper::text_symbolizer_helper(
+        const text_symbolizer &sym, const feature_impl &feature,
+        const proj_transform &prj_trans,
+        unsigned width, unsigned height, double scale_factor,
+        const CoordTransform &t, FaceManagerT &font_manager,
+        DetectorT &detector, const box2d<double> &query_extent)
+    : base_symbolizer_helper(sym, feature, prj_trans, width, height, scale_factor, t, query_extent),
+      finder_(feature, detector, dims_, placement_, font_manager, scale_factor),
+      points_on_line_(false)
+{
+    if (geometries_to_process_.size()) finder_.next_position();
 }
 
 placements_list const& text_symbolizer_helper::get()
@@ -66,7 +192,7 @@ placements_list const& text_symbolizer_helper::get()
     }
     else
     {
-        while (next_line_placement(mapnik::get<bool>(sym_, keys::clip, feature_, true /*TODO*/)));
+        while (next_line_placement(clipped_));
     }
     return finder_.placements();
 }
@@ -137,116 +263,6 @@ bool text_symbolizer_helper::next_point_placement()
     return false;
 }
 
-struct largest_bbox_first
-{
-    bool operator() (geometry_type const* g0, geometry_type const* g1) const
-    {
-        box2d<double> b0 = g0->envelope();
-        box2d<double> b1 = g1->envelope();
-        return b0.width()*b0.height() > b1.width()*b1.height();
-    }
-
-};
-
-void text_symbolizer_helper::initialize_geometries()
-{
-    // FIXME
-    bool largest_box_only = false;//get<value_bool>(sym_, keys::largest_box_only);
-    double minimum_path_length = 0; // get<value_double>(sym_, keys::minimum_path_length);
-    for ( auto const& geom :  feature_.paths())
-    {
-        // don't bother with empty geometries
-        if (geom.size() == 0) continue;
-        mapnik::geometry_type::types type = geom.type();
-        if (type == geometry_type::types::Polygon)
-        {
-            if (minimum_path_length > 0)
-            {
-                box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
-                if (gbox.width() < minimum_path_length)
-                {
-                    continue;
-                }
-            }
-        }
-        // TODO - calculate length here as well
-        geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
-    }
-
-    if (largest_box_only)
-    {
-        geometries_to_process_.sort(largest_bbox_first());
-        geo_itr_ = geometries_to_process_.begin();
-        geometries_to_process_.erase(++geo_itr_,geometries_to_process_.end());
-    }
-    geo_itr_ = geometries_to_process_.begin();
-}
-
-void text_symbolizer_helper::initialize_points()
-{
-    label_placement_enum how_placed = placement_->properties.label_placement;
-    if (how_placed == LINE_PLACEMENT)
-    {
-        point_placement_ = false;
-        return;
-    }
-    else
-    {
-        point_placement_ = true;
-    }
-
-    double label_x=0.0;
-    double label_y=0.0;
-    double z=0.0;
-
-    std::list<geometry_type*>::const_iterator itr = geometries_to_process_.begin();
-    std::list<geometry_type*>::const_iterator end = geometries_to_process_.end();
-    for (; itr != end; itr++)
-    {
-        geometry_type const& geom = **itr;
-        if (how_placed == VERTEX_PLACEMENT)
-        {
-            geom.rewind(0);
-            for(unsigned i = 0; i < geom.size(); i++)
-            {
-                geom.vertex(&label_x, &label_y);
-                prj_trans_.backward(label_x, label_y, z);
-                t_.forward(&label_x, &label_y);
-                points_.push_back(pixel_position(label_x, label_y));
-            }
-        }
-        else
-        {
-            // https://github.com/mapnik/mapnik/issues/1423
-            bool success = false;
-            // https://github.com/mapnik/mapnik/issues/1350
-            if (geom.type() == geometry_type::types::LineString)
-            {
-                success = label::middle_point(geom, label_x,label_y);
-            }
-            else if (how_placed == POINT_PLACEMENT)
-            {
-                success = label::centroid(geom, label_x, label_y);
-            }
-            else if (how_placed == INTERIOR_PLACEMENT)
-            {
-                success = label::interior_position(geom, label_x, label_y);
-            }
-            else
-            {
-                MAPNIK_LOG_ERROR(symbolizer_helpers) << "ERROR: Unknown placement type in initialize_points()";
-            }
-            if (success)
-            {
-                prj_trans_.backward(label_x, label_y, z);
-                t_.forward(&label_x, &label_y);
-                points_.push_back(pixel_position(label_x, label_y));
-            }
-        }
-    }
-    point_itr_ = points_.begin();
-}
-
 /*****************************************************************************/
 
 template <typename FaceManagerT, typename DetectorT>
@@ -256,21 +272,15 @@ text_symbolizer_helper::text_symbolizer_helper(
         unsigned width, unsigned height, double scale_factor,
         const CoordTransform &t, FaceManagerT &font_manager,
         DetectorT &detector, const box2d<double> &query_extent)
-    : sym_(sym),
-      feature_(feature),
-      prj_trans_(prj_trans),
-      t_(t),
-      dims_(0, 0, width, height),
-      query_extent_(query_extent),
-      points_on_line_(true),
-      placement_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
-      finder_(feature, detector, dims_, placement_, font_manager, scale_factor)
+    : base_symbolizer_helper(sym, feature, prj_trans, width, height, scale_factor, t, query_extent),
+      finder_(feature, detector, dims_, placement_, font_manager, scale_factor),
+      points_on_line_(true)
 {
-    initialize_geometries();
-    if (!geometries_to_process_.size()) return;
-    finder_.next_position();
-    initialize_points();
-    init_marker();
+    if (geometries_to_process_.size())
+    {
+        init_marker();
+        finder_.next_position();
+    }
 }
 
 
@@ -315,6 +325,8 @@ void text_symbolizer_helper::init_marker()
     marker_displacement.set(shield_dx,shield_dy);
     finder_.set_marker(std::make_shared<marker_info>(m, trans), bbox, unlock_image, marker_displacement);
 }
+
+/*****************************************************************************/
 
 template text_symbolizer_helper::text_symbolizer_helper(const text_symbolizer &sym,
     const feature_impl &feature,

@@ -300,6 +300,22 @@ def test_building_symbolizer_init():
     eq_(p.fill_opacity, 1)
     eq_(p.height,None)
 
+def test_group_symbolizer_init():
+    s = mapnik.GroupSymbolizer()
+
+    p = mapnik.GroupSymbolizerProperties()
+
+    l = mapnik.PairLayout()
+    l.item_margin = 5.0
+    p.set_layout(l)
+
+    r = mapnik.GroupRule(mapnik.Expression("[name%1]"))
+    r.append(mapnik.PointSymbolizer())
+    p.add_rule(r)
+    s.symbolizer_properties = p
+
+    eq_(s.comp_op,mapnik.CompositeOp.src_over)
+
 def test_stroke_init():
     s = mapnik.Stroke()
 

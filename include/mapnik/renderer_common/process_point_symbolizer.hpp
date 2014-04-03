@@ -23,6 +23,10 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP
 
+#include <mapnik/geom_util.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/marker_cache.hpp>
+
 namespace mapnik {
 
 template <typename F>

@@ -33,10 +33,52 @@
 
 namespace mapnik {
 
+class base_symbolizer_helper
+{
+public:
+    base_symbolizer_helper(symbolizer_base const& sym,
+                           feature_impl const& feature,
+                           proj_transform const& prj_trans,
+                           unsigned width,
+                           unsigned height,
+                           double scale_factor,
+                           CoordTransform const& t,
+                           box2d<double> const& query_extent);
+
+protected:
+    void initialize_geometries();
+    void initialize_points();
+
+    //Input
+    symbolizer_base const& sym_;
+    feature_impl const& feature_;
+    proj_transform const& prj_trans_;
+    CoordTransform const& t_;
+    box2d<double> dims_;
+    box2d<double> const& query_extent_;
+    float scale_factor_;
+    bool clipped_;
+
+    //Processing
+    /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
+    /** Remaining geometries to be processed. */
+    std::list<geometry_type*> geometries_to_process_;
+    /** Remaining points to be processed. */
+    std::list<pixel_position> points_;
+    /** Geometry currently being processed. */
+    std::list<geometry_type*>::iterator geo_itr_;
+    /** Point currently being processed. */
+    std::list<pixel_position>::iterator point_itr_;
+    /** Use point placement. Otherwise line placement is used. */
+    bool point_placement_;
+
+    text_placement_info_ptr placement_;
+};
+
 /** Helper object that does all the TextSymbolizer placement finding
  * work except actually rendering the object. */
 
-class text_symbolizer_helper
+class text_symbolizer_helper : public base_symbolizer_helper
 {
 public:
     template <typename FaceManagerT, typename DetectorT>
@@ -68,33 +110,11 @@ public:
 protected:
     bool next_point_placement();
     bool next_line_placement(bool clipped);
-    void initialize_geometries();
-    void initialize_points();
 
-    //Input
-    text_symbolizer const& sym_;
-    feature_impl const& feature_;
-    proj_transform const& prj_trans_;
-    CoordTransform const& t_;
-    box2d<double> dims_;
-    box2d<double> const& query_extent_;
-    //Processing
-    /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
-    /** Remaining geometries to be processed. */
-    std::list<geometry_type*> geometries_to_process_;
-    /** Geometry currently being processed. */
-    std::list<geometry_type*>::iterator geo_itr_;
-    /** Remaining points to be processed. */
-    std::list<pixel_position> points_;
-    /** Point currently being processed. */
-    std::list<pixel_position>::iterator point_itr_;
-    /** Use point placement. Otherwise line placement is used. */
-    bool point_placement_;
+    placement_finder finder_;
+
     /** Place text at points on a line instead of following the line (used for ShieldSymbolizer) .*/
     bool points_on_line_;
-
-    text_placement_info_ptr placement_;
-    placement_finder finder_;
 
     //ShieldSymbolizer only
     void init_marker();

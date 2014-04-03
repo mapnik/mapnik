@@ -91,6 +91,10 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         [](enumeration_wrapper e) { return enumeration<point_placement_enum,point_placement_enum_MAX>(point_placement_enum(e.value)).as_string();}, property_types::target_double },
     property_meta_type{ "raster-colorizer", nullptr, nullptr, property_types::target_colorizer},
     property_meta_type{ "halo-transform", false, nullptr, property_types::target_transform },
+    property_meta_type{ "num-columns", static_cast<value_integer>(0), nullptr, property_types::target_integer},
+    property_meta_type{ "start-column", static_cast<value_integer>(1), nullptr, property_types::target_integer},
+    property_meta_type{ "repeat-key", nullptr, nullptr, property_types::target_repeat_key},
+    property_meta_type{ "symbolizer-properties", nullptr, nullptr, property_types::target_group_symbolizer_properties}
 };
 
 property_meta_type const& get_meta(mapnik::keys key)

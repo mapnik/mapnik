@@ -54,6 +54,7 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/group/group_rule.hpp>
 
 
 // boost
@@ -101,6 +102,7 @@ private:
 
     void parse_rule(feature_type_style & style, xml_node const & r);
 
+    void parse_symbolizers(rule & rule, xml_node const & node);
     void parse_point_symbolizer(rule & rule, xml_node const& sym);
     void parse_line_pattern_symbolizer(rule & rule, xml_node const& sym);
     void parse_polygon_pattern_symbolizer(rule & rule, xml_node const& sym);
@@ -111,7 +113,13 @@ private:
     void parse_building_symbolizer(rule & rule, xml_node const& sym);
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
+    void parse_group_symbolizer(rule &rule, xml_node const& sym);
     void parse_debug_symbolizer(rule & rule, xml_node const& sym);
+
+    void parse_group_rule(group_symbolizer_properties &prop, xml_node const &r);
+    void parse_simple_layout(group_symbolizer_properties &prop, xml_node const &node);
+    void parse_pair_layout(group_symbolizer_properties &prop, xml_node const &nd);
+
     bool parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     void parse_stroke(symbolizer_base & symbol, xml_node const & sym);
     void ensure_font_face(std::string const& face_name);
@@ -798,58 +806,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
             rule.set_max_scale(child->get_value<double>());
         }
 
-        for (auto const& sym_node : node)
-        {
-            switch (name2int(sym_node.name().c_str()))
-            {
-            case name2int("PointSymbolizer"):
-                parse_point_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("LinePatternSymbolizer"):
-                parse_line_pattern_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("PolygonPatternSymbolizer"):
-                parse_polygon_pattern_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("TextSymbolizer"):
-                parse_text_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("ShieldSymbolizer"):
-                parse_shield_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("LineSymbolizer"):
-                parse_line_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("PolygonSymbolizer"):
-                parse_polygon_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("BuildingSymbolizer"):
-                parse_building_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("RasterSymbolizer"):
-                parse_raster_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("MarkersSymbolizer"):
-                parse_markers_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            case name2int("DebugSymbolizer"):
-                parse_debug_symbolizer(rule, sym_node);
-                sym_node.set_processed(true);
-                break;
-            default:
-                break;
-            }
-        }
+        parse_symbolizers(rule, node);
         style.add_rule(rule);
 
     }
@@ -860,6 +817,66 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
             ex.append_context(std::string("in rule '") + name + "'", node);
         }
         throw;
+    }
+}
+
+void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
+{
+    for (auto const& sym_node : node)
+    {
+        switch (name2int(sym_node.name().c_str()))
+        {
+        case name2int("PointSymbolizer"):
+            parse_point_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("LinePatternSymbolizer"):
+            parse_line_pattern_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("PolygonPatternSymbolizer"):
+            parse_polygon_pattern_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("TextSymbolizer"):
+            parse_text_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("ShieldSymbolizer"):
+            parse_shield_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("LineSymbolizer"):
+            parse_line_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("PolygonSymbolizer"):
+            parse_polygon_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("BuildingSymbolizer"):
+            parse_building_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("RasterSymbolizer"):
+            parse_raster_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("MarkersSymbolizer"):
+            parse_markers_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("GroupSymbolizer"):
+            parse_group_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("DebugSymbolizer"):
+            parse_debug_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -1550,6 +1567,58 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
     }
 }
 
+void map_parser::parse_group_symbolizer(rule &rule, xml_node const & sym)
+{
+    try
+    {
+        group_symbolizer symbol;
+        group_symbolizer_properties_ptr prop = std::make_shared<group_symbolizer_properties>();
+
+        set_symbolizer_property<symbolizer_base, value_integer>(symbol, keys::num_columns, sym);
+        set_symbolizer_property<symbolizer_base, value_integer>(symbol, keys::start_column, sym);
+        set_symbolizer_property<symbolizer_base, expression_ptr>(symbol, keys::repeat_key, sym);
+
+        text_placements_ptr placements = std::make_shared<text_placements_dummy>();
+        placements->defaults.placement_properties_from_xml(sym);
+        put<text_placements_ptr>(symbol, keys::text_placements_, placements);
+
+        size_t layout_count = 0;
+        for (auto const& node : sym)
+        {
+            if (node.is("GroupRule"))
+            {
+                parse_group_rule(*prop, node);
+                node.set_processed(true);
+            }
+            else if (node.is("SimpleLayout"))
+            {
+                parse_simple_layout(*prop, node);
+                node.set_processed(true);
+                ++layout_count;
+            }
+            else if (node.is("PairLayout"))
+            {
+                parse_pair_layout(*prop, node);
+                node.set_processed(true);
+                ++layout_count;
+            }
+            if (layout_count > 1)
+            {
+                throw config_error("Provide only one layout for a GroupSymbolizer.");
+            }
+        }
+        put(symbol, keys::group_properties, prop);
+
+        parse_symbolizer_base(symbol, sym);
+        rule.append(symbol);
+    }
+    catch (const config_error & ex)
+    {
+        ex.append_context(sym);
+        throw;
+    }
+}
+
 void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
 {
     debug_symbolizer symbol;
@@ -1646,6 +1715,71 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         throw;
     }
     return found_stops;
+}
+
+void map_parser::parse_group_rule(group_symbolizer_properties & prop, xml_node const & node)
+{
+    try
+    {
+        rule fake_rule;
+        expression_ptr filter, repeat_key;
+
+        xml_node const *filter_child = node.get_opt_child("Filter"),
+                       *rptkey_child = node.get_opt_child("RepeatKey");
+
+        if (filter_child)
+        {
+            filter = filter_child->get_value<expression_ptr>();
+        }
+        else
+        {
+            filter = std::make_shared<mapnik::expr_node>(true);
+        }
+
+        if (rptkey_child)
+        {
+            repeat_key = rptkey_child->get_value<expression_ptr>();
+        }
+
+        group_rule_ptr rule = std::make_shared<group_rule>(filter, repeat_key);
+
+        parse_symbolizers(fake_rule, node);
+
+        for (auto const& sym : fake_rule)
+        {
+           rule->append(sym);
+        }
+
+        prop.add_rule(rule);
+     }
+     catch (const config_error & ex)
+     {
+         ex.append_context(node);
+         throw;
+     }
+}
+
+void map_parser::parse_simple_layout(group_symbolizer_properties & prop, xml_node const & node)
+{
+    simple_row_layout layout;
+
+    optional<double> item_margin = node.get_opt_attr<double>("item-margin");
+    if (item_margin) layout.set_item_margin(*item_margin);
+
+    prop.set_layout(std::move(layout));
+}
+
+void map_parser::parse_pair_layout(group_symbolizer_properties & prop, xml_node const & node)
+{
+    pair_layout layout;
+
+    optional<double> item_margin = node.get_opt_attr<double>("item-margin");
+    if (item_margin) layout.set_item_margin(*item_margin);
+
+    optional<double> max_difference = node.get_opt_attr<double>("max-difference");
+    if (max_difference) layout.set_max_difference(*max_difference);
+
+    prop.set_layout(std::move(layout));
 }
 
 void map_parser::ensure_font_face(std::string const& face_name)

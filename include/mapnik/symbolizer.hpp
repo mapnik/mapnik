@@ -37,6 +37,7 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/group/group_symbolizer_properties.hpp>
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -79,7 +80,6 @@ struct enumeration_wrapper
     }
 };
 
-
 typedef std::vector<std::pair<double,double> > dash_array;
 
 struct  MAPNIK_DECL symbolizer_base
@@ -95,7 +95,8 @@ struct  MAPNIK_DECL symbolizer_base
                            transform_type,
                            text_placements_ptr,
                            dash_array,
-                           raster_colorizer_ptr> value_type;
+                           raster_colorizer_ptr,
+                           group_symbolizer_properties_ptr> value_type;
     typedef mapnik::keys key_type;
     typedef std::map<key_type, value_type> cont_type;
     cont_type properties;
@@ -122,7 +123,9 @@ enum class property_types : std::uint8_t
     target_transform,
     target_placement,
     target_dash_array,
-    target_colorizer
+    target_colorizer,
+    target_repeat_key,
+    target_group_symbolizer_properties
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
@@ -416,6 +419,7 @@ struct MAPNIK_DECL polygon_pattern_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL markers_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL raster_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL building_symbolizer : public symbolizer_base {};
+struct MAPNIK_DECL group_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL debug_symbolizer : public symbolizer_base {};
 
 // symbolizer
@@ -429,6 +433,7 @@ typedef boost::variant<point_symbolizer,
                        text_symbolizer,
                        building_symbolizer,
                        markers_symbolizer,
+                       group_symbolizer,
                        debug_symbolizer> symbolizer;
 
 
