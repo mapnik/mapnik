@@ -40,7 +40,10 @@ plugin_env['LIBS'] = []
 if env['RUNTIME_LINK'] == 'static':
     # pkg-config is more reliable than pg_config across platforms
     cmd = 'pkg-config libpq --libs --static'
-    plugin_env.ParseConfig(cmd)
+    try:
+        plugin_env.ParseConfig(cmd)
+    except OSError, e:
+        plugin_env.Append(LIBS='pq')
 else:
     plugin_env.Append(LIBS='pq')
 
