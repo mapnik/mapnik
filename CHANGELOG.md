@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- PostGIS: Added support for rendering 3D and 4D geometries (previously silently skipped) (#44)
+
 - AGG renderer: fixed geometry offsetting to work after smoothing to produce more consistent results (#2202)
 
 - AGG renderer: increased `vertex_dist_epsilon` to ensure nearly coincident points are discarded more readily (#2196)
