@@ -21,6 +21,7 @@
 
 Import ('plugin_base')
 Import ('env')
+from copy import copy
 
 PLUGIN_NAME = 'osm'
 
@@ -37,9 +38,18 @@ plugin_sources = Split(
   """ % locals()
 )
 
+plugin_env['LIBS'] = []
+if env['RUNTIME_LINK'] == 'static':
+    # pkg-config is more reliable than pg_config across platforms
+    cmd = 'pkg-config libcurl --libs --static'
+    plugin_env.ParseConfig(cmd)
+else:
+    plugin_env.Append(LIBS='curl')
+
+plugin_env.Append(LIBS='xml2')
+
 # Link Library to Dependencies
-libraries = [ 'xml2' ]
-libraries.append('curl')
+libraries = copy(plugin_env['LIBS'])
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
