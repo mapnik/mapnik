@@ -36,9 +36,6 @@
 // boost
 #include <boost/scoped_array.hpp>
 
-// stl
-#include <cassert>
-
 extern "C"
 {
 #include <png.h>
@@ -542,11 +539,9 @@ void save_as_png8_oct(T1 & file,
             std::vector<rgb> pal;
             trees[j].setOffset( static_cast<unsigned>(palette.size()));
             trees[j].create_palette(pal);
-            assert(pal.size() <= opts.colors);
             leftovers = cols[j] - static_cast<unsigned>(pal.size());
             cols[j] = static_cast<unsigned>(pal.size());
             palette.insert(palette.begin(), pal.begin(), pal.end());
-            assert(palette.size() <= 256);
         }
     }
 
@@ -684,7 +679,6 @@ void save_as_png8_hex(T1 & file,
     //transparency values per palette index
     std::vector<mapnik::rgba> pal;
     tree.create_palette(pal);
-    assert(int(pal.size()) <= opts.colors);
     std::vector<mapnik::rgb> palette;
     std::vector<unsigned> alphaTable;
     for(unsigned i=0; i<pal.size(); i++)
