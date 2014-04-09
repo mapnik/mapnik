@@ -45,6 +45,9 @@ if env['RUNTIME_LINK'] == 'static':
     try:
         plugin_env.ParseConfig(cmd)
     except OSError, e:
+        # if this fails likely only system curl is available
+        # on OS X at least the system curl lacks a pkg-config file
+        # so static linking is not viable anyway
         plugin_env.Append(LIBS='curl')
 else:
     plugin_env.Append(LIBS='curl')
