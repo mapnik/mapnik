@@ -1026,8 +1026,7 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
                     }
                     else // geometry
                     {
-                        result.reset(mapnik::datasource::Collection);
-                        return result;
+                        g_type = "";
                     }
                 }
             }
