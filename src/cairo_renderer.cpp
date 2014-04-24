@@ -450,8 +450,10 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               offset_transform_tag, affine_transform_tag,
-                               simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+                               affine_transform_tag,
+                               simplify_tag, smooth_tag,
+                               offset_transform_tag,
+                               dash_tag, stroke_tag> conv_types;
     cairo_save_restore guard(context_);
     mapnik::stroke const& stroke_ = sym.get_stroke();
     context_.set_operator(sym.comp_op());

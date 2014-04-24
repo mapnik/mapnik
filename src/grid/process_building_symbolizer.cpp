@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/std.hpp>
 #include <mapnik/feature.hpp>
@@ -165,3 +167,5 @@ template void grid_renderer<grid>::process(building_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif

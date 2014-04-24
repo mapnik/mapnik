@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(SVG_RENDERER)
+
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
@@ -117,3 +119,5 @@ void svg_renderer<T>::end_layer_processing(layer const& lay)
 
 template class svg_renderer<std::ostream_iterator<char> >;
 }
+
+#endif

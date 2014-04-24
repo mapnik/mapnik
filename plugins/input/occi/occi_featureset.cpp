@@ -259,9 +259,9 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
         SDOPointType* sdopoint = geom->getSdo_point();
         if (sdopoint && ! sdopoint->isNull())
         {
-            geometry_type* point = new geometry_type(mapnik::geometry_type::types::Point);
+            std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
             point->move_to(sdopoint->getX(), sdopoint->getY());
-            feature->add_geometry(point);
+            feature->add_geometry(point.release());
         }
     }
     break;

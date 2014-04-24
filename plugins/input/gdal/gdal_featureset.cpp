@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
@@ -449,9 +450,9 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                geometry_type * point = new geometry_type(mapnik::geometry_type::types::Point);
+                std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
                 point->move_to(pt.x, pt.y);
-                feature->add_geometry(point);
+                feature->add_geometry(point.release());
                 feature->put_new("value",value);
                 if (raster_has_nodata)
                 {

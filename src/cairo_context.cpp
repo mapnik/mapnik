@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(HAVE_CAIRO)
+
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/text_properties.hpp>
@@ -480,3 +482,4 @@ void cairo_context::add_text(glyph_positions_ptr pos,
 }
 
 } //ns mapnik
+#endif

@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // boost
 
 
@@ -114,3 +116,6 @@ template void grid_renderer<grid>::process(polygon_pattern_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif
+

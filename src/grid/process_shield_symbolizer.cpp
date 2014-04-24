@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
@@ -65,3 +67,5 @@ template void grid_renderer<grid>::process(shield_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif

@@ -22,6 +22,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -64,9 +65,9 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         double lat = static_cast<osm_node*>(cur_item)->lat;
         double lon = static_cast<osm_node*>(cur_item)->lon;
-        geometry_type* point = new geometry_type(mapnik::geometry_type::types::Point);
+        std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
         point->move_to(lon, lat);
-        feature->add_geometry(point);
+        feature->add_geometry(point.release());
     }
     else if (dataset_->current_item_is_way())
     {
@@ -82,15 +83,12 @@ feature_ptr osm_featureset<filterT>::next()
 
         if (!cur_item) return feature_ptr();
         feature = feature_factory::create(ctx_, cur_item->id);
-        geometry_type* geom;
+        mapnik::geometry_type::types geom_type = mapnik::geometry_type::types::LineString;
         if (static_cast<osm_way*>(cur_item)->is_polygon())
         {
-            geom = new geometry_type(mapnik::geometry_type::types::Polygon);
+            geom_type = mapnik::geometry_type::types::Polygon;
         }
-        else
-        {
-            geom = new geometry_type(mapnik::geometry_type::types::LineString);
-        }
+        std::unique_ptr<geometry_type> geom = std::make_unique<geometry_type>(geom_type);
 
         geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
                       static_cast<osm_way*>(cur_item)->nodes[0]->lat);
@@ -102,7 +100,7 @@ feature_ptr osm_featureset<filterT>::next()
             geom->line_to(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
                           static_cast<osm_way*>(cur_item)->nodes[count]->lat);
         }
-        feature->add_geometry(geom);
+        feature->add_geometry(geom.release());
     }
     else
     {
