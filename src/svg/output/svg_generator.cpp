@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(SVG_RENDERER)
+
 // mapnik
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/geometry.hpp>
@@ -102,3 +104,6 @@ namespace mapnik { namespace svg {
 
     template class svg_generator<std::ostream_iterator<char> >;
     }}
+
+#endif
+

@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/debug.hpp>
@@ -147,3 +149,5 @@ void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
 template class hit_grid<mapnik::value_integer>;
 
 }
+
+#endif

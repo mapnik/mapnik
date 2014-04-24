@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(HAVE_CAIRO)
+
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/font_util.hpp>
 #include <mapnik/text_properties.hpp>
@@ -501,3 +503,5 @@ void cairo_context::add_text(text_path const& path,
 
 }
 }
+
+#endif

@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // boost
 #include <boost/foreach.hpp>
 
@@ -114,3 +116,4 @@ template void grid_renderer<grid>::process(polygon_pattern_symbolizer const&,
 
 }
 
+#endif
