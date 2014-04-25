@@ -30,8 +30,8 @@
 namespace mapnik
 {
 
-group_rule::group_rule(const expression_ptr& filter = std::make_shared<mapnik::expr_node>(true),
-                       const expression_ptr& repeat_key = expression_ptr())
+group_rule::group_rule(const expression_ptr& filter,
+                       const expression_ptr& repeat_key)
    : filter_(filter),
      repeat_key_(repeat_key)
 {

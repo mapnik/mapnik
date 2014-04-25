@@ -28,9 +28,6 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression.hpp>
 
-// boost
-#include <boost/shared_ptr.hpp>
-
 namespace mapnik
 {
 
@@ -43,7 +40,8 @@ struct group_rule
 {
    typedef std::vector<symbolizer> symbolizers;
 
-   explicit group_rule(const expression_ptr& filter, const expression_ptr& repeat_key);
+   group_rule(const expression_ptr& filter = std::make_shared<mapnik::expr_node>(true),
+              const expression_ptr& repeat_key = expression_ptr());
 
    group_rule &operator=(const group_rule &rhs);
    bool operator==(const group_rule &rhs) const;
