@@ -19,6 +19,10 @@ endif
 
 all: mapnik
 
+g: config.gypi mapnik.gyp
+	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. --generator-output=./build/ -f make
+	make -C build V=$(V) mapnik -j2
+
 install:
 	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
