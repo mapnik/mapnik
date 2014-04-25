@@ -599,17 +599,6 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> clear_cache()\n"
         );
 
-#if defined(GRID_RENDERER)
-    def("render_grid",&mapnik::render_grid,
-        ( arg("map"),
-          arg("layer"),
-          args("key")="__id__",
-          arg("resolution")=4,
-          arg("fields")=boost::python::list()
-            )
-        );
-#endif
-
     def("render_to_file",&render_to_file1,
         "\n"
         "Render Map to file using explicit image type.\n"
