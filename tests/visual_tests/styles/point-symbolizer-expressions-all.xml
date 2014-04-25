@@ -7,12 +7,10 @@
             <Filter>[id] = 'file'</Filter>
             <PointSymbolizer file="[value]" />
         </Rule>
-        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'allow-overlap'</Filter>
             <PointSymbolizer allow-overlap="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
-        -->
         <Rule>
             <Filter>[id] = 'opacity'</Filter>
             <PointSymbolizer opacity="[value]" file="../../data/images/crosshair16x16.png" />
@@ -25,12 +23,10 @@
             <Filter>[id] = 'ignore-placement'</Filter>
             <PointSymbolizer ignore-placement="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
-        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
-            <PointSymbolizer comp-op="[value]" file="../../data/images/crosshair16x16.png" />
+            <PointSymbolizer comp-op="src-over" file="../../data/images/crosshair16x16.png" />
         </Rule>
-        -->
 
         <Rule>
             <TextSymbolizer dy='-16' face-name='DejaVu Sans Book' halo-fill='#ffffff' halo-radius='1'>[id]</TextSymbolizer>

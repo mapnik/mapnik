@@ -19,24 +19,22 @@
             <Filter>[id] = 'offset'</Filter>
             <LineSymbolizer stroke-width='5' stroke='#ff0000' offset="[value]" />
         </Rule>
-        <!-- not supported as expressions yet
         <Rule>
             <Filter>[id] = 'stroke-dasharray'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-dasharray="[value]" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-dasharray="3,3" />
         </Rule>
         <Rule>
             <Filter>[id] = 'stroke-linejoin'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linejoin="[value]" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linejoin="bevel" />
         </Rule>
         <Rule>
             <Filter>[id] = 'stroke-linecap'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linecap="[value]" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linecap="round" />
         </Rule>
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' comp-op="[value]" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' comp-op="minus" />
         </Rule>
-        -->
 
         <Rule>
             <TextSymbolizer face-name='DejaVu Sans Book' dy='-5'>[id]</TextSymbolizer>
