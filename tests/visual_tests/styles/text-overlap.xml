@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="rgb(255,100,100)">
+    <Style name="road">
+        <Rule>
+            <LineSymbolizer stroke="rgb(255,255,255)" stroke-width="12" stroke-opacity="0.7"/>
+        </Rule>
+        <Rule>
+            <TextSymbolizer placement="line" label-position-tolerance="50" spacing="60" minimum-distance="5" face-name="DejaVu Sans Book" halo-radius="1" halo-fill="rgb(255,255,0)">[NAME]</TextSymbolizer>
+        </Rule>
+    </Style>
+    <Layer name="road" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>road</StyleName>
+        <Datasource>
+            <Parameter name="file">../data/overlap</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

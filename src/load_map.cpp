@@ -958,11 +958,10 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
     {
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
-        optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         point_symbolizer symbol;
-        if (allow_overlap) put(symbol, keys::allow_overlap, *allow_overlap);
+        set_symbolizer_property<point_symbolizer,boolean>(symbol, keys::allow_overlap, sym);
         set_symbolizer_property<point_symbolizer,double>(symbol, keys::opacity, sym);
         set_symbolizer_property<point_symbolizer,boolean>(symbol, keys::ignore_placement, sym);
 
@@ -1081,8 +1080,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<double> max_error = sym.get_opt_attr<double>("max-error");
         if (max_error) put(symbol,keys::max_error, *max_error);
 
-        optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
-        if (allow_overlap) put(symbol, keys::allow_overlap, *allow_overlap);
+        set_symbolizer_property<markers_symbolizer,boolean>(symbol, keys::allow_overlap, sym);
 
         set_symbolizer_property<markers_symbolizer,boolean>(symbol, keys::ignore_placement, sym);
 
