@@ -144,8 +144,6 @@ void placement_finder<DetectorT>::find_point_placements(T & shape_path)
     if (p.label_spacing > 0)
         num_labels = static_cast<int> (floor(total_distance / pi.get_actual_label_spacing()));
 
-    if (p.force_odd_labels && num_labels % 2 == 0)
-        num_labels--;
     if (num_labels <= 0)
         num_labels = 1;
 
@@ -589,8 +587,6 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
     if (p.label_spacing > 0)
         num_labels = static_cast<int>(floor(total_distance / (pi.get_actual_label_spacing() + string_width_)));
 
-    if (p.force_odd_labels && (num_labels % 2 == 0))
-        num_labels--;
     if (num_labels <= 0)
         num_labels = 1;
 

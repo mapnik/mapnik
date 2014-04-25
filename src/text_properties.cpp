@@ -52,7 +52,6 @@ text_symbolizer_properties::text_symbolizer_properties() :
     minimum_padding(0.0),
     minimum_path_length(0.0),
     max_char_angle_delta(22.5 * M_PI/180.0),
-    force_odd_labels(false),
     allow_overlap(false),
     largest_bbox_only(true),
     text_ratio(0.0),

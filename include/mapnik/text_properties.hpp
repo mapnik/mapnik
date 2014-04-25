@@ -163,8 +163,6 @@ struct MAPNIK_DECL text_symbolizer_properties
     double minimum_padding;
     double minimum_path_length;
     double max_char_angle_delta;
-    /** Always try render an odd amount of labels */
-    bool force_odd_labels;
     bool allow_overlap;
     /** Only consider geometry with largest bbox (polygons) */
     bool largest_bbox_only;

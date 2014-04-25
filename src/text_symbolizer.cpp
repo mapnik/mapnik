@@ -290,16 +290,6 @@ void  text_symbolizer::set_label_position_tolerance(double tolerance)
     placement_options_->defaults.label_position_tolerance = tolerance;
 }
 
-bool  text_symbolizer::get_force_odd_labels() const
-{
-    return placement_options_->defaults.force_odd_labels;
-}
-
-void  text_symbolizer::set_force_odd_labels(bool force)
-{
-    placement_options_->defaults.force_odd_labels = force;
-}
-
 double text_symbolizer::get_max_char_angle_delta() const
 {
     return placement_options_->defaults.max_char_angle_delta;

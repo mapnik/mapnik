@@ -345,9 +345,6 @@ void export_shield_symbolizer()
         .add_property("fontset",
                       make_function(&shield_symbolizer::get_fontset,return_value_policy<copy_const_reference>()),
                       &shield_symbolizer::set_fontset)
-        .add_property("force_odd_labels",
-                      &shield_symbolizer::get_force_odd_labels,
-                      &shield_symbolizer::set_force_odd_labels)
         .add_property("halo_fill",
                       make_function(&shield_symbolizer::get_halo_fill,return_value_policy<copy_const_reference>()),
                       &shield_symbolizer::set_halo_fill)
