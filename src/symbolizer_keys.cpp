@@ -89,7 +89,7 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         [](enumeration_wrapper e) { return enumeration<marker_multi_policy_enum,marker_multi_policy_enum_MAX>(marker_multi_policy_enum(e.value)).as_string();}, property_types::target_double }, // FIXME - better naming ^^
     property_meta_type{ "placement", enumeration_wrapper(CENTROID_POINT_PLACEMENT),
                         [](enumeration_wrapper e) { return enumeration<point_placement_enum,point_placement_enum_MAX>(point_placement_enum(e.value)).as_string();}, property_types::target_double },
-    property_meta_type{ "raster-colorizer", nullptr, nullptr, property_types::target_colorizer},
+    property_meta_type{ "colorizer", nullptr, nullptr, property_types::target_colorizer},
     property_meta_type{ "halo-transform", false, nullptr, property_types::target_transform },
     property_meta_type{ "num-columns", static_cast<value_integer>(0), nullptr, property_types::target_integer},
     property_meta_type{ "start-column", static_cast<value_integer>(1), nullptr, property_types::target_integer},
