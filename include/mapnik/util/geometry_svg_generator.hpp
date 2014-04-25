@@ -91,7 +91,6 @@ namespace mapnik { namespace util {
 
     namespace svg_detail {
 
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
     template <typename Geometry>
     struct get_type
     {
@@ -115,37 +114,7 @@ namespace mapnik { namespace util {
             return coord;
         }
     };
-#else
-    template <typename Geometry>
-    struct get_type
-    {
-        template <typename T>
-        struct result { typedef int type; };
 
-        int operator() (Geometry const& geom) const
-        {
-            return static_cast<int>(geom.type());
-        }
-    };
-
-    template <typename T>
-    struct get_first
-    {
-        typedef T geometry_type;
-
-        template <typename U>
-        struct result { typedef typename geometry_type::value_type const type; };
-
-        typename geometry_type::value_type operator() (geometry_type const& geom) const
-        {
-            typename geometry_type::value_type coord;
-            geom.rewind(0);
-            std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
-            return coord;
-        }
-    };
-
-#endif
     template <typename T>
     struct coordinate_policy : karma::real_policies<T>
     {

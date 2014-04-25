@@ -28,7 +28,6 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/stroke.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -38,6 +37,7 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // boost
 #include <memory>

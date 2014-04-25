@@ -40,11 +40,13 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 
 feature_type_style::feature_type_style()
-: filter_mode_(FILTER_ALL),
-    filters_(),
-    direct_filters_(),
-    opacity_(1.0f),
-    image_filters_inflate_(false)
+    : rules_(),
+      filter_mode_(FILTER_ALL),
+      filters_(),
+      direct_filters_(),
+      comp_op_(),
+      opacity_(1.0f),
+      image_filters_inflate_(false)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs)
@@ -58,15 +60,9 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
 {
 }
 
-feature_type_style& feature_type_style::operator=(feature_type_style const& other)
+feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 {
-    if (this == &other) return *this;
-    rules_ = other.rules_;
-    filters_ = other.filters_;
-    direct_filters_ = other.direct_filters_;
-    comp_op_ = other.comp_op_;
-    opacity_ = other.opacity_;
-    image_filters_inflate_ = other.image_filters_inflate_;
+    std::swap(*this, rhs);
     return *this;
 }
 

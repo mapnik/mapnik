@@ -35,6 +35,7 @@
 #include <mapnik/ctrans.hpp>    // for CoordTransform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/renderer_common.hpp>
 
 // boost
 
@@ -107,6 +108,9 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
+    void process(group_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans);
     inline bool process(rule::symbolizers const& /*syms*/,
                         mapnik::feature_impl & /*feature*/,
                         proj_transform const& /*prj_trans*/)
@@ -124,20 +128,13 @@ public:
     }
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
     }
 
 private:
     buffer_type & pixmap_;
-    unsigned width_;
-    unsigned height_;
-    double scale_factor_;
-    CoordTransform t_;
-    freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
-    std::shared_ptr<label_collision_detector4> detector_;
     const std::unique_ptr<grid_rasterizer> ras_ptr;
-    box2d<double> query_extent_;
+    renderer_common common_;
     void setup(Map const& m);
 };
 }

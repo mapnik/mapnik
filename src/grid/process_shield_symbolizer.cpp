@@ -24,8 +24,13 @@
 #if defined(GRID_RENDERER)
 
 // mapnik
+#include <mapnik/feature.hpp>
+#include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
+#include <mapnik/grid/grid.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
+#include <mapnik/pixel_position.hpp>
 #include <mapnik/text/renderer.hpp>
 
 // agg
@@ -40,26 +45,40 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 {
     text_symbolizer_helper helper(
             sym, feature, prj_trans,
-            width_, height_,
-            scale_factor_ * (1.0/pixmap_.get_resolution()),
-            t_, font_manager_, *detector_,
-            query_extent_);
+            common_.width_, common_.height_,
+            common_.scale_factor_,
+            common_.t_, common_.font_manager_, *common_.detector_,
+            common_.query_extent_);
+    bool placement_found = false;
 
-    grid_text_renderer<T> ren(pixmap_, sym.comp_op(), scale_factor_);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+    double opacity = get<double>(sym,keys::opacity,feature, 1.0);
+
+    grid_text_renderer<T> ren(pixmap_,
+                              comp_op,
+                              common_.scale_factor_);
 
     placements_list const& placements = helper.get();
-    if (placements.empty()) return;
+    value_integer feature_id = feature.id();
+    
     for (glyph_positions_ptr glyphs : placements)
     {
-        if (glyphs->marker()->marker)
-            render_marker(feature, pixmap_.get_resolution(),
+        if (glyphs->marker())
+        {
+            render_marker(feature, 
+                          pixmap_.get_resolution(),
                           glyphs->marker_pos(),
                           *(glyphs->marker()->marker),
                           glyphs->marker()->transform,
-                          sym.get_opacity(), sym.comp_op());
-        ren.render(*glyphs, feature.id());
+                          opacity, comp_op);
+        }
+        ren.render(*glyphs, feature_id);
+        placement_found = true;
     }
-    pixmap_.add_feature(feature);
+    if (placement_found)
+    {
+        pixmap_.add_feature(feature);
+    }
 }
 
 template void grid_renderer<grid>::process(shield_symbolizer const&,

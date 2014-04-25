@@ -74,16 +74,9 @@ public:
     void premultiply();
     void demultiply();
 
-    color& operator=(color const& rhs)
+    color& operator=(color rhs)
     {
-        if (this==&rhs)
-            return *this;
-
-        red_   = rhs.red_;
-        green_ = rhs.green_;
-        blue_  = rhs.blue_;
-        alpha_ = rhs.alpha_;
-
+        swap(rhs);
         return *this;
     }
 
@@ -138,6 +131,14 @@ public:
 #else
         return static_cast<unsigned>((alpha_ << 24) | (blue_ << 16) | (green_ << 8) | (red_)) ;
 #endif
+    }
+private:
+    void swap(color & rhs)
+    {
+        std::swap(red_, rhs.red_);
+        std::swap(green_,rhs.green_);
+        std::swap(blue_,rhs.blue_);
+        std::swap(alpha_,rhs.alpha_);
     }
 };
 

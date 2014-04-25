@@ -27,17 +27,7 @@
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/symbolizer.hpp>  // for transform_list_ptr
-#include <mapnik/building_symbolizer.hpp>
-#include <mapnik/line_symbolizer.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/polygon_symbolizer.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/raster_symbolizer.hpp>
-#include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/text_symbolizer.hpp>
-#include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp> // for rule::symbolizers
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
 #include <mapnik/expression_node_types.hpp>
@@ -45,10 +35,15 @@
 #include <mapnik/parse_path.hpp>  // for path_processor_type
 #include <mapnik/path_expression.hpp>  // for path_expression_ptr
 #include <mapnik/text/placements/base.hpp>  // for text_placements
+#include <mapnik/image_scaling.hpp>
+#include <mapnik/group/group_symbolizer_properties.hpp>
+#include <mapnik/group/group_rule.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 // stl
 #include <set>
@@ -61,15 +56,6 @@ struct expression_attributes : boost::static_visitor<void>
     explicit expression_attributes(Container& names)
         : names_(names) {}
 
-    void operator() (value_type const& /*x*/) const
-    {
-    }
-
-    void operator() (geometry_type_attribute const& /*type*/) const
-    {
-        // do nothing
-    }
-
     void operator() (attribute const& attr) const
     {
         names_.insert(attr.name());
@@ -80,7 +66,6 @@ struct expression_attributes : boost::static_visitor<void>
     {
         boost::apply_visitor(*this, x.left);
         boost::apply_visitor(*this, x.right);
-
     }
 
     template <typename Tag>
@@ -99,142 +84,127 @@ struct expression_attributes : boost::static_visitor<void>
         boost::apply_visitor(*this, x.expr);
     }
 
+    template <typename T>
+    void operator() (T const& val) const {}
+
 private:
     Container& names_;
+};
+
+class group_attribute_collector : public mapnik::noncopyable
+{
+private:
+    std::set<std::string>& names_;
+    bool expand_index_columns_;
+public:
+    group_attribute_collector(std::set<std::string>& names,
+                              bool expand_index_columns)
+        : names_(names),
+          expand_index_columns_(expand_index_columns) {}
+
+    void operator() (group_symbolizer const& sym);
+};
+
+template <typename Container>
+struct extract_attribute_names : boost::static_visitor<void>
+{
+    explicit extract_attribute_names(Container& names)
+        : names_(names),
+          f_attr_(names) {}
+
+    void operator() (mapnik::expression_ptr const& expr) const
+    {
+        if (expr)
+        {
+            boost::apply_visitor(f_attr_, *expr);
+        }
+    }
+    void operator() (mapnik::transform_type const& expr) const
+    {
+        if (expr)
+        {
+            transform_processor_type::collect_attributes(names_, *expr);
+        }
+    }
+
+    void operator() (mapnik::text_placements_ptr const& expr) const
+    {
+        if (expr)
+        {
+            expression_set::const_iterator it;
+            expression_set expressions;
+            // TODO - optimize (dane)
+            expr->add_expressions(expressions);
+            for (it=expressions.begin(); it != expressions.end(); ++it)
+            {
+                if (*it) boost::apply_visitor(f_attr_, **it);
+            }
+        }
+    }
+
+    void operator() (mapnik::path_expression_ptr const& expr) const
+    {
+        if (expr)
+        {
+            path_processor_type::collect_attributes(*expr,names_);
+        }
+    }
+
+    template <typename T>
+    void operator() (T const& val) const {}
+
+private:
+    Container& names_;
+    expression_attributes<std::set<std::string> > f_attr_;
 };
 
 struct symbolizer_attributes : public boost::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
-        : names_(names),
-          filter_factor_(filter_factor),
-          f_attr(names) {}
+        : filter_factor_(filter_factor),
+          f_attrs_(names),
+          g_attrs_(names, true) {}
 
     template <typename T>
-    void operator () (T const&) const {}
-
-    void operator () (text_symbolizer const& sym)
+    void operator () (T const& sym)
     {
-        expression_set::const_iterator it;
-        expression_set expressions;
-        sym.get_placement_options()->add_expressions(expressions);
-        for (it=expressions.begin(); it != expressions.end(); it++)
+        for (auto const& prop : sym.properties)
         {
-            if (*it) boost::apply_visitor(f_attr, **it);
+            boost::apply_visitor(f_attrs_, prop.second);
         }
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (point_symbolizer const& sym)
-    {
-        path_expression_ptr const& filename_expr = sym.get_filename();
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (line_symbolizer const& sym)
-    {
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (line_pattern_symbolizer const& sym)
-    {
-        path_expression_ptr const& filename_expr = sym.get_filename();
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (polygon_symbolizer const& sym)
-    {
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (polygon_pattern_symbolizer const& sym)
-    {
-        path_expression_ptr const& filename_expr = sym.get_filename();
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (shield_symbolizer const& sym)
-    {
-        expression_set::const_iterator it;
-        expression_set expressions;
-        sym.get_placement_options()->add_expressions(expressions);
-        for (it=expressions.begin(); it != expressions.end(); it++)
-        {
-            if (*it) boost::apply_visitor(f_attr, **it);
-        }
-
-        path_expression_ptr const& filename_expr = sym.get_filename();
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (markers_symbolizer const& sym)
-    {
-        expression_ptr const& height_expr = sym.get_height();
-        if (height_expr)
-        {
-            boost::apply_visitor(f_attr,*height_expr);
-        }
-        expression_ptr const& width_expr = sym.get_width();
-        if (width_expr)
-        {
-            boost::apply_visitor(f_attr,*width_expr);
-        }
-        path_expression_ptr const& filename_expr = sym.get_filename();
-        if (filename_expr)
-        {
-            path_processor_type::collect_attributes(*filename_expr,names_);
-        }
-        collect_transform(sym.get_image_transform());
-        collect_transform(sym.get_transform());
-    }
-
-    void operator () (building_symbolizer const& sym)
-    {
-        expression_ptr const& height_expr = sym.height();
-        if (height_expr)
-        {
-            boost::apply_visitor(f_attr,*height_expr);
-        }
-        collect_transform(sym.get_transform());
     }
 
     void operator () (raster_symbolizer const& sym)
     {
-        filter_factor_ = sym.calculate_filter_factor();
+        boost::optional<double> filter_factor = get_optional<double>(sym, keys::filter_factor);
+        if (filter_factor)
+        {
+            filter_factor_ = *filter_factor;
+        }
+        else
+        {
+            boost::optional<scaling_method_e> scaling_method = get_optional<scaling_method_e>(sym, keys::scaling);
+            if (scaling_method && *scaling_method != SCALING_NEAR)
+            {
+                filter_factor_ = 2;
+            }
+        }
+        for (auto const& prop : sym.properties)
+        {
+            boost::apply_visitor(f_attrs_, prop.second);
+        }
+    }
+
+    void operator () (group_symbolizer const& sym)
+    {
+        g_attrs_(sym);
     }
 
 private:
-    std::set<std::string>& names_;
     double & filter_factor_;
-    expression_attributes<std::set<std::string> > f_attr;
-    void collect_transform(transform_list_ptr const& trans_expr)
-    {
-        if (trans_expr)
-        {
-            transform_processor_type::collect_attributes(names_, *trans_expr);
-        }
-    }
+    extract_attribute_names<std::set<std::string> > f_attrs_;
+    group_attribute_collector g_attrs_;
 };
 
 
@@ -254,11 +224,10 @@ public:
     void operator() (RuleType const& r)
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
-        typename RuleType::symbolizers::const_iterator symIter=symbols.begin();
         symbolizer_attributes s_attr(names_,filter_factor_);
-        while (symIter != symbols.end())
+        for (auto symbol : symbols)
         {
-            boost::apply_visitor(s_attr,*symIter++);
+            boost::apply_visitor(s_attr,symbol);
         }
 
         expression_ptr const& expr = r.get_filter();
@@ -270,6 +239,67 @@ public:
         return filter_factor_;
     }
 };
+
+
+inline void group_attribute_collector::operator() (group_symbolizer const& sym)
+{
+    // find all column names referenced in the group symbolizer
+    std::set<std::string> group_columns;
+    attribute_collector column_collector(group_columns);
+    expression_attributes<std::set<std::string> > rk_attr(group_columns);
+
+    // get columns from symbolizer repeat key
+    expression_ptr repeat_key = get<mapnik::expression_ptr>(sym, keys::repeat_key);
+    if (repeat_key)
+    {
+        boost::apply_visitor(rk_attr, *repeat_key);
+    }
+
+    // get columns from child rules and symbolizers
+    group_symbolizer_properties_ptr props = get<group_symbolizer_properties_ptr>(sym, keys::group_properties);
+    if (props) {
+        for (auto const& rule : props->get_rules())
+        {
+            // note that this recurses down on to the symbolizer
+            // internals too, so we get all free variables.
+            column_collector(*rule);
+            // still need to collect repeat key columns
+            if (rule->get_repeat_key())
+            {
+                boost::apply_visitor(rk_attr, *(rule->get_repeat_key()));
+            }
+        }
+    }
+
+    // get indexed column names
+    int start = get<value_integer>(sym, keys::start_column);
+    int end = start + get<value_integer>(sym, keys::num_columns);
+    for (auto const& col_name : group_columns)
+    {
+        if (expand_index_columns_ && col_name.find('%') != std::string::npos)
+        {
+            // Note: ignore column name if it is '%' by itself.
+            // '%' is a special case to access the index value itself,
+            // rather than acessing indexed columns from data source.
+            if (col_name.size() > 1)
+            {
+                // Indexed column name. add column name for each index value.
+                for (int col_idx = start; col_idx < end; ++col_idx)
+                {
+                    std::string col_idx_name = col_name;
+                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
+                    names_.insert(col_idx_name);
+                }
+            }
+        }
+        else
+        {
+            // This is not an indexed column, or we are ignoring indexes.
+            // Insert the name as is.
+            names_.insert(col_name);
+        }
+    }
+}
 
 } // namespace mapnik
 

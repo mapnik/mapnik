@@ -132,13 +132,41 @@ enum text_upright
 
 DEFINE_ENUM(text_upright_e, text_upright);
 
+/** Properties for building the layout of a single text placement */
+struct MAPNIK_DECL text_layout_properties
+{
+    text_layout_properties();
+
+    /** Load all values from XML ptree. */
+    void from_xml(xml_node const &sym);
+    /** Save all values to XML ptree (but does not create a new parent node!). */
+    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_layout_properties const &dfl=text_layout_properties()) const;
+
+    /** Get a list of all expressions used in any placement.
+     * This function is used to collect attributes. */
+    void add_expressions(expression_set &output) const;
+
+    //Per layout options
+    expression_ptr orientation;
+    pixel_position displacement;
+    horizontal_alignment_e halign;
+    justify_alignment_e jalign;
+    vertical_alignment_e valign;
+    double text_ratio;
+    double wrap_width;
+    bool wrap_before;
+    bool rotate_displacement;
+};
+typedef std::shared_ptr<text_layout_properties> text_layout_properties_ptr;
+
 class text_layout;
 
-
-/** Contains all text symbolizer properties which are not directly related to text formatting. */
+/** Contains all text symbolizer properties which are not directly related to text formatting and layout. */
 struct MAPNIK_DECL text_symbolizer_properties
 {
     text_symbolizer_properties();
+    /** Load only placement related values from XML ptree. */
+    void placement_properties_from_xml(xml_node const &sym);
     /** Load all values from XML ptree. */
     void from_xml(xml_node const &sym, fontset_map const & fontsets);
     /** Save all values to XML ptree (but does not create a new parent node!). */
@@ -159,12 +187,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     void add_expressions(expression_set &output) const;
 
     //Per symbolizer options
-    expression_ptr orientation;
-    pixel_position displacement;
     label_placement_e label_placement;
-    horizontal_alignment_e halign;
-    justify_alignment_e jalign;
-    vertical_alignment_e valign;
     /** distance between repeated labels on a single geometry */
     double label_spacing;
     /** distance the label can be moved on the line to fit, if 0 the default is used */
@@ -179,11 +202,11 @@ struct MAPNIK_DECL text_symbolizer_properties
     bool allow_overlap;
     /** Only consider geometry with largest bbox (polygons) */
     bool largest_bbox_only;
-    double text_ratio;
-    double wrap_width;
-    bool wrap_before;
-    bool rotate_displacement;
     text_upright_e upright;
+
+    /** Default values for text layouts */
+    text_layout_properties_ptr layout_defaults;
+
     /** Default values for char_properties. */
     char_properties_ptr format;
 private:

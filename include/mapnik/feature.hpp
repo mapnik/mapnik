@@ -90,7 +90,7 @@ private:
 typedef context<std::map<std::string,std::size_t> > context_type;
 typedef std::shared_ptr<context_type> context_ptr;
 
-static const value default_value;
+static const value default_feature_value;
 
 class MAPNIK_DECL feature_impl : private mapnik::noncopyable
 {
@@ -166,14 +166,14 @@ public:
         if (itr != ctx_->mapping_.end())
             return get(itr->second);
         else
-            return default_value;
+            return default_feature_value;
     }
 
     inline value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
             return data_[index];
-        return default_value;
+        return default_feature_value;
     }
 
     inline std::size_t size() const

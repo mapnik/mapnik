@@ -400,6 +400,7 @@ opts.AddVariables(
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
+    BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
@@ -1218,6 +1219,7 @@ if not preconfigured:
             temp_env = env.Clone()
             temp_env['LIBS'] = []
             try:
+                # TODO - freetype-config accepts --static as of v2.5.3
                 temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
                 if 'bz2' in temp_env['LIBS']:
                     env['EXTRA_FREETYPE_LIBS'].append('bz2')
@@ -1981,6 +1983,8 @@ if not HELP_REQUESTED:
                 SConscript('utils/pgsql2sqlite/build.py')
             if env['SVG2PNG']:
                 SConscript('utils/svg2png/build.py')
+            if env['NIK2IMG']:
+                SConscript('utils/nik2img/build.py')
             # devtools not ready for public
             #SConscript('utils/ogrindex/build.py')
             env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])

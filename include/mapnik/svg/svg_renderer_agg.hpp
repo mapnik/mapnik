@@ -27,15 +27,11 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_pixel.hpp>
 #endif
-
-#include <mapnik/noncopyable.hpp>
-
-// boost
-
 
 // agg
 #include "agg_path_storage.h"
@@ -111,12 +107,18 @@ public:
     typedef agg::conv_transform<curved_type>         curved_trans_type;
     typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
     typedef agg::renderer_base<PixelFormat>          renderer_base;
+    typedef VertexSource                             vertex_source_type;
+    typedef AttributeSource                          attribute_source_type;
 
     svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
           curved_(source_),
           curved_stroked_(curved_),
           attributes_(attributes) {}
+
+    svg_renderer_agg(svg_renderer_agg &&r) 
+      : source_(r.source_), curved_(source_), curved_stroked_(curved_),
+        attributes_(r.attributes_) {}
 
     template <typename Rasterizer, typename Scanline, typename Renderer>
     void render_gradient(Rasterizer& ras,

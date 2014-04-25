@@ -65,15 +65,13 @@ private:
     bool image_filters_inflate_;
 public:
     feature_type_style();
-
     feature_type_style(feature_type_style const& rhs);
-
-    feature_type_style& operator=(feature_type_style const& rhs);
+    feature_type_style& operator=(feature_type_style rhs);
 
     void add_rule(rule const& rule);
     rules const& get_rules() const;
     rules& get_rules_nonconst();
-    
+
     bool active(double scale_denom) const;
 
     void set_filter_mode(filter_mode_e mode);
@@ -81,12 +79,12 @@ public:
 
     // filters
     std::vector<filter::filter_type> const& image_filters() const;
-    std::vector<filter::filter_type> & image_filters();    
+    std::vector<filter::filter_type> & image_filters();
     std::vector<filter::filter_type> const& direct_image_filters() const;
     std::vector<filter::filter_type> & direct_image_filters();
     // compositing
     void set_comp_op(composite_mode_e comp_op);
-    boost::optional<composite_mode_e> comp_op() const;     
+    boost::optional<composite_mode_e> comp_op() const;
     void set_opacity(float opacity);
     float get_opacity() const;
     void set_image_filters_inflate(bool inflate);

@@ -3,6 +3,7 @@
 
 import mapnik
 mapnik.logger.set_severity(mapnik.severity_type.None)
+#mapnik.logger.set_severity(mapnik.severity_type.Debug)
 
 import shutil
 import sys
@@ -95,6 +96,10 @@ files = {
     'lines-4': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-5': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-6': {'sizes': sizes_few_square,'bbox':default_text_box},
+    'lines-7': {'sizes': sizes_few_square,'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
+    'lines-multi-layout-1': {'sizes': [(800,800)],'bbox':default_text_box},
+    'lines-multi-layout-2': {'sizes': [(800,800)],'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
+    'lines-multi-layout-shield': {'sizes': [(800,800)],'bbox':default_text_box},
     'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
     'collision': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
@@ -155,6 +160,8 @@ files = {
     'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-multi-layout-1': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
+    'text-multi-layout-2': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     'tiff-alpha-gdal': {'sizes':[(600,400)]},
     'tiff-alpha-broken-assoc-alpha-gdal': {'sizes':[(600,400)]},
@@ -219,6 +226,21 @@ files = {
     'tiff-nodata-rgba':{'sizes':[(512,512)]},
     'tiff-nodata-tolerance':{'sizes':[(512,512)]},
     'tiff-nodata-edge-rgba':{'sizes':[(512,512)]},
+    'marker-vs-point':{'sizes':[(512,512)]},
+    'line-symbolizer-expressions':{'sizes':[(256,256)]},
+    'line-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'point-symbolizer-expressions':{'sizes':[(256,256)]},
+    'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
+    'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'group-symbolizer-1':{'sizes':[(512,512)]},
+    'group-symbolizer-2':{'sizes':[(512,512)]},
+    'group-symbolizer-line-1':{'sizes':[(512,512)]},
+    'group-symbolizer-line-2':{'sizes':[(512,512)]},
+    'text-charplacement':{'sizes':[(512,512)]},
+    'text-displacement':{'sizes':[(512,512)]},
+    'text-overlap':{'sizes':[(512,512)]},
+    'text-spacing':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
     'line-smooth-and-offset':{'sizes':[(512,512)]}
     }

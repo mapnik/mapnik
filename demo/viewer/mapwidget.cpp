@@ -20,11 +20,7 @@
 
 #include <QtGui>
 
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono/process_cpu_clocks.hpp>
-#include <boost/chrono.hpp>
 #include <boost/bind.hpp>
-
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/layer.hpp>
@@ -35,6 +31,7 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/util/timer.hpp>
 
 #ifdef HAVE_CAIRO
 // cairo
@@ -504,12 +501,8 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
     try
     {
-        {
-            boost::chrono::process_cpu_clock::time_point start = boost::chrono::process_cpu_clock::now();
-            ren.apply();
-            boost::chrono::process_cpu_clock::duration elapsed = boost::chrono::process_cpu_clock::now() - start;
-            std::clog << "rendering took: " << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed) << "\n";
-        }
+        mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
+        ren.apply();
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
@@ -541,7 +534,10 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
     mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
-    renderer.apply();
+    {
+        mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
+        renderer.apply();
+    }
     image_32 buf(image_surface);
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());

@@ -32,6 +32,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 
 // stl
@@ -79,4 +80,3 @@ typedef boost::filter_iterator<value_not_null, feature_kv_iterator> feature_kv_i
 }
 
 #endif // MAPNIK_FEATURE_KV_ITERATOR_HPP
-

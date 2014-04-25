@@ -285,11 +285,15 @@ class _Color(Color,_injector):
     def __repr__(self):
         return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
 
-class _Symbolizers(Symbolizers,_injector):
+class _SymbolizerBase(SymbolizerBase,_injector):
+     # back compatibility
+     @property
+     def filename(self):
+         return self['file']
 
-    def __getitem__(self, idx):
-        sym = Symbolizers._c___getitem__(self, idx)
-        return sym.symbol()
+     @filename.setter
+     def filename(self, val):
+         self['file'] = val
 
 def _add_symbol_method_to_symbolizers(vars=globals()):
 

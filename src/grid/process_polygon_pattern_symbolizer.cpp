@@ -31,7 +31,6 @@
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
@@ -53,7 +52,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    std::string filename = get<std::string>(sym, keys::file, feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
     if (!mark) return;
@@ -69,19 +68,24 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     ras_ptr->reset();
 
+    bool clip = get<value_bool>(sym, keys::clip, feature, false);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform(), scale_factor_);
+    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (geom_transform) evaluate_transform(tr, feature, *geom_transform, common_.scale_factor_);
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
 
-    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
-    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
+    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     for ( geometry_type & geom : feature.paths())
     {
@@ -94,7 +98,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
 
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
 
     grid_renderer_base_type renb(pixf);

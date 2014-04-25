@@ -17,6 +17,7 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <vector>
 #include <algorithm>
 #include <mapnik/std.hpp>
@@ -58,11 +59,17 @@ int main(int argc, char** argv)
         lyr.add_style("style");
         m.add_layer(lyr);
         mapnik::feature_type_style the_style;
-        mapnik::rule the_rule;
-        mapnik::text_symbolizer text_sym(mapnik::parse_expression("[name]"),10,mapnik::color(0,0,0));
-        text_sym.set_fontset(fontset);
-        the_rule.append(text_sym);
-        the_style.add_rule(the_rule);
+        mapnik::rule r;
+        mapnik::text_symbolizer text_sym;
+        mapnik::text_placements_ptr placement_finder = std::make_shared<mapnik::text_placements_dummy>();
+        placement_finder->defaults.format->face_name = "DejaVu Sans Book";
+        placement_finder->defaults.format->text_size = 10;
+        placement_finder->defaults.format->fill = mapnik::color(0,0,0);
+        placement_finder->defaults.format->fontset = fontset;
+        placement_finder->defaults.set_old_style_expression(mapnik::parse_expression("[name]"));
+        mapnik::put<mapnik::text_placements_ptr>(text_sym, mapnik::keys::text_placements_, placement_finder);
+        r.append(std::move(text_sym));
+        the_style.add_rule(r);
         m.insert_style("style",the_style );
         m.zoom_to_box(mapnik::box2d<double>(-256,-256,
                                             256,256));
@@ -70,7 +77,7 @@ int main(int argc, char** argv)
         mapnik::agg_renderer<mapnik::image_32> ren(m,buf);
         ren.apply();
     } catch (std::exception const& ex) {
-        BOOST_TEST_EQ(std::string(ex.what()),std::string("No valid font face could be loaded for font set: 'fontset'"));
+        BOOST_TEST_EQ(std::string(ex.what()),std::string("Unable to find specified font face 'DejaVu Sans Book' in font set: 'fontset'"));
     }
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";

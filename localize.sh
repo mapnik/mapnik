@@ -11,3 +11,4 @@ export PYTHONPATH="${CURRENT_DIR}/bindings/python/":${PYTHONPATH}
 export MAPNIK_FONT_DIRECTORY="${CURRENT_DIR}/fonts/dejavu-fonts-ttf-2.33/ttf/"
 export MAPNIK_INPUT_PLUGINS_DIRECTORY="${CURRENT_DIR}/plugins/input/"
 export PATH="${CURRENT_DIR}/bin/":${PATH}
+export PATH="${CURRENT_DIR}/utils/nik2img":${PATH}

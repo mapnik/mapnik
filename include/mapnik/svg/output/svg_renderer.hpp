@@ -38,6 +38,7 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
+#include <mapnik/renderer_common.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
@@ -119,6 +120,9 @@ public:
     void process(debug_symbolizer const& /*sym*/,
                  mapnik::feature_impl & /*feature*/,
                  proj_transform const& /*prj_trans*/) {}
+    void process(group_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans);
 
     /*!
      * @brief Overload that process the whole set of symbolizers of a rule.
@@ -140,7 +144,7 @@ public:
 
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
     }
 
     inline OutputIterator& get_output_iterator()
@@ -155,17 +159,10 @@ public:
 
 private:
     OutputIterator& output_iterator_;
-    const int width_;
-    const int height_;
-    double scale_factor_;
-    CoordTransform t_;
     svg::path_output_attributes path_attributes_;
-    freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
-    std::shared_ptr<label_collision_detector4> detector_;
     svg::svg_generator<OutputIterator> generator_;
-    box2d<double> query_extent_;
     bool painted_;
+    renderer_common common_;
 
     /*!
      * @brief Visitor that makes the calls to process each symbolizer when stored in a boost::variant.

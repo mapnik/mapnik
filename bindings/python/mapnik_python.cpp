@@ -58,7 +58,6 @@ void export_python();
 void export_expression();
 void export_rule();
 void export_style();
-void export_stroke();
 void export_feature();
 void export_featureset();
 void export_fontset();
@@ -76,6 +75,7 @@ void export_raster_symbolizer();
 void export_text_placement();
 void export_shield_symbolizer();
 void export_debug_symbolizer();
+void export_group_symbolizer();
 void export_font_engine();
 void export_projection();
 void export_proj_transform();
@@ -99,6 +99,7 @@ void export_wkt_reader();
 #include "python_grid_utils.hpp"
 #endif
 #include "mapnik_value_converter.hpp"
+#include "mapnik_enumeration_wrapper_converter.hpp"
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
 #include <mapnik/marker_cache.hpp>
@@ -108,7 +109,6 @@ void export_wkt_reader();
 
 namespace mapnik {
     class font_set;
-    class stroke;
     class layer;
     class color;
     class label_collision_detector4;
@@ -565,7 +565,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_rule();
     export_style();
     export_layer();
-    export_stroke();
     export_datasource_cache();
     export_symbolizer();
     export_markers_symbolizer();
@@ -579,6 +578,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_text_placement();
     export_shield_symbolizer();
     export_debug_symbolizer();
+    export_group_symbolizer();
     export_font_engine();
     export_projection();
     export_proj_transform();
@@ -598,17 +598,6 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> from mapnik import clear_cache\n"
         ">>> clear_cache()\n"
         );
-
-#if defined(GRID_RENDERER)
-    def("render_grid",&mapnik::render_grid,
-        ( arg("map"),
-          arg("layer"),
-          args("key")="__id__",
-          arg("resolution")=4,
-          arg("fields")=boost::python::list()
-            )
-        );
-#endif
 
     def("render_to_file",&render_to_file1,
         "\n"
@@ -860,12 +849,10 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_png", &has_png, "Get png read/write support status");
     def("has_tiff", &has_tiff, "Get tiff read/write support status");
     def("has_webp", &has_webp, "Get webp read/write support status");
-    def("has_svg_renderer", &has_svg_renderer, "Get svg_renderer status");
     def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
 
-    python_optional<mapnik::stroke>();
     python_optional<mapnik::font_set>();
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();
@@ -882,4 +869,5 @@ BOOST_PYTHON_MODULE(_mapnik)
     register_ptr_to_python<mapnik::path_expression_ptr>();
     to_python_converter<mapnik::value_holder,mapnik_param_to_python>();
     to_python_converter<mapnik::value,mapnik_value_to_python>();
+    to_python_converter<mapnik::enumeration_wrapper,mapnik_enumeration_wrapper_to_python>();
 }

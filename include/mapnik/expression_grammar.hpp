@@ -65,11 +65,7 @@ struct unicode_impl
 
 struct regex_match_impl
 {
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
     template <typename T>
-#else
-    template <typename T0, typename T1>
-#endif
     struct result
     {
         typedef expr_node type;
@@ -87,11 +83,7 @@ struct regex_match_impl
 struct regex_replace_impl
 {
 
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
     template <typename T>
-#else
-    template <typename T0, typename T1, typename T2>
-#endif
     struct result
     {
         typedef expr_node type;
@@ -155,7 +147,10 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string() > regex_match_expr;
     qi::rule<Iterator, expr_node(expr_node), qi::locals<std::string,std::string>, space_type> regex_replace_expr;
     qi::rule<Iterator, std::string() , space_type> attr;
-    qi::rule<Iterator, std::string(), qi::locals<char> > ustring;
+    qi::rule<Iterator, std::string() , space_type> global_attr;
+    qi::rule<Iterator, std::string(), qi::locals<char> > quoted_ustring;
+    qi::rule<Iterator, std::string(), space_type> ustring;
+
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
     geometry_types geom_type;

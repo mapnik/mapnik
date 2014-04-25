@@ -33,8 +33,9 @@
 #include <mapnik/text/formatting/list.hpp>
 #include <mapnik/text/formatting/format.hpp>
 #include <mapnik/text/formatting/expression_format.hpp>
+#include <mapnik/text/formatting/layout.hpp>
 #include <mapnik/text/layout.hpp>
-#include <mapnik/text_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 
 #include "mapnik_enumeration.hpp"
 #include "mapnik_threads.hpp"
@@ -96,12 +97,12 @@ public:
     }
 };
 
-boost::python::tuple get_displacement(text_symbolizer_properties const& t)
+boost::python::tuple get_displacement(text_layout_properties const& t)
 {
     return boost::python::make_tuple(t.displacement.x, t.displacement.y);
 }
 
-void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
+void set_displacement(text_layout_properties &t, boost::python::tuple arg)
 {
     if (len(arg) != 2)
     {
@@ -116,7 +117,6 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
     double y = extract<double>(arg[1]);
     t.displacement.set(x, y);
 }
-
 
 struct NodeWrap: formatting::node, wrapper<formatting::node>
 {
@@ -224,6 +224,27 @@ struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expres
     }
 };
 
+struct LayoutNodeWrap: formatting::layout_node, wrapper<formatting::layout_node>
+{
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    {
+        if(override o = this->get_override("apply"))
+        {
+            python_block_auto_unblock b;
+            o(ptr(&p), ptr(&feature), ptr(&output));
+        }
+        else
+        {
+            formatting::layout_node::apply(p, feature, output);
+        }
+    }
+
+    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    {
+        formatting::layout_node::apply(p, feature, output);
+    }
+};
+
 struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 {
     //Default constructor
@@ -324,6 +345,7 @@ void insert_expression(expression_set *set, expression_ptr p)
     set->insert(p);
 }
 
+/*
 char_properties_ptr get_format(text_symbolizer const& sym)
 {
     return sym.get_placement_options()->defaults.format;
@@ -343,7 +365,7 @@ void set_properties(text_symbolizer const& sym, text_symbolizer_properties & def
 {
     sym.get_placement_options()->defaults = defaults;
 }
-
+*/
 }
 
 void export_text_placement()
@@ -391,44 +413,13 @@ void export_text_placement()
 
     class_<text_symbolizer>("TextSymbolizer",
                             init<>())
-        .def(init<expression_ptr, std::string const&, unsigned, color const&>())
-        .add_property("placements",
-                      &text_symbolizer::get_placement_options,
-                      &text_symbolizer::set_placement_options)
-        //TODO: Check return policy, is there a better way to do this?
-        .add_property("format",
-                      make_function(&get_format),
-                      &set_format,
-                      "Shortcut for placements.defaults.default_format")
-        .add_property("properties",
-                      make_function(&get_properties, return_value_policy<reference_existing_object>()),
-                      &set_properties,
-                      "Shortcut for placements.defaults")
-        .add_property("comp_op",
-                      &text_symbolizer::comp_op,
-                      &text_symbolizer::set_comp_op,
-                      "Set/get the comp-op")
-        .add_property("clip",
-                      &text_symbolizer::clip,
-                      &text_symbolizer::set_clip,
-                      "Set/get the text geometry's clipping status")
-        .add_property("halo_rasterizer",
-                      &text_symbolizer::get_halo_rasterizer,
-                      &text_symbolizer::set_halo_rasterizer,
-                      "Set/get the halo rasterizer method")
         ;
 
 
     class_with_converter<text_symbolizer_properties>
         ("TextSymbolizerProperties")
         .def_readwrite_convert("label_placement", &text_symbolizer_properties::label_placement)
-        .def_readwrite_convert("horizontal_alignment", &text_symbolizer_properties::halign)
-        .def_readwrite_convert("justify_alignment", &text_symbolizer_properties::jalign)
-        .def_readwrite_convert("vertical_alignment", &text_symbolizer_properties::valign)
-        .def_readwrite("orientation", &text_symbolizer_properties::orientation)
-        .add_property("displacement",
-                      &get_displacement,
-                      &set_displacement)
+        .def_readwrite_convert("upright", &text_symbolizer_properties::upright)
         .def_readwrite("label_spacing", &text_symbolizer_properties::label_spacing)
         .def_readwrite("label_position_tolerance", &text_symbolizer_properties::label_position_tolerance)
         .def_readwrite("avoid_edges", &text_symbolizer_properties::avoid_edges)
@@ -439,9 +430,7 @@ void export_text_placement()
         .def_readwrite("force_odd_labels", &text_symbolizer_properties::force_odd_labels)
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
         .def_readwrite("largest_bbox_only", &text_symbolizer_properties::largest_bbox_only)
-        .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
-        .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
-        .def_readwrite("wrap_before", &text_symbolizer_properties::wrap_before)
+        .def_readwrite("layout_defaults", &text_symbolizer_properties::layout_defaults)
         .def_readwrite("format", &text_symbolizer_properties::format)
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
@@ -453,9 +442,19 @@ void export_text_placement()
        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
     ;
 
+    class_with_converter<text_layout_properties>
+        ("TextLayoutProperties")
+        .def_readwrite_convert("horizontal_alignment", &text_layout_properties::halign)
+        .def_readwrite_convert("justify_alignment", &text_layout_properties::jalign)
+        .def_readwrite_convert("vertical_alignment", &text_layout_properties::valign)
+        .def_readwrite("text_ratio", &text_layout_properties::text_ratio)
+        .def_readwrite("wrap_width", &text_layout_properties::wrap_width)
+        .def_readwrite("wrap_before", &text_layout_properties::wrap_before)
+        .def_readwrite("orientation", &text_layout_properties::orientation)
+        .def_readwrite("rotate_displacement", &text_layout_properties::rotate_displacement)
+        .add_property("displacement", &get_displacement, &set_displacement);
 
-    class_with_converter<char_properties,
-            std::shared_ptr<char_properties> >
+    class_with_converter<char_properties>
         ("CharProperties")
         .def_readwrite_convert("text_transform", &char_properties::text_transform)
         .def_readwrite_convert("fontset", &char_properties::fontset)

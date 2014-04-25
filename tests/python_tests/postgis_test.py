@@ -278,7 +278,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         except StopIteration:
             pass
         eq_(feature,None)
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
+        eq_(ds.describe()['geometry_type'],None)
 
     def test_geometry_detection():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
@@ -735,14 +735,14 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         map1 = mapnik.Map(600,300)
         s = mapnik.Style()
         r = mapnik.Rule()
-        r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#f2eff9')))
+        r.symbols.append(mapnik.PolygonSymbolizer())
         s.rules.append(r)
         map1.append_style('style',s)
 
         # This layer will fail after a while
         buggy_s = mapnik.Style()
         buggy_r = mapnik.Rule()
-        buggy_r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#ff0000')))
+        buggy_r.symbols.append(mapnik.PolygonSymbolizer())
         buggy_r.filter = mapnik.Filter("[fips] = 'FR'")
         buggy_s.rules.append(buggy_r)
         map1.append_style('style for buggy layer',buggy_s)
@@ -765,8 +765,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         map2.background = mapnik.Color('steelblue')
         s = mapnik.Style()
         r = mapnik.Rule()
-        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
-        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
+        r.symbols.append(mapnik.LineSymbolizer())
+        r.symbols.append(mapnik.LineSymbolizer())
         s.rules.append(r)
         map2.append_style('style',s)
         layer1 = mapnik.Layer('layer1')

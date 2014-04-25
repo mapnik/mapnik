@@ -28,15 +28,12 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/line_symbolizer.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
+// stl
+#include <type_traits>
 
 namespace mapnik
 {
@@ -53,7 +50,7 @@ struct name_trait
     // if you get here you are probably using a new type
     // in the XML file. Just add a name trait for the new
     // type below.
-    BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+    static_assert( sizeof(T) == 0, "missing name_trait for the type");
 };
 
 #define DEFINE_NAME_TRAIT( type, type_name )                            \
@@ -109,7 +106,7 @@ xml_tree::xml_tree(std::string const& encoding)
     node_.set_processed(true); //root node is always processed
 }
 
-void xml_tree::set_filename(std::string fn)
+void xml_tree::set_filename(std::string const& fn)
 {
     file_ = fn;
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<!-- Upright test -->
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>lines</StyleName>
+        <StyleName>text</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/lines2.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="lines">
+        <Rule>
+            <LineSymbolizer stroke-width="3" stroke="green"/>
+        </Rule>
+    </Style>
+
+    <Style name="text">
+        <Rule>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" spacing="25" fill="#00ff00" halo-radius="1" halo-fill="rgba(255,255,255,0.6)" max-char-angle-delta="90">
+                <Layout dy="-3" vertical-alignment="top" wrap-width="33" wrap-before="true">
+                    <Format fill="#ff0000">"District One"</Format>
+                </Layout>
+                <Layout dy="5" vertical-alignment="bottom">
+                    <Format fill="#0000ff">"District Two"</Format>
+                </Layout>
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+
+</Map>

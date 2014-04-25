@@ -29,6 +29,7 @@
 #include <mapnik/text/formatting/text.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // boost
 
@@ -38,7 +39,7 @@ namespace mapnik
 {
 using boost::optional;
 
-
+/*
 static const char * label_placement_strings[] = {
     "point",
     "line",
@@ -95,14 +96,10 @@ static const char * text_upright_strings[] = {
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
 
+*/
 
 text_symbolizer_properties::text_symbolizer_properties() :
-    orientation(),
-    displacement(0.0,0.0),
     label_placement(POINT_PLACEMENT),
-    halign(H_AUTO),
-    jalign(J_AUTO),
-    valign(V_AUTO),
     label_spacing(0.0),
     label_position_tolerance(0.0),
     avoid_edges(false),
@@ -113,11 +110,8 @@ text_symbolizer_properties::text_symbolizer_properties() :
     force_odd_labels(false),
     allow_overlap(false),
     largest_bbox_only(true),
-    text_ratio(0.0),
-    wrap_width(0.0),
-    wrap_before(false),
-    rotate_displacement(false),
     upright(UPRIGHT_AUTO),
+    layout_defaults(std::make_shared<text_layout_properties>()),
     format(std::make_shared<char_properties>()),
     tree_()
 {
@@ -144,18 +138,10 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
     return tree_;
 }
 
-void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const & fontsets)
+void text_symbolizer_properties::placement_properties_from_xml(xml_node const &sym)
 {
     optional<label_placement_e> placement_ = sym.get_opt_attr<label_placement_e>("placement");
     if (placement_) label_placement = *placement_;
-    optional<vertical_alignment_e> valign_ = sym.get_opt_attr<vertical_alignment_e>("vertical-alignment");
-    if (valign_) valign = *valign_;
-    optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
-    if (text_ratio_) text_ratio = *text_ratio_;
-    optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
-    if (wrap_width_) wrap_width = *wrap_width_;
-    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
-    if (wrap_before_) wrap_before = *wrap_before_;
     optional<double> label_position_tolerance_ = sym.get_opt_attr<double>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
@@ -177,22 +163,18 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (allow_overlap_) allow_overlap = *allow_overlap_;
     optional<boolean> largest_bbox_only_ = sym.get_opt_attr<boolean>("largest-bbox-only");
     if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
-    optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
-    if (halign_) halign = *halign_;
-    optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
-    if (jalign_) jalign = *jalign_;
-    optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
-    if (orientation_) orientation = *orientation_;
-    optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
-    if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
-    optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");
-    if (upright_) upright = *upright_;
-    optional<double> dx = sym.get_opt_attr<double>("dx");
-    if (dx) displacement.x = *dx;
-    optional<double> dy = sym.get_opt_attr<double>("dy");
-    if (dy) displacement.y = *dy;
+}
+
+void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const & fontsets)
+{
+    placement_properties_from_xml(sym);
+
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
+    optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");
+    if (upright_) upright = *upright_;
+
+    layout_defaults->from_xml(sym);
 
     optional<expression_ptr> name_ = sym.get_opt_attr<expression_ptr>("name");
     if (name_)
@@ -211,41 +193,9 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
                                         bool explicit_defaults,
                                         text_symbolizer_properties const& dfl) const
 {
-    if (orientation)
-    {
-        std::string const& orientationstr = to_expression_string(*orientation);
-        if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
-            set_attr(node, "orientation", orientationstr);
-        }
-    }
-
-    if (displacement.x != dfl.displacement.x || explicit_defaults)
-    {
-        set_attr(node, "dx", displacement.x);
-    }
-    if (displacement.y != dfl.displacement.y || explicit_defaults)
-    {
-        set_attr(node, "dy", displacement.y);
-    }
     if (label_placement != dfl.label_placement || explicit_defaults)
     {
         set_attr(node, "placement", label_placement);
-    }
-    if (valign != dfl.valign || explicit_defaults)
-    {
-        set_attr(node, "vertical-alignment", valign);
-    }
-    if (text_ratio != dfl.text_ratio || explicit_defaults)
-    {
-        set_attr(node, "text-ratio", text_ratio);
-    }
-    if (wrap_width != dfl.wrap_width || explicit_defaults)
-    {
-        set_attr(node, "wrap-width", wrap_width);
-    }
-    if (wrap_before != dfl.wrap_before || explicit_defaults)
-    {
-        set_attr(node, "wrap-before", wrap_before);
     }
     if (label_position_tolerance != dfl.label_position_tolerance || explicit_defaults)
     {
@@ -267,21 +217,97 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "minimum-path-length", minimum_path_length);
     }
-    if (allow_overlap != dfl.allow_overlap || explicit_defaults)
-    {
-        set_attr(node, "allow-overlap", allow_overlap);
-    }
     if (avoid_edges != dfl.avoid_edges || explicit_defaults)
     {
         set_attr(node, "avoid-edges", avoid_edges);
     }
-    if (largest_bbox_only != dfl.largest_bbox_only|| explicit_defaults)
+    if (allow_overlap != dfl.allow_overlap || explicit_defaults)
     {
-        set_attr(node, "largest-bbox_only", largest_bbox_only);
+        set_attr(node, "allow-overlap", allow_overlap);
+    }
+    if (largest_bbox_only != dfl.largest_bbox_only || explicit_defaults)
+    {
+        set_attr(node, "largest-bbox-only", largest_bbox_only);
     }
     if (max_char_angle_delta != dfl.max_char_angle_delta || explicit_defaults)
     {
-        set_attr(node, "max-char-angle-delta", max_char_angle_delta);
+        set_attr(node, "max-char-angle-delta", max_char_angle_delta/(M_PI/180));
+    }
+    if (upright != dfl.upright || explicit_defaults)
+    {
+        set_attr(node, "upright", upright);
+    }
+
+    layout_defaults->to_xml(node, explicit_defaults, *(dfl.layout_defaults));
+    format->to_xml(node, explicit_defaults, *(dfl.format));
+    if (tree_) tree_->to_xml(node);
+}
+
+
+void text_symbolizer_properties::add_expressions(expression_set &output) const
+{
+    if (layout_defaults) layout_defaults->add_expressions(output);
+    if (tree_) tree_->add_expressions(output);
+}
+
+void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
+{
+    tree_ = std::make_shared<formatting::text_node>(expr);
+}
+
+text_layout_properties::text_layout_properties() :
+    orientation(),
+    displacement(0.0,0.0),
+    halign(H_AUTO),
+    jalign(J_AUTO),
+    valign(V_AUTO),
+    text_ratio(0.0),
+    wrap_width(0.0),
+    wrap_before(false),
+    rotate_displacement(false)
+{
+
+}
+
+void text_layout_properties::from_xml(xml_node const &sym)
+{
+    optional<double> dx = sym.get_opt_attr<double>("dx");
+    if (dx) displacement.x = *dx;
+    optional<double> dy = sym.get_opt_attr<double>("dy");
+    if (dy) displacement.y = *dy;
+    optional<vertical_alignment_e> valign_ = sym.get_opt_attr<vertical_alignment_e>("vertical-alignment");
+    if (valign_) valign = *valign_;
+    optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
+    if (halign_) halign = *halign_;
+    optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
+    if (jalign_) jalign = *jalign_;
+    optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
+    if (text_ratio_) text_ratio = *text_ratio_;
+    optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
+    if (wrap_width_) wrap_width = *wrap_width_;
+    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
+    if (wrap_before_) wrap_before = *wrap_before_;
+    optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
+    if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
+    optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
+    if (orientation_) orientation = *orientation_;
+}
+
+void text_layout_properties::to_xml(boost::property_tree::ptree &node,
+                                        bool explicit_defaults,
+                                        text_layout_properties const& dfl) const
+{
+    if (displacement.x != dfl.displacement.x || explicit_defaults)
+    {
+        set_attr(node, "dx", displacement.x);
+    }
+    if (displacement.y != dfl.displacement.y || explicit_defaults)
+    {
+        set_attr(node, "dy", displacement.y);
+    }
+    if (valign != dfl.valign || explicit_defaults)
+    {
+        set_attr(node, "vertical-alignment", valign);
     }
     if (halign != dfl.halign || explicit_defaults)
     {
@@ -291,32 +317,34 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "justify-alignment", jalign);
     }
-    if (valign != dfl.valign || explicit_defaults)
+    if (text_ratio != dfl.text_ratio || explicit_defaults)
     {
-        set_attr(node, "vertical-alignment", valign);
+        set_attr(node, "text-ratio", text_ratio);
+    }
+    if (wrap_width != dfl.wrap_width || explicit_defaults)
+    {
+        set_attr(node, "wrap-width", wrap_width);
+    }
+    if (wrap_before != dfl.wrap_before || explicit_defaults)
+    {
+        set_attr(node, "wrap-before", wrap_before);
     }
     if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
     {
         set_attr(node, "rotate-displacement", rotate_displacement);
     }
-    if (upright != dfl.upright || explicit_defaults)
+    if (orientation)
     {
-        set_attr(node, "upright", upright);
+        std::string const& orientationstr = to_expression_string(*orientation);
+        if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
+            set_attr(node, "orientation", orientationstr);
+        }
     }
-    format->to_xml(node, explicit_defaults, *(dfl.format));
-    if (tree_) tree_->to_xml(node);
 }
 
-
-void text_symbolizer_properties::add_expressions(expression_set &output) const
+void text_layout_properties::add_expressions(expression_set &output) const
 {
     output.insert(orientation);
-    if (tree_) tree_->add_expressions(output);
-}
-
-void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
-{
-    tree_ = std::make_shared<formatting::text_node>(expr);
 }
 
 char_properties::char_properties() :

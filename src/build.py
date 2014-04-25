@@ -145,7 +145,6 @@ else: # unix, non-macos
 source = Split(
     """
     fs.cpp
-    debug_symbolizer.cpp
     request.cpp
     well_known_srs.cpp
     params.cpp
@@ -158,7 +157,6 @@ source = Split(
     image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
-    building_symbolizer.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
@@ -179,8 +177,6 @@ source = Split(
     image_reader.cpp
     image_util.cpp
     layer.cpp
-    line_symbolizer.cpp
-    line_pattern_symbolizer.cpp
     map.cpp
     load_map.cpp
     memory.cpp
@@ -189,26 +185,18 @@ source = Split(
     palette.cpp
     path_expression_grammar.cpp
     plugin.cpp
-    point_symbolizer.cpp
-    polygon_pattern_symbolizer.cpp
-    polygon_symbolizer.cpp
     rule.cpp
     save_map.cpp
-    shield_symbolizer.cpp
-    text_symbolizer.cpp
     wkb.cpp
     projection.cpp
     proj_transform.cpp
-    distance.cpp
     scale_denominator.cpp
     simplify.cpp
     memory_datasource.cpp
-    stroke.cpp
     symbolizer.cpp
+    symbolizer_keys.cpp
     unicode.cpp
-    markers_symbolizer.cpp
     raster_colorizer.cpp
-    raster_symbolizer.cpp
     wkt/wkt_factory.cpp
     wkt/wkt_generator.cpp
     mapped_memory_cache.cpp
@@ -239,15 +227,21 @@ source = Split(
     text/formatting/list.cpp
     text/formatting/text.cpp
     text/formatting/format.cpp
+    text/formatting/layout.cpp
     text/formatting/registry.cpp
     text/placements/registry.cpp
     text/placements/base.cpp
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/simple.cpp
+    group/group_layout_manager.cpp
+    group/group_rule.cpp
+    group/group_symbolizer_helper.cpp
     xml_tree.cpp
     config_error.cpp
     color_factory.cpp
+    renderer_common.cpp
+    renderer_common/process_group_symbolizer.cpp
     """
     )
 
@@ -308,6 +302,7 @@ source += Split(
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
+    agg/process_group_symbolizer.cpp
     agg/process_debug_symbolizer.cpp
     """
     )
@@ -337,6 +332,7 @@ if env['GRID_RENDERER']:
         grid/process_raster_symbolizer.cpp
         grid/process_shield_symbolizer.cpp
         grid/process_text_symbolizer.cpp
+        grid/process_group_symbolizer.cpp
         """)
     lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
     libmapnik_defines.append('-DGRID_RENDERER')
@@ -359,6 +355,7 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/process_raster_symbolizer.cpp
     svg/output/process_shield_symbolizer.cpp
     svg/output/process_text_symbolizer.cpp
+    svg/output/process_group_symbolizer.cpp
     """)
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')

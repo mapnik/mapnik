@@ -28,8 +28,6 @@
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
-
-#include <mapnik/line_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 // agg
@@ -38,9 +36,6 @@
 #include "agg_scanline_bin.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
-
-// boost
-
 
 // stl
 #include <string>
@@ -60,7 +55,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                                simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
     agg::scanline_bin sl;
 
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
 
     grid_renderer_base_type renb(pixf);
@@ -68,34 +63,41 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    stroke const& stroke_ = sym.get_stroke();
-
     agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_transform(), scale_factor_);
+    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (transform) { evaluate_transform(tr, feature, *transform, common_.scale_factor_); }
 
-    box2d<double> clipping_extent = query_extent_;
-    if (sym.clip())
+    box2d<double> clipping_extent = common_.query_extent_;
+
+    bool clip = get<value_bool>(sym, keys::clip, feature, true);
+    double width = get<value_double>(sym, keys::stroke_width, feature, 1.0);
+    double offset = get<value_double>(sym, keys::offset, feature, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    bool has_dash = has_key<dash_array>(sym, keys::stroke_dasharray);
+
+    if (clip)
     {
-        double padding = (double)(query_extent_.width()/pixmap_.width());
-        double half_stroke = stroke_.get_width()/2.0;
+        double padding = (double)(common_.query_extent_.width()/pixmap_.width());
+        double half_stroke = width/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (std::fabs(sym.offset()) > 0)
-            padding *= std::fabs(sym.offset()) * 1.2;
-        padding *= scale_factor_;
+        if (std::fabs(offset) > 0)
+            padding *= std::fabs(offset) * 1.2;
+        padding *= common_.scale_factor_;
         clipping_extent.pad(padding);
     }
 
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
-    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(clipping_extent,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
+    if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
-    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
-    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-    if (stroke_.has_dash()) converter.set<dash_tag>();
+    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    if (has_dash) converter.set<dash_tag>();
     converter.set<stroke_tag>(); //always stroke
 
     for ( geometry_type & geom : feature.paths())

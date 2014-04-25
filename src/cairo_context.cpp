@@ -23,9 +23,9 @@
 #if defined(HAVE_CAIRO)
 
 #include <mapnik/cairo_context.hpp>
-#include <mapnik/text/face.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_set.hpp>
+#include <mapnik/text/face.hpp>
 
 #include <cairo-ft.h>
 
@@ -222,7 +222,7 @@ void cairo_context::set_line_width(double width)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::set_dash(dash_array const &dashes, double scale_factor)
+void cairo_context::set_dash(dash_array const& dashes, double scale_factor)
 {
     std::valarray<double> d(dashes.size() * 2);
     dash_array::const_iterator itr = dashes.begin();
@@ -405,7 +405,7 @@ void cairo_context::restore()
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::show_glyph(unsigned long index, pixel_position const& pos)
+void cairo_context::show_glyph(unsigned long index, pixel_position const &pos)
 {
     cairo_glyph_t glyph;
     glyph.index = index;
@@ -416,7 +416,7 @@ void cairo_context::show_glyph(unsigned long index, pixel_position const& pos)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::glyph_path(unsigned long index, pixel_position const& pos)
+void cairo_context::glyph_path(unsigned long index, pixel_position const &pos)
 {
     cairo_glyph_t glyph;
     glyph.index = index;
@@ -427,59 +427,106 @@ void cairo_context::glyph_path(unsigned long index, pixel_position const& pos)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_text(glyph_positions_ptr pos,
+void cairo_context::add_text(glyph_positions_ptr path,
                              cairo_face_manager & manager,
                              face_manager<freetype_engine> & font_manager,
                              double scale_factor)
 {
-    pixel_position const& base = pos->get_base_point();
+    pixel_position const& base_point = path->get_base_point();
+    const double sx = base_point.x;
+    const double sy = base_point.y;
 
-    //Render halo
-    glyph_positions::const_iterator itr, end = pos->end();
-    for (itr = pos->begin(); itr != end; itr++)
+    //render halo
+    double halo_radius = 0;
+    char_properties_ptr format;
+    for (auto const &glyph_pos : *path) 
     {
-        glyph_info const& glyph = *(itr->glyph);
-        double text_size = glyph.format->text_size * scale_factor;
-        glyph.face->set_character_sizes(text_size);
+        glyph_info const& glyph = *(glyph_pos.glyph);
+
+        if (glyph.format)
+        {
+            format = glyph.format;
+            // Settings have changed.
+            halo_radius = format->halo_radius * scale_factor;
+        }
+        // make sure we've got reasonable values.
+        if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
+
+        face_set_ptr faces = font_manager.get_face_set(format->face_name, format->fontset);
+        double text_size = format->text_size * scale_factor;
+        faces->set_character_sizes(text_size);
 
         cairo_matrix_t matrix;
-        matrix.xx = text_size * itr->rot.cos;
-        matrix.xy = text_size * itr->rot.sin;
-        matrix.yx = text_size * -itr->rot.sin;
-        matrix.yy = text_size * itr->rot.cos;
+        matrix.xx = text_size * glyph_pos.rot.cos;
+        matrix.xy = text_size * glyph_pos.rot.sin;
+        matrix.yx = text_size * -glyph_pos.rot.sin;
+        matrix.yy = text_size * glyph_pos.rot.cos;
         matrix.x0 = 0;
         matrix.y0 = 0;
-
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
-
-        glyph_path(glyph.glyph_index, base + ~(itr->pos + glyph.offset.rotate(itr->rot)));
-        set_line_width(2.0 * glyph.format->halo_radius * scale_factor);
+        pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
+        glyph_path(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
+        set_line_width(2.0 * halo_radius);
         set_line_join(ROUND_JOIN);
-        set_color(glyph.format->halo_fill);
+        set_color(format->halo_fill);
         stroke();
     }
-    //Render text
-    for (itr = pos->begin(); itr != end; itr++)
+
+    for (auto const &glyph_pos : *path) 
     {
-        glyph_info const& glyph = *(itr->glyph);
-        double text_size = glyph.format->text_size * scale_factor;
-        glyph.face->set_character_sizes(text_size);
+        glyph_info const& glyph = *(glyph_pos.glyph);
+
+        if (glyph.format)
+        {
+            format = glyph.format;
+        }
+
+        face_set_ptr faces = font_manager.get_face_set(format->face_name, format->fontset);
+        double text_size = format->text_size * scale_factor;
+        faces->set_character_sizes(text_size);
 
         cairo_matrix_t matrix;
-        matrix.xx = text_size * itr->rot.cos;
-        matrix.xy = text_size * itr->rot.sin;
-        matrix.yx = text_size * -itr->rot.sin;
-        matrix.yy = text_size * itr->rot.cos;
+        matrix.xx = text_size * glyph_pos.rot.cos;
+        matrix.xy = text_size * glyph_pos.rot.sin;
+        matrix.yx = text_size * -glyph_pos.rot.sin;
+        matrix.yy = text_size * glyph_pos.rot.cos;
         matrix.x0 = 0;
         matrix.y0 = 0;
-
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
-        set_color(glyph.format->fill);
-        show_glyph(glyph.glyph_index, base + ~(itr->pos + glyph.offset.rotate(itr->rot)));
+        pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
+        set_color(format->fill);
+        show_glyph(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
     }
+
 }
 
+cairo_face_manager::cairo_face_manager(std::shared_ptr<freetype_engine> font_engine)
+  : font_engine_(font_engine)
+{
+}
+
+cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
+{
+    cairo_face_cache::iterator itr = cache_.find(face);
+    cairo_face_ptr entry;
+
+    if (itr != cache_.end())
+    {
+        entry = itr->second;
+    }
+    else
+    {
+        entry = std::make_shared<cairo_face>(font_engine_, face);
+        cache_.insert(std::make_pair(face, entry));
+    }
+
+    return entry;
+}
+
+}
 } //ns mapnik
+
 #endif
+

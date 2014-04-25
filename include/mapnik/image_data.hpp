@@ -31,10 +31,10 @@
 #include <cstring>
 #include <stdexcept>
 
-
 namespace mapnik
 {
-template <class T> class ImageData
+template <typename T>
+class ImageData
 {
 public:
     typedef T pixel_type;
@@ -55,7 +55,7 @@ public:
         if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
     }
 
-    ImageData(const ImageData<T>& rhs)
+    ImageData(ImageData<T> const& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
          pData_((rhs.width_!=0 && rhs.height_!=0)?
@@ -63,6 +63,30 @@ public:
     {
         if (pData_) std::memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
     }
+
+    ImageData(ImageData<T> && rhs) noexcept
+        : width_(rhs.width_),
+          height_(rhs.height_),
+          pData_(rhs.pData_)
+    {
+        rhs.width_ = 0;
+        rhs.height_ = 0;
+        rhs.pData_ = nullptr;
+    }
+
+    ImageData<T>& operator=(ImageData<T> rhs)
+    {
+        swap(rhs);
+        return *this;
+    }
+
+    void swap(ImageData<T> & rhs)
+    {
+        std::swap(width_, rhs.width_);
+        std::swap(height_, rhs.height_);
+        std::swap(pData_, rhs.pData_);
+    }
+
     inline T& operator() (unsigned i,unsigned j)
     {
         assert(i<width_ && j<height_);
@@ -140,8 +164,8 @@ public:
     }
 
 private:
-    const unsigned width_;
-    const unsigned height_;
+    unsigned width_;
+    unsigned height_;
     T *pData_;
     ImageData& operator=(const ImageData&);
 };

@@ -48,7 +48,7 @@ public:
           std::string const& srs=MAPNIK_LONGLAT_PROJ);
 
     layer(layer const& l);
-    layer& operator=(layer const& rhs);
+    layer& operator=(layer rhs);
     bool operator==(layer const& other) const;
 
     /*!
@@ -199,7 +199,6 @@ public:
     void reset_buffer_size();
     ~layer();
 private:
-    void swap(layer& other);
 
     std::string name_;
     std::string srs_;

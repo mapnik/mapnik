@@ -31,11 +31,11 @@
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/point_symbolizer.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -52,68 +52,20 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
 
-    boost::optional<mapnik::marker_ptr> marker;
-    if ( !filename.empty() )
-    {
-        marker = marker_cache::instance().find(filename, true);
-    }
-    else
-    {
-        marker.reset(std::make_shared<mapnik::marker>());
-    }
-
-    if (marker)
-    {
-        box2d<double> const& bbox = (*marker)->bounding_box();
-        coord2d center = bbox.center();
-
-        agg::trans_affine tr;
-        evaluate_transform(tr, feature, sym.get_image_transform());
-        tr = agg::trans_affine_scaling(scale_factor_) * tr;
-
-        agg::trans_affine_translation recenter(-center.x, -center.y);
-        agg::trans_affine recenter_tr = recenter * tr;
-        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_) ;
-
-        for (std::size_t i=0; i<feature.num_geometries(); ++i)
-        {
-            geometry_type const& geom = feature.get_geometry(i);
-            double x;
-            double y;
-            double z=0;
-            if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-            {
-                if (!label::centroid(geom, x, y))
-                    return;
-            }
-            else
-            {
-                if (!label::interior_position(geom ,x, y))
-                    return;
-            }
-
-            prj_trans.backward(x,y,z);
-            t_.forward(&x,&y);
-            label_ext.re_center(x,y);
-            if (sym.get_allow_overlap() ||
-                detector_->has_placement(label_ext))
-            {
-
+    render_point_symbolizer(
+        sym, feature, prj_trans, common_,
+        [&](pixel_position const &pos, marker const &marker,
+            agg::trans_affine const &tr, double opacity) {
                 render_marker(feature,
                               pixmap_.get_resolution(),
-                              pixel_position(x, y),
-                              **marker,
+                              pos,
+                              marker,
                               tr,
-                              sym.get_opacity(),
-                              sym.comp_op());
-
-                if (!sym.get_ignore_placement())
-                    detector_->insert(label_ext);
-            }
-        }
-    }
+                              opacity,
+                              comp_op);
+        });
 }
 
 template void grid_renderer<grid>::process(point_symbolizer const&,

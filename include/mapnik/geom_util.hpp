@@ -247,6 +247,46 @@ double path_length(PathType & path)
     return length;
 }
 
+template <typename PathType>
+bool hit_test_first(PathType & path, double x, double y, double tol)
+{
+    bool inside=false;
+    double x0 = 0;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
+    path.rewind(0);
+    unsigned command = path.vertex(&x0, &y0);
+    if (command == SEG_END)
+    {
+        return false;
+    }
+    unsigned count = 0;
+    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    {
+        if (command == SEG_CLOSE)
+        {
+            break;
+        }
+        ++count;
+        if (command == SEG_MOVETO)
+        {
+            x0 = x1;
+            y0 = y1;
+            continue;
+        }
+
+        if ((((y1 <= y) && (y < y0)) ||
+             ((y0 <= y) && (y < y1))) &&
+            (x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
+            inside=!inside;
+
+        x0 = x1;
+        y0 = y1;
+    }
+    return inside;
+}
+
 namespace label {
 
 template <typename PathType>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="rgb(255,100,100)">
+    <Style name="road">
+        <Rule>
+            <LineSymbolizer stroke="rgb(255,255,255)" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+        </Rule>
+        <Rule>
+            <TextSymbolizer placement="line" label-position-tolerance="5" spacing="80" face-name="DejaVu Sans Book" halo-radius="1" halo-fill="rgb(255,255,0)">[NAME]</TextSymbolizer>
+        </Rule>
+    </Style>
+    <Layer name="road" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>road</StyleName>
+        <Datasource>
+            <Parameter name="file">../data/textspacing</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

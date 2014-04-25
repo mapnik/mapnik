@@ -35,7 +35,8 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
-
+#include <mapnik/gamma_method.hpp>
+#include <mapnik/renderer_common.hpp>
 // boost
 
 #include <memory>
@@ -57,21 +58,22 @@ namespace mapnik {
 
 namespace mapnik {
 
-template <typename T>
-class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
+template <typename T0, typename T1=label_collision_detector4>
+class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0> >,
                                  private mapnik::noncopyable
 {
 
 public:
-    typedef T buffer_type;
-    typedef agg_renderer<T> processor_impl_type;
+    typedef T0 buffer_type;
+    typedef agg_renderer<T0> processor_impl_type;
+    typedef T1 detector_type;
     // create with default, empty placement detector
-    agg_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    agg_renderer(Map const& m, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
-    agg_renderer(Map const &m, T & pixmap, std::shared_ptr<label_collision_detector4> detector,
+    agg_renderer(Map const &m, buffer_type & pixmap, std::shared_ptr<detector_type> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // pass in mapnik::request object to provide the mutable things per render
-    agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    agg_renderer(Map const& m, request const& req, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -114,13 +116,16 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
+    void process(group_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans);
     void process(debug_symbolizer const& sym,
                  feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    inline bool process(rule::symbolizers const& /*syms*/,
-                        mapnik::feature_impl & /*feature*/,
-                        proj_transform const& /*prj_trans*/)
+    inline bool process(rule::symbolizers const&,
+                        mapnik::feature_impl&,
+                        proj_transform const& )
     {
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
@@ -134,22 +139,22 @@ public:
 
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
     }
 
     inline box2d<double> clipping_extent() const
     {
-        if (t_.offset() > 0)
+        if (common_.t_.offset() > 0)
         {
-            box2d<double> box = query_extent_;
-            double scale = static_cast<double>(query_extent_.width())/static_cast<double>(width_);
+            box2d<double> box = common_.query_extent_;
+            double scale = static_cast<double>(common_.query_extent_.width())/static_cast<double>(common_.width_);
             // 3 is used here because at least 3 was needed for the 'style-level-compositing-tiled-0,1' visual test to pass
             // TODO - add more tests to hone in on a more robust #
-            scale *= t_.offset()*3;
+            scale *= common_.t_.offset()*3;
             box.pad(scale);
             return box;
         }
-        return query_extent_;
+        return common_.query_extent_;
     }
 
 protected:
@@ -164,18 +169,11 @@ private:
     buffer_type & pixmap_;
     std::shared_ptr<buffer_type> internal_buffer_;
     mutable buffer_type * current_buffer_;
-    CoordTransform t_;
     mutable bool style_level_compositing_;
-    unsigned width_;
-    unsigned height_;
-    double scale_factor_;
-    freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
-    std::shared_ptr<label_collision_detector4> detector_;
     const std::unique_ptr<rasterizer> ras_ptr;
-    box2d<double> query_extent_;
-    gamma_method_e gamma_method_;
+    gamma_method_enum gamma_method_;
     double gamma_;
+    renderer_common common_;
     void setup(Map const& m);
 };
 }

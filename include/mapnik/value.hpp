@@ -597,7 +597,12 @@ struct negate : public boost::static_visitor<V>
     }
 };
 
-struct to_bool : public boost::static_visitor<value_bool>
+// converters
+template <typename T>
+struct convert {};
+
+template <>
+struct convert<value_bool> : public boost::static_visitor<value_bool>
 {
     value_bool operator() (value_bool val) const
     {
@@ -622,7 +627,88 @@ struct to_bool : public boost::static_visitor<value_bool>
     }
 };
 
-struct to_string : public boost::static_visitor<std::string>
+template <>
+struct convert<value_double> : public boost::static_visitor<value_double>
+{
+    value_double operator() (value_double val) const
+    {
+        return val;
+    }
+
+    value_double operator() (value_integer val) const
+    {
+        return static_cast<value_double>(val);
+    }
+
+    value_double operator() (value_bool val) const
+    {
+        return static_cast<value_double>(val);
+    }
+
+    value_double operator() (std::string const& val) const
+    {
+        value_double result;
+        if (util::string2double(val,result))
+            return result;
+        return 0;
+    }
+
+    value_double operator() (value_unicode_string const& val) const
+    {
+        std::string utf8;
+        to_utf8(val,utf8);
+        return operator()(utf8);
+    }
+
+    value_double operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return 0.0;
+    }
+};
+
+template <>
+struct convert<value_integer> : public boost::static_visitor<value_integer>
+{
+    value_integer operator() (value_integer val) const
+    {
+        return val;
+    }
+
+    value_integer operator() (value_double val) const
+    {
+        return static_cast<value_integer>(rint(val));
+    }
+
+    value_integer operator() (value_bool val) const
+    {
+        return static_cast<value_integer>(val);
+    }
+
+    value_integer operator() (std::string const& val) const
+    {
+        value_integer result;
+        if (util::string2int(val,result))
+            return result;
+        return value_integer(0);
+    }
+
+    value_integer operator() (value_unicode_string const& val) const
+    {
+        std::string utf8;
+        to_utf8(val,utf8);
+        return operator()(utf8);
+    }
+
+    value_integer operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return value_integer(0);
+    }
+};
+
+template <>
+struct convert<std::string> : public boost::static_visitor<std::string>
 {
     template <typename T>
     std::string operator() (T val) const
@@ -720,84 +806,6 @@ struct to_expression_string : public boost::static_visitor<std::string>
     }
 };
 
-struct to_double : public boost::static_visitor<value_double>
-{
-    value_double operator() (value_double val) const
-    {
-        return val;
-    }
-
-    value_double operator() (value_integer val) const
-    {
-        return static_cast<value_double>(val);
-    }
-
-    value_double operator() (value_bool val) const
-    {
-        return static_cast<value_double>(val);
-    }
-
-    value_double operator() (std::string const& val) const
-    {
-        value_double result;
-        if (util::string2double(val,result))
-            return result;
-        return 0;
-    }
-
-    value_double operator() (value_unicode_string const& val) const
-    {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return operator()(utf8);
-    }
-
-    value_double operator() (value_null const& val) const
-    {
-        boost::ignore_unused_variable_warning(val);
-        return 0.0;
-    }
-};
-
-struct to_int : public boost::static_visitor<value_integer>
-{
-    value_integer operator() (value_integer val) const
-    {
-        return val;
-    }
-
-    value_integer operator() (value_double val) const
-    {
-        return static_cast<value_integer>(rint(val));
-    }
-
-    value_integer operator() (value_bool val) const
-    {
-        return static_cast<value_integer>(val);
-    }
-
-    value_integer operator() (std::string const& val) const
-    {
-        value_integer result;
-        if (util::string2int(val,result))
-            return result;
-        return value_integer(0);
-    }
-
-    value_integer operator() (value_unicode_string const& val) const
-    {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return operator()(utf8);
-    }
-
-    value_integer operator() (value_null const& val) const
-    {
-        boost::ignore_unused_variable_warning(val);
-        return value_integer(0);
-    }
-};
-
 } // namespace impl
 
 namespace value_adl_barrier {
@@ -886,9 +894,15 @@ public:
 
     bool is_null() const;
 
+    template <typename T>
+    T convert() const
+    {
+        return boost::apply_visitor(impl::convert<T>(),base_);
+    }
+
     value_bool to_bool() const
     {
-        return boost::apply_visitor(impl::to_bool(),base_);
+        return boost::apply_visitor(impl::convert<value_bool>(),base_);
     }
 
     std::string to_expression_string() const
@@ -898,7 +912,7 @@ public:
 
     std::string to_string() const
     {
-        return boost::apply_visitor(impl::to_string(),base_);
+        return boost::apply_visitor(impl::convert<std::string>(),base_);
     }
 
     value_unicode_string to_unicode() const
@@ -908,12 +922,12 @@ public:
 
     value_double to_double() const
     {
-        return boost::apply_visitor(impl::to_double(),base_);
+        return boost::apply_visitor(impl::convert<value_double>(),base_);
     }
 
     value_integer to_int() const
     {
-        return boost::apply_visitor(impl::to_int(),base_);
+        return boost::apply_visitor(impl::convert<value_integer>(),base_);
     }
 };
 

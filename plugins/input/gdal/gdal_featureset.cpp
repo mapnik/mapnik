@@ -203,7 +203,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
         if (im_width > 0 && im_height > 0)
         {
-            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, im_width, im_height);
+            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, im_width, im_height, filter_factor);
             feature->set_raster(raster);
             mapnik::image_data_32 & image = raster->data_;
             image.set(0xffffffff);
