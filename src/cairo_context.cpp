@@ -525,7 +525,6 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     return entry;
 }
 
-}
 } //ns mapnik
 
 #endif
