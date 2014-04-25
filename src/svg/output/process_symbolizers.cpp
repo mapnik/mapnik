@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(SVG_RENDERER)
+
 // mapnik
 #include <mapnik/svg/output/svg_renderer.hpp>
 
@@ -91,3 +93,6 @@ template bool svg_renderer<std::ostream_iterator<char> >::process(rule::symboliz
                                                                   proj_transform const& prj_trans);
 
 }
+
+#endif
+

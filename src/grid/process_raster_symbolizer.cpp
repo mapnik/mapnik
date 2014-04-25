@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
@@ -41,3 +43,5 @@ template void grid_renderer<grid>::process(raster_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif

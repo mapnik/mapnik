@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
@@ -201,3 +203,5 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
 template class grid_renderer<grid>;
 
 }
+
+#endif

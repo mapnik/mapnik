@@ -84,8 +84,10 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               offset_transform_tag, affine_transform_tag,
-                               simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+                               affine_transform_tag,
+                               simplify_tag, smooth_tag,
+                               offset_transform_tag,
+                               dash_tag, stroke_tag> conv_types;
 
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, agg::comp_op_src_over));

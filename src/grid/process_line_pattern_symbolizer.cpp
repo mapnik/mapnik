@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -67,7 +69,6 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, false);
 
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
     typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
@@ -148,3 +149,6 @@ template void grid_renderer<grid>::process(line_pattern_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif
+

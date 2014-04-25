@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#if defined(SVG_RENDERER)
+
 // mapnik
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 
@@ -288,3 +290,6 @@ namespace mapnik { namespace svg {
         svg_namespace_url_ = SVG_NAMESPACE_URL;
     }
     }}
+
+#endif
+

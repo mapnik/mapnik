@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(HAVE_CAIRO)
+
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_set.hpp>
@@ -524,3 +526,7 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
 }
 
 }
+} //ns mapnik
+
+#endif
+

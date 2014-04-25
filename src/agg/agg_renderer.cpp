@@ -219,7 +219,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
         {
             int radius = 0;
             mapnik::filter::filter_radius_visitor visitor(radius);
-            for(mapnik::filter::filter_type const& filter_tag : st.image_filters())
+            for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
                 boost::apply_visitor(visitor, filter_tag);
             }

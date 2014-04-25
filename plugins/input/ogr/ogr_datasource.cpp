@@ -165,8 +165,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
         int num_layers = dataset_->GetLayerCount();
         if (*layer_by_index >= num_layers)
         {
-            std::ostringstream s("OGR Plugin: only ");
-            s << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
+            std::ostringstream s;
+            s << "OGR Plugin: only " << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
             throw datasource_exception(s.str());
         }
 
@@ -214,7 +214,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (! layer_.is_valid())
     {
-        std::ostringstream s("OGR Plugin: ");
+        std::ostringstream s;
+        s << "OGR Plugin: ";
 
         if (layer_by_name)
         {
@@ -452,8 +453,8 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
 
         if (! found_name)
         {
-            std::ostringstream s("OGR Plugin: no attribute '");
-            s << *pos << "'. Valid attributes are: ";
+            std::ostringstream s;
+            s << "OGR Plugin: no attribute named '" << *pos << "'. Valid attributes are: ";
             std::vector<attribute_descriptor>::const_iterator e_itr = names.begin();
             std::vector<attribute_descriptor>::const_iterator e_end = names.end();
             for ( ;e_itr!=e_end;++e_itr)

@@ -23,6 +23,7 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>
@@ -334,8 +335,10 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               offset_transform_tag, affine_transform_tag,
-                               simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+                               affine_transform_tag,
+                               simplify_tag, smooth_tag,
+                               offset_transform_tag,
+                               dash_tag, stroke_tag> conv_types;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);

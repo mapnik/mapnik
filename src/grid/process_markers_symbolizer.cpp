@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 /*
 
 porting notes -->
@@ -151,3 +153,5 @@ template void grid_renderer<grid>::process(markers_symbolizer const&,
                                            mapnik::feature_impl &,
                                            proj_transform const&);
 }
+
+#endif

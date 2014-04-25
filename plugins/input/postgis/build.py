@@ -34,23 +34,21 @@ plugin_sources = Split(
   """ % locals()
 )
 
-# Link Library to Dependencies
+cxxflags = []
 plugin_env['LIBS'] = []
-libraries = ['pq']
-
-#if env['THREADING'] == 'multi':
-#    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':
-    # pg_config does not seem to report correct deps of libpq
-    # on os x so resort to hardcoding for now
-    if env['PLATFORM'] == 'Darwin':
-        libraries.extend(['ldap', 'pam', 'ssl', 'crypto', 'krb5'])
-    else:
-        # TODO - parse back into libraries variable
-        plugin_env.ParseConfig('pg_config --libs')
-        if plugin_env['LIBS']:
-            libraries.extend(copy(plugin_env['LIBS']))
+    # pkg-config is more reliable than pg_config across platforms
+    cmd = 'pkg-config libpq --libs --static'
+    try:
+        plugin_env.ParseConfig(cmd)
+    except OSError, e:
+        plugin_env.Append(LIBS='pq')
+else:
+    plugin_env.Append(LIBS='pq')
+
+# Link Library to Dependencies
+libraries = copy(plugin_env['LIBS'])
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.insert(0,'mapnik')

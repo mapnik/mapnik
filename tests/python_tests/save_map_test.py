@@ -39,7 +39,7 @@ def compare_map(xml):
     new_map = mapnik.Map(256, 256)
     mapnik.load_map(new_map, test_map,False,absolute_base)
     open(test_map2,'w').write(mapnik.save_map_to_string(new_map))
-    diff = ' diff %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
+    diff = ' diff -u %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
     try:
         eq_(open(test_map).read(),open(test_map2).read())
     except AssertionError, e:

@@ -236,11 +236,13 @@ files = {
     'group-symbolizer-1':{'sizes':[(512,512)]},
     'group-symbolizer-2':{'sizes':[(512,512)]},
     'group-symbolizer-line-1':{'sizes':[(512,512)]},
-    'group-symbolizer-line-2':{'sizes':[(512,512)]}
+    'group-symbolizer-line-2':{'sizes':[(512,512)]},
     'text-charplacement':{'sizes':[(512,512)]},
     'text-displacement':{'sizes':[(512,512)]},
     'text-overlap':{'sizes':[(512,512)]},
     'text-spacing':{'sizes':[(512,512)]},
+    # https://github.com/mapnik/mapnik/issues/2202
+    'line-smooth-and-offset':{'sizes':[(512,512)]}
     }
 
 class Reporting:

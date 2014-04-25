@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(SVG_RENDERER)
+
 // mapnik
 #include <mapnik/svg/output/svg_renderer.hpp>
 
@@ -37,3 +39,5 @@ template void svg_renderer<std::ostream_iterator<char> >::process(line_pattern_s
                                                                   mapnik::feature_impl & feature,
                                                                   proj_transform const& prj_trans);
 }
+
+#endif
