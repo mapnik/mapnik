@@ -778,13 +778,13 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
         # We expect this to trigger a PSQL error
         try:
-            mapnik.render_to_file(map1,'world.png', 'png')
+            mapnik.render_to_file(map1,'/tmp/mapnik-postgis-test-map1.png', 'png')
             # Test must fail if error was not raised just above
             eq_(False,True)
         except RuntimeError:
             pass
         # This used to raise an exception before correction of issue 2042
-        mapnik.render_to_file(map2,'world2.png', 'png')
+        mapnik.render_to_file(map2,'/tmp/mapnik-postgis-test-map2.png', 'png')
 
     def test_handling_of_zm_dimensions():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
