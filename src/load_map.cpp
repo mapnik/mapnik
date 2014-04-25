@@ -1327,6 +1327,8 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         ensure_exists(file);
         put(shield_symbol, keys::file , parse_path(file, sym.get_tree().path_expr_grammar));
         parse_symbolizer_base(shield_symbol, sym);
+        optional<halo_rasterizer_e> halo_rasterizer_ = sym.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
+        if (halo_rasterizer_) put(shield_symbol, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
         rule.append(std::move(shield_symbol));
     }
     catch (config_error const& ex)
