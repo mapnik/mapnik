@@ -278,7 +278,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         except StopIteration:
             pass
         eq_(feature,None)
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
+        eq_(ds.describe()['geometry_type'],None)
 
     def test_geometry_detection():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
