@@ -25,6 +25,7 @@
 #include <mapnik/value_types.hpp>
 
 #include <cstring>
+#include <algorithm>
 
 #include <boost/spirit/include/qi.hpp>
 
@@ -58,39 +59,6 @@ BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long_type())
 #endif
 BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_type())
 BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_type())
-
-struct bool_symbols : qi::symbols<char,bool>
-{
-    bool_symbols()
-    {
-        add("true",true)
-            ("false",false)
-            ("yes",true)
-            ("no",false)
-            ("on",true)
-            ("off",false)
-            ("1",true)
-            ("0",false);
-    }
-};
-
-bool string2bool(const char * iter, const char * end, bool & result)
-{
-    boost::spirit::qi::no_case_type no_case;
-    ascii::space_type space;
-    bool r = qi::phrase_parse(iter,end,no_case[bool_symbols()],space,result);
-    return r && (iter == end);
-}
-
-bool string2bool(std::string const& value, bool & result)
-{
-    boost::spirit::qi::no_case_type no_case;
-    ascii::space_type space;
-    std::string::const_iterator str_beg = value.begin();
-    std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],space,result);
-    return r && (str_beg == str_end);
-}
 
 bool string2int(const char * iter, const char * end, int & result)
 {
