@@ -235,7 +235,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             try
             {
                 // create throwaway projection object here to ensure it is valid
-                projection proj(srs);
+                projection proj(srs,true);
             }
             catch (std::exception const& ex)
             {
@@ -366,7 +366,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             {
                 std::string name = itr->get_attr<std::string>("name");
                 std::string value = itr->get_text();
-                file_sources_[name] = value;
+                file_sources_[std::move(name)] = std::move(value);
             }
             else if (itr->is("Datasource"))
             {
@@ -380,10 +380,10 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                     {
                         std::string param_name = paramIter->get_attr<std::string>("name");
                         std::string value = paramIter->get_text();
-                        params[param_name] = value;
+                        params[std::move(param_name)] = std::move(value);
                     }
                 }
-                datasource_templates_[name] = params;
+                datasource_templates_[name] = std::move(params);
             }
             else if (itr->is("Parameters"))
             {
@@ -403,20 +403,20 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                             {
                                 is_string = false;
                                 mapnik::value_integer value = paramIter->get_value<mapnik::value_integer>();
-                                params[name] = value;
+                                params[std::move(name)] = std::move(value);
                             }
                             else if (*type == "float")
                             {
                                 is_string = false;
                                 double value = paramIter->get_value<mapnik::value_double>();
-                                params[name] = value;
+                                params[std::move(name)] = std::move(value);
                             }
                         }
 
                         if (is_string)
                         {
                             std::string value = paramIter->get_text();
-                            params[name] = value;
+                            params[std::move(name)] = std::move(value);
                         }
                     }
                 }
@@ -467,12 +467,18 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
-            std::string filter_str = *filters;
-            bool result = filter::parse_image_filters(filter_str, style.image_filters());
-            if (!result)
+            std::string::const_iterator itr = filters->begin();
+            std::string::const_iterator end = filters->end();
+            boost::spirit::qi::ascii::space_type space;
+            bool result = boost::spirit::qi::phrase_parse(itr,end,
+                                                          sty.get_tree().image_filters_grammar,
+                                                          space,
+                                                          style.image_filters());
+            if (!result || itr!=end)
             {
-                throw config_error("failed to parse image-filters: '" + filter_str + "'");
+                throw config_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
             }
+
         }
 
         // direct image filters (applied directly on main image buffer
@@ -482,9 +488,8 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
         if (direct_filters)
         {
-            std::string filter_str = *direct_filters;
-            std::string::const_iterator itr = filter_str.begin();
-            std::string::const_iterator end = filter_str.end();
+            std::string::const_iterator itr = direct_filters->begin();
+            std::string::const_iterator end = direct_filters->end();
             boost::spirit::qi::ascii::space_type space;
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           sty.get_tree().image_filters_grammar,
@@ -496,6 +501,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             }
         }
 
+        style.reserve(sty.size());
         // rules
         for (auto const& rule_ : sty)
         {
@@ -504,7 +510,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
                 parse_rule(style, rule_);
             }
         }
-        map.insert_style(name, style);
+        map.insert_style(name, std::move(style));
     }
     catch (config_error const& ex)
     {
@@ -541,11 +547,11 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
             throw mapnik::config_error("no valid fonts could be loaded");
         }
 
-        map.insert_fontset(name, fontset);
+        map.insert_fontset(name, std::move(fontset));
 
         // XXX Hack because map object isn't accessible by text_symbolizer
         // when it's parsed
-        fontsets_.insert(std::pair<std::string, font_set>(name, fontset));
+        fontsets_.insert(std::move(std::make_pair(name, fontset)));
     }
     catch (config_error const& ex)
     {
@@ -590,7 +596,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         try
         {
             // create throwaway projection object here to ensure it is valid
-            projection proj(srs);
+            projection proj(srs,true);
         }
         catch (std::exception const& ex)
         {
@@ -807,7 +813,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
         }
 
         parse_symbolizers(rule, node);
-        style.add_rule(rule);
+        style.add_rule(std::move(rule));
 
     }
     catch (config_error const& ex)
@@ -822,6 +828,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
 
 void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
 {
+    rule.reserve(node.size());
     for (auto const& sym_node : node)
     {
         switch (name2int(sym_node.name().c_str()))
@@ -1378,14 +1385,18 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & sym)
             {
                 size_t size = buf.size();
                 if (size % 2 == 1)
+                {
                     buf.insert(buf.end(),buf.begin(),buf.end());
+                }
 
                 dash_array dash;
                 std::vector<double>::const_iterator pos = buf.begin();
                 while (pos != buf.end())
                 {
                     if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
+                    {
                         dash.emplace_back(*pos,*(pos + 1));
+                    }
                     pos +=2;
                 }
                 if (dash.size() > 0)

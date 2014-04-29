@@ -68,7 +68,7 @@ public:
     feature_type_style(feature_type_style const& rhs);
     feature_type_style& operator=(feature_type_style rhs);
 
-    void add_rule(rule const& rule);
+    void add_rule(rule && rule);
     rules const& get_rules() const;
     rules& get_rules_nonconst();
 
@@ -89,6 +89,10 @@ public:
     float get_opacity() const;
     void set_image_filters_inflate(bool inflate);
     bool image_filters_inflate() const;
+    inline void reserve(std::size_t size)
+    {
+        rules_.reserve(size);
+    }
 
     ~feature_type_style() {}
 

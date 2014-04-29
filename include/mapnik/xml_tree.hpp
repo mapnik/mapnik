@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/xml_node.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/transform_expression_grammar.hpp>
@@ -52,6 +53,8 @@ private:
     std::string file_;
     transcoder tr_;
 public:
+    mutable std::map<std::string,mapnik::color> color_cache_;
+    mutable std::map<std::string,mapnik::expression_ptr> expr_cache_;
     mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
     mapnik::expression_grammar<std::string::const_iterator> expr_grammar;
     path_expression_grammar<std::string::const_iterator> path_expr_grammar;

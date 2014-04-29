@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     r.set_filter(mapnik::parse_expression("[foo]='bar'"));
     r.append(std::move(mapnik::markers_symbolizer()));
     mapnik::feature_type_style style;
-    style.add_rule(r);
+    style.add_rule(std::move(r));
     map.insert_style("style",style);
 
     std::string csv_plugin("./plugins/input/csv.input");

@@ -82,6 +82,10 @@ public:
     {
         return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6 && !syms_.empty());
     }
+    inline void reserve(std::size_t size)
+    {
+        syms_.reserve(size);
+    }
 
 private:
 

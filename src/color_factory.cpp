@@ -46,7 +46,7 @@ color parse_color(std::string const& str,
                                                   c);
     if (result && (first == last))
     {
-        return c;
+        return std::move(c);
     }
     else
     {

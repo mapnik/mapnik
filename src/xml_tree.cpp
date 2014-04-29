@@ -126,8 +126,9 @@ const xml_node &xml_tree::root() const
     return node_;
 }
 
-xml_attribute::xml_attribute(std::string const& value_)
-    : value(value_), processed(false)
+xml_attribute::xml_attribute(const char * value_)
+    : value(value_),
+      processed(false)
 {
 
 }
@@ -167,9 +168,9 @@ const char* more_than_one_child::what() const throw()
 
 more_than_one_child::~more_than_one_child() throw() {}
 
-xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool is_text)
+xml_node::xml_node(xml_tree &tree, std::string && name, unsigned line, bool is_text)
     : tree_(tree),
-      name_(name),
+      name_(std::move(name)),
       is_text_(is_text),
       line_(line),
       processed_(false) {}
@@ -221,15 +222,15 @@ bool xml_node::is(std::string const& name) const
     return false;
 }
 
-xml_node &xml_node::add_child(std::string const& name, unsigned line, bool is_text)
+xml_node &xml_node::add_child(std::string && name, unsigned line, bool is_text)
 {
-    children_.push_back(xml_node(tree_, name, line, is_text));
+    children_.emplace_back(tree_, std::move(name), line, is_text);
     return children_.back();
 }
 
-void xml_node::add_attribute(std::string const& name, std::string const& value)
+void xml_node::add_attribute(const char * name, const char * value)
 {
-    attributes_.insert(std::make_pair(name,xml_attribute(value)));
+    attributes_.insert(std::move(std::make_pair(name,std::move(xml_attribute(value)))));
 }
 
 xml_node::attribute_map const& xml_node::get_attributes() const
@@ -245,6 +246,11 @@ void xml_node::set_processed(bool processed) const
 bool xml_node::processed() const
 {
     return processed_;
+}
+
+std::size_t xml_node::size() const
+{
+    return children_.size();
 }
 
 xml_node::const_iterator xml_node::begin() const
@@ -302,6 +308,7 @@ bool xml_node::has_child(std::string const& name) const
 template <typename T>
 boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
 {
+    if (attributes_.empty()) return boost::optional<T>();
     std::map<std::string, xml_attribute>::const_iterator itr = attributes_.find(name);
     if (itr ==  attributes_.end()) return boost::optional<T>();
     itr->second.processed = true;
@@ -333,7 +340,7 @@ T xml_node::get_attr(std::string const& name) const
 
 std::string xml_node::get_text() const
 {
-    if (children_.size() == 0)
+    if (children_.empty())
     {
         if (is_text_)
         {

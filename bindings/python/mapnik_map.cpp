@@ -47,6 +47,16 @@ std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
 
+void insert_style(mapnik::Map & m, std::string const& name, mapnik::feature_type_style const& style)
+{
+    m.insert_style(name,style);
+}
+
+void insert_fontset(mapnik::Map & m, std::string const& name, mapnik::font_set const& fontset)
+{
+    m.insert_fontset(name,fontset);
+}
+
 mapnik::feature_type_style find_style(mapnik::Map const& m, std::string const& name)
 {
     boost::optional<mapnik::feature_type_style const&> style = m.find_style(name);
@@ -163,7 +173,7 @@ void export_map()
                     "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
                     ))
 
-        .def("append_style",&Map::insert_style,
+        .def("append_style",insert_style,
              (arg("style_name"),arg("style_object")),
              "Insert a Mapnik Style onto the map by appending it.\n"
              "\n"
@@ -176,7 +186,7 @@ void export_map()
              "False # you can only append styles with unique names\n"
             )
 
-        .def("append_fontset",&Map::insert_fontset,
+        .def("append_fontset",insert_fontset,
              (arg("fontset")),
              "Add a FontSet to the map."
             )

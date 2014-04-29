@@ -66,9 +66,9 @@ feature_type_style& feature_type_style::operator=(feature_type_style rhs)
     return *this;
 }
 
-void feature_type_style::add_rule(rule const& rule)
+void feature_type_style::add_rule(rule && rule)
 {
-    rules_.push_back(rule);
+    rules_.push_back(std::move(rule));
 }
 
 rules const& feature_type_style::get_rules() const

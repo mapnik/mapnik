@@ -69,7 +69,7 @@ int main(int argc, char** argv)
         placement_finder->defaults.set_old_style_expression(mapnik::parse_expression("[name]"));
         mapnik::put<mapnik::text_placements_ptr>(text_sym, mapnik::keys::text_placements_, placement_finder);
         r.append(std::move(text_sym));
-        the_style.add_rule(r);
+        the_style.add_rule(std::move(r));
         m.insert_style("style",the_style );
         m.zoom_to_box(mapnik::box2d<double>(-256,-256,
                                             256,256));
