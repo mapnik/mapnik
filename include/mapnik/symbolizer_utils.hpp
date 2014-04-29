@@ -101,6 +101,12 @@ struct symbolizer_traits<building_symbolizer>
 };
 
 template<>
+struct symbolizer_traits<group_symbolizer>
+{
+    static char const* name() { return "GroupSymbolizer";}
+};
+
+template<>
 struct symbolizer_traits<debug_symbolizer>
 {
     static char const* name() { return "DebugSymbolizer";}
