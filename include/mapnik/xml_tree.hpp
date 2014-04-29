@@ -53,7 +53,6 @@ private:
     std::string file_;
     transcoder tr_;
 public:
-    mutable std::map<std::string,mapnik::color> color_cache_;
     mutable std::map<std::string,mapnik::expression_ptr> expr_cache_;
     mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
     mapnik::expression_grammar<std::string::const_iterator> expr_grammar;

@@ -180,7 +180,17 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
 {
     static inline boost::optional<mapnik::expression_ptr> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
     {
-        return parse_expression(source, tree.expr_grammar);
+        std::map<std::string,mapnik::expression_ptr>::const_iterator itr = tree.expr_cache_.find(source);
+        if (itr != tree.expr_cache_.end())
+        {
+            return itr->second;
+        }
+        else
+        {
+            mapnik::expression_ptr expr = parse_expression(source, tree.expr_grammar);
+            tree.expr_cache_.insert(std::move(std::make_pair(source,expr)));
+            return expr;
+        }
     }
 };
 

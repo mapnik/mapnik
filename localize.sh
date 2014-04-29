@@ -1,13 +1,12 @@
 #!/bin/bash
 UNAME=$(uname -s)
-CURRENT_DIR=$(pwd)
-
+export CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ ${UNAME} = 'Darwin' ]; then
-    export DYLD_LIBRARY_PATH="${CURRENT_DIR}/src/":${DYLD_LIBRARY_PATH}
+    export DYLD_LIBRARY_PATH="${CURRENT_DIR}/src/"
 else
-    export LD_LIBRARY_PATH="${CURRENT_DIR}/src/":${DYLD_LIBRARY_PATH}
+    export LD_LIBRARY_PATH="${CURRENT_DIR}/src/"
 fi
-export PYTHONPATH="${CURRENT_DIR}/bindings/python/":${PYTHONPATH}
+export PYTHONPATH="${CURRENT_DIR}/bindings/python/"
 export MAPNIK_FONT_DIRECTORY="${CURRENT_DIR}/fonts/dejavu-fonts-ttf-2.33/ttf/"
 export MAPNIK_INPUT_PLUGINS_DIRECTORY="${CURRENT_DIR}/plugins/input/"
 export PATH="${CURRENT_DIR}/bin/":${PATH}
