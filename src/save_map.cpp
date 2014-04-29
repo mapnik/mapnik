@@ -41,6 +41,9 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer_utils.hpp>
 #include <mapnik/transform_processor.hpp>
+#include <mapnik/group/group_rule.hpp>
+#include <mapnik/group/group_layout.hpp>
+#include <mapnik/group/group_symbolizer_properties.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -118,6 +121,10 @@ void serialize_raster_colorizer(ptree & sym_node,
     }
 }
 
+void serialize_group_symbolizer_properties(ptree & sym_node,
+                                           group_symbolizer_properties_ptr const& properties,
+                                           bool explicit_defaults = false);
+
 template <typename Meta>
 class serialize_symbolizer_property : public boost::static_visitor<>
 {
@@ -187,6 +194,14 @@ public:
         node_.put("<xmlattr>." + std::string(std::get<0>(meta_)), os.str());
     }
 
+    void operator () (group_symbolizer_properties_ptr const& properties) const
+    {
+        if (properties)
+        {
+            serialize_group_symbolizer_properties(node_, properties);
+        }
+    }
+
     template <typename T>
     void operator () ( T const& val ) const
     {
@@ -225,6 +240,89 @@ private:
     ptree & rule_;
     bool explicit_defaults_;
 };
+
+class serialize_group_layout : public boost::static_visitor<>
+{
+public:
+    serialize_group_layout(ptree & parent_node, bool explicit_defaults)
+        : parent_node_(parent_node),
+          explicit_defaults_(explicit_defaults) {}
+
+    void operator() ( simple_row_layout const& layout) const
+    {
+        ptree & layout_node = parent_node_.push_back(
+                ptree::value_type("SimpleLayout", ptree() ))->second;
+
+        simple_row_layout dfl;
+        if (explicit_defaults_ || layout.get_item_margin() != dfl.get_item_margin())
+        {
+            set_attr(layout_node, "item-margin", layout.get_item_margin());
+        }
+    }
+
+    void operator () ( pair_layout const& layout) const
+    {
+        ptree & layout_node = parent_node_.push_back(
+                ptree::value_type("PairLayout", ptree() ))->second;
+
+        pair_layout dfl;
+        if (explicit_defaults_ || layout.get_item_margin() != dfl.get_item_margin())
+        {
+            set_attr(layout_node, "item-margin", layout.get_item_margin());
+        }
+        if (explicit_defaults_ || layout.get_max_difference() != dfl.get_max_difference())
+        {
+            set_attr(layout_node, "max-difference", layout.get_max_difference());
+        }
+    }
+
+    template <typename T>
+    void operator () ( T const& val ) const {}
+
+private:
+    ptree & parent_node_;
+    bool explicit_defaults_;
+};
+
+void serialize_group_rule( ptree & parent_node, const group_rule & r, bool explicit_defaults)
+{
+    ptree & rule_node = parent_node.push_back(
+        ptree::value_type("GroupRule", ptree() ))->second;
+
+    group_rule dfl;
+    std::string filter = mapnik::to_expression_string(*r.get_filter());
+    std::string default_filter = mapnik::to_expression_string(*dfl.get_filter());
+
+    if (filter != default_filter)
+    {
+        rule_node.push_back( ptree::value_type(
+                                 "Filter", ptree()))->second.put_value( filter );
+    }
+
+    if (r.get_repeat_key())
+    {
+        std::string repeat_key = mapnik::to_expression_string(*r.get_repeat_key());
+        rule_node.push_back( ptree::value_type(
+                                 "RepeatKey", ptree()))->second.put_value( repeat_key );
+    }
+
+    rule::symbolizers::const_iterator begin = r.get_symbolizers().begin();
+    rule::symbolizers::const_iterator end = r.get_symbolizers().end();
+    serialize_symbolizer serializer( rule_node, explicit_defaults);
+    std::for_each( begin, end , boost::apply_visitor( serializer ));
+}
+
+void serialize_group_symbolizer_properties(ptree & sym_node,
+                                           group_symbolizer_properties_ptr const& properties,
+                                           bool explicit_defaults)
+{
+    boost::apply_visitor(serialize_group_layout(sym_node, explicit_defaults), properties->get_layout());
+
+    for (auto const& rule : properties->get_rules())
+    {
+        serialize_group_rule(sym_node, *rule, explicit_defaults);
+    }
+}
 
 void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
 {
