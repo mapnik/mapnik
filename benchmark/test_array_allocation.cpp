@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <array>
 #include <valarray>
+#include <boost/container/static_vector.hpp>
 
 // http://stackoverflow.com/questions/17347254/why-is-allocation-and-deallocation-of-stdvector-slower-than-dynamic-array-on-m
 
@@ -228,7 +229,7 @@ public:
     void operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
-             std::string data(&array_[0]);
+             std::string data(&array_[0],array_.size());
              ensure_zero((uint8_t *)&data[0],size_);
          }
     }
@@ -255,7 +256,32 @@ public:
     void operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
-             std::valarray<uint8_t> data(size_,0);
+             std::valarray<uint8_t> data(static_cast<uint8_t>(0),static_cast<size_t>(size_));
+             ensure_zero(&data[0],size_);
+         }
+    }
+};
+
+// http://i42.co.uk/stuff/vecarray.htm
+// http://www.boost.org/doc/libs/1_54_0/doc/html/boost/container/static_vector.html
+
+class test7 : public benchmark::test_case
+{
+public:
+    uint32_t size_;
+    std::vector<uint8_t> array_;
+    test7(mapnik::parameters const& params)
+     : test_case(params),
+       size_(*params.get<mapnik::value_integer>("size",256*256)),
+       array_(size_,0) { }
+    bool validate() const
+    {
+        return true;
+    }
+    void operator()() const
+    {
+         for (std::size_t i=0;i<iterations_;++i) {
+             boost::container::static_vector<uint8_t,256*256> data(size_,0);
              ensure_zero(&data[0],size_);
          }
     }
@@ -299,12 +325,16 @@ int main(int argc, char** argv)
         run(test_runner,"std::string range");
     }
     {
-        test5 test_runner(params);
+        test5b test_runner(params);
         run(test_runner,"std::string &[0]");
     }
     {
-        test5 test_runner(params);
+        test6 test_runner(params);
         run(test_runner,"valarray");
+    }
+    {
+        test7 test_runner(params);
+        run(test_runner,"static_vector");
     }
     return 0;
 }
