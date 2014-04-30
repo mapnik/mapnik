@@ -35,6 +35,8 @@ namespace mapnik { namespace svg {
         using namespace boost::spirit;
         typedef const char * iterator_type;
         typedef ascii::space_type skip_type;
+        // TODO - make it possible for this to be static const
+        // by avoiding ctor taking arg - https://github.com/mapnik/mapnik/pull/2231
         svg_transform_grammar<iterator_type,skip_type,TransformType> g(p);
         iterator_type first = wkt;
         iterator_type last =  wkt + std::strlen(wkt);
