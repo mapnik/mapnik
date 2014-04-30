@@ -26,11 +26,9 @@
 // mapnik
 #include <mapnik/xml_node.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/unicode.hpp>
 
 //stl
 #include <string>
-#include <memory>
 
 namespace mapnik
 {
@@ -46,10 +44,8 @@ public:
 private:
     xml_node node_;
     std::string file_;
-    transcoder tr_;
 public:
     mutable std::map<std::string,mapnik::expression_ptr> expr_cache_;
-
 };
 
 } //ns mapnik

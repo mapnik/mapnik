@@ -99,8 +99,7 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 
 xml_tree::xml_tree(std::string const& encoding)
     : node_(*this, "<root>"),
-      file_(),
-      tr_(encoding)
+      file_()
 {
     node_.set_processed(true); //root node is always processed
 }

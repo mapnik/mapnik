@@ -423,8 +423,6 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     mapnik::transcoder tr(desc_.get_encoding());
-    //mapnik::wkt_parser parse_wkt;
-    //mapnik::json::geometry_parser<std::string::const_iterator> parse_json;
 
     // handle rare case of a single line of data and user-provided headers
     // where a lack of a newline will mean that std::getline returns false

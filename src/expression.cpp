@@ -35,7 +35,7 @@ namespace mapnik
 
 expression_ptr parse_expression(std::string const& str, std::string const& encoding)
 {
-    static expression_grammar<std::string::const_iterator> g;
+    static const expression_grammar<std::string::const_iterator> g;
     return parse_expression(str, g);
 }
 

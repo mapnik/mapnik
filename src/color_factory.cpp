@@ -30,7 +30,7 @@ namespace mapnik {
 
 color parse_color(std::string const& str)
 {
-    static css_color_grammar<std::string::const_iterator> g;
+    static const css_color_grammar<std::string::const_iterator> g;
     return parse_color(str, g);
 }
 

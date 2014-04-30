@@ -36,7 +36,7 @@ transform_list_ptr parse_transform(std::string const& str)
 transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
 {
     transform_list_ptr tl = std::make_shared<transform_list>();
-    static transform_expression_grammar_string gte;
+    static const transform_expression_grammar_string gte;
     if (!parse_transform(*tl, str, gte))
     {
         tl.reset();
@@ -47,7 +47,7 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
 bool parse_transform(transform_list& tl,
                      std::string const& str)
 {
-    static transform_expression_grammar_string gte;
+    static const transform_expression_grammar_string gte;
     return parse_transform(tl, str, gte);
 }
 

@@ -42,20 +42,21 @@ template <typename Iterator>
 geometry_parser<Iterator>::~geometry_parser() {}
 
 template <typename Iterator>
-bool geometry_parser<Iterator>::parse(iterator_type first, iterator_type last, boost::ptr_vector<mapnik::geometry_type>& path)
+bool geometry_parser<Iterator>::parse(iterator_type first, iterator_type last, boost::ptr_vector<mapnik::geometry_type>& paths)
 {
     using namespace boost::spirit;
     standard_wide::space_type space;
-    return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(path)), space);
+    return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(paths)), space);
 }
-
 
 bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths)
 {
-    static geometry_parser<std::string::const_iterator> parser;
+    using namespace boost::spirit;
+    static const geometry_grammar<std::string::const_iterator> g;
+    standard_wide::space_type space;
     std::string::const_iterator start = json.begin();
     std::string::const_iterator end = json.end();
-    return parser.parse(start, end ,paths);
+    return qi::phrase_parse(start, end, (g)(boost::phoenix::ref(paths)), space);
 }
 
 template class geometry_parser<std::string::const_iterator> ;
