@@ -303,7 +303,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     if (xmlStrEqual(name, BAD_CAST "transform"))
     {
         agg::trans_affine tr;
-        mapnik::svg::parse_transform((const char*) value,tr);
+        mapnik::svg::parse_svg_transform((const char*) value,tr);
         parser.path_.transform().premultiply(tr);
     }
     else if (xmlStrEqual(name, BAD_CAST "fill"))
@@ -911,7 +911,7 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     if (value)
     {
         agg::trans_affine tr;
-        mapnik::svg::parse_transform((const char*) value,tr);
+        mapnik::svg::parse_svg_transform((const char*) value,tr);
         parser.temporary_gradient_.second.set_transform(tr);
         xmlFree(value);
     }
