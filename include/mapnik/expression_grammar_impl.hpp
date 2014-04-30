@@ -64,11 +64,12 @@ expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const
 }
 
 template <typename Iterator>
-expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
+expression_grammar<Iterator>::expression_grammar()
     : expression_grammar::base_type(expr),
-      unicode_(unicode_impl(tr)),
-      regex_match_(regex_match_impl(tr)),
-      regex_replace_(regex_replace_impl(tr))
+      tr_("utf-8"),
+      unicode_(unicode_impl(tr_)),
+      regex_match_(regex_match_impl(tr_)),
+      regex_replace_(regex_replace_impl(tr_))
 {
     qi::_1_type _1;
     qi::_a_type _a;

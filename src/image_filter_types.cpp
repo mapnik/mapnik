@@ -46,7 +46,7 @@ bool parse_image_filters(std::string const& filters, std::vector<filter_type>& i
 {
     std::string::const_iterator itr = filters.begin();
     std::string::const_iterator end = filters.end();
-    mapnik::image_filter_grammar<std::string::const_iterator,
+    static mapnik::image_filter_grammar<std::string::const_iterator,
                                  std::vector<mapnik::filter::filter_type> > filter_grammar;
     boost::spirit::qi::ascii::space_type space;
     bool r = boost::spirit::qi::phrase_parse(itr,end,

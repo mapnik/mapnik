@@ -52,7 +52,7 @@ bool geometry_parser<Iterator>::parse(iterator_type first, iterator_type last, b
 
 bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths)
 {
-    geometry_parser<std::string::const_iterator> parser;
+    static geometry_parser<std::string::const_iterator> parser;
     std::string::const_iterator start = json.begin();
     std::string::const_iterator end = json.end();
     return parser.parse(start, end ,paths);

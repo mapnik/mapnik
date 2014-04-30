@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_attribute_cast.hpp>
 #include <mapnik/util/conversions.hpp>
@@ -32,6 +33,9 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
+
+#include <mapnik/expression.hpp>
+
 // stl
 #include <type_traits>
 
@@ -96,12 +100,7 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 xml_tree::xml_tree(std::string const& encoding)
     : node_(*this, "<root>"),
       file_(),
-      tr_(encoding),
-      color_grammar(),
-      expr_grammar(tr_),
-      path_expr_grammar(),
-      transform_expr_grammar(expr_grammar),
-      image_filters_grammar()
+      tr_(encoding)
 {
     node_.set_processed(true); //root node is always processed
 }

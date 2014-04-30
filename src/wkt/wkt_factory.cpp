@@ -47,7 +47,7 @@ bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> 
 
 bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
-    wkt_parser parser;
+    static wkt_parser parser;
     return parser.parse(wkt,paths);
 }
 

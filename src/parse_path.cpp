@@ -40,7 +40,7 @@ namespace mapnik {
 
 path_expression_ptr parse_path(std::string const& str)
 {
-    path_expression_grammar<std::string::const_iterator> g;
+    static path_expression_grammar<std::string::const_iterator> g;
     return parse_path(str,g);
 }
 

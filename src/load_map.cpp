@@ -55,7 +55,7 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/group/group_rule.hpp>
-
+#include <mapnik/transform_expression.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -467,18 +467,9 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
-            std::string::const_iterator itr = filters->begin();
-            std::string::const_iterator end = filters->end();
-            boost::spirit::qi::ascii::space_type space;
-            bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          sty.get_tree().image_filters_grammar,
-                                                          space,
-                                                          style.image_filters());
-            if (!result || itr!=end)
-            {
-                throw config_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
+            if (!parse_image_filters(*filters, style.image_filters())) {
+                throw config_error("failed to parse image-filters: '" + *filters + "'");
             }
-
         }
 
         // direct image filters (applied directly on main image buffer
@@ -488,16 +479,8 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
         if (direct_filters)
         {
-            std::string::const_iterator itr = direct_filters->begin();
-            std::string::const_iterator end = direct_filters->end();
-            boost::spirit::qi::ascii::space_type space;
-            bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          sty.get_tree().image_filters_grammar,
-                                                          space,
-                                                          style.direct_image_filters());
-            if (!result || itr!=end)
-            {
-                throw config_error("failed to parse direct-image-filters: '" + std::string(itr,end) + "'");
+            if (!parse_image_filters(*direct_filters, style.direct_image_filters())) {
+                throw config_error("failed to parse direct-image-filters: '" + *direct_filters + "'");
             }
         }
 
@@ -926,7 +909,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     if (geometry_transform_wkt)
     {
         mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
-        if (!mapnik::parse_transform(*tl, *geometry_transform_wkt, pt.get_tree().transform_expr_grammar))
+        if (!mapnik::parse_transform(*tl, *geometry_transform_wkt))
         {
             std::string ss("Could not parse transform from '");
             ss += *geometry_transform_wkt + "', expected transform attribute";
@@ -989,12 +972,12 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             *file = ensure_relative_to_xml(file);
             std::string filename = *file;
             ensure_exists(filename);
-            put(symbol, keys::file, parse_path(filename, sym.get_tree().path_expr_grammar));
+            put(symbol, keys::file, parse_path(filename));
 
             if (image_transform_wkt)
             {
                 mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
-                if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
+                if (!mapnik::parse_transform(*tl, *image_transform_wkt))
                 {
                     throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
                 }
@@ -1058,7 +1041,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         if (!filename.empty())
         {
             ensure_exists(filename);
-            put(symbol,keys::file, parse_path(filename, sym.get_tree().path_expr_grammar));
+            put(symbol,keys::file, parse_path(filename));
         }
 
         // overall opacity to be applied to all paths
@@ -1071,7 +1054,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         if (image_transform_wkt)
         {
             mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
-            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt))
             {
                 throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
             }
@@ -1139,7 +1122,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
         line_pattern_symbolizer symbol;
-        put(symbol, keys::file, parse_path(file, sym.get_tree().path_expr_grammar));
+        put(symbol, keys::file, parse_path(file));
 
         // offset value
         optional<double> offset = sym.get_opt_attr<double>("offset");
@@ -1181,7 +1164,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
         polygon_pattern_symbolizer symbol;
-        put(symbol, keys::file, parse_path(file, sym.get_tree().path_expr_grammar));
+        put(symbol, keys::file, parse_path(file));
 
         // pattern alignment
         optional<pattern_alignment_e> p_alignment = sym.get_opt_attr<pattern_alignment_e>("alignment");
@@ -1239,7 +1222,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
         if (halo_transform_wkt)
         {
             mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
-            if (!mapnik::parse_transform(*tl, *halo_transform_wkt, sym.get_tree().transform_expr_grammar))
+            if (!mapnik::parse_transform(*tl, *halo_transform_wkt))
             {
                 throw mapnik::config_error("Failed to parse halo-transform: '" + *halo_transform_wkt + "'");
             }
@@ -1279,7 +1262,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         if (image_transform_wkt)
         {
             mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
-            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt))
             {
                 throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
             }
@@ -1332,7 +1315,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
-        put(shield_symbol, keys::file , parse_path(file, sym.get_tree().path_expr_grammar));
+        put(shield_symbol, keys::file , parse_path(file));
         parse_symbolizer_base(shield_symbol, sym);
         optional<halo_rasterizer_e> halo_rasterizer_ = sym.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
         if (halo_rasterizer_) put(shield_symbol, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));

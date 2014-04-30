@@ -38,7 +38,7 @@ namespace mapnik {
     struct transform_expression_grammar
         : qi::grammar<Iterator, transform_list(), space_type>
     {
-        explicit transform_expression_grammar(expression_grammar<Iterator> const& g);
+        explicit transform_expression_grammar();
 
         typedef qi::rule<Iterator, transform_node(), space_type> node_rule;
         typedef qi::rule<Iterator, transform_list(), space_type> list_rule;
@@ -57,6 +57,7 @@ namespace mapnik {
         qi::rule<Iterator, transform_node(), space_type> rotate;
         qi::rule<Iterator, transform_node(), space_type> skewX;
         qi::rule<Iterator, transform_node(), space_type> skewY;
+        mapnik::expression_grammar<Iterator> g_;
     };
 
 } // namespace mapnik
