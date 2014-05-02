@@ -19,7 +19,11 @@ endif
 
 all: mapnik
 
-g: config.gypi mapnik.gyp
+./deps/gyp:
+	git clone --depth 1 https://chromium.googlesource.com/external/gyp.git ./deps/gyp
+	patch -N deps/gyp/pylib/gyp/input.py gyp.diff
+
+g: config.gypi mapnik.gyp ./deps/gyp
 	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. --generator-output=./build/ -f make
 	make -C build V=$(V) mapnik -j2
 
