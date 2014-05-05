@@ -140,12 +140,12 @@ Map::const_style_iterator Map::end_styles() const
 // TODO(dane) - only kept for python bindings, can we avoid needing?
 bool Map::insert_style(std::string const& name,feature_type_style const& style)
 {
-    return styles_.insert(std::move(make_pair(name,style))).second;
+    return styles_.insert(make_pair(name,style)).second;
 }
 
 bool Map::insert_style(std::string const& name,feature_type_style && style)
 {
-    return styles_.insert(std::move(make_pair(name,std::move(style)))).second;
+    return styles_.insert(make_pair(name, std::move(style))).second;
 }
 
 void Map::remove_style(std::string const& name)
@@ -168,7 +168,7 @@ bool Map::insert_fontset(std::string const& name, font_set const& fontset)
     {
         throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
     }
-    return fontsets_.insert(std::move(make_pair(name, fontset))).second;
+    return fontsets_.insert(make_pair(name, fontset)).second;
 }
 
 bool Map::insert_fontset(std::string const& name, font_set && fontset)
@@ -177,7 +177,7 @@ bool Map::insert_fontset(std::string const& name, font_set && fontset)
     {
         throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
     }
-    return fontsets_.insert(std::move(make_pair(name, std::move(fontset)))).second;
+    return fontsets_.insert(make_pair(name, std::move(fontset))).second;
 }
 
 boost::optional<font_set const&> Map::find_fontset(std::string const& name) const

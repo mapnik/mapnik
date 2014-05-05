@@ -230,7 +230,7 @@ xml_node &xml_node::add_child(std::string && name, unsigned line, bool is_text)
 
 void xml_node::add_attribute(const char * name, const char * value)
 {
-    attributes_.insert(std::move(std::make_pair(name,std::move(xml_attribute(value)))));
+    attributes_.insert(std::make_pair(name,xml_attribute(value)));
 }
 
 xml_node::attribute_map const& xml_node::get_attributes() const
