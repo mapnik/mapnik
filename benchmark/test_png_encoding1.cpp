@@ -18,7 +18,7 @@ public:
         std::string out;
         for (std::size_t i=0;i<iterations_;++i) {
             out.clear();
-            out = mapnik::save_to_string(im_,"png8:m=h");
+            out = mapnik::save_to_string(im_,"png8:m=h:z=1");
         }
     }
 };
