@@ -1148,7 +1148,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
 
         if(base)
         {
-            std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
+            std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
             if (itr!=file_sources_.end())
             {
                 file = itr->second + "/" + file;
