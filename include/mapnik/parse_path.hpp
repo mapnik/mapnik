@@ -34,12 +34,9 @@
 namespace mapnik {
 
 // fwd declare to reduce compile time
-template <typename Iterator> struct path_expression_grammar;
 class feature_impl;
 
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
-MAPNIK_DECL path_expression_ptr parse_path(std::string const & str,
-                                           path_expression_grammar<std::string::const_iterator> const& g);
 
 struct MAPNIK_DECL path_processor
 {

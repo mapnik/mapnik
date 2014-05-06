@@ -160,7 +160,7 @@ struct do_xml_attribute_cast<mapnik::color>
 {
     static inline boost::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
     {
-        return parse_color(source, tree.color_grammar);
+        return parse_color(source);
     }
 };
 
@@ -187,7 +187,7 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
         }
         else
         {
-            mapnik::expression_ptr expr = parse_expression(source, tree.expr_grammar);
+            mapnik::expression_ptr expr = parse_expression(source);
             tree.expr_cache_.insert(std::make_pair(source,expr));
             return expr;
         }

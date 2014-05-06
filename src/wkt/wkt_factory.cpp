@@ -47,8 +47,12 @@ bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> 
 
 bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
-    wkt_parser parser;
-    return parser.parse(wkt,paths);
+    using namespace boost::spirit;
+    static const mapnik::wkt::wkt_collection_grammar<std::string::const_iterator> g;
+    ascii::space_type space;
+    std::string::const_iterator first = wkt.begin();
+    std::string::const_iterator last =  wkt.end();
+    return qi::phrase_parse(first, last, g, space, paths);
 }
 
 }

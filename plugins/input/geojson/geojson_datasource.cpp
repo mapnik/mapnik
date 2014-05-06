@@ -132,6 +132,8 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::json::generic_json<boost::spirit::multi_pass<base_iterator_type> > json;
+    // TODO - make it possible for this to be static const
+    // by avoiding ctor taking arg - https://github.com/mapnik/mapnik/pull/2231
     mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(json, ctx,*tr_);
     bool result = p.parse(begin,end, features_);
     if (!result)

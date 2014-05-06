@@ -34,7 +34,7 @@ namespace mapnik {
 namespace qi = boost::spirit::qi;
 
 template <typename Iterator>
-transform_expression_grammar<Iterator>::transform_expression_grammar(expression_grammar<Iterator> const& g)
+transform_expression_grammar<Iterator>::transform_expression_grammar()
         : transform_expression_grammar::base_type(start)
 {
     using boost::phoenix::construct;
@@ -123,8 +123,8 @@ transform_expression_grammar<Iterator>::transform_expression_grammar(expression_
     // expressions are separated by a comma.
     sep_expr = lit(',') >> expr [ _val = _1 ];
 
-    attr = g.attr.alias();
-    expr = g.expr.alias();
+    attr = g_.attr.alias();
+    expr = g_.expr.alias();
 }
 
 template struct mapnik::transform_expression_grammar<std::string::const_iterator>;

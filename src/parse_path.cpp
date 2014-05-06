@@ -31,30 +31,22 @@
 // boost
 #include <boost/variant.hpp>
 
-
 // stl
 #include <stdexcept>
-
 
 namespace mapnik {
 
 path_expression_ptr parse_path(std::string const& str)
 {
-    path_expression_grammar<std::string::const_iterator> g;
-    return parse_path(str,g);
-}
-
-path_expression_ptr parse_path(std::string const& str,
-                               path_expression_grammar<std::string::const_iterator> const& g)
-{
-    path_expression path;
+    static const path_expression_grammar<std::string::const_iterator> g;
+    auto path = std::make_shared<path_expression>();
     boost::spirit::standard_wide::space_type space;
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space, path);
-    if (r  && itr == end)
+    bool r = qi::phrase_parse(itr, end, g, space, *path);
+    if (r && itr == end)
     {
-        return std::make_shared<path_expression>(path); //path;
+        return path;
     }
     else
     {

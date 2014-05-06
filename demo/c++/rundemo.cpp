@@ -33,9 +33,6 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/expression.hpp>
-#include <mapnik/expression_string.hpp>
-#include <mapnik/expression_grammar.hpp>
 
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo_renderer.hpp>
@@ -58,9 +55,6 @@ int main ( int argc , char** argv)
         datasource_cache::instance().register_datasources("plugins/input/");
         freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.33/ttf/DejaVuSans.ttf");
 
-        mapnik::transcoder tr("utf-8");
-        mapnik::expression_grammar<std::string::const_iterator> expr_grammar(tr);
-
         Map m(800,600);
         m.set_background(parse_color("white"));
         m.set_srs(srs_merc);
@@ -70,7 +64,7 @@ int main ( int argc , char** argv)
         feature_type_style provpoly_style;
         {
             rule r;
-            r.set_filter(parse_expression("[NAME_EN] = 'Ontario'", expr_grammar));
+            r.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));
             {
                 polygon_symbolizer poly_sym;
                 put(poly_sym, keys::fill, color(250, 190, 183));
@@ -80,7 +74,7 @@ int main ( int argc , char** argv)
         }
         {
             rule r;
-            r.set_filter(parse_expression("[NOM_FR] = 'Québec'", expr_grammar));
+            r.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
             {
                 polygon_symbolizer poly_sym;
                 put(poly_sym, keys::fill, color(217, 235, 203));
@@ -113,7 +107,7 @@ int main ( int argc , char** argv)
         feature_type_style qcdrain_style;
         {
             rule r;
-            r.set_filter(parse_expression("[HYC] = 8", expr_grammar));
+            r.set_filter(parse_expression("[HYC] = 8"));
             {
                 polygon_symbolizer poly_sym;
                 put(poly_sym, keys::fill, color(153, 204, 255));
@@ -127,7 +121,7 @@ int main ( int argc , char** argv)
         feature_type_style roads34_style;
         {
             rule r;
-            r.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4", expr_grammar));
+            r.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4"));
             {
                 line_symbolizer line_sym;
                 put(line_sym,keys::stroke,color(171,158,137));
@@ -144,7 +138,7 @@ int main ( int argc , char** argv)
         feature_type_style roads2_style_1;
         {
             rule r;
-            r.set_filter(parse_expression("[CLASS] = 2", expr_grammar));
+            r.set_filter(parse_expression("[CLASS] = 2"));
             {
                 line_symbolizer line_sym;
                 put(line_sym,keys::stroke,color(171,158,137));
@@ -160,7 +154,7 @@ int main ( int argc , char** argv)
         feature_type_style roads2_style_2;
         {
             rule r;
-            r.set_filter(parse_expression("[CLASS] = 2", expr_grammar));
+            r.set_filter(parse_expression("[CLASS] = 2"));
             {
                 line_symbolizer line_sym;
                 put(line_sym,keys::stroke,color(255,250,115));
@@ -177,7 +171,7 @@ int main ( int argc , char** argv)
         feature_type_style roads1_style_1;
         {
             rule r;
-            r.set_filter(parse_expression("[CLASS] = 1", expr_grammar));
+            r.set_filter(parse_expression("[CLASS] = 1"));
             {
                 line_symbolizer line_sym;
                 put(line_sym,keys::stroke,color(188,149,28));
@@ -193,7 +187,7 @@ int main ( int argc , char** argv)
         feature_type_style roads1_style_2;
         {
             rule r;
-            r.set_filter(parse_expression("[CLASS] = 1", expr_grammar));
+            r.set_filter(parse_expression("[CLASS] = 1"));
             {
                 line_symbolizer line_sym;
                 put(line_sym,keys::stroke,color(242,191,36));
@@ -218,7 +212,7 @@ int main ( int argc , char** argv)
                 placement_finder->defaults.format->fill = color(0,0,0);
                 placement_finder->defaults.format->halo_fill = color(255,255,200);
                 placement_finder->defaults.format->halo_radius = 1;
-                placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]", expr_grammar));
+                placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]"));
                 put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
                 r.append(std::move(text_sym));
             }

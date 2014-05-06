@@ -423,8 +423,6 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     mapnik::transcoder tr(desc_.get_encoding());
-    mapnik::wkt_parser parse_wkt;
-    mapnik::json::geometry_parser<std::string::const_iterator> parse_json;
 
     // handle rare case of a single line of data and user-provided headers
     // where a lack of a newline will mean that std::getline returns false
@@ -543,7 +541,7 @@ void csv_datasource::parse_csv(T & stream,
                             break;
                         }
 
-                        if (parse_wkt.parse(value, feature->paths()))
+                        if (mapnik::from_wkt(value, feature->paths()))
                         {
                             parsed_wkt = true;
                         }
@@ -578,7 +576,7 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-                        if (parse_json.parse(value.begin(),value.end(), feature->paths()))
+                        if (mapnik::json::from_geojson(value, feature->paths()))
                         {
                             parsed_json = true;
                         }
@@ -686,7 +684,7 @@ void csv_datasource::parse_csv(T & stream,
                     (value_length > 1 && !has_dot && value[0] == '0'))
                 {
                     matched = true;
-                    feature->put(fld_name,tr.transcode(value.c_str()));
+                    feature->put(fld_name,std::move(tr.transcode(value.c_str())));
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
@@ -732,7 +730,7 @@ void csv_datasource::parse_csv(T & stream,
                 if (!matched)
                 {
                     // fallback to normal string
-                    feature->put(fld_name,tr.transcode(value.c_str()));
+                    feature->put(fld_name,std::move(tr.transcode(value.c_str())));
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(
