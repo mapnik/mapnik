@@ -215,7 +215,7 @@ private:
 
     int read_integer()
     {
-        boost::int32_t n;
+        std::int32_t n;
         if (needSwap_)
         {
             read_int32_xdr(wkb_ + pos_, n);

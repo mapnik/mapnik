@@ -35,7 +35,7 @@
 #include <mapnik/util/conversions.hpp>
 
 // boost
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 // stl
 #include <map>

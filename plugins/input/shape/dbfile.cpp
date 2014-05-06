@@ -30,13 +30,13 @@
 
 // boost
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp> // for int16_t and int32_t
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 
 // stl
+#include <cstdint>
 #include <string>
 #include <cstring>
 #include <stdexcept>
@@ -257,7 +257,7 @@ int dbf_file::read_short()
 {
     char b[2];
     file_.read(b,2);
-    boost::int16_t val;
+    std::int16_t val;
     mapnik::read_int16_ndr(b,val);
     return val;
 }
@@ -267,7 +267,7 @@ int dbf_file::read_int()
 {
     char b[4];
     file_.read(b,4);
-    boost::int32_t val;
+    std::int32_t val;
     mapnik::read_int32_ndr(b,val);
     return val;
 }

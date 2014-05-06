@@ -31,7 +31,7 @@
 #include <mapnik/datasource.hpp> // for feature_ptr
 
 // boost
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 // stl
 #include <map>

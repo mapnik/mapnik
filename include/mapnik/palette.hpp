@@ -56,7 +56,6 @@
 
 namespace mapnik {
 
-typedef boost::uint8_t byte;
 struct rgba;
 
 struct rgb {
@@ -142,4 +141,3 @@ private:
 } // namespace mapnik
 
 #endif // MAPNIK_PALETTE_HPP
-

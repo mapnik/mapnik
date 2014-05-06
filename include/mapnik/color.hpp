@@ -28,11 +28,11 @@
 #include <mapnik/global.hpp>
 
 //boost
-#include <boost/cstdint.hpp>
 #include <boost/operators.hpp>
 
 // stl
 #include <sstream>
+#include <cstdint>
 
 namespace mapnik {
 
@@ -40,10 +40,10 @@ class MAPNIK_DECL color
     : boost::equality_comparable<color>
 {
 private:
-    boost::uint8_t red_;
-    boost::uint8_t green_;
-    boost::uint8_t blue_;
-    boost::uint8_t alpha_;
+    std::uint8_t red_;
+    std::uint8_t green_;
+    std::uint8_t blue_;
+    std::uint8_t alpha_;
 
 public:
     color()
@@ -53,7 +53,7 @@ public:
         alpha_(0xff)
         {}
 
-    color(boost::uint8_t red, boost::uint8_t green, boost::uint8_t blue, boost::uint8_t alpha = 0xff)
+    color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 0xff)
       : red_(red),
         green_(green),
         blue_(blue),
@@ -88,38 +88,38 @@ public:
                (alpha_ == rhs.alpha());
     }
 
-    inline boost::uint8_t red() const
+    inline std::uint8_t red() const
     {
         return red_;
     }
 
-    inline boost::uint8_t green() const
+    inline std::uint8_t green() const
     {
         return green_;
     }
-    inline boost::uint8_t blue() const
+    inline std::uint8_t blue() const
     {
         return blue_;
     }
-    inline boost::uint8_t alpha() const
+    inline std::uint8_t alpha() const
     {
         return alpha_;
     }
 
-    inline void set_red(boost::uint8_t red)
+    inline void set_red(std::uint8_t red)
     {
         red_ = red;
     }
-    inline void set_green(boost::uint8_t green)
+    inline void set_green(std::uint8_t green)
     {
         green_ = green;
     }
 
-    inline void set_blue(boost::uint8_t blue)
+    inline void set_blue(std::uint8_t blue)
     {
         blue_ = blue;
     }
-    inline void set_alpha(boost::uint8_t alpha)
+    inline void set_alpha(std::uint8_t alpha)
     {
         alpha_ = alpha;
     }

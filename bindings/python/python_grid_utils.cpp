@@ -58,12 +58,12 @@ void grid2utf(T const& grid_type,
 
     keys_type keys;
     // start counting at utf8 codepoint 32, aka space character
-    boost::uint16_t codepoint = 32;
+    std::uint16_t codepoint = 32;
 
     unsigned array_size = data.width();
     for (unsigned y = 0; y < data.height(); ++y)
     {
-        boost::uint16_t idx = 0;
+        std::uint16_t idx = 0;
         const std::unique_ptr<Py_UNICODE[]> line(new Py_UNICODE[array_size]);
         typename T::value_type const* row = data.getRow(y);
         for (unsigned x = 0; x < data.width(); ++x)
@@ -121,12 +121,12 @@ void grid2utf(T const& grid_type,
 
     keys_type keys;
     // start counting at utf8 codepoint 32, aka space character
-    boost::uint16_t codepoint = 32;
+    std::uint16_t codepoint = 32;
 
     unsigned array_size = std::ceil(grid_type.width()/static_cast<float>(resolution));
     for (unsigned y = 0; y < grid_type.height(); y=y+resolution)
     {
-        boost::uint16_t idx = 0;
+        std::uint16_t idx = 0;
         const std::unique_ptr<Py_UNICODE[]> line(new Py_UNICODE[array_size]);
         mapnik::grid::value_type const* row = grid_type.getRow(y);
         for (unsigned x = 0; x < grid_type.width(); x=x+resolution)

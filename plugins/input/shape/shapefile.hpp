@@ -27,7 +27,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdexcept>
-
+#include <cstdint>
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -39,9 +39,6 @@
 #include <boost/interprocess/streams/bufferstream.hpp>
 #endif
 #include <mapnik/noncopyable.hpp>
-
-// boost
-#include <boost/cstdint.hpp>
 
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
@@ -106,7 +103,7 @@ struct shape_record
 
     int read_ndr_integer()
     {
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_ndr(&data[pos], val);
         pos += 4;
         return val;
@@ -114,7 +111,7 @@ struct shape_record
 
     int read_xdr_integer()
     {
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_xdr(&data[pos], val);
         pos += 4;
         return val;
@@ -206,7 +203,7 @@ public:
     {
         char b[4];
         file_.read(b, 4);
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_xdr(b, val);
         return val;
     }
@@ -215,7 +212,7 @@ public:
     {
         char b[4];
         file_.read(b, 4);
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_ndr(b, val);
         return val;
     }
