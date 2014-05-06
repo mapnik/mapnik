@@ -20,7 +20,7 @@ public:
     {
         std::string expected("./benchmark/data/multicolor-hextree-expected.png");
         std::string actual("./benchmark/data/multicolor-hextree-actual.png");
-        mapnik::save_to_file(im_->data(),actual, "png8:m=h");
+        mapnik::save_to_file(im_->data(),actual, "png8:m=h:z=1");
         return benchmark::compare_images(actual,expected);
     }
     void operator()() const
@@ -28,7 +28,7 @@ public:
         std::string out;
         for (std::size_t i=0;i<iterations_;++i) {
             out.clear();
-            out = mapnik::save_to_string(im_->data(),"png8:m=h");
+            out = mapnik::save_to_string(im_->data(),"png8:m=h:z=1");
         }
     }
 };

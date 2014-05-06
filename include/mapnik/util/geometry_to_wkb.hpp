@@ -24,6 +24,7 @@
 #define MAPNIK_GEOMETRY_TO_WKB_HPP
 
 // mapnik
+#include <mapnik/std.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 
@@ -141,7 +142,7 @@ wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
 {
     assert(g.size() == 1);
     std::size_t size = 1 + 4 + 8*2 ; // byteOrder + wkbType + Point
-    wkb_buffer_ptr wkb(new wkb_buffer(size));
+    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::geometry_type::types::Point);
@@ -161,7 +162,7 @@ wkb_buffer_ptr to_line_string_wkb( GeometryType const& g, wkbByteOrder byte_orde
     unsigned num_points = g.size();
     assert(num_points > 1);
     std::size_t size = 1 + 4 + 4 + 8*2*num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
-    wkb_buffer_ptr wkb(new wkb_buffer(size));
+    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::geometry_type::types::LineString);
@@ -209,7 +210,7 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
         }
     }
     unsigned num_rings = rings.size();
-    wkb_buffer_ptr wkb(new wkb_buffer(size));
+    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::geometry_type::types::Polygon);
@@ -281,7 +282,7 @@ wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
             wkb_cont.push_back(std::move(wkb));
         }
 
-        wkb_buffer_ptr multi_wkb( new wkb_buffer(multi_size));
+        wkb_buffer_ptr multi_wkb = std::make_unique<wkb_buffer>(multi_size);
         wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
         ss.write(reinterpret_cast<char*>(&byte_order),1);
         multi_type = collection ? 7 : multi_type + 3;

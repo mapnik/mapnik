@@ -576,19 +576,33 @@ private:
         switch (type)
         {
         case wkbPoint:               s << "Point"; break;
-        case wkbLineString:          s << "LineString"; break;
-        case wkbPolygon:             s << "Polygon"; break;
-        case wkbMultiPoint:          s << "MultiPoint"; break;
-        case wkbMultiLineString:     s << "MultiLineString"; break;
-        case wkbMultiPolygon:        s << "MultiPolygon"; break;
-        case wkbGeometryCollection:  s << "GeometryCollection"; break;
         case wkbPointZ:              s << "PointZ"; break;
-        case wkbLineStringZ:         s << "LineStringZ"; break;
-        case wkbPolygonZ:            s << "PolygonZ"; break;
+        case wkbPointM:              s << "PointM"; break;
+        case wkbPointZM:             s << "PointZM"; break;
+        case wkbMultiPoint:          s << "MultiPoint"; break;
         case wkbMultiPointZ:         s << "MultiPointZ"; break;
+        case wkbMultiPointM:         s << "MultiPointM"; break;
+        case wkbMultiPointZM:        s << "MultiPointZM"; break;
+        case wkbLineString:          s << "LineString"; break;
+        case wkbLineStringZ:         s << "LineStringZ"; break;
+        case wkbLineStringM:         s << "LineStringM"; break;
+        case wkbLineStringZM:        s << "LineStringZM"; break;
+        case wkbMultiLineString:     s << "MultiLineString"; break;
         case wkbMultiLineStringZ:    s << "MultiLineStringZ"; break;
+        case wkbMultiLineStringM:    s << "MultiLineStringM"; break;
+        case wkbMultiLineStringZM:   s << "MultiLineStringZM"; break;
+        case wkbPolygon:             s << "Polygon"; break;
+        case wkbPolygonZ:            s << "PolygonZ"; break;
+        case wkbPolygonM:            s << "PolygonM"; break;
+        case wkbPolygonZM:           s << "PolygonZM"; break;
+        case wkbMultiPolygon:        s << "MultiPolygon"; break;
         case wkbMultiPolygonZ:       s << "MultiPolygonZ"; break;
+        case wkbMultiPolygonM:       s << "MultiPolygonM"; break;
+        case wkbMultiPolygonZM:      s << "MultiPolygonZM"; break;
+        case wkbGeometryCollection:  s << "GeometryCollection"; break;
         case wkbGeometryCollectionZ: s << "GeometryCollectionZ"; break;
+        case wkbGeometryCollectionM: s << "GeometryCollectionM"; break;
+        case wkbGeometryCollectionZM: s << "GeometryCollectionZM"; break;
         default:                     s << "wkbUnknown(" << type << ")"; break;
         }
 

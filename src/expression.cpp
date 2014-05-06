@@ -36,12 +36,6 @@ namespace mapnik
 expression_ptr parse_expression(std::string const& str, std::string const& encoding)
 {
     static const expression_grammar<std::string::const_iterator> g;
-    return parse_expression(str, g);
-}
-
-expression_ptr parse_expression(std::string const& str,
-                                mapnik::expression_grammar<std::string::const_iterator> const& g)
-{
     boost::spirit::standard_wide::space_type space;
     auto node = std::make_shared<expr_node>();
     std::string::const_iterator itr = str.begin();

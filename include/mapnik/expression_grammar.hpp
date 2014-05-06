@@ -127,7 +127,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 {
     typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
 
-    explicit expression_grammar();
+    explicit expression_grammar(std::string const& encoding = "utf-8");
 
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
     typename integer_parser<mapnik::value_integer>::type int__;

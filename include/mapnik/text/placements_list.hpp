@@ -42,8 +42,8 @@ struct glyph_info;
 
 struct glyph_position
 {
-    glyph_position(glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
-        : glyph(&glyph), pos(pos), rot(rot) { }
+    glyph_position(glyph_info const& _glyph, pixel_position const& _pos, rotation const& _rot)
+        : glyph(&_glyph), pos(_pos), rot(_rot) { }
     glyph_info const* glyph;
     pixel_position pos;
     rotation rot;
@@ -52,8 +52,8 @@ struct glyph_position
 struct marker_info
 {
     marker_info() : marker(), transform() {}
-    marker_info(marker_ptr marker, agg::trans_affine const& transform) :
-        marker(marker), transform(transform) {}
+    marker_info(marker_ptr _marker, agg::trans_affine const& _transform) :
+        marker(_marker), transform(_transform) {}
     marker_ptr marker;
     agg::trans_affine transform;
 };

@@ -64,9 +64,9 @@ expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const
 }
 
 template <typename Iterator>
-expression_grammar<Iterator>::expression_grammar()
+expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     : expression_grammar::base_type(expr),
-      tr_("utf-8"),
+      tr_(encoding),
       unicode_(unicode_impl(tr_)),
       regex_match_(regex_match_impl(tr_)),
       regex_replace_(regex_replace_impl(tr_))
