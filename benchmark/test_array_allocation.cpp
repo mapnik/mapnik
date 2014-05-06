@@ -4,7 +4,10 @@
 #include <stdexcept>
 #include <array>
 #include <valarray>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 105400
 #include <boost/container/static_vector.hpp>
+#endif
 
 // http://stackoverflow.com/questions/17347254/why-is-allocation-and-deallocation-of-stdvector-slower-than-dynamic-array-on-m
 
@@ -262,6 +265,7 @@ public:
     }
 };
 
+#if BOOST_VERSION >= 105400
 // http://i42.co.uk/stuff/vecarray.htm
 // http://www.boost.org/doc/libs/1_54_0/doc/html/boost/container/static_vector.html
 
@@ -286,6 +290,7 @@ public:
          }
     }
 };
+#endif
 
 int main(int argc, char** argv)
 {
@@ -332,9 +337,11 @@ int main(int argc, char** argv)
         test6 test_runner(params);
         run(test_runner,"valarray");
     }
+#if BOOST_VERSION >= 105400
     {
         test7 test_runner(params);
         run(test_runner,"static_vector");
     }
+#endif
     return 0;
 }
