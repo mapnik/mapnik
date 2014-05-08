@@ -2,7 +2,8 @@ language: cpp
 
 compiler:
  - gcc
- - clang
+ # disabled to due https://github.com/mapnik/mapnik/issues/2235
+ #- clang
 
 # http://about.travis-ci.org/blog/2013-11-29-postgresql-92-93-now-available/
 addons:
