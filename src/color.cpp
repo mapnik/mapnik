@@ -31,6 +31,11 @@
 // boost
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_fusion.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
+
 // stl
 #include <sstream>
 
@@ -53,11 +58,11 @@ std::string color::to_string() const
     std::back_insert_iterator<std::string> sink(str);
     karma::generate(sink,
                     // begin grammar
-                    kstring[ phoenix::if_(alpha()==255) [_1="rgb("].else_[_1="rgba("]]
+                    kstring[ boost::phoenix::if_(alpha()==255) [_1="rgb("].else_[_1="rgba("]]
                     << color_generator[_1 = red()] << ','
                     << color_generator[_1 = green()] << ','
                     << color_generator[_1 = blue()]
-                    << kstring[ phoenix::if_(alpha()==255) [_1 = ')'].else_[_1 =',']]
+                    << kstring[ boost::phoenix::if_(alpha()==255) [_1 = ')'].else_[_1 =',']]
                     << eps(alpha()<255) << double_ [_1 = alpha()/255.0]
                     << ')'
                     // end grammar

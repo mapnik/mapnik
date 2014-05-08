@@ -1021,8 +1021,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             put(symbol, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
         }
 
-        optional<color> c = sym.get_opt_attr<color>("fill");
-        if (c) put(symbol, keys::fill, *c);
+        set_symbolizer_property<markers_symbolizer,color>(symbol, keys::fill, sym);
 
         optional<double> spacing = sym.get_opt_attr<double>("spacing");
         if (spacing) put(symbol,keys::spacing, *spacing);
@@ -1406,8 +1405,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
         building_symbolizer building_sym;
 
         // fill
-        optional<color> fill = sym.get_opt_attr<color>("fill");
-        if (fill) put(building_sym, keys::fill, *fill);
+        set_symbolizer_property<building_symbolizer,color>(building_sym, keys::fill, sym);
         // fill-opacity
         set_symbolizer_property<building_symbolizer,double>(building_sym, keys::fill_opacity, sym);
         // height

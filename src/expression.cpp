@@ -26,9 +26,9 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_grammar.hpp>
-#include <boost/spirit/include/qi.hpp>
 
 // boost
+#include <boost/spirit/include/qi.hpp>
 
 namespace mapnik
 {
@@ -47,7 +47,7 @@ expression_ptr parse_expression(std::string const& str, std::string const& encod
     }
     else
     {
-        throw config_error( "Failed to parse expression: \"" + str + "\"" );
+        throw config_error("Failed to parse expression: \"" + str + "\"");
     }
 }
 

@@ -261,6 +261,8 @@ struct evaluate_expression_wrapper<mapnik::color>
     mapnik::color operator() (T1 const& expr, T2 const& feature) const
     {
         mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value_type>(feature), expr);
+        // FIXME - throw instead?
+        if (val.is_null()) return mapnik::color(255,192,203); // pink
         return mapnik::color(val.to_string());
     }
 };

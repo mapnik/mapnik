@@ -194,7 +194,11 @@ struct evaluate_global_attributes : mapnik::noncopyable
         void operator() (expression_ptr const& expr) const
         {
             auto const& meta = get_meta(prop_.first);
-            boost::apply_visitor(assign_value<expression_ptr,Attributes>(prop_.second, expr, attributes_), std::get<1>(meta));
+            try {
+                boost::apply_visitor(assign_value<expression_ptr,Attributes>(prop_.second, expr, attributes_), std::get<1>(meta));
+            } catch (std::exception const& ex) {
+                // no-op
+            }
         }
 
         template <typename T>

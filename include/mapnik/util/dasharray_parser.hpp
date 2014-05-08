@@ -27,25 +27,26 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace util {
 
 template <typename Iterator>
 bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharray)
 {
+    using namespace boost::spirit;
     qi::double_type double_;
     qi::_1_type _1;
     qi::lit_type lit;
     qi::char_type char_;
     qi::ascii::space_type space;
     qi::no_skip_type no_skip;
-    using phoenix::push_back;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
     // no support for 'percentage' as viewport is unknown at load_map
     //
     bool r = qi::phrase_parse(first, last,
-                          (double_[push_back(phoenix::ref(dasharray), _1)] %
+                          (double_[boost::phoenix::push_back(boost::phoenix::ref(dasharray), _1)] %
                           no_skip[char_(", ")]
                           | lit("none")),
                           space);

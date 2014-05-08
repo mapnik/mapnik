@@ -30,13 +30,8 @@ namespace mapnik {
 
 color parse_color(std::string const& str)
 {
+    // TODO - early return for @color?
     static const css_color_grammar<std::string::const_iterator> g;
-    return parse_color(str, g);
-}
-
-color parse_color(std::string const& str,
-                  css_color_grammar<std::string::const_iterator> const& g)
-{
     color c;
     std::string::const_iterator first = str.begin();
     std::string::const_iterator last =  str.end();
@@ -50,7 +45,7 @@ color parse_color(std::string const& str,
     }
     else
     {
-        throw config_error( "Failed to parse color: \"" + str + "\"" );
+        throw config_error("Failed to a parse color: \"" + str + "\"");
     }
 }
 
