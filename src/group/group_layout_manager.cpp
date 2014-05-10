@@ -102,7 +102,7 @@ struct process_layout : public boost::static_visitor<>
             bottom_i = middle_ifirst + 1;
         }
 
-        while (bottom_i >= 0 && top_i < static_cast<int>(member_offsets_.size()))
+        while (bottom_i >= 0 && top_i >= 0 && top_i < static_cast<int>(member_offsets_.size()))
         {
             layout_box.expand_to_include(make_horiz_pair(top_i, layout_box.miny() - y_margin, -1, x_margin, layout.get_max_difference()));
             layout_box.expand_to_include(make_horiz_pair(bottom_i, layout_box.maxy() + y_margin, 1, x_margin, layout.get_max_difference()));
