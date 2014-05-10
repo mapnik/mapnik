@@ -87,7 +87,9 @@ struct process_layout : public boost::static_visitor<>
         }
 
         bound_box layout_box;
-        size_t middle_ifirst = (member_boxes_.size() - 1) >> 1, top_i = 0, bottom_i = 0;
+        size_t middle_ifirst = (member_boxes_.size() - 1) >> 1;
+        int top_i = 0;
+        int bottom_i = 0;
         if (middle_ifirst % 2 == 0)
         {
             layout_box = make_horiz_pair(0, 0.0, 0, x_margin, layout.get_max_difference());
@@ -100,7 +102,7 @@ struct process_layout : public boost::static_visitor<>
             bottom_i = middle_ifirst + 1;
         }
 
-        while (bottom_i >= 0 && top_i < member_offsets_.size())
+        while (bottom_i >= 0 && top_i < static_cast<int>(member_offsets_.size()))
         {
             layout_box.expand_to_include(make_horiz_pair(top_i, layout_box.miny() - y_margin, -1, x_margin, layout.get_max_difference()));
             layout_box.expand_to_include(make_horiz_pair(bottom_i, layout_box.maxy() + y_margin, 1, x_margin, layout.get_max_difference()));
