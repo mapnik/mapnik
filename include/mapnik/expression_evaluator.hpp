@@ -39,14 +39,16 @@
 namespace mapnik
 {
 
-template <typename T0, typename T1>
+template <typename T0, typename T1, typename T2>
 struct evaluate : boost::static_visitor<T1>
 {
     typedef T0 feature_type;
     typedef T1 value_type;
+    typedef T2 variable_type;
 
-    explicit evaluate(feature_type const& f)
-        : feature_(f) {}
+    explicit evaluate(feature_type const& f, variable_type const& v)
+        : feature_(f),
+          vars_(v) {}
 
     value_integer operator() (value_integer val) const
     {
@@ -80,7 +82,12 @@ struct evaluate : boost::static_visitor<T1>
 
     value_type operator() (global_attribute const& attr) const
     {
-        return value_type();// shouldn't get here
+        auto itr = vars_.find(attr.name);
+        if (itr != vars_.end())
+        {
+            return itr->second;
+        }
+        return value_type();// throw?
     }
 
     value_type operator() (geometry_type_attribute const& geom) const
@@ -144,6 +151,7 @@ struct evaluate : boost::static_visitor<T1>
     }
 
     feature_type const& feature_;
+    variable_type const& vars_;
 };
 
 }

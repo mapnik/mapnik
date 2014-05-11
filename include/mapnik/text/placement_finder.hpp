@@ -45,6 +45,7 @@ class placement_finder : mapnik::noncopyable
 {
 public:
     placement_finder(feature_impl const& feature,
+                        attributes const& attr,
                         DetectorType & detector,
                         box2d<double> const& extent,
                         text_placement_info_ptr placement_info,
@@ -79,6 +80,7 @@ private:
     text_upright_e simplify_upright(text_upright_e upright, double angle) const;
     box2d<double> get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     feature_impl const& feature_;
+    attributes const& attr_;
     DetectorType &detector_;
     box2d<double> const& extent_;
     text_placement_info_ptr info_;

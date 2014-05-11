@@ -175,7 +175,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     /** Takes a feature and produces formated text as output.
      * The output object has to be created by the caller and passed in for thread safety.
      */
-    void process(text_layout &output, feature_impl const& feature) const;
+    void process(text_layout &output, feature_impl const& feature, attributes const& vars) const;
     /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Sets new format tree. */

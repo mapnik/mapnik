@@ -38,6 +38,7 @@ class base_symbolizer_helper
 public:
     base_symbolizer_helper(symbolizer_base const& sym,
                            feature_impl const& feature,
+                           attributes const& vars,
                            proj_transform const& prj_trans,
                            unsigned width,
                            unsigned height,
@@ -52,6 +53,7 @@ protected:
     //Input
     symbolizer_base const& sym_;
     feature_impl const& feature_;
+    attributes const& vars_;
     proj_transform const& prj_trans_;
     CoordTransform const& t_;
     box2d<double> dims_;
@@ -84,6 +86,7 @@ public:
     template <typename FaceManagerT, typename DetectorT>
     text_symbolizer_helper(text_symbolizer const& sym,
                            feature_impl const& feature,
+                           attributes const& vars,
                            proj_transform const& prj_trans,
                            unsigned width,
                            unsigned height,
@@ -96,6 +99,7 @@ public:
     template <typename FaceManagerT, typename DetectorT>
     text_symbolizer_helper(shield_symbolizer const& sym,
                            feature_impl const& feature,
+                           attributes const& vars,
                            proj_transform const& prj_trans,
                            unsigned width,
                            unsigned height,

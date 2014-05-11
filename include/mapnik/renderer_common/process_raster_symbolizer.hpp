@@ -56,12 +56,12 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
         if (raster_width > 0 && raster_height > 0)
         {
             raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
-            scaling_method_e scaling_method = get<scaling_method_e>(sym, keys::scaling, feature, SCALING_NEAR);
-            composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+            scaling_method_e scaling_method = get<scaling_method_e>(sym, keys::scaling, feature, common.vars_, SCALING_NEAR);
+            composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common.vars_, src_over);
 
-            double opacity = get<double>(sym,keys::opacity,feature, 1.0);
+            double opacity = get<double>(sym,keys::opacity,feature, common.vars_, 1.0);
             bool premultiply_source = !source->premultiplied_alpha_;
-            auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied);
+            auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
             if (is_premultiplied)
             {
                 if (*is_premultiplied) premultiply_source = false;
@@ -80,7 +80,7 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
             {
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
-                unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, 16));
+                unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, common.vars_, 16));
                 reproject_and_scale_raster(target,
                                            *source,
                                            prj_trans,

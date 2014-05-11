@@ -99,7 +99,8 @@ struct converter_traits<T,mapnik::smooth_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         auto const& feat = boost::fusion::at_c<6>(args);
-        geom.smooth_value(get<value_double>(sym, keys::smooth, feat));
+        auto const& vars = boost::fusion::at_c<7>(args);
+        geom.smooth_value(get<value_double>(sym, keys::smooth, feat, vars));
     }
 };
 
@@ -114,8 +115,9 @@ struct converter_traits<T,mapnik::simplify_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         auto const& feat = boost::fusion::at_c<6>(args);
-        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(sym, keys::simplify_algorithm, feat)));
-        geom.set_simplify_tolerance(get<value_double>(sym, keys::simplify_tolerance, feat));
+        auto const& vars = boost::fusion::at_c<7>(args);
+        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(sym, keys::simplify_algorithm, feat, vars)));
+        geom.set_simplify_tolerance(get<value_double>(sym, keys::simplify_tolerance, feat, vars));
     }
 };
 
@@ -143,7 +145,7 @@ struct converter_traits<T, mapnik::dash_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double scale_factor = boost::fusion::at_c<7>(args);
+        double scale_factor = boost::fusion::at_c<8>(args);
         auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
         if (dash)
         {
@@ -167,11 +169,12 @@ struct converter_traits<T, mapnik::stroke_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         auto const& feat = boost::fusion::at_c<6>(args);
-        set_join_caps(sym, geom, feat);
-        double miterlimit = get<value_double>(sym, keys::stroke_miterlimit, feat, 4.0);
+        auto const& vars = boost::fusion::at_c<7>(args);
+        set_join_caps(sym, geom, feat, vars);
+        double miterlimit = get<value_double>(sym, keys::stroke_miterlimit, feat, vars, 4.0);
         geom.generator().miter_limit(miterlimit);
-        double scale_factor = boost::fusion::at_c<7>(args);
-        double width = get<value_double>(sym, keys::stroke_width, feat, 1.0);
+        double scale_factor = boost::fusion::at_c<8>(args);
+        double width = get<value_double>(sym, keys::stroke_width, feat, vars, 1.0);
         geom.generator().width(width * scale_factor);
     }
 };
@@ -248,8 +251,9 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         auto const& feat = boost::fusion::at_c<6>(args);
-        double offset = get<value_double>(sym, keys::offset, feat);
-        double scale_factor = boost::fusion::at_c<7>(args);
+        auto const& vars = boost::fusion::at_c<7>(args);
+        double offset = get<value_double>(sym, keys::offset, feat, vars);
+        double scale_factor = boost::fusion::at_c<8>(args);
         geom.set_offset(offset * scale_factor);
     }
 };
@@ -351,6 +355,7 @@ struct vertex_converter : private mapnik::noncopyable
     proj_trans_type const&,
     affine_trans_type const&,
     feature_type const&,
+    attributes const&,
     double //scale-factor
     > args_type;
 
@@ -361,6 +366,7 @@ struct vertex_converter : private mapnik::noncopyable
                      proj_trans_type const& prj_trans,
                      affine_trans_type const& affine_trans,
                      feature_type const& feature,
+                     attributes const& vars,
                      double scale_factor)
         : disp_(args_type(boost::cref(b),
                           boost::ref(ras),
@@ -369,6 +375,7 @@ struct vertex_converter : private mapnik::noncopyable
                           boost::cref(prj_trans),
                           boost::cref(affine_trans),
                           boost::cref(feature),
+                          boost::cref(vars),
                           scale_factor)) {}
 
     template <typename Geometry>

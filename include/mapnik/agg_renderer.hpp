@@ -67,6 +67,7 @@ public:
     typedef T0 buffer_type;
     typedef agg_renderer<T0> processor_impl_type;
     typedef T1 detector_type;
+    agg_renderer(Map const& m, buffer_type & pixmap, attributes const& vars, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with default, empty placement detector
     agg_renderer(Map const& m, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
@@ -140,6 +141,11 @@ public:
     inline double scale_factor() const
     {
         return common_.scale_factor_;
+    }
+
+    inline attributes variables()
+    {
+        return common_.vars_;
     }
 
     inline box2d<double> clipping_extent() const

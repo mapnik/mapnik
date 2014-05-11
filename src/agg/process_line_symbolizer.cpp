@@ -26,7 +26,6 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 
@@ -59,14 +58,14 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                               proj_transform const& prj_trans)
 
 {
-    color const& col = get<color>(sym, keys::stroke, feature, mapnik::color(0,0,0));
+    color const& col = get<color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0,0,0));
     unsigned r=col.red();
     unsigned g=col.green();
     unsigned b=col.blue();
     unsigned a=col.alpha();
 
-    double gamma = get<value_double>(sym, keys::stroke_gamma, feature, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::stroke_gamma_method, feature, GAMMA_POWER);
+    double gamma = get<value_double>(sym, keys::stroke_gamma, feature, common_.vars_, 1.0);
+    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::stroke_gamma_method, feature, common_.vars_, GAMMA_POWER);
     ras_ptr->reset();
 
     if (gamma != gamma_ || gamma_method != gamma_method_)
@@ -90,22 +89,22 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                                dash_tag, stroke_tag> conv_types;
 
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, agg::comp_op_src_over));
+    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
     renderer_base renb(pixf);
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, *transform, common_.scale_factor_);
+    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
     box2d<double> clip_box = clipping_extent();
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, true);
-    double width = get<value_double>(sym, keys::stroke_width, feature, 1.0);
-    double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0);
-    double offset = get<value_double>(sym, keys::offset, feature, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, false);
-    line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum>(sym, keys::line_rasterizer, feature, RASTERIZER_FULL);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
+    double opacity = get<value_double>(sym,keys::stroke_opacity,feature, common_.vars_, 1.0);
+    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
+    line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum>(sym, keys::line_rasterizer, feature, common_.vars_, RASTERIZER_FULL);
     if (clip)
     {
         double padding = static_cast<double>(common_.query_extent_.width()/pixmap_.width());
@@ -135,11 +134,11 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         renderer_type ren(renb, profile);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
         rasterizer_type ras(ren);
-        set_join_caps_aa(sym, ras, feature);
+        set_join_caps_aa(sym, ras, feature, common_.vars_);
 
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-            converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
+            converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -159,7 +158,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     {
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_); 
+            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_); 
 
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform

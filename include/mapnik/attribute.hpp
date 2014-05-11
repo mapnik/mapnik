@@ -26,9 +26,11 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/value.hpp>
 
 // stl
 #include <string>
+#include <unordered_map>
 
 namespace mapnik {
 
@@ -77,6 +79,8 @@ struct global_attribute
         return ctx.get(name);
     }
 };
+
+typedef std::unordered_map<std::string, value> attributes;
 
 }
 

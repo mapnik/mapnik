@@ -34,6 +34,7 @@
 #include <mapnik/marker.hpp> // for svg_storage_type
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/markers_placement.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // agg
 #include "agg_ellipse.h"
@@ -364,7 +365,7 @@ private:
 
 
 template <typename T>
-void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
+void build_ellipse(T const& sym, mapnik::feature_impl const& feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
 {
     auto width_expr  = get<expression_ptr>(sym, keys::width);
     auto height_expr = get<expression_ptr>(sym, keys::height);
@@ -372,17 +373,17 @@ void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storag
     double height = 0;
     if (width_expr && height_expr)
     {
-        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
-        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
     }
     else if (width_expr)
     {
-        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
         height = width;
     }
     else if (height_expr)
     {
-        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
         width = height;
     }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
@@ -464,6 +465,7 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              double svg_width,
                              double svg_height,
                              mapnik::feature_impl const& feature,
+                             attributes const& vars,
                              T const& sym)
 {
     double width = 0;
@@ -471,11 +473,11 @@ void setup_transform_scaling(agg::trans_affine & tr,
 
     expression_ptr width_expr = get<expression_ptr>(sym, keys::width);
     if (width_expr)
-        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
 
     expression_ptr height_expr = get<expression_ptr>(sym, keys::height);
     if (height_expr)
-        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
 
     if (width > 0 && height > 0)
     {

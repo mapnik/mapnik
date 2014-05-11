@@ -61,8 +61,8 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
     agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
 
-    double opacity = get<value_double>(sym,keys::fill_opacity,feature, 1.0);
-    color const& fill = get<mapnik::color>(sym, keys::fill, feature);
+    double opacity = get<value_double>(sym,keys::fill_opacity,feature, common_.vars_, 1.0);
+    color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
     unsigned r=fill.red();
     unsigned g=fill.green();
     unsigned b=fill.blue();
@@ -71,8 +71,8 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
     agg::scanline_u8 sl;
 
     ras_ptr->reset();
-    double gamma = get<value_double>(sym, keys::gamma, feature, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, GAMMA_POWER);
+    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
+    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);
@@ -80,7 +80,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    double height = get<double>(sym, keys::height,0.0) * common_.scale_factor_;
+    double height = get<double>(sym, keys::height, feature, common_.vars_,0.0) * common_.scale_factor_;
 
     render_building_symbolizer(
         feature, height,

@@ -115,7 +115,8 @@ struct render_thunk_extractor : public boost::static_visitor<>
 {
     render_thunk_extractor(box2d<double> &box,
                            render_thunk_list &thunks,
-                           mapnik::feature_impl &feature,
+                           feature_impl &feature,
+                           attributes const& vars,
                            proj_transform const &prj_trans,
                            renderer_common &common,
                            box2d<double> const &clipping_extent);
@@ -137,7 +138,8 @@ private:
 
     box2d<double> &box_;
     render_thunk_list &thunks_;
-    mapnik::feature_impl &feature_;
+    feature_impl & feature_;
+    attributes const& vars_;
     proj_transform const &prj_trans_;
     renderer_common &common_;
     box2d<double> clipping_extent_;
@@ -181,9 +183,10 @@ void render_offset_placements(placements_list const& placements,
 
 template <typename F>
 void render_group_symbolizer(group_symbolizer const &sym,
-                             mapnik::feature_impl &feature,
-                             proj_transform const &prj_trans,
-                             box2d<double> const &clipping_extent,
+                             feature_impl & feature,
+                             attributes const& vars,
+                             proj_transform const & prj_trans,
+                             box2d<double> const & clipping_extent,
                              renderer_common &common,
                              F render_thunks)
 {
@@ -260,7 +263,7 @@ void render_group_symbolizer(group_symbolizer const &sym,
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())
         {
-             if (boost::apply_visitor(evaluate<Feature,value_type>(*sub_feature),
+             if (boost::apply_visitor(evaluate<Feature,value_type,attributes>(*sub_feature,common.vars_),
                                                *(rule->get_filter())).to_bool())
              {
                 // add matched rule and feature to the list of things to draw
@@ -269,7 +272,7 @@ void render_group_symbolizer(group_symbolizer const &sym,
                 // construct a bounding box around all symbolizers for the matched rule
                 bound_box bounds;
                 render_thunk_list thunks;
-                render_thunk_extractor extractor(bounds, thunks, *sub_feature, prj_trans,
+                render_thunk_extractor extractor(bounds, thunks, *sub_feature, common.vars_, prj_trans,
                                                  virtual_renderer, clipping_extent);
 
                 for (auto const& sym : *rule)
@@ -288,7 +291,7 @@ void render_group_symbolizer(group_symbolizer const &sym,
     }
 
     // create a symbolizer helper
-    group_symbolizer_helper helper(sym, feature, prj_trans,
+    group_symbolizer_helper helper(sym, feature, vars, prj_trans,
                                    common.width_, common.height_,
                                    common.scale_factor_, common.t_,
                                    *common.detector_, clipping_extent);
@@ -316,7 +319,7 @@ void render_group_symbolizer(group_symbolizer const &sym,
             // evalute the repeat key with the matched sub feature if we have one
             if (rpt_key_expr)
             {
-                rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *rpt_key_expr).to_unicode();
+                rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_), *rpt_key_expr).to_unicode();
             }
             helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
         }

@@ -46,10 +46,11 @@ class feature_impl;
 
 template <typename Container> struct expression_attributes;
 
-template <typename T>
+template <typename T, typename T1>
 struct transform_processor
 {
     typedef T feature_type;
+    typedef T1 variable_type;
     typedef agg::trans_affine transform_type;
 
     template <typename Container>
@@ -109,9 +110,11 @@ struct transform_processor
     {
         node_evaluator(transform_type& tr,
                        feature_type const& feat,
+                       variable_type const& v,
                        double scale_factor)
             : transform_(tr),
               feature_(feat),
+              vars_(v),
               scale_factor_(scale_factor) {}
 
         void operator() (identity_node const& node)
@@ -175,7 +178,7 @@ struct transform_processor
 
         double eval(expr_node const& x) const
         {
-            mapnik::evaluate<feature_type, value_type> e(feature_);
+            mapnik::evaluate<feature_type, value_type, variable_type> e(feature_,vars_);
             return boost::apply_visitor(e, x).to_double();
         }
 
@@ -186,6 +189,7 @@ struct transform_processor
 
         transform_type& transform_;
         feature_type const& feature_;
+        variable_type const& vars_;
         double scale_factor_;
     };
 
@@ -201,10 +205,13 @@ struct transform_processor
         }
     }
 
-    static void evaluate(transform_type& tr, feature_type const& feat,
-                         transform_list const& list, double scale_factor)
+    static void evaluate(transform_type& tr,
+                         feature_type const& feat,
+                         variable_type const& vars,
+                         transform_list const& list,
+                         double scale_factor)
     {
-        node_evaluator eval(tr, feat, scale_factor);
+        node_evaluator eval(tr, feat, vars, scale_factor);
 
         #ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(transform) << "transform: begin with " << to_string(matrix_node(tr));
@@ -235,7 +242,7 @@ struct transform_processor
     }
 };
 
-typedef mapnik::transform_processor<feature_impl> transform_processor_type;
+typedef mapnik::transform_processor<feature_impl,attributes> transform_processor_type;
 
 } // namespace mapnik
 

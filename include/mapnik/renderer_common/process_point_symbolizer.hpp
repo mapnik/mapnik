@@ -36,9 +36,9 @@ void render_point_symbolizer(point_symbolizer const &sym,
                              renderer_common &common,
                              F render_marker)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature);
+    std::string filename = get<std::string>(sym, keys::file, feature, common.vars_);
     boost::optional<mapnik::marker_ptr> marker;
-    if ( !filename.empty() )
+    if (!filename.empty())
     {
         marker = marker_cache::instance().find(filename, true);
     }
@@ -46,20 +46,19 @@ void render_point_symbolizer(point_symbolizer const &sym,
     {
         marker.reset(std::make_shared<mapnik::marker>());
     }
-
     if (marker)
     {
-        double opacity = get<double>(sym,keys::opacity,feature, 1.0);
-        bool allow_overlap = get<bool>(sym, keys::allow_overlap, feature, false);
-        bool ignore_placement = get<bool>(sym, keys::ignore_placement, feature, false);
-        point_placement_enum placement= get<point_placement_enum>(sym, keys::point_placement_type, feature, CENTROID_POINT_PLACEMENT);
+        double opacity = get<double>(sym,keys::opacity,feature, common.vars_, 1.0);
+        bool allow_overlap = get<bool>(sym, keys::allow_overlap, feature, common.vars_, false);
+        bool ignore_placement = get<bool>(sym, keys::ignore_placement, feature, common.vars_, false);
+        point_placement_enum placement= get<point_placement_enum>(sym, keys::point_placement_type, feature, common.vars_, CENTROID_POINT_PLACEMENT);
 
         box2d<double> const& bbox = (*marker)->bounding_box();
         coord2d center = bbox.center();
 
         agg::trans_affine tr;
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-        if (image_transform) evaluate_transform(tr, feature, *image_transform);
+        if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
 
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;

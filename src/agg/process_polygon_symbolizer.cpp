@@ -55,8 +55,8 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
                              conv_types, feature_impl> vertex_converter_type;
 
     ras_ptr->reset();
-    double gamma = get<value_double>(sym, keys::gamma, feature, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, GAMMA_POWER);
+    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
+    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);
@@ -81,7 +81,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
             typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
             typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
             pixfmt_comp_type pixf(buf);
-            pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, agg::comp_op_src_over));
+            pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
             renderer_base renb(pixf);
             renderer_type ren(renb);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));

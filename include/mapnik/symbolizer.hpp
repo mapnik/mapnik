@@ -29,6 +29,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/parse_path.hpp>
@@ -38,6 +39,8 @@
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
+#include <mapnik/attribute.hpp>
+
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -63,6 +66,7 @@ class feature_impl;
 
 MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr,
                                     feature_impl const& feature,
+                                    attributes const& vars,
                                     transform_type const& trans_expr,
                                     double scale_factor=1.0);
 
@@ -245,10 +249,10 @@ struct evaluate_expression_wrapper
 {
     typedef T result_type;
 
-    template <typename T1, typename T2>
-    result_type operator() (T1 const& expr, T2 const& feature) const
+    template <typename T1, typename T2, typename T3>
+    result_type operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type result = boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value_type>(feature), expr);
+        mapnik::value_type result = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         return detail::expression_result<result_type, std::is_enum<result_type>::value>::convert(result);
     }
 };
@@ -257,10 +261,10 @@ struct evaluate_expression_wrapper
 template <>
 struct evaluate_expression_wrapper<mapnik::color>
 {
-    template <typename T1, typename T2>
-    mapnik::color operator() (T1 const& expr, T2 const& feature) const
+    template <typename T1, typename T2, typename T3>
+    mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value_type>(feature), expr);
+        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         // FIXME - throw instead?
         if (val.is_null()) return mapnik::color(255,192,203); // pink
         return mapnik::color(val.to_string());
@@ -271,10 +275,10 @@ struct evaluate_expression_wrapper<mapnik::color>
 template <>
 struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
 {
-    template <typename T1, typename T2>
-    mapnik::enumeration_wrapper operator() (T1 const& expr, T2 const& feature) const
+    template <typename T1, typename T2, typename T3>
+    mapnik::enumeration_wrapper operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value_type>(feature), expr);
+        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         return mapnik::enumeration_wrapper(val.to_int());
     }
 };
@@ -285,12 +289,14 @@ struct extract_value : public boost::static_visitor<T>
 {
     typedef T result_type;
 
-    extract_value(mapnik::feature_impl const& feature)
-        : feature_(feature) {}
+    extract_value(mapnik::feature_impl const& feature,
+                  mapnik::attributes const& v)
+        : feature_(feature),
+          vars_(v) {}
 
     auto operator() (mapnik::expression_ptr const& expr) const -> result_type
     {
-        return evaluate_expression_wrapper<result_type>()(*expr,feature_);
+        return evaluate_expression_wrapper<result_type>()(*expr,feature_,vars_);
     }
 
     auto operator() (mapnik::path_expression_ptr const& expr) const -> result_type
@@ -308,13 +314,14 @@ struct extract_value : public boost::static_visitor<T>
         return detail::enumeration_result<result_type, std::is_enum<result_type>::value>::convert(e);
     }
 
-    template <typename T1>
-    auto operator() (T1 const& val) const -> result_type
+    template <typename TVal>
+    auto operator() (TVal const& val) const -> result_type
     {
         return result_type();
     }
 
     mapnik::feature_impl const& feature_;
+    mapnik::attributes const& vars_;
 };
 
 template <typename T1>
@@ -353,25 +360,25 @@ bool has_key(symbolizer_base const& sym, keys key)
 }
 
 template <typename T>
-T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, T const& _default_value = T())
+T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
 {
     typedef symbolizer_base::cont_type::const_iterator const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_value<T>(feature), itr->second);
+        return boost::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
     return _default_value;
 }
 
 template <typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature)
+boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
     typedef symbolizer_base::cont_type::const_iterator const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_value<T>(feature), itr->second);
+        return boost::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
     return boost::optional<T>();
 }

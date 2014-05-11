@@ -41,19 +41,23 @@
 namespace mapnik {
 
 base_symbolizer_helper::base_symbolizer_helper(
-        const symbolizer_base &sym, const feature_impl &feature,
-        const proj_transform &prj_trans,
+        symbolizer_base const& sym,
+        feature_impl const& feature,
+        attributes const& vars,
+        proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
-        const CoordTransform &t, const box2d<double> &query_extent)
+        CoordTransform const& t,
+        box2d<double> const& query_extent)
     : sym_(sym),
       feature_(feature),
+      vars_(vars),
       prj_trans_(prj_trans),
       t_(t),
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      clipped_(mapnik::get<bool>(sym_, keys::clip, feature_, true /*TODO*/)),
-      placement_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
+      clipped_(get<bool>(sym_, keys::clip, feature_, vars, true)),
+      placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return;
@@ -74,8 +78,8 @@ struct largest_bbox_first
 void base_symbolizer_helper::initialize_geometries()
 {
     // FIXME
-    bool largest_box_only = false;//get<value_bool>(sym_, keys::largest_box_only);
-    double minimum_path_length = 0; // get<value_double>(sym_, keys::minimum_path_length);
+    bool largest_box_only = get<value_bool>(sym_, keys::largest_box_only, feature_, vars_, false);
+    double minimum_path_length = get<value_double>(sym_, keys::minimum_path_length, feature_, vars_, 0);
     for ( auto const& geom :  feature_.paths())
     {
         // don't bother with empty geometries
@@ -172,13 +176,15 @@ void base_symbolizer_helper::initialize_points()
 
 template <typename FaceManagerT, typename DetectorT>
 text_symbolizer_helper::text_symbolizer_helper(
-        const text_symbolizer &sym, const feature_impl &feature,
-        const proj_transform &prj_trans,
+        text_symbolizer const& sym,
+        feature_impl const& feature,
+        attributes const& vars,
+        proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
-        const CoordTransform &t, FaceManagerT &font_manager,
+        CoordTransform const& t, FaceManagerT & font_manager,
         DetectorT &detector, const box2d<double> &query_extent)
-    : base_symbolizer_helper(sym, feature, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, detector, dims_, placement_, font_manager, scale_factor),
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
+      finder_(feature, vars, detector, dims_, placement_, font_manager, scale_factor),
       points_on_line_(false)
 {
     if (geometries_to_process_.size()) finder_.next_position();
@@ -267,13 +273,15 @@ bool text_symbolizer_helper::next_point_placement()
 
 template <typename FaceManagerT, typename DetectorT>
 text_symbolizer_helper::text_symbolizer_helper(
-        const shield_symbolizer &sym, const feature_impl &feature,
-        const proj_transform &prj_trans,
+        shield_symbolizer const& sym,
+        feature_impl const& feature,
+        attributes const& vars,
+        proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
-        const CoordTransform &t, FaceManagerT &font_manager,
+        CoordTransform const& t, FaceManagerT & font_manager,
         DetectorT &detector, const box2d<double> &query_extent)
-    : base_symbolizer_helper(sym, feature, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, detector, dims_, placement_, font_manager, scale_factor),
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
+      finder_(feature, vars, detector, dims_, placement_, font_manager, scale_factor),
       points_on_line_(true)
 {
     if (geometries_to_process_.size())
@@ -286,23 +294,17 @@ text_symbolizer_helper::text_symbolizer_helper(
 
 void text_symbolizer_helper::init_marker()
 {
-    //shield_symbolizer const& sym = static_cast<shield_symbolizer const&>(sym_);
-    std::string filename = mapnik::get<std::string>(sym_, keys::file, feature_);
+    std::string filename = mapnik::get<std::string>(sym_, keys::file, feature_, vars_);
+    if (filename.empty()) return;
+    boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
+    if (!marker) return;
     //FIXME - need to test this
     //std::string filename = path_processor_type::evaluate(filename_string, feature_);
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-    if (image_transform) evaluate_transform(trans, feature_, *image_transform);
-    boost::optional<marker_ptr> opt_marker; //TODO: Why boost::optional?
-    if (!filename.empty())
-    {
-        opt_marker = marker_cache::instance().find(filename, true);
-    }
-    marker_ptr m;
-    if (opt_marker) m = *opt_marker;
-    if (!m) return;
-    double width = m->width();
-    double height = m->height();
+    if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
+    double width = (*marker)->width();
+    double height = (*marker)->height();
     double px0 = - 0.5 * width;
     double py0 = - 0.5 * height;
     double px1 = 0.5 * width;
@@ -318,35 +320,39 @@ void text_symbolizer_helper::init_marker()
     box2d<double> bbox(px0, py0, px1, py1);
     bbox.expand_to_include(px2, py2);
     bbox.expand_to_include(px3, py3);
-    bool unlock_image = mapnik::get<value_bool>(sym_, keys::unlock_image, false);
-    double shield_dx = mapnik::get<value_double>(sym_, keys::shield_dx, 0.0);
-    double shield_dy = mapnik::get<value_double>(sym_, keys::shield_dy, 0.0);
+    bool unlock_image = mapnik::get<value_bool>(sym_, keys::unlock_image, feature_, vars_, false);
+    double shield_dx = mapnik::get<value_double>(sym_, keys::shield_dx, feature_, vars_, 0.0);
+    double shield_dy = mapnik::get<value_double>(sym_, keys::shield_dy, feature_, vars_, 0.0);
     pixel_position marker_displacement;
     marker_displacement.set(shield_dx,shield_dy);
-    finder_.set_marker(std::make_shared<marker_info>(m, trans), bbox, unlock_image, marker_displacement);
+    finder_.set_marker(std::make_shared<marker_info>(*marker, trans), bbox, unlock_image, marker_displacement);
 }
 
 /*****************************************************************************/
 
-template text_symbolizer_helper::text_symbolizer_helper(const text_symbolizer &sym,
-    const feature_impl &feature,
-    const proj_transform &prj_trans,
+template text_symbolizer_helper::text_symbolizer_helper(
+    text_symbolizer const& sym,
+    feature_impl const& feature,
+    attributes const& vars,
+    proj_transform const& prj_trans,
     unsigned width,
     unsigned height,
     double scale_factor,
-    const CoordTransform &t,
+    CoordTransform const& t,
     face_manager<freetype_engine> &font_manager,
     label_collision_detector4 &detector,
-    const box2d<double> &query_extent);
+    box2d<double> const& query_extent);
 
-template text_symbolizer_helper::text_symbolizer_helper(const shield_symbolizer &sym,
-    const feature_impl &feature,
-    const proj_transform &prj_trans,
+template text_symbolizer_helper::text_symbolizer_helper(
+    shield_symbolizer const& sym,
+    feature_impl const& feature,
+    attributes const& vars,
+    proj_transform const& prj_trans,
     unsigned width,
     unsigned height,
     double scale_factor,
-    const CoordTransform &t,
+    CoordTransform const& t,
     face_manager<freetype_engine> &font_manager,
     label_collision_detector4 &detector,
-    const box2d<double> &query_extent);
+    box2d<double> const& query_extent);
 } //namespace

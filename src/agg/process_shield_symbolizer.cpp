@@ -38,21 +38,21 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
 {
     box2d<double> clip_box = clipping_extent();
     text_symbolizer_helper helper(
-            sym, feature, prj_trans,
+            sym, feature, common_.vars_, prj_trans,
             common_.width_, common_.height_,
             common_.scale_factor_,
             common_.t_, common_.font_manager_, *common_.detector_,
             clip_box);
 
-    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, HALO_RASTERIZER_FULL);
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature, common_.vars_, HALO_RASTERIZER_FULL);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     agg_text_renderer<T0> ren(*current_buffer_,
                              halo_rasterizer,
                              comp_op,
                              common_.scale_factor_,
                              common_.font_manager_.get_stroker());
 
-    double opacity = get<double>(sym,keys::opacity,feature, 1.0);
+    double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
 
     placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
