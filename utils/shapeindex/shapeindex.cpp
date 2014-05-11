@@ -96,9 +96,9 @@ int main (int argc,char** argv)
             shape_files=vm["shape_files"].as< vector<string> >();
         }
     }
-    catch (...)
+    catch (std::exception const& ex)
     {
-        clog << "Exception of unknown type!" << endl;
+        clog << "Error:" << ex.what() << endl;
         return -1;
     }
 
