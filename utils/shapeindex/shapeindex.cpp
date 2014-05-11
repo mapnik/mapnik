@@ -98,7 +98,7 @@ int main (int argc,char** argv)
     }
     catch (std::exception const& ex)
     {
-        clog << "Error:" << ex.what() << endl;
+        clog << "Error: " << ex.what() << endl;
         return -1;
     }
 
@@ -120,14 +120,14 @@ int main (int argc,char** argv)
 
         if (! mapnik::util::exists (shapename_full))
         {
-            clog << "error : file " << shapename_full << " does not exist" << endl;
+            clog << "Error : file " << shapename_full << " does not exist" << endl;
             continue;
         }
 
         shape_file shp (shapename_full);
 
         if (! shp.is_open()) {
-            clog << "error : cannot open " << shapename_full << endl;
+            clog << "Error : cannot open " << shapename_full << endl;
             continue;
         }
 
