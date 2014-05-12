@@ -495,6 +495,7 @@ struct div: public boost::static_visitor<V>
     template <typename T>
     value_type operator() (T lhs, T rhs) const
     {
+        if (rhs == 0) return std::numeric_limits<value_type>::infinity();
         return lhs / rhs;
     }
 
@@ -513,11 +514,13 @@ struct div: public boost::static_visitor<V>
 
     value_type operator() (value_double lhs, value_integer rhs) const
     {
+        if (rhs == 0) return std::numeric_limits<value_type>::infinity();
         return lhs / rhs;
     }
 
     value_type operator() (value_integer lhs, value_double rhs) const
     {
+        if (rhs == 0) return std::numeric_limits<value_type>::infinity();
         return lhs / rhs;
     }
 };
