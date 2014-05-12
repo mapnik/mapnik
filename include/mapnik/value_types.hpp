@@ -53,10 +53,24 @@ struct value_null
         return true;
     }
 
+    template <typename T>
+    bool operator==(T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return false;
+    }
+
     bool operator!=(value_null const& other) const
     {
         boost::ignore_unused_variable_warning(other);
         return false;
+    }
+
+    template <typename T>
+    bool operator!=(T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return true;
     }
 
     template <typename T>
