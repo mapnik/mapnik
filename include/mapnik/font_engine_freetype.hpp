@@ -44,6 +44,7 @@
 #include <vector>
 
 struct FT_LibraryRec_;
+struct FT_MemoryRec_;
 
 namespace mapnik
 {
@@ -78,7 +79,8 @@ public:
     virtual ~freetype_engine();
     freetype_engine();
 private:
-    FT_LibraryRec_ *library_;
+    FT_LibraryRec_ * library_;
+    std::unique_ptr<FT_MemoryRec_> memory_;
 #ifdef MAPNIK_THREADSAFE
     static std::mutex mutex_;
 #endif
