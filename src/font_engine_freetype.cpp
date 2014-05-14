@@ -63,20 +63,22 @@ void* _Realloc_Func(FT_Memory memory, long cur_size, long new_size, void* block)
 namespace mapnik
 {
 
+void init_freetype(FT_Memory memory, FT_Library & library)
+{
+    memory->alloc = _Alloc_Func;
+    memory->free = _Free_Func;
+    memory->realloc = _Realloc_Func;
+    FT_Error error = FT_New_Library(memory, &library );
+    if (error) throw std::runtime_error("can not initalise FreeType2 library");
+    FT_Add_Default_Modules(library);
+}
+
 freetype_engine::freetype_engine() :
     library_(nullptr),
     memory_(new FT_MemoryRec_)
 
 {
-    memory_->alloc = _Alloc_Func;
-    memory_->free = _Free_Func;
-    memory_->realloc = _Realloc_Func;
-    FT_Error error = FT_New_Library( &*memory_, &library_ );
-    if (error)
-    {
-        throw std::runtime_error("can not load FreeType2 library");
-    }
-    FT_Add_Default_Modules(library_);
+    init_freetype(&*memory_, library_);
 }
 
 freetype_engine::~freetype_engine()
@@ -105,13 +107,16 @@ bool freetype_engine::register_font(std::string const& file_name)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
+    std::unique_ptr<FT_MemoryRec_> memory(new FT_MemoryRec_);
     FT_Library library = 0;
-    FT_Error error = FT_Init_FreeType(&library);
-    if (error)
-    {
-        throw std::runtime_error("Failed to initialize FreeType2 library");
-    }
+    init_freetype(&*memory, library);
+    bool result = register_font_impl(file_name, library);
+    FT_Done_Library(library);
+    return result;
+}
 
+bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
+{
     FT_Face face = 0;
     int num_faces = 0;
     bool success = false;
@@ -120,7 +125,7 @@ bool freetype_engine::register_font(std::string const& file_name)
     // see the FT_FaceRec in freetype.h
     for ( int i = 0; face == 0 || i < num_faces; i++ ) {
         // if face is null then this is the first face
-        error = FT_New_Face (library,file_name.c_str(),i,&face);
+        FT_Error error = FT_New_Face (library,file_name.c_str(),i,&face);
         if (error)
         {
             break;
@@ -154,14 +159,26 @@ bool freetype_engine::register_font(std::string const& file_name)
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
     }
-    if (face)
-        FT_Done_Face(face);
-    if (library)
-        FT_Done_FreeType(library);
+
+    if (face) FT_Done_Face(face);
+
     return success;
 }
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
+{
+#ifdef MAPNIK_THREADSAFE
+    mapnik::scoped_lock lock(mutex_);
+#endif
+    std::unique_ptr<FT_MemoryRec_> memory(new FT_MemoryRec_);
+    FT_Library library = 0;
+    init_freetype(&*memory, library);
+    bool result = register_fonts_impl(dir, library, recurse);
+    FT_Done_Library(library);
+    return result;
+}
+
+bool freetype_engine::register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse)
 {
     if (!mapnik::util::exists(dir))
     {
@@ -169,7 +186,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     }
     if (!mapnik::util::is_directory(dir))
     {
-        return mapnik::freetype_engine::register_font(dir);
+        return mapnik::freetype_engine::register_font_impl(dir, library);
     }
     bool success = false;
     try
@@ -177,30 +194,30 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
         boost::filesystem::directory_iterator end_itr;
         for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
-    #if (BOOST_FILESYSTEM_VERSION == 3)
+#if (BOOST_FILESYSTEM_VERSION == 3)
             std::string file_name = itr->path().string();
-    #else // v2
+#else // v2
             std::string file_name = itr->string();
-    #endif
+#endif
             if (boost::filesystem::is_directory(*itr) && recurse)
             {
-                if (register_fonts(file_name, true))
+                if (register_fonts_impl(file_name, library, true))
                 {
                     success = true;
                 }
             }
             else
             {
-    #if (BOOST_FILESYSTEM_VERSION == 3)
+#if (BOOST_FILESYSTEM_VERSION == 3)
                 std::string base_name = itr->path().filename().string();
-    #else // v2
+#else // v2
                 std::string base_name = itr->filename();
-    #endif
+#endif
                 if (!boost::algorithm::starts_with(base_name,".") &&
                     boost::filesystem::is_regular_file(file_name) &&
                     is_font_file(file_name))
                 {
-                    if (mapnik::freetype_engine::register_font(file_name))
+                    if (mapnik::freetype_engine::register_font_impl(file_name, library))
                     {
                         success = true;
                     }
@@ -342,8 +359,8 @@ face_set_ptr face_manager<T>::get_face_set(const font_set &fset)
         else
         {
             MAPNIK_LOG_DEBUG(font_engine_freetype)
-                    << "Failed to find face '" << *name
-                    << "' in font set '" << fset.get_name() << "'\n";
+                << "Failed to find face '" << *name
+                << "' in font set '" << fset.get_name() << "'\n";
         }
 #endif
     }

@@ -66,7 +66,7 @@ public:
      *  @return bool - true if at least one face was successfully registered in the file.
      */
     static bool register_font(std::string const& file_name);
-    /*! \brief register a font file
+    /*! \brief register a font files
      *  @param dir - path to a directory containing fonts or subdirectories.
      *  @param recurse - default false, whether to search for fonts in sub directories.
      *  @return bool - true if at least one face was successfully registered.
@@ -79,6 +79,8 @@ public:
     virtual ~freetype_engine();
     freetype_engine();
 private:
+    static bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
+    static bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
     FT_LibraryRec_ * library_;
     std::unique_ptr<FT_MemoryRec_> memory_;
 #ifdef MAPNIK_THREADSAFE
