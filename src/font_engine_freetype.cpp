@@ -34,6 +34,7 @@
 // stl
 #include <algorithm>
 #include <stdexcept>
+#include <cstdlib>
 
 // freetype2
 extern "C"
@@ -41,25 +42,46 @@ extern "C"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
+#include FT_MODULE_H
+}
+
+void* _Alloc_Func(FT_Memory memory, long size)
+{
+    return std::malloc(size);
+}
+
+void _Free_Func(FT_Memory memory, void *block)
+{
+    std::free(block);
+}
+
+void* _Realloc_Func(FT_Memory memory, long cur_size, long new_size, void* block)
+{
+    return std::realloc(block, new_size);
 }
 
 namespace mapnik
 {
 
 freetype_engine::freetype_engine() :
-    library_(nullptr)
+    library_(nullptr),
+    memory_(new FT_MemoryRec_)
 
 {
-    FT_Error error = FT_Init_FreeType( &library_ );
+    memory_->alloc = _Alloc_Func;
+    memory_->free = _Free_Func;
+    memory_->realloc = _Realloc_Func;
+    FT_Error error = FT_New_Library( &*memory_, &library_ );
     if (error)
     {
         throw std::runtime_error("can not load FreeType2 library");
     }
+    FT_Add_Default_Modules(library_);
 }
 
 freetype_engine::~freetype_engine()
 {
-    FT_Done_FreeType(library_);
+    FT_Done_Library(library_);
 }
 
 bool freetype_engine::is_font_file(std::string const& file_name)

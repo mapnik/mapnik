@@ -193,7 +193,7 @@ def shortest_name(libs):
 
 def rm_path(item,set,_env):
     for i in _env[set]:
-        if item in i:
+        if i.startswith(item):
             _env[set].remove(i)
 
 def sort_paths(items,priority):
