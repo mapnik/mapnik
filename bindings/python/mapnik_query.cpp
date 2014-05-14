@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "boost_std_shared_shim.hpp"
+#include "python_to_value.hpp"
 
 // boost
 #include <boost/python.hpp>
@@ -69,6 +70,15 @@ struct names_to_list
     }
 };
 
+namespace {
+
+    void set_variables(mapnik::query & q, boost::python::dict const& d)
+    {
+        mapnik::attributes vars = mapnik::dict2attr(d);
+        q.set_variables(vars);
+    }
+}
+
 void export_query()
 {
     using namespace boost::python;
@@ -85,5 +95,6 @@ void export_query()
                                             return_value_policy<copy_const_reference>()) )
         .add_property("property_names", make_function(&query::property_names,
                                                       return_value_policy<copy_const_reference>()) )
-        .def("add_property_name", &query::add_property_name);
+        .def("add_property_name", &query::add_property_name)
+        .def("set_variables",&set_variables);
 }

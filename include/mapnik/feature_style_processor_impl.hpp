@@ -471,6 +471,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
                                height/qh);
 
     query q(layer_ext,res,scale_denom,extent);
+    q.set_variables(p.variables());
 
     if (p.attribute_collection_policy() == COLLECT_ALL)
     {
