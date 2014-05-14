@@ -69,7 +69,7 @@ void init_freetype(FT_Memory memory, FT_Library & library)
     memory->free = _Free_Func;
     memory->realloc = _Realloc_Func;
     FT_Error error = FT_New_Library(memory, &library );
-    if (error) throw std::runtime_error("can not load FreeType2 library");
+    if (error) throw std::runtime_error("can not initalise FreeType2 library");
     FT_Add_Default_Modules(library);
 }
 
