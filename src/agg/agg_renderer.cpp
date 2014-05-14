@@ -63,21 +63,6 @@ namespace mapnik
 {
 
 template <typename T0, typename T1>
-agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, attributes const& vars, double scale_factor, unsigned offset_x, unsigned offset_y)
-    : feature_style_processor<agg_renderer>(m, scale_factor),
-      pixmap_(pixmap),
-      internal_buffer_(),
-      current_buffer_(&pixmap),
-      style_level_compositing_(false),
-      ras_ptr(new rasterizer),
-      gamma_method_(GAMMA_POWER),
-      gamma_(1.0),
-      common_(m, vars, offset_x, offset_y, m.width(), m.height(), scale_factor)
-{
-    setup(m);
-}
-
-template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
@@ -93,7 +78,7 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor
 }
 
 template <typename T0, typename T1>
-agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, attributes const& vars, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
@@ -102,7 +87,7 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, T0 & pixmap,
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
-      common_(req, attributes(), offset_x, offset_y, req.width(), req.height(), scale_factor)
+      common_(req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
     setup(m);
 }

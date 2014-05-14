@@ -190,8 +190,10 @@ void render_with_vars(mapnik::Map const& map,
             boost::python::dict const& d)
 {
     mapnik::attributes vars = mapnik::dict2attr(d);
+    mapnik::request req(map.width(),map.height(),map.get_current_extent());
+    req.set_buffer_size(map.buffer_size());
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,vars,1,0,0);
+    mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,image,1,0,0);
     ren.apply();
 }
 

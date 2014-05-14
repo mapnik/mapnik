@@ -78,7 +78,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     svg_path_adapter svg_path(stl_storage);
                     build_ellipse(sym, feature, common.vars_, marker_ellipse, svg_path);
                     svg_attribute_type attributes;
-                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
                     if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
@@ -103,7 +103,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     }
                     converter.template set<transform_tag>(); //always transform
                     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                    apply_markers_multi(feature, converter, sym);
+                    apply_markers_multi(feature, common.vars_, converter, sym);
                 }
                 else
                 {
@@ -114,7 +114,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
                     svg_path_adapter svg_path(stl_storage);
                     svg_attribute_type attributes;
-                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
                     auto rasterizer_dispatch = make_vector_dispatch(
                       svg_path, result ? attributes : (*stock_vector_marker)->attributes(),
                       **stock_vector_marker, bbox, tr, snap_pixels);
@@ -135,7 +135,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     }
                     converter.template set<transform_tag>(); //always transform
                     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                    apply_markers_multi(feature, converter, sym);
+                    apply_markers_multi(feature, common.vars_, converter, sym);
                 }
             }
             else // raster markers
@@ -165,7 +165,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                 }
                 converter.template set<transform_tag>(); //always transform
                 if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                apply_markers_multi(feature, converter, sym);
+                apply_markers_multi(feature, common.vars_, converter, sym);
             }
         }
     }

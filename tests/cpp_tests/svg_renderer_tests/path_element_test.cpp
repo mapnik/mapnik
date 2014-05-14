@@ -44,7 +44,7 @@ void prepare_map(Map & m)
             put(poly_sym, keys::fill, color(250, 190, 183));
             r.append(std::move(poly_sym));
         }
-        provpoly_style.add_rule(r);
+        provpoly_style.add_rule(std::move(r));
     }
     {
         rule r;
@@ -54,7 +54,7 @@ void prepare_map(Map & m)
             put(poly_sym, keys::fill, color(217, 235, 203));
             r.append(std::move(poly_sym));
         }
-        provpoly_style.add_rule(r);
+        provpoly_style.add_rule(std::move(r));
     }
     m.insert_style("provinces",provpoly_style);
 
@@ -73,7 +73,7 @@ void prepare_map(Map & m)
             put(line_sym,keys::stroke_dasharray,dash);
             r.append(std::move(line_sym));
         }
-        provlines_style.add_rule(r);
+        provlines_style.add_rule(std::move(r));
     }
     m.insert_style("provlines",provlines_style);
 
@@ -87,7 +87,7 @@ void prepare_map(Map & m)
             put(poly_sym, keys::fill, color(153, 204, 255));
             r.append(std::move(poly_sym));
         }
-        qcdrain_style.add_rule(r);
+        qcdrain_style.add_rule(std::move(r));
     }
     m.insert_style("drainage",qcdrain_style);
 
@@ -104,7 +104,7 @@ void prepare_map(Map & m)
             put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
             r.append(std::move(line_sym));
         }
-        roads34_style.add_rule(r);
+        roads34_style.add_rule(std::move(r));
     }
     m.insert_style("smallroads",roads34_style);
 
@@ -121,7 +121,7 @@ void prepare_map(Map & m)
             put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
             r.append(std::move(line_sym));
         }
-        roads2_style_1.add_rule(r);
+        roads2_style_1.add_rule(std::move(r));
     }
     m.insert_style("road-border", roads2_style_1);
 
@@ -137,7 +137,7 @@ void prepare_map(Map & m)
             put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
             r.append(std::move(line_sym));
         }
-        roads2_style_2.add_rule(r);
+        roads2_style_2.add_rule(std::move(r));
     }
     m.insert_style("road-fill", roads2_style_2);
 
@@ -154,7 +154,7 @@ void prepare_map(Map & m)
             put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
             r.append(std::move(line_sym));
         }
-        roads1_style_1.add_rule(r);
+        roads1_style_1.add_rule(std::move(r));
     }
     m.insert_style("highway-border", roads1_style_1);
 
@@ -170,7 +170,7 @@ void prepare_map(Map & m)
             put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
             r.append(std::move(line_sym));
         }
-        roads1_style_2.add_rule(r);
+        roads1_style_2.add_rule(std::move(r));
     }
     m.insert_style("highway-fill", roads1_style_2);
 
@@ -190,7 +190,7 @@ void prepare_map(Map & m)
             put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
             r.append(std::move(text_sym));
         }
-        popplaces_style.add_rule(r);
+        popplaces_style.add_rule(std::move(r));
     }
 
     m.insert_style("popplaces",popplaces_style );
@@ -202,7 +202,6 @@ void prepare_map(Map & m)
         p["type"]="shape";
         p["file"]="demo/data/boundaries";
         p["encoding"]="latin1";
-
         layer lyr("Provinces");
         lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.set_srs(srs_lcc);

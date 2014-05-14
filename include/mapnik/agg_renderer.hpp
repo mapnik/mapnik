@@ -67,14 +67,13 @@ public:
     typedef T0 buffer_type;
     typedef agg_renderer<T0> processor_impl_type;
     typedef T1 detector_type;
-    agg_renderer(Map const& m, buffer_type & pixmap, attributes const& vars, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with default, empty placement detector
     agg_renderer(Map const& m, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
     agg_renderer(Map const &m, buffer_type & pixmap, std::shared_ptr<detector_type> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // pass in mapnik::request object to provide the mutable things per render
-    agg_renderer(Map const& m, request const& req, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    agg_renderer(Map const& m, request const& req, attributes const& vars, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -143,7 +142,7 @@ public:
         return common_.scale_factor_;
     }
 
-    inline attributes variables()
+    inline attributes const& variables() const
     {
         return common_.vars_;
     }

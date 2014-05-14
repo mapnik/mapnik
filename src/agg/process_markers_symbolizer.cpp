@@ -111,6 +111,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                                         marker_trans,
                                         sym,
                                         *common_.detector_,
+                                        feature, common_.vars_,
                                         common_.scale_factor_,
                                         snap_pixels);
         },
@@ -125,6 +126,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                                         marker_trans,
                                         sym,
                                         *common_.detector_,
+                                        feature, common_.vars_,
                                         common_.scale_factor_,
                                         true /*snap rasters no matter what*/);
         });

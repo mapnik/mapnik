@@ -68,7 +68,7 @@ public:
     typedef T buffer_type;
     typedef grid_renderer<T> processor_impl_type;
     grid_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
-    grid_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    grid_renderer(Map const& m, request const& req, attributes const& vars, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~grid_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -129,6 +129,11 @@ public:
     inline double scale_factor() const
     {
         return common_.scale_factor_;
+    }
+
+    inline attributes const& variables() const
+    {
+        return common_.vars_;
     }
 
 private:

@@ -68,7 +68,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    double height = get<value_double>(sym, keys::height,feature, 0.0);
+    double height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
 
     render_building_symbolizer(
         feature, height,
