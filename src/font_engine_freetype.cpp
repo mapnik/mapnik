@@ -235,10 +235,9 @@ bool freetype_engine::register_fonts_impl(std::string const& dir, FT_LibraryRec_
 std::vector<std::string> freetype_engine::face_names ()
 {
     std::vector<std::string> names;
-    std::map<std::string,std::pair<int,std::string> >::const_iterator itr;
-    for (itr = name2file_.begin();itr!=name2file_.end();++itr)
+    for (auto const& kv : name2file_)
     {
-        names.push_back(itr->first);
+        names.push_back(kv.first);
     }
     return names;
 }
@@ -251,13 +250,12 @@ std::map<std::string,std::pair<int,std::string> > const& freetype_engine::get_ma
 
 face_ptr freetype_engine::create_face(std::string const& family_name)
 {
-    std::map<std::string, std::pair<int,std::string> >::const_iterator itr;
-    itr = name2file_.find(family_name);
+    auto itr = name2file_.find(family_name);
     if (itr != name2file_.end())
     {
         FT_Face face;
 
-        std::map<std::string,std::string>::const_iterator mem_font_itr = memory_fonts_.find(itr->second.second);
+        auto mem_font_itr = memory_fonts_.find(itr->second.second);
 
         if (mem_font_itr != memory_fonts_.end()) // memory font
         {
@@ -278,8 +276,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
             std::ifstream is(itr->second.second.c_str() , std::ios::binary);
             std::string buffer((std::istreambuf_iterator<char>(is)),
                                std::istreambuf_iterator<char>());
-            std::pair<std::map<std::string,std::string>::iterator,bool> result
-                = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
+            auto result = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
 
             FT_Error error = FT_New_Memory_Face (library_,
                                                  reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
@@ -346,9 +343,9 @@ face_set_ptr face_manager<T>::get_face_set(font_set const& fset)
 {
     std::vector<std::string> const& names = fset.get_face_names();
     face_set_ptr face_set = std::make_shared<font_face_set>();
-    for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
+    for (auto const& name  : names)
     {
-        face_ptr face = get_face(*name);
+        face_ptr face = get_face(name);
         if (face)
         {
             face_set->add(face);
