@@ -73,10 +73,9 @@ void init_freetype(FT_Memory memory, FT_Library & library)
     FT_Add_Default_Modules(library);
 }
 
-freetype_engine::freetype_engine() :
-    library_(nullptr),
-    memory_(new FT_MemoryRec_)
-
+freetype_engine::freetype_engine()
+    : library_(nullptr),
+      memory_(new FT_MemoryRec_)
 {
     init_freetype(&*memory_, library_);
 }
@@ -313,10 +312,9 @@ stroker_ptr freetype_engine::create_stroker()
 
 
 template <typename T>
-face_ptr face_manager<T>::get_face(const std::string &name)
+face_ptr face_manager<T>::get_face(std::string const& name)
 {
-    face_ptr_cache_type::iterator itr;
-    itr = face_ptr_cache_.find(name);
+    auto itr = face_ptr_cache_.find(name);
     if (itr != face_ptr_cache_.end())
     {
         return itr->second;
@@ -333,7 +331,7 @@ face_ptr face_manager<T>::get_face(const std::string &name)
 }
 
 template <typename T>
-face_set_ptr face_manager<T>::get_face_set(const std::string &name)
+face_set_ptr face_manager<T>::get_face_set(std::string const& name)
 {
     face_set_ptr face_set = std::make_shared<font_face_set>();
     if (face_ptr face = get_face(name))
@@ -344,7 +342,7 @@ face_set_ptr face_manager<T>::get_face_set(const std::string &name)
 }
 
 template <typename T>
-face_set_ptr face_manager<T>::get_face_set(const font_set &fset)
+face_set_ptr face_manager<T>::get_face_set(font_set const& fset)
 {
     std::vector<std::string> const& names = fset.get_face_names();
     face_set_ptr face_set = std::make_shared<font_face_set>();
