@@ -37,15 +37,6 @@ namespace mapnik
 {
 
 template <typename T>
-svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, attributes const& vars, double scale_factor, unsigned offset_x, unsigned offset_y) :
-    feature_style_processor<svg_renderer>(m, scale_factor),
-    output_iterator_(output_iterator),
-    generator_(output_iterator),
-    painted_(false),
-    common_(m, vars, offset_x, offset_y, m.width(), m.height(), scale_factor)
-{}
-
-template <typename T>
 svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
     feature_style_processor<svg_renderer>(m, scale_factor),
     output_iterator_(output_iterator),
@@ -55,12 +46,12 @@ svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, double scale_fa
 {}
 
 template <typename T>
-svg_renderer<T>::svg_renderer(Map const& m, request const& req, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
+svg_renderer<T>::svg_renderer(Map const& m, request const& req,  attributes const& vars, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
     feature_style_processor<svg_renderer>(m, scale_factor),
     output_iterator_(output_iterator),
     generator_(output_iterator),
     painted_(false),
-    common_(req, attributes(), offset_x, offset_y, req.width(), req.height(), scale_factor)
+    common_(req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {}
 
 template <typename T>
