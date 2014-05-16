@@ -81,7 +81,7 @@ struct feature_collection_grammar :
         start = feature_collection | feature_from_geometry(_val) | feature(_val)
             ;
 
-        feature_collection = lit('{') >> (type | features) % lit(',') >> lit('}')
+        feature_collection = lit('{') >> (type | features | json.key_value) % lit(',') >> lit('}')
             ;
 
         type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
