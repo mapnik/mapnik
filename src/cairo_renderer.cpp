@@ -761,14 +761,14 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     cairo_save_restore guard(context_);
-
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](raster &target, composite_mode_e comp_op, double opacity, 
+        [&](image_data_32 &target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
             context_.set_operator(comp_op);
-            context_.add_image(start_x, start_y, target.data_, opacity);
-        });
+            context_.add_image(start_x, start_y, target, opacity);
+        }
+    );
 }
 
 namespace detail {

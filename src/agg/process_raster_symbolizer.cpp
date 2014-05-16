@@ -33,7 +33,6 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 
@@ -53,11 +52,12 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
 {
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](raster &target, composite_mode_e comp_op, double opacity, 
+        [&](image_data_32 & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
-            composite(current_buffer_->data(), target.data_,
+            composite(current_buffer_->data(), target,
                       comp_op, opacity, start_x, start_y, false);
-        });
+        }
+    );
 }
 
 template void agg_renderer<image_32>::process(raster_symbolizer const&,

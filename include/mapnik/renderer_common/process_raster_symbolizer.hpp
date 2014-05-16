@@ -23,6 +23,9 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP
 
+// mapnik
+#include <mapnik/warp.hpp>
+
 // agg
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -55,10 +58,8 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
         {
-            raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
             scaling_method_e scaling_method = get<scaling_method_e>(sym, keys::scaling, feature, common.vars_, SCALING_NEAR);
             composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common.vars_, src_over);
-
             double opacity = get<double>(sym,keys::opacity,feature, common.vars_, 1.0);
             bool premultiply_source = !source->premultiplied_alpha_;
             auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
@@ -80,6 +81,7 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
             {
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
+                raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
                 unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, common.vars_, 16));
                 reproject_and_scale_raster(target,
                                            *source,
@@ -88,31 +90,46 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                                            offset_y,
                                            mesh_size,
                                            scaling_method);
+                composite(target.data_, comp_op, opacity, start_x, start_y);
             }
             else
             {
-                if (scaling_method == SCALING_BILINEAR8)
+                double image_ratio_x = ext.width() / source->data_.width();
+                double image_ratio_y = ext.height() / source->data_.height();
+                double eps = 1e-5;
+                if ( (std::fabs(image_ratio_x - 1) <= eps) &&
+                     (std::fabs(image_ratio_y - 1) <= eps) &&
+                     (std::fabs(start_x) <= eps) &&
+                     (std::fabs(start_y) <= eps) )
                 {
-                    scale_image_bilinear8<image_data_32>(target.data_,
-                                                         source->data_,
-                                                         0.0,
-                                                         0.0);
+                    composite(source->data_, comp_op, opacity, start_x, start_y);
                 }
                 else
                 {
-                    double image_ratio_x = ext.width() / source->data_.width();
-                    double image_ratio_y = ext.height() / source->data_.height();
-                    scale_image_agg<image_data_32>(target.data_,
-                                                   source->data_,
-                                                   scaling_method,
-                                                   image_ratio_x,
-                                                   image_ratio_y,
-                                                   0.0,
-                                                   0.0,
-                                                   source->get_filter_factor());
+                    raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
+                    if (scaling_method == SCALING_BILINEAR8)
+                    {
+                        scale_image_bilinear8<image_data_32>(target.data_,
+                                                             source->data_,
+                                                             0.0,
+                                                             0.0);
+                    }
+                    else
+                    {
+                        double image_ratio_x = ext.width() / source->data_.width();
+                        double image_ratio_y = ext.height() / source->data_.height();
+                        scale_image_agg<image_data_32>(target.data_,
+                                                       source->data_,
+                                                       scaling_method,
+                                                       image_ratio_x,
+                                                       image_ratio_y,
+                                                       0.0,
+                                                       0.0,
+                                                       source->get_filter_factor());
+                    }
+                    composite(target.data_, comp_op, opacity, start_x, start_y);
                 }
             }
-            composite(target, comp_op, opacity, start_x, start_y);
         }
     }
 }
