@@ -66,6 +66,14 @@ if 'geojson' in mapnik.DatasourceCache.plugin_names():
 #        query.add_property_name('bogus')
 #        fs = ds.features(query)
 
+    def test_parsing_feature_collection_with_top_level_properties():
+        ds = mapnik.Datasource(type='geojson',file='../data/json/feature_collection_level_properties.json')
+        f = ds.all_features()[0]
+
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(f['feat_name'], u'feat_value')
+
 if __name__ == "__main__":
     setup()
     run_all(eval(x) for x in dir() if x.startswith("test_"))
