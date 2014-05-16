@@ -1,0 +1,18 @@
+{
+  "type": "FeatureCollection",
+   "properties": {
+      "fc_name": "fc_value"
+    },
+    "features": [
+      {
+          "type": "Feature",
+          "properties": {
+            "feat_name": "feat_value"
+          },
+          "geometry": {
+              "type": "Point",
+              "coordinates": [ -122, 48 ]
+          }
+      }
+  ]
+}
