@@ -52,7 +52,7 @@
 </Style>
 <Style name="labels">
   <Rule>
-    <TextSymbolizer placement="line" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true">[type]</TextSymbolizer>
+    <TextSymbolizer halo-rasterizer="fast" placement="line" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true">[type]</TextSymbolizer>
   </Rule>
 </Style>
 <Layer name="layer"
