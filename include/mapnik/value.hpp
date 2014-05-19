@@ -425,7 +425,7 @@ struct sub : public boost::static_visitor<V>
     value_type operator() (value_unicode_string const& lhs,
                            value_unicode_string const& ) const
     {
-        return lhs;
+        return value_type();
     }
 
     value_type operator() (value_double lhs, value_integer rhs) const
@@ -462,7 +462,7 @@ struct mult : public boost::static_visitor<V>
     value_type operator() (value_unicode_string const& lhs,
                            value_unicode_string const& ) const
     {
-        return lhs;
+        return value_type();
     }
 
     value_type operator() (value_double lhs, value_integer rhs) const
@@ -510,7 +510,7 @@ struct div: public boost::static_visitor<V>
     value_type operator() (value_unicode_string const& lhs,
                            value_unicode_string const&) const
     {
-        return lhs;
+        return value_type();
     }
 
     value_type operator() (value_double lhs, value_integer rhs) const
@@ -545,7 +545,7 @@ struct mod: public boost::static_visitor<V>
     value_type operator() (value_unicode_string const& lhs,
                            value_unicode_string const&) const
     {
-        return lhs;
+        return value_type();
     }
 
     value_type operator() (value_bool lhs,
@@ -595,8 +595,7 @@ struct negate : public boost::static_visitor<V>
 
     value_type operator() (value_unicode_string const& ustr) const
     {
-        value_unicode_string inplace(ustr);
-        return inplace.reverse();
+        return value_type();
     }
 };
 
