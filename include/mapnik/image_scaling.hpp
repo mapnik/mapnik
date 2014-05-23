@@ -74,7 +74,7 @@ MAPNIK_DECL void scale_image_agg(Image & target,
 #ifdef _MSC_VER
 template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
                       mapnik::image_data_32 & target,
-                      mapnik::image_data_32 &const source,
+                      mapnik::image_data_32 const& source,
                       scaling_method_e scaling_method,
                       double image_ratio_x,
                       double image_ratio_y,
