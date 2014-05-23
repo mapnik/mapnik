@@ -97,10 +97,10 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                 double image_ratio_x = ext.width() / source->data_.width();
                 double image_ratio_y = ext.height() / source->data_.height();
                 double eps = 1e-5;
-                if ( (std::fabs(image_ratio_x - 1) <= eps) &&
-                     (std::fabs(image_ratio_y - 1) <= eps) &&
-                     (std::fabs(start_x) <= eps) &&
-                     (std::fabs(start_y) <= eps) )
+                if ( (std::fabs(image_ratio_x - 1.0) <= eps) &&
+                     (std::fabs(image_ratio_y - 1.0) <= eps) &&
+                     (std::abs(start_x) <= eps) &&
+                     (std::abs(start_y) <= eps) )
                 {
                     composite(source->data_, comp_op, opacity, start_x, start_y);
                 }
