@@ -267,15 +267,17 @@ class _Path(Path,_injector):
 
 class _Datasource(Datasource,_injector):
 
-    def all_features(self,fields=None):
+    def all_features(self,fields=None,variables={}):
         query = Query(self.envelope())
+        query.set_variables(variables);
         attributes = fields or self.fields()
         for fld in attributes:
             query.add_property_name(fld)
         return self.features(query).features
 
-    def featureset(self,fields=None):
+    def featureset(self,fields=None,variables={}):
         query = Query(self.envelope())
+        query.set_variables(variables);
         attributes = fields or self.fields()
         for fld in attributes:
             query.add_property_name(fld)

@@ -55,6 +55,7 @@ struct raster_markers_rasterizer_dispatch_grid
                                        Detector & detector,
                                        double scale_factor,
                                        mapnik::feature_impl & feature,
+                                       attributes const& vars,
                                        PixMapType & pixmap)
         : buf_(render_buffer),
         pixf_(buf_),
@@ -66,29 +67,19 @@ struct raster_markers_rasterizer_dispatch_grid
         detector_(detector),
         scale_factor_(scale_factor),
         feature_(feature),
+        vars_(vars),
         pixmap_(pixmap),
         placed_(false)
-    {
-        // TODO - support basic binary operators
-        //pixf_.comp_op(static_cast<agg::comp_op_e>(sym_.comp_op()));
-    }
-
-    raster_markers_rasterizer_dispatch_grid(raster_markers_rasterizer_dispatch_grid &&d) 
-      : buf_(d.buf_), pixf_(d.pixf_), renb_(d.renb_), ras_(d.ras_), src_(d.src_), 
-        marker_trans_(d.marker_trans_), sym_(d.sym_), detector_(d.detector_), 
-        scale_factor_(d.scale_factor_), feature_(d.feature_), pixmap_(d.pixmap_),
-        placed_(d.placed_)
     {
     }
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, false);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, false);
-        double spacing = get<double>(sym_, keys::spacing, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, 0.2);
+        agg::scanline_bin sl_;
+        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
+        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
+        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
 
         box2d<double> bbox_(0,0, src_.width(),src_.height());
         if (placement_method != MARKER_LINE_PLACEMENT ||
@@ -99,17 +90,23 @@ struct raster_markers_rasterizer_dispatch_grid
             if (path.type() == geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
+                {
                     return;
+                }
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
+                {
                     return;
+                }
             }
             else
             {
                 if (!label::centroid(path, x, y))
+                {
                     return;
+                }
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -131,6 +128,8 @@ struct raster_markers_rasterizer_dispatch_grid
         }
         else
         {
+            double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+            double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
             markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
                                                                       spacing * scale_factor_,
                                                                       max_error,
@@ -153,6 +152,7 @@ struct raster_markers_rasterizer_dispatch_grid
 
     void render_raster_marker(agg::trans_affine const& marker_tr)
     {
+        agg::scanline_bin sl_;
         double width  = src_.width();
         double height = src_.height();
         double p[8];
@@ -174,7 +174,6 @@ struct raster_markers_rasterizer_dispatch_grid
     }
 
 private:
-    agg::scanline_bin sl_;
     BufferType & buf_;
     PixFmt pixf_;
     RendererBase renb_;
@@ -185,6 +184,7 @@ private:
     Detector & detector_;
     double scale_factor_;
     mapnik::feature_impl & feature_;
+    attributes const& vars_;
     PixMapType & pixmap_;
     bool placed_;
 };
@@ -208,6 +208,7 @@ struct vector_markers_rasterizer_dispatch_grid
                                             Detector & detector,
                                             double scale_factor,
                                             mapnik::feature_impl & feature,
+                                            attributes const& vars,
                                             PixMapType & pixmap)
         : buf_(render_buffer),
         pixf_(buf_),
@@ -220,30 +221,20 @@ struct vector_markers_rasterizer_dispatch_grid
         detector_(detector),
         scale_factor_(scale_factor),
         feature_(feature),
+        vars_(vars),
         pixmap_(pixmap),
         placed_(false)
-    {
-        // TODO
-        //pixf_.comp_op(static_cast<agg::comp_op_e>(sym_.comp_op()));
-    }
-
-    vector_markers_rasterizer_dispatch_grid(vector_markers_rasterizer_dispatch_grid &&d)
-      : buf_(d.buf_), pixf_(d.pixf_), svg_renderer_(std::move(d.svg_renderer_)), ras_(d.ras_),
-        bbox_(d.bbox_), marker_trans_(d.marker_trans_), sym_(d.sym_), detector_(d.detector_),
-        scale_factor_(d.scale_factor_), feature_(d.feature_), pixmap_(d.pixmap_),
-        placed_(d.placed_)
     {
     }
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, false);
-        double spacing = get<double>(sym_, keys::spacing, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, 0.2);
-        double opacity = get<double>(sym_,keys::opacity, 1.0);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, false);
+        agg::scanline_bin sl_;
+        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
+        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
+        double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
+        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == geometry_type::types::Point)
@@ -253,17 +244,23 @@ struct vector_markers_rasterizer_dispatch_grid
             if (path.type() == geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
+                {
                     return;
+                }
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
+                {
                     return;
+                }
             }
             else
             {
                 if (!label::centroid(path, x, y))
+                {
                     return;
+                }
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -285,6 +282,8 @@ struct vector_markers_rasterizer_dispatch_grid
         }
         else
         {
+            double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+            double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
             markers_placement<T, Detector> placement(path, bbox_, marker_trans_, detector_,
                                                      spacing * scale_factor_,
                                                      max_error,
@@ -305,7 +304,6 @@ struct vector_markers_rasterizer_dispatch_grid
         }
     }
 private:
-    agg::scanline_bin sl_;
     BufferType & buf_;
     pixfmt_type pixf_;
     renderer_base renb_;
@@ -317,10 +315,10 @@ private:
     Detector & detector_;
     double scale_factor_;
     mapnik::feature_impl & feature_;
+    attributes const& vars_;
     PixMapType & pixmap_;
     bool placed_;
 };
-
 
 }
 #endif

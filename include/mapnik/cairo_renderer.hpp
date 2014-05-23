@@ -58,17 +58,20 @@ class MAPNIK_DECL cairo_renderer_base : private mapnik::noncopyable
 protected:
     cairo_renderer_base(Map const& m,
                         cairo_ptr const& cairo,
+                        attributes const& vars,
                         double scale_factor=1.0,
                         unsigned offset_x=0,
                         unsigned offset_y=0);
     cairo_renderer_base(Map const& m,
                         request const& req,
                         cairo_ptr const& cairo,
+                        attributes const& vars,
                         double scale_factor=1.0,
                         unsigned offset_x=0,
                         unsigned offset_y=0);
     cairo_renderer_base(Map const& m,
                         cairo_ptr const& cairo,
+                        attributes const& vars,
                         std::shared_ptr<label_collision_detector4> detector,
                         double scale_factor=1.0,
                         unsigned offset_x=0,
@@ -138,6 +141,11 @@ public:
         return common_.scale_factor_;
     }
 
+    inline attributes const& variables() const
+    {
+        return common_.vars_;
+    }
+
     void render_marker(pixel_position const& pos,
                        marker const& marker,
                        agg::trans_affine const& mtx,
@@ -165,6 +173,7 @@ public:
                    unsigned offset_y=0);
     cairo_renderer(Map const& m,
                    request const& req,
+                   attributes const& vars,
                    T const& obj,
                    double scale_factor=1.0,
                    unsigned offset_x=0,

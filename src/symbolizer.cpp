@@ -29,7 +29,9 @@
 namespace mapnik {
 
 // START FIXME - move to its own compilation unit
-void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
+void evaluate_transform(agg::trans_affine& tr,
+                        feature_impl const& feature,
+                        attributes const& vars,
                         transform_list_ptr const& trans_expr, double scale_factor)
 {
     if (trans_expr)
@@ -38,7 +40,7 @@ void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
     MAPNIK_LOG_DEBUG(transform) << "transform: evaluate "
                                 << transform_processor_type::to_string(*trans_expr);
 #endif
-        transform_processor_type::evaluate(tr, feature, *trans_expr, scale_factor);
+        transform_processor_type::evaluate(tr, feature, vars, *trans_expr, scale_factor);
     }
 }
 // END FIXME

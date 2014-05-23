@@ -28,7 +28,10 @@
 #include <mapnik/util/conversions.hpp>
 
 // webp
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 #include <webp/encode.h>
+#pragma clang diagnostic pop
 
 // stl
 #include <stdexcept>

@@ -39,11 +39,12 @@ namespace mapnik {
 
 group_symbolizer_helper::group_symbolizer_helper(
         const group_symbolizer &sym, const feature_impl &feature,
+        attributes const& vars,
         const proj_transform &prj_trans,
         unsigned width, unsigned height, double scale_factor,
         const CoordTransform &t, DetectorType &detector,
         const box2d<double> &query_extent)
-    : base_symbolizer_helper(sym, feature, prj_trans, width, height, scale_factor, t, query_extent),
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       detector_(detector)
 {}
 

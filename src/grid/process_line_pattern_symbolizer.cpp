@@ -50,9 +50,9 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature);
-
-    boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
+    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    if (filename.empty()) return;
+    boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
     if (!mark) return;
 
     if (!(*mark)->is_bitmap())
@@ -64,10 +64,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
-    bool clip = get<value_bool>(sym, keys::clip, feature);
-    double offset = get<value_double>(sym, keys::offset, feature, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
     typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
@@ -89,7 +89,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) { evaluate_transform(tr, feature, *transform, common_.scale_factor_); }
+    if (transform)
+    {
+        evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
+    }
 
     box2d<double> clipping_extent = common_.query_extent_;
     if (clip)
@@ -117,7 +120,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-        converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
+        converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset

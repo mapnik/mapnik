@@ -52,9 +52,9 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature);
-
-    boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
+    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    if (filename.empty()) return;
+    boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
     if (!mark) return;
 
     if (!(*mark)->is_bitmap())
@@ -68,18 +68,21 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, false);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
     agg::trans_affine tr;
-    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (geom_transform) evaluate_transform(tr, feature, *geom_transform, common_.scale_factor_);
+    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (transform)
+    {
+        evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
+    }
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-        converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
+        converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

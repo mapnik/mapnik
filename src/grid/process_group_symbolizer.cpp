@@ -117,7 +117,7 @@ void  grid_renderer<T>::process(group_symbolizer const& sym,
                                 proj_transform const& prj_trans)
 {
     render_group_symbolizer(
-        sym, feature, prj_trans, common_.query_extent_, common_,
+        sym, feature, common_.vars_, prj_trans, common_.query_extent_, common_,
         [&](render_thunk_list const& thunks, pixel_position const& render_offset)
         {
             thunk_renderer<T> ren(*this, pixmap_, common_, feature, render_offset);

@@ -34,6 +34,7 @@
 #include <mapnik/marker.hpp> // for svg_storage_type
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/markers_placement.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // agg
 #include "agg_ellipse.h"
@@ -74,6 +75,8 @@ struct vector_markers_rasterizer_dispatch
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
+                                       feature_impl & feature,
+                                       attributes const& vars,
                                        double scale_factor,
                                        bool snap_to_pixels)
     : buf_(render_buffer),
@@ -85,26 +88,22 @@ struct vector_markers_rasterizer_dispatch
         marker_trans_(marker_trans),
         sym_(sym),
         detector_(detector),
+        feature_(feature),
+        vars_(vars),
         scale_factor_(scale_factor),
         snap_to_pixels_(snap_to_pixels)
     {
-        pixf_.comp_op(get<agg::comp_op_e>(sym_, keys::comp_op, agg::comp_op_src_over));
-    }
-
-    vector_markers_rasterizer_dispatch(vector_markers_rasterizer_dispatch &&d)
-      : buf_(d.buf_), pixf_(d.pixf_), svg_renderer_(std::move(d.svg_renderer_)), ras_(d.ras_),
-        bbox_(d.bbox_), marker_trans_(d.marker_trans_), sym_(d.sym_), detector_(d.detector_),
-        scale_factor_(d.scale_factor_), snap_to_pixels_(d.snap_to_pixels_)
-    {
+        pixf_.comp_op(get<agg::comp_op_e>(sym_, keys::comp_op, feature_, vars_, agg::comp_op_src_over));
     }
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, false);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, false);
-        double opacity = get<double>(sym_,keys::opacity, 1.0);
+        agg::scanline_u8 sl_;
+        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
+        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
+        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
+        double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == mapnik::geometry_type::types::Point)
@@ -114,17 +113,23 @@ struct vector_markers_rasterizer_dispatch
             if (path.type() == mapnik::geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
+                {
                     return;
+                }
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
+                {
                     return;
+                }
             }
             else
             {
                 if (!label::centroid(path, x, y))
+                {
                     return;
+                }
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -149,8 +154,8 @@ struct vector_markers_rasterizer_dispatch
         }
         else
         {
-            double spacing = get<double>(sym_, keys::spacing, 100.0);
-            double max_error = get<double>(sym_, keys::max_error, 0.2);
+            double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+            double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
             markers_placement<T, Detector> placement(path, bbox_, marker_trans_, detector_,
                                                      spacing * scale_factor_,
                                                      max_error,
@@ -168,7 +173,6 @@ struct vector_markers_rasterizer_dispatch
         }
     }
 private:
-    agg::scanline_u8 sl_;
     BufferType & buf_;
     pixfmt_type pixf_;
     renderer_base renb_;
@@ -178,6 +182,8 @@ private:
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;
     Detector & detector_;
+    feature_impl & feature_;
+    attributes const& vars_;
     double scale_factor_;
     bool snap_to_pixels_;
 };
@@ -198,6 +204,8 @@ struct raster_markers_rasterizer_dispatch
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
+                                       feature_impl & feature,
+                                       attributes const& vars,
                                        double scale_factor,
                                        bool snap_to_pixels)
         : buf_(render_buffer),
@@ -208,27 +216,22 @@ struct raster_markers_rasterizer_dispatch
         marker_trans_(marker_trans),
         sym_(sym),
         detector_(detector),
+        feature_(feature),
+        vars_(vars),
         scale_factor_(scale_factor),
         snap_to_pixels_(snap_to_pixels)
     {
-        pixf_.comp_op(get<agg::comp_op_e>(sym_, keys::comp_op, agg::comp_op_src_over));
-    }
-
-    raster_markers_rasterizer_dispatch(raster_markers_rasterizer_dispatch &&d) 
-      : buf_(d.buf_), pixf_(d.pixf_), renb_(d.renb_), ras_(d.ras_), src_(d.src_), 
-        marker_trans_(d.marker_trans_), sym_(d.sym_), detector_(d.detector_), 
-        scale_factor_(d.scale_factor_), snap_to_pixels_(d.snap_to_pixels_)
-    {
+        pixf_.comp_op(get<agg::comp_op_e>(sym_, keys::comp_op, feature_, vars_, agg::comp_op_src_over));
     }
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, false);
+        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
+        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         box2d<double> bbox_(0,0, src_.width(),src_.height());
-        double opacity = get<double>(sym_, keys::opacity, 1.0);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, false);
+        double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
+        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == mapnik::geometry_type::types::Point)
@@ -238,17 +241,23 @@ struct raster_markers_rasterizer_dispatch
             if (path.type() == mapnik::geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
+                {
                     return;
+                }
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
+                {
                     return;
+                }
             }
             else
             {
                 if (!label::centroid(path, x, y))
+                {
                     return;
+                }
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -266,8 +275,8 @@ struct raster_markers_rasterizer_dispatch
         }
         else
         {
-            double spacing  = get<double>(sym_, keys::spacing, 100.0);
-            double max_error  = get<double>(sym_, keys::max_error, 0.2);
+            double spacing  = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+            double max_error  = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
             markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
                                                                       spacing * scale_factor_,
                                                                       max_error,
@@ -287,6 +296,7 @@ struct raster_markers_rasterizer_dispatch
                               double opacity)
     {
         typedef agg::pixfmt_rgba32_pre pixfmt_pre;
+        agg::scanline_u8 sl_;
         double width  = src_.width();
         double height = src_.height();
         if (std::fabs(1.0 - scale_factor_) < 0.001
@@ -349,7 +359,6 @@ struct raster_markers_rasterizer_dispatch
     }
 
 private:
-    agg::scanline_u8 sl_;
     BufferType & buf_;
     pixfmt_comp_type pixf_;
     renderer_base renb_;
@@ -358,13 +367,15 @@ private:
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;
     Detector & detector_;
+    feature_impl & feature_;
+    attributes const& vars_;
     double scale_factor_;
     bool snap_to_pixels_;
 };
 
 
 template <typename T>
-void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
+void build_ellipse(T const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
 {
     auto width_expr  = get<expression_ptr>(sym, keys::width);
     auto height_expr = get<expression_ptr>(sym, keys::height);
@@ -372,17 +383,17 @@ void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storag
     double height = 0;
     if (width_expr && height_expr)
     {
-        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
-        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
     }
     else if (width_expr)
     {
-        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
         height = width;
     }
     else if (height_expr)
     {
-        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
         width = height;
     }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
@@ -400,13 +411,16 @@ void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storag
 }
 
 template <typename Attr>
-bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& sym)
+bool push_explicit_style(Attr const& src, Attr & dst,
+                         markers_symbolizer const& sym,
+                         feature_impl & feature,
+                         attributes const& vars)
 {
-    auto fill_color = get_optional<color>(sym, keys::fill);
-    auto fill_opacity = get_optional<double>(sym, keys::fill_opacity);
-    auto stroke_color = get_optional<color>(sym, keys::stroke);
-    auto stroke_width = get_optional<double>(sym, keys::stroke_width);
-    auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity);
+    auto fill_color = get_optional<color>(sym, keys::fill, feature, vars);
+    auto fill_opacity = get_optional<double>(sym, keys::fill_opacity, feature, vars);
+    auto stroke_color = get_optional<color>(sym, keys::stroke, feature, vars);
+    auto stroke_width = get_optional<double>(sym, keys::stroke_width, feature, vars);
+    auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity, feature, vars);
     if (fill_color ||
         fill_opacity ||
         stroke_color ||
@@ -463,7 +477,8 @@ template <typename T>
 void setup_transform_scaling(agg::trans_affine & tr,
                              double svg_width,
                              double svg_height,
-                             mapnik::feature_impl const& feature,
+                             mapnik::feature_impl & feature,
+                             attributes const& vars,
                              T const& sym)
 {
     double width = 0;
@@ -471,11 +486,11 @@ void setup_transform_scaling(agg::trans_affine & tr,
 
     expression_ptr width_expr = get<expression_ptr>(sym, keys::width);
     if (width_expr)
-        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
 
     expression_ptr height_expr = get<expression_ptr>(sym, keys::height);
     if (height_expr)
-        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
 
     if (width > 0 && height > 0)
     {
@@ -497,7 +512,7 @@ void setup_transform_scaling(agg::trans_affine & tr,
 
 // Apply markers to a feature with multiple geometries
 template <typename Converter>
-void apply_markers_multi(feature_impl & feature, Converter& converter, markers_symbolizer const& sym)
+void apply_markers_multi(feature_impl & feature, attributes const& vars, Converter& converter, markers_symbolizer const& sym)
 {
   std::size_t geom_count = feature.paths().size();
   if (geom_count == 1)
@@ -506,8 +521,8 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
   }
   else if (geom_count > 1)
   {
-      marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum>(sym, keys::markers_multipolicy, MARKER_EACH_MULTI);
-      marker_placement_enum placement = get<marker_placement_enum>(sym, keys::markers_placement_type, MARKER_POINT_PLACEMENT);
+      marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum>(sym, keys::markers_multipolicy, feature, vars, MARKER_EACH_MULTI);
+      marker_placement_enum placement = get<marker_placement_enum>(sym, keys::markers_placement_type, feature, vars, MARKER_POINT_PLACEMENT);
       if (placement == MARKER_POINT_PLACEMENT &&
           multi_policy == MARKER_WHOLE_MULTI)
       {
@@ -551,7 +566,7 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
           }
           for (geometry_type & path : feature.paths())
           {
-            converter.apply(path);
+              converter.apply(path);
           }
       }
   }

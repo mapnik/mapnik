@@ -77,7 +77,7 @@ node_ptr format_node::from_xml(xml_node const& xml)
 }
 
 
-void format_node::apply(char_properties_ptr p, const feature_impl &feature, text_layout &output) const
+void format_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
 {
     char_properties_ptr new_properties = std::make_shared<char_properties>(*p);
     if (face_name) new_properties->face_name = *face_name;
@@ -92,7 +92,7 @@ void format_node::apply(char_properties_ptr p, const feature_impl &feature, text
     if (halo_radius) new_properties->halo_radius = *halo_radius;
 
     if (child_) {
-        child_->apply(new_properties, feature, output);
+        child_->apply(new_properties, feature, vars, output);
     } else {
         MAPNIK_LOG_WARN(format) << "Useless format: No text to format";
     }

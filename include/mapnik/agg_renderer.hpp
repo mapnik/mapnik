@@ -73,7 +73,7 @@ public:
     agg_renderer(Map const &m, buffer_type & pixmap, std::shared_ptr<detector_type> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // pass in mapnik::request object to provide the mutable things per render
-    agg_renderer(Map const& m, request const& req, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    agg_renderer(Map const& m, request const& req, attributes const& vars, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -140,6 +140,11 @@ public:
     inline double scale_factor() const
     {
         return common_.scale_factor_;
+    }
+
+    inline attributes const& variables() const
+    {
+        return common_.vars_;
     }
 
     inline box2d<double> clipping_extent() const

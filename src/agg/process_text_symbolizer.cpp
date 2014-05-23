@@ -38,14 +38,14 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent();
     text_symbolizer_helper helper(
-            sym, feature, prj_trans,
+            sym, feature, common_.vars_, prj_trans,
             common_.width_, common_.height_,
             common_.scale_factor_,
             common_.t_, common_.font_manager_, *common_.detector_,
             clip_box);
 
-    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, HALO_RASTERIZER_FULL);
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer,feature, common_.vars_, HALO_RASTERIZER_FULL);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     agg_text_renderer<T0> ren(*current_buffer_,
                              halo_rasterizer,
                              comp_op,
@@ -56,7 +56,7 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::halo_transform);
     if (transform)
     {
-        evaluate_transform(halo_transform, feature, *transform);
+        evaluate_transform(halo_transform, feature, common_.vars_, *transform);
         ren.set_halo_transform(halo_transform);
     }
     placements_list const& placements = helper.get();

@@ -100,9 +100,9 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
 
-    std::string filename = get<std::string>(sym, keys::file, feature);
-
-    boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
+    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    if (filename.empty()) return;
+    boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
     if (!mark) return;
 
     if (!(*mark)->is_bitmap())
@@ -114,16 +114,15 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
-
-    bool clip = get<value_bool>(sym, keys::clip, feature);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
     //double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0); TODO
-    double offset = get<value_double>(sym, keys::offset, feature, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
-    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, agg::comp_op_src_over));
+    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 
@@ -134,7 +133,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, *transform, common_.scale_factor_);
+    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
     box2d<double> clip_box = clipping_extent();
     if (clip)
@@ -152,7 +151,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-        converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
+        converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

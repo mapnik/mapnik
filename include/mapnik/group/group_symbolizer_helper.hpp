@@ -55,6 +55,7 @@ public:
 
     group_symbolizer_helper(group_symbolizer const& sym,
                             feature_impl const& feature,
+                            attributes const& vars,
                             proj_transform const& prj_trans,
                             unsigned width,
                             unsigned height,

@@ -101,7 +101,7 @@ public:
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
 
-    void init_orientation(feature_impl const& feature);
+    void init_orientation(feature_impl const& feature, attributes const& attr);
 
 private:
     void break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before);

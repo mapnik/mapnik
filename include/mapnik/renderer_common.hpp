@@ -27,30 +27,33 @@
 #include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
 #include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/attribute.hpp>
 
 // fwd declarations to speed up compile
 namespace mapnik {
   class label_collision_detector4;
   class Map;
   class request;
+//  class attributes;
 }
 
 namespace mapnik {
 
 struct renderer_common
 {
-    renderer_common(Map const &m, unsigned offset_x, unsigned offset_y, 
+    renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y, 
                        unsigned width, unsigned height, double scale_factor);
-    renderer_common(Map const &m, unsigned offset_x, unsigned offset_y, 
+    renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y, 
                        unsigned width, unsigned height, double scale_factor,
                        std::shared_ptr<label_collision_detector4> detector);
-    renderer_common(request const &req, unsigned offset_x, unsigned offset_y, 
+    renderer_common(request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y, 
                        unsigned width, unsigned height, double scale_factor);
-    renderer_common(const renderer_common &);
+    renderer_common(renderer_common const& other);
 
     unsigned width_;
     unsigned height_;
     double scale_factor_;
+    attributes vars_;
     // TODO: dirty hack for cairo renderer, figure out how to remove this
     std::shared_ptr<freetype_engine> shared_font_engine_;
     freetype_engine &font_engine_;
@@ -61,7 +64,7 @@ struct renderer_common
 
 private:
     renderer_common(unsigned width, unsigned height, double scale_factor,
-                       CoordTransform &&t, std::shared_ptr<label_collision_detector4> detector);
+                    attributes const& vars, CoordTransform &&t, std::shared_ptr<label_collision_detector4> detector);
 };
 
 }

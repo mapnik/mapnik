@@ -82,6 +82,8 @@ enum class keys : std::uint8_t
     start_column,
     repeat_key,
     group_properties,
+    largest_box_only,
+    minimum_path_length,
     MAX_SYMBOLIZER_KEY
 };
 

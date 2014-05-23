@@ -48,9 +48,9 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
     typedef agg::pod_bvector<path_attributes> svg_attribute_type;
 
-    std::string filename = get<std::string>(sym, keys::file, feature, "shape://ellipse");
-    bool clip = get<value_bool>(sym, keys::clip, feature, false);
-    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
+    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, false);
 
     // https://github.com/mapnik/mapnik/issues/1316
     bool snap_pixels = !mapnik::marker_cache::instance().is_uri(filename);
@@ -76,11 +76,11 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     svg_storage_type marker_ellipse;
                     vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
                     svg_path_adapter svg_path(stl_storage);
-                    build_ellipse(sym, feature, marker_ellipse, svg_path);
+                    build_ellipse(sym, feature, common.vars_, marker_ellipse, svg_path);
                     svg_attribute_type attributes;
-                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-                    if (image_transform) evaluate_transform(tr, feature, *image_transform);
+                    if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
 
                     auto rasterizer_dispatch = make_vector_dispatch(
@@ -90,7 +90,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
 
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.scale_factor_);
+                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -103,18 +103,18 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     }
                     converter.template set<transform_tag>(); //always transform
                     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                    apply_markers_multi(feature, converter, sym);
+                    apply_markers_multi(feature, common.vars_, converter, sym);
                 }
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
-                    setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
+                    setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, common.vars_, sym);
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-                    if (image_transform) evaluate_transform(tr, feature, *image_transform);
+                    if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                     vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
                     svg_path_adapter svg_path(stl_storage);
                     svg_attribute_type attributes;
-                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
                     auto rasterizer_dispatch = make_vector_dispatch(
                       svg_path, result ? attributes : (*stock_vector_marker)->attributes(),
                       **stock_vector_marker, bbox, tr, snap_pixels);
@@ -122,7 +122,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
 
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.scale_factor_);
+                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -135,14 +135,14 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     }
                     converter.template set<transform_tag>(); //always transform
                     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                    apply_markers_multi(feature, converter, sym);
+                    apply_markers_multi(feature, common.vars_, converter, sym);
                 }
             }
             else // raster markers
             {
-                setup_transform_scaling(tr, (*mark)->width(), (*mark)->height(), feature, sym);
+                setup_transform_scaling(tr, (*mark)->width(), (*mark)->height(), feature, common.vars_, sym);
                 auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-                if (image_transform) evaluate_transform(tr, feature, *image_transform);
+                if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                 box2d<double> const& bbox = (*mark)->bounding_box();
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
                 
@@ -151,7 +151,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
 
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.scale_factor_);
+                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {
@@ -165,7 +165,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                 }
                 converter.template set<transform_tag>(); //always transform
                 if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                apply_markers_multi(feature, converter, sym);
+                apply_markers_multi(feature, common.vars_, converter, sym);
             }
         }
     }

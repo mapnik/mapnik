@@ -235,12 +235,12 @@ void text_layout::shape_text(text_line & line)
     shaper_type::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
 }
 
-void text_layout::init_orientation(feature_impl const& feature)
+void text_layout::init_orientation(feature_impl const& feature, attributes const& attr)
 {
     if (properties_->orientation)
     {
         // https://github.com/mapnik/mapnik/issues/1352
-        mapnik::evaluate<feature_impl, value_type> evaluator(feature);
+        mapnik::evaluate<feature_impl, value_type, attributes> evaluator(feature,attr);
         orientation_.init(
             boost::apply_visitor(
             evaluator,

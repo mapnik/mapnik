@@ -471,6 +471,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
                                height/qh);
 
     query q(layer_ext,res,scale_denom,extent);
+    q.set_variables(p.variables());
 
     if (p.attribute_collection_policy() == COLLECT_ALL)
     {
@@ -643,6 +644,7 @@ void feature_style_processor<Processor>::render_style(
         p.end_style_processing(*style);
         return;
     }
+    mapnik::attributes vars = p.variables();
     feature_ptr feature;
     bool was_painted = false;
     while ((feature = features->next()))
@@ -652,7 +654,7 @@ void feature_style_processor<Processor>::render_style(
         for (rule const* r : rc.get_if_rules() )
         {
             expression_ptr const& expr = r->get_filter();
-            value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(*feature),*expr);
+            value_type result = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(*feature,vars),*expr);
             if (result.to_bool())
             {
                 was_painted = true;

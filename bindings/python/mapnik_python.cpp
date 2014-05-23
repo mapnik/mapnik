@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "boost_std_shared_shim.hpp"
+#include "python_to_value.hpp"
 #include <boost/python/args.hpp>        // for keywords, arg, etc
 #include <boost/python/converter/from_python.hpp>
 #include <boost/python/def.hpp>         // for def
@@ -182,7 +183,18 @@ void render(mapnik::Map const& map,
     python_unblock_auto_block b;
     mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
     ren.apply();
+}
 
+void render_with_vars(mapnik::Map const& map,
+            mapnik::image_32& image,
+            boost::python::dict const& d)
+{
+    mapnik::attributes vars = mapnik::dict2attr(d);
+    mapnik::request req(map.width(),map.height(),map.get_current_extent());
+    req.set_buffer_size(map.buffer_size());
+    python_unblock_auto_block b;
+    mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,image,1,0,0);
+    ren.apply();
 }
 
 void render_with_detector(
@@ -259,7 +271,6 @@ void render6(mapnik::Map const& map, PycairoContext* py_context)
     mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context);
     ren.apply();
 }
-
 void render_with_detector2(
     mapnik::Map const& map,
     PycairoContext* py_context,
@@ -647,6 +658,7 @@ BOOST_PYTHON_MODULE(_mapnik)
         "\n"
         );
 
+    def("render_with_vars",&render_with_vars);
 
     def("render", &render, render_overloads(
             "\n"

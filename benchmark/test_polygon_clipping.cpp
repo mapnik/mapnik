@@ -27,6 +27,7 @@
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
 #include <mapnik/image_util.hpp>
+#include <fstream>
 
 void render(mapnik::geometry_type & geom,
             mapnik::box2d<double> const& extent,

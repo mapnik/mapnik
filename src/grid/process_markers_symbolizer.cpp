@@ -129,6 +129,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                         *common_.detector_,
                                         common_.scale_factor_,
                                         feature,
+                                        common_.vars_,
                                         pixmap_);
         },
         [&](image_data_32 const &marker, agg::trans_affine const &tr,
@@ -145,6 +146,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                         *common_.detector_,
                                         common_.scale_factor_,
                                         feature,
+                                        common_.vars_,
                                         pixmap_);
         });
 }

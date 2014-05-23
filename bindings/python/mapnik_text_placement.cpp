@@ -125,10 +125,10 @@ struct NodeWrap: formatting::node, wrapper<formatting::node>
 
     }
 
-    void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         python_block_auto_unblock b;
-        this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&output));
+        this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
     }
 
     virtual void add_expressions(expression_set &output) const
@@ -163,85 +163,85 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
 
     }
 
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
             python_block_auto_unblock b;
-            o(ptr(&p), ptr(&feature), ptr(&output));
+            o(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
         }
         else
         {
-            formatting::text_node::apply(p, feature, output);
+            formatting::text_node::apply(p, feature, vars, output);
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
-        formatting::text_node::apply(p, feature, output);
+        formatting::text_node::apply(p, feature, vars, output);
     }
 };
 
 struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
 {
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
             python_block_auto_unblock b;
-            o(ptr(&p), ptr(&feature), ptr(&output));
+            o(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
         }
         else
         {
-            formatting::format_node::apply(p, feature, output);
+            formatting::format_node::apply(p, feature, vars ,output);
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
-        formatting::format_node::apply(p, feature, output);
+        formatting::format_node::apply(p, feature, vars, output);
     }
 };
 
 struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expression_format>
 {
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
             python_block_auto_unblock b;
-            o(ptr(&p), ptr(&feature), ptr(&output));
+            o(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
         }
         else
         {
-            formatting::expression_format::apply(p, feature, output);
+            formatting::expression_format::apply(p, feature, vars, output);
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
-        formatting::expression_format::apply(p, feature, output);
+        formatting::expression_format::apply(p, feature, vars, output);
     }
 };
 
 struct LayoutNodeWrap: formatting::layout_node, wrapper<formatting::layout_node>
 {
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
             python_block_auto_unblock b;
-            o(ptr(&p), ptr(&feature), ptr(&output));
+            o(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
         }
         else
         {
-            formatting::layout_node::apply(p, feature, output);
+            formatting::layout_node::apply(p, feature, vars, output);
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
-        formatting::layout_node::apply(p, feature, output);
+        formatting::layout_node::apply(p, feature, vars, output);
     }
 };
 
@@ -266,22 +266,22 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
     /* TODO: Add constructor taking variable number of arguments.
        http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function */
 
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
             python_block_auto_unblock b;
-            o(ptr(&p), ptr(&feature), ptr(&output));
+            o(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
         }
         else
         {
-            formatting::list_node::apply(p, feature, output);
+            formatting::list_node::apply(p, feature, vars, output);
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
-        formatting::list_node::apply(p, feature, output);
+        formatting::list_node::apply(p, feature, vars, output);
     }
 
     inline void IndexError(){

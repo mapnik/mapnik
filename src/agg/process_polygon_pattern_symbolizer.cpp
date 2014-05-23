@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-// boost
-
-
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
@@ -57,13 +54,27 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
+    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    if (filename.empty()) return;
+    boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
+    if (!marker) return;
+
+    if (!(*marker)->is_bitmap())
+    {
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
+        return;
+    }
+
+    boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
+    if (!pat) return;
+
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
     agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
-    double gamma = get<value_double>(sym, keys::gamma, feature, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, GAMMA_POWER);
+    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
+    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);
@@ -71,34 +82,10 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    std::string filename = get<std::string>(sym, keys::file, feature);
-    boost::optional<mapnik::marker_ptr> marker;
-    if ( !filename.empty() )
-    {
-        marker = marker_cache::instance().find(filename, true);
-    }
-    else
-    {
-        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: File not found=" << filename;
-    }
-
-    if (!marker) return;
-
-    if (!(*marker)->is_bitmap())
-    {
-        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer";
-
-        return;
-    }
-
-    boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
-
-    if (!pat) return;
-
-    bool clip = get<value_bool>(sym, keys::clip, feature, false);
-    double opacity = get<double>(sym,keys::stroke_opacity, 1.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, false);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
+    double opacity = get<double>(sym,keys::stroke_opacity, feature, common_.vars_, 1.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
     box2d<double> clip_box = clipping_extent();
 
@@ -121,7 +108,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         span_gen_type> renderer_type;
 
     pixfmt_type pixf(buf);
-    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, agg::comp_op_src_over));
+    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
     ren_base renb(pixf);
 
     unsigned w=(*pat)->width();
@@ -130,7 +117,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
-    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, LOCAL_ALIGNMENT);
+    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, LOCAL_ALIGNMENT);
     unsigned offset_x=0;
     unsigned offset_y=0;
 
@@ -156,12 +143,12 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, *transform, common_.scale_factor_);
+    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-        converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.scale_factor_);
+        converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

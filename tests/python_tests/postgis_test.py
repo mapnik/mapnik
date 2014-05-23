@@ -1011,6 +1011,15 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
 
+    def test_variable_in_subquery1():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
+           (select * from test where @zoom = 30 ) as tmp''',
+                            geometry_field='geom',
+                            autodetect_key_field=True)
+        fs = ds.featureset(variables={'zoom':30})
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
+
 
     atexit.register(postgis_takedown)
 

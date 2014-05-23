@@ -41,12 +41,14 @@ namespace mapnik
 {
 
 placement_finder::placement_finder(feature_impl const& feature,
+                                   attributes const& attr,
                                    DetectorType &detector,
                                    box2d<double> const& extent,
                                    text_placement_info_ptr placement_info,
                                    face_manager_freetype & font_manager,
                                    double scale_factor)
     : feature_(feature),
+      attr_(attr),
       detector_(detector),
       extent_(extent),
       info_(placement_info),
@@ -74,8 +76,8 @@ bool placement_finder::next_position()
     }
 
     text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_->properties.layout_defaults);
-    layout->init_orientation(feature_);
-    info_->properties.process(*layout, feature_);
+    layout->init_orientation(feature_, attr_);
+    info_->properties.process(*layout, feature_, attr_);
 
     layouts_.clear();
     layouts_.add(layout);
@@ -266,11 +268,11 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
         for (auto const& line : layout)
         {
-            //Only subtract half the line height here and half at the end because text is automatically
-            //centered on the line
+            // Only subtract half the line height here and half at the end because text is automatically
+            // centered on the line
             offset -= sign * line.height()/2;
             vertex_cache & off_pp = pp.get_offseted(offset, sign*layout.width());
-            vertex_cache::scoped_state off_state(off_pp); //TODO: Remove this when a clean implementation in vertex_cache::get_offseted was done
+            vertex_cache::scoped_state off_state(off_pp); // TODO: Remove this when a clean implementation in vertex_cache::get_offseted is done
 
             if (!off_pp.move(sign * layout.jalign_offset(line.width()) - align_offset.x)) return false;
 
@@ -291,7 +293,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     }
                     current_cluster = glyph.char_index;
                     last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
-                    //Only calculate new angle at the start of each cluster!
+                    // Only calculate new angle at the start of each cluster!
                     angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
                     if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
@@ -306,7 +308,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 if (std::abs(angle) > M_PI/2) ++upside_down_glyph_count;
 
                 pixel_position pos = off_pp.current_position() + cluster_offset;
-                //Center the text on the line
+                // Center the text on the line
                 double char_height = line.max_char_height();
                 pos.y = -pos.y - char_height/2.0*rot.cos;
                 pos.x =  pos.x + char_height/2.0*rot.sin;
@@ -319,20 +321,20 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 bboxes.push_back(std::move(bbox));
                 glyphs->push_back(glyph, pos, rot);
             }
-            //See comment above
+            // See comment above
             offset -= sign * line.height()/2;
         }
     }
 
-    if (upside_down_glyph_count > (layouts_.text().length() / 2))
+    if (upside_down_glyph_count > static_cast<unsigned>(layouts_.text().length() / 2))
     {
         if (orientation == UPRIGHT_AUTO)
         {
-            //Try again with oposite orientation
+            // Try again with opposite orientation
             begin.restore();
             return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
         }
-        //upright==left_only or right_only and more than 50% of characters upside down => no placement
+        // upright==left_only or right_only and more than 50% of characters upside down => no placement
         else if (orientation == UPRIGHT_LEFT_ONLY || orientation == UPRIGHT_RIGHT_ONLY)
         {
             return false;

@@ -25,7 +25,6 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
-
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/marker.hpp>
@@ -50,7 +49,7 @@ void agg_renderer<T0,T1>::process(point_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, src_over);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
 
     render_point_symbolizer(
         sym, feature, prj_trans, common_,

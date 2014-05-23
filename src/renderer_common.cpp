@@ -24,14 +24,18 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/request.hpp>
+#include <mapnik/attribute.hpp>
 
 namespace mapnik {
 
 renderer_common::renderer_common(unsigned width, unsigned height, double scale_factor,
-                                 CoordTransform &&t, std::shared_ptr<label_collision_detector4> detector)
+                                 attributes const& vars,
+                                 CoordTransform && t,
+                                 std::shared_ptr<label_collision_detector4> detector)
    : width_(width),
      height_(height),
      scale_factor_(scale_factor),
+     vars_(vars),
      shared_font_engine_(std::make_shared<freetype_engine>()),
      font_engine_(*shared_font_engine_),
      font_manager_(font_engine_),
@@ -40,26 +44,29 @@ renderer_common::renderer_common(unsigned width, unsigned height, double scale_f
      detector_(detector)
 {}
 
-renderer_common::renderer_common(Map const &m, unsigned offset_x, unsigned offset_y,
+renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                                  unsigned width, unsigned height, double scale_factor)
    : renderer_common(width, height, scale_factor,
+                     vars,
                      CoordTransform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
                      std::make_shared<label_collision_detector4>(
                         box2d<double>(-m.buffer_size(), -m.buffer_size(), 
                                       m.width() + m.buffer_size() ,m.height() + m.buffer_size())))
 {}
 
-renderer_common::renderer_common(Map const &m, unsigned offset_x, unsigned offset_y,
+renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                                  unsigned width, unsigned height, double scale_factor,
                                  std::shared_ptr<label_collision_detector4> detector)
    : renderer_common(width, height, scale_factor,
+                     vars,
                      CoordTransform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
                      detector)
 {}
 
-renderer_common::renderer_common(request const &req, unsigned offset_x, unsigned offset_y,
+renderer_common::renderer_common(request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y,
                                  unsigned width, unsigned height, double scale_factor)
    : renderer_common(width, height, scale_factor,
+                     vars,
                      CoordTransform(req.width(),req.height(),req.extent(),offset_x,offset_y),
                      std::make_shared<label_collision_detector4>(
                         box2d<double>(-req.buffer_size(), -req.buffer_size(), 
@@ -70,6 +77,7 @@ renderer_common::renderer_common(renderer_common const &other)
    : width_(other.width_),
      height_(other.height_),
      scale_factor_(other.scale_factor_),
+     vars_(other.vars_),
      shared_font_engine_(other.shared_font_engine_),
      font_engine_(*shared_font_engine_),
      font_manager_(font_engine_),
