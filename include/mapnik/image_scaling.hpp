@@ -54,11 +54,11 @@ enum scaling_method_e
     SCALING_BILINEAR8
 };
 
-boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
-boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
+MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
+MAPNIK_DECL boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
 
 template <typename Image>
-void scale_image_agg(Image & target,
+MAPNIK_DECL void scale_image_agg(Image & target,
                       Image const& source,
                       scaling_method_e scaling_method,
                       double image_ratio_x,

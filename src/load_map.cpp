@@ -1309,6 +1309,8 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         ensure_exists(file);
         shield_symbol.set_filename( parse_path(file, sym.get_tree().path_expr_grammar) );
         parse_symbolizer_base(shield_symbol, sym);
+        optional<halo_rasterizer_e> halo_rasterizer = sym.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
+        if (halo_rasterizer) shield_symbol.set_halo_rasterizer(*halo_rasterizer);
         rule.append(shield_symbol);
     }
     catch (config_error const& ex)

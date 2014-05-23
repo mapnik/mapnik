@@ -1,0 +1,31 @@
+#!/bin/bash
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+cd ../
+source ./localize.sh
+
+BASE=./benchmark/out
+function run {
+    ${BASE}/$1 --threads 0 --iterations $3;
+    ${BASE}/$1 --threads $2 --iterations $(expr $3 / $2);
+}
+
+run test_array_allocation 20 100000
+run test_png_encoding1 10 1000
+run test_png_encoding2 10 50
+run test_to_string1 10 100000
+run test_to_string2 10 100000
+run test_proj_transform1 10 100
+run test_expression_parse 10 10000
+run test_face_ptr_creation 10 10000
+run test_polygon_clipping 10 1000
+run test_polygon_clipping_rendering 10 100
+
+./benchmark/out/test_rendering \
+  --name "text rendering" \
+  --map benchmark/data/roads.xml \
+  --extent 1477001.12245,6890242.37746,1480004.49012,6892244.62256 \
+  --width 600 \
+  --height 600 \
+  --iterations 20 \
+  --threads 10

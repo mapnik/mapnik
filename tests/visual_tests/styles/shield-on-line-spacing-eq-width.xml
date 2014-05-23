@@ -69,6 +69,7 @@
               face-name="DejaVu Sans Book"
               halo-fill="white"
               halo-radius="2"
+              halo-rasterizer="fast"
               spacing="15">
             'hi'
             </ShieldSymbolizer>

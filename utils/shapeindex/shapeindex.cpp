@@ -32,10 +32,7 @@
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 
-const int MAXDEPTH = 64;
 const int DEFAULT_DEPTH = 8;
-const double MINRATIO=0.5;
-const double MAXRATIO=0.8;
 const double DEFAULT_RATIO=0.55;
 
 int main (int argc,char** argv)

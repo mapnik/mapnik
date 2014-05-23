@@ -902,7 +902,6 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
         {
-            raster target(target_ext, raster_width,raster_height);
             scaling_method_e scaling_method = sym.get_scaling_method();
             double filter_radius = sym.calculate_filter_factor();
             bool premultiply_source = !source->premultiplied_alpha_;
@@ -925,38 +924,58 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
             {
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
+                raster target(target_ext, raster_width,raster_height);
                 reproject_and_scale_raster(target, *source, prj_trans,
                                  offset_x, offset_y,
                                  sym.get_mesh_size(),
                                  filter_radius,
                                  scaling_method);
+                cairo_save_restore guard(context_);
+                context_.set_operator(sym.comp_op());
+                context_.add_image(start_x, start_y, target.data_, sym.get_opacity());
             }
             else
             {
-                if (scaling_method == SCALING_BILINEAR8)
+                double image_ratio_x = ext.width() / source->data_.width();
+                double image_ratio_y = ext.height() / source->data_.height();
+                double eps = 1e-5;
+                if ( (std::fabs(image_ratio_x - 1.0) <= eps) &&
+                     (std::fabs(image_ratio_y - 1.0) <= eps) &&
+                     (std::abs(start_x) <= eps) &&
+                     (std::abs(start_y) <= eps) )
                 {
-                    scale_image_bilinear8<image_data_32>(target.data_,
-                                                         source->data_,
-                                                         0.0,
-                                                         0.0);
+                    cairo_save_restore guard(context_);
+                    context_.set_operator(sym.comp_op());
+                    context_.add_image(start_x, start_y, source->data_, sym.get_opacity());
                 }
                 else
                 {
-                    double image_ratio_x = ext.width() / source->data_.width();
-                    double image_ratio_y = ext.height() / source->data_.height();
-                    scale_image_agg<image_data_32>(target.data_,
-                                                   source->data_,
-                                                   scaling_method,
-                                                   image_ratio_x,
-                                                   image_ratio_y,
-                                                   0.0,
-                                                   0.0,
-                                                   filter_radius);
+                    raster target(target_ext, raster_width,raster_height);
+                    if (scaling_method == SCALING_BILINEAR8)
+                    {
+                        scale_image_bilinear8<image_data_32>(target.data_,
+                                                             source->data_,
+                                                             0.0,
+                                                             0.0);
+                    }
+                    else
+                    {
+                        double image_ratio_x = ext.width() / source->data_.width();
+                        double image_ratio_y = ext.height() / source->data_.height();
+                        scale_image_agg<image_data_32>(target.data_,
+                                                       source->data_,
+                                                       scaling_method,
+                                                       image_ratio_x,
+                                                       image_ratio_y,
+                                                       0.0,
+                                                       0.0,
+                                                       filter_radius);
+                    }
+                    cairo_save_restore guard(context_);
+                    context_.set_operator(sym.comp_op());
+                    context_.add_image(start_x, start_y, target.data_, sym.get_opacity());
                 }
             }
-            cairo_save_restore guard(context_);
-            context_.set_operator(sym.comp_op());
-            context_.add_image(start_x, start_y, target.data_, sym.get_opacity());
         }
     }
 }
