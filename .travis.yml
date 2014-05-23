@@ -33,7 +33,7 @@ before_install:
 install:
  - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
  - ./configure CXX="nice ${CXX}" CC="nice ${CC}" DEMO=False BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True || cat config.log
- - JOBS=4 make
+ - JOBS=6 make
 
 env:
   - TESTS_TO_RUN=python BINDINGS=python CPP_TESTS=false BENCHMARK=false
