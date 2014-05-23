@@ -118,11 +118,15 @@ public:
      */
     Map(Map const& rhs);
 
+    // let compiler generate move ctor
+    Map(Map && other) = default;
+
     /*! \brief Assignment operator
      *
      *  TODO: to be documented
      *
      */
+
     Map& operator=(Map rhs);
 
     /*! \brief Get all styles
