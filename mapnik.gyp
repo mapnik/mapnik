@@ -81,6 +81,45 @@
         "dependencies": [ "mapnik" ]
     },
     {
+        "target_name": "ogr",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/ogr/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+    },
+    {
+        "target_name": "gdal",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/gdal/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+    },
+    {
+        "target_name": "postgis",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/postgis/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'libraries': [ '<!@(pkg-config libpq --libs --static)']
+    },
+    {
+        "target_name": "sqlite",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/sqlite/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'libraries': [ '<!@(pkg-config sqlite3 --libs)']
+    },
+    {
+        "target_name": "geojson",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/geojson/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ]
+    },
+    {
         "target_name": "agg_blend_src_over_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/agg_blend_src_over_test.cpp"],
