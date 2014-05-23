@@ -16,7 +16,8 @@
         '-Wno-c++11-long-long',
         '-Wno-unsequenced',
         '-Wno-sign-compare',
-        '-Wno-unused-function'
+        '-Wno-unused-function',
+        '-Wno-redeclared-class-member'
       ]
     },
     'msvs_settings': {
