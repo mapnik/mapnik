@@ -99,7 +99,7 @@ public:
     bool processed() const;
     void set_processed(bool processed) const;
 
-    unsigned line() const;
+    int line() const;
     std::string line_to_string() const;
 
     const_iterator begin() const;
@@ -133,7 +133,7 @@ private:
     std::list<xml_node> children_;
     attribute_map attributes_;
     bool is_text_;
-    unsigned line_;
+    int line_;
     mutable bool processed_;
     static std::string xml_text;
 };
