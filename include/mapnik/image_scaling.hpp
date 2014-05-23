@@ -78,9 +78,9 @@ MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
                       scaling_method_e scaling_method,
                       double image_ratio_x,
                       double image_ratio_y,
-                      double x_off_f=0,
-                      double y_off_f=0,
-                      double filter_radius=2);
+                      double x_off_f,
+                      double y_off_f,
+                      double filter_radius);
 #endif
 
 template <typename Image>
