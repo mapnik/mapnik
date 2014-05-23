@@ -141,7 +141,10 @@ private:
         case rapidxml::node_data:
         case rapidxml::node_cdata:
         {
-            node.add_child(cur_node->value(), 0, true);
+            if (cur_node->value_size() > 0) // Don't add empty text nodes
+            {
+                node.add_child(cur_node->value(), 0, true);
+            }
         }
         break;
         default:
