@@ -122,7 +122,7 @@ private:
         {
         case rapidxml::node_element:
         {
-            xml_node &new_node = node.add_child((char *)cur_node->name(), -1, false);
+            xml_node &new_node = node.add_child((char *)cur_node->name(), 0, false);
             // Copy attributes
             for (rapidxml::xml_attribute<char> *attr = cur_node->first_attribute();
                  attr; attr = attr->next_attribute())
@@ -145,7 +145,7 @@ private:
         {
             if (cur_node->value_size() > 0) // Don't add empty text nodes
             {
-                node.add_child(cur_node->value(), -1, true);
+                node.add_child(cur_node->value(), 0, true);
             }
         }
         break;

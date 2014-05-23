@@ -368,7 +368,7 @@ T xml_node::get_value() const
     return *result;
 }
 
-int xml_node::line() const
+unsigned xml_node::line() const
 {
     return line_;
 }
