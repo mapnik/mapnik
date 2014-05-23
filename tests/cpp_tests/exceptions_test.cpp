@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     style.add_rule(r);
     map.insert_style("style",style);
 
-    std::string csv_plugin("./plugins/input/csv.input");
+    std::string csv_plugin("./Release/csv.input");
     if (mapnik::util::exists(csv_plugin)) {
         try {
             mapnik::datasource_cache::instance().register_datasource(csv_plugin);
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
         }
     }
 
-    std::string shape_plugin("./plugins/input/shape.input");
+    std::string shape_plugin("./Release/shape.input");
     if (mapnik::util::exists(shape_plugin)) {
         try {
             mapnik::datasource_cache::instance().register_datasource(shape_plugin);
