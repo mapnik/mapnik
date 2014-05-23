@@ -263,6 +263,8 @@ template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<i
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                     std::string const&);
 
+template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
+                                                               std::string const&);
 
 template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
                                                                std::string const&,
