@@ -72,7 +72,7 @@ MAPNIK_DECL void scale_image_agg(Image & target,
                       double filter_radius=2);
 
 #ifdef _MSC_VER
-MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
+template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
                       mapnik::image_data_32 & target,
                       mapnik::image_data_32 &const source,
                       scaling_method_e scaling_method,
