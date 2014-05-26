@@ -49,7 +49,7 @@ public:
         : cursorId(0),
           closed_(false),
           pending_(false),
-          statement_timeout_(4000) // in milliseconds
+          statement_timeout_(0) // in milliseconds
     {
         std::string connect_with_pass = connection_str;
         if (password && !password->empty())
@@ -79,6 +79,13 @@ public:
             MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection closed - " << this;
             closed_ = true;
         }
+    }
+
+    int statement_timeout(int statement_timeout)
+    {
+      int old_timeout = statement_timeout_;
+      statement_timeout_ = statement_timeout;
+      return old_timeout;
     }
 
     bool execute(std::string const& sql)
@@ -133,7 +140,7 @@ public:
 
         bool ok = false;
         fd_set input_mask;
-        struct timeval toutval;
+        struct timeval toutval, *tmout = NULL;
         while ( true ) {
           do {
 
@@ -144,17 +151,20 @@ public:
               FD_ZERO(&input_mask);
               FD_SET(sock, &input_mask);
 
-              int msleft = statement_timeout_ - timeout.wall_clock_elapsed();
-              toutval.tv_sec = 0;
-              toutval.tv_usec = msleft*1000; // microseconds
+              if ( statement_timeout_ ) {
+                int msleft = statement_timeout_ - timeout.wall_clock_elapsed();
+                toutval.tv_sec = 0;
+                toutval.tv_usec = msleft*1000; // microseconds
+                tmout = &toutval;
+              }
 
-              int ret = select(sock + 1, &input_mask, NULL, NULL, &toutval);
+              int ret = select(sock + 1, &input_mask, NULL, NULL, tmout);
               if ( ret < 1 )
               {
                 std::stringstream ss;
                 ss << "Postgis Plugin: ";
                 if ( ret == 0 ) {
-                  ss << "timeout ";
+                  ss << "timeout (" <<statement_timeout_ << " ms)";
                 } else {
                   ss << "select: " << strerror(errno);
                 }
@@ -166,6 +176,7 @@ public:
               }
             }
           } while ( PQisBusy(conn_) );
+
           if ( ! success ) {
             ok = false;
             break;

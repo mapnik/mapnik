@@ -85,6 +85,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
+      statement_timeout_(*params_.get<int>("statement_timeout",0)),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
@@ -590,6 +591,8 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
 
 boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
 {
+
+    conn->statement_timeout(statement_timeout_);
 
     if (!ctx)
     {

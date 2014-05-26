@@ -113,6 +113,7 @@ private:
     bool estimate_extent_;
     int max_async_connections_;
     bool asynchronous_request_;
+    int statement_timeout_;
     int intersect_min_scale_;
     int intersect_max_scale_;
 };
