@@ -80,17 +80,8 @@ box2d<T>::box2d(box2d_type && rhs)
 template <typename T>
 box2d<T>& box2d<T>::operator=(box2d_type other)
 {
-    swap(other);
+    swap(*this, other);
     return *this;
-}
-
-template <typename T>
-void box2d<T>::swap(box2d_type & other)
-{
-    std::swap(minx_, other.minx_);
-    std::swap(miny_, other.miny_);
-    std::swap(maxx_, other.maxx_);
-    std::swap(maxy_, other.maxy_);
 }
 
 template <typename T>
@@ -471,4 +462,5 @@ box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
 
 template class box2d<int>;
 template class box2d<double>;
+
 }

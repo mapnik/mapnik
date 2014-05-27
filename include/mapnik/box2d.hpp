@@ -57,7 +57,14 @@ private:
     T miny_;
     T maxx_;
     T maxy_;
-    void swap(box2d_type & rhs);
+    friend inline void swap(box2d_type & lhs, box2d_type & rhs)
+    {
+        using std::swap;
+        swap(lhs.minx_, rhs.minx_);
+        swap(lhs.miny_, rhs.miny_);
+        swap(lhs.maxx_, rhs.maxx_);
+        swap(lhs.maxy_, rhs.maxy_);
+    }
 public:
     box2d();
     box2d(T minx,T miny,T maxx,T maxy);
