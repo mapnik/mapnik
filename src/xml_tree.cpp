@@ -334,7 +334,7 @@ T xml_node::get_attr(std::string const& name) const
     throw attribute_not_found(name_, name);
 }
 
-std::string xml_node::get_text() const
+std::string const& xml_node::get_text() const
 {
     if (children_.size() == 0)
     {
