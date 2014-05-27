@@ -512,11 +512,10 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
             throw mapnik::config_error("no valid fonts could be loaded");
         }
 
-        map.insert_fontset(name, std::move(fontset));
-
         // XXX Hack because map object isn't accessible by text_symbolizer
         // when it's parsed
         fontsets_.insert(std::make_pair(name, fontset));
+        map.insert_fontset(name, std::move(fontset));
     }
     catch (config_error const& ex)
     {
