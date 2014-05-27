@@ -95,10 +95,28 @@ Map::Map(Map const& rhs)
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
       current_extent_(rhs.current_extent_),
-    maximum_extent_(rhs.maximum_extent_),
-    base_path_(rhs.base_path_),
-    extra_params_(rhs.extra_params_) {}
+      maximum_extent_(rhs.maximum_extent_),
+      base_path_(rhs.base_path_),
+      extra_params_(rhs.extra_params_) {}
 
+
+Map::Map(Map && rhs)
+    : width_(std::move(rhs.width_)),
+      height_(std::move(rhs.height_)),
+      srs_(std::move(rhs.srs_)),
+      buffer_size_(std::move(rhs.buffer_size_)),
+      background_(std::move(rhs.background_)),
+      background_image_(std::move(rhs.background_image_)),
+      background_image_comp_op_(std::move(rhs.background_image_comp_op_)),
+      background_image_opacity_(std::move(rhs.background_image_opacity_)),
+      styles_(std::move(rhs.styles_)),
+      fontsets_(std::move(rhs.fontsets_)),
+      layers_(std::move(rhs.layers_)),
+      aspectFixMode_(std::move(rhs.aspectFixMode_)),
+      current_extent_(std::move(rhs.current_extent_)),
+      maximum_extent_(std::move(rhs.maximum_extent_)),
+      base_path_(std::move(rhs.base_path_)),
+      extra_params_(std::move(rhs.extra_params_)) {}
 
 Map::~Map() {}
 
@@ -181,13 +199,7 @@ Map::const_style_iterator Map::end_styles() const
     return styles_.end();
 }
 
-// TODO(dane) - only kept for python bindings, can we avoid needing?
-bool Map::insert_style(std::string const& name,feature_type_style const& style)
-{
-    return styles_.insert(make_pair(name,style)).second;
-}
-
-bool Map::insert_style(std::string const& name,feature_type_style && style)
+bool Map::insert_style(std::string const& name,feature_type_style style)
 {
     return styles_.insert(make_pair(name, std::move(style))).second;
 }
@@ -206,16 +218,7 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
 
-bool Map::insert_fontset(std::string const& name, font_set const& fontset)
-{
-    if (fontset.get_name() != name)
-    {
-        throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
-    }
-    return fontsets_.insert(make_pair(name, fontset)).second;
-}
-
-bool Map::insert_fontset(std::string const& name, font_set && fontset)
+bool Map::insert_fontset(std::string const& name, font_set fontset)
 {
     if (fontset.get_name() != name)
     {

@@ -38,7 +38,7 @@ public:
     // ctor/copy/move/dtor
     font_set(std::string const& name);
     font_set(font_set const& rhs);
-    font_set(font_set &&) = default;
+    font_set(font_set &&);
     font_set& operator=(font_set rhs);
     ~font_set();
     // comparison

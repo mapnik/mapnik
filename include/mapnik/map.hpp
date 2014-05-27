@@ -118,8 +118,8 @@ public:
      */
     Map(Map const& rhs);
 
-    // let compiler generate move ctor
-    Map(Map && other) = default;
+    // move ctor
+    Map(Map && other);
 
     // assignment operator
     Map& operator=(Map rhs);
@@ -163,8 +163,7 @@ public:
      *  @return true If success.
      *          false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style const& style);
-    bool insert_style(std::string const& name,feature_type_style && style);
+    bool insert_style(std::string const& name,feature_type_style style);
 
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
@@ -183,8 +182,7 @@ public:
      *  @return true If success.
      *          false If failure.
      */
-    bool insert_fontset(std::string const& name, font_set const& fontset);
-    bool insert_fontset(std::string const& name, font_set && fontset);
+    bool insert_fontset(std::string const& name, font_set fontset);
 
     /*! \brief Find a fontset.
      *  @param name The name of the fontset.
