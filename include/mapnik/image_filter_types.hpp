@@ -41,32 +41,48 @@
 
 namespace mapnik { namespace filter {
 
-struct blur {};
-struct emboss {};
-struct sharpen {};
-struct edge_detect {};
-struct sobel {};
-struct gray {};
-struct x_gradient {};
-struct y_gradient {};
-struct invert {};
+struct image_filter_base
+{
+    inline bool operator==(image_filter_base const& ) const
+    {
+        return true;
+    }
+};
 
-struct agg_stack_blur
+struct blur : image_filter_base {};
+struct emboss : image_filter_base {};
+struct sharpen : image_filter_base {};
+struct edge_detect : image_filter_base {};
+struct sobel : image_filter_base {};
+struct gray : image_filter_base {};
+struct x_gradient : image_filter_base {};
+struct y_gradient : image_filter_base {};
+struct invert : image_filter_base {};
+
+struct agg_stack_blur : image_filter_base
 {
     agg_stack_blur(unsigned rx_, unsigned ry_)
         : rx(rx_),ry(ry_) {}
+    inline bool operator==(agg_stack_blur const& rhs) const
+    {
+        return rx == rhs.rx && ry == rhs.ry;
+    }
     unsigned rx;
     unsigned ry;
 };
 
-struct color_to_alpha
+struct color_to_alpha : image_filter_base
 {
     color_to_alpha(mapnik::color const& c)
         : color(c) {}
+    inline bool operator==(color_to_alpha const& rhs) const
+    {
+        return color == rhs.color;
+    }
     mapnik::color color;
 };
 
-struct scale_hsla
+struct scale_hsla : image_filter_base
 {
     scale_hsla(double _h0, double _h1,
          double _s0, double _s1,
@@ -104,6 +120,19 @@ struct scale_hsla
         return (a0 == 0 &&
                 a1 == 1);
     }
+
+    inline bool operator==(scale_hsla const& rhs) const
+    {
+        return h0 == rhs.h0 &&
+            h1 == rhs.h1 &&
+            s0 == rhs.s0 &&
+            s1 == rhs.s1 &&
+            l0 == rhs.l0 &&
+            l1 == rhs.l1 &&
+            a0 == rhs.a0 &&
+            a1 == rhs.a1;
+    }
+
     double h0;
     double h1;
     double s0;
@@ -119,6 +148,7 @@ struct color_stop
     color_stop() {}
     color_stop(mapnik::color const& c, double val = 0.0)
         : color(c),offset(val) {}
+    bool operator==(color_stop const& rhs) const { return color == rhs.color && offset == rhs.offset;}
     mapnik::color color;
     double offset;
 };
