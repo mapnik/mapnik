@@ -64,30 +64,35 @@ rule::rule(rule const& rhs)
       syms_(rhs.syms_),
       filter_(std::make_shared<expr_node>(*rhs.filter_)),
       else_filter_(rhs.else_filter_),
-      also_filter_(rhs.also_filter_)
-{
-}
+      also_filter_(rhs.also_filter_) {}
 
 rule& rule::operator=(rule rhs)
 {
-    swap(rhs);
+    swap(*this, rhs);
     return *this;
 }
 
-bool rule::operator==(rule const& other)
+bool rule::operator==(rule const& rhs) const
 {
-    return  (this == &other);
+    return  (name_ == rhs.name_) &&
+        (min_scale_ == rhs.min_scale_) &&
+        (max_scale_ == rhs.max_scale_) &&
+        (syms_ == rhs.syms_) &&
+        (filter_ == rhs.filter_) &&
+        (else_filter_ == rhs.else_filter_) &&
+        (also_filter_ == rhs.also_filter_);
 }
 
-void rule::swap(rule& rhs) throw()
+void swap(rule & lhs, rule & rhs)
 {
-    name_=rhs.name_;
-    min_scale_=rhs.min_scale_;
-    max_scale_=rhs.max_scale_;
-    syms_=rhs.syms_;
-    filter_=rhs.filter_;
-    else_filter_=rhs.else_filter_;
-    also_filter_=rhs.also_filter_;
+    using std::swap;
+    swap(lhs.name_, rhs.name_);
+    swap(lhs.min_scale_, rhs.min_scale_);
+    swap(lhs.max_scale_, rhs.max_scale_);
+    swap(lhs.syms_, rhs.syms_);
+    swap(lhs.filter_, rhs.filter_);
+    swap(lhs.else_filter_, rhs.else_filter_);
+    swap(lhs.also_filter_, rhs.also_filter_);
 }
 
 void rule::set_max_scale(double scale)

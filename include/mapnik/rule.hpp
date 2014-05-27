@@ -58,7 +58,7 @@ public:
          double max_scale_denominator = std::numeric_limits<double>::infinity());
     rule(const rule& rhs);
     rule& operator=(rule rhs);
-    bool operator==(rule const& other);
+    bool operator==(rule const& rhs) const;
     void set_max_scale(double scale);
     double get_max_scale() const;
     void set_min_scale(double scale);
@@ -88,8 +88,7 @@ public:
     }
 
 private:
-
-    void swap(rule& rhs) throw();
+    friend void swap(rule & lhs, rule & rhs);
 };
 
 }
