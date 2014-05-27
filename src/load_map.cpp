@@ -648,7 +648,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
 
             if (child.is("StyleName"))
             {
-                std::string style_name = child.get_text();
+                std::string const& style_name = child.get_text();
                 if (style_name.empty())
                 {
                     std::string ss("StyleName is empty in Layer: '");

@@ -119,7 +119,7 @@ public:
     template <typename T>
     T get_attr(std::string const& name) const;
 
-    std::string get_text() const;
+    std::string const& get_text() const;
 
     xml_tree const& get_tree() const
     {
