@@ -63,9 +63,11 @@ private:
     boost::optional<composite_mode_e> comp_op_;
     float opacity_;
     bool image_filters_inflate_;
+    friend void swap(feature_type_style& lhs, feature_type_style & rhs);
 public:
     feature_type_style();
     feature_type_style(feature_type_style const& rhs);
+    feature_type_style(feature_type_style &&) = default;
     feature_type_style& operator=(feature_type_style rhs);
 
     void add_rule(rule && rule);
