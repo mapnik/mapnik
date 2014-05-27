@@ -81,9 +81,21 @@ void swap(layer & lhs, layer & rhs)
     std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
 }
 
-bool layer::operator==(layer const& other) const
+bool layer::operator==(layer const& rhs) const
 {
-    return (this == &other);
+    return (name_ == rhs.name_) &&
+        (srs_ == rhs.srs_) &&
+        (min_zoom_ == rhs.min_zoom_) &&
+        (max_zoom_ == rhs.max_zoom_) &&
+        (active_ == rhs.active_) &&
+        (queryable_ == rhs.queryable_) &&
+        (clear_label_cache_ == rhs.clear_label_cache_) &&
+        (cache_features_ == rhs.cache_features_) &&
+        (group_by_ == rhs.group_by_) &&
+        (styles_ == rhs.styles_) &&
+        (ds_ == rhs.ds_) &&
+        (buffer_size_ == rhs.buffer_size_) &&
+        (maximum_extent_ == rhs.maximum_extent_);
 }
 
 layer::~layer() {}
