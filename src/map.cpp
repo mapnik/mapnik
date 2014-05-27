@@ -95,16 +95,39 @@ Map::Map(Map const& rhs)
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
       current_extent_(rhs.current_extent_),
-      maximum_extent_(rhs.maximum_extent_),
-      base_path_(rhs.base_path_),
-      extra_params_(rhs.extra_params_) {}
+    maximum_extent_(rhs.maximum_extent_),
+    base_path_(rhs.base_path_),
+    extra_params_(rhs.extra_params_) {}
+
 
 Map::~Map() {}
 
+
 Map& Map::operator=(Map rhs)
 {
-    std::swap(*this, rhs);
+    swap(*this, rhs);
     return *this;
+}
+
+void swap (Map & lhs, Map & rhs)
+{
+    using std::swap;
+    std::swap(lhs.width_,  rhs.width_);
+    std::swap(lhs.height_, rhs.height_);
+    std::swap(lhs.srs_, rhs.srs_);
+    std::swap(lhs.buffer_size_, rhs.buffer_size_);
+    std::swap(lhs.background_, rhs.background_);
+    std::swap(lhs.background_image_, rhs.background_image_);
+    std::swap(lhs.background_image_comp_op_, rhs.background_image_comp_op_);
+    std::swap(lhs.background_image_opacity_, rhs.background_image_opacity_);
+    std::swap(lhs.styles_, rhs.styles_);
+    std::swap(lhs.fontsets_, rhs.fontsets_);
+    std::swap(lhs.layers_, rhs.layers_);
+    std::swap(lhs.aspectFixMode_, rhs.aspectFixMode_);
+    std::swap(lhs.current_extent_, rhs.current_extent_);
+    std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
+    std::swap(lhs.base_path_, rhs.base_path_);
+    std::swap(lhs.extra_params_, rhs.extra_params_);
 }
 
 std::map<std::string,feature_type_style> const& Map::styles() const
@@ -275,7 +298,7 @@ void Map::set_height(unsigned height)
 void Map::resize(unsigned width,unsigned height)
 {
     if ((width != width_ ||
-        height != height_) &&
+         height != height_) &&
         width >= MIN_MAPSIZE &&
         width <= MAX_MAPSIZE &&
         height >= MIN_MAPSIZE &&
@@ -436,7 +459,7 @@ void Map::zoom_all()
             if (maximum_extent_)
             {
                 MAPNIK_LOG_ERROR(map) << "could not zoom to combined layer extents"
-                    << " so falling back to maximum-extent for zoom_all result";
+                                      << " so falling back to maximum-extent for zoom_all result";
                 zoom_to_box(*maximum_extent_);
             }
             else
@@ -611,7 +634,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             if (fs)
             {
                 return std::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                               hit_test_filter(x,y,tol));
+                                                                             hit_test_filter(x,y,tol));
             }
         }
     }

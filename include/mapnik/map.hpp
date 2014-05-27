@@ -110,7 +110,7 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs=MAPNIK_LONGLAT_PROJ);
+    Map(int width, int height, std::string const& srs = MAPNIK_LONGLAT_PROJ);
 
     /*! \brief Copy Constructor.
      *
@@ -433,6 +433,7 @@ public:
     void set_extra_parameters(parameters& params);
 
 private:
+    friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
 };
 
