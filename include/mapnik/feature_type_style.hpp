@@ -65,10 +65,14 @@ private:
     bool image_filters_inflate_;
     friend void swap(feature_type_style& lhs, feature_type_style & rhs);
 public:
+    // ctor
     feature_type_style();
     feature_type_style(feature_type_style const& rhs);
     feature_type_style(feature_type_style &&) = default;
     feature_type_style& operator=(feature_type_style rhs);
+
+    // comparison
+    bool operator==(feature_type_style const& rhs) const;
 
     void add_rule(rule && rule);
     rules const& get_rules() const;

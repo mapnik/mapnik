@@ -78,6 +78,17 @@ void swap( feature_type_style & lhs, feature_type_style & rhs)
     std::swap(lhs.image_filters_inflate_, rhs.image_filters_inflate_);
 }
 
+bool feature_type_style::operator==(feature_type_style const& rhs) const
+{
+    return (rules_ == rhs.rules_) &&
+        (filter_mode_ == rhs.filter_mode_) &&
+        (filters_ == rhs.filters_) &&
+        (direct_filters_ == rhs.direct_filters_) &&
+        (comp_op_ == rhs.comp_op_) &&
+        (opacity_ == rhs.opacity_) &&
+        (image_filters_inflate_ == rhs.image_filters_inflate_);
+}
+
 void feature_type_style::add_rule(rule && rule)
 {
     rules_.push_back(std::move(rule));
