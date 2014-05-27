@@ -121,13 +121,11 @@ public:
     // let compiler generate move ctor
     Map(Map && other) = default;
 
-    /*! \brief Assignment operator
-     *
-     *  TODO: to be documented
-     *
-     */
-
+    // assignment operator
     Map& operator=(Map rhs);
+
+    // comparison op
+    bool operator==(Map const& other) const;
 
     /*! \brief Get all styles
      * @return Const reference to styles

@@ -130,6 +130,27 @@ void swap (Map & lhs, Map & rhs)
     std::swap(lhs.extra_params_, rhs.extra_params_);
 }
 
+
+bool Map::operator==(Map const& rhs) const
+{
+    return (width_ = rhs.width_) &&
+        (height_ == rhs.height_) &&
+        (srs_ == rhs.srs_) &&
+        (buffer_size_ == rhs.buffer_size_) &&
+        (background_ == rhs.background_) &&
+        (background_image_ == rhs.background_image_) &&
+        (background_image_comp_op_ == rhs.background_image_comp_op_) &&
+        (background_image_opacity_ == rhs.background_image_opacity_) &&
+        (styles_ == rhs.styles_) &&
+        (fontsets_ == rhs.fontsets_) &&
+        (layers_ == rhs.layers_) &&
+        (aspectFixMode_ == rhs.aspectFixMode_) &&
+        (current_extent_ == rhs.current_extent_) &&
+        (maximum_extent_ == rhs.maximum_extent_) &&
+        (base_path_ == rhs.base_path_) &&
+        (extra_params_ == rhs.extra_params_);
+}
+
 std::map<std::string,feature_type_style> const& Map::styles() const
 {
     return styles_;
