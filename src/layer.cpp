@@ -42,7 +42,7 @@ layer::layer(std::string const& name, std::string const& srs)
       group_by_(""),
       ds_() {}
 
-layer::layer(const layer& rhs)
+layer::layer(layer const& rhs)
     : name_(rhs.name_),
       srs_(rhs.srs_),
       min_zoom_(rhs.min_zoom_),
@@ -59,8 +59,26 @@ layer::layer(const layer& rhs)
 
 layer& layer::operator=(layer rhs)
 {
-    std::swap(*this, rhs);
+    swap(*this, rhs);
     return *this;
+}
+
+void swap(layer & lhs, layer & rhs)
+{
+    using std::swap;
+    std::swap(lhs.name_,rhs.name_);
+    std::swap(lhs.srs_, rhs.srs_);
+    std::swap(lhs.min_zoom_, rhs.min_zoom_);
+    std::swap(lhs.max_zoom_,rhs.max_zoom_);
+    std::swap(lhs.active_, rhs.active_);
+    std::swap(lhs.queryable_, rhs.queryable_);
+    std::swap(lhs.clear_label_cache_, rhs.clear_label_cache_);
+    std::swap(lhs.cache_features_, rhs.cache_features_);
+    std::swap(lhs.group_by_, rhs.group_by_);
+    std::swap(lhs.styles_, rhs.styles_);
+    std::swap(lhs.ds_, rhs.ds_);
+    std::swap(lhs.buffer_size_, rhs.buffer_size_);
+    std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
 }
 
 bool layer::operator==(layer const& other) const

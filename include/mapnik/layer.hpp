@@ -199,10 +199,9 @@ public:
     void reset_buffer_size();
     ~layer();
 private:
-
+    friend void swap(layer & lhs, layer & rhs);
     std::string name_;
     std::string srs_;
-
     double min_zoom_;
     double max_zoom_;
     bool active_;
