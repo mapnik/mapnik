@@ -133,7 +133,7 @@ void swap (Map & lhs, Map & rhs)
 
 bool Map::operator==(Map const& rhs) const
 {
-    return (width_ = rhs.width_) &&
+    return (width_ == rhs.width_) &&
         (height_ == rhs.height_) &&
         (srs_ == rhs.srs_) &&
         (buffer_size_ == rhs.buffer_size_) &&
