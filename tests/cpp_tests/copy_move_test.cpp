@@ -58,12 +58,12 @@ int main(int argc, char** argv)
     m0.set_background(mapnik::color("skyblue"));
     m2.set_background(mapnik::color("skyblue"));
 
-    auto m1 = m0;
+    auto m1 = m0; //copy
 
     BOOST_TEST(m0 == m1);
     BOOST_TEST(m0 != m2);
 
-    m2 = m1;
+    m2 = m1; // copy
     BOOST_TEST(m2 == m1);
     m2 = std::move(m1);
     BOOST_TEST(m2 == m0);
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     if (!::boost::detail::test_errors())
     {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
-        else std::clog << "C++ parameters: \x1b[1;32m✓ \x1b[0m\n";
+        else std::clog << "C++ copy/move/assignment tests: \x1b[1;32m✓ \x1b[0m\n";
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
     }
     else
