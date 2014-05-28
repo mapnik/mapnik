@@ -178,6 +178,7 @@ xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool 
       processed_(false) {}
 
 std::string xml_node::xml_text = "<xmltext>";
+std::string xml_node::empty_text = "";
 
 std::string const& xml_node::name() const
 {
@@ -336,16 +337,13 @@ T xml_node::get_attr(std::string const& name) const
 
 std::string const& xml_node::get_text() const
 {
-    if (children_.size() == 0)
+    if (children_.empty())
     {
-        if (is_text_)
+        if (!is_text_)
         {
-            return name_;
+            return empty_text;
         }
-        else
-        {
-            return "";
-        }
+        return name_;
     }
     if (children_.size() == 1)
     {
@@ -354,16 +352,16 @@ std::string const& xml_node::get_text() const
     throw more_than_one_child(name_);
 }
 
-
 template <typename T>
 T xml_node::get_value() const
 {
-    boost::optional<T> result = xml_attribute_cast<T>(tree_, get_text());
+    std::string const& text = get_text();
+    boost::optional<T> result = xml_attribute_cast<T>(tree_, text);
     if (!result)
     {
         throw config_error(std::string("Failed to parse value. Expected ")
                            + name_trait<T>::name() +
-                           " but got '" + get_text() + "'", *this);
+                           " but got '" + text + "'", *this);
     }
     return *result;
 }

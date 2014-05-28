@@ -136,6 +136,7 @@ private:
     unsigned line_;
     mutable bool processed_;
     static std::string xml_text;
+    static std::string empty_text;
 };
 
 } //ns mapnik

@@ -353,7 +353,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             else if (itr->is("FileSource"))
             {
                 std::string name = itr->get_attr<std::string>("name");
-                std::string value = itr->get_text();
+                std::string const& value = itr->get_text();
                 file_sources_[name] = value;
             }
             else if (itr->is("Datasource"))
@@ -367,7 +367,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                     if (paramIter->is("Parameter"))
                     {
                         std::string param_name = paramIter->get_attr<std::string>("name");
-                        std::string value = paramIter->get_text();
+                        std::string const& value = paramIter->get_text();
                         params[param_name] = value;
                     }
                 }
@@ -400,10 +400,9 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                                 params[name] = value;
                             }
                         }
-
                         if (is_string)
                         {
-                            std::string value = paramIter->get_text();
+                            std::string const& value = paramIter->get_text();
                             params[name] = value;
                         }
                     }
@@ -717,7 +716,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                     if (paramIter->is("Parameter"))
                     {
                         std::string param_name = paramIter->get_attr<std::string>("name");
-                        std::string value = paramIter->get_text();
+                        std::string const& value = paramIter->get_text();
                         params[param_name] = value;
                     }
                 }
