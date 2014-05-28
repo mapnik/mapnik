@@ -108,7 +108,7 @@ bool layer::operator==(layer const& rhs) const
         (cache_features_ == rhs.cache_features_) &&
         (group_by_ == rhs.group_by_) &&
         (styles_ == rhs.styles_) &&
-        ((ds_ && rhs.ds_) ? *ds_ == *rhs.ds_ : false) &&
+        ((ds_ && rhs.ds_) ? *ds_ == *rhs.ds_ : ds_ == rhs.ds_) &&
         (buffer_size_ == rhs.buffer_size_) &&
         (maximum_extent_ == rhs.maximum_extent_);
 }
