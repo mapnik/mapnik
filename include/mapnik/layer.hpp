@@ -46,8 +46,10 @@ class MAPNIK_DECL layer
 public:
     layer(std::string const& name,
           std::string const& srs=MAPNIK_LONGLAT_PROJ);
-
+    // copy
     layer(layer const& l);
+    // move
+    layer(layer && l);
     layer& operator=(layer rhs);
     bool operator==(layer const& other) const;
 

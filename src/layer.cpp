@@ -57,6 +57,21 @@ layer::layer(layer const& rhs)
       buffer_size_(rhs.buffer_size_),
       maximum_extent_(rhs.maximum_extent_) {}
 
+layer::layer(layer && rhs)
+    : name_(std::move(rhs.name_)),
+      srs_(std::move(rhs.srs_)),
+      min_zoom_(std::move(rhs.min_zoom_)),
+      max_zoom_(std::move(rhs.max_zoom_)),
+      active_(std::move(rhs.active_)),
+      queryable_(std::move(rhs.queryable_)),
+      clear_label_cache_(std::move(rhs.clear_label_cache_)),
+      cache_features_(std::move(rhs.cache_features_)),
+      group_by_(std::move(rhs.group_by_)),
+      styles_(std::move(rhs.styles_)),
+      ds_(std::move(rhs.ds_)),
+      buffer_size_(std::move(rhs.buffer_size_)),
+      maximum_extent_(std::move(rhs.maximum_extent_)) {}
+
 layer& layer::operator=(layer rhs)
 {
     swap(*this, rhs);
