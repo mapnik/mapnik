@@ -105,6 +105,11 @@ public:
         return params_;
     }
 
+    bool operator==(datasource const& rhs) const
+    {
+        return params_ == rhs.params();
+    }
+
     /*!
      * @brief Get the type of the datasource
      * @return The type of the datasource (Vector or Raster)
