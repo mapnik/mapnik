@@ -375,6 +375,7 @@ void export_layer()
                       ">>> lyr.styles[0]\n"
                       "'My Style'\n"
             )
-
+        // comparison
+        .def(self == self)
         ;
 }

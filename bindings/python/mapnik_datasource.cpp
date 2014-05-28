@@ -184,6 +184,7 @@ void export_datasource()
         .def("params",make_function(params_const,return_value_policy<copy_const_reference>()),
              "The configuration parameters of the data source. "
              "These vary depending on the type of data source.")
+        .def(self == self)
         ;
 
     def("CreateDatasource",&create_datasource);

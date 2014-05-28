@@ -528,5 +528,7 @@ void export_map()
                       ">>> m.width\n"
                       "800\n"
             )
+        // comparison
+        .def(self == self)
         ;
 }
