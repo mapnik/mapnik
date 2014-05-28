@@ -65,37 +65,6 @@ BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long)
 BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
 BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
 
-struct bool_symbols : qi::symbols<char,bool>
-{
-    bool_symbols()
-    {
-        add("true",true)
-            ("false",false)
-            ("yes",true)
-            ("no",false)
-            ("on",true)
-            ("off",false)
-            ("1",true)
-            ("0",false);
-    }
-};
-
-bool string2bool(const char * iter, const char * end, bool & result)
-{
-    using boost::spirit::qi::no_case;
-    bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
-    return r && (iter == end);
-}
-
-bool string2bool(std::string const& value, bool & result)
-{
-    using boost::spirit::qi::no_case;
-    std::string::const_iterator str_beg = value.begin();
-    std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],ascii::space,result);
-    return r && (str_beg == str_end);
-}
-
 bool string2int(const char * iter, const char * end, int & result)
 {
     bool r = qi::phrase_parse(iter,end,INTEGER,ascii::space,result);

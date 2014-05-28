@@ -29,6 +29,7 @@
 
 // stl
 #include <string>
+#include <algorithm>
 
 namespace mapnik { namespace util {
 
@@ -37,6 +38,29 @@ Note: this file intentionally provides non-templated methods
 to avoid the compile time overhead given it is included
 by many other headers inside mapnik.
 */
+
+MAPNIK_DECL inline bool string2bool(std::string const& value, bool & result)
+{
+    if (value == "true") {
+        return result = true;
+    } else if (value == "false") {
+        result = false;
+        return true;
+    }
+    std::string val(value);
+    std::transform(val.begin(), val.end(), val.begin(), ::tolower);
+    if (val == "true" || val == "yes" || val == "1" || val == "on") {
+        return result = true;
+    }
+    result = false;
+    return true;
+}
+
+MAPNIK_DECL inline bool string2bool(const char * iter, const char * end, bool & result)
+{
+    std::string val(iter,end);
+    return string2bool(val,result);
+}
 
 MAPNIK_DECL bool string2bool(std::string const& value, bool & result);
 MAPNIK_DECL bool string2bool(const char * iter, const char * end, bool & result);
