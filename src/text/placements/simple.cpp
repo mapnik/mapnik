@@ -30,8 +30,9 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
-
 #include <boost/property_tree/ptree.hpp>
+
+#include <cmath>
 
 namespace mapnik
 {
@@ -70,28 +71,28 @@ bool text_placement_info_simple::next_position_only()
         displacement = pdisp;
         break;
     case NORTH:
-        displacement.set(0, -abs(pdisp.y));
+        displacement.set(0, -std::abs(pdisp.y));
         break;
     case EAST:
-        displacement.set(abs(pdisp.x), 0);
+        displacement.set(std::abs(pdisp.x), 0);
         break;
     case SOUTH:
-        displacement.set(0, abs(pdisp.y));
+        displacement.set(0, std::abs(pdisp.y));
         break;
     case WEST:
-        displacement.set(-abs(pdisp.x), 0);
+        displacement.set(-std::abs(pdisp.x), 0);
         break;
     case NORTHEAST:
-        displacement.set(abs(pdisp.x), -abs(pdisp.y));
+        displacement.set(std::abs(pdisp.x), -std::abs(pdisp.y));
         break;
     case SOUTHEAST:
-        displacement.set(abs(pdisp.x), abs(pdisp.y));
+        displacement.set(std::abs(pdisp.x), std::abs(pdisp.y));
         break;
     case NORTHWEST:
-        displacement.set(-abs(pdisp.x), -abs(pdisp.y));
+        displacement.set(-std::abs(pdisp.x), -std::abs(pdisp.y));
         break;
     case SOUTHWEST:
-        displacement.set(-abs(pdisp.x), abs(pdisp.y));
+        displacement.set(-std::abs(pdisp.x), std::abs(pdisp.y));
         break;
     default:
         MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
