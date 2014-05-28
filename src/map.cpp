@@ -251,9 +251,9 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-void Map::add_layer(layer const& l)
+void Map::add_layer(layer l)
 {
-    layers_.push_back(l);
+    layers_.push_back(std::move(l));
 }
 
 void Map::remove_layer(size_t index)

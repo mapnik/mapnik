@@ -207,7 +207,7 @@ public:
     /*! \brief Add a layer to the map.
      *  @param l The layer to add.
      */
-    void add_layer(layer const& l);
+    void add_layer(layer l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
