@@ -33,6 +33,8 @@
 #include <boost/make_shared.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <cmath>
+
 namespace mapnik
 {
 
@@ -72,28 +74,28 @@ bool text_placement_info_simple::next_position_only()
         displacement = pdisp;
         break;
     case NORTH:
-        displacement = std::make_pair(0, -abs(pdisp.second));
+        displacement = std::make_pair(0, -std::abs(pdisp.second));
         break;
     case EAST:
-        displacement = std::make_pair(abs(pdisp.first), 0);
+        displacement = std::make_pair(std::abs(pdisp.first), 0);
         break;
     case SOUTH:
-        displacement = std::make_pair(0, abs(pdisp.second));
+        displacement = std::make_pair(0, std::abs(pdisp.second));
         break;
     case WEST:
-        displacement = std::make_pair(-abs(pdisp.first), 0);
+        displacement = std::make_pair(-std::abs(pdisp.first), 0);
         break;
     case NORTHEAST:
-        displacement = std::make_pair(abs(pdisp.first), -abs(pdisp.second));
+        displacement = std::make_pair(std::abs(pdisp.first), -std::abs(pdisp.second));
         break;
     case SOUTHEAST:
-        displacement = std::make_pair(abs(pdisp.first), abs(pdisp.second));
+        displacement = std::make_pair(std::abs(pdisp.first), std::abs(pdisp.second));
         break;
     case NORTHWEST:
-        displacement = std::make_pair(-abs(pdisp.first), -abs(pdisp.second));
+        displacement = std::make_pair(-std::abs(pdisp.first), -std::abs(pdisp.second));
         break;
     case SOUTHWEST:
-        displacement = std::make_pair(-abs(pdisp.first), abs(pdisp.second));
+        displacement = std::make_pair(-std::abs(pdisp.first), std::abs(pdisp.second));
         break;
     default:
         MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
