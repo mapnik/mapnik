@@ -55,7 +55,7 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
 
-shape_datasource::shape_datasource(const parameters &params)
+shape_datasource::shape_datasource(parameters const& params)
     : datasource (params),
       type_(datasource::Vector),
       file_length_(0),
