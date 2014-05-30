@@ -36,7 +36,8 @@ class MAPNIK_DECL memory_datasource : public datasource
 {
     friend class memory_featureset;
 public:
-    memory_datasource(datasource::datasource_t type=datasource::Vector, bool bbox_check=true);
+    memory_datasource(parameters const& params);
+    static const char * name();
     virtual ~memory_datasource();
     virtual datasource::datasource_t type() const;
     virtual featureset_ptr features(query const& q) const;

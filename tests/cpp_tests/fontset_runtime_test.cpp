@@ -1,6 +1,7 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <mapnik/memory_datasource.hpp>
+#include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/unicode.hpp>
@@ -47,7 +48,10 @@ int main(int argc, char** argv)
         auto pt = std::make_unique<mapnik::geometry_type>(mapnik::geometry_type::types::Point);
         pt->move_to(128,128);
         feature->add_geometry(pt.release());
-        std::shared_ptr<mapnik::memory_datasource> ds = std::make_shared<mapnik::memory_datasource>();
+
+        mapnik::parameters params;
+        params["type"]="memory";
+        auto ds = std::make_shared<mapnik::memory_datasource>(params);
         ds->push(feature);
         mapnik::Map m(256,256);
         mapnik::font_set fontset("fontset");
@@ -57,7 +61,7 @@ int main(int argc, char** argv)
         mapnik::layer lyr("layer");
         lyr.set_datasource(ds);
         lyr.add_style("style");
-        m.add_layer(lyr);
+        m.add_layer(std::move(lyr));
         mapnik::feature_type_style the_style;
         mapnik::rule r;
         mapnik::text_symbolizer text_sym;

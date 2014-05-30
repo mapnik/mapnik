@@ -26,11 +26,16 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
-
+#include <mapnik/boolean.hpp>
 // boost
 
 // stl
 #include <algorithm>
+
+using mapnik::datasource;
+using mapnik::parameters;
+
+DATASOURCE_PLUGIN(mapnik::memory_datasource)
 
 namespace mapnik {
 
@@ -60,11 +65,16 @@ struct accumulate_extent
     bool first_;
 };
 
-memory_datasource::memory_datasource(datasource::datasource_t type, bool bbox_check)
-    : datasource(parameters()),
-      desc_("in-memory datasource","utf-8"),
-      type_(type),
-      bbox_check_(bbox_check) {}
+const char * memory_datasource::name()
+{
+    return "memory";
+}
+
+memory_datasource::memory_datasource(parameters const& params)
+    : datasource(params),
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+      type_(datasource::Vector),
+      bbox_check_(*params.get<boolean>("bbox_check", true)) {}
 
 memory_datasource::~memory_datasource() {}
 
