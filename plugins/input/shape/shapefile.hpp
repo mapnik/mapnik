@@ -180,7 +180,7 @@ public:
         return file_;
     }
 
-    inline bool is_open()
+    inline bool is_open() const
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         return (file_.buffer().second > 0);
