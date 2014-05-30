@@ -17,7 +17,7 @@ see the documentation of mapnik.printing.PDFPrinter() for options
 """
 from __future__ import absolute_import
 
-from . import render, Map, Box2d, MemoryDatasource, Layer, Feature, Projection, ProjTransform, Coord, Style, Rule, Geometry2d
+from . import render, Map, Box2d, Layer, Feature, Projection, ProjTransform, Coord, Style, Rule, Geometry2d
 import math
 import os
 import tempfile
@@ -306,12 +306,12 @@ class PDFPrinter:
     """Main class for creating PDF print outs, basically contruct an instance
     with appropriate options and then call render_map with your mapnik map
     """
-    def __init__(self, 
-                 pagesize=pagesizes["a4"], 
-                 margin=0.005, 
+    def __init__(self,
+                 pagesize=pagesizes["a4"],
+                 margin=0.005,
                  box=None,
                  percent_box=None,
-                 scale=default_scale, 
+                 scale=default_scale,
                  resolution=resolutions.dpi72,
                  preserve_aspect=True,
                  centering=centering.constrained,
@@ -321,7 +321,7 @@ class PDFPrinter:
 
         pagesize: tuple of page size in meters, see predefined sizes in pagessizes dict (default a4)
         margin: page margin in meters (default 0.01)
-        box: box within the page to render the map into (will not render over margin). This should be 
+        box: box within the page to render the map into (will not render over margin). This should be
              a Mapnik Box2d object. Default is the full page within the margin
         percent_box: as per box, but specified as a percent (0->1) of the full page size. If both box
                      and percent_box are specified percent_box will be used.
@@ -485,7 +485,7 @@ class PDFPrinter:
 
     def _get_context(self):
         if HAS_PANGOCAIRO_MODULE:
-            return 
+            return
         elif HAS_PYCAIRO_MODULE:
             return cairo.Context(self._s)
         return None
@@ -779,7 +779,7 @@ class PDFPrinter:
             prev = value
             value+=page_div_size
             fill = [1-z for z in fill]
-            label_value += div_size 
+            label_value += div_size
             if self._is_latlon and label_value > 180:
                 label_value -= 360
             text = "%d" % label_value
@@ -1025,4 +1025,3 @@ class PDFPrinter:
                         if y > h:
                             h = y
         return (w,h)
-

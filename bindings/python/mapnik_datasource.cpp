@@ -41,6 +41,7 @@ using mapnik::datasource;
 using mapnik::memory_datasource;
 using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
+using mapnik::parameters;
 
 namespace
 {
@@ -191,7 +192,7 @@ void export_datasource()
 
     class_<memory_datasource,
            bases<datasource>, std::shared_ptr<memory_datasource>,
-           boost::noncopyable>("MemoryDatasource", no_init)
+           boost::noncopyable>("MemoryDatasourceBase", init<parameters>())
         .def("add_feature",&memory_datasource::push,
              "Adds a Feature:\n"
              ">>> ms = MemoryDatasource()\n"

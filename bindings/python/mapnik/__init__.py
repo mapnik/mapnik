@@ -627,6 +627,16 @@ def Python(**keywords):
     keywords['type'] = 'python'
     return CreateDatasource(keywords)
 
+def MemoryDatasource(**keywords):
+    """Create a Memory Datasource.
+
+    Optional keyword arguments:
+        (TODO)
+    """
+    params = Parameters()
+    params.append(Parameter('type','memory'))
+    return MemoryDatasourceBase(params)
+
 class PythonDatasource(object):
     """A base class for a Python data source.
 

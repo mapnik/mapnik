@@ -61,7 +61,7 @@ int main(int argc, char** argv)
         mapnik::layer lyr("layer");
         lyr.set_datasource(ds);
         lyr.add_style("style");
-        m.add_layer(std::move(lyr));
+        m.add_layer(lyr);
         mapnik::feature_type_style the_style;
         mapnik::rule r;
         mapnik::text_symbolizer text_sym;
