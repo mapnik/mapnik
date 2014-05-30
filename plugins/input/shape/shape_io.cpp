@@ -24,6 +24,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/std.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/geom_util.hpp>
 
@@ -53,7 +54,7 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
     {
         try
         {
-            index_= std::make_shared<shape_file>(shape_name + INDEX);
+            index_ = std::make_unique<shape_file>(shape_name + INDEX);
         }
         catch (...)
         {

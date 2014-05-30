@@ -53,11 +53,11 @@ using mapnik::coord2d;
 class shape_datasource : public datasource
 {
 public:
-    shape_datasource(const parameters &params);
+    shape_datasource(parameters const& params);
     virtual ~shape_datasource();
     datasource::datasource_t type() const;
     static const char * name();
-    featureset_ptr features(const query& q) const;
+    featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
@@ -68,7 +68,6 @@ private:
 
     datasource::datasource_t type_;
     std::string shape_name_;
-    std::shared_ptr<shape_io> shape_;
     shape_io::shapeType shape_type_;
     long file_length_;
     box2d<double> extent_;

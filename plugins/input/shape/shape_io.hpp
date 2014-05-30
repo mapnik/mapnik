@@ -61,9 +61,10 @@ public:
     shape_file& shp();
     dbf_file& dbf();
 
-    inline std::shared_ptr<shape_file>& index()
+    inline boost::optional<shape_file&> index()
     {
-        return index_;
+        if (index_) return boost::optional<shape_file&>(*index_);
+        return boost::optional<shape_file&>();
     }
 
     inline bool has_index() const
@@ -79,7 +80,7 @@ public:
     shapeType type_;
     shape_file shp_;
     dbf_file   dbf_;
-    std::shared_ptr<shape_file> index_;
+    std::unique_ptr<shape_file> index_;
     unsigned reclength_;
     unsigned id_;
     box2d<double> cur_extent_;

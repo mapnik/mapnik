@@ -42,23 +42,23 @@ using mapnik::geometry_type;
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
-                                                        shape_io& shape,
+                                                        std::unique_ptr<shape_io> && shape_ptr,
                                                         std::set<std::string> const& attribute_names,
                                                         std::string const& encoding,
                                                         std::string const& shape_name,
                                                         int row_limit)
     : filter_(filter),
       ctx_(std::make_shared<mapnik::context_type>()),
-      shape_(shape),
-      tr_(new mapnik::transcoder(encoding)),
-      row_limit_(row_limit),
-      count_(0),
-      feature_bbox_()
+    shape_ptr_(std::move(shape_ptr)),
+    tr_(new mapnik::transcoder(encoding)),
+    row_limit_(row_limit),
+    count_(0),
+    feature_bbox_()
 {
-    shape_.shp().skip(100);
-    setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
+    shape_ptr_->shp().skip(100);
+    setup_attributes(ctx_, attribute_names, shape_name, *shape_ptr_,attr_ids_);
 
-    std::shared_ptr<shape_file> index = shape_.index();
+    auto index = shape_ptr_->index();
     if (index)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
@@ -86,11 +86,11 @@ feature_ptr shape_index_featureset<filterT>::next()
 
     while ( itr_ != offsets_.end())
     {
-        shape_.move_to(*itr_++);
-        shape_file::record_type record(shape_.reclength_ * 2);
-        shape_.shp().read_record(record);
+        shape_ptr_->move_to(*itr_++);
+        shape_file::record_type record(shape_ptr_->reclength_ * 2);
+        shape_ptr_->shp().read_record(record);
         int type = record.read_ndr_integer();
-        feature_ptr feature(feature_factory::create(ctx_,shape_.id_));
+        feature_ptr feature(feature_factory::create(ctx_,shape_ptr_->id_));
 
         switch (type)
         {
@@ -146,17 +146,17 @@ feature_ptr shape_index_featureset<filterT>::next()
         }
 
         // FIXME: https://github.com/mapnik/mapnik/issues/1020
-        feature->set_id(shape_.id_);
+        feature->set_id(shape_ptr_->id_);
         if (attr_ids_.size())
         {
-            shape_.dbf().move_to(shape_.id_);
+            shape_ptr_->dbf().move_to(shape_ptr_->id_);
             std::vector<int>::const_iterator itr = attr_ids_.begin();
             std::vector<int>::const_iterator end = attr_ids_.end();
             try
             {
                 for (; itr!=end; ++itr)
                 {
-                    shape_.dbf().add_attribute(*itr, *tr_, *feature);
+                    shape_ptr_->dbf().add_attribute(*itr, *tr_, *feature);
                 }
             }
             catch (...)

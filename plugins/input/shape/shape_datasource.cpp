@@ -31,6 +31,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/std.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
@@ -95,7 +96,7 @@ shape_datasource::shape_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "shape_datasource::init(get_column_description)");
 #endif
 
-        std::shared_ptr<shape_io> shape_ref = std::make_shared<shape_io>(shape_name_);
+        std::unique_ptr<shape_io> shape_ref = std::make_unique<shape_io>(shape_name_);
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
@@ -136,11 +137,6 @@ shape_datasource::shape_datasource(parameters const& params)
                 break;
             }
         }
-        // for indexed shapefiles we keep open the file descriptor for fast reads
-        if (indexed_) {
-            shape_ = shape_ref;
-        }
-
     }
     catch (datasource_exception const& ex)
     {
@@ -198,8 +194,6 @@ void shape_datasource::init(shape_io& shape)
 
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Z min/max=" << zmin << "," << zmax;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: M min/max=" << mmin << "," << mmax;
-#else
-    shape.shp().skip(4*8);
 #endif
 
     // check if we have an index file around
@@ -226,7 +220,7 @@ layer_descriptor shape_datasource::get_descriptor() const
     return desc_;
 }
 
-featureset_ptr shape_datasource::features(const query& q) const
+featureset_ptr shape_datasource::features(query const& q) const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features");
@@ -235,11 +229,10 @@ featureset_ptr shape_datasource::features(const query& q) const
     filter_in_box filter(q.get_bbox());
     if (indexed_)
     {
-        shape_->shp().seek(0);
-        // TODO - use std::make_shared - #760
+        std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
         return featureset_ptr
             (new shape_index_featureset<filter_in_box>(filter,
-                                                       *shape_,
+                                                       std::move(shape_ptr),
                                                        q.property_names(),
                                                        desc_.get_encoding(),
                                                        shape_name_,
@@ -248,11 +241,11 @@ featureset_ptr shape_datasource::features(const query& q) const
     else
     {
         return std::make_shared<shape_featureset<filter_in_box> >(filter,
-                                                                    shape_name_,
-                                                                    q.property_names(),
-                                                                    desc_.get_encoding(),
-                                                                    file_length_,
-                                                                    row_limit_);
+                                                                  shape_name_,
+                                                                  q.property_names(),
+                                                                  desc_.get_encoding(),
+                                                                  file_length_,
+                                                                  row_limit_);
     }
 }
 
@@ -277,11 +270,10 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
 
     if (indexed_)
     {
-        shape_->shp().seek(0);
-        // TODO - use std::make_shared - #760
+        std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
         return featureset_ptr
             (new shape_index_featureset<filter_at_point>(filter,
-                                                         *shape_,
+                                                         std::move(shape_ptr),
                                                          names,
                                                          desc_.get_encoding(),
                                                          shape_name_,
@@ -290,11 +282,11 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     else
     {
         return std::make_shared<shape_featureset<filter_at_point> >(filter,
-                                                                      shape_name_,
-                                                                      names,
-                                                                      desc_.get_encoding(),
-                                                                      file_length_,
-                                                                      row_limit_);
+                                                                    shape_name_,
+                                                                    names,
+                                                                    desc_.get_encoding(),
+                                                                    file_length_,
+                                                                    row_limit_);
     }
 }
 
