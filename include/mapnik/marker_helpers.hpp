@@ -512,7 +512,7 @@ void setup_transform_scaling(agg::trans_affine & tr,
 
 // Apply markers to a feature with multiple geometries
 template <typename Converter>
-void apply_markers_multi(feature_impl & feature, attributes const& vars, Converter& converter, markers_symbolizer const& sym)
+void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter& converter, markers_symbolizer const& sym)
 {
     std::size_t geom_count = feature.paths().size();
     if (geom_count == 1)
@@ -542,8 +542,8 @@ void apply_markers_multi(feature_impl & feature, attributes const& vars, Convert
             // Only apply to path with largest envelope area
             // TODO: consider using true area for polygon types
             double maxarea = 0;
-            geometry_type* largest = 0;
-            for (geometry_type & geom : feature.paths())
+            geometry_type const* largest = 0;
+            for (geometry_type const& geom : feature.paths())
             {
                 const box2d<double>& env = geom.envelope();
                 double area = env.width() * env.height();
@@ -564,7 +564,7 @@ void apply_markers_multi(feature_impl & feature, attributes const& vars, Convert
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            for (geometry_type & path : feature.paths())
+            for (geometry_type const& path : feature.paths())
             {
                 converter.apply(path);
             }

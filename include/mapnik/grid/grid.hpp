@@ -98,7 +98,7 @@ public:
         return id_name_;
     }
 
-    void add_feature(mapnik::feature_impl & feature);
+    void add_feature(mapnik::feature_impl const& feature);
 
     inline void add_property_name(std::string const& name)
     {

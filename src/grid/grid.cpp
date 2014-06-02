@@ -67,10 +67,10 @@ hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
       f_keys_(rhs.f_keys_),
       features_(rhs.features_),
       ctx_(rhs.ctx_)
-      {
-          f_keys_[base_mask] = "";
-          data_.set(base_mask);
-      }
+{
+    f_keys_[base_mask] = "";
+    data_.set(base_mask);
+}
 
 template <typename T>
 void hit_grid<T>::clear()
@@ -85,7 +85,7 @@ void hit_grid<T>::clear()
 }
 
 template <typename T>
-void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
+void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
 {
     value_type feature_id = feature.id();
     // avoid adding duplicate features (e.g. in the case of both a line symbolizer and a polygon symbolizer)
@@ -95,7 +95,8 @@ void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
         return;
     }
 
-    if (ctx_->size() == 0) {
+    if (ctx_->size() == 0)
+    {
         context_type::map_type::const_iterator itr = feature.context()->begin();
         context_type::map_type::const_iterator end = feature.context()->end();
         for ( ;itr!=end; ++itr)

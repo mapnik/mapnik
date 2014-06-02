@@ -362,7 +362,7 @@ struct vertex_converter : private mapnik::noncopyable
     vertex_converter(bbox_type const& b,
                      rasterizer_type & ras,
                      symbolizer_type const& sym,
-                     trans_type & tr,
+                     trans_type const& tr,
                      proj_trans_type const& prj_trans,
                      affine_trans_type const& affine_trans,
                      feature_type const& feature,

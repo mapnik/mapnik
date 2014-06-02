@@ -113,9 +113,10 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 
     render_markers_symbolizer(
         sym, feature, prj_trans, common_, clip_box,
-        [&](svg_path_adapter &path, svg_attribute_type const &attr, svg_storage_type &,
-            box2d<double> const &bbox, agg::trans_affine const &tr,
-            bool) -> vector_dispatch_type {
+        [&](svg_path_adapter & path, svg_attribute_type const& attr, svg_storage_type &,
+            box2d<double> const& bbox, agg::trans_affine const& tr,
+            bool) -> vector_dispatch_type
+        {
             // TODO - clamping to >= 4 pixels
             coord2d center = bbox.center();
             agg::trans_affine_translation recenter(-center.x, -center.y);
@@ -132,8 +133,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                         common_.vars_,
                                         pixmap_);
         },
-        [&](image_data_32 const &marker, agg::trans_affine const &tr,
-            box2d<double> const &bbox) -> raster_dispatch_type {
+        [&](image_data_32 const& marker, agg::trans_affine const& tr,
+            box2d<double> const& bbox) -> raster_dispatch_type
+        {
             // - clamp sizes to > 4 pixels of interactivity
             coord2d center = bbox.center();
             agg::trans_affine_translation recenter(-center.x, -center.y);

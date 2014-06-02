@@ -30,11 +30,11 @@
 namespace mapnik {
 
 template <typename F1, typename F2>
-void render_markers_symbolizer(markers_symbolizer const &sym,
-                               mapnik::feature_impl &feature,
-                               proj_transform const &prj_trans,
-                               renderer_common &common,
-                               box2d<double> const &clip_box,
+void render_markers_symbolizer(markers_symbolizer const& sym,
+                               mapnik::feature_impl & feature,
+                               proj_transform const& prj_trans,
+                               renderer_common const& common,
+                               box2d<double> const& clip_box,
                                F1 make_vector_dispatch,
                                F2 make_raster_dispatch)
 {
@@ -167,4 +167,4 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_MARKERS_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_MARKERS_SYMBOLIZER_HPP

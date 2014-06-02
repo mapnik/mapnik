@@ -54,7 +54,7 @@ struct raster_markers_rasterizer_dispatch_grid
                                        markers_symbolizer const& sym,
                                        Detector & detector,
                                        double scale_factor,
-                                       mapnik::feature_impl & feature,
+                                       mapnik::feature_impl const& feature,
                                        attributes const& vars,
                                        PixMapType & pixmap)
         : buf_(render_buffer),
@@ -81,7 +81,7 @@ struct raster_markers_rasterizer_dispatch_grid
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
 
-        box2d<double> bbox_(0,0, src_.width(),src_.height());
+        box2d<double> bbox(0,0, src_.width(),src_.height());
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == geometry_type::types::Point)
         {
@@ -110,7 +110,7 @@ struct raster_markers_rasterizer_dispatch_grid
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
-            box2d<double> transformed_bbox = bbox_ * matrix;
+            box2d<double> transformed_bbox = bbox * matrix;
             if (allow_overlap ||
                 detector_.has_placement(transformed_bbox))
             {
@@ -130,7 +130,7 @@ struct raster_markers_rasterizer_dispatch_grid
         {
             double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
             double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-            markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
+            markers_placement<T, label_collision_detector4> placement(path, bbox, marker_trans_, detector_,
                                                                       spacing * scale_factor_,
                                                                       max_error,
                                                                       allow_overlap);
@@ -183,7 +183,7 @@ private:
     markers_symbolizer const& sym_;
     Detector & detector_;
     double scale_factor_;
-    mapnik::feature_impl & feature_;
+    mapnik::feature_impl const& feature_;
     attributes const& vars_;
     PixMapType & pixmap_;
     bool placed_;
@@ -199,15 +199,15 @@ struct vector_markers_rasterizer_dispatch_grid
     typedef typename renderer_base::pixfmt_type         pixfmt_type;
 
     vector_markers_rasterizer_dispatch_grid(BufferType & render_buffer,
-                                            vertex_source_type &path,
-                                            const attribute_source_type &attrs,
+                                            vertex_source_type & path,
+                                            attribute_source_type const& attrs,
                                             Rasterizer & ras,
                                             box2d<double> const& bbox,
                                             agg::trans_affine const& marker_trans,
                                             markers_symbolizer const& sym,
                                             Detector & detector,
                                             double scale_factor,
-                                            mapnik::feature_impl & feature,
+                                            mapnik::feature_impl const& feature,
                                             attributes const& vars,
                                             PixMapType & pixmap)
         : buf_(render_buffer),
@@ -225,6 +225,7 @@ struct vector_markers_rasterizer_dispatch_grid
         pixmap_(pixmap),
         placed_(false)
     {
+        //std::cerr << "vector_markers_rasterizer_dispatch_grid() ctor" << std::endl;
     }
 
     template <typename T>
@@ -263,6 +264,7 @@ struct vector_markers_rasterizer_dispatch_grid
                     return;
                 }
             }
+
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
@@ -270,6 +272,7 @@ struct vector_markers_rasterizer_dispatch_grid
                 detector_.has_placement(transformed_bbox))
             {
                 svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
+
                 if (!ignore_placement)
                 {
                     detector_.insert(transformed_bbox);
@@ -315,7 +318,7 @@ private:
     markers_symbolizer const& sym_;
     Detector & detector_;
     double scale_factor_;
-    mapnik::feature_impl & feature_;
+    mapnik::feature_impl const& feature_;
     attributes const& vars_;
     PixMapType & pixmap_;
     bool placed_;
