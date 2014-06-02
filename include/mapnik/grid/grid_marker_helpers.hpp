@@ -231,7 +231,8 @@ struct vector_markers_rasterizer_dispatch_grid
     void add_path(T & path)
     {
         agg::scanline_bin sl_;
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
+        marker_placement_enum placement_method =
+            get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
