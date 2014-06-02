@@ -29,12 +29,6 @@
 
 namespace mapnik {
 
-namespace {
-
-
-
-} // anonymous namespace
-
 template <typename F1, typename F2>
 void render_markers_symbolizer(markers_symbolizer const &sym,
                                mapnik::feature_impl &feature,
@@ -84,7 +78,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                     box2d<double> bbox = marker_ellipse.bounding_box();
 
                     auto rasterizer_dispatch = make_vector_dispatch(
-                      svg_path, result ? attributes : (*stock_vector_marker)->attributes(), 
+                      svg_path, result ? attributes : (*stock_vector_marker)->attributes(),
                       marker_ellipse, bbox, tr, snap_pixels);
                     typedef decltype(rasterizer_dispatch) dispatch_type;
 
@@ -145,7 +139,7 @@ void render_markers_symbolizer(markers_symbolizer const &sym,
                 if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                 box2d<double> const& bbox = (*mark)->bounding_box();
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
-                
+
                 auto rasterizer_dispatch = make_raster_dispatch(**marker, tr, bbox);
                 typedef decltype(rasterizer_dispatch) dispatch_type;
 
