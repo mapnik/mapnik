@@ -66,7 +66,7 @@ struct vector_markers_rasterizer_dispatch
     typedef typename SvgRenderer::vertex_source_type    vertex_source_type;
     typedef typename SvgRenderer::attribute_source_type attribute_source_type;
     typedef typename renderer_base::pixfmt_type         pixfmt_type;
-  
+
     vector_markers_rasterizer_dispatch(BufferType & render_buffer,
                                        vertex_source_type &path,
                                        attribute_source_type const &attrs,
@@ -208,7 +208,7 @@ struct raster_markers_rasterizer_dispatch
                                        attributes const& vars,
                                        double scale_factor,
                                        bool snap_to_pixels)
-        : buf_(render_buffer),
+    : buf_(render_buffer),
         pixf_(buf_),
         renb_(pixf_),
         ras_(ras),
@@ -320,8 +320,8 @@ struct raster_markers_rasterizer_dispatch
             //typedef agg::span_image_filter_rgba_2x2<img_accessor_type,interpolator_type> span_gen_type;
             typedef agg::span_image_resample_rgba_affine<img_accessor_type> span_gen_type;
             typedef agg::renderer_scanline_aa_alpha<renderer_base,
-                    agg::span_allocator<color_type>,
-                    span_gen_type> renderer_type;
+                                                    agg::span_allocator<color_type>,
+                                                    span_gen_type> renderer_type;
 
             double p[8];
             p[0] = 0;     p[1] = 0;
@@ -514,62 +514,62 @@ void setup_transform_scaling(agg::trans_affine & tr,
 template <typename Converter>
 void apply_markers_multi(feature_impl & feature, attributes const& vars, Converter& converter, markers_symbolizer const& sym)
 {
-  std::size_t geom_count = feature.paths().size();
-  if (geom_count == 1)
-  {
-      converter.apply(feature.paths()[0]);
-  }
-  else if (geom_count > 1)
-  {
-      marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum>(sym, keys::markers_multipolicy, feature, vars, MARKER_EACH_MULTI);
-      marker_placement_enum placement = get<marker_placement_enum>(sym, keys::markers_placement_type, feature, vars, MARKER_POINT_PLACEMENT);
-      if (placement == MARKER_POINT_PLACEMENT &&
-          multi_policy == MARKER_WHOLE_MULTI)
-      {
-          double x, y;
-          if (label::centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y))
-          {
-              geometry_type pt(geometry_type::types::Point);
-              pt.move_to(x, y);
-              // unset any clipping since we're now dealing with a point
-              converter.template unset<clip_poly_tag>();
-              converter.apply(pt);
-          }
-      }
-      else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
-                multi_policy == MARKER_LARGEST_MULTI)
-      {
-          // Only apply to path with largest envelope area
-          // TODO: consider using true area for polygon types
-          double maxarea = 0;
-          geometry_type* largest = 0;
-          for (geometry_type & geom : feature.paths())
-          {
-              const box2d<double>& env = geom.envelope();
-              double area = env.width() * env.height();
-              if (area > maxarea)
-              {
-                  maxarea = area;
-                  largest = &geom;
-              }
-          }
-          if (largest)
-          {
-              converter.apply(*largest);
-          }
-      }
-      else
-      {
-          if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
-          {
-              MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
-          }
-          for (geometry_type & path : feature.paths())
-          {
-              converter.apply(path);
-          }
-      }
-  }
+    std::size_t geom_count = feature.paths().size();
+    if (geom_count == 1)
+    {
+        converter.apply(feature.paths()[0]);
+    }
+    else if (geom_count > 1)
+    {
+        marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum>(sym, keys::markers_multipolicy, feature, vars, MARKER_EACH_MULTI);
+        marker_placement_enum placement = get<marker_placement_enum>(sym, keys::markers_placement_type, feature, vars, MARKER_POINT_PLACEMENT);
+        if (placement == MARKER_POINT_PLACEMENT &&
+            multi_policy == MARKER_WHOLE_MULTI)
+        {
+            double x, y;
+            if (label::centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y))
+            {
+                geometry_type pt(geometry_type::types::Point);
+                pt.move_to(x, y);
+                // unset any clipping since we're now dealing with a point
+                converter.template unset<clip_poly_tag>();
+                converter.apply(pt);
+            }
+        }
+        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
+                 multi_policy == MARKER_LARGEST_MULTI)
+        {
+            // Only apply to path with largest envelope area
+            // TODO: consider using true area for polygon types
+            double maxarea = 0;
+            geometry_type* largest = 0;
+            for (geometry_type & geom : feature.paths())
+            {
+                const box2d<double>& env = geom.envelope();
+                double area = env.width() * env.height();
+                if (area > maxarea)
+                {
+                    maxarea = area;
+                    largest = &geom;
+                }
+            }
+            if (largest)
+            {
+                converter.apply(*largest);
+            }
+        }
+        else
+        {
+            if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
+            {
+                MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
+            }
+            for (geometry_type & path : feature.paths())
+            {
+                converter.apply(path);
+            }
+        }
+    }
 }
 
 }
