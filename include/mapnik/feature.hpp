@@ -191,7 +191,7 @@ public:
         data_ = data;
     }
 
-    inline context_ptr context()
+    inline context_ptr context() const
     {
         return ctx_;
     }
