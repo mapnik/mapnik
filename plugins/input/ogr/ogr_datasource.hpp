@@ -63,7 +63,7 @@ private:
     mapnik::datasource::datasource_t type_;
     std::string dataset_name_;
     std::string index_name_;
-    OGRDataSource* dataset_;
+    gdal_dataset_type dataset_;
     ogr_layer_ptr layer_;
     std::string layer_name_;
     mapnik::layer_descriptor desc_;
