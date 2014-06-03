@@ -73,12 +73,14 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype','clipper', env['ICU_LIB_NAME'],filesystem,system,regex,'harfbuzz', 'harfbuzz-icu']
-
+lib_env['LIBS'] = ['clipper', 'harfbuzz', 'harfbuzz-icu', env['ICU_LIB_NAME'],filesystem,system,regex]
 
 if mingwbuild:
     lib_env['LIBS'].append(env['ICU_LIB_I18N'])
     lib_env['LIBS'].append(env['ICU_LIB_DATA'])
+    
+lib_env['LIBS'].append('freetype')
+lib_env['LIBS'].append('graphite2')
 
 if env['HAS_CAIRO']:
     lib_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
