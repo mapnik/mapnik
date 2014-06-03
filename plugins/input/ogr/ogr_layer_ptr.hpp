@@ -33,7 +33,7 @@
 #include <gdal_version.h>
 #include <ogrsf_frmts.h>
 
-#if GDAL_VERSION_NUM >= 2000
+#if GDAL_VERSION_MAJOR >= 2
 typedef GDALDataset* gdal_dataset_type;
 #else
 typedef OGRDataSource* gdal_dataset_type;
