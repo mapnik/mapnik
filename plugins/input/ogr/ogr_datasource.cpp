@@ -72,7 +72,7 @@ ogr_datasource::~ogr_datasource()
 {
     // free layer before destroying the datasource
     layer_.free_layer();
-#if GDAL_VERSION_NUM >= 2000
+#if GDAL_VERSION_MAJOR >= 2
     GDALClose(( GDALDatasetH) dataset_);
 #else
     OGRDataSource::DestroyDataSource (dataset_);
@@ -117,7 +117,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (! driver.empty())
     {
-#if GDAL_VERSION_NUM >= 2000
+#if GDAL_VERSION_MAJOR >= 2
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
         const char* papszAllowedDrivers[] = { driver.c_str(), NULL };
         dataset_ = static_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers,NULL,NULL));
@@ -132,7 +132,11 @@ void ogr_datasource::init(mapnik::parameters const& params)
     else
     {
         // open ogr driver
+#if GDAL_VERSION_MAJOR >= 2
         dataset_ = static_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), FALSE, NULL));
+#else
+        dataset_ = OGRSFDriverRegistrar::Open(dataset_name_.c_str(), FALSE);
+#endif
     }
 
     if (! dataset_)
