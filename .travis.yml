@@ -5,9 +5,13 @@ compiler:
  # disabled to due https://github.com/mapnik/mapnik/issues/2235
  #- clang
 
-# http://about.travis-ci.org/blog/2013-11-29-postgresql-92-93-now-available/
 addons:
   postgresql: "9.3"
+
+env:
+  - TESTS_TO_RUN=python BINDINGS=python CPP_TESTS=false BENCHMARK=false DEMO=False
+  - TESTS_TO_RUN=visual BINDINGS=python CPP_TESTS=false BENCHMARK=false DEMO=False
+  - TESTS_TO_RUN=cpp BINDINGS=none CPP_TESTS=true BENCHMARK=true DEMO=True
 
 before_install:
  # we need at least g++-4.7 for c++11 features
@@ -21,36 +25,26 @@ before_install:
  # upgrade compilers
  - sudo apt-get install -y gcc-4.8 g++-4.8
  - sudo apt-get install -y make boost1.55 libgdal-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
- - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.24.tar.bz2
- - tar xf harfbuzz-0.9.24.tar.bz2
- - cd harfbuzz-0.9.24
+ - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.29.tar.bz2
+ - tar xf harfbuzz-0.9.29.tar.bz2
+ - cd harfbuzz-0.9.29
  - ./configure && make && sudo make install
  - sudo ldconfig
  - cd ../
- - createdb template_postgis
- - psql -c "CREATE EXTENSION postgis" template_postgis
 
 install:
- - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
- - ./configure CXX="nice ${CXX}" CC="nice ${CC}" DEMO=False BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True || cat config.log
- - JOBS=4 make
-
-env:
-  - TESTS_TO_RUN=python BINDINGS=python CPP_TESTS=false BENCHMARK=false
-  - TESTS_TO_RUN=visual BINDINGS=python CPP_TESTS=false BENCHMARK=false
-  - TESTS_TO_RUN=cpp BINDINGS=none CPP_TESTS=true BENCHMARK=true
+ - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
+ - ./configure CXX="nice ${CXX}" CC="nice ${CC}" DEMO=${DEMO} BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True
+ - JOBS=3 make
 
 before_script:
  - make test-$TESTS_TO_RUN
 
 script:
- - if [ "${BENCHMARK}" = true ]; then make bench; fi;
+ - if [[ "${BENCHMARK}" == true ]]; then make bench; fi;
 
 notifications:
   irc:
     channels:
       - "irc.freenode.org#mapnik"
     use_notice: true
-  email:
-    on_success: [never]
-    on_failure: [change]
