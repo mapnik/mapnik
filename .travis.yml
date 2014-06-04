@@ -19,7 +19,8 @@ before_install:
  - sudo apt-get install -y make libgdal-dev boost1.55 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
 
 script:
- - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=False DEMO=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True && JOBS=2 make
+ - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=False DEMO=True BENCHMARK=True BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
+ - JOBS=3 make
  - make test-local
 
 notifications:
