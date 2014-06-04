@@ -76,11 +76,8 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                              svg_attribute_type,
                              renderer_type,
                              pixfmt_comp_type > svg_renderer_type;
-    typedef vector_markers_rasterizer_dispatch<buf_type,
-                                               svg_renderer_type,
-                                               rasterizer,
-                                               detector_type > vector_dispatch_type;
-    typedef raster_markers_rasterizer_dispatch<buf_type,rasterizer, detector_type> raster_dispatch_type;
+
+    ras_ptr->reset();
 
     double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
     gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
@@ -90,46 +87,17 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_method_ = gamma_method;
         gamma_ = gamma;
     }
-    
-    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
 
-    ras_ptr->reset();
+    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     box2d<double> clip_box = clipping_extent();
 
-    render_markers_symbolizer(
-        sym, feature, prj_trans, common_, clip_box,
-        [&](svg_path_adapter &path, svg_attribute_type const &attr, svg_storage_type &,
-            box2d<double> const &bbox, agg::trans_affine const &tr,
-            bool snap_pixels) -> vector_dispatch_type {
-            coord2d center = bbox.center();
-            agg::trans_affine_translation recenter(-center.x, -center.y);
-            agg::trans_affine marker_trans = recenter * tr;
-            return vector_dispatch_type(render_buffer,
-                                        path, attr,
-                                        *ras_ptr,
-                                        bbox,
-                                        marker_trans,
-                                        sym,
-                                        *common_.detector_,
-                                        feature, common_.vars_,
-                                        common_.scale_factor_,
-                                        snap_pixels);
-        },
-        [&](image_data_32 const &marker, agg::trans_affine const &tr,
-            box2d<double> const &bbox) -> raster_dispatch_type {
-            coord2d center = bbox.center();
-            agg::trans_affine_translation recenter(-center.x, -center.y);
-            agg::trans_affine marker_trans = recenter * tr;
-            return raster_dispatch_type(render_buffer,
-                                        *ras_ptr,
-                                        marker,
-                                        marker_trans,
-                                        sym,
-                                        *common_.detector_,
-                                        feature, common_.vars_,
-                                        common_.scale_factor_,
-                                        true /*snap rasters no matter what*/);
-        });
+    auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
+    typedef decltype(renderer_context) context_type;
+    typedef vector_markers_rasterizer_dispatch<svg_renderer_type, detector_type, context_type> vector_dispatch_type;
+    typedef raster_markers_rasterizer_dispatch<detector_type, context_type> raster_dispatch_type;
+
+    render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
+        sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
 template void agg_renderer<image_32>::process(markers_symbolizer const&,

@@ -59,31 +59,33 @@
 namespace mapnik {
 
 
-template <typename BufferType, typename SvgRenderer, typename Rasterizer, typename Detector>
-struct vector_markers_rasterizer_dispatch
+template <typename SvgRenderer, typename Detector, typename RendererContext>
+struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
 {
     typedef typename SvgRenderer::renderer_base         renderer_base;
     typedef typename SvgRenderer::vertex_source_type    vertex_source_type;
     typedef typename SvgRenderer::attribute_source_type attribute_source_type;
     typedef typename renderer_base::pixfmt_type         pixfmt_type;
 
-    vector_markers_rasterizer_dispatch(BufferType & render_buffer,
-                                       vertex_source_type &path,
+    typedef typename std::tuple_element<0,RendererContext>::type BufferType;
+    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
+
+    vector_markers_rasterizer_dispatch(vertex_source_type & path,
                                        attribute_source_type const &attrs,
-                                       Rasterizer & ras,
                                        box2d<double> const& bbox,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
+                                       double scale_factor,
                                        feature_impl & feature,
                                        attributes const& vars,
-                                       double scale_factor,
-                                       bool snap_to_pixels)
-    : buf_(render_buffer),
+                                       RendererContext const& renderer_context,
+                                       bool snap_to_pixels = false)
+    : buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),
         svg_renderer_(path, attrs),
-        ras_(ras),
+        ras_(std::get<1>(renderer_context)),
         bbox_(bbox),
         marker_trans_(marker_trans),
         sym_(sym),
@@ -177,7 +179,7 @@ private:
     pixfmt_type pixf_;
     renderer_base renb_;
     SvgRenderer svg_renderer_;
-    Rasterizer & ras_;
+    RasterizerType & ras_;
     box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;
@@ -188,9 +190,12 @@ private:
     bool snap_to_pixels_;
 };
 
-template <typename BufferType, typename Rasterizer, typename Detector>
-struct raster_markers_rasterizer_dispatch
+template <typename Detector,typename RendererContext>
+struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
 {
+    typedef typename std::remove_reference<typename std::tuple_element<0,RendererContext>::type>::type BufferType;
+    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
+
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
@@ -198,20 +203,21 @@ struct raster_markers_rasterizer_dispatch
     typedef agg::pixfmt_custom_blend_rgba<blender_type, BufferType> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
 
-    raster_markers_rasterizer_dispatch(BufferType & render_buffer,
-                                       Rasterizer & ras,
-                                       image_data_32 const& src,
+
+
+    raster_markers_rasterizer_dispatch(image_data_32 const& src,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
+                                       double scale_factor,
                                        feature_impl & feature,
                                        attributes const& vars,
-                                       double scale_factor,
-                                       bool snap_to_pixels)
-    : buf_(render_buffer),
+                                       RendererContext const& renderer_context,
+                                       bool snap_to_pixels = false)
+    : buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),
-        ras_(ras),
+        ras_(std::get<1>(renderer_context)),
         src_(src),
         marker_trans_(marker_trans),
         sym_(sym),
@@ -362,7 +368,7 @@ private:
     BufferType & buf_;
     pixfmt_comp_type pixf_;
     renderer_base renb_;
-    Rasterizer & ras_;
+    RasterizerType & ras_;
     image_data_32 const& src_;
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;
@@ -512,7 +518,7 @@ void setup_transform_scaling(agg::trans_affine & tr,
 
 // Apply markers to a feature with multiple geometries
 template <typename Converter>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter& converter, markers_symbolizer const& sym)
+void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, markers_symbolizer const& sym)
 {
     std::size_t geom_count = feature.paths().size();
     if (geom_count == 1)
@@ -523,6 +529,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
     {
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum>(sym, keys::markers_multipolicy, feature, vars, MARKER_EACH_MULTI);
         marker_placement_enum placement = get<marker_placement_enum>(sym, keys::markers_placement_type, feature, vars, MARKER_POINT_PLACEMENT);
+
         if (placement == MARKER_POINT_PLACEMENT &&
             multi_policy == MARKER_WHOLE_MULTI)
         {

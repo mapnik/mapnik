@@ -74,7 +74,7 @@ porting notes -->
 
 // stl
 #include <algorithm>
-
+#include <tuple>
 
 namespace mapnik {
 
@@ -94,63 +94,25 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                              svg_attribute_type,
                              renderer_type,
                              pixfmt_type > svg_renderer_type;
-    typedef vector_markers_rasterizer_dispatch_grid<buf_type,
-                                                    svg_renderer_type,
-                                                    grid_rasterizer,
-                                                    detector_type,
-                                                    mapnik::grid > vector_dispatch_type;
-    typedef raster_markers_rasterizer_dispatch_grid<buf_type,
-                                                    grid_rasterizer,
-                                                    pixfmt_type,
-                                                    grid_renderer_base_type,
-                                                    renderer_type,
-                                                    detector_type,
-                                                    mapnik::grid > raster_dispatch_type;
 
     buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     ras_ptr->reset();
     box2d<double> clip_box = common_.query_extent_;
 
-    render_markers_symbolizer(
-        sym, feature, prj_trans, common_, clip_box,
-        [&](svg_path_adapter & path, svg_attribute_type const& attr, svg_storage_type &,
-            box2d<double> const& bbox, agg::trans_affine const& tr,
-            bool) -> vector_dispatch_type
-        {
-            // TODO - clamping to >= 4 pixels
-            coord2d center = bbox.center();
-            agg::trans_affine_translation recenter(-center.x, -center.y);
-            agg::trans_affine marker_trans = recenter * tr;
-            return vector_dispatch_type(render_buf,
-                                        path, attr,
-                                        *ras_ptr,
-                                        bbox,
-                                        marker_trans,
-                                        sym,
-                                        *common_.detector_,
-                                        common_.scale_factor_,
-                                        feature,
-                                        common_.vars_,
-                                        pixmap_);
-        },
-        [&](image_data_32 const& marker, agg::trans_affine const& tr,
-            box2d<double> const& bbox) -> raster_dispatch_type
-        {
-            // - clamp sizes to > 4 pixels of interactivity
-            coord2d center = bbox.center();
-            agg::trans_affine_translation recenter(-center.x, -center.y);
-            agg::trans_affine marker_trans = recenter * tr;
-            return raster_dispatch_type(render_buf,
-                                        *ras_ptr,
-                                        marker,
-                                        marker_trans,
-                                        sym,
-                                        *common_.detector_,
-                                        common_.scale_factor_,
-                                        feature,
-                                        common_.vars_,
-                                        pixmap_);
-        });
+    auto renderer_context = std::tie(render_buf,*ras_ptr,pixmap_);
+    typedef decltype(renderer_context) context_type;
+
+    typedef vector_markers_rasterizer_dispatch_grid<svg_renderer_type,
+                                                    detector_type,
+                                                    context_type> vector_dispatch_type;
+
+    typedef raster_markers_rasterizer_dispatch_grid<grid_renderer_base_type,
+                                                    renderer_type,
+                                                    detector_type,
+                                                    context_type> raster_dispatch_type;
+
+    render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
+        sym, feature, prj_trans, common_, clip_box,renderer_context);
 }
 
 template void grid_renderer<grid>::process(markers_symbolizer const&,
