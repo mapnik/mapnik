@@ -41,7 +41,7 @@
 
 #include <memory>
 
-// fwd declaration to avoid depedence on agg headers
+// fwd declaration to avoid dependence on agg headers
 namespace agg { struct trans_affine; }
 
 // fwd declarations to speed up compile
