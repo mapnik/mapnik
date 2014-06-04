@@ -1,8 +1,9 @@
 #include "bench_framework.hpp"
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
-#include <codecvt>
 #include <boost/locale.hpp>
+#ifndef __linux__
+#include <codecvt>
 
 class test : public benchmark::test_case
 {
@@ -31,6 +32,8 @@ public:
         }
     }
 };
+
+#endif
 
 class test2 : public benchmark::test_case
 {
@@ -91,8 +94,12 @@ int main(int argc, char** argv)
 {
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
+#ifndef __linux__
     test test_runner(params);
     run(test_runner,"utf encode std::codecvt");
+#else
+    std::clog << "skipping 'utf encode std::codecvt' test since <codecvt> is not supported on __linux__\n";
+#endif
     test2 test_runner2(params);
     run(test_runner2,"utf encode boost::locale");
     test3 test_runner3(params);
