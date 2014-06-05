@@ -58,7 +58,6 @@
 
 namespace mapnik {
 
-
 template <typename SvgRenderer, typename Detector, typename RendererContext>
 struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
 {
@@ -71,7 +70,7 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
     typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
 
     vector_markers_rasterizer_dispatch(vertex_source_type & path,
-                                       attribute_source_type const &attrs,
+                                       attribute_source_type const& attrs,
                                        box2d<double> const& bbox,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
@@ -114,24 +113,15 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
             double y = 0;
             if (path.type() == mapnik::geometry_type::types::LineString)
             {
-                if (!label::middle_point(path, x, y))
-                {
-                    return;
-                }
+                if (!label::middle_point(path, x, y)) return;
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                if (!label::interior_position(path, x, y))
-                {
-                    return;
-                }
+                if (!label::interior_position(path, x, y)) return;
             }
             else
             {
-                if (!label::centroid(path, x, y))
-                {
-                    return;
-                }
+                if (!label::centroid(path, x, y)) return;
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -244,24 +234,15 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
             double y = 0;
             if (path.type() == mapnik::geometry_type::types::LineString)
             {
-                if (!label::middle_point(path, x, y))
-                {
-                    return;
-                }
+                if (!label::middle_point(path, x, y)) return;
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                if (!label::interior_position(path, x, y))
-                {
-                    return;
-                }
+                if (!label::interior_position(path, x, y)) return;
             }
             else
             {
-                if (!label::centroid(path, x, y))
-                {
-                    return;
-                }
+                if (!label::centroid(path, x, y)) return;
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
