@@ -426,7 +426,6 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos,
 {
     using namespace mapnik::svg;
     agg::trans_affine mtx = tr;
-
     if (recenter)
     {
         coord<double,2> c = bbox.center();
@@ -855,7 +854,7 @@ struct markers_dispatch : mapnik::noncopyable
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
-                render_vector_marker(ctx_, pixel_position(x,y),marker_, bbox_, attributes_, matrix, opacity, true);
+                render_vector_marker(ctx_, pixel_position(x,y), marker_, bbox_, attributes_, matrix, opacity, true);
 
             }
         }
@@ -863,27 +862,23 @@ struct markers_dispatch : mapnik::noncopyable
 
     SvgPath & marker_;
     Attributes const& attributes_;
-    Detector & detector_;
-    markers_symbolizer const& sym_;
     box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
+    markers_symbolizer const& sym_;
+    Detector & detector_;
+    double scale_factor_;
     feature_impl const& feature_;
     attributes const& vars_;
-    double scale_factor_;
     cairo_context & ctx_;
 };
 
 template <typename RendererContext, typename ImageMarker, typename Detector>
-struct markers_dispatch_2 : mapnik::noncopyable
+struct raster_markers_dispatch : mapnik::noncopyable
 {
-
-    //typedef typename std::tuple_element<0,RendererContext>::type CairoContext;
-
-    markers_dispatch_2(ImageMarker & marker,
+    raster_markers_dispatch(ImageMarker & marker,
                        agg::trans_affine const& marker_trans,
                        markers_symbolizer const& sym,
                        Detector & detector,
-                       //box2d<double> const& bbox,
                        double scale_factor,
                        feature_impl const& feature,
                        mapnik::attributes const& vars,
@@ -893,9 +888,9 @@ struct markers_dispatch_2 : mapnik::noncopyable
         sym_(sym),
         bbox_(std::get<1>(renderer_context)),
         marker_trans_(marker_trans),
+        scale_factor_(scale_factor),
         feature_(feature),
         vars_(vars),
-        scale_factor_(scale_factor),
         ctx_(std::get<0>(renderer_context)) {}
 
     template <typename T>
@@ -964,15 +959,15 @@ struct markers_dispatch_2 : mapnik::noncopyable
         }
     }
 
-    cairo_context & ctx_;
     ImageMarker & marker_;
     Detector & detector_;
     markers_symbolizer const& sym_;
     box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
+    double scale_factor_;
     feature_impl const& feature_;
     attributes const& vars_;
-    double scale_factor_;
+    cairo_context & ctx_;
 };
 
 }
@@ -992,7 +987,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
     typedef decltype(renderer_context) RendererContextType;
     typedef detail::markers_dispatch<RendererContextType, svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> > , svg_attribute_type,
                                      label_collision_detector4> vector_dispatch_type;
-    typedef detail::markers_dispatch_2<RendererContextType, mapnik::image_data_32,
+    typedef detail::raster_markers_dispatch<RendererContextType, mapnik::image_data_32,
                                        label_collision_detector4> raster_dispatch_type;
 
 
