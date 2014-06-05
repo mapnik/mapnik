@@ -29,16 +29,19 @@
 
 namespace mapnik {
 
-template <typename F1, typename F2>
+template <typename T0, typename T1, typename T2>
 void render_markers_symbolizer(markers_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans,
                                renderer_common const& common,
                                box2d<double> const& clip_box,
-                               F1 make_vector_dispatch,
-                               F2 make_raster_dispatch)
+                               T2 const& renderer_context)
 {
     using namespace mapnik::svg;
+    typedef T0 vector_dispatch_type;
+    typedef T1 raster_dispatch_type;
+    typedef T2 renderer_context_type;
+
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
     typedef agg::pod_bvector<path_attributes> svg_attribute_type;
 
@@ -47,7 +50,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, false);
 
     // https://github.com/mapnik/mapnik/issues/1316
-    bool snap_pixels = !mapnik::marker_cache::instance().is_uri(filename);
+    bool snap_to_pixels = !mapnik::marker_cache::instance().is_uri(filename);
     if (!filename.empty())
     {
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
@@ -76,13 +79,19 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
                     if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
+                    vector_dispatch_type rasterizer_dispatch(svg_path,
+                                                             result ? attributes : (*stock_vector_marker)->attributes(),
+                                                             bbox,
+                                                             tr,
+                                                             sym,
+                                                             *common.detector_,
+                                                             common.scale_factor_,
+                                                             feature,
+                                                             common.vars_,
+                                                             snap_to_pixels,
+                                                             renderer_context);
 
-                    auto rasterizer_dispatch = make_vector_dispatch(
-                      svg_path, result ? attributes : (*stock_vector_marker)->attributes(),
-                      marker_ellipse, bbox, tr, snap_pixels);
-                    typedef decltype(rasterizer_dispatch) dispatch_type;
-
-                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                    vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
                         converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
@@ -109,12 +118,19 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     svg_path_adapter svg_path(stl_storage);
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
-                    auto rasterizer_dispatch = make_vector_dispatch(
-                      svg_path, result ? attributes : (*stock_vector_marker)->attributes(),
-                      **stock_vector_marker, bbox, tr, snap_pixels);
-                    typedef decltype(rasterizer_dispatch) dispatch_type;
+                    vector_dispatch_type rasterizer_dispatch(svg_path,
+                                                             result ? attributes : (*stock_vector_marker)->attributes(),
+                                                             bbox,
+                                                             tr,
+                                                             sym,
+                                                             *common.detector_,
+                                                             common.scale_factor_,
+                                                             feature,
+                                                             common.vars_,
+                                                             snap_to_pixels,
+                                                             renderer_context);
 
-                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                    vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
                         converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
@@ -139,11 +155,20 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                 if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                 box2d<double> const& bbox = (*mark)->bounding_box();
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
+                // - clamp sizes to > 4 pixels of interactivity
+                coord2d center = bbox.center();
+                agg::trans_affine_translation recenter(-center.x, -center.y);
+                agg::trans_affine marker_trans = recenter * tr;
+                raster_dispatch_type rasterizer_dispatch(**marker,
+                                                         marker_trans,
+                                                         sym,
+                                                         *common.detector_,
+                                                         common.scale_factor_,
+                                                         feature,
+                                                         common.vars_,
+                                                         renderer_context);
 
-                auto rasterizer_dispatch = make_raster_dispatch(**marker, tr, bbox);
-                typedef decltype(rasterizer_dispatch) dispatch_type;
-
-                vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                vertex_converter<box2d<double>, raster_dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
                     converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
 

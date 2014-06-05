@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/noncopyable.hpp>
-
+#include <mapnik/box2d.hpp>
 // agg
 #include "agg_math.h"
 #include "agg_array.h"
@@ -937,6 +937,10 @@ public:
         return vertices_[idx].cmd;
     }
 
+    box2d<double> const& bounding_box() const
+    {
+        vertices_.bounding_box();
+    }
 private:
     Container & vertices_;
 };

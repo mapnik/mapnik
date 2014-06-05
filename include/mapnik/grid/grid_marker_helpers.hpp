@@ -41,26 +41,28 @@
 
 namespace mapnik {
 
-template <typename BufferType, typename Rasterizer, typename PixFmt, typename RendererBase, typename RendererType, typename Detector, typename PixMapType>
-struct raster_markers_rasterizer_dispatch_grid
+template <typename RendererBase, typename RendererType, typename Detector, typename RendererContext>
+struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
 {
     typedef typename RendererBase::pixfmt_type pixfmt_type;
     typedef typename RendererBase::pixfmt_type::color_type color_type;
 
-    raster_markers_rasterizer_dispatch_grid(BufferType & render_buffer,
-                                       Rasterizer & ras,
-                                       image_data_32 const& src,
-                                       agg::trans_affine const& marker_trans,
-                                       markers_symbolizer const& sym,
-                                       Detector & detector,
-                                       double scale_factor,
-                                       mapnik::feature_impl const& feature,
-                                       attributes const& vars,
-                                       PixMapType & pixmap)
-        : buf_(render_buffer),
+    typedef typename std::tuple_element<0,RendererContext>::type BufferType;
+    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
+    typedef typename std::tuple_element<2,RendererContext>::type PixMapType;
+
+    raster_markers_rasterizer_dispatch_grid(image_data_32 const& src,
+                                            agg::trans_affine const& marker_trans,
+                                            markers_symbolizer const& sym,
+                                            Detector & detector,
+                                            double scale_factor,
+                                            mapnik::feature_impl const& feature,
+                                            attributes const& vars,
+                                            RendererContext const& renderer_context)
+    : buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),
-        ras_(ras),
+        ras_(std::get<1>(renderer_context)),
         src_(src),
         marker_trans_(marker_trans),
         sym_(sym),
@@ -68,10 +70,8 @@ struct raster_markers_rasterizer_dispatch_grid
         scale_factor_(scale_factor),
         feature_(feature),
         vars_(vars),
-        pixmap_(pixmap),
-        placed_(false)
-    {
-    }
+        pixmap_(std::get<2>(renderer_context)),
+        placed_(false) {}
 
     template <typename T>
     void add_path(T & path)
@@ -175,9 +175,9 @@ struct raster_markers_rasterizer_dispatch_grid
 
 private:
     BufferType & buf_;
-    PixFmt pixf_;
+    pixfmt_type pixf_;
     RendererBase renb_;
-    Rasterizer & ras_;
+    RasterizerType & ras_;
     image_data_32 const& src_;
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;
@@ -190,18 +190,20 @@ private:
 };
 
 
-template <typename BufferType, typename SvgRenderer, typename Rasterizer, typename Detector, typename PixMapType>
-struct vector_markers_rasterizer_dispatch_grid
+template <typename SvgRenderer, typename Detector, typename RendererContext>
+struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
 {
     typedef typename SvgRenderer::renderer_base         renderer_base;
     typedef typename SvgRenderer::vertex_source_type    vertex_source_type;
     typedef typename SvgRenderer::attribute_source_type attribute_source_type;
     typedef typename renderer_base::pixfmt_type         pixfmt_type;
 
-    vector_markers_rasterizer_dispatch_grid(BufferType & render_buffer,
-                                            vertex_source_type & path,
+    typedef typename std::tuple_element<0,RendererContext>::type BufferType;
+    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
+    typedef typename std::tuple_element<2,RendererContext>::type PixMapType;
+
+    vector_markers_rasterizer_dispatch_grid(vertex_source_type & path,
                                             attribute_source_type const& attrs,
-                                            Rasterizer & ras,
                                             box2d<double> const& bbox,
                                             agg::trans_affine const& marker_trans,
                                             markers_symbolizer const& sym,
@@ -209,12 +211,13 @@ struct vector_markers_rasterizer_dispatch_grid
                                             double scale_factor,
                                             mapnik::feature_impl const& feature,
                                             attributes const& vars,
-                                            PixMapType & pixmap)
-        : buf_(render_buffer),
+                                            bool snap_to_pixels,
+                                            RendererContext const& renderer_context)
+    : buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),
         svg_renderer_(path, attrs),
-        ras_(ras),
+        ras_(std::get<1>(renderer_context)),
         bbox_(bbox),
         marker_trans_(marker_trans),
         sym_(sym),
@@ -222,10 +225,9 @@ struct vector_markers_rasterizer_dispatch_grid
         scale_factor_(scale_factor),
         feature_(feature),
         vars_(vars),
-        pixmap_(pixmap),
+        pixmap_(std::get<2>(renderer_context)),
         placed_(false)
     {
-        //std::cerr << "vector_markers_rasterizer_dispatch_grid() ctor" << std::endl;
     }
 
     template <typename T>
@@ -238,6 +240,9 @@ struct vector_markers_rasterizer_dispatch_grid
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
 
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == geometry_type::types::Point)
         {
@@ -245,34 +250,24 @@ struct vector_markers_rasterizer_dispatch_grid
             double y = 0;
             if (path.type() == geometry_type::types::LineString)
             {
-                if (!label::middle_point(path, x, y))
-                {
-                    return;
-                }
+                if (!label::middle_point(path, x, y)) return;
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                if (!label::interior_position(path, x, y))
-                {
-                    return;
-                }
+                if (!label::interior_position(path, x, y)) return;
             }
             else
             {
-                if (!label::centroid(path, x, y))
-                {
-                    return;
-                }
+                if (!label::centroid(path, x, y)) return;
             }
 
-            agg::trans_affine matrix = marker_trans_;
+            agg::trans_affine matrix = recenter * marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
             if (allow_overlap ||
                 detector_.has_placement(transformed_bbox))
             {
                 svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
-
                 if (!ignore_placement)
                 {
                     detector_.insert(transformed_bbox);
@@ -295,7 +290,7 @@ struct vector_markers_rasterizer_dispatch_grid
             double x, y, angle;
             while (placement.get_point(x, y, angle, ignore_placement))
             {
-                agg::trans_affine matrix = marker_trans_;
+                agg::trans_affine matrix = recenter * marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x, y);
                 svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
@@ -312,7 +307,7 @@ private:
     pixfmt_type pixf_;
     renderer_base renb_;
     SvgRenderer svg_renderer_;
-    Rasterizer & ras_;
+    RasterizerType & ras_;
     box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;

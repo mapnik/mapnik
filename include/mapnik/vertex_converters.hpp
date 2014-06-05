@@ -293,7 +293,8 @@ struct dispatcher
     dispatcher(args_type const& args)
         : args_(args)
     {
-        std::memset(&vec_[0], 0,  sizeof(unsigned)*vec_.size());
+        //std::memset(&vec_[0], 0,  sizeof(unsigned)*vec_.size());
+        std::fill(vec_.begin(), vec_.end(), 0);
     }
 
     template <typename Iter, typename End, typename Geometry>

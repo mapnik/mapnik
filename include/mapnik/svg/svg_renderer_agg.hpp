@@ -116,10 +116,6 @@ public:
           curved_stroked_(curved_),
           attributes_(attributes) {}
 
-    svg_renderer_agg(svg_renderer_agg &&r) 
-      : source_(r.source_), curved_(source_), curved_stroked_(curved_),
-        attributes_(r.attributes_) {}
-
     template <typename Rasterizer, typename Scanline, typename Renderer>
     void render_gradient(Rasterizer& ras,
                          Scanline& sl,
@@ -426,11 +422,13 @@ public:
     }
 #endif
 
+    inline VertexSource & source() const { return source_;}
+    inline AttributeSource const& attributes() const { return attributes_;}
 private:
 
-    VertexSource &  source_;
-    curved_type          curved_;
-    curved_stroked_type  curved_stroked_;
+    VertexSource &         source_;
+    curved_type            curved_;
+    curved_stroked_type    curved_stroked_;
     AttributeSource const& attributes_;
 };
 
