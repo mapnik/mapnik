@@ -26,21 +26,22 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/guarded_map.hpp>
 
 // boost
-#include <memory>
-
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/optional.hpp>
+
+// stl
+#include <memory>
 #ifdef MAPNIK_THREADSAFE
 #include <thread>
 #endif
-
-//// stl
 #include <vector>
 
 struct FT_LibraryRec_;
@@ -49,6 +50,8 @@ struct FT_MemoryRec_;
 namespace mapnik
 {
 
+typedef guarded_map<glyph_index_t, glyph_info> glyph_cache_type;
+typedef std::shared_ptr<glyph_cache_type> glyph_cache_ptr;
 class stroker;
 typedef std::shared_ptr<stroker> stroker_ptr;
 class font_face_set;
@@ -88,6 +91,7 @@ private:
 #endif
     static std::map<std::string, std::pair<int,std::string> > name2file_;
     static std::map<std::string, std::string> memory_fonts_;
+    static std::map<const std::string, glyph_cache_ptr> glyph_cache_map_;
 };
 
 template <typename T>

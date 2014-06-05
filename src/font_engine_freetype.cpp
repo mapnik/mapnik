@@ -253,7 +253,26 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     auto itr = name2file_.find(family_name);
     if (itr != name2file_.end())
     {
+#ifdef MAPNIK_THREADSAFE
+        mapnik::scoped_lock lock(mutex_);
+#endif
         FT_Face face;
+        glyph_cache_ptr glyphs;
+
+        // Find face shared glyphs cache or create it if it doesn't exist yet.
+        auto glyph_cache_map_itr = glyph_cache_map_.find(itr->second.second);
+
+        if (glyph_cache_map_itr != glyph_cache_map_.end()) // glyph cache exists
+        {
+            glyphs = glyph_cache_map_itr->second;
+        }
+        else
+        {
+            std::pair<std::map<const std::string, glyph_cache_ptr>::iterator, bool> glyphs_result 
+                = glyph_cache_map_.emplace(itr->second.second, std::make_shared<glyph_cache_type>());
+
+            glyphs = glyphs_result.first->second;
+        }
 
         auto mem_font_itr = memory_fonts_.find(itr->second.second);
 
@@ -265,14 +284,11 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                                 itr->second.first, // face index
                                                 &face);
 
-            if (!error) return std::make_shared<font_face>(face);
+            if (!error) return std::make_shared<font_face>(face, glyphs);
         }
         else
         {
             // load font into memory
-#ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(mutex_);
-#endif
             std::ifstream is(itr->second.second.c_str() , std::ios::binary);
             std::string buffer((std::istreambuf_iterator<char>(is)),
                                std::istreambuf_iterator<char>());
@@ -283,7 +299,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                                  static_cast<FT_Long>(buffer.size()),
                                                  itr->second.first,
                                                  &face);
-            if (!error) return std::make_shared<font_face>(face);
+            if (!error) return std::make_shared<font_face>(face, glyphs);
             else
             {
                 // we can't load font, erase it.
@@ -380,6 +396,7 @@ std::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 std::map<std::string,std::string> freetype_engine::memory_fonts_;
+std::map<const std::string,glyph_cache_ptr> freetype_engine::glyph_cache_map_;
 template class face_manager<freetype_engine>;
 
 }

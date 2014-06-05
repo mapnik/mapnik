@@ -26,6 +26,7 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/guarded_map.hpp>
 
 // freetype2
 extern "C"
@@ -36,7 +37,6 @@ extern "C"
 }
 
 //stl
-#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -44,10 +44,14 @@ extern "C"
 namespace mapnik
 {
 
+typedef guarded_map<glyph_index_t, glyph_info> glyph_cache_type;
+typedef std::shared_ptr<glyph_cache_type> glyph_cache_ptr;
+
 class font_face : mapnik::noncopyable
 {
 public:
     font_face(FT_Face face);
+    font_face(FT_Face face, glyph_cache_ptr glyphs);
 
     std::string family_name() const
     {
@@ -74,11 +78,14 @@ public:
 
 private:
     FT_Face face_;
-    mutable std::map<glyph_index_t, glyph_info> dimension_cache_;
+    mutable glyph_cache_ptr glyphs_;
     mutable double char_height_;
 };
 typedef std::shared_ptr<font_face> face_ptr;
 
+inline bool operator==(face_ptr const& lhs, face_ptr const& rhs) {
+    return lhs->get_face() == rhs->get_face();
+}
 
 class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {
