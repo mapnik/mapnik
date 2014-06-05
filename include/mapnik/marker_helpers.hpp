@@ -78,8 +78,8 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
                                        double scale_factor,
                                        feature_impl & feature,
                                        attributes const& vars,
-                                       RendererContext const& renderer_context,
-                                       bool snap_to_pixels = false)
+                                       bool snap_to_pixels,
+                                       RendererContext const& renderer_context)
     : buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),

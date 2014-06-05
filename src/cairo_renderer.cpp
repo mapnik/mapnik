@@ -419,13 +419,12 @@ void cairo_renderer_base::render_box(box2d<double> const& b)
     context_.stroke();
 }
 
-void render_vector_marker(cairo_context & context, pixel_position const& pos, mapnik::svg_storage_type & vmarker,
+void render_vector_marker(cairo_context & context, pixel_position const& pos,
+                          svg::svg_path_adapter & svg_path, box2d<double> const& bbox,
                           agg::pod_bvector<svg::path_attributes> const & attributes,
                           agg::trans_affine const& tr, double opacity, bool recenter)
 {
     using namespace mapnik::svg;
-    box2d<double> bbox = vmarker.bounding_box();
-
     agg::trans_affine mtx = tr;
 
     if (recenter)
@@ -458,9 +457,6 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             cairo_matrix_init(&matrix,m[0],m[1],m[2],m[3],m[4],m[5]);
             context.transform(matrix);
         }
-
-        vertex_stl_adapter<svg_path_storage> stl_storage(vmarker.source());
-        svg_path_adapter svg_path(stl_storage);
 
         if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
         {
@@ -533,8 +529,11 @@ void cairo_renderer_base::render_marker(pixel_position const& pos,
         {
             agg::trans_affine marker_tr = tr;
             marker_tr *=agg::trans_affine_scaling(common_.scale_factor_);
+            box2d<double> bbox = vmarker->bounding_box();
             agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
-            render_vector_marker(context_, pos, *vmarker, attributes, marker_tr, opacity, recenter);
+            svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(vmarker->source());
+            svg::svg_path_adapter svg_path(stl_storage);
+            render_vector_marker(context_, pos, svg_path, bbox, attributes, marker_tr, opacity, recenter);
         }
     }
     else if (marker.is_bitmap())
@@ -563,7 +562,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
     render_point_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](pixel_position const& pos, marker const& marker, 
+        [&](pixel_position const& pos, marker const& marker,
             agg::trans_affine const& tr, double opacity) {
             render_marker(pos, marker, tr, opacity);
         });
@@ -773,29 +772,31 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
 
 namespace detail {
 
-template <typename Context, typename SvgPath, typename Attributes, typename Detector>
-struct markers_dispatch
+template <typename RendererContext, typename SvgPath, typename Attributes, typename Detector>
+struct markers_dispatch : mapnik::noncopyable
 {
-    markers_dispatch(Context & ctx,
-                     SvgPath & marker,
+    markers_dispatch(SvgPath & marker,
                      Attributes const& attributes,
-                     Detector & detector,
-                     markers_symbolizer const& sym,
                      box2d<double> const& bbox,
                      agg::trans_affine const& marker_trans,
+                     markers_symbolizer const& sym,
+                     Detector & detector,
+                     double scale_factor,
                      feature_impl const& feature,
                      mapnik::attributes const& vars,
-                     double scale_factor)
-        :ctx_(ctx),
-         marker_(marker),
-         attributes_(attributes),
-         detector_(detector),
-         sym_(sym),
-         bbox_(bbox),
-         marker_trans_(marker_trans),
-         feature_(feature),
-         vars_(vars),
-         scale_factor_(scale_factor) {}
+                     bool snap_to_pixels,
+                     RendererContext const& renderer_context)
+        :marker_(marker),
+        attributes_(attributes),
+        bbox_(bbox),
+        marker_trans_(marker_trans),
+        sym_(sym),
+        detector_(detector),
+        scale_factor_(scale_factor),
+        feature_(feature),
+        vars_(vars),
+        ctx_(std::get<0>(renderer_context))
+    {}
 
 
     template <typename T>
@@ -815,18 +816,15 @@ struct markers_dispatch
             double y = 0;
             if (path.type() == geometry_type::types::LineString)
             {
-                if (!label::middle_point(path, x, y))
-                    return;
+                if (!label::middle_point(path, x, y)) return;
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                if (!label::interior_position(path, x, y))
-                    return;
+                if (!label::interior_position(path, x, y)) return;
             }
             else
             {
-                if (!label::centroid(path, x, y))
-                    return;
+                if (!label::centroid(path, x, y)) return;
             }
             coord2d center = bbox_.center();
             agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
@@ -838,7 +836,7 @@ struct markers_dispatch
             if (allow_overlap ||
                 detector_.has_placement(transformed_bbox))
             {
-                render_vector_marker(ctx_, pixel_position(x,y), marker_, attributes_, marker_trans_, opacity, true);
+                render_vector_marker(ctx_, pixel_position(x,y), marker_, bbox_, attributes_, marker_trans_, opacity, true);
 
                 if (!ignore_placement)
                 {
@@ -857,13 +855,12 @@ struct markers_dispatch
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
-                render_vector_marker(ctx_, pixel_position(x,y),marker_, attributes_, matrix, opacity, true);
+                render_vector_marker(ctx_, pixel_position(x,y),marker_, bbox_, attributes_, matrix, opacity, true);
 
             }
         }
     }
 
-    Context & ctx_;
     SvgPath & marker_;
     Attributes const& attributes_;
     Detector & detector_;
@@ -873,30 +870,33 @@ struct markers_dispatch
     feature_impl const& feature_;
     attributes const& vars_;
     double scale_factor_;
+    cairo_context & ctx_;
 };
 
-template <typename Context, typename ImageMarker, typename Detector>
-struct markers_dispatch_2
+template <typename RendererContext, typename ImageMarker, typename Detector>
+struct markers_dispatch_2 : mapnik::noncopyable
 {
-    markers_dispatch_2(Context & ctx,
-                       ImageMarker & marker,
-                       Detector & detector,
-                       markers_symbolizer const& sym,
-                       box2d<double> const& bbox,
+
+    //typedef typename std::tuple_element<0,RendererContext>::type CairoContext;
+
+    markers_dispatch_2(ImageMarker & marker,
                        agg::trans_affine const& marker_trans,
+                       markers_symbolizer const& sym,
+                       Detector & detector,
+                       //box2d<double> const& bbox,
+                       double scale_factor,
                        feature_impl const& feature,
                        mapnik::attributes const& vars,
-                       double scale_factor)
-        :ctx_(ctx),
-         marker_(marker),
-         detector_(detector),
-         sym_(sym),
-         bbox_(bbox),
-         marker_trans_(marker_trans),
-         feature_(feature),
-         vars_(vars),
-         scale_factor_(scale_factor) {}
-
+                       RendererContext const& renderer_context)
+        :marker_(marker),
+        detector_(detector),
+        sym_(sym),
+        bbox_(std::get<1>(renderer_context)),
+        marker_trans_(marker_trans),
+        feature_(feature),
+        vars_(vars),
+        scale_factor_(scale_factor),
+        ctx_(std::get<0>(renderer_context)) {}
 
     template <typename T>
     void add_path(T & path)
@@ -964,7 +964,7 @@ struct markers_dispatch_2
         }
     }
 
-    Context & ctx_;
+    cairo_context & ctx_;
     ImageMarker & marker_;
     Detector & detector_;
     markers_symbolizer const& sym_;
@@ -981,29 +981,24 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     typedef agg::pod_bvector<svg::path_attributes> svg_attribute_type;
-    typedef detail::markers_dispatch_2<cairo_context, mapnik::image_data_32,
-                                       label_collision_detector4> raster_dispatch_type;
-    typedef detail::markers_dispatch<cairo_context, mapnik::svg_storage_type, svg_attribute_type,
-                                     label_collision_detector4> vector_dispatch_type;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     context_.set_operator(comp_op);
     box2d<double> clip_box = common_.query_extent_;
 
-    render_markers_symbolizer(
+    auto renderer_context = std::tie(context_, clip_box);
+
+    typedef decltype(renderer_context) RendererContextType;
+    typedef detail::markers_dispatch<RendererContextType, svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> > , svg_attribute_type,
+                                     label_collision_detector4> vector_dispatch_type;
+    typedef detail::markers_dispatch_2<RendererContextType, mapnik::image_data_32,
+                                       label_collision_detector4> raster_dispatch_type;
+
+
+    render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
         sym, feature, prj_trans, common_, clip_box,
-        [&](svg::svg_path_adapter &, svg_attribute_type const &attr, svg_storage_type &marker,
-            box2d<double> const &bbox, agg::trans_affine const &marker_trans,
-            bool) -> vector_dispatch_type {
-            return vector_dispatch_type(context_, marker, attr, *common_.detector_, sym, bbox, 
-                                        marker_trans, feature, common_.vars_, common_.scale_factor_);
-        },
-        [&](image_data_32 &marker, agg::trans_affine const &marker_trans,
-            box2d<double> const &bbox) -> raster_dispatch_type {
-            return raster_dispatch_type(context_, marker, *common_.detector_, sym, bbox, 
-                                        marker_trans, feature, common_.vars_, common_.scale_factor_);
-        });
+        renderer_context);
 }
 
 void cairo_renderer_base::process(text_symbolizer const& sym,
@@ -1031,7 +1026,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
 namespace {
 
 /**
- * Render a thunk which was frozen from a previous call to 
+ * Render a thunk which was frozen from a previous call to
  * extract_bboxes. We should now have a new offset at which
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.

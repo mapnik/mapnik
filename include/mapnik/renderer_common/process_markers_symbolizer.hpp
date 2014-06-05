@@ -50,7 +50,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, false);
 
     // https://github.com/mapnik/mapnik/issues/1316
-    bool snap_pixels = !mapnik::marker_cache::instance().is_uri(filename);
+    bool snap_to_pixels = !mapnik::marker_cache::instance().is_uri(filename);
     if (!filename.empty())
     {
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
@@ -79,21 +79,20 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
                     if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
-
-                    vector_dispatch_type rasterizer_dispatch(//std::get<0>(renderer_context), // render_buf
-                                                             svg_path,
+                    coord2d center = bbox.center();
+                    agg::trans_affine_translation recenter(-center.x, -center.y);
+                    agg::trans_affine marker_trans = recenter * tr;
+                    vector_dispatch_type rasterizer_dispatch(svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
-                                                             //std::get<1>(renderer_context), // rasterizer
                                                              bbox,
-                                                             tr,
+                                                             marker_trans,
                                                              sym,
                                                              *common.detector_,
                                                              common.scale_factor_,
                                                              feature,
                                                              common.vars_,
+                                                             snap_to_pixels,
                                                              renderer_context);
-
-                                                             //std::get<2>(renderer_context)); // pixmap
 
                     vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
@@ -135,6 +134,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              common.scale_factor_,
                                                              feature,
                                                              common.vars_,
+                                                             snap_to_pixels,
                                                              renderer_context);
 
                     vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
@@ -162,12 +162,10 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                 if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                 box2d<double> const& bbox = (*mark)->bounding_box();
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
-
                 // - clamp sizes to > 4 pixels of interactivity
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
                 agg::trans_affine marker_trans = recenter * tr;
-
                 raster_dispatch_type rasterizer_dispatch(**marker,
                                                          marker_trans,
                                                          sym,
