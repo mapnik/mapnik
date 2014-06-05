@@ -240,6 +240,9 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
 
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == geometry_type::types::Point)
         {
@@ -247,27 +250,18 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
             double y = 0;
             if (path.type() == geometry_type::types::LineString)
             {
-                if (!label::middle_point(path, x, y))
-                {
-                    return;
-                }
+                if (!label::middle_point(path, x, y)) return;
             }
             else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                if (!label::interior_position(path, x, y))
-                {
-                    return;
-                }
+                if (!label::interior_position(path, x, y)) return;
             }
             else
             {
-                if (!label::centroid(path, x, y))
-                {
-                    return;
-                }
+                if (!label::centroid(path, x, y)) return;
             }
 
-            agg::trans_affine matrix = marker_trans_;
+            agg::trans_affine matrix = recenter * marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
             if (allow_overlap ||
@@ -296,7 +290,7 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
             double x, y, angle;
             while (placement.get_point(x, y, angle, ignore_placement))
             {
-                agg::trans_affine matrix = marker_trans_;
+                agg::trans_affine matrix = recenter * marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x, y);
                 svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);

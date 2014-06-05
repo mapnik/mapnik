@@ -79,13 +79,10 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
                     if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
-                    coord2d center = bbox.center();
-                    agg::trans_affine_translation recenter(-center.x, -center.y);
-                    agg::trans_affine marker_trans = recenter * tr;
                     vector_dispatch_type rasterizer_dispatch(svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
                                                              bbox,
-                                                             marker_trans,
+                                                             tr,
                                                              sym,
                                                              *common.detector_,
                                                              common.scale_factor_,
@@ -121,14 +118,10 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     svg_path_adapter svg_path(stl_storage);
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
-                    // TODO - clamping to >= 4 pixels
-                    coord2d center = bbox.center();
-                    agg::trans_affine_translation recenter(-center.x, -center.y);
-                    agg::trans_affine marker_trans = recenter * tr;
                     vector_dispatch_type rasterizer_dispatch(svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
                                                              bbox,
-                                                             marker_trans,
+                                                             tr,
                                                              sym,
                                                              *common.detector_,
                                                              common.scale_factor_,

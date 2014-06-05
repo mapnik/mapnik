@@ -106,6 +106,9 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
 
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+
         if (placement_method != MARKER_LINE_PLACEMENT ||
             path.type() == mapnik::geometry_type::types::Point)
         {
@@ -123,7 +126,7 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
             {
                 if (!label::centroid(path, x, y)) return;
             }
-            agg::trans_affine matrix = marker_trans_;
+            agg::trans_affine matrix = recenter * marker_trans_;
             matrix.translate(x,y);
             if (snap_to_pixels_)
             {
@@ -157,7 +160,8 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
             double angle = 0;
             while (placement.get_point(x, y, angle, ignore_placement))
             {
-                agg::trans_affine matrix = marker_trans_;
+
+                agg::trans_affine matrix = recenter * marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x, y);
                 svg_renderer_.render(ras_, sl_, renb_, matrix, opacity, bbox_);
