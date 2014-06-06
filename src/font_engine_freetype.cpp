@@ -354,7 +354,7 @@ face_set_ptr face_manager<T>::get_face_set(font_set const& fset)
         else
         {
             MAPNIK_LOG_DEBUG(font_engine_freetype)
-                << "Failed to find face '" << *name
+                << "Failed to find face '" << name
                 << "' in font set '" << fset.get_name() << "'\n";
         }
 #endif
