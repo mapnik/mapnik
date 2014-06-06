@@ -35,7 +35,7 @@
 
 #ifdef HAVE_CAIRO
 // cairo
-#include <mapnik/cairo_renderer.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 
 #include "mapwidget.hpp"

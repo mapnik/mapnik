@@ -34,7 +34,7 @@
 #include <mapnik/request.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_context.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/ctrans.hpp>    // for CoordTransform
 #include <mapnik/renderer_common.hpp>

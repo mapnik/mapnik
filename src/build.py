@@ -282,8 +282,8 @@ if env['HAS_CAIRO']:
     lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     libmapnik_defines.append('-DHAVE_CAIRO')
     lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
-    source.insert(0,'cairo_renderer.cpp')
-    source.insert(0,'cairo_context.cpp')
+    source.insert(0,'cairo/cairo_renderer.cpp')
+    source.insert(0,'cairo/cairo_context.cpp')
 
 for cpp in enabled_imaging_libraries:
     source.append(cpp)

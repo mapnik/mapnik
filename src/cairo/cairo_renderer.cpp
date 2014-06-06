@@ -31,8 +31,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/cairo_renderer.hpp>
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/markers_placement.hpp>

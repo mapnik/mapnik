@@ -33,7 +33,7 @@
 
 #if defined(HAVE_CAIRO)
 #include <cairo.h>
-#include <mapnik/cairo_renderer.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 
 #if defined(SVG_RENDERER)

@@ -22,7 +22,7 @@
 
 #if defined(HAVE_CAIRO)
 
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_context.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/text/face.hpp>
@@ -439,7 +439,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
     //render halo
     double halo_radius = 0;
     char_properties_ptr format;
-    for (auto const &glyph_pos : *path) 
+    for (auto const &glyph_pos : *path)
     {
         glyph_info const& glyph = *(glyph_pos.glyph);
 
@@ -473,7 +473,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
         stroke();
     }
 
-    for (auto const &glyph_pos : *path) 
+    for (auto const &glyph_pos : *path)
     {
         glyph_info const& glyph = *(glyph_pos.glyph);
 
@@ -528,4 +528,3 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
 } //ns mapnik
 
 #endif
-

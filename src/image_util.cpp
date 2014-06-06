@@ -54,7 +54,7 @@ extern "C"
 #include <mapnik/util/conversions.hpp>
 
 #ifdef HAVE_CAIRO
-#include <mapnik/cairo_renderer.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #include <cairo.h>
 #ifdef CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>
