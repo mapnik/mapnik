@@ -50,8 +50,8 @@ namespace mapnik
 
 template <typename T0,typename T1>
 void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
 {
     typedef coord_transform<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_pre> ren_base;
@@ -84,14 +84,14 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
 
     render_building_symbolizer(
         feature, height,
-        [&](geometry_type &faces) {
-            path_type faces_path (common_.t_,faces,prj_trans);
+        [&,r,g,b,a,opacity](geometry_type &faces) {
+            path_type faces_path (this->common_.t_,faces,prj_trans);
             ras_ptr->add_path(faces_path);
             ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
-            ras_ptr->reset();
+            this->ras_ptr->reset();
         },
-        [&](geometry_type &frame) {
+        [&,r,g,b,a,opacity](geometry_type &frame) {
             path_type path(common_.t_,frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             stroke.width(common_.scale_factor_);
@@ -100,7 +100,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
         },
-        [&](geometry_type &roof) {
+        [&,r,g,b,a,opacity](geometry_type &roof) {
             path_type roof_path (common_.t_,roof,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
