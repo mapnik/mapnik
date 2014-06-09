@@ -7,7 +7,7 @@ Import ('env')
 test_env = env.Clone()
 
 test_env['LIBS'] = copy(env['LIBMAPNIK_LIBS'])
-test_env.AppendUnique(LIBS='mapnik')
+test_env.AppendUnique(LIBS=env['MAPNIK_NAME'])
 test_env.AppendUnique(CXXFLAGS='-g')
 if 'g++' in env['CXX']:
     test_env.Append(CXXFLAGS='-fPIC')

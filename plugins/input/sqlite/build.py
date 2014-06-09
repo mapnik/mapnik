@@ -44,7 +44,7 @@ if env['SQLITE_LINKFLAGS']:
     plugin_env.Append(LINKFLAGS=linkflags)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                        SHLIBPREFIX='',

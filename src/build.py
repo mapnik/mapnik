@@ -391,9 +391,9 @@ if env['PLATFORM'] == 'Darwin' or not env['ENABLE_SONAME']:
     target_path = env['MAPNIK_LIB_BASE_DEST']
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if env['LINKING'] == 'static':
-            mapnik = lib_env_final.StaticLibrary('mapnik', source)
+            mapnik = lib_env_final.StaticLibrary(env['MAPNIK_NAME'], source)
         else:
-            mapnik = lib_env_final.SharedLibrary('mapnik', source)
+            mapnik = lib_env_final.SharedLibrary(env['MAPNIK_NAME'], source)
         result = env.Install(target_path, mapnik)
         env.Alias(target='install', source=result)
 
@@ -415,9 +415,9 @@ else:
 
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if env['LINKING'] == 'static':
-            mapnik = lib_env_final.StaticLibrary('mapnik', source)
+            mapnik = lib_env_final.StaticLibrary(env['MAPNIK_NAME'], source)
         else:
-            mapnik = lib_env_final.SharedLibrary('mapnik', source)
+            mapnik = lib_env_final.SharedLibrary(env['MAPNIK_NAME'], source)
         result = env.InstallAs(target=target, source=mapnik)
         env.Alias(target='install', source=result)
         if result:
