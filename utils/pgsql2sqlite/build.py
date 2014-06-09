@@ -47,7 +47,7 @@ program_env.PrependUnique(CPPPATH=['#plugins/input/postgis'])
 
 libraries = []
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries.extend([boost_program_options,'sqlite3','pq','mapnik','icuuc'])
+libraries.extend([boost_program_options,'sqlite3','pq',env['MAPNIK_NAME'],'icuuc'])
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
