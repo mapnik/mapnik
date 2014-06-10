@@ -10,6 +10,7 @@ test_env['LIBS'] = [env['MAPNIK_NAME']]
 test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     test_env.AppendUnique(LIBS='dl')
+    test_env.AppendUnique(LIBS='rt')
 test_env.AppendUnique(CXXFLAGS='-g')
 test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
 test_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
