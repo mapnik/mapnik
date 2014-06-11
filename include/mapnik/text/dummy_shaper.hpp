@@ -61,7 +61,7 @@ static void shape_text(text_line & line,
     {
         face_set_ptr face_set = font_manager.get_face_set(text_item.format->face_name, text_item.format->fontset);
         double size = text_item.format->text_size * scale_factor;
-        face_set->set_character_sizes(size);
+        face_set->set_unscaled_character_sizes();
         if (face_set->begin() == face_set->end()) return; // Invalid face set
         face_ptr face = *(face_set->begin());
         FT_Face freetype_face = face->get_face();
@@ -73,12 +73,14 @@ static void shape_text(text_line & line,
             tmp.glyph_index = FT_Get_Char_Index(freetype_face, c);
             if (tmp.glyph_index == 0) continue; // Skip unknown characters
             tmp.char_index = i;
-            tmp.width = 0; // Filled in by glyph_dimensions
+            tmp.unscaled_width = 0; // Filled in by glyph_dimensions
             tmp.offset.clear();
             tmp.face = face;
             tmp.format = text_item.format;
             face->glyph_dimensions(tmp);
-            width_map[i] += tmp.width;
+            tmp.scale_multiplier = (size / face->get_face()->units_per_EM);
+            std::cout << tmp.unscaled_advance;
+            width_map[i] += tmp.advance();
             line.add_glyph(tmp, scale_factor);
         }
         line.update_max_char_height(face->get_char_height());

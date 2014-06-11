@@ -67,6 +67,7 @@ public:
     double get_char_height() const;
 
     bool set_character_sizes(double size);
+    bool set_unscaled_character_sizes();
 
     void glyph_dimensions(glyph_info &glyph) const;
 
@@ -88,6 +89,7 @@ public:
 
     void add(face_ptr face);
     void set_character_sizes(double size);
+    void set_unscaled_character_sizes();
 
     unsigned size() const { return faces_.size(); }
     iterator begin() { return faces_.begin(); }
