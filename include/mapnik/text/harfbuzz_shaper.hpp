@@ -100,11 +100,15 @@ static void shape_text(text_line & line,
             for (unsigned i=0; i<num_glyphs; ++i)
             {
                 glyph_info tmp;
-                tmp.char_index = glyphs[i].cluster;
                 tmp.glyph_index = glyphs[i].codepoint;
+
+                // cache will overwrite tmp if codepoint is found 
+                // in cache, so call this first
+                face->glyph_dimensions(tmp);
+
+                tmp.char_index = glyphs[i].cluster;
                 tmp.face = face;
                 tmp.format = text_item.format;
-                face->glyph_dimensions(tmp);
                 //tmp.width = positions[i].x_advance / 64.0; //Overwrite default width with better value provided by HarfBuzz
                 tmp.width = positions[i].x_advance >> 6;
                 tmp.offset.set(positions[i].x_offset / 64.0, positions[i].y_offset / 64.0);
