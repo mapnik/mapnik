@@ -36,12 +36,13 @@ font_face::font_face(FT_Face face)
 {
 }
 
-double font_face::get_char_height() const
+double font_face::get_char_height(double size) const
 {
     if (char_height_ != 0.0) return char_height_;
     glyph_info tmp;
     tmp.glyph_index = FT_Get_Char_Index(face_, 'X');
     glyph_dimensions(tmp);
+    tmp.scale_multiplier = size / face_->units_per_EM;
     char_height_ = tmp.height();
     return char_height_;
 }
@@ -96,7 +97,7 @@ void font_face::glyph_dimensions(glyph_info & glyph) const
 
     glyph.unscaled_ymin = glyph_bbox.yMin * glyph.y_scale;
     glyph.unscaled_ymax = glyph_bbox.yMax * glyph.y_scale;
-    glyph.unscaled_advance = face_->glyph->metrics.horiAdvance * glyph.x_scale;
+    glyph.unscaled_advance = face_->glyph->advance.x * glyph.x_scale;
     glyph.unscaled_line_height = face_->size->metrics.height * glyph.y_scale;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));

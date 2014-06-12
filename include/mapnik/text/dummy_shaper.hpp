@@ -82,7 +82,7 @@ static void shape_text(text_line & line,
             width_map[i] += tmp.advance();
             line.add_glyph(tmp, scale_factor);
         }
-        line.update_max_char_height(face->get_char_height());
+        line.update_max_char_height(face->get_char_height(size));
     }
 }
 

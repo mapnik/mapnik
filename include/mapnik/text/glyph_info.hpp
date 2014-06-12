@@ -49,7 +49,7 @@ struct glyph_info
           unscaled_ymax(0.0),
           unscaled_advance(0.0),
           unscaled_line_height(0.0),
-          scale_multiplier(0.0),
+          scale_multiplier(1.0),
           offset(),
           format() {}
     glyph_index_t glyph_index;
@@ -68,8 +68,8 @@ struct glyph_info
     pixel_position offset;
     char_properties_ptr format;
 
-    double ymin() const { return floor(unscaled_ymin * scale_multiplier / y_scale); }
-    double ymax() const { return ceil(unscaled_ymax * scale_multiplier / y_scale); }
+    double ymin() const { return floor(unscaled_ymin * 64.0 * scale_multiplier / y_scale); }
+    double ymax() const { return ceil(unscaled_ymax * 64.0 * scale_multiplier / y_scale); }
     double height() const { return ymax() - ymin(); };
     double advance() const { return floor(unscaled_advance * scale_multiplier / x_scale); };
     double line_height() const { return floor(unscaled_line_height * scale_multiplier / y_scale); };
