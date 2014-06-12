@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_TO_WKB_HPP
 
 // mapnik
-#include <mapnik/std.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 
