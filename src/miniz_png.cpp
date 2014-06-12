@@ -56,7 +56,11 @@ PNGWriter::PNGWriter(int level, int strategy)
     {
         throw std::runtime_error("compression level must be between 0 and 10");
     }
-    mz_uint flags = s_tdefl_num_probes[level] | (level <= 3) ? TDEFL_GREEDY_PARSING_FLAG : 0 | TDEFL_WRITE_ZLIB_HEADER;
+    mz_uint flags = s_tdefl_num_probes[level] | TDEFL_WRITE_ZLIB_HEADER;
+    if (level <= 3)
+    {
+        flags |= TDEFL_GREEDY_PARSING_FLAG;
+    }
     if (strategy == Z_FILTERED) flags |= TDEFL_FILTER_MATCHES;
     else if (strategy == Z_HUFFMAN_ONLY) flags &= ~TDEFL_MAX_PROBES_MASK;
     else if (strategy == Z_RLE) flags |= TDEFL_RLE_MATCHES;
