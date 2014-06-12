@@ -21,7 +21,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <vector>
 #include <algorithm>
-#include <mapnik/std.hpp>
+#include <mapnik/make_unique.hpp>
 
 #include "utils.hpp"
 

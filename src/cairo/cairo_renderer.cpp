@@ -23,7 +23,7 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
-#include <mapnik/std.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>

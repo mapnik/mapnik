@@ -1,4 +1,3 @@
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -22,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/std.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
