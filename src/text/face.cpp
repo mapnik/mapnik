@@ -88,19 +88,16 @@ void font_face::glyph_dimensions(glyph_info & glyph) const
     FT_Glyph image;
     if (FT_Get_Glyph(face_->glyph, &image)) return;
     FT_BBox glyph_bbox;
-    FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox);
+    FT_Glyph_Get_CBox(image, FT_GLYPH_BBOX_TRUNCATE, &glyph_bbox);
     FT_Done_Glyph(image);
 
-    glyph.unscaled_ymin = glyph_bbox.yMin;
-    glyph.unscaled_ymax = glyph_bbox.yMax;
+    glyph.x_scale = face_->size->metrics.x_scale;
+    glyph.y_scale = face_->size->metrics.y_scale;
 
-    glyph.unscaled_width = glyph_bbox.xMax - glyph_bbox.xMin;
-    glyph.unscaled_height = glyph_bbox.yMax - glyph_bbox.yMin;
-    glyph.unscaled_advance = face_->glyph->advance.x;
-
-    glyph.unscaled_ascender = face_->size->metrics.ascender;
-    glyph.unscaled_descender = face_->size->metrics.descender;
-    glyph.unscaled_line_height = face_->size->metrics.height;
+    glyph.unscaled_ymin = glyph_bbox.yMin * glyph.y_scale;
+    glyph.unscaled_ymax = glyph_bbox.yMax * glyph.y_scale;
+    glyph.unscaled_advance = face_->glyph->metrics.horiAdvance * glyph.x_scale;
+    glyph.unscaled_line_height = face_->size->metrics.height * glyph.y_scale;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
 }

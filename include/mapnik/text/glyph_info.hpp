@@ -43,13 +43,11 @@ struct glyph_info
         : glyph_index(0),
           face(nullptr),
           char_index(0),
+          x_scale(0.0),
+          y_scale(0.0),
           unscaled_ymin(0.0),
           unscaled_ymax(0.0),
-          unscaled_width(0.0),
-          unscaled_height(0.0),
           unscaled_advance(0.0),
-          unscaled_ascender(0.0),
-          unscaled_descender(0.0),
           unscaled_line_height(0.0),
           scale_multiplier(0.0),
           offset(),
@@ -58,13 +56,11 @@ struct glyph_info
     face_ptr face;
     // Position in the string of all characters i.e. before itemizing
     unsigned char_index;
+    double x_scale;
+    double y_scale;
     double unscaled_ymin;
     double unscaled_ymax;
-    double unscaled_width;
-    double unscaled_height;
     double unscaled_advance;
-    double unscaled_ascender;
-    double unscaled_descender;
     // Line height returned by freetype, includes normal font
     // line spacing, but not additional user defined spacing
     double unscaled_line_height;
@@ -72,14 +68,11 @@ struct glyph_info
     pixel_position offset;
     char_properties_ptr format;
 
-    double ymin() const { return unscaled_ymin * scale_multiplier; }
-    double ymax() const { return unscaled_ymax * scale_multiplier; }
-    double width() const { return unscaled_width * scale_multiplier; };
-    double height() const { return unscaled_height * scale_multiplier; };
-    double advance() const { return floor(unscaled_advance * scale_multiplier); };
-    double ascender() const { return unscaled_ascender * scale_multiplier; };
-    double descender() const { return unscaled_descender * scale_multiplier; };
-    double line_height() const { return unscaled_line_height * scale_multiplier; };
+    double ymin() const { return floor(unscaled_ymin * scale_multiplier / y_scale); }
+    double ymax() const { return ceil(unscaled_ymax * scale_multiplier / y_scale); }
+    double height() const { return ymax() - ymin(); };
+    double advance() const { return floor(unscaled_advance * scale_multiplier / x_scale); };
+    double line_height() const { return floor(unscaled_line_height * scale_multiplier / y_scale); };
 };
 
 } //ns mapnik

@@ -108,7 +108,11 @@ static void shape_text(text_line & line,
                 tmp.format = text_item.format;
                 tmp.scale_multiplier = size / face->get_face()->units_per_EM;
                 //Overwrite default advance with better value provided by HarfBuzz
-                tmp.unscaled_advance = positions[i].x_advance;
+                tmp.unscaled_advance = positions[i].x_advance * tmp.x_scale;
+
+                std::cerr << tmp.line_height() << ' ' <<
+                    tmp.advance() << '\n';
+
                 tmp.offset.set(positions[i].x_offset * tmp.scale_multiplier, positions[i].y_offset * tmp.scale_multiplier);
                 width_map[glyphs[i].cluster] += tmp.advance();
                 line.add_glyph(tmp, scale_factor);
