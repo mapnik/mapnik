@@ -72,14 +72,13 @@ static void shape_text(text_line & line,
             glyph_info tmp;
             tmp.glyph_index = FT_Get_Char_Index(freetype_face, c);
             if (tmp.glyph_index == 0) continue; // Skip unknown characters
+            face->glyph_dimensions(tmp);
+
             tmp.char_index = i;
-            tmp.unscaled_width = 0; // Filled in by glyph_dimensions
-            tmp.offset.clear();
             tmp.face = face;
             tmp.format = text_item.format;
-            face->glyph_dimensions(tmp);
-            tmp.scale_multiplier = (size / face->get_face()->units_per_EM);
-            std::cout << tmp.unscaled_advance;
+            tmp.scale_multiplier = size / face->get_face()->units_per_EM;
+            tmp.offset.clear();
             width_map[i] += tmp.advance();
             line.add_glyph(tmp, scale_factor);
         }

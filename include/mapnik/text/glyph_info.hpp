@@ -27,6 +27,7 @@
 #include <mapnik/pixel_position.hpp>
 
 #include <memory>
+#include <cmath>
 
 namespace mapnik
 {
@@ -75,7 +76,7 @@ struct glyph_info
     double ymax() const { return unscaled_ymax * scale_multiplier; }
     double width() const { return unscaled_width * scale_multiplier; };
     double height() const { return unscaled_height * scale_multiplier; };
-    double advance() const { return unscaled_advance * scale_multiplier; };
+    double advance() const { return floor(unscaled_advance * scale_multiplier); };
     double ascender() const { return unscaled_ascender * scale_multiplier; };
     double descender() const { return unscaled_descender * scale_multiplier; };
     double line_height() const { return unscaled_line_height * scale_multiplier; };

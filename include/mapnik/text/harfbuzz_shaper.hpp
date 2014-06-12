@@ -100,15 +100,16 @@ static void shape_text(text_line & line,
             for (unsigned i=0; i<num_glyphs; ++i)
             {
                 glyph_info tmp;
-                tmp.char_index = glyphs[i].cluster;
                 tmp.glyph_index = glyphs[i].codepoint;
+                face->glyph_dimensions(tmp);
+
+                tmp.char_index = glyphs[i].cluster;
                 tmp.face = face;
                 tmp.format = text_item.format;
-                face->glyph_dimensions(tmp);
-                tmp.scale_multiplier = (size / face->get_face()->units_per_EM);
+                tmp.scale_multiplier = size / face->get_face()->units_per_EM;
                 //Overwrite default advance with better value provided by HarfBuzz
                 tmp.unscaled_advance = positions[i].x_advance;
-                tmp.offset.set(positions[i].x_offset / 64.0, positions[i].y_offset / 64.0);
+                tmp.offset.set(positions[i].x_offset * tmp.scale_multiplier, positions[i].y_offset * tmp.scale_multiplier);
                 width_map[glyphs[i].cluster] += tmp.advance();
                 line.add_glyph(tmp, scale_factor);
             }
