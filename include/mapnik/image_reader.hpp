@@ -57,6 +57,7 @@ struct MAPNIK_DECL image_reader : private mapnik::noncopyable
 {
     virtual unsigned width() const=0;
     virtual unsigned height() const=0;
+    virtual bool has_alpha() const=0;
     virtual bool premultiplied_alpha() const=0;
     virtual void read(unsigned x,unsigned y,image_data_32& image)=0;
     virtual ~image_reader() {}
