@@ -188,13 +188,17 @@ webp_reader<T>::~webp_reader()
 template <typename T>
 void webp_reader<T>::init()
 {
-    int width, height;
-    if (!WebPGetInfo(buffer_->data(), buffer_->size(), &width, &height))
+    WebPDecoderConfig config;
+    config_guard guard(config);
+    if (!WebPInitDecoderConfig(&config))
     {
-        throw image_reader_exception("WEBP reader: WebPGetInfo failed");
+        throw image_reader_exception("WEBP reader: WebPInitDecoderConfig failed");
     }
-    width_ = width;
-    height_ = height;
+    if (WebPGetFeatures(buffer_->data(), buffer_->size(), &config.input) == VP8_STATUS_OK) {
+        width_ = config.input.width;
+        height_ = config.input.height;
+        has_alpha_ = config.input.has_alpha;
+    }
 }
 
 template <typename T>
