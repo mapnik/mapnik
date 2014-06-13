@@ -25,7 +25,9 @@
 
 #include <memory>
 
-namespace mapnik {
+#if __cplusplus <= 201103L
+
+namespace std {
 
 // C++14 backfill from http://herbsutter.com/gotw/_102/
 template<typename T, typename ...Args>
@@ -34,5 +36,6 @@ inline std::unique_ptr<T> make_unique(Args&& ...args) {
 }
 
 }
+#endif
 
 #endif // MAPNIK_MAKE_UNIQUE_HPP
