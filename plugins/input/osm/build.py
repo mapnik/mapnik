@@ -34,24 +34,10 @@ plugin_sources = Split(
   %(PLUGIN_NAME)s_featureset.cpp
   osmparser.cpp
   dataset_deliverer.cpp
-  basiccurl.cpp
   """ % locals()
 )
 
 plugin_env['LIBS'] = []
-if env['RUNTIME_LINK'] == 'static':
-    # pkg-config is more reliable than pg_config across platforms
-    cmd = 'pkg-config libcurl --libs --static'
-    try:
-        plugin_env.ParseConfig(cmd)
-    except OSError, e:
-        # if this fails likely only system curl is available
-        # on OS X at least the system curl lacks a pkg-config file
-        # so static linking is not viable anyway
-        plugin_env.Append(LIBS='curl')
-else:
-    plugin_env.Append(LIBS='curl')
-
 plugin_env.Append(LIBS='xml2')
 
 # Link Library to Dependencies
