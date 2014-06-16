@@ -72,7 +72,7 @@ struct glyph_info
     double ymax() const { return ceil(unscaled_ymax * 64.0 * scale_multiplier / y_scale); }
     double height() const { return ymax() - ymin(); };
     double advance() const { return floor(unscaled_advance * scale_multiplier / x_scale); };
-    double line_height() const { return floor(unscaled_line_height * scale_multiplier / y_scale); };
+    double line_height() const { return ceil(unscaled_line_height * scale_multiplier / y_scale); };
 };
 
 } //ns mapnik
