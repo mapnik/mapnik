@@ -354,6 +354,7 @@ char_properties::char_properties() :
     character_spacing(0),
     line_spacing(0),
     text_opacity(1.0),
+    halo_opacity(1.0),
     wrap_char(' '),
     text_transform(NONE),
     fill(color(0,0,0)),
@@ -381,6 +382,8 @@ void char_properties::from_xml(xml_node const& node, fontset_map const& fontsets
     if (line_spacing_) line_spacing = *line_spacing_;
     optional<double> opacity_ = node.get_opt_attr<double>("opacity");
     if (opacity_) text_opacity = *opacity_;
+    optional<double> halo_opacity_ = node.get_opt_attr<double>("halo-opacity");
+    if (halo_opacity_) halo_opacity = *halo_opacity_;
     optional<std::string> wrap_char_ = node.get_opt_attr<std::string>("wrap-character");
     if (wrap_char_ && (*wrap_char_).size() > 0) wrap_char = ((*wrap_char_)[0]);
     optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");

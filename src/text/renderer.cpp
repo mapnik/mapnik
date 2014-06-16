@@ -176,7 +176,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                                      format->halo_fill.rgba(),
                                      bit->left,
                                      height - bit->top,
-                                     format->text_opacity,
+                                     format->halo_opacity,
                                      comp_op_);
                 }
             }
@@ -191,7 +191,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                                 bit->left,
                                 height - bit->top,
                                 halo_radius,
-                                format->text_opacity,
+                                format->halo_opacity,
                                 comp_op_);
                 }
             }

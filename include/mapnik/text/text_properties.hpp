@@ -60,15 +60,16 @@ struct MAPNIK_DECL char_properties
 {
     char_properties();
     /** Construct object from XML. */
-    void from_xml(xml_node const &sym, fontset_map const & fontsets);
+    void from_xml(xml_node const& sym, fontset_map const& fontsets);
     /** Write object to XML ptree. */
-    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
+    void to_xml(boost::property_tree::ptree& node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     double text_opacity;
+    double halo_opacity;
     unsigned wrap_char;
     text_transform_e text_transform; //Per expression
     color fill;
