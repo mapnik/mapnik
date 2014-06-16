@@ -25,7 +25,7 @@ from glob import glob
 Import('env')
 
 base = './mapnik/'
-subdirs = ['','svg','wkt','grid','json','util','group','text','text/placements','text/formatting']
+subdirs = ['','svg','wkt','cairo','grid','json','util','group','text','text/placements','text/formatting']
 
 if env['SVG_RENDERER']:
     subdirs.append('svg/output')
