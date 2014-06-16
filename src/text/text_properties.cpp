@@ -363,32 +363,32 @@ char_properties::char_properties() :
 
 }
 
-void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
+void char_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
-    optional<double> text_size_ = sym.get_opt_attr<double>("size");
+    optional<double> text_size_ = node.get_opt_attr<double>("size");
     if (text_size_) text_size = *text_size_;
-    optional<double> character_spacing_ = sym.get_opt_attr<double>("character-spacing");
+    optional<double> character_spacing_ = node.get_opt_attr<double>("character-spacing");
     if (character_spacing_) character_spacing = *character_spacing_;
-    optional<color> fill_ = sym.get_opt_attr<color>("fill");
+    optional<color> fill_ = node.get_opt_attr<color>("fill");
     if (fill_) fill = *fill_;
-    optional<color> halo_fill_ = sym.get_opt_attr<color>("halo-fill");
+    optional<color> halo_fill_ = node.get_opt_attr<color>("halo-fill");
     if (halo_fill_) halo_fill = *halo_fill_;
-    optional<double> halo_radius_ = sym.get_opt_attr<double>("halo-radius");
+    optional<double> halo_radius_ = node.get_opt_attr<double>("halo-radius");
     if (halo_radius_) halo_radius = *halo_radius_;
-    optional<text_transform_e> tconvert_ = sym.get_opt_attr<text_transform_e>("text-transform");
+    optional<text_transform_e> tconvert_ = node.get_opt_attr<text_transform_e>("text-transform");
     if (tconvert_) text_transform = *tconvert_;
-    optional<double> line_spacing_ = sym.get_opt_attr<double>("line-spacing");
+    optional<double> line_spacing_ = node.get_opt_attr<double>("line-spacing");
     if (line_spacing_) line_spacing = *line_spacing_;
-    optional<double> opacity_ = sym.get_opt_attr<double>("opacity");
+    optional<double> opacity_ = node.get_opt_attr<double>("opacity");
     if (opacity_) text_opacity = *opacity_;
-    optional<std::string> wrap_char_ = sym.get_opt_attr<std::string>("wrap-character");
+    optional<std::string> wrap_char_ = node.get_opt_attr<std::string>("wrap-character");
     if (wrap_char_ && (*wrap_char_).size() > 0) wrap_char = ((*wrap_char_)[0]);
-    optional<std::string> face_name_ = sym.get_opt_attr<std::string>("face-name");
+    optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");
     if (face_name_)
     {
         face_name = *face_name_;
     }
-    optional<std::string> fontset_name_ = sym.get_opt_attr<std::string>("fontset-name");
+    optional<std::string> fontset_name_ = node.get_opt_attr<std::string>("fontset-name");
     if (fontset_name_) {
         std::map<std::string,font_set>::const_iterator itr = fontsets.find(*fontset_name_);
         if (itr != fontsets.end())
@@ -397,20 +397,20 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
         }
         else
         {
-            throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", sym);
+            throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", node);
         }
     }
     if (!face_name.empty() && fontset)
     {
-        throw config_error("Can't have both face-name and fontset-name", sym);
+        throw config_error("Can't have both face-name and fontset-name", node);
     }
     if (face_name.empty() && !fontset)
     {
-        throw config_error("Must have face-name or fontset-name", sym);
+        throw config_error("Must have face-name or fontset-name", node);
     }
 }
 
-void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl) const
+void char_properties::to_xml(boost::property_tree::ptree& node, bool explicit_defaults, char_properties const& dfl) const
 {
     if (fontset)
     {
