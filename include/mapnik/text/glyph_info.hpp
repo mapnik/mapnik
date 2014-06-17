@@ -43,8 +43,6 @@ struct glyph_info
         : glyph_index(0),
           face(nullptr),
           char_index(0),
-          x_scale(0.0),
-          y_scale(0.0),
           unscaled_ymin(0.0),
           unscaled_ymax(0.0),
           unscaled_advance(0.0),
@@ -56,8 +54,6 @@ struct glyph_info
     face_ptr face;
     // Position in the string of all characters i.e. before itemizing
     unsigned char_index;
-    double x_scale;
-    double y_scale;
     double unscaled_ymin;
     double unscaled_ymax;
     double unscaled_advance;
@@ -68,11 +64,13 @@ struct glyph_info
     pixel_position offset;
     char_properties_ptr format;
 
-    double ymin() const { return floor(unscaled_ymin * 64.0 * scale_multiplier / y_scale); }
-    double ymax() const { return ceil(unscaled_ymax * 64.0 * scale_multiplier / y_scale); }
+    double ymin() const { return floor(unscaled_ymin * 64.0 * scale_multiplier); }
+    double ymax() const { return ceil(unscaled_ymax * 64.0 * scale_multiplier); }
     double height() const { return ymax() - ymin(); };
-    double advance() const { return floor(unscaled_advance * scale_multiplier / x_scale); };
-    double line_height() const { return ceil(unscaled_line_height * scale_multiplier / y_scale); };
+    // TODO: we round to integers for now to maintain
+    // back compatibility with Mapnik 2.x
+    double advance() const { return floor(unscaled_advance * scale_multiplier); };
+    double line_height() const { return ceil(unscaled_line_height * scale_multiplier); };
 };
 
 } //ns mapnik

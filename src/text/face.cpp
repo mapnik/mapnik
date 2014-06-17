@@ -92,13 +92,10 @@ void font_face::glyph_dimensions(glyph_info & glyph) const
     FT_Glyph_Get_CBox(image, FT_GLYPH_BBOX_TRUNCATE, &glyph_bbox);
     FT_Done_Glyph(image);
 
-    glyph.x_scale = face_->size->metrics.x_scale;
-    glyph.y_scale = face_->size->metrics.y_scale;
-
-    glyph.unscaled_ymin = glyph_bbox.yMin * glyph.y_scale;
-    glyph.unscaled_ymax = glyph_bbox.yMax * glyph.y_scale;
-    glyph.unscaled_advance = face_->glyph->advance.x * glyph.x_scale;
-    glyph.unscaled_line_height = face_->size->metrics.height * glyph.y_scale;
+    glyph.unscaled_ymin = glyph_bbox.yMin;
+    glyph.unscaled_ymax = glyph_bbox.yMax;
+    glyph.unscaled_advance = face_->glyph->advance.x;
+    glyph.unscaled_line_height = face_->size->metrics.height;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
 }
