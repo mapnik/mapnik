@@ -52,6 +52,7 @@ enum text_transform
     CAPITALIZE,
     text_transform_MAX
 };
+
 DEFINE_ENUM(text_transform_e, text_transform);
 
 typedef std::map<std::string, font_set> fontset_map;
@@ -59,9 +60,9 @@ typedef std::map<std::string, font_set> fontset_map;
 struct MAPNIK_DECL char_properties
 {
     char_properties();
-    /** Construct object from XML. */
+    // Construct object from XML.
     void from_xml(xml_node const& sym, fontset_map const& fontsets);
-    /** Write object to XML ptree. */
+    // Write object to XML ptree.
     void to_xml(boost::property_tree::ptree& node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
     boost::optional<font_set> fontset;
