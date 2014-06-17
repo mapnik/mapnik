@@ -463,6 +463,11 @@ void char_properties::to_xml(boost::property_tree::ptree& node, bool explicit_de
     {
         set_attr(node, "opacity", text_opacity);
     }
+    // for shield_symbolizer this is later overridden
+    if (halo_opacity != dfl.halo_opacity || explicit_defaults)
+    {
+        set_attr(node, "halo-opacity", halo_opacity);
+    }
 }
 
 } //ns mapnik
