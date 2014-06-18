@@ -24,7 +24,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/std.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/geom_util.hpp>
 

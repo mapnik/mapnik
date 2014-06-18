@@ -69,6 +69,7 @@ class text_renderer : private mapnik::noncopyable
 public:
     text_renderer (halo_rasterizer_e rasterizer,
                    composite_mode_e comp_op = src_over,
+                   composite_mode_e halo_comp_op = src_over,
                    double scale_factor=1.0,
                    stroker_ptr stroker=stroker_ptr());
     void set_transform(agg::trans_affine const& transform);
@@ -78,6 +79,7 @@ protected:
     void prepare_glyphs(glyph_positions const& positions);
     halo_rasterizer_e rasterizer_;
     composite_mode_e comp_op_;
+    composite_mode_e halo_comp_op_;
     double scale_factor_;
     glyph_vector glyphs_;
     stroker_ptr stroker_;
@@ -92,8 +94,9 @@ public:
     typedef T pixmap_type;
     agg_text_renderer (pixmap_type & pixmap, halo_rasterizer_e rasterizer,
                        composite_mode_e comp_op = src_over,
-                       double scale_factor=1.0,
-                       stroker_ptr stroker=stroker_ptr());
+                       composite_mode_e halo_comp_op = src_over,
+                       double scale_factor = 1.0,
+                       stroker_ptr stroker = stroker_ptr());
     void render(glyph_positions const& positions);
 private:
     pixmap_type & pixmap_;
@@ -107,8 +110,9 @@ class grid_text_renderer : public text_renderer
 {
 public:
     typedef T pixmap_type;
-    grid_text_renderer (pixmap_type & pixmap, composite_mode_e comp_op = src_over,
-                        double scale_factor=1.0);
+    grid_text_renderer (pixmap_type & pixmap,
+                        composite_mode_e comp_op = src_over,
+                        double scale_factor = 1.0);
     void render(glyph_positions const& positions, value_integer feature_id);
 private:
     pixmap_type & pixmap_;

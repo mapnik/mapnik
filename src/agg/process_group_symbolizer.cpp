@@ -41,7 +41,7 @@
 namespace mapnik {
 
 /**
- * Render a thunk which was frozen from a previous call to 
+ * Render a thunk which was frozen from a previous call to
  * extract_bboxes. We should now have a new offset at which
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.
@@ -68,7 +68,7 @@ struct thunk_renderer : public boost::static_visitor<>
 
     void operator()(text_render_thunk const &thunk) const
     {
-        text_renderer_type ren(*buf_, thunk.halo_rasterizer_, thunk.comp_op_,
+        text_renderer_type ren(*buf_, thunk.halo_rasterizer_, thunk.comp_op_, thunk.comp_op_,
                                common_.scale_factor_, common_.font_manager_.get_stroker());
 
         render_offset_placements(

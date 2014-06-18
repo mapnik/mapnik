@@ -20,19 +20,22 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_STD_HPP
-#define MAPNIK_STD_HPP
+#ifndef MAPNIK_MAKE_UNIQUE_HPP
+#define MAPNIK_MAKE_UNIQUE_HPP
 
 #include <memory>
+
+#if __cplusplus <= 201103L
 
 namespace std {
 
 // C++14 backfill from http://herbsutter.com/gotw/_102/
 template<typename T, typename ...Args>
-inline ::std::unique_ptr<T> make_unique(Args&& ...args) {
-    return ::std::unique_ptr<T>(new T(::std::forward<Args>(args)...));
+inline std::unique_ptr<T> make_unique(Args&& ...args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
 }
-
 #endif
+
+#endif // MAPNIK_MAKE_UNIQUE_HPP

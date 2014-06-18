@@ -22,7 +22,6 @@
 
 #include "osm.h"
 #include "osmparser.h"
-#include "basiccurl.h"
 
 #include <mapnik/debug.hpp>
 
@@ -40,40 +39,6 @@ bool osm_dataset::load(const char* filename,std::string const& parser)
     if (parser == "libxml2")
     {
         return osmparser::parse(this, filename);
-    }
-    return false;
-}
-
-bool osm_dataset::load_from_url(std::string const& url,
-                                std::string const& bbox,
-                                std::string const& parser)
-{
-    if (parser == "libxml2")
-    {
-        MAPNIK_LOG_DEBUG(osm) << "osm_dataset: load_from_url url=" << url << ",bbox=" << bbox;
-
-        std::ostringstream str;
-        // use curl to grab the data
-        // fetch all the data we want - probably from osmxpai
-
-        str << url << "?bbox=" << bbox;
-
-        MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Full url=" << str.str();
-
-        CURL_LOAD_DATA* resp = grab_http_response(str.str().c_str());
-
-        if (resp != nullptr)
-        {
-            char *blx = new char[resp->nbytes + 1];
-            std::memcpy(blx, resp->data, resp->nbytes);
-            blx[resp->nbytes] = '\0';
-
-            MAPNIK_LOG_DEBUG(osm) << "osm_dataset: CURL Response=" << blx;
-
-            delete[] blx;
-            bool success = osmparser::parse(this, resp->data, resp->nbytes);
-            return success;
-        }
     }
     return false;
 }

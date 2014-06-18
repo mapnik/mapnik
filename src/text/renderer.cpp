@@ -31,9 +31,10 @@
 namespace mapnik
 {
 
-text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op, double scale_factor, stroker_ptr stroker)
+text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op, composite_mode_e halo_comp_op, double scale_factor, stroker_ptr stroker)
     : rasterizer_(rasterizer),
       comp_op_(comp_op),
+      halo_comp_op_(halo_comp_op),
       scale_factor_(scale_factor),
       glyphs_(),
       stroker_(stroker),
@@ -109,9 +110,10 @@ template <typename T>
 agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap,
                                          halo_rasterizer_e rasterizer,
                                          composite_mode_e comp_op,
+                                         composite_mode_e halo_comp_op,
                                          double scale_factor,
                                          stroker_ptr stroker)
-    : text_renderer(rasterizer, comp_op, scale_factor, stroker), pixmap_(pixmap)
+    : text_renderer(rasterizer, comp_op, halo_comp_op, scale_factor, stroker), pixmap_(pixmap)
 {}
 
 template <typename T>
@@ -176,8 +178,8 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                                      format->halo_fill.rgba(),
                                      bit->left,
                                      height - bit->top,
-                                     format->text_opacity,
-                                     comp_op_);
+                                     format->halo_opacity,
+                                     halo_comp_op_);
                 }
             }
             else
@@ -191,8 +193,8 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                                 bit->left,
                                 height - bit->top,
                                 halo_radius,
-                                format->text_opacity,
-                                comp_op_);
+                                format->halo_opacity,
+                                halo_comp_op_);
                 }
             }
         }
@@ -342,12 +344,11 @@ void grid_text_renderer<T>::render_halo_id(
 template <typename T>
 grid_text_renderer<T>::grid_text_renderer(pixmap_type &pixmap,
                                           composite_mode_e comp_op,
-                                          double scale_factor) :
-    text_renderer(HALO_RASTERIZER_FAST, comp_op, scale_factor), pixmap_(pixmap)
-{
-}
-
+                                          double scale_factor)
+    : text_renderer(HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor),
+      pixmap_(pixmap) {}
 
 template class agg_text_renderer<image_32>;
 template class grid_text_renderer<grid>;
-}
+
+} // namespace mapnik

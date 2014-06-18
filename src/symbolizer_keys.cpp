@@ -96,7 +96,9 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
     property_meta_type{ "repeat-key", nullptr, nullptr, property_types::target_repeat_key},
     property_meta_type{ "symbolizer-properties", nullptr, nullptr, property_types::target_group_symbolizer_properties},
     property_meta_type{ "largest-box-only", false, nullptr, property_types::target_bool },
-    property_meta_type{ "minimum-path-length", false, nullptr, property_types::target_double }
+    property_meta_type{ "minimum-path-length", false, nullptr, property_types::target_double },
+    property_meta_type{ "halo-comp-op", enumeration_wrapper(src_over),
+                        [](enumeration_wrapper e) { return *comp_op_to_string(composite_mode_e(e.value)); }, property_types::target_comp_op},
 };
 
 property_meta_type const& get_meta(mapnik::keys key)

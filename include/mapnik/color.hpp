@@ -97,10 +97,12 @@ public:
     {
         return green_;
     }
+
     inline std::uint8_t blue() const
     {
         return blue_;
     }
+
     inline std::uint8_t alpha() const
     {
         return alpha_;
@@ -110,6 +112,7 @@ public:
     {
         red_ = red;
     }
+
     inline void set_green(std::uint8_t green)
     {
         green_ = green;

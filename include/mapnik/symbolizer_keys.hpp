@@ -84,6 +84,7 @@ enum class keys : std::uint8_t
     group_properties,
     largest_box_only,
     minimum_path_length,
+    halo_comp_op,
     MAX_SYMBOLIZER_KEY
 };
 

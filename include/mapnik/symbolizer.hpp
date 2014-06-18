@@ -50,6 +50,7 @@
 #include <functional>
 // boost
 #include <boost/variant/variant_fwd.hpp>
+#include <boost/concept_check.hpp>
 
 namespace agg { struct trans_affine; }
 
@@ -145,6 +146,8 @@ struct evaluate_path_wrapper
     template <typename T1, typename T2>
     result_type operator() (T1 const& expr, T2 const& feature) const
     {
+        boost::ignore_unused_variable_warning(expr);
+        boost::ignore_unused_variable_warning(feature);
         return result_type();
     }
 
@@ -200,6 +203,7 @@ struct enumeration_result<T,false>
     typedef T result_type;
     static result_type convert(enumeration_wrapper const& e)
     {
+        boost::ignore_unused_variable_warning(e);
         return result_type();// FAIL
     }
 };
@@ -306,6 +310,7 @@ struct extract_value : public boost::static_visitor<T>
 
     auto operator() (result_type const& val) const -> result_type
     {
+        boost::ignore_unused_variable_warning(val);
         return val;
     }
 
@@ -314,9 +319,10 @@ struct extract_value : public boost::static_visitor<T>
         return detail::enumeration_result<result_type, std::is_enum<result_type>::value>::convert(e);
     }
 
-    template <typename TVal>
-    auto operator() (TVal const& val) const -> result_type
+    template <typename T1>
+    auto operator() (T1 const& val) const -> result_type
     {
+        boost::ignore_unused_variable_warning(val);
         return result_type();
     }
 
