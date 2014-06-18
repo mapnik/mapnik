@@ -185,7 +185,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
                 std::string base_name = itr->filename();
     #endif
                 if (!boost::algorithm::starts_with(base_name,".") &&
-                    boost::filesystem::is_regular_file(file_name) &&
+                    mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))
                 {
                     if (mapnik::freetype_engine::register_font(file_name))
