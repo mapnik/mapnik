@@ -79,7 +79,7 @@ static void shape_text(text_line & line,
             tmp.format = text_item.format;
             face->glyph_dimensions(tmp);
             width_map[i] += tmp.width;
-            line.add_glyph(tmp, scale_factor);
+            line.add_glyph(std::move(tmp), scale_factor);
         }
         line.update_max_char_height(face->get_char_height());
     }

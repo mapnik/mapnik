@@ -109,7 +109,7 @@ static void shape_text(text_line & line,
                 tmp.width = positions[i].x_advance >> 6;
                 tmp.offset.set(positions[i].x_offset / 64.0, positions[i].y_offset / 64.0);
                 width_map[glyphs[i].cluster] += tmp.width;
-                line.add_glyph(tmp, scale_factor);
+                line.add_glyph(std::move(tmp), scale_factor);
             }
             line.update_max_char_height(face->get_char_height());
             break; //When we reach this point the current font had all glyphs.
