@@ -26,6 +26,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
+#include <mapnik/utils.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -130,7 +131,11 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
-    std::ifstream file(file_name.c_str() , std::ios::binary);
+#ifdef _WINDOWS
+    std::ifstream file(mapnik::utf8_to_utf16(file_name), std::ios::binary);
+#else
+    std::ifstream file(file_name.c_str(), std::ios::binary);
+#endif
     if (!file.good()) {
         return false;
     }
@@ -227,12 +232,23 @@ bool freetype_engine::register_fonts_impl(std::string const& dir, FT_LibraryRec_
     try
     {
         boost::filesystem::directory_iterator end_itr;
+#ifdef _WINDOWS
+        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
+        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
+    #else // v2
+            std::string file_name = mapnik::utf16_to_utf8(itr->wstring());
+    #endif
+#else
         for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
             std::string file_name = itr->path().string();
 #else // v2
             std::string file_name = itr->string();
+#endif
 #endif
             if (boost::filesystem::is_directory(*itr) && recurse)
             {

@@ -27,6 +27,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/util/fs.hpp>
+#include <mapnik/utils.hpp>
 
 // boost
 #include <boost/filesystem/operations.hpp>
@@ -169,7 +170,12 @@ void datasource_cache::register_datasources(std::string const& str)
     if (mapnik::util::exists(str) && mapnik::util::is_directory(str))
     {
         boost::filesystem::directory_iterator end_itr;
+#ifdef _WINDOWS
+        std::wstring wide_dir(mapnik::utf8_to_utf16(str));
+        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+#else
         for (boost::filesystem::directory_iterator itr(str); itr != end_itr; ++itr )
+#endif
         {
 
 #if (BOOST_FILESYSTEM_VERSION == 3)
