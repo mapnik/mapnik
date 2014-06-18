@@ -107,7 +107,7 @@ static void shape_text(text_line & line,
                     face->glyph_dimensions(tmp);
                     tmp.scale_multiplier = size / face->get_face()->units_per_EM;
                     width_map[i] += tmp.advance();
-                    line.add_glyph(tmp, scale_factor);
+                    line.add_glyph(std::move(tmp), scale_factor);
                     ++i;
                 }
             }
