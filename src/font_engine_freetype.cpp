@@ -114,9 +114,7 @@ bool freetype_engine::register_font(std::string const& file_name)
     std::ifstream file(file_name.c_str() , std::ios::binary);
 #endif
     if (!file.good()) {
-        std::ostringstream s;
-        s << "Unable to open font file '" << file_name << "' ";
-        throw std::runtime_error(s.str().c_str());
+        return false;
     }
 
     FT_Library library = 0;
