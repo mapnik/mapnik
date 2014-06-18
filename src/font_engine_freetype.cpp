@@ -26,6 +26,7 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/utils.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid.hpp>
@@ -107,7 +108,11 @@ bool freetype_engine::register_font(std::string const& file_name)
     mutex::scoped_lock lock(mutex_);
 #endif
 
+#ifdef _WINDOWS
+    std::ifstream file(mapnik::utf8_to_utf16(file_name) , std::ios::binary);
+#else
     std::ifstream file(file_name.c_str() , std::ios::binary);
+#endif
     if (!file.good()) {
         std::ostringstream s;
         s << "Unable to open font file '" << file_name << "' ";
@@ -202,6 +207,16 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     try
     {
         boost::filesystem::directory_iterator end_itr;
+#ifdef _WINDOWS
+        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
+        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
+    #else // v2
+            std::string file_name = mapnik::utf16_to_utf8(itr->wstring());
+    #endif
+#else
         for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
     #if (BOOST_FILESYSTEM_VERSION == 3)
@@ -209,6 +224,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     #else // v2
             std::string file_name = itr->string();
     #endif
+#endif
             if (boost::filesystem::is_directory(*itr) && recurse)
             {
                 if (register_fonts(file_name, true))
