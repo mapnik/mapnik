@@ -38,8 +38,22 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-libraries = [ 'xml2' ]
-libraries.append('curl')
+plugin_env['LIBS'] = []
+if env['RUNTIME_LINK'] == 'static':
+    # pkg-config is more reliable than pg_config across platforms
+    cmd = 'pkg-config libcurl --libs --static'
+    try:
+        plugin_env.ParseConfig(cmd)
+    except OSError, e:
+        # if this fails likely only system curl is available
+        # on OS X at least the system curl lacks a pkg-config file
+        # so static linking is not viable anyway
+        plugin_env.Append(LIBS='curl')
+else:
+    plugin_env.Append(LIBS='curl')
+
+libraries = plugin_env['LIBS']
+libraries.append('xml2')
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
