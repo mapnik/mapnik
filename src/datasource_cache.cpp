@@ -172,7 +172,7 @@ void datasource_cache::register_datasources(std::string const& str)
     {
         boost::filesystem::directory_iterator end_itr;
 #ifdef _WINDOWS
-        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
+        std::wstring wide_dir(mapnik::utf8_to_utf16(str));
         for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
 #else
         for (boost::filesystem::directory_iterator itr(str); itr != end_itr; ++itr )
