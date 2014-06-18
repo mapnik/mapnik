@@ -610,6 +610,10 @@ def get_pkg_lib(context, config, lib):
     if ret:
         try:
             value = call(cmd,silent=True)
+            if ' ' in value:
+                parts = value.split(' ')
+                if len(parts) > 1:
+                    value = parts[1]
             libnames = re.findall(libpattern,value)
             if libnames:
                 libname = libnames[0]
