@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map[]>
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+<Style name="raster">
+  <Rule>
+    <RasterSymbolizer opacity="1" scaling="bilinear" comp-op="src-over"/>
+  </Rule>
+</Style>
+<Layer name="raster"
+  srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>raster</StyleName>
+    <Datasource>
+       <Parameter name="file">../data/satellite.png</Parameter>
+       <Parameter name="extent">0,0,10,10</Parameter>
+       <Parameter name="type">gdal</Parameter>
+    </Datasource>
+</Layer>
+
+<Style name="labels">
+  <Rule>
+    <Filter>[x]=2</Filter>
+    <TextSymbolizer
+      face-name="DejaVu Sans Book"
+      size="15"
+      halo-opacity=".1"
+      halo-radius="2"
+      halo-rasterizer="fast"
+      fill="#03080D"
+      halo-comp-op="difference"
+      >
+      'M a p n i k'
+    </TextSymbolizer>
+  </Rule>
+  <Rule>
+    <Filter>[x]=5</Filter>
+    <TextSymbolizer
+      face-name="DejaVu Sans Book"
+      size="15"
+      halo-fill="gray"
+      halo-opacity=".2"
+      halo-radius="2"
+      fill="#29471B"
+      halo-comp-op="invert-rgb"
+      >
+      'M a p n i k'
+    </TextSymbolizer>
+  </Rule>
+  <Rule>
+    <Filter>[x]=8</Filter>
+    <TextSymbolizer
+      face-name="DejaVu Sans Book"
+      size="15"
+      halo-fill="gray"
+      halo-opacity=".3"
+      halo-radius="1"
+      fill="#F6EDB7"
+      halo-comp-op="invert"
+      >
+      'M a p n i k'
+    </TextSymbolizer>
+  </Rule>
+</Style>
+
+<Layer name="labels" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>labels</StyleName>
+    <Datasource>
+        <Parameter name="inline">x,y
+2,1
+2,2
+2,3
+2,4
+2,5
+2,6
+2,7
+2,8
+2,9
+5,1
+5,2
+5,3
+5,4
+5,5
+5,6
+5,7
+5,8
+5,9
+8,1
+8,2
+8,3
+8,4
+8,5
+8,8
+8,6
+8,7
+8,8
+8,9
+</Parameter>
+        <Parameter name="type">csv</Parameter>
+    </Datasource>
+</Layer>
+
+</Map>

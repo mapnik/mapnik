@@ -243,7 +243,8 @@ files = {
     'text-spacing':{'sizes':[(512,512)]},
     'text-halo-opacity':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
-    'line-smooth-and-offset':{'sizes':[(512,512)]}
+    'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'halo-comp-op-on-satellite':{'sizes':[(450,450)]}
     }
 
 class Reporting:
