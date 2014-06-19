@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/palette.hpp>
+#include <mapnik/config.hpp>
 
 // stl
 #include <vector>
@@ -48,7 +49,7 @@ namespace mapnik { namespace MiniZ {
 
 using mapnik::rgb;
 
-class PNGWriter {
+class MAPNIK_DECL PNGWriter {
 
 public:
     PNGWriter(int level, int strategy);
