@@ -287,7 +287,7 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
                       -common_.t_.offset(),
                       -common_.t_.offset(), false);
         }
-        else if (blend_from || st.get_opacity() < 1)
+        else if (blend_from || st.get_opacity() < 1.0)
         {
             composite(pixmap_.data(), current_buffer_->data(),
                       src_over, st.get_opacity(),
