@@ -67,9 +67,7 @@ struct glyph_info
     double ymin() const { return floor(unscaled_ymin * 64.0 * scale_multiplier); }
     double ymax() const { return ceil(unscaled_ymax * 64.0 * scale_multiplier); }
     double height() const { return ymax() - ymin(); };
-    // TODO: we round to integers for now to maintain
-    // back compatibility with Mapnik 2.x
-    double advance() const { return floor(unscaled_advance * scale_multiplier); };
+    double advance() const { return unscaled_advance * scale_multiplier; };
     double line_height() const { return ceil(unscaled_line_height * scale_multiplier); };
 };
 
