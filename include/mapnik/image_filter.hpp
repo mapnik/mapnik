@@ -392,8 +392,12 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
 template <typename Src, typename Filter>
 void apply_filter(Src & src, Filter const& filter)
 {
-    double_buffer<Src> tb(src);
-    apply_convolution_3x3(tb.src_view, tb.dst_view, filter);
+    {
+        src.demultiply();
+        double_buffer<Src> tb(src);
+        apply_convolution_3x3(tb.src_view, tb.dst_view, filter);
+    } // ensure ~double_buffer() is called before premultiplying
+    src.premultiply();
 }
 
 template <typename Src>
