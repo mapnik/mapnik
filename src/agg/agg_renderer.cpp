@@ -275,10 +275,12 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
         {
             blend_from = true;
             mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
+            current_buffer_->demultiply(); // apply image-filters in de-multiplied color space
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
                 boost::apply_visitor(visitor, filter_tag);
             }
+            current_buffer_->premultiply(); // back to pre-multiplied color space
         }
         if (st.comp_op())
         {

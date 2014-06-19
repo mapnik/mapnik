@@ -142,26 +142,6 @@ boost::gil::rgba8_view_t rgba8_view(Image & img)
                             img.width() * sizeof(rgba8_pixel_t));
 }
 
-namespace detail {
-
-template <typename T>
-inline void premultiply_alpha( T & dst)
-{
-    auto alpha = dst[3];
-    if (alpha < 255)
-    {
-        if (alpha == 0)
-        {
-            dst[0] = dst[1] = dst[2] = 0;
-        }
-        dst[0] = (dst[0] * alpha + 255) >> 8;
-        dst[1] = (dst[1] * alpha + 255) >> 8;
-        dst[2] = (dst[2] * alpha + 255) >> 8;
-    }
-}
-
-}
-
 template <typename Image>
 struct double_buffer
 {
@@ -274,7 +254,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
     // top row
     for (int x = 0 ; x < src_view.width(); ++x)
     {
-        *dst_it = src_loc[loc11];
+        (*dst_it)[3] = src_loc[loc11][3]; // Dst.a = Src.a
         for (int i = 0; i < 3; ++i)
         {
             bits32f p[9];
@@ -310,7 +290,6 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
 
             process_channel(p, (*dst_it)[i], filter);
         }
-        detail::premultiply_alpha(*dst_it);
         ++src_loc.x();
         ++dst_it;
     }
@@ -322,7 +301,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
     {
         for (int x = 0; x < src_view.width(); ++x)
         {
-            *dst_it = src_loc[loc11];
+            (*dst_it)[3] = src_loc[loc11][3]; // Dst.a = Src.a
             for (int i = 0; i < 3; ++i)
             {
                 bits32f p[9];
@@ -358,8 +337,6 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
                 }
                 process_channel(p, (*dst_it)[i], filter);
             }
-
-            detail::premultiply_alpha(*dst_it);
             ++dst_it;
             ++src_loc.x();
         }
@@ -371,7 +348,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
     //src_loc = src_view.xy_at(0,src_view.height()-1);
     for (int x = 0 ; x < src_view.width(); ++x)
     {
-        *dst_it = src_loc[loc11];
+        (*dst_it)[3] = src_loc[loc11][3]; // Dst.a = Src.a
         for (int i = 0; i < 3; ++i)
         {
             bits32f p[9];
@@ -407,7 +384,6 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
             p[8] = p[2];
             process_channel(p, (*dst_it)[i], filter);
         }
-        detail::premultiply_alpha(*dst_it);
         ++src_loc.x();
         ++dst_it;
     }
