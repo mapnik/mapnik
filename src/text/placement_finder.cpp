@@ -157,10 +157,10 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
             {
                 // place the character relative to the center of the string envelope
                 glyphs->push_back(glyph, (pixel_position(x, y).rotate(orientation)) + layout_offset, orientation);
-                if (glyph.width)
+                if (glyph.advance())
                 {
                     //Only advance if glyph is not part of a multiple glyph sequence
-                    x += glyph.width + glyph.format->character_spacing * scale_factor_;
+                    x += glyph.advance() + glyph.format->character_spacing * scale_factor_;
                 }
             }
         }
@@ -313,8 +313,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 pos.y = -pos.y - char_height/2.0*rot.cos;
                 pos.x =  pos.x + char_height/2.0*rot.sin;
 
-                cluster_offset.x += rot.cos * glyph.width;
-                cluster_offset.y -= rot.sin * glyph.width;
+                cluster_offset.x += rot.cos * glyph.advance();
+                cluster_offset.y -= rot.sin * glyph.advance();
 
                 box2d<double> bbox = get_bbox(layout, glyph, pos, rot);
                 if (collision(bbox)) return false;
@@ -446,18 +446,18 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
           Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
     */
     double width = layout.cluster_width(glyph.char_index);
-    if (glyph.width <= 0) width = -width;
+    if (glyph.advance() <= 0) width = -width;
     pixel_position tmp, tmp2;
-    tmp.set(0, glyph.ymax);
+    tmp.set(0, glyph.ymax());
     tmp = tmp.rotate(rot);
-    tmp2.set(width, glyph.ymax);
+    tmp2.set(width, glyph.ymax());
     tmp2 = tmp2.rotate(rot);
     box2d<double> bbox(tmp.x,  -tmp.y,
                        tmp2.x, -tmp2.y);
-    tmp.set(width, glyph.ymin);
+    tmp.set(width, glyph.ymin());
     tmp = tmp.rotate(rot);
     bbox.expand_to_include(tmp.x, -tmp.y);
-    tmp.set(0, glyph.ymin);
+    tmp.set(0, glyph.ymin());
     tmp = tmp.rotate(rot);
     bbox.expand_to_include(tmp.x, -tmp.y);
     pixel_position pos2 = pos + pixel_position(0, glyph.offset.y).rotate(rot);

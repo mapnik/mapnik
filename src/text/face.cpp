@@ -36,12 +36,13 @@ font_face::font_face(FT_Face face)
 {
 }
 
-double font_face::get_char_height() const
+double font_face::get_char_height(double size) const
 {
     if (char_height_ != 0.0) return char_height_;
     glyph_info tmp;
     tmp.glyph_index = FT_Get_Char_Index(face_, 'X');
     glyph_dimensions(tmp);
+    tmp.scale_multiplier = size / face_->units_per_EM;
     char_height_ = tmp.height();
     return char_height_;
 }
@@ -50,6 +51,12 @@ bool font_face::set_character_sizes(double size)
 {
     char_height_ = 0.0;
     return !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0);
+}
+
+bool font_face::set_unscaled_character_sizes()
+{
+    char_height_ = 0.0;
+    return !FT_Set_Char_Size(face_,0,face_->units_per_EM,0,0);
 }
 
 void font_face::glyph_dimensions(glyph_info & glyph) const
@@ -82,16 +89,13 @@ void font_face::glyph_dimensions(glyph_info & glyph) const
     FT_Glyph image;
     if (FT_Get_Glyph(face_->glyph, &image)) return;
     FT_BBox glyph_bbox;
-    FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox);
+    FT_Glyph_Get_CBox(image, FT_GLYPH_BBOX_TRUNCATE, &glyph_bbox);
     FT_Done_Glyph(image);
 
-    glyph.ymin = glyph_bbox.yMin; //pixels!
-    glyph.ymax = glyph_bbox.yMax;
-    glyph.line_height = face_->size->metrics.height/64.0;
-    // TODO: we round to integers for now to maintain
-    // back compatibility with Mapnik 2.x
-    //glyph.width = face_->glyph->advance.x/64.0;
-    glyph.width = face_->glyph->advance.x >> 6;
+    glyph.unscaled_ymin = glyph_bbox.yMin;
+    glyph.unscaled_ymax = glyph_bbox.yMax;
+    glyph.unscaled_advance = face_->glyph->advance.x;
+    glyph.unscaled_line_height = face_->size->metrics.height;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
 }
@@ -117,6 +121,14 @@ void font_face_set::set_character_sizes(double size)
     for (face_ptr const& face : faces_)
     {
         face->set_character_sizes(size);
+    }
+}
+
+void font_face_set::set_unscaled_character_sizes()
+{
+    for (face_ptr const& face : faces_)
+    {
+        face->set_unscaled_character_sizes();
     }
 }
 
