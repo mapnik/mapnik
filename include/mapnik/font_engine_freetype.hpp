@@ -31,13 +31,13 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/guarded_map.hpp>
 
 // boost
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/optional.hpp>
 
 // stl
+#include <map>
 #include <memory>
 #ifdef MAPNIK_THREADSAFE
 #include <thread>
@@ -50,7 +50,7 @@ struct FT_MemoryRec_;
 namespace mapnik
 {
 
-typedef guarded_map<glyph_index_t, glyph_info> glyph_cache_type;
+typedef std::map<glyph_index_t, glyph_info> glyph_cache_type;
 typedef std::shared_ptr<glyph_cache_type> glyph_cache_ptr;
 class stroker;
 typedef std::shared_ptr<stroker> stroker_ptr;
