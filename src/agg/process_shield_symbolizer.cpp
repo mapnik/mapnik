@@ -46,11 +46,13 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
 
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature, common_.vars_, HALO_RASTERIZER_FULL);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
     agg_text_renderer<T0> ren(*current_buffer_,
-                             halo_rasterizer,
-                             comp_op,
-                             common_.scale_factor_,
-                             common_.font_manager_.get_stroker());
+                              halo_rasterizer,
+                              comp_op,
+                              halo_comp_op,
+                              common_.scale_factor_,
+                              common_.font_manager_.get_stroker());
 
     double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
 

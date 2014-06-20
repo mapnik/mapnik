@@ -31,7 +31,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/std.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>

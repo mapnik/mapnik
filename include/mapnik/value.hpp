@@ -423,8 +423,10 @@ struct sub : public boost::static_visitor<V>
     }
 
     value_type operator() (value_unicode_string const& lhs,
-                           value_unicode_string const& ) const
+                           value_unicode_string const& rhs) const
     {
+        boost::ignore_unused_variable_warning(lhs);
+        boost::ignore_unused_variable_warning(rhs);
         return value_type();
     }
 
@@ -460,8 +462,10 @@ struct mult : public boost::static_visitor<V>
     }
 
     value_type operator() (value_unicode_string const& lhs,
-                           value_unicode_string const& ) const
+                           value_unicode_string const& rhs) const
     {
+        boost::ignore_unused_variable_warning(lhs);
+        boost::ignore_unused_variable_warning(rhs);
         return value_type();
     }
 
@@ -500,7 +504,7 @@ struct div: public boost::static_visitor<V>
         return lhs / rhs;
     }
 
-    value_type operator() (value_bool lhs, value_bool rhs ) const
+    value_type operator() (value_bool lhs, value_bool rhs) const
     {
         boost::ignore_unused_variable_warning(lhs);
         boost::ignore_unused_variable_warning(rhs);
@@ -508,8 +512,10 @@ struct div: public boost::static_visitor<V>
     }
 
     value_type operator() (value_unicode_string const& lhs,
-                           value_unicode_string const&) const
+                           value_unicode_string const& rhs) const
     {
+        boost::ignore_unused_variable_warning(lhs);
+        boost::ignore_unused_variable_warning(rhs);
         return value_type();
     }
 
@@ -543,8 +549,10 @@ struct mod: public boost::static_visitor<V>
     }
 
     value_type operator() (value_unicode_string const& lhs,
-                           value_unicode_string const&) const
+                           value_unicode_string const& rhs) const
     {
+        boost::ignore_unused_variable_warning(lhs);
+        boost::ignore_unused_variable_warning(rhs);
         return value_type();
     }
 
@@ -583,7 +591,7 @@ struct negate : public boost::static_visitor<V>
         return -val;
     }
 
-    value_type operator() (value_null const& val) const
+    value_type operator() (value_null val) const
     {
         return val;
     }
@@ -595,6 +603,7 @@ struct negate : public boost::static_visitor<V>
 
     value_type operator() (value_unicode_string const& ustr) const
     {
+        boost::ignore_unused_variable_warning(ustr);
         return value_type();
     }
 };

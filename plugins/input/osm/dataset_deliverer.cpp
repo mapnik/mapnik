@@ -29,7 +29,6 @@
 #include <sstream>
 
 #include "dataset_deliverer.h"
-#include "basiccurl.h"
 
 osm_dataset * dataset_deliverer::dataset = nullptr;
 std::string dataset_deliverer::last_bbox = "";
@@ -62,35 +61,6 @@ osm_dataset* dataset_deliverer::load_from_file(const string& file, const string&
             return nullptr;
         }
         last_filename = file;
-    }
-    return dataset;
-}
-
-osm_dataset* dataset_deliverer::load_from_url(const string& url, const string& bbox, const string& parser)
-{
-    if (dataset == nullptr)
-    {
-        dataset = new osm_dataset;
-        if (dataset->load_from_url(url.c_str(), bbox, parser) == false)
-        {
-            return nullptr;
-        }
-
-        atexit(dataset_deliverer::release);
-        last_bbox = bbox;
-    }
-    else if (bbox != last_bbox)
-    {
-        MAPNIK_LOG_WARN(osm) << "osm_dataset_deliverer: BBoxes are different=" << last_bbox << "," << bbox;
-
-        // Reload the dataset
-        dataset->clear();
-        if (dataset->load_from_url(url.c_str(), bbox, parser) == false)
-        {
-            return nullptr;
-        }
-
-        last_bbox = bbox;
     }
     return dataset;
 }

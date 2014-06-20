@@ -139,6 +139,7 @@ public:
     virtual ~tiff_reader();
     unsigned width() const;
     unsigned height() const;
+    inline bool has_alpha() const { return false; /*FIXME*/ }
     bool premultiplied_alpha() const;
     void read(unsigned x,unsigned y,image_data_32& image);
 private:

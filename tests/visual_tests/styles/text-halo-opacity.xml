@@ -1,0 +1,85 @@
+<Map srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over" background-color="steelblue" minimum-version="3.0.0">
+
+    <Style name="labels">
+        <Rule>
+            <Filter>([id]=1)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="4"
+              halo-opacity="1.0"
+              >
+              'halo-opacity = 1.0'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=2)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="4"
+              halo-opacity="0.75"
+              >
+              'halo-opacity = 0.75'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=3)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="4"
+              halo-opacity="0.5"
+            >
+              'halo-opacity = 0.5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=4)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="4"
+              halo-opacity="0.25"
+            >
+                'halo-opacity = 0.25'
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>labels</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+id,x,y
+1,1.5,4.5
+2,1.5,3.5
+3,1.5,2.5
+4,1.5,1.5
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+0,0
+5,0
+0,5
+5,5
+            </Parameter>
+        </Datasource>
+    </Layer>
+</Map>

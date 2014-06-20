@@ -4,7 +4,7 @@ from copy import copy
 
 Import ('env')
 
-libraries = ['mapnik']
+libraries = [env['MAPNIK_NAME']]
 libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 
 for cpp_test in glob.glob('*_test.cpp'):

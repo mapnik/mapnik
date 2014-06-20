@@ -63,7 +63,7 @@ static void shape_text(text_line & line,
     {
         face_set_ptr face_set = font_manager.get_face_set(text_item.format->face_name, text_item.format->fontset);
         double size = text_item.format->text_size * scale_factor;
-        face_set->set_character_sizes(size);
+        face_set->set_unscaled_character_sizes();
         font_face_set::iterator face_itr = face_set->begin(), face_end = face_set->end();
         for (; face_itr != face_end; ++face_itr)
         {
@@ -109,13 +109,16 @@ static void shape_text(text_line & line,
                 tmp.char_index = glyphs[i].cluster;
                 tmp.face = face;
                 tmp.format = text_item.format;
-                //tmp.width = positions[i].x_advance / 64.0; //Overwrite default width with better value provided by HarfBuzz
-                tmp.width = positions[i].x_advance >> 6;
-                tmp.offset.set(positions[i].x_offset / 64.0, positions[i].y_offset / 64.0);
-                width_map[glyphs[i].cluster] += tmp.width;
-                line.add_glyph(tmp, scale_factor);
+                tmp.scale_multiplier = size / face->get_face()->units_per_EM;
+
+                //Overwrite default advance with better value provided by HarfBuzz
+                tmp.unscaled_advance = positions[i].x_advance;
+
+                tmp.offset.set(positions[i].x_offset * tmp.scale_multiplier, positions[i].y_offset * tmp.scale_multiplier);
+                width_map[glyphs[i].cluster] += tmp.advance();
+                line.add_glyph(std::move(tmp), scale_factor);
             }
-            line.update_max_char_height(face->get_char_height());
+            line.update_max_char_height(face->get_char_height(size));
             break; //When we reach this point the current font had all glyphs.
         }
     }

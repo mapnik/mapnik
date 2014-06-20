@@ -5,8 +5,7 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #if defined(HAVE_CAIRO)
-#include <mapnik/cairo_renderer.hpp>
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>

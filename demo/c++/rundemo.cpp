@@ -33,10 +33,10 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/save_map.hpp>
 
 #if defined(HAVE_CAIRO)
-#include <mapnik/cairo_renderer.hpp>
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 
 #include <iostream>
@@ -361,7 +361,8 @@ int main ( int argc , char** argv)
             "- cairo-demo.svg\n"
             "Have a look!\n";
 #endif
-
+        // save map definition (data + style)
+        save_map(m, "map.xml");
     }
     catch ( std::exception const& ex )
     {
@@ -373,5 +374,6 @@ int main ( int argc , char** argv)
         std::cerr << "### Unknown exception." << std::endl;
         return EXIT_FAILURE;
     }
+
     return EXIT_SUCCESS;
 }

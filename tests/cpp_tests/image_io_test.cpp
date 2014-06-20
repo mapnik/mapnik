@@ -21,6 +21,14 @@ int main(int argc, char** argv)
     boost::optional<std::string> type;
     try
     {
+        mapnik::image_data_32 im(256,256);
+        unsigned char* bytes = im.getBytes();
+        mapnik::image_data_32 * im_ptr = new mapnik::image_data_32(256,256,(unsigned int *)bytes);
+        unsigned char* same_bytes = im_ptr->getBytes();
+        BOOST_TEST(bytes == same_bytes);
+        delete im_ptr;
+        BOOST_TEST(bytes == same_bytes);
+
         BOOST_TEST(set_working_dir(args));
 
 #if defined(HAVE_JPEG)

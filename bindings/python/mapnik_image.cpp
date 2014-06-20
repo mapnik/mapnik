@@ -36,7 +36,7 @@
 
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_context.hpp>
 #include <pycairo.h>
 #include <cairo.h>
 #endif

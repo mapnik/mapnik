@@ -49,7 +49,7 @@ plugin_env.Append(CXXFLAGS=cxxflags)
 plugin_env.Append(CPPDEFINES=cppdefines)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../shape',
                                       SHLIBSUFFIX='.input',

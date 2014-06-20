@@ -429,7 +429,7 @@ def PostGIS(**keywords):
       cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
 
     >>> from mapnik import PostGIS, Layer
-    >>> params = dict(dbname='mapnik',table='osm',user='postgres',password='gis')
+    >>> params = dict(dbname=env['MAPNIK_NAME'],table='osm',user='postgres',password='gis')
     >>> params['estimate_extent'] = False
     >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
     >>> postgis = PostGIS(**params)

@@ -119,7 +119,7 @@ configuration = {
     "git_describe": git_describe,
     "version_string": config_env['MAPNIK_VERSION_STRING'],
     "version": config_env['MAPNIK_VERSION'],
-    "mapnik_libname": 'mapnik',
+    "mapnik_libname": env['MAPNIK_NAME'],
     "mapnik_libpath": lib_path,
     "ldflags": ldflags,
     "dep_libs": dep_libs,

@@ -40,7 +40,7 @@ def is_py3():
 
 
 prefix = env['PREFIX']
-target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
+target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + env['MAPNIK_NAME'])
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
 py_env = env.Clone()
@@ -48,7 +48,7 @@ py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
 
 py_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
-py_env['LIBS'] = ['mapnik',env['BOOST_PYTHON_LIB']]
+py_env['LIBS'] = [env['MAPNIK_NAME'],env['BOOST_PYTHON_LIB']]
 
 link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])
 
@@ -135,8 +135,8 @@ else:
 
 paths += "__all__ = [mapniklibpath,inputpluginspath,fontscollectionpath]\n"
 
-if not os.path.exists('mapnik'):
-    os.mkdir('mapnik')
+if not os.path.exists(env['MAPNIK_NAME']):
+    os.mkdir(env['MAPNIK_NAME'])
 
 file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 

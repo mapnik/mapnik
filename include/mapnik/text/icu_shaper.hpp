@@ -65,7 +65,7 @@ static void shape_text(text_line & line,
     {
         face_set_ptr face_set = font_manager.get_face_set(text_item.format->face_name, text_item.format->fontset);
         double size = text_item.format->text_size * scale_factor;
-        face_set->set_character_sizes(size);
+        face_set->set_unscaled_character_sizes();
         for (auto const& face : *face_set)
         {
             UBiDi *bidi = ubidi_openSized(length, 0, &err);
@@ -105,13 +105,14 @@ static void shape_text(text_line & line,
                     tmp.face = face;
                     tmp.format = text_item.format;
                     face->glyph_dimensions(tmp);
-                    width_map[i] += tmp.width;
-                    line.add_glyph(tmp, scale_factor);
+                    tmp.scale_multiplier = size / face->get_face()->units_per_EM;
+                    width_map[i] += tmp.advance();
+                    line.add_glyph(std::move(tmp), scale_factor);
                     ++i;
                 }
             }
             if (!shaped_status) continue;
-            line.update_max_char_height(face->get_char_height());
+            line.update_max_char_height(face->get_char_height(size));
             return;
         }
     }

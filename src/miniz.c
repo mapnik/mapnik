@@ -928,9 +928,9 @@ typedef unsigned char mz_validate_uint64[sizeof(mz_uint64)==8 ? 1 : -1];
 #ifdef _MSC_VER
   #define MZ_FORCEINLINE __forceinline
 #elif defined(__GNUC__)
-  #define MZ_FORCEINLINE __attribute__((__always_inline__))
+  #define MZ_FORCEINLINE inline __attribute__((__always_inline__))
 #else
-  #define MZ_FORCEINLINE
+  #define MZ_FORCEINLINE inline
 #endif
 
 #ifdef __cplusplus

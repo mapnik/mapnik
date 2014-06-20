@@ -38,7 +38,7 @@
 
 // cairo
 #ifdef HAVE_CAIRO
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_context.hpp>
 #endif
 
 // boost

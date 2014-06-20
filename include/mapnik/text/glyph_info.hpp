@@ -27,6 +27,7 @@
 #include <mapnik/pixel_position.hpp>
 
 #include <memory>
+#include <cmath>
 
 namespace mapnik
 {
@@ -42,25 +43,32 @@ struct glyph_info
         : glyph_index(0),
           face(nullptr),
           char_index(0),
-          width(0.0),
-          ymin(0.0),
-          ymax(0.0),
-          line_height(0.0),
+          unscaled_ymin(0.0),
+          unscaled_ymax(0.0),
+          unscaled_advance(0.0),
+          unscaled_line_height(0.0),
+          scale_multiplier(1.0),
           offset(),
           format() {}
     glyph_index_t glyph_index;
     face_ptr face;
     // Position in the string of all characters i.e. before itemizing
     unsigned char_index;
-    double width;
-    double ymin;
-    double ymax;
+    double unscaled_ymin;
+    double unscaled_ymax;
+    double unscaled_advance;
     // Line height returned by freetype, includes normal font
     // line spacing, but not additional user defined spacing
-    double line_height;
+    double unscaled_line_height;
+    double scale_multiplier;
     pixel_position offset;
     char_properties_ptr format;
-    double height() const { return ymax-ymin; }
+
+    double ymin() const { return unscaled_ymin * 64.0 * scale_multiplier; }
+    double ymax() const { return unscaled_ymax * 64.0 * scale_multiplier; }
+    double height() const { return ymax() - ymin(); };
+    double advance() const { return unscaled_advance * scale_multiplier; };
+    double line_height() const { return unscaled_line_height * scale_multiplier; };
 };
 
 inline bool operator<(glyph_info const& lhs, glyph_info const& rhs) {

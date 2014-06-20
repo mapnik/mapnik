@@ -46,7 +46,7 @@ public:
     /** Get glyph vector. */
     glyph_vector const& glyphs() const { return glyphs_; }
     /** Append glyph. */
-    void add_glyph(glyph_info const& glyph, double scale_factor_);
+    void add_glyph(glyph_info && glyph, double scale_factor_);
 
     /** Preallocate memory. */
     void reserve(glyph_vector::size_type length);
