@@ -64,11 +64,11 @@ struct glyph_info
     pixel_position offset;
     char_properties_ptr format;
 
-    double ymin() const { return floor(unscaled_ymin * 64.0 * scale_multiplier); }
-    double ymax() const { return ceil(unscaled_ymax * 64.0 * scale_multiplier); }
+    double ymin() const { return unscaled_ymin * 64.0 * scale_multiplier; }
+    double ymax() const { return unscaled_ymax * 64.0 * scale_multiplier; }
     double height() const { return ymax() - ymin(); };
     double advance() const { return unscaled_advance * scale_multiplier; };
-    double line_height() const { return ceil(unscaled_line_height * scale_multiplier); };
+    double line_height() const { return unscaled_line_height * scale_multiplier; };
 };
 
 } //ns mapnik
