@@ -325,6 +325,8 @@ public:
     void add_text(glyph_positions_ptr pos,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> & font_manager,
+                  composite_mode_e comp_op = src_over,
+                  composite_mode_e halo_comp_op = src_over,
                   double scale_factor = 1.0);
 
     template <typename T>

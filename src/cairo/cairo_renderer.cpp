@@ -579,9 +579,8 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
     double opacity = get<double>(sym,keys::opacity,feature, common_.vars_, 1.0);
-
-    context_.set_operator(comp_op);
 
     placements_list const &placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
@@ -593,8 +592,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                           glyphs->marker()->transform,
                           opacity);
         }
-
-        context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
+        context_.add_text(glyphs, face_manager_, common_.font_manager_, comp_op, halo_comp_op, common_.scale_factor_);
     }
 }
 
@@ -1008,12 +1006,12 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_,  src_over);
-    context_.set_operator(comp_op);
+    composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_,  src_over);
 
     placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
     {
-        context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
+        context_.add_text(glyphs, face_manager_, common_.font_manager_, comp_op, halo_comp_op, common_.scale_factor_);
     }
 }
 
@@ -1062,7 +1060,7 @@ struct thunk_renderer : public boost::static_visitor<>
                                        glyphs->marker()->transform,
                                        thunk.opacity_, thunk.comp_op_);
                 }
-                context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
+                context_.add_text(glyphs, face_manager_, common_.font_manager_, src_over, src_over, common_.scale_factor_);
             });
     }
 
