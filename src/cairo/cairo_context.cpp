@@ -66,7 +66,7 @@ void cairo_context::show_page()
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::set_color(color const &color, double opacity)
+void cairo_context::set_color(color const& color, double opacity)
 {
     set_color(color.red()/255.0, color.green()/255.0, color.blue()/255.0, color.alpha() * opacity / 255.0);
 }
@@ -469,7 +469,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
         glyph_path(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
         set_line_width(2.0 * halo_radius);
         set_line_join(ROUND_JOIN);
-        set_color(format->halo_fill);
+        set_color(format->halo_fill, format->halo_opacity);
         stroke();
     }
 
@@ -496,7 +496,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
         pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
-        set_color(format->fill);
+        set_color(format->fill, format->text_opacity);
         show_glyph(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
     }
 

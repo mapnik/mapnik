@@ -1010,7 +1010,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_,  src_over);
     context_.set_operator(comp_op);
 
-    placements_list const &placements = helper.get();
+    placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
     {
         context_.add_text(glyphs, face_manager_, common_.font_manager_, common_.scale_factor_);
