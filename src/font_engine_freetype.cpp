@@ -106,13 +106,13 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
 {
     if (count <= 0) return 0;
     FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
-    fseek (file , offset , SEEK_SET);
-    return fread ((char*)buffer, 1, count, file);
+    std::fseek (file , offset , SEEK_SET);
+    return std::fread ((char*)buffer, 1, count, file);
 }
 
 void ft_close_cb(FT_Stream stream)
 {
-    fclose (static_cast<FILE *>(stream->descriptor.pointer));
+    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -143,7 +143,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
     fseek(file, 0, SEEK_END);
-    std::size_t file_size = ftell(file);
+    std::size_t file_size = std::ftell(file);
     fseek(file, 0, SEEK_SET);
     streamRec.base = 0;
     streamRec.pos = 0;
@@ -320,16 +320,15 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
-            FILE * file = fopen(itr->second.second.c_str(),"rb");
+            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(itr->second.second.c_str(),"rb"), std::fclose);
             if (file != nullptr)
             {
-                fseek(file, 0, SEEK_END);
-                unsigned long file_size = ftell(file);
-                fseek(file, 0, SEEK_SET);
+                std::fseek(file.get(), 0, SEEK_END);
+                unsigned long file_size = std::ftell(file.get());
+                std::fseek(file.get(), 0, SEEK_SET);
                 boost::scoped_array<char> buffer(new char[file_size]);
-                fread(buffer.get(), file_size, 1, file);
+                std::fread(buffer.get(), file_size, 1, file.get());
                 auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::string(buffer.get(),file_size)));
-
                 FT_Error error = FT_New_Memory_Face (library_,
                                                      reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
                                                      static_cast<FT_Long>(result.first->second.size()),
