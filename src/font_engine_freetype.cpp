@@ -327,7 +327,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 unsigned long file_size = ftell(file);
                 fseek(file, 0, SEEK_SET);
                 boost::scoped_array<char> buffer(new char[file_size]);
-                fread(buffer.get(), 1, file_size, file);
+                fread(buffer.get(), file_size, 1, file);
                 auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::string(buffer.get(),file_size)));
 
                 FT_Error error = FT_New_Memory_Face (library_,
