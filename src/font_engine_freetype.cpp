@@ -102,17 +102,17 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
 
-unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count) {
-    if (count <= 0) return count;
-    std::ifstream * file = static_cast<std::ifstream *>(stream->descriptor.pointer);
-    file->seekg(offset, std::ios::beg);
-    file->read((char*)buffer, count);
-    return file->gcount();
+unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count)
+{
+    if (count <= 0) return 0;
+    FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
+    fseek (file , offset , SEEK_SET);
+    return fread ((char*)buffer, 1, count, file);
 }
 
-void ft_close_cb(FT_Stream stream) {
-    std::ifstream * file = static_cast<std::ifstream *>(stream->descriptor.pointer);
-    file->close();
+void ft_close_cb(FT_Stream stream)
+{
+    fclose (static_cast<FILE *>(stream->descriptor.pointer));
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -132,28 +132,23 @@ bool freetype_engine::register_font(std::string const& file_name)
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
 #ifdef _WINDOWS
-    std::ifstream file(mapnik::utf8_to_utf16(file_name), std::ios::binary);
+    FILE * file = fopen(mapnik::utf8_to_utf16(file_name).c_str(),"rb");
 #else
-    std::ifstream file(file_name.c_str(), std::ios::binary);
+    FILE * file = fopen(file_name.c_str(),"rb");
 #endif
-    if (!file.good()) {
-        return false;
-    }
+    if (file == nullptr) return false;
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
-    std::streampos beg = file.tellg();
-    file.seekg (0, std::ios::end);
-    std::streampos end = file.tellg();
-    std::size_t file_size = end - beg;
-    file.seekg (0, std::ios::beg);
-
+    fseek (file , 0 , SEEK_END);
+    std::size_t file_size = ftell(file);
+    rewind(file);
     streamRec.base = 0;
     streamRec.pos = 0;
     streamRec.size = file_size;
-    streamRec.descriptor.pointer = &file;
+    streamRec.descriptor.pointer = file;
     streamRec.read  = ft_read_cb;
     streamRec.close = ft_close_cb;
     args.flags = FT_OPEN_STREAM;
