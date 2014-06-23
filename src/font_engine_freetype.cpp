@@ -142,9 +142,9 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
-    fseek (file , 0 , SEEK_END);
+    fseek(file, 0, SEEK_END);
     std::size_t file_size = ftell(file);
-    rewind(file);
+    fseek(file, 0, SEEK_SET);
     streamRec.base = 0;
     streamRec.pos = 0;
     streamRec.size = file_size;
