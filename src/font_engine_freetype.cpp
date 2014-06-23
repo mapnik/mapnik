@@ -131,19 +131,21 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
+    char buffer[512];
 #ifdef _WINDOWS
     std::ifstream file(mapnik::utf8_to_utf16(file_name), std::ios::binary);
 #else
     std::ifstream file(file_name.c_str(), std::ios::binary);
 #endif
-    if (!file.good()) {
-        return false;
-    }
+    if (!file.good()) return false;
+    file.rdbuf()->pubsetbuf(buffer, 512);
+
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
+
     std::streampos beg = file.tellg();
     file.seekg (0, std::ios::end);
     std::streampos end = file.tellg();
