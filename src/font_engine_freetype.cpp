@@ -320,21 +320,27 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
-            std::ifstream is(itr->second.second.c_str() , std::ios::binary);
-            std::string buffer((std::istreambuf_iterator<char>(is)),
-                               std::istreambuf_iterator<char>());
-            auto result = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
-
-            FT_Error error = FT_New_Memory_Face (library_,
-                                                 reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
-                                                 static_cast<FT_Long>(buffer.size()),
-                                                 itr->second.first,
-                                                 &face);
-            if (!error) return std::make_shared<font_face>(face);
-            else
+            FILE * file = fopen(itr->second.second.c_str(),"rb");
+            if (file != nullptr)
             {
-                // we can't load font, erase it.
-                memory_fonts_.erase(result.first);
+                fseek(file, 0, SEEK_END);
+                unsigned long file_size = ftell(file);
+                fseek(file, 0, SEEK_SET);
+                boost::scoped_array<char> buffer(new char[file_size]);
+                fread(buffer.get(), 1, file_size, file);
+                auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::string(buffer.get())));
+
+                FT_Error error = FT_New_Memory_Face (library_,
+                                                     reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
+                                                     static_cast<FT_Long>(result.first->second.size()),
+                                                     itr->second.first,
+                                                     &face);
+                if (!error) return std::make_shared<font_face>(face);
+                else
+                {
+                    // we can't load font, erase it.
+                    memory_fonts_.erase(result.first);
+                }
             }
         }
     }
