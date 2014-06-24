@@ -131,12 +131,15 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
+    char buffer[512];
 #ifdef _WINDOWS
     FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(),"rb");
 #else
     FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
+
     if (file == nullptr) return false;
+
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
