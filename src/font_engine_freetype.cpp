@@ -158,13 +158,11 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
+    for ( int i = 0; face == 0 || i < num_faces; ++i )
+    {
         // if face is null then this is the first face
         FT_Error error = FT_Open_Face(library, &args, i, &face);
-        if (error)
-        {
-            break;
-        }
+        if (error) break;
         // store num_faces locally, after FT_Done_Face it can not be accessed any more
         if (!num_faces)
             num_faces = face->num_faces;
@@ -193,10 +191,8 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
 
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
+        if (face) FT_Done_Face(face);
     }
-
-    if (face) FT_Done_Face(face);
-
     return success;
 }
 
