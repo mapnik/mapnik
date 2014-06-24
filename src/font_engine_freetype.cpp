@@ -131,7 +131,6 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
-    char buffer[512];
 #ifdef _WINDOWS
     FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(), L"rb");
 #else
@@ -306,8 +305,8 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
         if (mem_font_itr != memory_fonts_.end()) // memory font
         {
             FT_Error error = FT_New_Memory_Face(library_,
-                                                reinterpret_cast<FT_Byte const*>(mem_font_itr->second.c_str()),
-                                                static_cast<FT_Long>(mem_font_itr->second.size()), // size
+                                                reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                                static_cast<FT_Long>(mem_font_itr->second.second), // size
                                                 itr->second.first, // face index
                                                 &face);
 
@@ -332,10 +331,10 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 std::fseek(file.get(), 0, SEEK_SET);
                 std::unique_ptr<char[]> buffer(new char[file_size]);
                 std::fread(buffer.get(), file_size, 1, file.get());
-                auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::string(buffer.get(),file_size)));
+                auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::make_pair(std::move(buffer),file_size)));
                 FT_Error error = FT_New_Memory_Face (library_,
-                                                     reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
-                                                     static_cast<FT_Long>(result.first->second.size()),
+                                                     reinterpret_cast<FT_Byte const*>(result.first->second.first.get()),
+                                                     static_cast<FT_Long>(result.first->second.second),
                                                      itr->second.first,
                                                      &face);
                 if (!error) return std::make_shared<font_face>(face);
@@ -435,7 +434,7 @@ face_set_ptr face_manager<T>::get_face_set(const std::string &name, boost::optio
 std::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-std::map<std::string,std::string> freetype_engine::memory_fonts_;
+std::map<std::string,std::pair<std::unique_ptr<char[]>,std::size_t> > freetype_engine::memory_fonts_;
 template class face_manager<freetype_engine>;
 
 }
