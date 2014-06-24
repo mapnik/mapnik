@@ -164,7 +164,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
         FT_Error error = FT_Open_Face(library, &args, i, &face);
         if (error) break;
         // store num_faces locally, after FT_Done_Face it can not be accessed any more
-        if (!num_faces)
+        if (num_faces == 0)
             num_faces = face->num_faces;
         // some fonts can lack names, skip them
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
