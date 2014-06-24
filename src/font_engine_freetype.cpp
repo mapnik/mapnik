@@ -133,7 +133,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
 {
     char buffer[512];
 #ifdef _WINDOWS
-    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(),"rb");
+    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(), L"rb");
 #else
     FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
@@ -321,7 +321,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #endif
 
 #ifdef _WINDOWS
-            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(),"rb"), fclose);
+            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(), L"rb"), fclose);
 #else
             std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(itr->second.second.c_str(),"rb"), std::fclose);
 #endif
