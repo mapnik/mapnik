@@ -132,9 +132,9 @@ bool freetype_engine::register_font(std::string const& file_name)
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
 #ifdef _WINDOWS
-    FILE * file = fopen(mapnik::utf8_to_utf16(file_name).c_str(),"rb");
+    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(),"rb");
 #else
-    FILE * file = fopen(file_name.c_str(),"rb");
+    FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
     if (file == nullptr) return false;
     FT_Face face = 0;
@@ -316,7 +316,12 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
+
+#ifdef _WINDOWS
+            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(),"rb"), fclose);
+#else
             std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(itr->second.second.c_str(),"rb"), std::fclose);
+#endif
             if (file != nullptr)
             {
                 std::fseek(file.get(), 0, SEEK_END);
