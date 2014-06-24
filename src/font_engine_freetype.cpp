@@ -102,17 +102,17 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
 
-unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count) {
-    if (count <= 0) return count;
-    std::ifstream * file = static_cast<std::ifstream *>(stream->descriptor.pointer);
-    file->seekg(offset, std::ios::beg);
-    file->read((char*)buffer, count);
-    return file->gcount();
+unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count)
+{
+    if (count <= 0) return 0;
+    FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
+    std::fseek (file , offset , SEEK_SET);
+    return std::fread ((char*)buffer, 1, count, file);
 }
 
-void ft_close_cb(FT_Stream stream) {
-    std::ifstream * file = static_cast<std::ifstream *>(stream->descriptor.pointer);
-    file->close();
+void ft_close_cb(FT_Stream stream)
+{
+    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -133,29 +133,25 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
 {
     char buffer[512];
 #ifdef _WINDOWS
-    std::ifstream file(mapnik::utf8_to_utf16(file_name), std::ios::binary);
+    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(),"rb");
 #else
-    std::ifstream file(file_name.c_str(), std::ios::binary);
+    FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
-    if (!file.good()) return false;
-    file.rdbuf()->pubsetbuf(buffer, 512);
+
+    if (file == nullptr) return false;
 
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
-
-    std::streampos beg = file.tellg();
-    file.seekg (0, std::ios::end);
-    std::streampos end = file.tellg();
-    std::size_t file_size = end - beg;
-    file.seekg (0, std::ios::beg);
-
+    fseek(file, 0, SEEK_END);
+    std::size_t file_size = std::ftell(file);
+    fseek(file, 0, SEEK_SET);
     streamRec.base = 0;
     streamRec.pos = 0;
     streamRec.size = file_size;
-    streamRec.descriptor.pointer = &file;
+    streamRec.descriptor.pointer = file;
     streamRec.read  = ft_read_cb;
     streamRec.close = ft_close_cb;
     args.flags = FT_OPEN_STREAM;
@@ -165,15 +161,13 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
+    for ( int i = 0; face == 0 || i < num_faces; ++i )
+    {
         // if face is null then this is the first face
         FT_Error error = FT_Open_Face(library, &args, i, &face);
-        if (error)
-        {
-            break;
-        }
+        if (error) break;
         // store num_faces locally, after FT_Done_Face it can not be accessed any more
-        if (!num_faces)
+        if (num_faces == 0)
             num_faces = face->num_faces;
         // some fonts can lack names, skip them
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
@@ -200,10 +194,8 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
 
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
+        if (face) FT_Done_Face(face);
     }
-
-    if (face) FT_Done_Face(face);
-
     return success;
 }
 
@@ -327,21 +319,31 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
-            std::ifstream is(itr->second.second.c_str() , std::ios::binary);
-            std::string buffer((std::istreambuf_iterator<char>(is)),
-                               std::istreambuf_iterator<char>());
-            auto result = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
 
-            FT_Error error = FT_New_Memory_Face (library_,
-                                                 reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
-                                                 static_cast<FT_Long>(buffer.size()),
-                                                 itr->second.first,
-                                                 &face);
-            if (!error) return std::make_shared<font_face>(face);
-            else
+#ifdef _WINDOWS
+            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(),"rb"), fclose);
+#else
+            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(itr->second.second.c_str(),"rb"), std::fclose);
+#endif
+            if (file != nullptr)
             {
-                // we can't load font, erase it.
-                memory_fonts_.erase(result.first);
+                std::fseek(file.get(), 0, SEEK_END);
+                std::size_t file_size = std::ftell(file.get());
+                std::fseek(file.get(), 0, SEEK_SET);
+                std::unique_ptr<char[]> buffer(new char[file_size]);
+                std::fread(buffer.get(), file_size, 1, file.get());
+                auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::string(buffer.get(),file_size)));
+                FT_Error error = FT_New_Memory_Face (library_,
+                                                     reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
+                                                     static_cast<FT_Long>(result.first->second.size()),
+                                                     itr->second.first,
+                                                     &face);
+                if (!error) return std::make_shared<font_face>(face);
+                else
+                {
+                    // we can't load font, erase it.
+                    memory_fonts_.erase(result.first);
+                }
             }
         }
     }
