@@ -59,7 +59,7 @@ namespace mapnik {
 typedef boost::uint8_t byte;
 struct rgba;
 
-struct rgb {
+struct MAPNIK_DECL rgb {
     byte r;
     byte g;
     byte b;
@@ -73,7 +73,7 @@ struct rgb {
     }
 };
 
-struct rgba
+struct MAPNIK_DECL rgba
 {
     byte r;
     byte g;
@@ -104,7 +104,7 @@ struct rgba
     }
 
     // ordering by mean(a,r,g,b), a, r, g, b
-    struct mean_sort_cmp
+    struct MAPNIK_DECL mean_sort_cmp
     {
         bool operator() (const rgba& x, const rgba& y) const;
     };

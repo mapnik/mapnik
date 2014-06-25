@@ -51,7 +51,7 @@ if env['PLUGIN_LINKING'] == 'shared':
     install_dest = env['MAPNIK_INPUT_PLUGINS_DEST']
 
     # only link mapnik if we are build an external shared object
-    libraries.append('mapnik')
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary(
                   # the name of the target to build, eg 'sqlite.input'

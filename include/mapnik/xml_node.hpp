@@ -118,7 +118,7 @@ public:
     template <typename T>
     T get_attr(std::string const& name) const;
 
-    std::string get_text() const;
+    std::string const& get_text() const;
 
     xml_tree const& get_tree() const
     {
@@ -136,6 +136,7 @@ private:
     unsigned line_;
     mutable bool processed_;
     static std::string xml_text;
+    static std::string empty_text;
 };
 
 } //ns mapnik

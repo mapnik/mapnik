@@ -29,6 +29,10 @@
 #include <boost/optional.hpp>
 #include <mapnik/config.hpp>
 
+#ifdef _MSC_VER
+#include <mapnik/image_data.hpp>
+#endif
+
 namespace mapnik
 {
 
@@ -66,6 +70,18 @@ MAPNIK_DECL void scale_image_agg(Image & target,
                       double x_off_f=0,
                       double y_off_f=0,
                       double filter_radius=2);
+
+#ifdef _MSC_VER
+template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
+                      mapnik::image_data_32 & target,
+                      mapnik::image_data_32 const& source,
+                      scaling_method_e scaling_method,
+                      double image_ratio_x,
+                      double image_ratio_y,
+                      double x_off_f,
+                      double y_off_f,
+                      double filter_radius);
+#endif
 
 template <typename Image>
 void scale_image_bilinear_old(Image & target,

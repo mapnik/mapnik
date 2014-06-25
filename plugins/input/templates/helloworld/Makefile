@@ -1,6 +1,6 @@
-CXX = clang++
+# To use clang, run:  make CXX=clang++
 
-CXXFLAGS = $(shell mapnik-config --cflags)
+CXXFLAGS = $(shell mapnik-config --cflags) -fPIC
 
 LIBS = $(shell mapnik-config --libs --ldflags --dep-libs)
 
@@ -27,4 +27,4 @@ clean:
 deploy : all
 	cp hello.input $(shell mapnik-config --input-plugins)
 
-install: clean all deploy
+install: all deploy

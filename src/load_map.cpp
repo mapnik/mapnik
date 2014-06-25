@@ -353,7 +353,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             else if (itr->is("FileSource"))
             {
                 std::string name = itr->get_attr<std::string>("name");
-                std::string value = itr->get_text();
+                std::string const& value = itr->get_text();
                 file_sources_[name] = value;
             }
             else if (itr->is("Datasource"))
@@ -367,7 +367,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                     if (paramIter->is("Parameter"))
                     {
                         std::string param_name = paramIter->get_attr<std::string>("name");
-                        std::string value = paramIter->get_text();
+                        std::string const& value = paramIter->get_text();
                         params[param_name] = value;
                     }
                 }
@@ -400,10 +400,9 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                                 params[name] = value;
                             }
                         }
-
                         if (is_string)
                         {
-                            std::string value = paramIter->get_text();
+                            std::string const& value = paramIter->get_text();
                             params[name] = value;
                         }
                     }
@@ -673,7 +672,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
 
             if (child->is("StyleName"))
             {
-                std::string style_name = child->get_text();
+                std::string const& style_name = child->get_text();
                 if (style_name.empty())
                 {
                     std::string ss("StyleName is empty in Layer: '");
@@ -717,7 +716,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                     if (paramIter->is("Parameter"))
                     {
                         std::string param_name = paramIter->get_attr<std::string>("name");
-                        std::string value = paramIter->get_text();
+                        std::string const& value = paramIter->get_text();
                         params[param_name] = value;
                     }
                 }
@@ -1739,9 +1738,13 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
         if (node.is_text()) {
             error_message += "\n* text '" + node.text() + "'";
         } else {
-            error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
+            error_message += "\n* node '" + node.name() + "'";
+            if (node.line() > 0)
+            {
+                error_message += " at line " + node.line_to_string();
+            }
         }
-        return; //All attributes and children are automatically unprocessed, too.
+        return; // All attributes and children are automatically unprocessed, too.
     }
     xml_node::attribute_map const& attr = node.get_attributes();
     xml_node::attribute_map::const_iterator aitr = attr.begin();

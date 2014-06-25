@@ -26,6 +26,7 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/utils.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid.hpp>
@@ -88,11 +89,30 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
 
+unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count) {
+    if (count <= 0) return 0;
+    FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
+    std::fseek (file , offset , SEEK_SET);
+    return std::fread ((char*)buffer, 1, count, file);
+}
+
+void ft_close_cb(FT_Stream stream) {
+    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
+}
+
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
+
+#ifdef _WINDOWS
+    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(), L"rb");
+#else
+    FILE * file = std::fopen(file_name.c_str(),"rb");
+#endif
+    if (file == NULL) return false;
+
     FT_Library library = 0;
     FT_Error error = FT_Init_FreeType(&library);
     if (error)
@@ -101,6 +121,21 @@ bool freetype_engine::register_font(std::string const& file_name)
     }
 
     FT_Face face = 0;
+    FT_Open_Args args;
+    FT_StreamRec streamRec;
+    memset(&args, 0, sizeof(args));
+    memset(&streamRec, 0, sizeof(streamRec));
+    fseek(file, 0, SEEK_END);
+    std::size_t file_size = std::ftell(file);
+    fseek(file, 0, SEEK_SET);
+    streamRec.base = 0;
+    streamRec.pos = 0;
+    streamRec.size = file_size;
+    streamRec.descriptor.pointer = file;
+    streamRec.read  = ft_read_cb;
+    streamRec.close = ft_close_cb;
+    args.flags = FT_OPEN_STREAM;
+    args.stream = &streamRec;
     int num_faces = 0;
     bool success = false;
     // some font files have multiple fonts in a file
@@ -108,7 +143,7 @@ bool freetype_engine::register_font(std::string const& file_name)
     // see the FT_FaceRec in freetype.h
     for ( int i = 0; face == 0 || i < num_faces; i++ ) {
         // if face is null then this is the first face
-        error = FT_New_Face (library,file_name.c_str(),i,&face);
+        error = FT_Open_Face(library, &args, i, &face);
         if (error)
         {
             break;
@@ -141,9 +176,8 @@ bool freetype_engine::register_font(std::string const& file_name)
 
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
+        if (face) FT_Done_Face(face);
     }
-    if (face)
-        FT_Done_Face(face);
     if (library)
         FT_Done_FreeType(library);
     return success;
@@ -163,6 +197,16 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     try
     {
         boost::filesystem::directory_iterator end_itr;
+#ifdef _WINDOWS
+        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
+        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
+    #else // v2
+            std::string file_name = mapnik::utf16_to_utf8(itr->wstring());
+    #endif
+#else
         for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
     #if (BOOST_FILESYSTEM_VERSION == 3)
@@ -170,6 +214,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     #else // v2
             std::string file_name = itr->string();
     #endif
+#endif
             if (boost::filesystem::is_directory(*itr) && recurse)
             {
                 if (register_fonts(file_name, true))
@@ -185,7 +230,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
                 std::string base_name = itr->filename();
     #endif
                 if (!boost::algorithm::starts_with(base_name,".") &&
-                    boost::filesystem::is_regular_file(file_name) &&
+                    mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))
                 {
                     if (mapnik::freetype_engine::register_font(file_name))
@@ -247,22 +292,33 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mutex::scoped_lock lock(mutex_);
 #endif
-            std::ifstream is(itr->second.second.c_str() , std::ios::binary);
-            std::string buffer((std::istreambuf_iterator<char>(is)),
-                               std::istreambuf_iterator<char>());
-            std::pair<std::map<std::string,std::string>::iterator,bool> result
-                = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
-
-            FT_Error error = FT_New_Memory_Face (library_,
-                                                 reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
-                                                 static_cast<FT_Long>(buffer.size()),
-                                                 itr->second.first,
-                                                 &face);
-            if (!error) return boost::make_shared<font_face>(face);
-            else
+#ifdef _WINDOWS
+            FILE * file = _wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(), L"rb");
+#else
+            FILE * file = std::fopen(itr->second.second.c_str(),"rb");
+#endif
+            if (file != NULL)
             {
-                // we can't load font, erase it.
-                memory_fonts_.erase(result.first);
+                std::fseek(file, 0, SEEK_END);
+                std::size_t file_size = std::ftell(file);
+                std::fseek(file, 0, SEEK_SET);
+                std::string buffer;
+                buffer.resize(file_size);
+                std::fread(&buffer[0], file_size, 1, file);
+                std::pair<std::map<std::string,std::string>::iterator,bool> result =
+                    memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
+                FT_Error error = FT_New_Memory_Face (library_,
+                                                     reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
+                                                     static_cast<FT_Long>(buffer.size()),
+                                                     itr->second.first,
+                                                     &face);
+                std::fclose(file);
+                if (!error) return boost::make_shared<font_face>(face);
+                else
+                {
+                    // we can't load font, erase it.
+                    memory_fonts_.erase(result.first);
+                }
             }
         }
     }

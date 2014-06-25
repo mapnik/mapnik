@@ -33,6 +33,7 @@ namespace mapnik { namespace util {
 
 MAPNIK_DECL bool exists(std::string const& value);
 MAPNIK_DECL bool is_directory(std::string const& value);
+MAPNIK_DECL bool is_regular_file(std::string const& value);
 MAPNIK_DECL bool remove(std::string const& value);
 MAPNIK_DECL bool is_relative(std::string const& value);
 MAPNIK_DECL std::string make_relative(std::string const& filepath, std::string const& base);

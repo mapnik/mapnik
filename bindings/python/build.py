@@ -48,7 +48,7 @@ py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
 
 py_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
-py_env['LIBS'] = ['mapnik',env['BOOST_PYTHON_LIB']]
+py_env['LIBS'] = [env['MAPNIK_NAME'],env['BOOST_PYTHON_LIB']]
 
 link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])
 
