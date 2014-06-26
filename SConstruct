@@ -100,6 +100,7 @@ pretty_dep_names = {
 PLUGINS = { # plugins with external dependencies
             # configured by calling project, hence 'path':None
             'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
+            'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
             # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
@@ -1384,7 +1385,7 @@ if not preconfigured:
                                      env['LIBS'].remove(libname)
                             else:
                                 details['lib'] = libname
-                elif plugin == 'postgis':
+                elif plugin == 'postgis' or plugin == 'pgraster':
                     conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
                     if conf.ogr_enabled():
