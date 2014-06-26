@@ -76,7 +76,7 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 
 gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
-      desc_(*params.get<std::string>("type"), "utf-8"),
+      desc_(gdal_datasource::name(), "utf-8"),
       nodata_value_(params.get<double>("nodata")),
       nodata_tolerance_(*params.get<double>("nodata_tolerance",1e-12))
 {

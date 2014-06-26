@@ -11,8 +11,8 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(hello_datasource)
 
 hello_datasource::hello_datasource(parameters const& params)
-: datasource(params),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+  : datasource(params),
+    desc_(hello_datasource::name(), *params.get<std::string>("encoding","utf-8")),
     extent_()
 {
     this->init(params);

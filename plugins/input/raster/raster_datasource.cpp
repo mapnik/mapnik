@@ -46,8 +46,8 @@ using mapnik::image_reader;
 DATASOURCE_PLUGIN(raster_datasource)
 
 raster_datasource::raster_datasource(parameters const& params)
-: datasource(params),
-    desc_(*params.get<std::string>("type"), "utf-8"),
+  : datasource(params),
+    desc_(raster_datasource::name(), "utf-8"),
     extent_initialized_(false)
 {
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";

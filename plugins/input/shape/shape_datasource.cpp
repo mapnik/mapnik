@@ -62,7 +62,7 @@ shape_datasource::shape_datasource(parameters const& params)
       file_length_(0),
       indexed_(false),
       row_limit_(*params.get<mapnik::value_integer>("row_limit",0)),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
+      desc_(shape_datasource::name(), *params.get<std::string>("encoding","utf-8"))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");

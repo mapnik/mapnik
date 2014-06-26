@@ -88,6 +88,15 @@ namespace util {
 #endif
     }
 
+    bool is_regular_file(std::string const& filepath)
+    {
+#ifdef _WINDOWS
+        return boost::filesystem::is_regular_file(mapnik::utf8_to_utf16(filepath));
+#else
+        return boost::filesystem::is_regular_file(filepath);
+#endif
+    }
+
     bool remove(std::string const& filepath)
     {
 #ifdef _WINDOWS

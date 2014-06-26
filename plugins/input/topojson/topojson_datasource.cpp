@@ -143,7 +143,7 @@ struct collect_attributes_visitor : public boost::static_visitor<void>
 topojson_datasource::topojson_datasource(parameters const& params)
   : datasource(params),
     type_(datasource::Vector),
-    desc_(*params.get<std::string>("type"),
+    desc_(topojson_datasource::name(),
           *params.get<std::string>("encoding","utf-8")),
     file_(*params.get<std::string>("file","")),
     extent_(),

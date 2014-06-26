@@ -70,7 +70,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       srid_(*params.get<mapnik::value_integer>("srid", 0)),
       extent_initialized_(false),
       simplify_geometries_(false),
-      desc_(*params.get<std::string>("type"), "utf-8"),
+      desc_(postgis_datasource::name(), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
              params.get<std::string>("dbname"),

@@ -76,7 +76,7 @@ occi_datasource::occi_datasource(parameters const& params)
       scale_denom_token_("!scale_denominator!"),
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+      desc_(occi_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
       use_wkb_(*params.get<mapnik::boolean>("use_wkb", false)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       row_prefetch_(*params.get<int>("row_prefetch", 100)),
