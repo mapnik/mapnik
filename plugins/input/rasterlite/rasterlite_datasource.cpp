@@ -72,7 +72,7 @@ inline void* rasterlite_datasource::open_dataset() const
 
 rasterlite_datasource::rasterlite_datasource(parameters const& params)
     : datasource(params),
-      desc_(*params.get<std::string>("type"),"utf-8")
+      desc_(rasterlite_datasource::name(),"utf-8")
 {
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Initializing...";
 

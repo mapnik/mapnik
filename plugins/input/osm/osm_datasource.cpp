@@ -52,7 +52,7 @@ osm_datasource::osm_datasource(const parameters& params)
     : datasource (params),
       extent_(),
       type_(datasource::Vector),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8"))
+      desc_(osm_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
 {
     osm_data_ = nullptr;
     std::string osm_filename = *params.get<std::string>("file", "");

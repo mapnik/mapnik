@@ -57,23 +57,23 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(csv_datasource)
 
 csv_datasource::csv_datasource(parameters const& params)
-    : datasource(params),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
-      extent_(),
-      filename_(),
-      inline_string_(),
-      file_length_(0),
-      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
-      features_(),
-      escape_(*params.get<std::string>("escape", "")),
-      separator_(*params.get<std::string>("separator", "")),
-      quote_(*params.get<std::string>("quote", "")),
-      headers_(),
-      manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
-      strict_(*params.get<mapnik::boolean>("strict", false)),
-      filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
-      ctx_(std::make_shared<mapnik::context_type>()),
-      extent_initialized_(false)
+  : datasource(params),
+    desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+    extent_(),
+    filename_(),
+    inline_string_(),
+    file_length_(0),
+    row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
+    features_(),
+    escape_(*params.get<std::string>("escape", "")),
+    separator_(*params.get<std::string>("separator", "")),
+    quote_(*params.get<std::string>("quote", "")),
+    headers_(),
+    manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
+    strict_(*params.get<mapnik::boolean>("strict", false)),
+    filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
+    ctx_(std::make_shared<mapnik::context_type>()),
+    extent_initialized_(false)
 {
     /* TODO:
        general:
@@ -475,16 +475,16 @@ void csv_datasource::parse_csv(T & stream,
             {
                 std::ostringstream s;
                 s << "CSV Plugin: # of columns("
-                << num_fields << ") > # of headers("
-                << num_headers << ") parsed for row " << line_number << "\n";
+                  << num_fields << ") > # of headers("
+                  << num_headers << ") parsed for row " << line_number << "\n";
                 throw mapnik::datasource_exception(s.str());
             }
             else if (num_fields < num_headers)
             {
                 std::ostringstream s;
                 s << "CSV Plugin: # of headers("
-                << num_headers << ") > # of columns("
-                << num_fields << ") parsed for row " << line_number << "\n";
+                  << num_headers << ") > # of columns("
+                  << num_fields << ") parsed for row " << line_number << "\n";
                 if (strict_)
                 {
                     throw mapnik::datasource_exception(s.str());
@@ -691,9 +691,9 @@ void csv_datasource::parse_csv(T & stream,
                     }
                 }
                 else if ((value[0] >= '0' && value[0] <= '9') ||
-                          value[0] == '-' ||
-                          value[0] == '+' ||
-                          value[0] == '.')
+                         value[0] == '-' ||
+                         value[0] == '+' ||
+                         value[0] == '.')
                 {
                     bool has_e = value.find("e") != std::string::npos;
                     if (has_dot || has_e)
@@ -805,14 +805,14 @@ void csv_datasource::parse_csv(T & stream,
                     s << "CSV Plugin: does your csv have valid headers?\n";
                     if (!parsed_x)
                     {
-                          s << "Could not detect or parse any rows named 'x' or 'longitude' "
+                        s << "Could not detect or parse any rows named 'x' or 'longitude' "
                           << "for line " << line_number << " but found " <<  headers_.size()
                           << " with values like: " << csv_line << "\n"
                           << "for: " << boost::algorithm::join(collected, ",") << "\n";
                     }
                     if (!parsed_y)
                     {
-                          s << "Could not detect or parse any rows named 'y' or 'latitude' "
+                        s << "Could not detect or parse any rows named 'y' or 'latitude' "
                           << "for line " << line_number << " but found " <<  headers_.size()
                           << " with values like: " << csv_line << "\n"
                           << "for: " << boost::algorithm::join(collected, ",") << "\n";

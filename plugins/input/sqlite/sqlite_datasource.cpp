@@ -66,7 +66,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
       row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       intersects_token_("!intersects!"),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+      desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
       format_(mapnik::wkbAuto)
 {
     /* TODO

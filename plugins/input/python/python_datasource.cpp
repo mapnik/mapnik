@@ -21,7 +21,7 @@ DATASOURCE_PLUGIN(python_datasource)
 
 python_datasource::python_datasource(parameters const& params)
   : datasource(params),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+    desc_(python_datasource::name(), *params.get<std::string>("encoding","utf-8")),
     factory_(*params.get<std::string>("factory", ""))
 {
     // extract any remaining parameters as keyword args for the factory
