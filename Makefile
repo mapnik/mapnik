@@ -25,8 +25,8 @@ all: mapnik
 
 g: config.gypi mapnik.gyp ./deps/gyp
 	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. --generator-output=./build/ -f make
-	export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64/bin/:$$PATH && make -C build V=$(V) mapnik -j2
-	export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64/bin/:$$PATH && make -C build V=1 -j2
+	#export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64/bin/:$$PATH && make -C build V=$(V) mapnik -j2
+	export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64-macosx/bin/:$$PATH && make -C build V=1 -j2
 	make test
 
 install:
