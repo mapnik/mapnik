@@ -88,6 +88,7 @@ private:
     boost::optional<box2d<double> > maximum_extent_;
     std::string base_path_;
     parameters extra_params_;
+    std::map<std::string,std::pair<int,std::string> > font_file_mapping_;
 
 public:
 
@@ -425,6 +426,16 @@ public:
      * @brief Set extra, arbitary Parameters of the Map
      */
     void set_extra_parameters(parameters& params);
+
+    std::map<std::string,std::pair<int,std::string> > const& get_font_file_mapping() const
+    {
+        return font_file_mapping_;
+    }
+
+    std::map<std::string,std::pair<int,std::string> > & get_font_file_mapping()
+    {
+        return font_file_mapping_;
+    }
 
 private:
     void fixAspectRatio();
