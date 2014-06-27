@@ -47,10 +47,16 @@ public:
 
 
 private:
+  void read_grayscale(mapnik::raster_ptr raster);
+  void read_rgb(mapnik::raster_ptr raster);
+
   int wkbsize_;
   const uint8_t* wkb_;
   const uint8_t* wkbend_;
   const uint8_t* ptr_;
+  uint16_t numBands_;
+  uint16_t width_;
+  uint16_t height_;
 };
 
 
