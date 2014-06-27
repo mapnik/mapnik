@@ -51,6 +51,8 @@
 // boost
 #include <boost/variant/variant_fwd.hpp>
 #include <boost/concept_check.hpp>
+// agg
+#include "agg_pixfmt_rgba.h"
 
 namespace agg { struct trans_affine; }
 
@@ -185,6 +187,19 @@ struct expression_result<T,false>
         return val.convert<T>();
     }
 };
+
+template <>
+struct expression_result<agg::comp_op_e,true>
+{
+    typedef agg::comp_op_e result_type;
+    static result_type convert(value_type const& val)
+    {
+        auto result = comp_op_from_string(val.to_string());
+        if (result) return static_cast<result_type>(*result);
+        return agg::comp_op_src_over;
+    }
+};
+
 
 // enum
 template <typename T, bool is_enum = true>

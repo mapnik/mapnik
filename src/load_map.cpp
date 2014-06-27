@@ -846,41 +846,71 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
     }
 }
 
-// helper method
+namespace detail {
+// helpers
+template <typename Symbolizer, typename T>
+struct set_symbolizer_property_impl
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    {
+        typedef T value_type;
+        std::string const& name = std::get<0>(get_meta(key));
+        try
+        {
+            optional<value_type> val = node.get_opt_attr<value_type>(name);
+            if (val) put(sym, key, *val);
+        }
+        catch (config_error const&)
+        {
+            // try parser as an expression
+            optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+            if (val) put(sym, key, *val);
+        }
+    }
+};
+
+template <typename Symbolizer>
+struct set_symbolizer_property_impl<Symbolizer, composite_mode_e>
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    {
+        typedef composite_mode_e value_type;
+        std::string const& name = std::get<0>(get_meta(key));
+        try
+        {
+            optional<std::string> comp_op_name = node.get_opt_attr<std::string>("comp-op");
+            if (comp_op_name)
+            {
+                optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+                if (comp_op)
+                {
+                    put(sym, keys::comp_op, *comp_op);
+                }
+                else
+                {
+                    optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+                    if (val) put(sym, key, *val);
+                }
+            }
+        }
+        catch (config_error const& ex)
+        {
+            MAPNIK_LOG_ERROR(composite_mode_e) << ex.what();
+        }
+    }
+};
+} // namespace detail
+
 template <typename Symbolizer, typename T>
 void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const & node)
 {
-    typedef T value_type;
-    std::string const& name = std::get<0>(get_meta(key));
-    try
-    {
-        optional<value_type> val = node.get_opt_attr<value_type>(name);
-        if (val) put(sym, key, *val);
-    }
-    catch (config_error const&)
-    {
-        // try parser as an expression
-        optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-        if (val) put(sym, key, *val);
-    }
+    detail::set_symbolizer_property_impl<Symbolizer,T>::apply(sym,key,node);
 }
 
 void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
 {
-    optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
-    if (comp_op_name)
-    {
-        optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
-        if (comp_op)
-        {
-            put(sym, keys::comp_op, *comp_op);
-        }
-        else
-        {
-            throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
-        }
-    }
 
+    set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, pt);
     optional<std::string> geometry_transform_wkt = pt.get_opt_attr<std::string>("geometry-transform");
     if (geometry_transform_wkt)
     {

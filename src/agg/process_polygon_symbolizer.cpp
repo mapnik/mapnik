@@ -51,7 +51,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
 {
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     typedef vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
-                             CoordTransform, proj_transform, agg::trans_affine, 
+                             CoordTransform, proj_transform, agg::trans_affine,
                              conv_types, feature_impl> vertex_converter_type;
 
     ras_ptr->reset();
@@ -81,7 +81,8 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
             typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
             typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
             pixfmt_comp_type pixf(buf);
-            pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
+            auto comp_op = get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over);
+            pixf.comp_op(comp_op);
             renderer_base renb(pixf);
             renderer_type ren(renb);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
