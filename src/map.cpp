@@ -70,7 +70,9 @@ Map::Map()
     background_image_comp_op_(src_over),
     background_image_opacity_(1.0),
     aspectFixMode_(GROW_BBOX),
-    base_path_("") {}
+    base_path_(""),
+    extra_params_(),
+    font_file_mapping_() {}
 
 Map::Map(int width,int height, std::string const& srs)
     : width_(width),
@@ -80,7 +82,9 @@ Map::Map(int width,int height, std::string const& srs)
       background_image_comp_op_(src_over),
       background_image_opacity_(1.0),
       aspectFixMode_(GROW_BBOX),
-      base_path_("") {}
+      base_path_(""),
+      extra_params_(),
+      font_file_mapping_() {}
 
 Map::Map(Map const& rhs)
     : width_(rhs.width_),
@@ -98,7 +102,9 @@ Map::Map(Map const& rhs)
       current_extent_(rhs.current_extent_),
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
-      extra_params_(rhs.extra_params_) {}
+      extra_params_(rhs.extra_params_),
+      font_directory_(rhs.font_directory_),
+      font_file_mapping_(rhs.font_file_mapping_) {}
 
 Map::~Map() {}
 
@@ -120,6 +126,8 @@ Map& Map::operator=(Map const& rhs)
     maximum_extent_=rhs.maximum_extent_;
     base_path_=rhs.base_path_;
     extra_params_=rhs.extra_params_;
+    font_directory_=rhs.font_directory_;
+    font_file_mapping_=rhs.font_file_mapping_;
     return *this;
 }
 

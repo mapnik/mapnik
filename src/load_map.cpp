@@ -263,6 +263,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             optional<std::string> font_directory = map_node.get_opt_attr<std::string>("font-directory");
             if (font_directory)
             {
+                map.set_font_directory(*font_directory);
                 if (!freetype_engine::register_fonts(ensure_relative_to_xml(font_directory),
                                                      map.get_font_file_mapping(),
                                                      false))
