@@ -862,7 +862,7 @@ struct set_symbolizer_property_impl
         }
         catch (config_error const&)
         {
-            // try parser as an expression
+            // try parsing as an expression
             optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
             if (val) put(sym, key, *val);
         }
@@ -878,13 +878,14 @@ struct set_symbolizer_property_impl<Symbolizer, composite_mode_e>
         std::string const& name = std::get<0>(get_meta(key));
         try
         {
-            optional<std::string> comp_op_name = node.get_opt_attr<std::string>("comp-op");
+            optional<std::string> comp_op_name = node.get_opt_attr<std::string>(name);
+
             if (comp_op_name)
             {
                 optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
                 if (comp_op)
                 {
-                    put(sym, keys::comp_op, *comp_op);
+                    put(sym, key, *comp_op);
                 }
                 else
                 {
@@ -1203,19 +1204,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
         text_symbolizer text_symbol;
         parse_symbolizer_base(text_symbol, node);
         // halo-comp-op
-        optional<std::string> comp_op_name = node.get_opt_attr<std::string>("halo-comp-op");
-        if (comp_op_name)
-        {
-            optional<composite_mode_e> halo_comp_op = comp_op_from_string(*comp_op_name);
-            if (halo_comp_op)
-            {
-                put(text_symbol, keys::halo_comp_op, *halo_comp_op);
-            }
-            else
-            {
-                throw config_error("failed to parse halo-comp-op: '" + *comp_op_name + "'");
-            }
-        }
+        set_symbolizer_property<symbolizer_base,composite_mode_e>(text_symbol, keys::halo_comp_op, node);
 
         put<text_placements_ptr>(text_symbol, keys::text_placements_, placement_finder);
         optional<halo_rasterizer_e> halo_rasterizer_ = node.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");

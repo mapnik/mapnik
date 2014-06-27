@@ -51,8 +51,6 @@
 // boost
 #include <boost/variant/variant_fwd.hpp>
 #include <boost/concept_check.hpp>
-// agg
-#include "agg_pixfmt_rgba.h"
 
 namespace agg { struct trans_affine; }
 
@@ -132,7 +130,8 @@ enum class property_types : std::uint8_t
     target_dash_array,
     target_colorizer,
     target_repeat_key,
-    target_group_symbolizer_properties
+    target_group_symbolizer_properties,
+    target_halo_comp_op
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
@@ -174,7 +173,9 @@ struct expression_result
     typedef T result_type;
     static result_type convert(value_type const& val)
     {
-        return static_cast<T>(val.convert<value_integer>());
+        auto result = comp_op_from_string(val.to_string());
+        if (result) return static_cast<result_type>(*result);
+        return result_type(0);
     }
 };
 
@@ -185,18 +186,6 @@ struct expression_result<T,false>
     static result_type convert(value_type const& val)
     {
         return val.convert<T>();
-    }
-};
-
-template <>
-struct expression_result<agg::comp_op_e,true>
-{
-    typedef agg::comp_op_e result_type;
-    static result_type convert(value_type const& val)
-    {
-        auto result = comp_op_from_string(val.to_string());
-        if (result) return static_cast<result_type>(*result);
-        return agg::comp_op_src_over;
     }
 };
 
