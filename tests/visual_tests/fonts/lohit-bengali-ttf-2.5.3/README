@@ -1,0 +1,21 @@
+					Lohit Fonts Project
+
+1) Generating .ttf file from source
+   Example
+   $tar -xvf lohit-hindi-2.4.3.tar.gz 
+   $cd lohit-hindi-2.4.3
+   $make
+
+2) Installing font (.ttf) file
+   You can then install .ttf font files by copying them to ~/.fonts directory. 
+   Then execute fc-cache command and then relogin to use that font.
+   
+
+Lohit Project Information :-
+See https://fedorahosted.org/lohit/ for more details.
+
+Mailing list:-
+http://www.redhat.com/mailman/listinfo/lohit-devel-list
+
+
+

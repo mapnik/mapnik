@@ -14,7 +14,7 @@
     <Style name="My Style">
         <Rule>
             <LineSymbolizer stroke-width="12" stroke="red"/>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="line" spacing="10" upright="left" max-char-angle-delta="0">"Some Text"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="line" spacing="10" max-char-angle-delta="0">"Some Text"</TextSymbolizer>
         </Rule>
     </Style>
 
