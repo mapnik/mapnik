@@ -57,6 +57,97 @@ namespace agg { struct trans_affine; }
 namespace mapnik
 {
 
+enum line_cap_enum
+{
+    BUTT_CAP,
+    SQUARE_CAP,
+    ROUND_CAP,
+    line_cap_enum_MAX
+};
+
+DEFINE_ENUM( line_cap_e, line_cap_enum );
+
+enum line_join_enum
+{
+    MITER_JOIN,
+    MITER_REVERT_JOIN,
+    ROUND_JOIN,
+    BEVEL_JOIN,
+    line_join_enum_MAX
+};
+
+DEFINE_ENUM( line_join_e, line_join_enum );
+
+enum line_rasterizer_enum
+{
+    RASTERIZER_FULL,           // agg::renderer_scanline_aa_solid
+    RASTERIZER_FAST,           // agg::rasterizer_outline_aa, twice as fast but only good for thin lines
+    line_rasterizer_enum_MAX
+};
+
+DEFINE_ENUM( line_rasterizer_e, line_rasterizer_enum );
+
+
+enum halo_rasterizer_enum
+{
+    HALO_RASTERIZER_FULL,
+    HALO_RASTERIZER_FAST,
+    halo_rasterizer_enum_MAX
+};
+
+DEFINE_ENUM(halo_rasterizer_e, halo_rasterizer_enum);
+
+enum point_placement_enum
+{
+    CENTROID_POINT_PLACEMENT,
+    INTERIOR_POINT_PLACEMENT,
+    point_placement_enum_MAX
+};
+
+DEFINE_ENUM( point_placement_e, point_placement_enum );
+
+enum pattern_alignment_enum
+{
+    LOCAL_ALIGNMENT,
+    GLOBAL_ALIGNMENT,
+    pattern_alignment_enum_MAX
+};
+
+DEFINE_ENUM( pattern_alignment_e, pattern_alignment_enum );
+
+enum debug_symbolizer_mode_enum
+{
+    DEBUG_SYM_MODE_COLLISION,
+    DEBUG_SYM_MODE_VERTEX,
+    debug_symbolizer_mode_enum_MAX
+};
+
+DEFINE_ENUM( debug_symbolizer_mode_e, debug_symbolizer_mode_enum );
+
+
+// markers
+// TODO - consider merging with text_symbolizer label_placement_e
+enum marker_placement_enum
+{
+    MARKER_POINT_PLACEMENT,
+    MARKER_INTERIOR_PLACEMENT,
+    MARKER_LINE_PLACEMENT,
+    marker_placement_enum_MAX
+};
+
+DEFINE_ENUM( marker_placement_e, marker_placement_enum );
+
+enum marker_multi_policy_enum
+{
+    MARKER_EACH_MULTI, // each component in a multi gets its marker
+    MARKER_WHOLE_MULTI, // consider all components of a multi as a whole
+    MARKER_LARGEST_MULTI, // only the largest component of a multi gets a marker
+    marker_multi_policy_enum_MAX
+};
+
+DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
+
+
 // fwd declares
 // TODO - move these transform declares to own header
 namespace detail { struct transform_node; }
@@ -166,6 +257,64 @@ struct evaluate_path_wrapper<std::string>
 
 namespace detail {
 
+template <typename T>
+struct enum_traits
+{
+    typedef boost::optional<T> result_type;
+    static result_type from_string(std::string const& str)
+    {
+        return result_type();
+    }
+};
+
+template <>
+struct enum_traits<composite_mode_e>
+{
+    typedef boost::optional<composite_mode_e> result_type;
+    static result_type from_string(std::string const& str)
+    {
+        return comp_op_from_string(str);
+    }
+};
+
+template <>
+struct enum_traits<line_join_enum>
+{
+    typedef boost::optional<line_join_enum> result_type;
+    static result_type from_string(std::string const& str)
+    {
+        enumeration<line_join_enum,line_join_enum_MAX> e;
+        try
+        {
+            e.from_string(str);
+            return result_type(line_join_enum(e));
+        }
+        catch (...)
+        {
+            return result_type();
+        }
+    }
+};
+
+template <>
+struct enum_traits<line_cap_enum>
+{
+    typedef boost::optional<line_cap_enum> result_type;
+    static result_type from_string(std::string const& str)
+    {
+        enumeration<line_cap_enum,line_cap_enum_MAX> e;
+        try
+        {
+            e.from_string(str);
+            return result_type(line_cap_enum(e));
+        }
+        catch (...)
+        {
+            return result_type();
+        }
+    }
+};
+
 // enum
 template <typename T, bool is_enum = true>
 struct expression_result
@@ -173,7 +322,7 @@ struct expression_result
     typedef T result_type;
     static result_type convert(value_type const& val)
     {
-        auto result = comp_op_from_string(val.to_string());
+        auto result = enum_traits<T>::from_string(val.to_string());
         if (result) return static_cast<result_type>(*result);
         return result_type(0);
     }
@@ -458,95 +607,6 @@ typedef boost::variant<point_symbolizer,
 
 typedef std::vector<std::pair<double,double> > dash_array;
 
-enum line_cap_enum
-{
-    BUTT_CAP,
-    SQUARE_CAP,
-    ROUND_CAP,
-    line_cap_enum_MAX
-};
-
-DEFINE_ENUM( line_cap_e, line_cap_enum );
-
-enum line_join_enum
-{
-    MITER_JOIN,
-    MITER_REVERT_JOIN,
-    ROUND_JOIN,
-    BEVEL_JOIN,
-    line_join_enum_MAX
-};
-
-DEFINE_ENUM( line_join_e, line_join_enum );
-
-enum line_rasterizer_enum
-{
-    RASTERIZER_FULL,           // agg::renderer_scanline_aa_solid
-    RASTERIZER_FAST,           // agg::rasterizer_outline_aa, twice as fast but only good for thin lines
-    line_rasterizer_enum_MAX
-};
-
-DEFINE_ENUM( line_rasterizer_e, line_rasterizer_enum );
-
-
-enum halo_rasterizer_enum
-{
-    HALO_RASTERIZER_FULL,
-    HALO_RASTERIZER_FAST,
-    halo_rasterizer_enum_MAX
-};
-
-DEFINE_ENUM(halo_rasterizer_e, halo_rasterizer_enum);
-
-enum point_placement_enum
-{
-    CENTROID_POINT_PLACEMENT,
-    INTERIOR_POINT_PLACEMENT,
-    point_placement_enum_MAX
-};
-
-DEFINE_ENUM( point_placement_e, point_placement_enum );
-
-enum pattern_alignment_enum
-{
-    LOCAL_ALIGNMENT,
-    GLOBAL_ALIGNMENT,
-    pattern_alignment_enum_MAX
-};
-
-DEFINE_ENUM( pattern_alignment_e, pattern_alignment_enum );
-
-enum debug_symbolizer_mode_enum
-{
-    DEBUG_SYM_MODE_COLLISION,
-    DEBUG_SYM_MODE_VERTEX,
-    debug_symbolizer_mode_enum_MAX
-};
-
-DEFINE_ENUM( debug_symbolizer_mode_e, debug_symbolizer_mode_enum );
-
-
-// markers
-// TODO - consider merging with text_symbolizer label_placement_e
-enum marker_placement_enum
-{
-    MARKER_POINT_PLACEMENT,
-    MARKER_INTERIOR_PLACEMENT,
-    MARKER_LINE_PLACEMENT,
-    marker_placement_enum_MAX
-};
-
-DEFINE_ENUM( marker_placement_e, marker_placement_enum );
-
-enum marker_multi_policy_enum
-{
-    MARKER_EACH_MULTI, // each component in a multi gets its marker
-    MARKER_WHOLE_MULTI, // consider all components of a multi as a whole
-    MARKER_LARGEST_MULTI, // only the largest component of a multi gets a marker
-    marker_multi_policy_enum_MAX
-};
-
-DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
 
 }
 

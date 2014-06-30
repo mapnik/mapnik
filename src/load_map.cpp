@@ -848,7 +848,7 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
 
 namespace detail {
 // helpers
-template <typename Symbolizer, typename T>
+template <typename Symbolizer, typename T, bool is_enum = false>
 struct set_symbolizer_property_impl
 {
     static void apply(Symbolizer & sym, keys key, xml_node const & node)
@@ -869,23 +869,23 @@ struct set_symbolizer_property_impl
     }
 };
 
-template <typename Symbolizer>
-struct set_symbolizer_property_impl<Symbolizer, composite_mode_e>
+template <typename Symbolizer, typename T>
+struct set_symbolizer_property_impl<Symbolizer, T, true>
 {
     static void apply(Symbolizer & sym, keys key, xml_node const & node)
     {
-        typedef composite_mode_e value_type;
+        typedef T value_type;
         std::string const& name = std::get<0>(get_meta(key));
         try
         {
-            optional<std::string> comp_op_name = node.get_opt_attr<std::string>(name);
+            optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
 
-            if (comp_op_name)
+            if (enum_str)
             {
-                optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
-                if (comp_op)
+                optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);
+                if (enum_val)
                 {
-                    put(sym, key, *comp_op);
+                    put(sym, key, *enum_val);
                 }
                 else
                 {
@@ -905,7 +905,7 @@ struct set_symbolizer_property_impl<Symbolizer, composite_mode_e>
 template <typename Symbolizer, typename T>
 void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const & node)
 {
-    detail::set_symbolizer_property_impl<Symbolizer,T>::apply(sym,key,node);
+    detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,node);
 }
 
 void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
@@ -1321,12 +1321,14 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & node)
     set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_opacity, node);
 
     // stroke-linejoin
-    optional<line_join_e> line_join = node.get_opt_attr<line_join_e>("stroke-linejoin");
-    if (line_join) put(symbol, keys::stroke_linejoin, line_join_enum(*line_join));
+    set_symbolizer_property<symbolizer_base,line_join_enum>(symbol, keys::stroke_linejoin, node);
+    //optional<line_join_e> line_join = node.get_opt_attr<line_join_e>("stroke-linejoin");
+    //if (line_join) put(symbol, keys::stroke_linejoin, line_join_enum(*line_join));
 
     // stroke-linecap
-    optional<line_cap_e> line_cap = node.get_opt_attr<line_cap_e>("stroke-linecap");
-    if (line_cap) put(symbol, keys::stroke_linecap,line_cap_enum(*line_cap));
+    set_symbolizer_property<symbolizer_base,line_cap_enum>(symbol, keys::stroke_linecap, node);
+    //optional<line_cap_e> line_cap = node.get_opt_attr<line_cap_e>("stroke-linecap");
+    //if (line_cap) put(symbol, keys::stroke_linecap,line_cap_enum(*line_cap));
 
     // stroke-gamma
     optional<double> gamma = node.get_opt_attr<double>("stroke-gamma");
