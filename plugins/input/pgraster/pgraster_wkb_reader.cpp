@@ -272,7 +272,6 @@ pgraster_wkb_reader::get_raster() {
     MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: Raster extent=" << ext;
 
     mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(ext, width_, height_);
-    mapnik::image_data_32 & image = raster->data_;
 
     switch (numBands_) {
       case 1:
