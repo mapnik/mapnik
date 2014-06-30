@@ -891,12 +891,13 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                 {
                     optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
                     if (val) put(sym, key, *val);
+                    else MAPNIK_LOG_ERROR(Symbolizer) << " failed to parse:" << name;
                 }
             }
         }
         catch (config_error const& ex)
         {
-            MAPNIK_LOG_ERROR(composite_mode_e) << ex.what();
+            MAPNIK_LOG_ERROR(Symbolizer) << ex.what();
         }
     }
 };

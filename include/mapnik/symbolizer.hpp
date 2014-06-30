@@ -277,43 +277,26 @@ struct enum_traits<composite_mode_e>
     }
 };
 
-template <>
-struct enum_traits<line_join_enum>
-{
-    typedef boost::optional<line_join_enum> result_type;
-    static result_type from_string(std::string const& str)
-    {
-        enumeration<line_join_enum,line_join_enum_MAX> e;
-        try
-        {
-            e.from_string(str);
-            return result_type(line_join_enum(e));
-        }
-        catch (...)
-        {
-            return result_type();
-        }
-    }
-};
+#define ENUM_FROM_STRING( e ) \
+template <> struct enum_traits<e> { \
+    typedef boost::optional<e> result_type; \
+    static result_type from_string(std::string const& str) \
+    { \
+        enumeration<e, e ## _MAX> enum_; \
+        try \
+        { \
+            enum_.from_string(str); \
+            return result_type(e(enum_)); \
+        } \
+        catch (...) \
+        { \
+            return result_type(); \
+        } \
+    } \
+};\
 
-template <>
-struct enum_traits<line_cap_enum>
-{
-    typedef boost::optional<line_cap_enum> result_type;
-    static result_type from_string(std::string const& str)
-    {
-        enumeration<line_cap_enum,line_cap_enum_MAX> e;
-        try
-        {
-            e.from_string(str);
-            return result_type(line_cap_enum(e));
-        }
-        catch (...)
-        {
-            return result_type();
-        }
-    }
-};
+ENUM_FROM_STRING( line_join_enum )
+ENUM_FROM_STRING( line_cap_enum )
 
 // enum
 template <typename T, bool is_enum = true>
