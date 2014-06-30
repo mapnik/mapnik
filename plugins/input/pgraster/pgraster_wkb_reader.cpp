@@ -30,7 +30,6 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/global.hpp> // for int2net
 #include <mapnik/box2d.hpp> // for box2d
 
 // boost
