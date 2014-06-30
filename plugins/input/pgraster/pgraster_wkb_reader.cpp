@@ -155,7 +155,53 @@ void
 pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
 {
   mapnik::image_data_32 & image = raster->data_;
-  image.set(0x220000ff); // this is red, half-transparent
+
+  // Start with plain white (ABGR or RGBA depending on endiannes)
+  image.set(0xffffffff);
+
+  raster->premultiplied_alpha_ = true;
+
+  uint8_t type = read_uint8(&ptr_);
+
+  int pixtype = BANDTYPE_PIXTYPE(type);
+  int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
+  int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
+
+  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: band type:"
+        << pixtype << " offline:" << offline
+        << " hasnodata:" << hasnodata;
+
+  if ( offline ) {
+    MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: offline band "
+          " unsupported";
+    return;
+  }
+
+  if ( pixtype > PT_8BUI || pixtype < PT_8BSI ) {
+    MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: band "
+          "type " << type << " unsupported";
+    return;
+  }
+
+  uint8_t nodataval = read_uint8(&ptr_); // need to read anyway
+  if ( hasnodata ) {
+    MAPNIK_LOG_WARN(pgraster) <<
+      "pgraster_featureset: nodata value unsupported";
+  }
+
+  int ps = 4; // sizeof(image_data::pixel_type)
+  uint8_t * image_data = image.getBytes();
+  for (int y=0; y<height_; ++y) {
+    //uint8_t *optr = image_data + y * width_ * ps;
+    for (int x=0; x<width_; ++x) {
+      uint8_t val = read_uint8(&ptr_);
+      int off = y * width_ * ps + x * ps;
+      // Pixel space is RGBA
+      image_data[off+0] = val;
+      image_data[off+1] = val;
+      image_data[off+2] = val;
+    }
+  }
 }
 
 void
