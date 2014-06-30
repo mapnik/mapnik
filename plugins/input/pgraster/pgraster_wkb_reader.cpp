@@ -163,9 +163,14 @@ void
 pgraster_wkb_reader::read_rgb(mapnik::raster_ptr raster)
 {
   mapnik::image_data_32 & image = raster->data_;
-  uint8_t nodataval;
 
-  //image.set(0x2200ff00); // this is green, half-transparent
+  // Start with plain white (ABGR or RGBA depending on endiannes)
+  image.set(0xffffffff);
+  //raster->set_nodata(0xffffffff);
+
+  raster->premultiplied_alpha_ = true;
+
+  uint8_t nodataval;
   for (int bn=0; bn<numBands_; ++bn) {
     uint8_t type = read_uint8(&ptr_);
 
@@ -196,15 +201,24 @@ pgraster_wkb_reader::read_rgb(mapnik::raster_ptr raster)
             << " nodataval " << tmp << " != band 0 nodataval " << nodataval;
     }
 
-    int ps = 4; // pixel size
+    int ps = 4; // sizeof(image_data::pixel_type)
     uint8_t * image_data = image.getBytes();
     for (int y=0; y<height_; ++y) {
+      //uint8_t *optr = image_data + y * width_ * ps;
       for (int x=0; x<width_; ++x) {
         uint8_t val = read_uint8(&ptr_);
+        // optr would now point to an ABGR pixel
+        // we'll consider first band  (bn=0) to be R optr[4-0-1] = optr[3]
+        // we'll consider second band (bn=1) to be G optr[4-1-1] = optr[2]
+        // we'll consider third  band (bn=2) to be B optr[4-2-1] = optr[1]
+        // optr[0] will be alpha
+        //optr[0] = 255;
+        ///////////optr[ps - bn - 1] = val;
         // y * width_ * ps is the row (ps is pixel size)
         // x * ps is the column
-        // 3 - bn is the band (AGBR, 0 is alpha so we never hit it)
-        image_data[ y * width_ * ps + x * ps + 4 - bn ] = val;
+        int off = y * width_ * ps + x * ps;
+        // Pixel space is RGBA
+        image_data[off+bn] = val;
       }
     }
   }
@@ -258,9 +272,7 @@ pgraster_wkb_reader::get_raster() {
     MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: Raster extent=" << ext;
 
     mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(ext, width_, height_);
-    //raster->set_nodata(0x11111111);
     mapnik::image_data_32 & image = raster->data_;
-    image.set(0xffffffff); // this is white, opaque (should be transparent?)
 
     switch (numBands_) {
       case 1:
