@@ -90,11 +90,11 @@ public:
         xml_base_path_()
     {}
 
-    void parse_map(Map & map, xml_node const& sty, std::string const& base_path);
+    void parse_map(Map & map, xml_node const& node, std::string const& base_path);
 private:
-    void parse_map_include(Map & map, xml_node const& include);
-    void parse_style(Map & map, xml_node const& sty);
-    void parse_layer(Map & map, xml_node const& lay);
+    void parse_map_include(Map & map, xml_node const& node);
+    void parse_style(Map & map, xml_node const& node);
+    void parse_layer(Map & map, xml_node const& node);
     void parse_symbolizer_base(symbolizer_base &sym, xml_node const& node);
 
     void parse_fontset(Map & map, xml_node const & fset);
@@ -169,11 +169,11 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     parser.parse_map(map, tree.root(), base_path);
 }
 
-void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& base_path)
+void map_parser::parse_map(Map & map, xml_node const& node, std::string const& base_path)
 {
     try
     {
-        xml_node const& map_node = pt.get_child("Map");
+        xml_node const& map_node = node.get_child("Map");
         try
         {
             // Check if relative paths should be interpreted as relative to/from XML location
@@ -332,14 +332,14 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
     {
         throw config_error("Not a map file. Node 'Map' not found.");
     }
-    find_unused_nodes(pt);
+    find_unused_nodes(node);
 }
 
-void map_parser::parse_map_include(Map & map, xml_node const& include)
+void map_parser::parse_map_include(Map & map, xml_node const& node)
 {
     try
     {
-        for (auto const& n : include)
+        for (auto const& n : node)
         {
             if (n.is_text()) continue;
             if (n.is("Include"))
@@ -408,24 +408,24 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
     }
     catch (config_error const& ex)
     {
-        ex.append_context(include);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_style(Map & map, xml_node const& sty)
+void map_parser::parse_style(Map & map, xml_node const& node)
 {
     std::string name("<missing name>");
     try
     {
-        name = sty.get_attr<std::string>("name");
+        name = node.get_attr<std::string>("name");
         feature_type_style style;
 
-        filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
+        filter_mode_e filter_mode = node.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
 
         // compositing
-        optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
+        optional<std::string> comp_op_name = node.get_opt_attr<std::string>("comp-op");
         if (comp_op_name)
         {
             optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
@@ -439,17 +439,17 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             }
         }
 
-        optional<double> opacity = sty.get_opt_attr<double>("opacity");
+        optional<double> opacity = node.get_opt_attr<double>("opacity");
         if (opacity) style.set_opacity(*opacity);
 
-        optional<boolean> image_filters_inflate = sty.get_opt_attr<boolean>("image-filters-inflate");
+        optional<boolean> image_filters_inflate = node.get_opt_attr<boolean>("image-filters-inflate");
         if (image_filters_inflate)
         {
             style.set_image_filters_inflate(*image_filters_inflate);
         }
 
         // image filters
-        optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
+        optional<std::string> filters = node.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
             if (!parse_image_filters(*filters, style.image_filters())) {
@@ -461,7 +461,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         // TODO : consider creating a separate XML node e.g
         // <ImageFilter name="myfilter" op="blur emboss"/>
         //
-        optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
+        optional<std::string> direct_filters = node.get_opt_attr<std::string>("direct-image-filters");
         if (direct_filters)
         {
             if (!parse_image_filters(*direct_filters, style.direct_image_filters())) {
@@ -469,9 +469,9 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             }
         }
 
-        style.reserve(sty.size());
+        style.reserve(node.size());
         // rules
-        for (auto const& rule_ : sty)
+        for (auto const& rule_ : node)
         {
             if (rule_.is("Rule"))
             {
@@ -482,20 +482,20 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
     }
     catch (config_error const& ex)
     {
-        ex.append_context(std::string("in style '") + name + "'", sty);
+        ex.append_context(std::string("in style '") + name + "'", node);
         throw;
     }
 }
 
-void map_parser::parse_fontset(Map & map, xml_node const& fset)
+void map_parser::parse_fontset(Map & map, xml_node const& node)
 {
     std::string name("<missing name>");
     try
     {
-        name = fset.get_attr<std::string>("name");
+        name = node.get_attr<std::string>("name");
         font_set fontset(name);
         bool success = false;
-        for (auto const& n: fset)
+        for (auto const& n: node)
         {
             if (n.is("Font"))
             {
@@ -519,7 +519,7 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
     }
     catch (config_error const& ex)
     {
-        ex.append_context(std::string("in FontSet '") + name + "'", fset);
+        ex.append_context(std::string("in FontSet '") + name + "'", node);
         throw;
     }
 }
