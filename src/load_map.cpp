@@ -891,13 +891,17 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                 {
                     optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
                     if (val) put(sym, key, *val);
-                    else MAPNIK_LOG_ERROR(Symbolizer) << " failed to parse:" << name;
+                    else
+                    {
+                        throw config_error("failed to parse symbolizer property: '" + name + "'");
+                    }
                 }
             }
         }
         catch (config_error const& ex)
         {
-            MAPNIK_LOG_ERROR(Symbolizer) << ex.what();
+            ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
+            throw;
         }
     }
 };
