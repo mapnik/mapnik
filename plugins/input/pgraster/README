@@ -1,0 +1,6 @@
+This plugin shares directives with the "postgis" one,
+with the following differences:
+
+ - "raster_field" replaces "geometry_field"
+
+ - "prescale_rasters" replaces "simplify_geometries"
