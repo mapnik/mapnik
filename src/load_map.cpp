@@ -860,11 +860,16 @@ struct set_symbolizer_property_impl
             optional<value_type> val = node.get_opt_attr<value_type>(name);
             if (val) put(sym, key, *val);
         }
-        catch (config_error const&)
+        catch (config_error const& ex)
         {
             // try parsing as an expression
             optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
             if (val) put(sym, key, *val);
+            else
+            {
+                ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
+                throw;
+            }
         }
     }
 };
@@ -1324,17 +1329,10 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & node)
     set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_width, node);
     // stroke-opacity
     set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_opacity, node);
-
     // stroke-linejoin
     set_symbolizer_property<symbolizer_base,line_join_enum>(symbol, keys::stroke_linejoin, node);
-    //optional<line_join_e> line_join = node.get_opt_attr<line_join_e>("stroke-linejoin");
-    //if (line_join) put(symbol, keys::stroke_linejoin, line_join_enum(*line_join));
-
     // stroke-linecap
     set_symbolizer_property<symbolizer_base,line_cap_enum>(symbol, keys::stroke_linecap, node);
-    //optional<line_cap_e> line_cap = node.get_opt_attr<line_cap_e>("stroke-linecap");
-    //if (line_cap) put(symbol, keys::stroke_linecap,line_cap_enum(*line_cap));
-
     // stroke-gamma
     optional<double> gamma = node.get_opt_attr<double>("stroke-gamma");
     if (gamma) put(symbol, keys::stroke_gamma, *gamma);
