@@ -2,6 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
+ * Copyright (C) 2014 Sandro Santilli <strk@keybit.net>
  * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
@@ -61,6 +62,15 @@ using mapnik::coord2d;
 
 typedef boost::shared_ptr< ConnectionManager::PoolType> CnxPool_ptr;
 
+struct pgraster_overview
+{
+  std::string schema;
+  std::string table;
+  std::string column;
+  float scale; // max absolute scale between x and y
+};
+
+
 class pgraster_datasource : public datasource
 {
 public:
@@ -82,25 +92,34 @@ private:
     std::string populate_tokens(std::string const& sql) const;
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
     static const std::string RASTER_COLUMNS;
+    static const std::string RASTER_OVERVIEWS;
     static const std::string SPATIAL_REF_SYS;
     static const double FMAX;
 
     const std::string uri_;
     const std::string username_;
     const std::string password_;
+    // table name (schema qualified or not) or subquery
     const std::string table_;
+    // schema name (possibly extracted from table_)
     std::string schema_;
-    std::string geometry_table_;
-    const std::string geometry_field_;
+    // table name (possibly extracted from table_)
+    std::string raster_table_;
+    const std::string raster_field_;
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;
     std::string geometryColumn_;
     mapnik::datasource::datasource_t type_;
     int srid_;
+    // max scale of master table
+    float maxScale_;
+    // Available overviews, ordered by max scale, ascending
+    std::vector<pgraster_overview> overviews_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
     bool prescale_rasters_;
+    bool use_overviews_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;

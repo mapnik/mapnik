@@ -3,4 +3,8 @@ with the following differences:
 
  - "raster_field" replaces "geometry_field"
 
+ - "raster_table" replaces "geometry_table"
+
  - "prescale_rasters" replaces "simplify_geometries"
+
+ - "use_overviews" introduced

@@ -2,6 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
+ * Copyright (C) 2014 Sandro Santilli <strk@keybit.net>
  * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
@@ -28,7 +29,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/global.hpp>
+#include <mapnik/global.hpp> // for byte
 #include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
@@ -51,24 +52,35 @@ DATASOURCE_PLUGIN(pgraster_datasource)
 
 const double pgraster_datasource::FMAX = std::numeric_limits<float>::max();
 const std::string pgraster_datasource::RASTER_COLUMNS = "raster_columns";
+const std::string pgraster_datasource::RASTER_OVERVIEWS = "raster_overviews";
 const std::string pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using boost::shared_ptr;
 using mapnik::attribute_descriptor;
 
+namespace {
+  // TODO: move to sql_utils
+  std::string quote_literal(std::string& s) {
+    return "\"" + s + "\""; // TODO: escape internal quotes
+  }
+
+};
+
 pgraster_datasource::pgraster_datasource(parameters const& params)
     : datasource(params),
       table_(*params.get<std::string>("table", "")),
       schema_(""),
-      geometry_table_(*params.get<std::string>("geometry_table", "")),
-      geometry_field_(*params.get<std::string>("raster_field", "")),
+      raster_table_(*params.get<std::string>("raster_table", "")),
+      raster_field_(*params.get<std::string>("raster_field", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
       row_limit_(*params.get<int>("row_limit", 0)),
       type_(datasource::Raster),
       srid_(*params.get<int>("srid", 0)),
+      maxScale_(0),
       extent_initialized_(false),
       prescale_rasters_(false),
+      use_overviews_(false),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -124,6 +136,9 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
     boost::optional<mapnik::boolean> prescale_opt = params.get<mapnik::boolean>("prescale_rasters", false);
     prescale_rasters_ = prescale_opt && *prescale_opt;
 
+    boost::optional<mapnik::boolean> overview_opt = params.get<mapnik::boolean>("use_overviews", false);
+    use_overviews_ = overview_opt && *overview_opt;
+
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
@@ -136,30 +151,30 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
             desc_.set_encoding(conn->client_encoding());
 
-            if (geometry_table_.empty())
+            if (raster_table_.empty())
             {
-                geometry_table_ = mapnik::sql_utils::table_from_sql(table_);
+                raster_table_ = mapnik::sql_utils::table_from_sql(table_);
             }
 
-            std::string::size_type idx = geometry_table_.find_last_of('.');
+            std::string::size_type idx = raster_table_.find_last_of('.');
             if (idx != std::string::npos)
             {
-                schema_ = geometry_table_.substr(0, idx);
-                geometry_table_ = geometry_table_.substr(idx + 1);
+                schema_ = raster_table_.substr(0, idx);
+                raster_table_ = raster_table_.substr(idx + 1);
             }
             else
             {
-                geometry_table_ = geometry_table_.substr(0);
+                raster_table_ = raster_table_.substr(0);
             }
 
-            // If we do not know both the geometry_field and the srid
+            // If we do not know either the geometry_field or the srid
             // then first attempt to fetch the geometry name from a geometry_columns entry.
             // This will return no records if we are querying a bogus table returned
             // from the simplistic table parsing in table_from_sql() or if
             // the table parameter references a table, view, or subselect not
             // registered in the geometry columns.
-            geometryColumn_ = geometry_field_;
-            if (geometryColumn_.empty() || srid_ == 0)
+            geometryColumn_ = raster_field_;
+            if (geometryColumn_.empty() || srid_ == 0 || (schema_.empty() && use_overviews_))
             {
 #ifdef MAPNIK_STATS
                 mapnik::progress_timer __stats2__(std::clog, "pgraster_datasource::init(get_srid_and_geometry_column)");
@@ -168,9 +183,10 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
                 try
                 {
-                    s << "SELECT r_raster_column as col, srid FROM "
+                    s << "SELECT r_raster_column as col, "
+                      << "greatest(scale_x, scale_y) as maxscale, srid FROM "
                       << RASTER_COLUMNS <<" WHERE r_table_name='"
-                      << mapnik::sql_utils::unquote_double(geometry_table_)
+                      << mapnik::sql_utils::unquote_double(raster_table_)
                       << "'";
                     if (! schema_.empty())
                     {
@@ -178,16 +194,18 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                           << mapnik::sql_utils::unquote_double(schema_)
                           << "'";
                     }
-                    if (! geometry_field_.empty())
+                    if (! raster_field_.empty())
                     {
                         s << " AND r_raster_column='"
-                          << mapnik::sql_utils::unquote_double(geometry_field_)
+                          << mapnik::sql_utils::unquote_double(raster_field_)
                           << "'";
                     }
                     shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
                     {
                         geometryColumn_ = rs->getValue("col");
+                        maxScale_ = atof(rs->getValue("maxscale")); // TODO: check for null ?
+                        MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Using maxscale=" << maxScale_;
                         if (srid_ == 0)
                         {
                             const char* srid_c = rs->getValue("srid");
@@ -237,6 +255,80 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 }
             }
 
+            // If overviews were requested, take note of the max scale
+            // of each available overview, sorted by scale descending
+            if ( use_overviews_ )
+            {
+                std::ostringstream err;
+                if ( schema_.empty() )
+                {
+                  err << "Pgraster Plugin: unable to lookup available table"
+                      << " overviews due to unknown schema";
+                  throw mapnik::datasource_exception(err.str());
+                }
+                if ( geometryColumn_.empty() )
+                {
+                  err << "Pgraster Plugin: unable to lookup available table"
+                      << " overviews due to unknown column name";
+                  throw mapnik::datasource_exception(err.str());
+                }
+                if ( ! maxScale_ )
+                {
+                  err << "Pgraster Plugin: unable to use overviews due "
+                      << "to unconstrained scales in column "
+                      << quote_literal(geometryColumn_)
+                      << " of table " << quote_literal(schema_) 
+                      << "." << quote_literal(raster_table_); 
+                  throw mapnik::datasource_exception(err.str());
+                }
+                if ( table_[table_.find_first_not_of(" \t\r\n")] == '(' ) 
+                {
+                  err << "Pgraster Plugin: overviews cannot be used "
+                         "with subqueries ";
+                  throw mapnik::datasource_exception(err.str());
+                }
+
+                err << "Pgraster Plugin: Error: unimplemented overviews support";
+                //throw mapnik::datasource_exception(err.str());
+
+                std::ostringstream s;
+                s << "select "
+                     "r.r_table_schema sch, "
+                     "r.r_table_name tab, "
+                     "r.r_raster_column col, "
+                     "greatest(abs(r.scale_x), abs(r.scale_y)) scl "
+                     "from"
+                     " raster_overviews o,"
+                     " raster_columns r "
+                     "where"
+                     " o.r_table_schema = '"
+                  << mapnik::sql_utils::unquote_double(schema_)
+                  << "' and o.r_table_name = '"
+                  << mapnik::sql_utils::unquote_double(raster_table_)
+                  << "' and o.r_raster_column = '"
+                  << mapnik::sql_utils::unquote_double(geometryColumn_)
+                  << "' and r.r_table_schema = o.o_table_schema"
+                     " and r.r_table_name = o.o_table_name"
+                     " and r.r_raster_column = o.o_raster_column"
+                     " ORDER BY scl ASC";
+                MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: running query " << s.str();
+                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+                while (rs->next())
+                {
+                  overviews_.resize(overviews_.size()+1);
+                  pgraster_overview& ov = overviews_.back();
+                  ov.schema = rs->getValue("sch"); 
+                  ov.table = rs->getValue("tab");
+                  ov.column = rs->getValue("col");
+                  ov.scale = atof(rs->getValue("scl"));
+                  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: found overview " << ov.schema << "." << ov.table << "." << ov.column << " with scale " << ov.scale;
+                }
+                rs->close();
+                if ( overviews_.empty() ) {
+                  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no overview found for " << schema_ << "." << raster_table_ << "." << geometryColumn_;
+                }
+            }
+
             // detect primary key
             if (*autodetect_key_field && key_field_.empty())
             {
@@ -251,7 +343,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
                     "AND c.oid = i.indrelid AND i.indisprimary = 't' "
                     "AND t.typname !~ '^geom' AND c.relname ="
-                  << " '" << mapnik::sql_utils::unquote_double(geometry_table_) << "' "
+                  << " '" << mapnik::sql_utils::unquote_double(raster_table_) << "' "
                     //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
                   << "AND (i.indkey[0]=a.attnum OR i.indkey[1]=a.attnum OR i.indkey[2]=a.attnum "
                     "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
@@ -280,7 +372,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                                 key_field_ = std::string(key_field_string);
 
                                 MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: auto-detected key field of '"
-                                                          << key_field_ << "' on table '" << geometry_table_ << "'";
+                                                          << key_field_ << "' on table '" << raster_table_ << "'";
                             }
                         }
                         else
@@ -291,7 +383,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                             err << "PostGIS Plugin: Error: '"
                                 << rs_key->getValue(0)
                                 << "' on table '"
-                                << geometry_table_
+                                << raster_table_
                                 << "' is not a valid integer primary key field\n";
                             throw mapnik::datasource_exception(err.str());
                         }
@@ -313,7 +405,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
             {
                 throw mapnik::datasource_exception(std::string("PostGIS Plugin: Error: primary key required")
                                                    + " but could not be detected for table '" +
-                                                   geometry_table_ + "', please supply 'key_field' option to specify field to use for primary key");
+                                                   raster_table_ + "', please supply 'key_field' option to specify field to use for primary key");
             }
 
             if (srid_ == 0)
@@ -716,7 +808,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
             {
                 s_error << schema_ << ".";
             }
-            s_error << geometry_table_
+            s_error << raster_table_
                     << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                     << "in the geometry_columns for '";
 
@@ -724,15 +816,44 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
             {
                 s_error << schema_ << ".";
             }
-            s_error << geometry_table_ << "'.";
+            s_error << raster_table_ << "'.";
 
             throw mapnik::datasource_exception(s_error.str());
         }
 
-        std::ostringstream s;
-
         const double px_gw = 1.0 / boost::get<0>(q.resolution());
         const double px_gh = 1.0 / boost::get<1>(q.resolution());
+
+        MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: px_gw=" << px_gw
+                                   << " px_gh=" << px_gh;
+
+        std::string table_with_bbox;
+        std::string col = geometryColumn_;
+
+        if ( use_overviews_ ) {
+          std::string sch = schema_;
+          std::string tab = raster_table_;
+          const double scale = std::min(px_gw, px_gh);
+          for (int i=overviews_.size()-1; i>1; --i) {
+            const pgraster_overview& o = overviews_[i];
+            if ( o.scale < scale ) {
+              sch = o.schema;
+              tab = o.table;
+              col = o.column;
+              MAPNIK_LOG_DEBUG(pgraster)
+                << "pgraster_datasource: using overview "
+                << sch << "." << tab << "." << col
+                << " with scale=" << o.scale
+                << " for min out scale=" << scale;
+              break;
+            }
+          }
+          table_with_bbox = sch + "." + tab;
+        } else {
+          table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
+        }
+
+        std::ostringstream s;
 
         s << "SELECT ST_AsBinary(";
 
@@ -740,17 +861,17 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
           s << "ST_Resize(";
         }
 
-        s << "\"" << geometryColumn_ << "\"";
+        s << "\"" << col << "\"";
 
         if (prescale_rasters_) {
           const double scale = std::min(px_gw, px_gh);
-          s << ", CASE WHEN abs(ST_ScaleX(\"" << geometryColumn_
+          s << ", CASE WHEN abs(ST_ScaleX(\"" << col
             << "\"))::float8 < " << scale << " THEN abs(ST_ScaleX(\""
-            << geometryColumn_ << "\"))::float8/"
+            << col << "\"))::float8/"
             << scale  << " ELSE 1.0 END"
-            << ", CASE WHEN abs(ST_ScaleY(\"" << geometryColumn_
+            << ", CASE WHEN abs(ST_ScaleY(\"" << col
             << "\"))::float8 < " << scale << " THEN abs(ST_ScaleY(\""
-            << geometryColumn_ << "\"))::float8/"
+            << col << "\"))::float8/"
             << scale << " ELSE 1.0 END)";
         }
 
@@ -784,14 +905,15 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
             }
         }
 
-        std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
-
         s << " FROM " << table_with_bbox;
 
         if (row_limit_ > 0)
         {
             s << " LIMIT " << row_limit_;
         }
+
+        MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: "
+          "features query: " << s.str();
 
         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
         return boost::make_shared<pgraster_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
@@ -824,7 +946,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
                 {
                     s_error << schema_ << ".";
                 }
-                s_error << geometry_table_
+                s_error << raster_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                         << "in the geometry_columns for '";
 
@@ -832,7 +954,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
                 {
                     s_error << schema_ << ".";
                 }
-                s_error << geometry_table_ << "'.";
+                s_error << raster_table_ << "'.";
 
                 throw mapnik::datasource_exception(s_error.str());
             }
@@ -909,10 +1031,10 @@ box2d<double> pgraster_datasource::envelope() const
                 {
                     s_error << schema_ << ".";
                 }
-                s_error << geometry_table_ << "' because we cannot determine the geometry field name."
+                s_error << raster_table_ << "' because we cannot determine the raster field name."
                         << "\nPlease provide either an 'extent' parameter to skip this query, "
-                        << "a 'geometry_field' and/or 'geometry_table' parameter, or add a "
-                        << "record to the 'geometry_columns' for your table.";
+                        << "a 'geometry_field' and/or 'rater_table' parameter, or add a "
+                        << "record to the 'raster_columns' for your table.";
 
                 throw mapnik::datasource_exception("Pgraster Plugin: " + s_error.str());
             }
@@ -927,7 +1049,7 @@ box2d<double> pgraster_datasource::envelope() const
                     s << mapnik::sql_utils::unquote_double(schema_) << "','";
                 }
 
-                s << mapnik::sql_utils::unquote_double(geometry_table_) << "','"
+                s << mapnik::sql_utils::unquote_double(raster_table_) << "','"
                   << mapnik::sql_utils::unquote_double(geometryColumn_) << "') as ext) as tmp";
             }
             else
@@ -950,7 +1072,7 @@ box2d<double> pgraster_datasource::envelope() const
 
                     // but if the subquery does not limit records then querying the
                     // actual table will be faster as indexes can be used
-                    s << geometry_table_ << ") as tmp";
+                    s << raster_table_ << ") as tmp";
                 }
             }
 
