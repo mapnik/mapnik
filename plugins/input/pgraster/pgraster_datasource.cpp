@@ -68,7 +68,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       type_(datasource::Raster),
       srid_(*params.get<int>("srid", 0)),
       extent_initialized_(false),
-      simplify_geometries_(false),
+      prescale_rasters_(false),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -121,8 +121,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
     boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
     boost::optional<mapnik::boolean> estimate_extent = params.get<mapnik::boolean>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
-    boost::optional<mapnik::boolean> simplify_opt = params.get<mapnik::boolean>("simplify_geometries", false);
-    simplify_geometries_ = simplify_opt && *simplify_opt;
+    boost::optional<mapnik::boolean> prescale_opt = params.get<mapnik::boolean>("prescale_rasters", false);
+    prescale_rasters_ = prescale_opt && *prescale_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -736,18 +736,22 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         s << "SELECT ST_AsBinary(";
 
-        if (simplify_geometries_) {
-          s << "ST_Simplify(";
+        if (prescale_rasters_) {
+          s << "ST_Resize(";
         }
 
         s << "\"" << geometryColumn_ << "\"";
 
-        if (simplify_geometries_) {
-          // 1/20 of pixel seems to be a good compromise to avoid
-          // drop of collapsed polygons.
-          // See https://github.com/mapnik/mapnik/issues/1639
-          const double tolerance = std::min(px_gw, px_gh) / 2.0;
-          s << ", " << tolerance << ")";
+        if (prescale_rasters_) {
+          const double scale = std::min(px_gw, px_gh);
+          s << ", CASE WHEN abs(ST_ScaleX(\"" << geometryColumn_
+            << "\"))::float8 < " << scale << " THEN abs(ST_ScaleX(\""
+            << geometryColumn_ << "\"))::float8/"
+            << scale  << " ELSE 1.0 END"
+            << ", CASE WHEN abs(ST_ScaleY(\"" << geometryColumn_
+            << "\"))::float8 < " << scale << " THEN abs(ST_ScaleY(\""
+            << geometryColumn_ << "\"))::float8/"
+            << scale << " ELSE 1.0 END)";
         }
 
         s << ") AS geom";
