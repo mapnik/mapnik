@@ -877,7 +877,7 @@ struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
     {
         std::string const& name = std::get<0>(get_meta(key));
         optional<std::string> transform = node.get_opt_attr<std::string>(name);
-        if (transform)  put(sym, key, mapnik::parse_transform(*transform));
+        if (transform) put(sym, key, mapnik::parse_transform(*transform));
     }
 };
 
@@ -952,14 +952,15 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
         optional<std::string> base = node.get_opt_attr<std::string>("base");
         optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
 
-        point_symbolizer symbol;
-        set_symbolizer_property<point_symbolizer,boolean>(symbol, keys::allow_overlap, node);
-        set_symbolizer_property<point_symbolizer,double>(symbol, keys::opacity, node);
-        set_symbolizer_property<point_symbolizer,boolean>(symbol, keys::ignore_placement, node);
-
-        boost::optional<point_placement_e> placement = node.get_opt_attr<point_placement_e>("placement");
-        if (placement) put(symbol, keys::point_placement_type, point_placement_enum(*placement));
-
+        point_symbolizer sym;
+        // allow-overlap
+        set_symbolizer_property<point_symbolizer,boolean>(sym, keys::allow_overlap, node);
+        // opacity
+        set_symbolizer_property<point_symbolizer,double>(sym, keys::opacity, node);
+        // ignore-placement
+        set_symbolizer_property<point_symbolizer,boolean>(sym, keys::ignore_placement, node);
+        // point placement
+        set_symbolizer_property<symbolizer_base,point_placement_enum>(sym, keys::point_placement_type, node);
         if (file && !file->empty())
         {
             if(base)
@@ -974,15 +975,15 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
             *file = ensure_relative_to_xml(file);
             std::string filename = *file;
             ensure_exists(filename);
-            put(symbol, keys::file, parse_path(filename));
+            put(sym, keys::file, parse_path(filename));
 
             if (image_transform_wkt)
             {
-                put(symbol, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
+                put(sym, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
             }
         }
-        parse_symbolizer_base(symbol, node);
-        rule.append(std::move(symbol));
+        parse_symbolizer_base(sym, node);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
@@ -1313,30 +1314,26 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
     }
 }
 
-void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & node)
+void map_parser::parse_stroke(symbolizer_base & sym, xml_node const & node)
 {
     // stroke
-    set_symbolizer_property<symbolizer_base,color>(symbol, keys::stroke, node);
+    set_symbolizer_property<symbolizer_base,color>(sym, keys::stroke, node);
     // stroke-width
-    set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_width, node);
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_width, node);
     // stroke-opacity
-    set_symbolizer_property<symbolizer_base,double>(symbol, keys::stroke_opacity, node);
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_opacity, node);
     // stroke-linejoin
-    set_symbolizer_property<symbolizer_base,line_join_enum>(symbol, keys::stroke_linejoin, node);
+    set_symbolizer_property<symbolizer_base,line_join_enum>(sym, keys::stroke_linejoin, node);
     // stroke-linecap
-    set_symbolizer_property<symbolizer_base,line_cap_enum>(symbol, keys::stroke_linecap, node);
+    set_symbolizer_property<symbolizer_base,line_cap_enum>(sym, keys::stroke_linecap, node);
     // stroke-gamma
-    optional<double> gamma = node.get_opt_attr<double>("stroke-gamma");
-    if (gamma) put(symbol, keys::stroke_gamma, *gamma);
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_gamma, node);
     // stroke-gamma-method
-    optional<gamma_method_e> gamma_method = node.get_opt_attr<gamma_method_e>("stroke-gamma-method");
-    if (gamma_method) put(symbol, keys::stroke_gamma_method, gamma_method_enum(*gamma_method));
-
+    set_symbolizer_property<symbolizer_base,gamma_method_enum>(sym, keys::stroke_gamma_method, node);
     // stroke-dashoffset
-    optional<double> dash_offset = node.get_opt_attr<double>("stroke-dashoffset");
-    if (dash_offset) put(symbol,keys::stroke_dashoffset, *dash_offset);
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_dashoffset, node);
+    // stroke-miterlimit
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_miterlimit, node);
     // stroke-dasharray
     optional<std::string> str = node.get_opt_attr<std::string>("stroke-dasharray");
     if (str)
@@ -1364,7 +1361,7 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & node)
                 }
                 if (dash.size() > 0)
                 {
-                    put(symbol,keys::stroke_dasharray,dash);
+                    put(sym,keys::stroke_dasharray,dash);
                 }
             }
         }
@@ -1376,9 +1373,7 @@ void map_parser::parse_stroke(symbolizer_base & symbol, xml_node const & node)
         }
     }
 
-    // stroke-miterlimit
-    optional<double> miterlimit = node.get_opt_attr<double>("stroke-miterlimit");
-    if (miterlimit) put(symbol, keys::stroke_miterlimit, *miterlimit);
+
 }
 
 void map_parser::parse_line_symbolizer(rule & rule, xml_node const & node)
@@ -1392,8 +1387,7 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & node)
         // offset
         set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
         // rasterizer
-        optional<line_rasterizer_e> rasterizer = node.get_opt_attr<line_rasterizer_e>("rasterizer");
-        if (rasterizer) put(sym, keys::line_rasterizer, line_rasterizer_enum(*rasterizer));
+        set_symbolizer_property<symbolizer_base,line_rasterizer_enum>(sym, keys::line_rasterizer, node);
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
@@ -1416,9 +1410,8 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & node)
         // gamma
         set_symbolizer_property<symbolizer_base,double>(sym, keys::gamma, node);
         // gamma method
-        optional<gamma_method_e> gamma_method = node.get_opt_attr<gamma_method_e>("gamma-method");
-        if (gamma_method) put(sym, keys::gamma_method, gamma_method_enum(*gamma_method));
-        //
+        set_symbolizer_property<symbolizer_base,gamma_method_enum>(sym, keys::gamma_method, node);
+
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)

@@ -40,7 +40,7 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/attribute.hpp>
-
+#include <mapnik/gamma_method.hpp>
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -308,6 +308,9 @@ template <> struct enum_traits<e> { \
 
 ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( line_cap_enum )
+ENUM_FROM_STRING( point_placement_enum )
+ENUM_FROM_STRING( gamma_method_enum )
+ENUM_FROM_STRING( line_rasterizer_enum )
 
 // enum
 template <typename T, bool is_enum = true>
