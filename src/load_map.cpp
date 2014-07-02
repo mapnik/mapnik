@@ -96,12 +96,9 @@ private:
     void parse_style(Map & map, xml_node const& node);
     void parse_layer(Map & map, xml_node const& node);
     void parse_symbolizer_base(symbolizer_base &sym, xml_node const& node);
-
-    void parse_fontset(Map & map, xml_node const & fset);
+    void parse_fontset(Map & map, xml_node const & node);
     bool parse_font(font_set & fset, xml_node const& f);
-
     void parse_rule(feature_type_style & style, xml_node const & node);
-
     void parse_symbolizers(rule & rule, xml_node const & node);
     void parse_point_symbolizer(rule & rule, xml_node const& node);
     void parse_line_pattern_symbolizer(rule & rule, xml_node const& node);
@@ -115,7 +112,6 @@ private:
     void parse_markers_symbolizer(rule & rule, xml_node const& node);
     void parse_group_symbolizer(rule &rule, xml_node const& node);
     void parse_debug_symbolizer(rule & rule, xml_node const& node);
-
     void parse_group_rule(group_symbolizer_properties &prop, xml_node const& node);
     void parse_simple_layout(group_symbolizer_properties &prop, xml_node const& node);
     void parse_pair_layout(group_symbolizer_properties &prop, xml_node const& node);
