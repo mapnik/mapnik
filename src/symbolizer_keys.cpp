@@ -78,7 +78,7 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
     property_meta_type{ "premultiplied", false, nullptr, property_types::target_bool },
     property_meta_type{ "smooth", false, nullptr, property_types::target_double },
     property_meta_type{ "simplify-algorithm", enumeration_wrapper(radial_distance),
-                        [](enumeration_wrapper e) { return *simplify_algorithm_to_string(simplify_algorithm_e(e.value));}, property_types::target_double },
+                        [](enumeration_wrapper e) { return *simplify_algorithm_to_string(simplify_algorithm_e(e.value));}, property_types::target_simplify_algorithm },
     property_meta_type{ "simplify-tolerance", 0.0, nullptr, property_types::target_double },
     property_meta_type{ "halo-rasterizer", enumeration_wrapper(HALO_RASTERIZER_FULL),
                         [](enumeration_wrapper e) { return enumeration<halo_rasterizer_enum,halo_rasterizer_enum_MAX>(halo_rasterizer_enum(e.value)).as_string();}, property_types::target_double },

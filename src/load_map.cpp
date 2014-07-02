@@ -864,7 +864,7 @@ struct set_symbolizer_property_impl
         {
             // try parsing as an expression
             optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-            if (val) put(sym, key, *val);
+            if (val && *val) put(sym, key, *val);
             else
             {
                 ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
@@ -895,7 +895,11 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                 else
                 {
                     optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-                    if (val) put(sym, key, *val);
+                    if (val && *val)
+                    {
+                        std::cerr << *val << std::endl;
+                        put(sym, key, *val);
+                    }
                     else
                     {
                         throw config_error("failed to parse symbolizer property: '" + name + "'");
@@ -913,43 +917,28 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
 } // namespace detail
 
 template <typename Symbolizer, typename T>
-void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const & node)
+void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
 {
     detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,node);
 }
 
-void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
+void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& node)
 {
-
-    set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, pt);
-    optional<std::string> geometry_transform_wkt = pt.get_opt_attr<std::string>("geometry-transform");
+    set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, node);
+    optional<std::string> geometry_transform_wkt = node.get_opt_attr<std::string>("geometry-transform");
     if (geometry_transform_wkt)
     {
         put(sym, keys::geometry_transform, mapnik::parse_transform(*geometry_transform_wkt));
     }
 
     // clip
-    set_symbolizer_property<symbolizer_base, boolean>(sym, keys::clip, pt);
-
+    set_symbolizer_property<symbolizer_base, boolean>(sym, keys::clip, node);
     // simplify algorithm
-    optional<std::string> simplify_algorithm_name = pt.get_opt_attr<std::string>("simplify-algorithm");
-    if (simplify_algorithm_name)
-    {
-        optional<simplify_algorithm_e> simplify_algorithm = simplify_algorithm_from_string(*simplify_algorithm_name);
-        if (simplify_algorithm)
-        {
-            put(sym, keys::simplify_algorithm, *simplify_algorithm);
-        }
-        else
-        {
-            throw config_error("failed to parse simplify-algorithm: '" + *simplify_algorithm_name + "'");
-        }
-    }
-
+    set_symbolizer_property<symbolizer_base, simplify_algorithm_e>(sym, keys::simplify_algorithm, node);
     // simplify value
-    set_symbolizer_property<symbolizer_base,double>(sym, keys::simplify_tolerance, pt);
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::simplify_tolerance, node);
     // smooth value
-    set_symbolizer_property<symbolizer_base,double>(sym, keys::smooth, pt);
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::smooth, node);
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)

@@ -222,7 +222,8 @@ enum class property_types : std::uint8_t
     target_colorizer,
     target_repeat_key,
     target_group_symbolizer_properties,
-    target_halo_comp_op
+    target_halo_comp_op,
+    target_simplify_algorithm
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
@@ -274,6 +275,16 @@ struct enum_traits<composite_mode_e>
     static result_type from_string(std::string const& str)
     {
         return comp_op_from_string(str);
+    }
+};
+
+template <>
+struct enum_traits<simplify_algorithm_e>
+{
+    typedef boost::optional<simplify_algorithm_e> result_type;
+    static result_type from_string(std::string const& str)
+    {
+        return simplify_algorithm_from_string(str);
     }
 };
 
