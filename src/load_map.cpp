@@ -1034,54 +1034,55 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             }
         }
 
-        markers_symbolizer symbol;
+        markers_symbolizer sym;
 
         if (!filename.empty())
         {
             ensure_exists(filename);
-            put(symbol,keys::file, parse_path(filename));
+            put(sym,keys::file, parse_path(filename));
         }
 
         // overall opacity to be applied to all paths
-        set_symbolizer_property<markers_symbolizer,double>(symbol, keys::opacity, node);
-
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::opacity, node);
         // fill opacity
-        set_symbolizer_property<markers_symbolizer,double>(symbol, keys::fill_opacity, node);
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::fill_opacity, node);
 
         optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
         {
-            put(symbol, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
+            put(sym, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
         }
 
-        set_symbolizer_property<markers_symbolizer,color>(symbol, keys::fill, node);
-
-        optional<double> spacing = node.get_opt_attr<double>("spacing");
-        if (spacing) put(symbol,keys::spacing, *spacing);
-
-        optional<double> max_error = node.get_opt_attr<double>("max-error");
-        if (max_error) put(symbol,keys::max_error, *max_error);
-
-        set_symbolizer_property<markers_symbolizer,boolean>(symbol, keys::allow_overlap, node);
-
-        set_symbolizer_property<markers_symbolizer,boolean>(symbol, keys::ignore_placement, node);
+        // fill
+        set_symbolizer_property<markers_symbolizer,color>(sym, keys::fill, node);
+        // spacing
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::spacing, node);
+        // max-error
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::max_error, node);
+        // allow-overlap
+        set_symbolizer_property<markers_symbolizer,boolean>(sym, keys::allow_overlap, node);
+        // ignore-placement
+        set_symbolizer_property<markers_symbolizer,boolean>(sym, keys::ignore_placement, node);
+        // width
+        //set_symbolizer_property<markers_symbolizer,double>(sym, keys::width, node);
+        // height
+        //set_symbolizer_property<markers_symbolizer,double>(sym, keys::height, node);
 
         optional<expression_ptr> width = node.get_opt_attr<expression_ptr>("width");
-        if (width) put(symbol, keys::width, *width );
+        if (width) put(sym, keys::width, *width );
 
         optional<expression_ptr> height = node.get_opt_attr<expression_ptr>("height");
-        if (height) put(symbol, keys::height, *height);
+        if (height) put(sym, keys::height, *height);
 
-        parse_stroke(symbol,node);
+        // stroke
+        parse_stroke(sym,node);
+        // marker placement
+        set_symbolizer_property<markers_symbolizer,marker_placement_enum>(sym, keys::markers_placement_type, node);
+        // multi-policy
+        set_symbolizer_property<markers_symbolizer,marker_multi_policy_enum>(sym, keys::markers_multipolicy, node);
 
-        optional<marker_placement_e> placement = node.get_opt_attr<marker_placement_e>("placement");
-        if (placement) put(symbol, keys::markers_placement_type, marker_placement_enum(*placement));
-
-        optional<marker_multi_policy_e> mpolicy = node.get_opt_attr<marker_multi_policy_e>("multi-policy");
-        if (mpolicy) put(symbol, keys::markers_multipolicy, marker_multi_policy_enum(*mpolicy));
-
-        parse_symbolizer_base(symbol, node);
-        rule.append(std::move(symbol));
+        parse_symbolizer_base(sym, node);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {

@@ -223,7 +223,10 @@ enum class property_types : std::uint8_t
     target_repeat_key,
     target_group_symbolizer_properties,
     target_halo_comp_op,
-    target_simplify_algorithm
+    target_simplify_algorithm,
+    target_markers_placement,
+    target_markers_multipolicy,
+    target_gamma_method
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
@@ -309,9 +312,10 @@ template <> struct enum_traits<e> { \
 ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( line_cap_enum )
 ENUM_FROM_STRING( point_placement_enum )
+ENUM_FROM_STRING( marker_placement_enum )
 ENUM_FROM_STRING( gamma_method_enum )
 ENUM_FROM_STRING( line_rasterizer_enum )
-
+ENUM_FROM_STRING( marker_multi_policy_enum )
 // enum
 template <typename T, bool is_enum = true>
 struct expression_result

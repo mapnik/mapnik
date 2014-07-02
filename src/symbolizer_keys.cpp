@@ -34,7 +34,7 @@ namespace mapnik {
 static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] =
 {
     property_meta_type{ "gamma", 1.0, nullptr, property_types::target_double},
-    property_meta_type{ "gamma-method", static_cast<value_integer>(GAMMA_POWER), nullptr, property_types::target_integer},
+    property_meta_type{ "gamma-method", static_cast<value_integer>(GAMMA_POWER), nullptr, property_types::target_gamma_method},
     property_meta_type{ "opacity", 1.0, nullptr, property_types::target_double},
     property_meta_type{ "alignment", enumeration_wrapper(LOCAL_ALIGNMENT),
                         [](enumeration_wrapper e) { return enumeration<pattern_alignment_enum,pattern_alignment_enum_MAX>(pattern_alignment_enum(e.value)).as_string();}, property_types::target_pattern_alignment},
@@ -52,7 +52,7 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
     property_meta_type{ "stroke-linecap", enumeration_wrapper(BUTT_CAP),
                         [](enumeration_wrapper e) { return enumeration<line_cap_enum,line_cap_enum_MAX>(line_cap_enum(e.value)).as_string();}, property_types::target_line_cap },
     property_meta_type{ "stroke-gamma", 1.0, nullptr, property_types::target_double },
-    property_meta_type{ "stroke-gamma-method",static_cast<value_integer>(GAMMA_POWER), nullptr, property_types::target_double },
+    property_meta_type{ "stroke-gamma-method",static_cast<value_integer>(GAMMA_POWER), nullptr, property_types::target_gamma_method },
     property_meta_type{ "stroke-dashoffset", static_cast<value_integer>(0), nullptr, property_types::target_double },
     property_meta_type{ "stroke-dasharray", false, nullptr, property_types::target_dash_array },
     property_meta_type{ "stroke-miterlimit", 4.0, nullptr, property_types::target_double },
@@ -64,8 +64,8 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
     property_meta_type{ "max-error", 0.0, nullptr, property_types::target_double },
     property_meta_type{ "allow-overlap",false, nullptr, property_types::target_bool },
     property_meta_type{ "ignore-placement", false, nullptr, property_types::target_bool },
-    property_meta_type{ "width",static_cast<value_integer>(0), nullptr, property_types::target_double },
-    property_meta_type{ "height",static_cast<value_integer>(0), nullptr, property_types::target_double },
+    property_meta_type{ "width",0.0, nullptr, property_types::target_double },
+    property_meta_type{ "height",0.0, nullptr, property_types::target_double },
     property_meta_type{ "file", "", nullptr, property_types::target_string },
     property_meta_type{ "shield-dx", 0.0, nullptr, property_types::target_double },
     property_meta_type{ "shield-dy", 0.0, nullptr, property_types::target_double },
@@ -84,9 +84,9 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         [](enumeration_wrapper e) { return enumeration<halo_rasterizer_enum,halo_rasterizer_enum_MAX>(halo_rasterizer_enum(e.value)).as_string();}, property_types::target_double },
     property_meta_type{ "text-placements", false, nullptr, property_types::target_double },
     property_meta_type{ "placement", enumeration_wrapper(MARKER_POINT_PLACEMENT),
-                        [](enumeration_wrapper e) { return enumeration<marker_placement_enum,marker_placement_enum_MAX>(marker_placement_enum(e.value)).as_string();}, property_types::target_double }, // FIXME - rename to "markers-placement-type"
+                        [](enumeration_wrapper e) { return enumeration<marker_placement_enum,marker_placement_enum_MAX>(marker_placement_enum(e.value)).as_string();}, property_types::target_markers_placement }, // FIXME - rename to "markers-placement-type"
     property_meta_type{ "multi-policy", enumeration_wrapper(MARKER_EACH_MULTI),
-                        [](enumeration_wrapper e) { return enumeration<marker_multi_policy_enum,marker_multi_policy_enum_MAX>(marker_multi_policy_enum(e.value)).as_string();}, property_types::target_double }, // FIXME - better naming ^^
+                        [](enumeration_wrapper e) { return enumeration<marker_multi_policy_enum,marker_multi_policy_enum_MAX>(marker_multi_policy_enum(e.value)).as_string();}, property_types::target_markers_multipolicy },
     property_meta_type{ "placement", enumeration_wrapper(CENTROID_POINT_PLACEMENT),
                         [](enumeration_wrapper e) { return enumeration<point_placement_enum,point_placement_enum_MAX>(point_placement_enum(e.value)).as_string();}, property_types::target_double },
     property_meta_type{ "colorizer", nullptr, nullptr, property_types::target_colorizer},
