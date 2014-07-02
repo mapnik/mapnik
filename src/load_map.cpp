@@ -860,13 +860,24 @@ struct set_symbolizer_property_impl
         {
             // try parsing as an expression
             optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-            if (val && *val) put(sym, key, *val);
+            if (val) put(sym, key, *val);
             else
             {
                 ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
                 throw;
             }
         }
+    }
+};
+
+template <typename Symbolizer>
+struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    {
+        std::string const& name = std::get<0>(get_meta(key));
+        optional<std::string> transform = node.get_opt_attr<std::string>(name);
+        if (transform)  put(sym, key, mapnik::parse_transform(*transform));
     }
 };
 
@@ -891,9 +902,8 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                 else
                 {
                     optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-                    if (val && *val)
+                    if (val)
                     {
-                        std::cerr << *val << std::endl;
                         put(sym, key, *val);
                     }
                     else
@@ -920,13 +930,10 @@ void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
 
 void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& node)
 {
+    // comp-op
     set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, node);
-    optional<std::string> geometry_transform_wkt = node.get_opt_attr<std::string>("geometry-transform");
-    if (geometry_transform_wkt)
-    {
-        put(sym, keys::geometry_transform, mapnik::parse_transform(*geometry_transform_wkt));
-    }
-
+    // geometry transform
+    set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::geometry_transform, node);
     // clip
     set_symbolizer_property<symbolizer_base, boolean>(sym, keys::clip, node);
     // simplify algorithm
