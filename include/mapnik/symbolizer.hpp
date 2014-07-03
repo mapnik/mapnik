@@ -316,6 +316,7 @@ ENUM_FROM_STRING( marker_placement_enum )
 ENUM_FROM_STRING( gamma_method_enum )
 ENUM_FROM_STRING( line_rasterizer_enum )
 ENUM_FROM_STRING( marker_multi_policy_enum )
+ENUM_FROM_STRING( halo_rasterizer_enum )
 // enum
 template <typename T, bool is_enum = true>
 struct expression_result

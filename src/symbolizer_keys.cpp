@@ -81,7 +81,7 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         [](enumeration_wrapper e) { return *simplify_algorithm_to_string(simplify_algorithm_e(e.value));}, property_types::target_simplify_algorithm },
     property_meta_type{ "simplify-tolerance", 0.0, nullptr, property_types::target_double },
     property_meta_type{ "halo-rasterizer", enumeration_wrapper(HALO_RASTERIZER_FULL),
-                        [](enumeration_wrapper e) { return enumeration<halo_rasterizer_enum,halo_rasterizer_enum_MAX>(halo_rasterizer_enum(e.value)).as_string();}, property_types::target_double },
+                        [](enumeration_wrapper e) { return enumeration<halo_rasterizer_enum,halo_rasterizer_enum_MAX>(halo_rasterizer_enum(e.value)).as_string();}, property_types::target_halo_rasterizer },
     property_meta_type{ "text-placements", false, nullptr, property_types::target_double },
     property_meta_type{ "placement", enumeration_wrapper(MARKER_POINT_PLACEMENT),
                         [](enumeration_wrapper e) { return enumeration<marker_placement_enum,marker_placement_enum_MAX>(marker_placement_enum(e.value)).as_string();}, property_types::target_markers_placement }, // FIXME - rename to "markers-placement-type"

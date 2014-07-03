@@ -976,11 +976,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
             std::string filename = *file;
             ensure_exists(filename);
             put(sym, keys::file, parse_path(filename));
-
-            if (image_transform_wkt)
-            {
-                put(sym, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
-            }
+            set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         }
         parse_symbolizer_base(sym, node);
         rule.append(std::move(sym));
@@ -1046,13 +1042,8 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<markers_symbolizer,double>(sym, keys::opacity, node);
         // fill opacity
         set_symbolizer_property<markers_symbolizer,double>(sym, keys::fill_opacity, node);
-
-        optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
-        if (image_transform_wkt)
-        {
-            put(sym, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
-        }
-
+        // transform
+        set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         // fill
         set_symbolizer_property<markers_symbolizer,color>(sym, keys::fill, node);
         // spacing
@@ -1205,22 +1196,17 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
         {
             ensure_font_face(placement_finder->defaults.format->face_name);
         }
-        text_symbolizer text_symbol;
-        parse_symbolizer_base(text_symbol, node);
+        text_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        // placement finder
+        put<text_placements_ptr>(sym, keys::text_placements_, placement_finder);
         // halo-comp-op
-        set_symbolizer_property<symbolizer_base,composite_mode_e>(text_symbol, keys::halo_comp_op, node);
-
-        put<text_placements_ptr>(text_symbol, keys::text_placements_, placement_finder);
-        optional<halo_rasterizer_e> halo_rasterizer_ = node.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
-        if (halo_rasterizer_) put(text_symbol, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
-
-        optional<std::string> halo_transform_wkt = node.get_opt_attr<std::string>("halo-transform");
-        if (halo_transform_wkt)
-        {
-            put(text_symbol, keys::halo_transform, mapnik::parse_transform(*halo_transform_wkt));
-        }
-
-        rule.append(std::move(text_symbol));
+        set_symbolizer_property<text_symbolizer,composite_mode_e>(sym, keys::halo_comp_op, node);
+        // halo-rasterizer
+        set_symbolizer_property<text_symbolizer, halo_rasterizer_enum>(sym, keys::halo_rasterizer, node);
+        // halo-transform
+        set_symbolizer_property<text_symbolizer, transform_type>(sym, keys::halo_transform, node);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
@@ -1248,30 +1234,29 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
             ensure_font_face(placement_finder->defaults.format->face_name);
         }
 
-        shield_symbolizer shield_symbol;
-        put<text_placements_ptr>(shield_symbol, keys::text_placements_, placement_finder);
-        optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
-        if (image_transform_wkt)
-        {
-            put(shield_symbol, keys::image_transform, mapnik::parse_transform(*image_transform_wkt));
-        }
+        shield_symbolizer sym;
+        put<text_placements_ptr>(sym, keys::text_placements_, placement_finder);
+        // transform
+        set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
+        // shield displacements: shield-dx shield-dy
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::shield_dx, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::shield_dy, node);
 
-        // shield displacement
-        optional<double> shield_dx = node.get_opt_attr<double>("shield-dx");
-        if (shield_dx) put(shield_symbol, keys::shield_dx, *shield_dx);
+        //optional<double> shield_dx = node.get_opt_attr<double>("shield-dx");
+        //if (shield_dx) put(shield_symbol, keys::shield_dx, *shield_dx);
 
-        optional<double> shield_dy = node.get_opt_attr<double>("shield-dy");
-        if (shield_dy) put(shield_symbol, keys::shield_dy, *shield_dy);
+        //optional<double> shield_dy = node.get_opt_attr<double>("shield-dy");
+        //if (shield_dy) put(shield_symbol, keys::shield_dy, *shield_dy);
 
         // opacity
-        set_symbolizer_property<shield_symbolizer,double>(shield_symbol, keys::opacity, node);
+        set_symbolizer_property<shield_symbolizer,double>(sym, keys::opacity, node);
 
         // text-opacity
-        set_symbolizer_property<shield_symbolizer,double>(shield_symbol, keys::text_opacity, node);
+        set_symbolizer_property<shield_symbolizer,double>(sym, keys::text_opacity, node);
 
         // unlock_image
         optional<boolean> unlock_image = node.get_opt_attr<boolean>("unlock-image");
-        if (unlock_image) put(shield_symbol, keys::unlock_image, *unlock_image);
+        if (unlock_image) put(sym, keys::unlock_image, *unlock_image);
 
         std::string file = node.get_attr<std::string>("file");
         if (file.empty())
@@ -1302,11 +1287,11 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
-        put(shield_symbol, keys::file , parse_path(file));
-        parse_symbolizer_base(shield_symbol, node);
+        put(sym, keys::file , parse_path(file));
+        parse_symbolizer_base(sym, node);
         optional<halo_rasterizer_e> halo_rasterizer_ = node.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
-        if (halo_rasterizer_) put(shield_symbol, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
-        rule.append(std::move(shield_symbol));
+        if (halo_rasterizer_) put(sym, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
