@@ -13,6 +13,8 @@ env:
   - TESTS_TO_RUN=cpp BINDINGS=none CPP_TESTS=true BENCHMARK=true DEMO=True
 
 before_install:
+ - nproc
+ - free
  # we need at least g++-4.7 for c++11 features
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  # grab more recent gdal/proj
@@ -33,8 +35,8 @@ before_install:
 
 install:
  - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
- - ./configure CXX="nice ${CXX}" CC="nice ${CC}" DEMO=${DEMO} BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True
- - JOBS=3 make
+ - ./configure CXX="${CXX}" CC="${CC}" DEMO=${DEMO} BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True
+ - JOBS=2 make
 
 before_script:
  - make test-$TESTS_TO_RUN
@@ -46,5 +48,4 @@ notifications:
   irc:
     channels:
       - "irc.freenode.org#mapnik"
-
     use_notice: true
