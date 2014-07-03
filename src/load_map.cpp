@@ -56,6 +56,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/transform_expression.hpp>
+#include <mapnik/evaluate_global_attributes.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -860,7 +861,20 @@ struct set_symbolizer_property_impl
         {
             // try parsing as an expression
             optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-            if (val) put(sym, key, *val);
+            if (val)
+            {
+                // first try pre-evaluate expressions which don't have dynamic properties
+                //auto result = pre_evaluate_expression<mapnik::value>(*val);
+                //if (std::get<1>(result))
+                //{
+                //    put(sym, key, std::get<0>(result));
+                //}
+                //else
+                //{
+                    // expression_ptr
+                put(sym, key, *val);
+                    //}
+            }
             else
             {
                 ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
@@ -904,7 +918,26 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                     optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
                     if (val)
                     {
-                        put(sym, key, *val);
+                        // first try pre-evaluate expressions which don't have dynamic properties
+                        auto result = pre_evaluate_expression<value>(*val);
+                        if (std::get<1>(result))
+                        {
+                            optional<T> enum_val = detail::enum_traits<T>::from_string(std::get<0>(result).to_string());
+                            if (enum_val)
+                            {
+                                put(sym, key, *enum_val);
+                            }
+                            else
+                            {
+                                // can't evaluate
+                                throw config_error("failed to parse symbolizer property: '" + name + "'");
+                            }
+                        }
+                        else
+                        {
+                            // put expression_ptr
+                            put(sym, key, *val);
+                        }
                     }
                     else
                     {
