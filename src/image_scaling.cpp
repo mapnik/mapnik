@@ -288,7 +288,6 @@ void scale_image_agg(Image & target,
     agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
     pixfmt_pre pixf_dst(rbuf_dst);
     renderer_base_pre rb_dst_pre(pixf_dst);
-    rb_dst_pre.clear(agg::rgba(0, 0, 0, 0));
 
     // create a scaling matrix
     agg::trans_affine img_mtx;
