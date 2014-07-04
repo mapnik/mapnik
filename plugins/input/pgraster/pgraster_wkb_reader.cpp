@@ -152,6 +152,60 @@ typedef enum {
 using mapnik::box2d;
 
 void
+pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
+{
+  mapnik::image_data_32 & image = raster->data_;
+
+  // Start with all zeroes
+  image.set(0);
+
+  uint8_t type = read_uint8(&ptr_);
+
+  int pixtype = BANDTYPE_PIXTYPE(type);
+  int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
+  int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
+
+  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: band type:"
+        << pixtype << " offline:" << offline
+        << " hasnodata:" << hasnodata;
+
+  if ( offline ) {
+    MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: offline band "
+          " unsupported";
+    return;
+  }
+
+  if ( hasnodata ) {
+    MAPNIK_LOG_WARN(pgraster) <<
+      "pgraster_wkb_reader: nodata value unsupported";
+  }
+
+  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: reading " << height_ << "x" << width_ << " pixels";
+
+  float* data = (float*)image.getBytes();
+  float val;
+
+  // TODO: support all pixel types, use a templated function ?
+  switch (pixtype) {
+    case PT_8BUI:
+      val = read_uint8(&ptr_); // nodata value, need to read in any case
+      for (int y=0; y<height_; ++y) {
+        for (int x=0; x<width_; ++x) {
+          val = read_uint8(&ptr_);
+          int off = y * width_ + x;
+          data[off] = val;
+        }
+      }
+      break;
+    default:
+      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band "
+            "type " << type << " unsupported";
+      break;
+  }
+
+}
+
+void
 pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
 {
   mapnik::image_data_32 & image = raster->data_;
@@ -167,26 +221,26 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
   int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
   int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
 
-  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: band type:"
+  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: band type:"
         << pixtype << " offline:" << offline
         << " hasnodata:" << hasnodata;
 
   if ( offline ) {
-    MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: offline band "
+    MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: offline band "
           " unsupported";
     return;
   }
 
   if ( pixtype > PT_8BUI || pixtype < PT_8BSI ) {
-    MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: band "
+    MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band "
           "type " << type << " unsupported";
     return;
   }
 
-  uint8_t nodataval = read_uint8(&ptr_); // need to read anyway
+  uint8_t val = read_uint8(&ptr_); // nodata value, need to read anyway
   if ( hasnodata ) {
     MAPNIK_LOG_WARN(pgraster) <<
-      "pgraster_featureset: nodata value unsupported";
+      "pgraster_wkb_reader: nodata value unsupported";
   }
 
   int ps = 4; // sizeof(image_data::pixel_type)
@@ -194,7 +248,7 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
   for (int y=0; y<height_; ++y) {
     //uint8_t *optr = image_data + y * width_ * ps;
     for (int x=0; x<width_; ++x) {
-      uint8_t val = read_uint8(&ptr_);
+      val = read_uint8(&ptr_);
       int off = y * width_ * ps + x * ps;
       // Pixel space is RGBA
       image_data[off+0] = val;
@@ -223,18 +277,18 @@ pgraster_wkb_reader::read_rgb(mapnik::raster_ptr raster)
     int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
     int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
 
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: band " << bn
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: band " << bn
           << " type:" << pixtype << " offline:" << offline
           << " hasnodata:" << hasnodata;
 
     if ( offline ) {
-      MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: offline band "
+      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: offline band "
             << bn << " unsupported";
       continue;
     }
 
     if ( pixtype > PT_8BUI || pixtype < PT_8BSI ) {
-      MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: band " << bn
+      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band " << bn
             << " type " << type << " unsupported";
       continue;
     }
@@ -242,7 +296,7 @@ pgraster_wkb_reader::read_rgb(mapnik::raster_ptr raster)
     uint8_t tmp = read_uint8(&ptr_);
     if ( ! bn ) nodataval = tmp;
     else if ( tmp != nodataval ) {
-      MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: band " << bn
+      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band " << bn
             << " nodataval " << tmp << " != band 0 nodataval " << nodataval;
     }
 
@@ -280,7 +334,7 @@ pgraster_wkb_reader::get_raster() {
     /* Read version of protocol */
     uint16_t version = read_uint16(&ptr_, endian);
     if (version != 0) {
-       MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: WKB version "
+       MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: WKB version "
           << version << " unsupported";
       return mapnik::raster_ptr();
     }
@@ -296,39 +350,52 @@ pgraster_wkb_reader::get_raster() {
     width_ = read_uint16(&ptr_, endian);
     height_ = read_uint16(&ptr_, endian);
 
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: numBands=" << numBands_;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: scaleX=" << scaleX;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: scaleY=" << scaleY;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: ipX=" << ipX;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: ipY=" << ipY;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: skewX=" << skewX;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: skewY=" << skewY;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: srid=" << srid;
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: size="
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: numBands=" << numBands_;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: scaleX=" << scaleX;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: scaleY=" << scaleY;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: ipX=" << ipX;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: ipY=" << ipY;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: skewX=" << skewX;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: skewY=" << skewY;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: srid=" << srid;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: size="
       << width_ << "x" << height_;
 
+    // this is for color interpretation
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: bandno=" << bandno_;
 
     if ( skewX || skewY ) {
-      MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: raster rotation is not supported";
+      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: raster rotation is not supported";
       return mapnik::raster_ptr();
     }
 
     box2d<double> ext(ipX,ipY,ipX+(width_*scaleX),ipY+(height_*scaleY)); 
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_featureset: Raster extent=" << ext;
+    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: Raster extent=" << ext;
 
     mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(ext, width_, height_);
 
-    switch (numBands_) {
-      case 1:
-        read_grayscale(raster);
-        break;
-      case 3:
-        read_rgb(raster);
-        break;
-      default:
-        MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: raster with "
-          << numBands_ << " bands is not supported";
+    if ( bandno_ ) {
+      if ( bandno_ != 1 ) {
+        MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: "
+              "reading bands other than 1st as indexed is unsupported";
         return mapnik::raster_ptr();
+      }
+      MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: requested band " << bandno_;
+      read_indexed(raster);
+    }
+    else {
+      switch (numBands_) {
+        case 1:
+          read_grayscale(raster);
+          break;
+        case 3:
+          read_rgb(raster);
+          break;
+        default:
+          MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: raster with "
+            << numBands_ << " bands is not supported";
+          return mapnik::raster_ptr();
+      }
     }
 
     return raster;

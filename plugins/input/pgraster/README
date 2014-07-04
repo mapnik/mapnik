@@ -8,3 +8,5 @@ with the following differences:
  - "prescale_rasters" replaces "simplify_geometries"
 
  - "use_overviews" introduced
+
+ - "band" introduced, with same semantic of the GDAL driver

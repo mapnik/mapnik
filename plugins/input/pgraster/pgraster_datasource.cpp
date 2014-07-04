@@ -77,10 +77,11 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       row_limit_(*params.get<int>("row_limit", 0)),
       type_(datasource::Raster),
       srid_(*params.get<int>("srid", 0)),
+      band_(*params.get<int>("band", 0)),
       maxScale_(0),
       extent_initialized_(false),
-      prescale_rasters_(false),
-      use_overviews_(false),
+      prescale_rasters_(false), // TODO: use params.get<bool> !
+      use_overviews_(false), // TODO: use params.get<bool> !
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -857,6 +858,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         s << "SELECT ST_AsBinary(";
 
+        if (band_) s << "ST_Band(";
+
         if (prescale_rasters_) {
           s << "ST_Resize(";
         }
@@ -873,7 +876,11 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
             << "\"))::float8 < " << scale << " THEN abs(ST_ScaleY(\""
             << col << "\"))::float8/"
             << scale << " ELSE 1.0 END)";
+          // TODO: if band_ is given, we'll interpret as indexed so
+          //       the rescaling must NOT ruin it (use algorithm mode!)
         }
+
+        if (band_) s << ", " << band_ << ")";
 
         s << ") AS geom";
 
@@ -916,7 +923,12 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
           "features query: " << s.str();
 
         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return boost::make_shared<pgraster_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+        return boost::make_shared<pgraster_featureset>(rs, ctx,
+                  desc_.get_encoding(), !key_field_.empty(),
+                  band_ ? 1 : 0 // whatever band number is given we'd have 
+                                // extracted with ST_Band above so it becomes
+                                // band number 1
+               );
 
     }
 

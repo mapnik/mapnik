@@ -112,6 +112,12 @@ private:
     std::string geometryColumn_;
     mapnik::datasource::datasource_t type_;
     int srid_;
+    // 1-based index of band to extract from the raster
+    // 0 means fetch all bands
+    // any index also forces color interpretation off so that values
+    // arrives untouched into the resulting mapnik raster, for threatment
+    // by raster colorizer
+    int band_;
     // max scale of master table
     float maxScale_;
     // Available overviews, ordered by max scale, ascending

@@ -45,10 +45,14 @@ class IResultSet;
 class pgraster_featureset : public mapnik::Featureset
 {
 public:
+    /// @param bandno band number (1-based). 0 (default) reads all bands.
+    ///               Anything else forces interpretation of colors off
+    ///               (values copied verbatim)
     pgraster_featureset(boost::shared_ptr<IResultSet> const& rs,
                        context_ptr const& ctx,
                        std::string const& encoding,
-                       bool key_field = false);
+                       bool key_field = false,
+                       int bandno = 0);
     feature_ptr next();
     ~pgraster_featureset();
 
@@ -58,6 +62,7 @@ private:
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::value_integer feature_id_;
     bool key_field_;
+    int band_;
 };
 
 #endif // PGRASTER_FEATURESET_HPP

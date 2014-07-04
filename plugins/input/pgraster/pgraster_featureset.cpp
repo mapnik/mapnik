@@ -56,12 +56,13 @@ using mapnik::context_ptr;
 pgraster_featureset::pgraster_featureset(boost::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
-                                       bool key_field)
+                                       bool key_field, int bandno)
     : rs_(rs),
       ctx_(ctx),
       tr_(new transcoder(encoding)),
       feature_id_(1),
-      key_field_(key_field)
+      key_field_(key_field),
+      band_(bandno)
 {
 }
 
@@ -134,10 +135,11 @@ feature_ptr pgraster_featureset::next()
         int size = rs_->getFieldLength(0);
         const uint8_t *data = (const uint8_t*)rs_->getValue(0);
 
-        mapnik::raster_ptr raster = pgraster_wkb_reader::read(data, size);
+        mapnik::raster_ptr raster = pgraster_wkb_reader::read(data, size, band_);
         if (!raster)
         {
             MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: could not parse raster wkb";
+            // TODO: throw an exception ?
             continue;
         }
         MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: raster of " << raster->data_.width() << "x" << raster->data_.height() << " pixels covering extent " << raster->ext_;

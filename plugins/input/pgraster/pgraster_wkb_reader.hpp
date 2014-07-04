@@ -29,24 +29,40 @@
 // boost
 #include <boost/cstdint.hpp> // for boost::uint8_t
 
+enum pgraster_color_interp {
+  // Automatic color interpretation:
+  // uses grayscale for single band, rgb for 3 bands
+  pgr_auto,
+  // Grayscale interpretation:
+  // uses grayscale for single band, rgb for 3 bands
+  pgr_grayscale,
+  pgr_indexed,
+  pgr_rgb
+};
+
 class pgraster_wkb_reader
 {
 public:
 
-  pgraster_wkb_reader(const uint8_t* wkb, int size)
-    : wkbsize_(size), wkb_(wkb), wkbend_(wkb+size), ptr_(wkb) 
+  pgraster_wkb_reader(const uint8_t* wkb, int size, int bnd=0)
+    : wkbsize_(size), wkb_(wkb), wkbend_(wkb+size), ptr_(wkb), bandno_(bnd) 
   {}
 
   mapnik::raster_ptr get_raster();
 
-  static mapnik::raster_ptr read(const uint8_t* wkb, int size)
+  /// @param bnd band number. If 0 (default) it'll try to read all bands
+  ///            with automatic color interpretation (rgb for 3 bands,
+  ///            grayscale for 1 band). Any other value results in pixel
+  ///            values being copied verbatim into the returned raster
+  ///            for interpretation by the caller.
+  static mapnik::raster_ptr read(const uint8_t* wkb, int size, int bnd=0)
   {
-    pgraster_wkb_reader reader(wkb,size);
+    pgraster_wkb_reader reader(wkb,size,bnd);
     return reader.get_raster();
   }
 
-
 private:
+  void read_indexed(mapnik::raster_ptr raster);
   void read_grayscale(mapnik::raster_ptr raster);
   void read_rgb(mapnik::raster_ptr raster);
 
@@ -54,6 +70,7 @@ private:
   const uint8_t* wkb_;
   const uint8_t* wkbend_;
   const uint8_t* ptr_;
+  int bandno_;
   uint16_t numBands_;
   uint16_t width_;
   uint16_t height_;
