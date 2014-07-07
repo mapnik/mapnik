@@ -851,7 +851,7 @@ struct set_symbolizer_property_impl
 {
     static void apply(Symbolizer & sym, keys key, xml_node const & node)
     {
-        typedef T value_type;
+        using value_type = T;
         std::string const& name = std::get<0>(get_meta(key));
         try
         {
@@ -901,7 +901,7 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
 {
     static void apply(Symbolizer & sym, keys key, xml_node const & node)
     {
-        typedef T value_type;
+        using value_type = T;
         std::string const& name = std::get<0>(get_meta(key));
         try
         {

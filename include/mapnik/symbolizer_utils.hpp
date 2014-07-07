@@ -224,7 +224,7 @@ private:
 
 struct symbolizer_to_json : public boost::static_visitor<std::string>
 {
-    typedef std::string result_type;
+    using result_type = std::string;
 
     template <typename T>
     auto operator() (T const& sym) const -> result_type

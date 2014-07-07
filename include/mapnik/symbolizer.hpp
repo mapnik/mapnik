@@ -151,9 +151,9 @@ DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
 // fwd declares
 // TODO - move these transform declares to own header
 namespace detail { struct transform_node; }
-typedef std::vector<detail::transform_node> transform_list;
-typedef std::shared_ptr<transform_list>   transform_list_ptr;
-typedef transform_list_ptr transform_type;
+using transform_list =  std::vector<detail::transform_node>;
+using transform_list_ptr = std::shared_ptr<transform_list>;
+using transform_type = transform_list_ptr;
 class feature_impl;
 
 MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr,
@@ -176,25 +176,25 @@ struct enumeration_wrapper
     }
 };
 
-typedef std::vector<std::pair<double,double> > dash_array;
+using dash_array = std::vector<std::pair<double,double> >;
 
 struct  MAPNIK_DECL symbolizer_base
 {
-    typedef boost::variant<value_bool,
-                           value_integer,
-                           enumeration_wrapper,
-                           value_double,
-                           std::string,
-                           color,
-                           expression_ptr,
-                           path_expression_ptr,
-                           transform_type,
-                           text_placements_ptr,
-                           dash_array,
-                           raster_colorizer_ptr,
-                           group_symbolizer_properties_ptr> value_type;
-    typedef mapnik::keys key_type;
-    typedef std::map<key_type, value_type> cont_type;
+    using value_type =  boost::variant<value_bool,
+                                       value_integer,
+                                       enumeration_wrapper,
+                                       value_double,
+                                       std::string,
+                                       color,
+                                       expression_ptr,
+                                       path_expression_ptr,
+                                       transform_type,
+                                       text_placements_ptr,
+                                       dash_array,
+                                       raster_colorizer_ptr,
+                                       group_symbolizer_properties_ptr>;
+    using key_type =  mapnik::keys;
+    using cont_type = std::map<key_type, value_type>;
     cont_type properties;
 };
 
@@ -238,7 +238,7 @@ inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
 template <typename T>
 struct evaluate_path_wrapper
 {
-    typedef T result_type;
+    using result_type = T;
     template <typename T1, typename T2>
     result_type operator() (T1 const& expr, T2 const& feature) const
     {
@@ -264,7 +264,7 @@ namespace detail {
 template <typename T>
 struct enum_traits
 {
-    typedef boost::optional<T> result_type;
+    using result_type = boost::optional<T>;
     static result_type from_string(std::string const& str)
     {
         return result_type();
@@ -274,7 +274,7 @@ struct enum_traits
 template <>
 struct enum_traits<composite_mode_e>
 {
-    typedef boost::optional<composite_mode_e> result_type;
+    using result_type = boost::optional<composite_mode_e>;
     static result_type from_string(std::string const& str)
     {
         return comp_op_from_string(str);
@@ -284,7 +284,7 @@ struct enum_traits<composite_mode_e>
 template <>
 struct enum_traits<simplify_algorithm_e>
 {
-    typedef boost::optional<simplify_algorithm_e> result_type;
+    using result_type = boost::optional<simplify_algorithm_e>;
     static result_type from_string(std::string const& str)
     {
         return simplify_algorithm_from_string(str);
