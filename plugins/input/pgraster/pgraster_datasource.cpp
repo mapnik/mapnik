@@ -168,14 +168,18 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 raster_table_ = raster_table_.substr(0);
             }
 
-            // If we do not know either the geometry_field or the srid
-            // then first attempt to fetch the geometry name from a geometry_columns entry.
+            // If we do not know either the geometry_field or the srid or we
+            // want to use overviews but do not know about schema, or
+            // no extent was specified, then attempt to fetch the missing
+            // information from a raster_columns entry.
+            //
             // This will return no records if we are querying a bogus table returned
             // from the simplistic table parsing in table_from_sql() or if
             // the table parameter references a table, view, or subselect not
             // registered in the geometry columns.
             geometryColumn_ = raster_field_;
-            if (geometryColumn_.empty() || srid_ == 0 || (schema_.empty() && use_overviews_))
+            if (geometryColumn_.empty() || srid_ == 0 ||
+                (schema_.empty() && use_overviews_) || ! extent_initialized_)
             {
 #ifdef MAPNIK_STATS
                 mapnik::progress_timer __stats2__(std::clog, "pgraster_datasource::init(get_srid_and_geometry_column)");
@@ -184,8 +188,12 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
                 try
                 {
-                    s << "SELECT r_raster_column as col, "
-                      << "greatest(scale_x, scale_y) as maxscale, srid FROM "
+                    s << "SELECT r_raster_column col, srid";
+                    if ( ! extent_initialized_ ) {
+                      s << ", st_xmin(extent) xmin, st_ymin(extent) ymin"
+                        << ", st_xmax(extent) xmax, st_ymax(extent) ymax";
+                    }
+                    s << ", greatest(scale_x, scale_y) maxscale FROM "
                       << RASTER_COLUMNS <<" WHERE r_table_name='"
                       << mapnik::sql_utils::unquote_double(raster_table_)
                       << "'";
@@ -201,12 +209,29 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                           << mapnik::sql_utils::unquote_double(raster_field_)
                           << "'";
                     }
+                    MAPNIK_LOG_DEBUG(pgraster) <<
+                      "pgraster_datasource: running query " << s.str();
                     shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
                     {
                         geometryColumn_ = rs->getValue("col");
                         maxScale_ = atof(rs->getValue("maxscale")); // TODO: check for null ?
-                        MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Using maxscale=" << maxScale_;
+                        if ( ! extent_initialized_ ) {
+                          double lox, loy, hix, hiy;
+                          if (mapnik::util::string2double(rs->getValue("xmin"), lox) &&
+                              mapnik::util::string2double(rs->getValue("ymin"), loy) &&
+                              mapnik::util::string2double(rs->getValue("xmax"), hix) &&
+                              mapnik::util::string2double(rs->getValue("ymax"), hiy))
+                          {
+                            extent_.init(lox, loy, hix, hiy);
+                            extent_initialized_ = true;
+                            MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Layer extent=" << extent_;
+                          }
+                          else
+                          {
+                            MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Could not determine extent from query: " << s.str();
+                          }
+                        }
                         if (srid_ == 0)
                         {
                             const char* srid_c = rs->getValue("srid");
@@ -220,6 +245,10 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                                 }
                             }
                         }
+                    }
+                    else
+                    {
+            MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no response from metadata query " << s.str();
                     }
                     rs->close();
                 }
@@ -1056,6 +1085,7 @@ box2d<double> pgraster_datasource::envelope() const
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
                   << " FROM (SELECT ST_Estimated_Extent('";
 
+                // TODO: query from highest-factor overview instead
                 if (! schema_.empty())
                 {
                     s << mapnik::sql_utils::unquote_double(schema_) << "','";
@@ -1077,6 +1107,7 @@ box2d<double> pgraster_datasource::envelope() const
                 }
                 else
                 {
+                    // TODO: query from highest-factor overview instead
                     if (! schema_.empty())
                     {
                         s << schema_ << ".";
