@@ -30,6 +30,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_utils.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/layer.hpp>
@@ -864,16 +865,16 @@ struct set_symbolizer_property_impl
             if (val)
             {
                 // first try pre-evaluate expressions which don't have dynamic properties
-                //auto result = pre_evaluate_expression<mapnik::value>(*val);
-                //if (std::get<1>(result))
-                //{
-                //    put(sym, key, std::get<0>(result));
-                //}
-                //else
-                //{
+                auto result = pre_evaluate_expression<mapnik::value>(*val);
+                if (std::get<1>(result))
+                {
+                    set_property_from_value(sym, key,std::get<0>(result));
+                }
+                else
+                {
                     // expression_ptr
-                put(sym, key, *val);
-                    //}
+                    put(sym, key, *val);
+                }
             }
             else
             {
@@ -905,7 +906,6 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
         try
         {
             optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
-
             if (enum_str)
             {
                 optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);

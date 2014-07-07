@@ -127,7 +127,7 @@ public:
 };
 }
 
-std::string symbolizer_name(symbolizer const& sym)
+inline std::string symbolizer_name(symbolizer const& sym)
 {
     std::string type = boost::apply_visitor( detail::symbolizer_name_impl(), sym);
     return type;
@@ -307,6 +307,31 @@ inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
         break;
     }
 }
+
+
+
+template <typename Symbolizer, typename T>
+inline void set_property_from_value(Symbolizer & sym, mapnik::keys key, T const& val)
+{
+    switch (std::get<3>(get_meta(key)))
+    {
+    case property_types::target_bool:
+        put(sym, key, val.to_bool());
+        break;
+    case property_types::target_integer:
+        put(sym, key, val.to_int());
+        break;
+    case property_types::target_double:
+        put(sym, key, val.to_double());
+        break;
+    case property_types::target_color:
+        put(sym, key, mapnik::parse_color(val.to_string()));
+        break;
+    default:
+        break;
+    }
+}
+
 
 }
 
