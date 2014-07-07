@@ -94,7 +94,7 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
 
     cinfo.dest = (struct jpeg_destination_mgr *)(*cinfo.mem->alloc_small)
         ((j_common_ptr) &cinfo, JPOOL_PERMANENT, sizeof(jpeg_detail::dest_mgr));
-    jpeg_detail::dest_mgr * dest = (jpeg_detail::dest_mgr*) cinfo.dest;
+    jpeg_detail::dest_mgr * dest = reinterpret_cast<jpeg_detail::dest_mgr*>(cinfo.dest);
     dest->pub.init_destination = jpeg_detail::init_destination;
     dest->pub.empty_output_buffer = jpeg_detail::empty_output_buffer;
     dest->pub.term_destination = jpeg_detail::term_destination;
@@ -139,4 +139,3 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
 #endif
 
 #endif // MAPNIK_JPEG_IO_HPP
-
