@@ -1063,19 +1063,32 @@ box2d<double> pgraster_datasource::envelope() const
         {
             std::ostringstream s;
 
-            if (geometryColumn_.empty())
+            std::string col = geometryColumn_;
+            std::string sch = schema_;
+            std::string tab = raster_table_;
+
+            if ( use_overviews_ && ! overviews_.empty() )
+            {
+              // query from highest-factor overview instead
+              const pgraster_overview& o = overviews_.back();
+              sch = o.schema;
+              tab = o.table;
+              col = o.column;
+            }
+
+            if (col.empty())
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: unable to query the layer extent of table '";
 
-                if (! schema_.empty())
+                if (! sch.empty())
                 {
-                    s_error << schema_ << ".";
+                    s_error << sch << ".";
                 }
                 s_error << raster_table_ << "' because we cannot determine the raster field name."
                         << "\nPlease provide either an 'extent' parameter to skip this query, "
-                        << "a 'geometry_field' and/or 'rater_table' parameter, or add a "
-                        << "record to the 'raster_columns' for your table.";
+                        << "a 'raster_field' and/or 'raster_table' parameter, or add "
+                        << "standard constraints to your raster table.";
 
                 throw mapnik::datasource_exception("Pgraster Plugin: " + s_error.str());
             }
@@ -1085,37 +1098,35 @@ box2d<double> pgraster_datasource::envelope() const
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
                   << " FROM (SELECT ST_Estimated_Extent('";
 
-                // TODO: query from highest-factor overview instead
-                if (! schema_.empty())
+                if (! sch.empty())
                 {
-                    s << mapnik::sql_utils::unquote_double(schema_) << "','";
+                    s << mapnik::sql_utils::unquote_double(sch) << "','";
                 }
 
-                s << mapnik::sql_utils::unquote_double(raster_table_) << "','"
-                  << mapnik::sql_utils::unquote_double(geometryColumn_) << "') as ext) as tmp";
+                s << mapnik::sql_utils::unquote_double(tab) << "','"
+                  << mapnik::sql_utils::unquote_double(col) << "') as ext) as tmp";
             }
             else
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent(" <<geometryColumn_<< "::geometry) as ext from ";
+                  << " FROM (SELECT ST_Extent(" << col << "::geometry) as ext from ";
 
                 if (extent_from_subquery_)
                 {
                     // if a subselect limits records then calculating the extent upon the
                     // subquery will be faster and the bounds will be more accurate
-                    s << populate_tokens(table_) << ") as tmp";
+                    s << populate_tokens(tab) << ") as tmp";
                 }
                 else
                 {
-                    // TODO: query from highest-factor overview instead
-                    if (! schema_.empty())
+                    if (! sch.empty())
                     {
-                        s << schema_ << ".";
+                        s << sch << ".";
                     }
 
                     // but if the subquery does not limit records then querying the
                     // actual table will be faster as indexes can be used
-                    s << raster_table_ << ") as tmp";
+                    s << tab << ") as tmp";
                 }
             }
 
