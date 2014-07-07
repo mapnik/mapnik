@@ -28,7 +28,7 @@
 
 namespace mapnik {
 
-typedef agg::row_ptr_cache<mapnik::grid::value_type> grid_rendering_buffer;
+using grid_rendering_buffer = agg::row_ptr_cache<mapnik::grid::value_type>;
 
 }
 

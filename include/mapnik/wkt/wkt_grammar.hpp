@@ -47,7 +47,7 @@ namespace mapnik { namespace wkt {
         template <typename T>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         template <typename T0,typename T1, typename T2, typename T3>
@@ -63,7 +63,7 @@ namespace mapnik { namespace wkt {
         template <typename T>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         template <typename T>
@@ -79,7 +79,7 @@ namespace mapnik { namespace wkt {
         template <typename T0>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         template <typename T0>

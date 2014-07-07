@@ -36,7 +36,7 @@ namespace mapnik
 namespace formatting
 {
 
-typedef node_ptr (*from_xml_function_ptr)(xml_node const& xml);
+using from_xml_function_ptr = node_ptr (*)(xml_node const&);
 
 class registry : public singleton<registry, CreateStatic>,
                  private mapnik::noncopyable

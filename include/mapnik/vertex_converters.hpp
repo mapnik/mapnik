@@ -79,8 +79,8 @@ namespace  detail {
 template <typename T0, typename T1>
 struct converter_traits
 {
-    typedef T0 geometry_type;
-    typedef geometry_type conv_type;
+    using geometry_type = T0;
+    using conv_type = geometry_type;
     template <typename Args>
     static void setup(geometry_type & , Args const& )
     {
@@ -91,8 +91,8 @@ struct converter_traits
 template <typename T>
 struct converter_traits<T,mapnik::smooth_tag>
 {
-    typedef T geometry_type;
-    typedef typename agg::conv_smooth_poly1_curve<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = typename agg::conv_smooth_poly1_curve<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -107,8 +107,8 @@ struct converter_traits<T,mapnik::smooth_tag>
 template <typename T>
 struct converter_traits<T,mapnik::simplify_tag>
 {
-    typedef T geometry_type;
-    typedef simplify_converter<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = simplify_converter<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -124,8 +124,8 @@ struct converter_traits<T,mapnik::simplify_tag>
 template <typename T>
 struct converter_traits<T, mapnik::clip_line_tag>
 {
-    typedef T geometry_type;
-    typedef typename agg::conv_clip_polyline<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = typename agg::conv_clip_polyline<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -138,8 +138,8 @@ struct converter_traits<T, mapnik::clip_line_tag>
 template <typename T>
 struct converter_traits<T, mapnik::dash_tag>
 {
-    typedef T geometry_type;
-    typedef typename agg::conv_dash<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = typename agg::conv_dash<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -161,8 +161,8 @@ struct converter_traits<T, mapnik::dash_tag>
 template <typename T>
 struct converter_traits<T, mapnik::stroke_tag>
 {
-    typedef T geometry_type;
-    typedef typename agg::conv_stroke<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = typename agg::conv_stroke<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -182,9 +182,9 @@ struct converter_traits<T, mapnik::stroke_tag>
 template <typename T>
 struct converter_traits<T,mapnik::clip_poly_tag>
 {
-    typedef T geometry_type;
-    //typedef mapnik::polygon_clipper<geometry_type> conv_type;
-    typedef typename agg::conv_clip_polygon<geometry_type> conv_type;
+    using geometry_type = T;
+    //using conv_type = mapnik::polygon_clipper<geometry_type>;
+    using conv_type = typename agg::conv_clip_polygon<geometry_type>;
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
@@ -197,8 +197,8 @@ struct converter_traits<T,mapnik::clip_poly_tag>
 template <typename T>
 struct converter_traits<T,mapnik::close_poly_tag>
 {
-    typedef T geometry_type;
-    typedef typename agg::conv_close_polygon<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = typename agg::conv_close_polygon<geometry_type>;
     template <typename Args>
     static void setup(geometry_type & , Args const&)
     {
@@ -209,8 +209,8 @@ struct converter_traits<T,mapnik::close_poly_tag>
 template <typename T>
 struct converter_traits<T,mapnik::transform_tag>
 {
-    typedef T geometry_type;
-    typedef coord_transform<CoordTransform, geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = coord_transform<CoordTransform, geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -223,10 +223,8 @@ struct converter_traits<T,mapnik::transform_tag>
 template <typename T>
 struct converter_traits<T,mapnik::affine_transform_tag>
 {
-    typedef T geometry_type;
-    typedef agg::conv_transform<geometry_type, agg::trans_affine const>
-        conv_base_type;
-
+    using geometry_type = T;
+    using conv_base_type =  agg::conv_transform<geometry_type, agg::trans_affine const>;
     struct conv_type : public conv_base_type
     {
         conv_type(geometry_type& geom)
@@ -243,8 +241,8 @@ struct converter_traits<T,mapnik::affine_transform_tag>
 template <typename T>
 struct converter_traits<T,mapnik::offset_transform_tag>
 {
-    typedef T geometry_type;
-    typedef offset_converter<geometry_type> conv_type;
+    using geometry_type = T;
+    using conv_type = offset_converter<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
@@ -264,9 +262,9 @@ struct converter_fwd
     template <typename Base, typename T0,typename T1,typename T2, typename Iter,typename End>
     static void forward(Base& base, T0 & geom,T1 const& args)
     {
-        typedef T0 geometry_type;
-        typedef T2 conv_tag;
-        typedef typename detail::converter_traits<geometry_type,conv_tag>::conv_type conv_type;
+        using geometry_type = T0;
+        using conv_tag = T2;
+        using conv_type = typename detail::converter_traits<geometry_type,conv_tag>::conv_type;
         conv_type conv(geom);
         detail::converter_traits<conv_type,conv_tag>::setup(conv,args);
         base.template dispatch<Iter,End>(conv, typename boost::is_same<Iter,End>::type());
@@ -286,9 +284,9 @@ struct converter_fwd<true>
 template <typename A, typename C>
 struct dispatcher
 {
-    typedef dispatcher this_type;
-    typedef A args_type;
-    typedef C conv_types;
+    using this_type = dispatcher;
+    using args_type = A;
+    using conv_types = C;
 
     dispatcher(args_type const& args)
         : args_(args)
@@ -306,9 +304,9 @@ struct dispatcher
     template <typename Iter, typename End, typename Geometry>
     void dispatch(Geometry & geom, boost::mpl::false_)
     {
-        typedef typename boost::mpl::deref<Iter>::type conv_tag;
-        typedef typename detail::converter_traits<Geometry,conv_tag>::conv_type conv_type;
-        typedef typename boost::mpl::next<Iter>::type Next;
+        using conv_tag = typename boost::mpl::deref<Iter>::type;
+        using conv_type = typename detail::converter_traits<Geometry,conv_tag>::conv_type;
+        using Next = typename boost::mpl::next<Iter>::type;
 
         std::size_t index = boost::mpl::distance<Iter,End>::value - 1;
         if (vec_[index] == 1)
@@ -326,8 +324,8 @@ struct dispatcher
     template <typename Geometry>
     void apply(Geometry & geom)
     {
-        typedef typename boost::mpl::begin<conv_types>::type begin;
-        typedef typename boost::mpl::end  <conv_types>::type end;
+        using begin = typename boost::mpl::begin<conv_types>::type;
+        using end = typename boost::mpl::end  <conv_types>::type;
         dispatch<begin,end,Geometry>(geom, boost::false_type());
     }
 
@@ -339,16 +337,15 @@ struct dispatcher
 template <typename B, typename R, typename S, typename T, typename P, typename A, typename C, typename F >
 struct vertex_converter : private mapnik::noncopyable
 {
-    typedef C conv_types;
-    typedef B bbox_type;
-    typedef R rasterizer_type;
-    typedef S symbolizer_type;
-    typedef T trans_type;
-    typedef P proj_trans_type;
-    typedef A affine_trans_type;
-    typedef F feature_type;
-    typedef typename boost::fusion::vector
-    <
+    using conv_types = C;
+    using bbox_type = B;
+    using rasterizer_type = R;
+    using symbolizer_type = S;
+    using trans_type = T;
+    using proj_trans_type = P;
+    using affine_trans_type = A;
+    using feature_type = F;
+    using args_type =  typename boost::fusion::vector<
     bbox_type const&,
     rasterizer_type&,
     symbolizer_type const&,
@@ -358,7 +355,7 @@ struct vertex_converter : private mapnik::noncopyable
     feature_type const&,
     attributes const&,
     double //scale-factor
-    > args_type;
+    >;
 
     vertex_converter(bbox_type const& b,
                      rasterizer_type & ras,
@@ -382,15 +379,15 @@ struct vertex_converter : private mapnik::noncopyable
     template <typename Geometry>
     void apply(Geometry & geom)
     {
-        typedef Geometry geometry_type;
+        using geometry_type = Geometry;
         disp_.template apply<geometry_type>(geom);
     }
 
     template <typename Conv>
     void set()
     {
-        typedef typename boost::mpl::find<conv_types,Conv>::type iter;
-        typedef typename boost::mpl::end<conv_types>::type end;
+        using iter = typename boost::mpl::find<conv_types,Conv>::type;
+        using end = typename boost::mpl::end<conv_types>::type;
         std::size_t index = boost::mpl::distance<iter,end>::value - 1;
         if (index < disp_.vec_.size())
             disp_.vec_[index]=1;
@@ -399,8 +396,8 @@ struct vertex_converter : private mapnik::noncopyable
     template <typename Conv>
     void unset()
     {
-        typedef typename boost::mpl::find<conv_types,Conv>::type iter;
-        typedef typename boost::mpl::end<conv_types>::type end;
+        using iter = typename boost::mpl::find<conv_types,Conv>::type;
+        using end = typename boost::mpl::end<conv_types>::type;
         std::size_t index = boost::mpl::distance<iter,end>::value - 1;
         if (index < disp_.vec_.size())
             disp_.vec_[index]=0;

@@ -28,7 +28,7 @@
 namespace mapnik
 {
 
-typedef std::tuple<double,double,double,double> segment_t;
+using segment_t = std::tuple<double,double,double,double>;
 
 static bool y_order(segment_t const& first,segment_t const& second)
 {

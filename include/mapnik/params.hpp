@@ -40,9 +40,9 @@ namespace mapnik
 // fwd declare
 class boolean;
 
-typedef boost::variant<value_null,value_integer,value_double,std::string> value_holder;
-typedef std::pair<std::string, value_holder> parameter;
-typedef std::map<std::string, value_holder> param_map;
+using value_holder = boost::variant<value_null,value_integer,value_double,std::string>;
+using parameter = std::pair<std::string, value_holder>;
+using param_map = std::map<std::string, value_holder>;
 
 class MAPNIK_DECL parameters : public param_map
 {

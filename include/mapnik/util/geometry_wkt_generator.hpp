@@ -61,7 +61,7 @@ template <typename Geometry>
 struct get_type
 {
     template <typename T>
-    struct result { typedef int type; };
+    struct result { using type = int; };
 
     int operator() (Geometry const& geom) const
     {
@@ -72,10 +72,10 @@ struct get_type
 template <typename T>
 struct get_first
 {
-    typedef T geometry_type;
+    using geometry_type = T;
 
     template <typename U>
-    struct result { typedef typename geometry_type::value_type const type; };
+    struct result { using type  = const typename geometry_type::value_type; };
 
     typename geometry_type::value_type const operator() (geometry_type const& geom) const
     {
@@ -89,10 +89,10 @@ struct get_first
 template <typename T>
 struct multi_geometry_
 {
-    typedef T geometry_container;
+    using geometry_container = T;
 
     template <typename U>
-    struct result { typedef bool type; };
+    struct result { using type = bool; };
     bool operator() (geometry_container const& geom) const
     {
         return geom.size() > 1 ? true : false;
@@ -102,10 +102,10 @@ struct multi_geometry_
 template <typename T>
 struct get_x
 {
-    typedef T value_type;
+    using value_type = T;
 
     template <typename U>
-    struct result { typedef double type; };
+    struct result { using type = double; };
 
     double operator() (value_type const& val) const
     {
@@ -116,10 +116,10 @@ struct get_x
 template <typename T>
 struct get_y
 {
-    typedef T value_type;
+    using value_type = T;
 
     template <typename U>
-    struct result { typedef double type; };
+    struct result { using type = double; };
 
     double operator() (value_type const& val) const
     {
@@ -130,10 +130,10 @@ struct get_y
 template <typename T>
 struct multi_geometry_type
 {
-    typedef T geometry_container;
+    using geometry_container = T;
 
     template <typename U>
-    struct result { typedef std::tuple<unsigned,bool> type; };
+    struct result { using type = std::tuple<unsigned,bool>; };
 
     std::tuple<unsigned,bool> operator() (geometry_container const& geom) const;
 };
@@ -142,7 +142,7 @@ struct multi_geometry_type
 template <typename T>
 struct wkt_coordinate_policy : karma::real_policies<T>
 {
-    typedef boost::spirit::karma::real_policies<T> base_type;
+    using base_type = boost::spirit::karma::real_policies<T>;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
     static unsigned precision(T n)
     {
@@ -173,8 +173,8 @@ template <typename OutputIterator, typename Geometry>
 struct wkt_generator :
     karma::grammar<OutputIterator, Geometry const& ()>
 {
-    typedef Geometry geometry_type;
-    typedef typename boost::remove_pointer<typename geometry_type::value_type>::type coord_type;
+    using geometry_type = Geometry;
+    using coord_type = typename boost::remove_pointer<typename geometry_type::value_type>::type;
 
     wkt_generator(bool single = false);
     // rules
@@ -202,7 +202,7 @@ template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
         karma::grammar<OutputIterator, karma::locals< std::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
-    typedef typename boost::remove_pointer<typename GeometryContainer::value_type>::type geometry_type;
+    using geometry_type = typename boost::remove_pointer<typename GeometryContainer::value_type>::type;
 
     wkt_multi_generator();
     // rules

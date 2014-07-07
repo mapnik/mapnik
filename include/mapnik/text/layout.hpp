@@ -39,16 +39,16 @@
 namespace mapnik
 {
 
-typedef std::shared_ptr<text_layout> text_layout_ptr;
-typedef std::vector<text_layout_ptr> text_layout_vector;
+using text_layout_ptr = std::shared_ptr<text_layout>;
+using text_layout_vector = std::vector<text_layout_ptr>;
 
 class text_layout
 {
 public:
-    typedef std::vector<text_line> line_vector;
-    typedef line_vector::const_iterator const_iterator;
-    typedef text_layout_vector::const_iterator child_iterator;
-    typedef harfbuzz_shaper shaper_type;
+    using line_vector = std::vector<text_line>;
+    using const_iterator = line_vector::const_iterator;
+    using child_iterator = text_layout_vector::const_iterator;
+    using shaper_type = harfbuzz_shaper;
     text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties_ptr properties);
 
     /** Adds a new text part. Call this function repeatedly to build the complete text. */

@@ -48,9 +48,9 @@ namespace mapnik {
  */
 struct thunk_renderer : public boost::static_visitor<>
 {
-    typedef agg_renderer<image_32> renderer_type;
-    typedef typename renderer_type::buffer_type buffer_type;
-    typedef agg_text_renderer<buffer_type> text_renderer_type;
+    using renderer_type = agg_renderer<image_32>;
+    using buffer_type = typename renderer_type::buffer_type;
+    using text_renderer_type = agg_text_renderer<buffer_type>;
 
     thunk_renderer(renderer_type &ren,
                    buffer_type *buf,

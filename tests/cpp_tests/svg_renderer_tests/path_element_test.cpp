@@ -281,7 +281,7 @@ void render_to_file(Map const& m, const std::string output_filename)
 
     if(output_stream)
     {
-        typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
+        using svg_ren = svg_renderer<std::ostream_iterator<char> >;
         std::ostream_iterator<char> output_stream_iterator(output_stream);
         svg_ren renderer(m, output_stream_iterator);
         renderer.apply();

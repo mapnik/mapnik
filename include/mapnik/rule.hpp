@@ -40,7 +40,7 @@ namespace mapnik
 class MAPNIK_DECL rule
 {
 public:
-    typedef std::vector<symbolizer> symbolizers;
+    using symbolizers = std::vector<symbolizer>;
 private:
 
     std::string name_;

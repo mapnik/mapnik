@@ -32,7 +32,7 @@
 #include <memory>
 
 class postgis_processor_context;
-typedef std::shared_ptr<postgis_processor_context> postgis_processor_context_ptr;
+using postgis_processor_context_ptr = std::shared_ptr<postgis_processor_context>;
 
 class AsyncResultSet : public IResultSet, private mapnik::noncopyable
 {
@@ -212,7 +212,7 @@ public:
     int num_async_requests_;
 
 private:
-    typedef std::queue<std::shared_ptr<AsyncResultSet> > async_queue;
+    using async_queue = std::queue<std::shared_ptr<AsyncResultSet> >;
     async_queue q_;
 
 };

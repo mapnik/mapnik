@@ -42,9 +42,9 @@ namespace mapnik
 template <typename T0, typename T1, typename T2>
 struct evaluate : boost::static_visitor<T1>
 {
-    typedef T0 feature_type;
-    typedef T1 value_type;
-    typedef T2 variable_type;
+    using feature_type = T0;
+    using value_type = T1;
+    using variable_type = T2;
 
     explicit evaluate(feature_type const& f, variable_type const& v)
         : feature_(f),

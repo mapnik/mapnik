@@ -32,10 +32,10 @@
 
 #ifdef USE_DENSE_HASH_MAP
     #include <mapnik/sparsehash/dense_hash_map>
-    typedef google::dense_hash_map<unsigned int, unsigned char> rgba_hash_table;
+    using rgba_hash_table = google::dense_hash_map<unsigned int, unsigned char>;
 #else
     #include <boost/unordered_map.hpp>
-    typedef boost::unordered_map<unsigned int, unsigned char> rgba_hash_table;
+    using rgba_hash_table = boost::unordered_map<unsigned int, unsigned char>;
 #endif
 
 // stl

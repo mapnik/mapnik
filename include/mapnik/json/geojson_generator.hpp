@@ -38,7 +38,7 @@ template <typename OutputIterator> struct multi_geometry_generator_grammar;
 
 class MAPNIK_DECL feature_generator : private mapnik::noncopyable
 {
-    typedef std::back_insert_iterator<std::string> sink_type;
+    using sink_type = std::back_insert_iterator<std::string>;
 public:
     feature_generator();
     ~feature_generator();
@@ -49,7 +49,7 @@ private:
 
 class MAPNIK_DECL geometry_generator : private mapnik::noncopyable
 {
-    typedef std::back_insert_iterator<std::string> sink_type;
+    using sink_type = std::back_insert_iterator<std::string>;
 public:
     geometry_generator();
     ~geometry_generator();

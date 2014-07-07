@@ -156,8 +156,8 @@ namespace params_detail {
 template <typename T>
 struct converter
 {
-    typedef T value_type;
-    typedef boost::optional<value_type> return_type;
+    using value_type = T;
+    using return_type = boost::optional<value_type>;
     static return_type extract(parameters const& params,
                                std::string const& name,
                                boost::optional<T> const& default_opt_value)

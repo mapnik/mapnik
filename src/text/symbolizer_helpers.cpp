@@ -218,8 +218,8 @@ bool text_symbolizer_helper::next_line_placement(bool clipped)
         bool success = false;
         if (clipped)
         {
-            typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-            typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+            using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+            using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
             clipped_geometry_type clipped(**geo_itr_);
             clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
@@ -229,7 +229,7 @@ bool text_symbolizer_helper::next_line_placement(bool clipped)
         }
         else
         {
-            typedef coord_transform<CoordTransform,geometry_type> path_type;
+            using path_type = coord_transform<CoordTransform,geometry_type>;
             path_type path(t_, **geo_itr_, prj_trans_);
             success = finder_.find_line_placements(path, points_on_line_);
         }

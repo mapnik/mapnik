@@ -41,8 +41,8 @@ class path_iterator
 {
 
 public:
-    typedef T path_type;
-    typedef typename std::tuple<unsigned, double, double> value_type;
+    using path_type = T;
+    using value_type = typename std::tuple<unsigned, double, double>;
 
     path_iterator()
         : v_(mapnik::SEG_END,0,0),

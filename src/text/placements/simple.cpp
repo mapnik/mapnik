@@ -65,7 +65,7 @@ bool text_placement_info_simple::next_position_only()
     pixel_position const& pdisp = parent_->defaults.layout_defaults->displacement;
     pixel_position &displacement = properties.layout_defaults->displacement;
     if (position_state >= parent_->direction_.size()) return false;
-    directions_t dir = parent_->direction_[position_state];
+    directions_e dir = parent_->direction_[position_state];
     switch (dir) {
     case EXACT_POSITION:
         displacement = pdisp;
@@ -121,7 +121,7 @@ text_placement_info_ptr text_placements_simple::get_placement_info(
 void text_placements_simple::set_positions(std::string positions)
 {
     positions_ = positions;
-    struct direction_name_ : qi::symbols<char, directions_t>
+    struct direction_name_ : qi::symbols<char, directions_e>
     {
         direction_name_()
         {

@@ -276,10 +276,10 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
-    typedef vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
-                             CoordTransform, proj_transform, agg::trans_affine,
-                             conv_types, feature_impl> vertex_converter_type;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type = vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
+                                                   CoordTransform, proj_transform, agg::trans_affine,
+                                                   conv_types, feature_impl>;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -299,7 +299,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    using path_type = coord_transform<CoordTransform,geometry_type>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     mapnik::color fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
@@ -337,11 +337,11 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               affine_transform_tag,
-                               simplify_tag, smooth_tag,
-                               offset_transform_tag,
-                               dash_tag, stroke_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag, smooth_tag,
+                                          offset_transform_tag,
+                                          dash_tag, stroke_tag>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, true);
@@ -600,8 +600,8 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+    using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -684,8 +684,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    //typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    //typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    //using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
+    //using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -728,7 +728,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
@@ -972,7 +972,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::pod_bvector<svg::path_attributes> svg_attribute_type;
+    using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -981,11 +981,13 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
     auto renderer_context = std::tie(context_, clip_box);
 
-    typedef decltype(renderer_context) RendererContextType;
-    typedef detail::markers_dispatch<RendererContextType, svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> > , svg_attribute_type,
-                                     label_collision_detector4> vector_dispatch_type;
-    typedef detail::raster_markers_dispatch<RendererContextType, mapnik::image_data_32,
-                                       label_collision_detector4> raster_dispatch_type;
+    using RendererContextType = decltype(renderer_context);
+    using vector_dispatch_type = detail::markers_dispatch<RendererContextType,
+                                                          svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> >,
+                                                          svg_attribute_type,label_collision_detector4>;
+
+    using raster_dispatch_type = detail::raster_markers_dispatch<RendererContextType, mapnik::image_data_32,
+                                                                 label_collision_detector4>;
 
 
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
@@ -1025,7 +1027,7 @@ namespace {
  */
 struct thunk_renderer : public boost::static_visitor<>
 {
-    typedef cairo_renderer_base renderer_type;
+    using renderer_type = cairo_renderer_base;
 
     thunk_renderer(renderer_type &ren,
                    cairo_context &context,
@@ -1120,7 +1122,7 @@ void cairo_renderer_base::process(debug_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef label_collision_detector4 detector_type;
+    using detector_type = label_collision_detector4;
     cairo_save_restore guard(context_);
 
     debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);

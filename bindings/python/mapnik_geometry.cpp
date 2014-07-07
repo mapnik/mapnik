@@ -50,7 +50,7 @@ namespace {
 using mapnik::from_wkt;
 using mapnik::geometry_type;
 
-typedef boost::ptr_vector<geometry_type> path_type;
+using path_type = boost::ptr_vector<geometry_type>;
 
 geometry_type const& getitem_impl(path_type & p, int key)
 {

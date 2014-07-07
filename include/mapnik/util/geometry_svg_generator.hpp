@@ -50,7 +50,7 @@
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type
-typedef mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type> path_type;
+using path_type = mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type>;
 
 template <>
 struct is_container<path_type const> : mpl::true_ {} ;
@@ -58,7 +58,7 @@ struct is_container<path_type const> : mpl::true_ {} ;
 template <>
 struct container_iterator<path_type const>
 {
-    typedef mapnik::util::path_iterator<path_type> type;
+    using type = mapnik::util::path_iterator<path_type>;
 };
 
 template <>
@@ -94,7 +94,7 @@ namespace mapnik { namespace util {
     template <typename Geometry>
     struct get_type
     {
-        typedef int result_type;
+        using result_type = int;
         result_type operator() (Geometry const& geom) const
         {
             return static_cast<int>(geom.type());
@@ -104,8 +104,8 @@ namespace mapnik { namespace util {
     template <typename T>
     struct get_first
     {
-        typedef T geometry_type;
-        typedef typename geometry_type::value_type const result_type;
+        using geometry_type = T;
+        using result_type = typename geometry_type::value_type const;
         result_type operator() (geometry_type const& geom) const
         {
             typename geometry_type::value_type coord;
@@ -118,7 +118,7 @@ namespace mapnik { namespace util {
     template <typename T>
     struct coordinate_policy : karma::real_policies<T>
     {
-        typedef boost::spirit::karma::real_policies<T> base_type;
+        using base_type = boost::spirit::karma::real_policies<T>;
         static int floatfield(T n) { return base_type::fmtflags::fixed; }
         static unsigned precision(T n) { return 4u ;}
     };
@@ -129,8 +129,8 @@ namespace mapnik { namespace util {
         karma::grammar<OutputIterator, Geometry const& ()>
     {
 
-        typedef Geometry geometry_type;
-        typedef typename boost::remove_pointer<typename geometry_type::value_type>::type coord_type;
+        using geometry_type = Geometry;
+        using coord_type = typename boost::remove_pointer<typename geometry_type::value_type>::type;
 
         svg_generator()
             : svg_generator::base_type(svg)

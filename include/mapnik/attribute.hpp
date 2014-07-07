@@ -80,7 +80,7 @@ struct global_attribute
     }
 };
 
-typedef std::unordered_map<std::string, value> attributes;
+using attributes = std::unordered_map<std::string, value>;
 
 }
 

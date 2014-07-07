@@ -34,7 +34,7 @@ namespace mapnik {
 template <typename T>
 class coord_array
 {
-    typedef T coord_type;
+    using coord_type = T;
     coord_type* pt_;
     const unsigned size_;
 public:

@@ -81,7 +81,7 @@ DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
 {
-    typedef enumeration<ENUM, MAX> Enum;
+    using Enum = enumeration<ENUM, MAX>;
 
     static std::string name()
     {

@@ -49,9 +49,9 @@ template <typename Container> struct expression_attributes;
 template <typename T, typename T1>
 struct transform_processor
 {
-    typedef T feature_type;
-    typedef T1 variable_type;
-    typedef agg::trans_affine transform_type;
+    using feature_type = T;
+    using variable_type = T1;
+    using transform_type = agg::trans_affine;
 
     template <typename Container>
     struct attribute_collector : boost::static_visitor<void>
@@ -242,7 +242,7 @@ struct transform_processor
     }
 };
 
-typedef mapnik::transform_processor<feature_impl,attributes> transform_processor_type;
+using transform_processor_type = mapnik::transform_processor<feature_impl,attributes>;
 
 } // namespace mapnik
 

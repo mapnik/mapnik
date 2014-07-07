@@ -55,7 +55,7 @@ enum text_transform
 
 DEFINE_ENUM(text_transform_e, text_transform);
 
-typedef std::map<std::string, font_set> fontset_map;
+using fontset_map = std::map<std::string, font_set>;
 
 struct MAPNIK_DECL char_properties
 {
@@ -159,7 +159,7 @@ struct MAPNIK_DECL text_layout_properties
     bool wrap_before;
     bool rotate_displacement;
 };
-typedef std::shared_ptr<text_layout_properties> text_layout_properties_ptr;
+using text_layout_properties_ptr = std::shared_ptr<text_layout_properties>;
 
 class text_layout;
 

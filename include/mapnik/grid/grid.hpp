@@ -52,12 +52,12 @@ template <typename T>
 class MAPNIK_DECL hit_grid
 {
 public:
-    typedef T value_type;
-    typedef mapnik::ImageData<value_type> data_type;
-    typedef std::string lookup_type;
+    using value_type = T;
+    using data_type = mapnik::ImageData<value_type>;
+    using lookup_type = std::string;
     // mapping between pixel id and key
-    typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<lookup_type, mapnik::feature_ptr> feature_type;
+    using feature_key_type = std::map<value_type, lookup_type>;
+    using feature_type = std::map<lookup_type, mapnik::feature_ptr>;
     static const value_type base_mask;
 
 private:
@@ -232,7 +232,7 @@ public:
 
 };
 
-typedef hit_grid<mapnik::value_integer> grid;
+using grid = hit_grid<mapnik::value_integer>;
 
 }
 #endif //MAPNIK_GRID_HPP

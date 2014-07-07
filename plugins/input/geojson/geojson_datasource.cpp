@@ -112,7 +112,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         file_ = *base + "/" + file_;
     }
 
-    typedef std::istreambuf_iterator<char> base_iterator_type;
+    using base_iterator_type = std::istreambuf_iterator<char>;
 
 #if defined (_WINDOWS)
     std::ifstream is(mapnik::utf8_to_utf16(file_),std::ios_base::in | std::ios_base::binary);

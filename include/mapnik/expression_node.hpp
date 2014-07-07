@@ -40,21 +40,21 @@ namespace mapnik
 {
 
 template <typename Tag> struct make_op;
-template <> struct make_op<tags::negate> { typedef std::negate<value_type> type;};
-template <> struct make_op<tags::plus> { typedef std::plus<value_type> type;};
-template <> struct make_op<tags::minus> { typedef std::minus<value_type> type;};
-template <> struct make_op<tags::mult> { typedef std::multiplies<value_type> type;};
-template <> struct make_op<tags::div> { typedef std::divides<value_type> type;};
-template <> struct make_op<tags::mod> { typedef std::modulus<value_type> type;};
-template <> struct make_op<tags::less> { typedef std::less<value_type> type;};
-template <> struct make_op<tags::less_equal> { typedef std::less_equal<value_type> type;};
-template <> struct make_op<tags::greater> { typedef std::greater<value_type> type;};
-template <> struct make_op<tags::greater_equal> { typedef std::greater_equal<value_type> type;};
-template <> struct make_op<tags::equal_to> { typedef std::equal_to<value_type> type;};
-template <> struct make_op<tags::not_equal_to> { typedef std::not_equal_to<value_type> type;};
-template <> struct make_op<tags::logical_not> { typedef std::logical_not<value_type> type;};
-template <> struct make_op<tags::logical_and> { typedef std::logical_and<value_type> type;};
-template <> struct make_op<tags::logical_or> { typedef std::logical_or<value_type> type;};
+template <> struct make_op<tags::negate> { using type = std::negate<value_type>;};
+template <> struct make_op<tags::plus> { using type = std::plus<value_type>;};
+template <> struct make_op<tags::minus> { using type = std::minus<value_type>;};
+template <> struct make_op<tags::mult> { using type = std::multiplies<value_type>;};
+template <> struct make_op<tags::div> { using type = std::divides<value_type>;};
+template <> struct make_op<tags::mod> { using type =  std::modulus<value_type>;};
+template <> struct make_op<tags::less> { using type = std::less<value_type>;};
+template <> struct make_op<tags::less_equal> { using type = std::less_equal<value_type>;};
+template <> struct make_op<tags::greater> { using type = std::greater<value_type>;};
+template <> struct make_op<tags::greater_equal> { using type = std::greater_equal<value_type>;};
+template <> struct make_op<tags::equal_to> { using type = std::equal_to<value_type>;};
+template <> struct make_op<tags::not_equal_to> { using type = std::not_equal_to<value_type>;};
+template <> struct make_op<tags::logical_not> { using type = std::logical_not<value_type>;};
+template <> struct make_op<tags::logical_and> { using type = std::logical_and<value_type>;};
+template <> struct make_op<tags::logical_or> { using type =  std::logical_or<value_type>;};
 
 template <typename Tag>
 struct unary_node

@@ -31,7 +31,7 @@ namespace mapnik { namespace util {
 template <typename T>
 std::tuple<unsigned,bool> detail::multi_geometry_type<T>::operator() (T const& geom) const
 {
-    typedef T geometry_container;
+    using geometry_container = T;
     unsigned type = 0u;
     bool collection = false;
 
@@ -150,7 +150,7 @@ template struct mapnik::util::wkt_multi_generator<std::back_insert_iterator<std:
 
 bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
 {
-    typedef std::back_insert_iterator<std::string> sink_type;
+    using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(wkt);
     wkt_generator<sink_type, mapnik::geometry_type> generator(true);
     bool result = karma::generate(sink, generator, geom);
@@ -159,7 +159,7 @@ bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
 
 bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
 {
-    typedef std::back_insert_iterator<std::string> sink_type;
+    using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(wkt);
     wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
     bool result = karma::generate(sink, generator, geom);

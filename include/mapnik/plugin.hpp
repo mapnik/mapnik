@@ -33,12 +33,12 @@ namespace mapnik
 {
 
 //  Opaque structure for handle
-typedef struct _mapnik_lib_t mapnik_lib_t;
+using mapnik_lib_t = struct _mapnik_lib_t;
 
 class PluginInfo : mapnik::noncopyable
 {
 public:
-    typedef const char * name_func();
+    using name_func = const char* (*) ();
     PluginInfo (std::string const& filename,
                 std::string const& library_name);
     ~PluginInfo();

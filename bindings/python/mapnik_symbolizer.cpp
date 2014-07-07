@@ -105,7 +105,7 @@ std::shared_ptr<mapnik::symbolizer_base::value_type> numeric_wrapper(const objec
 
 struct extract_python_object : public boost::static_visitor<boost::python::object>
 {
-    typedef boost::python::object result_type;
+    using result_type = boost::python::object;
 
     template <typename T>
     auto operator() (T const& val) const -> result_type
@@ -116,7 +116,7 @@ struct extract_python_object : public boost::static_visitor<boost::python::objec
 
 boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::string const& name)
 {
-    typedef symbolizer_base::cont_type::const_iterator const_iterator;
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
     mapnik::keys key = mapnik::get_key(name);
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())

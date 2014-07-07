@@ -60,7 +60,7 @@ namespace {
 
 struct get_type
 {
-    typedef int result_type;
+    using result_type = int;
     result_type operator() (geometry_type const& geom) const
     {
         return static_cast<int>(geom.type());
@@ -69,7 +69,7 @@ struct get_type
 
 struct get_first
 {
-    typedef geometry_type::value_type const result_type;
+    using result_type = geometry_type::value_type const;
     result_type operator() (geometry_type const& geom) const
     {
         geometry_type::value_type coord;
@@ -80,7 +80,7 @@ struct get_first
 
 struct multi_geometry_type
 {
-    typedef std::tuple<unsigned,bool>  result_type;
+    using result_type = std::tuple<unsigned,bool> ;
     result_type operator() (geometry_container const& geom) const
     {
         unsigned type = 0u;
@@ -105,7 +105,7 @@ struct multi_geometry_type
 
 struct not_empty
 {
-    typedef bool result_type;
+    using result_type = bool;
     result_type operator() (geometry_container const& cont) const
     {
         for (auto const& geom : cont)
@@ -119,7 +119,7 @@ struct not_empty
 template <typename T>
 struct json_coordinate_policy : karma::real_policies<T>
 {
-    typedef boost::spirit::karma::real_policies<T> base_type;
+    using base_type = boost::spirit::karma::real_policies<T>;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
 
     static unsigned precision(T n)

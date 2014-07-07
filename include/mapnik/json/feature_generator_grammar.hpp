@@ -50,7 +50,7 @@ struct is_container<mapnik::feature_impl const> : mpl::false_ {} ;
 template <>
 struct container_iterator<mapnik::feature_impl const>
 {
-    typedef mapnik::feature_kv_iterator2 type;
+    using type = mapnik::feature_kv_iterator2;
 };
 
 template <>
@@ -77,7 +77,7 @@ template <>
 struct transform_attribute<const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>,
                            mapnik::geometry_container const& ,karma::domain>
 {
-    typedef mapnik::geometry_container const& type;
+    using type = mapnik::geometry_container const&;
     static type pre(const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>& f)
     {
         return boost::fusion::at<mpl::int_<0> >(f).paths();
@@ -94,7 +94,7 @@ namespace phoenix = boost::phoenix;
 struct get_id
 {
     template <typename T>
-    struct result { typedef int type; };
+    struct result { using type =  int; };
 
     int operator() (mapnik::feature_impl const& f) const
     {
@@ -104,10 +104,10 @@ struct get_id
 
 struct make_properties_range
 {
-    typedef boost::iterator_range<mapnik::feature_kv_iterator> properties_range_type;
+    using properties_range_type = boost::iterator_range<mapnik::feature_kv_iterator>;
 
     template <typename T>
-    struct result { typedef properties_range_type type; };
+    struct result { using type = properties_range_type; };
 
     properties_range_type operator() (mapnik::feature_impl const& f) const
     {
@@ -119,7 +119,7 @@ struct make_properties_range
 struct utf8
 {
     template <typename T>
-    struct result { typedef std::string type; };
+    struct result { using type = std::string; };
 
     std::string operator() (mapnik::value_unicode_string const& ustr) const
     {
@@ -132,7 +132,7 @@ struct utf8
 struct value_base
 {
     template <typename T>
-    struct result { typedef mapnik::value_base const& type; };
+    struct result { using type =  mapnik::value_base const&; };
 
     mapnik::value_base const& operator() (mapnik::value const& val) const
     {
@@ -180,8 +180,8 @@ template <typename OutputIterator>
 struct feature_generator_grammar:
         karma::grammar<OutputIterator, mapnik::feature_impl const&()>
 {
-    typedef std::tuple<std::string, mapnik::value> pair_type;
-    typedef make_properties_range::properties_range_type range_type;
+    using pair_type = std::tuple<std::string, mapnik::value>;
+    using range_type = make_properties_range::properties_range_type;
 
     feature_generator_grammar()
         : feature_generator_grammar::base_type(feature)

@@ -99,10 +99,10 @@ struct text_render_thunk
  * Variant type for render thunks to allow us to re-render them
  * via a static visitor later.
  */
-typedef boost::variant<point_render_thunk,
-                       text_render_thunk> render_thunk;
-typedef std::shared_ptr<render_thunk> render_thunk_ptr;
-typedef std::list<render_thunk_ptr> render_thunk_list;
+using render_thunk = boost::variant<point_render_thunk,
+                                    text_render_thunk>;
+using render_thunk_ptr = std::shared_ptr<render_thunk>;
+using render_thunk_list = std::list<render_thunk_ptr>;
 
 /**
  * Base class for extracting the bounding boxes associated with placing

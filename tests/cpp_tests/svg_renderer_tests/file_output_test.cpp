@@ -41,7 +41,7 @@ namespace fs = boost::filesystem;
 BOOST_AUTO_TEST_CASE(file_output_test_case)
 {
     using namespace mapnik;
-    typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
+    using svg_ren = svg_renderer<std::ostream_iterator<char> >;
 
     Map map(800, 600);
     map.set_background(parse_color("blue"));

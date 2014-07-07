@@ -36,9 +36,9 @@ namespace mapnik
 
 struct attribute;
 
-typedef boost::variant<std::string, attribute> path_component;
-typedef std::vector<path_component> path_expression;
-typedef std::shared_ptr<path_expression> path_expression_ptr;
+using path_component = boost::variant<std::string, attribute>;
+using path_expression = std::vector<path_component>;
+using path_expression_ptr = std::shared_ptr<path_expression>;
 
 }
 

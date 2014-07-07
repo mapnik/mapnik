@@ -34,8 +34,8 @@
 #endif
 
 #define BOOST_SPIRIT_AUTO(domain_, name, expr)                  \
-    typedef boost::proto::result_of::                           \
-    deep_copy<BOOST_TYPEOF(expr)>::type name##_expr_type;       \
+    using name##_expr_type = boost::proto::result_of::          \
+        deep_copy<BOOST_TYPEOF(expr)>::type ;                   \
     BOOST_SPIRIT_ASSERT_MATCH(                                  \
         boost::spirit::domain_::domain, name##_expr_type);      \
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \

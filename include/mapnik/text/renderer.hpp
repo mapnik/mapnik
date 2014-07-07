@@ -75,7 +75,7 @@ public:
     void set_transform(agg::trans_affine const& transform);
     void set_halo_transform(agg::trans_affine const& halo_transform);
 protected:
-    typedef std::vector<glyph_t> glyph_vector;
+    using glyph_vector = std::vector<glyph_t>;
     void prepare_glyphs(glyph_positions const& positions);
     halo_rasterizer_e rasterizer_;
     composite_mode_e comp_op_;
@@ -91,7 +91,7 @@ template <typename T>
 class agg_text_renderer : public text_renderer
 {
 public:
-    typedef T pixmap_type;
+    using pixmap_type = T;
     agg_text_renderer (pixmap_type & pixmap, halo_rasterizer_e rasterizer,
                        composite_mode_e comp_op = src_over,
                        composite_mode_e halo_comp_op = src_over,
@@ -109,7 +109,7 @@ template <typename T>
 class grid_text_renderer : public text_renderer
 {
 public:
-    typedef T pixmap_type;
+    using pixmap_type = T;
     grid_text_renderer (pixmap_type & pixmap,
                         composite_mode_e comp_op = src_over,
                         double scale_factor = 1.0);

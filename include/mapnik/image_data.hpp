@@ -37,7 +37,7 @@ template <typename T>
 class ImageData
 {
 public:
-    typedef T pixel_type;
+    using pixel_type = T;
 
     ImageData(int width, int height)
         : width_(static_cast<unsigned>(width)),
@@ -192,8 +192,8 @@ private:
     ImageData& operator=(ImageData const&);
 };
 
-typedef ImageData<unsigned> image_data_32;
-typedef ImageData<byte>  image_data_8;
+using image_data_32 = ImageData<unsigned>;
+using image_data_8 = ImageData<byte> ;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP

@@ -33,9 +33,9 @@ namespace mapnik
 {
 
 class font_face;
-typedef std::shared_ptr<font_face> face_ptr;
+using face_ptr = std::shared_ptr<font_face>;
 
-typedef unsigned glyph_index_t;
+using glyph_index_t = unsigned;
 
 struct glyph_info
 {

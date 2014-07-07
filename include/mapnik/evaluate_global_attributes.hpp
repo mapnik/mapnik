@@ -47,7 +47,7 @@ namespace {
 template <typename T, typename Attributes>
 struct evaluate_expression : boost::static_visitor<T>
 {
-    typedef T value_type;
+    using value_type = T;
 
     explicit evaluate_expression(Attributes const& attributes)
         : attributes_(attributes) {}
@@ -139,7 +139,7 @@ struct evaluate_expression : boost::static_visitor<T>
 template <typename T>
 struct evaluate_expression<T, boost::none_t> : boost::static_visitor<T>
 {
-    typedef T value_type;
+    using value_type = T;
 
     evaluate_expression(boost::none_t) {}
 

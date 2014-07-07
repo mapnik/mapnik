@@ -49,8 +49,8 @@ void grid2utf(T const& grid_type,
                      boost::python::list& l,
                      std::vector<typename T::lookup_type>& key_order)
 {
-    typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
-    typedef typename keys_type::const_iterator keys_iterator;
+    using keys_type = std::map< typename T::lookup_type, typename T::value_type>;
+    using keys_iterator = typename keys_type::const_iterator;
 
     typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
@@ -113,8 +113,8 @@ void grid2utf(T const& grid_type,
                      std::vector<typename T::lookup_type>& key_order,
                      unsigned int resolution)
 {
-    typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
-    typedef typename keys_type::const_iterator keys_iterator;
+    using keys_type = std::map< typename T::lookup_type, typename T::value_type>;
+    using keys_iterator = typename keys_type::const_iterator;
 
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
     typename T::feature_key_type::const_iterator feature_pos;
@@ -176,8 +176,8 @@ void grid2utf2(T const& grid_type,
                       std::vector<typename T::lookup_type>& key_order,
                       unsigned int resolution)
 {
-    typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
-    typedef typename keys_type::const_iterator keys_iterator;
+    using keys_type = std::map< typename T::lookup_type, typename T::value_type>;
+    using keys_iterator = typename keys_type::const_iterator;
 
     typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();

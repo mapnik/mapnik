@@ -46,10 +46,10 @@
 namespace mapnik
 {
 
-typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;
-typedef mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage> svg_storage_type;
-typedef std::shared_ptr<svg_storage_type> svg_path_ptr;
-typedef std::shared_ptr<image_data_32> image_ptr;
+using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
+using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;
+using svg_path_ptr = std::shared_ptr<svg_storage_type>;
+using image_ptr = std::shared_ptr<image_data_32>;
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.

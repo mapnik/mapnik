@@ -57,7 +57,7 @@
 
 namespace mapnik
 {
-typedef boost::unique_lock<std::mutex> scoped_lock;
+using scoped_lock = boost::unique_lock<std::mutex>;
 }
 
 #endif // MAPNIK_CONFIG_HPP

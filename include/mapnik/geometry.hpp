@@ -49,10 +49,10 @@ public:
         PolygonExterior = Polygon,
         PolygonInterior = Polygon | ( 1 << geometry_bits)
     };
-    typedef T coord_type;
-    typedef Container<coord_type> container_type;
-    typedef typename container_type::value_type value_type;
-    typedef typename container_type::size_type size_type;
+    using coord_type = T;
+    using container_type = Container<coord_type>;
+    using value_type = typename container_type::value_type;
+    using size_type = typename container_type::size_type;
 private:
     container_type cont_;
     types type_;
@@ -153,9 +153,9 @@ public:
     }
 };
 
-typedef geometry<double,vertex_vector> geometry_type;
-typedef std::shared_ptr<geometry_type> geometry_ptr;
-typedef boost::ptr_vector<geometry_type> geometry_container;
+using geometry_type = geometry<double,vertex_vector>;
+using geometry_ptr = std::shared_ptr<geometry_type>;
+using geometry_container = boost::ptr_vector<geometry_type>;
 
 }
 

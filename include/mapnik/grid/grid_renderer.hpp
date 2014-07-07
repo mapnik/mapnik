@@ -65,8 +65,8 @@ class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T
 {
 
 public:
-    typedef T buffer_type;
-    typedef grid_renderer<T> processor_impl_type;
+    using buffer_type = T;
+    using processor_impl_type = grid_renderer<T>;
     grid_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     grid_renderer(Map const& m, request const& req, attributes const& vars, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~grid_renderer();

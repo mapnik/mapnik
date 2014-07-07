@@ -79,7 +79,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
     }
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag>;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
@@ -97,9 +97,9 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             converter.apply(geom);
         }
     }
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
@@ -125,4 +125,3 @@ template void grid_renderer<grid>::process(polygon_pattern_symbolizer const&,
 }
 
 #endif
-

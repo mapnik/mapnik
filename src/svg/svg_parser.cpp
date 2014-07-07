@@ -67,11 +67,11 @@ void parse_gradient_stop(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_attr(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_attr(svg_parser & parser,const xmlChar * name, const xmlChar * value );
 
-typedef std::vector<std::pair<double, agg::rgba8> > color_lookup_type;
+using color_lookup_type = std::vector<std::pair<double, agg::rgba8> >;
 
 namespace qi = boost::spirit::qi;
 
-typedef std::vector<std::pair<std::string, std::string> > pairs_type;
+using pairs_type = std::vector<std::pair<std::string, std::string> >;
 
 template <typename Iterator,typename SkipType>
 struct key_value_sequence_ordered
@@ -146,7 +146,7 @@ double parse_double_optional_percent(const char* str, bool &percent)
 bool parse_style (const char* str, pairs_type & v)
 {
     using namespace boost::spirit::qi;
-    typedef boost::spirit::ascii::space_type skip_type;
+    using skip_type = boost::spirit::ascii::space_type;
     key_value_sequence_ordered<const char*, skip_type> kv_parser;
     return phrase_parse(str, str + std::strlen(str), kv_parser, skip_type(), v);
 }
@@ -433,8 +433,8 @@ void parse_attr(svg_parser & parser, xmlTextReaderPtr reader)
 
             if (xmlStrEqual(name, BAD_CAST "style"))
             {
-                typedef std::vector<std::pair<std::string,std::string> > cont_type;
-                typedef cont_type::value_type value_type;
+                using cont_type = std::vector<std::pair<std::string,std::string> >;
+                using value_type = cont_type::value_type;
                 cont_type vec;
                 parse_style((const char*)value, vec);
                 for (value_type kv : vec )
@@ -794,8 +794,8 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "style");
     if (value)
     {
-        typedef std::vector<std::pair<std::string,std::string> > cont_type;
-        typedef cont_type::value_type value_type;
+        using cont_type = std::vector<std::pair<std::string,std::string> >;
+        using value_type = cont_type::value_type;
         cont_type vec;
         parse_style((const char*)value, vec);
 

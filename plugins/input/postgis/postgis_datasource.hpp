@@ -60,7 +60,7 @@ using mapnik::query;
 using mapnik::parameters;
 using mapnik::coord2d;
 
-typedef std::shared_ptr< ConnectionManager::PoolType> CnxPool_ptr;
+using CnxPool_ptr = std::shared_ptr< ConnectionManager::PoolType>;
 
 class postgis_datasource : public datasource
 {

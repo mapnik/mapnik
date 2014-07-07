@@ -82,8 +82,8 @@ private:
 class xml_node
 {
 public:
-    typedef std::list<xml_node>::const_iterator const_iterator;
-    typedef std::map<std::string, xml_attribute> attribute_map;
+    using const_iterator = std::list<xml_node>::const_iterator;
+    using attribute_map = std::map<std::string, xml_attribute>;
     xml_node(xml_tree &tree, std::string && name, unsigned line=0, bool is_text = false);
 
     std::string const& name() const;

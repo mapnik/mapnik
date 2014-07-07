@@ -38,7 +38,7 @@ protected:
 };
 }
 
-typedef non_copyable_::noncopyable noncopyable;
+using noncopyable = non_copyable_::noncopyable;
 
 } // namespace mapnik
 

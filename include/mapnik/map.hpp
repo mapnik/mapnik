@@ -91,10 +91,10 @@ private:
 
 public:
 
-    typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
-    typedef std::map<std::string,feature_type_style>::iterator style_iterator;
-    typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
-    typedef std::map<std::string,font_set>::iterator fontset_iterator;
+    using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
+    using style_iterator = std::map<std::string,feature_type_style>::iterator;
+    using const_fontset_iterator = std::map<std::string,font_set>::const_iterator;
+    using fontset_iterator = std::map<std::string,font_set>::iterator;
 
     /*! \brief Default constructor.
      *

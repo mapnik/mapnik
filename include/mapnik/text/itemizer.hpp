@@ -83,12 +83,12 @@ private:
         unsigned end;
         T data;
     };
-    typedef run<char_properties_ptr> format_run_t;
-    typedef run<UBiDiDirection> direction_run_t;
-    typedef run<UScriptCode> script_run_t;
-    typedef std::list<format_run_t> format_run_list;
-    typedef std::list<script_run_t> script_run_list;
-    typedef std::list<direction_run_t> direction_run_list;
+    using format_run_t = run<char_properties_ptr>;
+    using direction_run_t = run<UBiDiDirection>;
+    using script_run_t = run<UScriptCode>;
+    using format_run_list = std::list<format_run_t>;
+    using script_run_list = std::list<script_run_t>;
+    using direction_run_list = std::list<direction_run_t>;
     mapnik::value_unicode_string text_;
     /// Format runs are always sorted by char index
     format_run_list format_runs_;

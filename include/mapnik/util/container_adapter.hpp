@@ -38,7 +38,7 @@ struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
 template <>
 struct container_iterator<mapnik::geometry_type const>
 {
-    typedef mapnik::util::path_iterator<mapnik::geometry_type> type;
+    using type = mapnik::util::path_iterator<mapnik::geometry_type>;
 };
 
 template <>

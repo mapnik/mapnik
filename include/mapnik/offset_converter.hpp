@@ -45,7 +45,7 @@ const double pi = boost::math::constants::pi<double>();
 template <typename Geometry>
 struct MAPNIK_DECL offset_converter
 {
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
 
     offset_converter(Geometry & geom)
         : geom_(geom)

@@ -374,8 +374,8 @@ private:
 
     status init_vertices_visvalingam_whyatt()
     {
-        typedef std::set<weighted_vertex *, weighted_vertex::ascending_sort> VertexSet;
-        typedef std::vector<weighted_vertex *> VertexList;
+        using VertexSet = std::set<weighted_vertex *, weighted_vertex::ascending_sort>;
+        using VertexList = std::vector<weighted_vertex *>;
 
         std::vector<weighted_vertex *> v_list;
         vertex2d vtx(vertex2d::no_init);

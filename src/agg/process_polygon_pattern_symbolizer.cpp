@@ -68,8 +68,8 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
     if (!pat) return;
 
-    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
+    using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
     agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
@@ -89,23 +89,23 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent();
 
-    typedef agg::rgba8 color;
-    typedef agg::order_rgba order;
-    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
+    using color = agg::rgba8;
+    using order = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+    using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
 
-    typedef agg::wrap_mode_repeat wrap_x_type;
-    typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
-                                     wrap_x_type,
-                                     wrap_y_type> img_source_type;
+    using wrap_x_type = agg::wrap_mode_repeat;
+    using wrap_y_type = agg::wrap_mode_repeat;
+    using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
+                                                     wrap_x_type,
+                                                     wrap_y_type>;
 
-    typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
-    typedef agg::renderer_base<pixfmt_type> ren_base;
+    using span_gen_type = agg::span_pattern_rgba<img_source_type>;
+    using ren_base = agg::renderer_base<pixfmt_type>;
 
-    typedef agg::renderer_scanline_aa_alpha<ren_base,
+    using renderer_type = agg::renderer_scanline_aa_alpha<ren_base,
         agg::span_allocator<agg::rgba8>,
-        span_gen_type> renderer_type;
+        span_gen_type>;
 
     pixfmt_type pixf(buf);
     pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
@@ -145,7 +145,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);

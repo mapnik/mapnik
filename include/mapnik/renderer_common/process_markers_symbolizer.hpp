@@ -38,12 +38,12 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                T2 const& renderer_context)
 {
     using namespace mapnik::svg;
-    typedef T0 vector_dispatch_type;
-    typedef T1 raster_dispatch_type;
-    typedef T2 renderer_context_type;
+    using vector_dispatch_type = T0;
+    using raster_dispatch_type = T1;
+    using renderer_context_type = T2;
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
-    typedef agg::pod_bvector<path_attributes> svg_attribute_type;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag>;
+    using svg_attribute_type = agg::pod_bvector<path_attributes>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);

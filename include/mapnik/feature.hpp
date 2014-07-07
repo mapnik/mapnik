@@ -48,7 +48,7 @@ namespace mapnik {
 class raster;
 class feature_impl;
 
-typedef std::shared_ptr<raster> raster_ptr;
+using raster_ptr = std::shared_ptr<raster>;
 
 template <typename T>
 class context : private mapnik::noncopyable
@@ -56,13 +56,13 @@ class context : private mapnik::noncopyable
 {
     friend class feature_impl;
 public:
-    typedef T map_type;
-    typedef typename map_type::value_type value_type;
-    typedef typename map_type::key_type key_type;
-    typedef typename map_type::size_type size_type;
-    typedef typename map_type::difference_type difference_type;
-    typedef typename map_type::iterator iterator;
-    typedef typename map_type::const_iterator const_iterator;
+    using map_type = T;
+    using value_type = typename map_type::value_type;
+    using key_type = typename map_type::key_type;
+    using size_type = typename map_type::size_type;
+    using difference_type = typename map_type::difference_type;
+    using iterator = typename map_type::iterator;
+    using const_iterator = typename map_type::const_iterator;
 
     context()
         : mapping_() {}
@@ -87,8 +87,8 @@ private:
     map_type mapping_;
 };
 
-typedef context<std::map<std::string,std::size_t> > context_type;
-typedef std::shared_ptr<context_type> context_ptr;
+using context_type = context<std::map<std::string,std::size_t> >;
+using context_ptr = std::shared_ptr<context_type>;
 
 static const value default_feature_value;
 
@@ -97,9 +97,9 @@ class MAPNIK_DECL feature_impl : private mapnik::noncopyable
     friend class feature_kv_iterator;
 public:
 
-    typedef mapnik::value value_type;
-    typedef std::vector<value_type> cont_type;
-    typedef feature_kv_iterator iterator;
+    using value_type = mapnik::value;
+    using cont_type = std::vector<value_type>;
+    using iterator = feature_kv_iterator;
 
     feature_impl(context_ptr const& ctx, mapnik::value_integer id)
         : id_(id),
@@ -308,9 +308,9 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 }
 
 // TODO - remove at Mapnik 3.x
-typedef feature_impl Feature;
+using Feature = feature_impl;
 
-typedef std::shared_ptr<feature_impl> feature_ptr;
+using feature_ptr = std::shared_ptr<feature_impl>;
 
 }
 

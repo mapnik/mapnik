@@ -30,7 +30,7 @@
 
 namespace mapnik
 {
-typedef std::pair<double,double> dimension_type;
+using dimension_type = std::pair<double,double>;
 
 class MAPNIK_DECL text_placements;
 /** Generate a possible placement.
@@ -61,7 +61,7 @@ public:
 
 };
 
-typedef std::shared_ptr<text_placement_info> text_placement_info_ptr;
+using text_placement_info_ptr = std::shared_ptr<text_placement_info>;
 
 /** This object handles the management of all TextSymbolizer properties. It can
  * be used as a base class for own objects which implement new processing
@@ -99,7 +99,7 @@ public:
 };
 
 /** Pointer to object of class text_placements */
-typedef std::shared_ptr<text_placements> text_placements_ptr;
+using text_placements_ptr = std::shared_ptr<text_placements>;
 
 } //ns mapnik
 

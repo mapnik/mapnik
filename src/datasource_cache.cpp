@@ -108,7 +108,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-        create_ds* create_datasource = reinterpret_cast<create_ds*>(itr->second->get_symbol("create"));
+        create_ds create_datasource = reinterpret_cast<create_ds>(itr->second->get_symbol("create"));
 
     if (! create_datasource)
     {

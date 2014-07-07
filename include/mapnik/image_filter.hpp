@@ -112,7 +112,7 @@
 //  kernel_1d_fixed<float,9> kernel(conv,4);
 
 // color_converted_view<rgb8_pixel_t>(src_view);
-//typedef kth_channel_view_type< 0, const rgba8_view_t>::type view_t;
+//using view_t = kth_channel_view_type< 0, const rgba8_view_t>::type;
 
 //view_t red = kth_channel_view<0>(const_view(src_view));
 

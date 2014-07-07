@@ -49,7 +49,7 @@ using mapnik::read_double_xdr;
 
 struct RecordTag
 {
-    typedef char* data_type;
+    using data_type = char*;
     static data_type alloc(unsigned size)
     {
         return static_cast<data_type>(::operator new(sizeof(char)*size));
@@ -63,7 +63,7 @@ struct RecordTag
 
 struct MappedRecordTag
 {
-    typedef const char* data_type;
+    using data_type = const char*;
     static data_type alloc(unsigned) { return 0; }
     static void dealloc(data_type ) {}
 };
@@ -136,12 +136,12 @@ class shape_file : mapnik::noncopyable
 public:
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    typedef boost::interprocess::ibufferstream file_source_type;
-    typedef shape_record<MappedRecordTag> record_type;
+    using file_source_type = boost::interprocess::ibufferstream;
+    using record_type = shape_record<MappedRecordTag>;
     mapnik::mapped_region_ptr mapped_region_;
 #else
-    typedef std::ifstream file_source_type;
-    typedef shape_record<RecordTag> record_type;
+    using file_source_type = std::ifstream;
+    using record_type = shape_record<RecordTag>;
 #endif
 
     file_source_type file_;

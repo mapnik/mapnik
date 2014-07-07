@@ -28,7 +28,7 @@
 namespace mapnik
 {
 struct char_properties;
-typedef std::shared_ptr<char_properties> char_properties_ptr;
+using char_properties_ptr = std::shared_ptr<char_properties>;
 }
 
 #endif // CHAR_PROPERTIES_PTR_HPP

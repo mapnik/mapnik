@@ -32,8 +32,8 @@
 namespace mapnik
 {
 struct group_rule;
-typedef std::shared_ptr<group_rule> group_rule_ptr;
-typedef std::vector<group_rule_ptr> group_rules;
+using group_rule_ptr = std::shared_ptr<group_rule>;
+using group_rules = std::vector<group_rule_ptr>;
 
 /** Contains all group symbolizer properties related to building a group layout. */
 struct group_symbolizer_properties
@@ -55,7 +55,7 @@ private:
     group_rules  rules_;
 };
 
-typedef std::shared_ptr<group_symbolizer_properties> group_symbolizer_properties_ptr;
+using group_symbolizer_properties_ptr = std::shared_ptr<group_symbolizer_properties>;
 
 } //ns mapnik
 

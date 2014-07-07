@@ -239,7 +239,7 @@ void csv_datasource::parse_csv(T & stream,
     // set back to start
     stream.seekg(0, std::ios::beg);
 
-    typedef boost::escaped_list_separator<char> escape_type;
+    using escape_type = boost::escaped_list_separator<char>;
 
     std::string esc = mapnik::util::trim_copy(escape);
     if (esc.empty()) esc = "\\";
@@ -263,7 +263,7 @@ void csv_datasource::parse_csv(T & stream,
         throw mapnik::datasource_exception(s);
     }
 
-    typedef boost::tokenizer< escape_type > Tokenizer;
+    using Tokenizer = boost::tokenizer< escape_type >;
 
     int line_number(1);
     bool has_wkt_field = false;

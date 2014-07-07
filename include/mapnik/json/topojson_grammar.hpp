@@ -44,7 +44,7 @@ using standard_wide::space_type;
 
 struct where_message
 {
-    typedef std::string result_type;
+    using result_type = std::string;
 
     template <typename Iterator>
     std::string operator() (Iterator first, Iterator last, std::size_t size) const

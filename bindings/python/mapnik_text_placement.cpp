@@ -68,7 +68,7 @@ template <typename T,
 class class_with_converter : public boost::python::class_<T, X1, X2, X3>
 {
 public:
-    typedef class_with_converter<T,X1,X2,X3> self;
+    using self = class_with_converter<T,X1,X2,X3>;
     // Construct with the class name, with or without docstring, and default __init__() function
     class_with_converter(char const* name, char const* doc = 0) : boost::python::class_<T, X1, X2, X3>(name, doc)  { }
 

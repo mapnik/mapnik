@@ -41,23 +41,23 @@ struct MAPNIK_DECL coord_transform
     template <typename T>
     struct void_type
     {
-        typedef void type;
+        using type = void;
     };
 
     template <typename T, typename D, typename _ = void>
     struct select_value_type
     {
-        typedef D type;
+        using type = D;
     };
 
     template <typename T, typename D>
     struct select_value_type<T, D, typename void_type<typename T::value_type>::type>
     {
-        typedef typename T::value_type type;
+        using type = typename T::value_type;
     };
 
-    typedef std::size_t size_type;
-    typedef typename select_value_type<Geometry, void>::type value_type;
+    using size_type = std::size_t;
+    using value_type = typename select_value_type<Geometry, void>::type;
 
     coord_transform(Transform const& t,
                      Geometry & geom,

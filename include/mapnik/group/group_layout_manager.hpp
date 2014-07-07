@@ -36,10 +36,10 @@ using std::vector;
 namespace mapnik
 {
 
-typedef box2d<double> bound_box;
+using bound_box = box2d<double>;
 
 struct group_layout_manager
-{    
+{
     group_layout_manager(const group_layout &layout)
         : layout_(layout),
           input_origin_(0, 0),
@@ -57,7 +57,7 @@ struct group_layout_manager
           update_layout_(true)
     {
     }
-    
+
     group_layout_manager(const group_layout &layout, const pixel_position &input_origin,
                          const vector<bound_box> &item_boxes)
         : layout_(layout),
@@ -67,27 +67,27 @@ struct group_layout_manager
           update_layout_(true)
     {
     }
-    
+
     inline void set_layout(const group_layout &layout)
     {
         layout_ = layout;
         update_layout_ = true;
     }
-    
+
     inline void add_member_bound_box(const bound_box &member_box)
     {
         member_boxes_.push_back(member_box);
         update_layout_ = true;
     }
-    
+
     inline const pixel_position &offset_at(size_t i)
     {
         handle_update();
         return member_offsets_.at(i);
     }
-    
+
     bound_box offset_box_at(size_t i);
-    
+
 private:
 
     void handle_update();

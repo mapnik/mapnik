@@ -48,7 +48,7 @@ struct MAPNIK_DECL Featureset : private mapnik::noncopyable
     virtual ~Featureset() {}
 };
 
-typedef std::shared_ptr<Featureset> featureset_ptr;
+using featureset_ptr = std::shared_ptr<Featureset>;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
@@ -132,9 +132,9 @@ protected:
     parameters params_;
 };
 
-typedef const char * datasource_name();
-typedef datasource* create_ds(parameters const& params);
-typedef void destroy_ds(datasource *ds);
+using datasource_name = const char* (*)();
+using create_ds = datasource* (*) (parameters const&);
+using destroy_ds = void (*) (datasource *);
 
 class datasource_deleter
 {
@@ -145,7 +145,7 @@ public:
     }
 };
 
-typedef std::shared_ptr<datasource> datasource_ptr;
+using datasource_ptr = std::shared_ptr<datasource>;
 
 #ifdef MAPNIK_STATIC_PLUGINS
     #define DATASOURCE_PLUGIN(classname)

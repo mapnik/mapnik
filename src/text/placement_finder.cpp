@@ -527,9 +527,9 @@ pixel_position const& glyph_positions::marker_pos() const
 
 
 /*************************************************************************************/
-typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
-typedef coord_transform<CoordTransform,geometry_type> PathType;
+using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+using ClippedPathType = coord_transform<CoordTransform,clipped_geometry_type>;
+using PathType = coord_transform<CoordTransform,geometry_type>;
 template bool placement_finder::find_line_placements<ClippedPathType>(ClippedPathType &, bool);
 template bool placement_finder::find_line_placements<PathType>(PathType &, bool);
 

@@ -139,7 +139,7 @@ struct do_xml_attribute_cast<mapnik::enumeration<T,MAX> >
 {
     static inline boost::optional<mapnik::enumeration<T,MAX> > xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
-        typedef typename boost::optional<mapnik::enumeration<T,MAX> > result_type;
+        using result_type = typename boost::optional<mapnik::enumeration<T,MAX> >;
         try
         {
             mapnik::enumeration<T,MAX> e;

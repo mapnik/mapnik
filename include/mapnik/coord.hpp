@@ -33,7 +33,7 @@
 namespace mapnik {
 template <typename T,int dim>
 struct coord {
-    typedef T type;
+    using type = T;
 };
 
 template <typename T>
@@ -46,7 +46,7 @@ struct coord<T,2>
                                                                                                 boost::multipliable2<coord<T,2>, T > > > > > >
 
 {
-    typedef T type;
+    using type = T;
     T x;
     T y;
 public:
@@ -139,7 +139,7 @@ private:
 template <typename T>
 struct coord<T,3>
 {
-    typedef T type;
+    using type = T;
     T x;
     T y;
     T z;
@@ -182,8 +182,8 @@ private:
     }
 };
 
-typedef coord<double,2> coord2d;
-typedef coord<int,2> coord2i;
+using coord2d = coord<double,2>;
+using coord2i = coord<int,2>;
 
 
 template <typename charT,typename traits,typename T ,int dim>

@@ -42,7 +42,7 @@ using standard_wide::space_type;
 
 struct generate_id
 {
-    typedef int result_type;
+    using result_type = int;
 
     generate_id(int start)
         : id_(start) {}

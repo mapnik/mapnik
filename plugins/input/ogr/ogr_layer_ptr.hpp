@@ -34,9 +34,9 @@
 #include <ogrsf_frmts.h>
 
 #if GDAL_VERSION_MAJOR >= 2
-typedef GDALDataset* gdal_dataset_type;
+using gdal_dataset_type = GDALDataset*;
 #else
-typedef OGRDataSource* gdal_dataset_type;
+using gdal_dataset_type = OGRDataSource*;
 #endif
 
 class ogr_layer_ptr

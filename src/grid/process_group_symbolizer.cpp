@@ -1,4 +1,3 @@
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -56,9 +55,9 @@ namespace mapnik {
 template <typename T0>
 struct thunk_renderer : public boost::static_visitor<>
 {
-    typedef grid_renderer<T0> renderer_type;
-    typedef typename renderer_type::buffer_type buffer_type;
-    typedef grid_text_renderer<buffer_type> text_renderer_type;
+    using renderer_type = grid_renderer<T0>;
+    using buffer_type = typename renderer_type::buffer_type;
+    using text_renderer_type = grid_text_renderer<buffer_type>;
 
     thunk_renderer(renderer_type &ren,
                    buffer_type &pixmap,

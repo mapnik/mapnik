@@ -71,7 +71,7 @@ python_datasource::python_datasource(parameters const& params)
         boost::python::object callable = callable_module.attr(callable_name);
         // prepare the arguments
         boost::python::dict kwargs;
-        typedef std::map<std::string, std::string>::value_type kv_type;
+        using kv_type = std::map<std::string, std::string>::value_type;
         for (kv_type const& kv : kwargs_)
         {
             kwargs[boost::python::str(kv.first)] = boost::python::str(kv.second);
@@ -103,7 +103,7 @@ mapnik::layer_descriptor python_datasource::get_descriptor() const
 
 mapnik::datasource::datasource_t python_datasource::type() const
 {
-    typedef boost::optional<mapnik::datasource::geometry_t> return_type;
+    using return_type = boost::optional<mapnik::datasource::geometry_t>;
 
     try
     {
@@ -162,7 +162,7 @@ mapnik::box2d<double> python_datasource::envelope() const
 
 boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_type() const
 {
-    typedef boost::optional<mapnik::datasource::geometry_t> return_type;
+    using return_type = boost::optional<mapnik::datasource::geometry_t>;
 
     try
     {

@@ -293,7 +293,7 @@ struct enum_traits<simplify_algorithm_e>
 
 #define ENUM_FROM_STRING( e ) \
 template <> struct enum_traits<e> { \
-    typedef boost::optional<e> result_type; \
+    using result_type = boost::optional<e>; \
     static result_type from_string(std::string const& str) \
     { \
         enumeration<e, e ## _MAX> enum_; \
@@ -321,7 +321,7 @@ ENUM_FROM_STRING( halo_rasterizer_enum )
 template <typename T, bool is_enum = true>
 struct expression_result
 {
-    typedef T result_type;
+    using result_type = T;
     static result_type convert(value_type const& val)
     {
         auto result = enum_traits<T>::from_string(val.to_string());
@@ -333,7 +333,7 @@ struct expression_result
 template <typename T>
 struct expression_result<T,false>
 {
-    typedef T result_type;
+    using result_type = T;
     static result_type convert(value_type const& val)
     {
         return val.convert<T>();
@@ -345,7 +345,7 @@ struct expression_result<T,false>
 template <typename T, bool is_enum = true>
 struct enumeration_result
 {
-    typedef T result_type;
+    using result_type = T;
     static result_type convert(enumeration_wrapper const& e)
     {
         return static_cast<result_type>(e.value);
@@ -355,7 +355,7 @@ struct enumeration_result
 template <typename T>
 struct enumeration_result<T,false>
 {
-    typedef T result_type;
+    using result_type = T;
     static result_type convert(enumeration_wrapper const& e)
     {
         boost::ignore_unused_variable_warning(e);
@@ -406,7 +406,7 @@ struct put_impl<T, false>
 template <typename T>
 struct evaluate_expression_wrapper
 {
-    typedef T result_type;
+    using result_type = T;
 
     template <typename T1, typename T2, typename T3>
     result_type operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
@@ -446,7 +446,7 @@ struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
 template <typename T>
 struct extract_value : public boost::static_visitor<T>
 {
-    typedef T result_type;
+    using result_type = T;
 
     extract_value(mapnik::feature_impl const& feature,
                   mapnik::attributes const& v)
@@ -488,7 +488,7 @@ struct extract_value : public boost::static_visitor<T>
 template <typename T1>
 struct extract_raw_value : public boost::static_visitor<T1>
 {
-    typedef T1 result_type;
+    using result_type = T1;
 
     auto operator() (result_type const& val) const -> result_type const&
     {
@@ -523,7 +523,7 @@ bool has_key(symbolizer_base const& sym, keys key)
 template <typename T>
 T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
 {
-    typedef symbolizer_base::cont_type::const_iterator const_iterator;
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
@@ -535,7 +535,7 @@ T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature,
 template <typename T>
 boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
-    typedef symbolizer_base::cont_type::const_iterator const_iterator;
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
@@ -547,7 +547,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::fe
 template <typename T>
 T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 {
-    typedef symbolizer_base::cont_type::const_iterator const_iterator;
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
@@ -559,7 +559,7 @@ T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 template <typename T>
 boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
 {
-    typedef symbolizer_base::cont_type::const_iterator const_iterator;
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
@@ -574,7 +574,7 @@ constexpr auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
     return static_cast<typename std::underlying_type<Enum>::type>(e);
 }
 
-typedef std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types> property_meta_type;
+using property_meta_type = std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types>;
 property_meta_type const& get_meta(mapnik::keys key);
 mapnik::keys get_key(std::string const& name);
 
@@ -593,22 +593,20 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL debug_symbolizer : public symbolizer_base {};
 
 // symbolizer
-typedef boost::variant<point_symbolizer,
-                       line_symbolizer,
-                       line_pattern_symbolizer,
-                       polygon_symbolizer,
-                       polygon_pattern_symbolizer,
-                       raster_symbolizer,
-                       shield_symbolizer,
-                       text_symbolizer,
-                       building_symbolizer,
-                       markers_symbolizer,
-                       group_symbolizer,
-                       debug_symbolizer> symbolizer;
+using symbolizer = boost::variant<point_symbolizer,
+                                  line_symbolizer,
+                                  line_pattern_symbolizer,
+                                  polygon_symbolizer,
+                                  polygon_pattern_symbolizer,
+                                  raster_symbolizer,
+                                  shield_symbolizer,
+                                  text_symbolizer,
+                                  building_symbolizer,
+                                  markers_symbolizer,
+                                  group_symbolizer,
+                                  debug_symbolizer>;
 
-
-typedef std::vector<std::pair<double,double> > dash_array;
-
+using dash_array = std::vector<std::pair<double,double> >;
 
 }
 

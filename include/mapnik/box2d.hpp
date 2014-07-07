@@ -51,7 +51,7 @@ template <typename T> class MAPNIK_DECL box2d
                                                               boost::multipliable2<box2d<T>, T > > > >
 {
 public:
-    typedef box2d<T> box2d_type;
+    using box2d_type = box2d<T>;
 private:
     T minx_;
     T miny_;

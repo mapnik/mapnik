@@ -49,7 +49,7 @@ class MAPNIK_DECL feature_kv_iterator :
                                       boost::forward_traversal_tag>
 {
 public:
-    typedef std::tuple<std::string,value> value_type;
+    using value_type = std::tuple<std::string,value>;
 
     feature_kv_iterator (feature_impl const& f, bool begin = false);
 private:
@@ -75,7 +75,7 @@ struct value_not_null
     }
 };
 
-typedef boost::filter_iterator<value_not_null, feature_kv_iterator> feature_kv_iterator2;
+using feature_kv_iterator2 = boost::filter_iterator<value_not_null, feature_kv_iterator>;
 
 }
 

@@ -53,10 +53,10 @@ namespace mapnik { namespace svg {
     template <typename OutputIterator>
     class svg_generator : private mapnik::noncopyable
     {
-        typedef svg::svg_root_attributes_grammar<OutputIterator> root_attributes_grammar;
-        typedef svg::svg_rect_attributes_grammar<OutputIterator> rect_attributes_grammar;
-        typedef svg::svg_path_attributes_grammar<OutputIterator> path_attributes_grammar;
-        typedef svg::svg_path_dash_array_grammar<OutputIterator> path_dash_array_grammar;
+        using root_attributes_grammar = svg::svg_root_attributes_grammar<OutputIterator>;
+        using rect_attributes_grammar = svg::svg_rect_attributes_grammar<OutputIterator>;
+        using path_attributes_grammar = svg::svg_path_attributes_grammar<OutputIterator>;
+        using path_dash_array_grammar = svg::svg_path_dash_array_grammar<OutputIterator>;
 
     public:
         explicit svg_generator(OutputIterator& output_iterator);

@@ -135,7 +135,7 @@ struct wkb_buffer
     char * data_;
 };
 
-typedef std::unique_ptr<wkb_buffer> wkb_buffer_ptr;
+using wkb_buffer_ptr = std::unique_ptr<wkb_buffer>;
 
 template<typename GeometryType>
 wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
@@ -186,8 +186,8 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
     unsigned num_points = g.size();
     assert(num_points > 1);
 
-    typedef std::pair<double,double> point_type;
-    typedef std::vector<point_type> linear_ring;
+    using point_type = std::pair<double,double>;
+    using linear_ring = std::vector<point_type>;
     boost::ptr_vector<linear_ring> rings;
 
     double x = 0;

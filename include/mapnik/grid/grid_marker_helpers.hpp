@@ -44,12 +44,12 @@ namespace mapnik {
 template <typename RendererBase, typename RendererType, typename Detector, typename RendererContext>
 struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
 {
-    typedef typename RendererBase::pixfmt_type pixfmt_type;
-    typedef typename RendererBase::pixfmt_type::color_type color_type;
+    using pixfmt_type = typename RendererBase::pixfmt_type;
+    using color_type = typename RendererBase::pixfmt_type::color_type;
 
-    typedef typename std::tuple_element<0,RendererContext>::type BufferType;
-    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
-    typedef typename std::tuple_element<2,RendererContext>::type PixMapType;
+    using BufferType = typename std::tuple_element<0,RendererContext>::type;
+    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
+    using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
     raster_markers_rasterizer_dispatch_grid(image_data_32 const& src,
                                             agg::trans_affine const& marker_trans,
@@ -193,14 +193,14 @@ private:
 template <typename SvgRenderer, typename Detector, typename RendererContext>
 struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
 {
-    typedef typename SvgRenderer::renderer_base         renderer_base;
-    typedef typename SvgRenderer::vertex_source_type    vertex_source_type;
-    typedef typename SvgRenderer::attribute_source_type attribute_source_type;
-    typedef typename renderer_base::pixfmt_type         pixfmt_type;
+    using renderer_base = typename SvgRenderer::renderer_base        ;
+    using vertex_source_type = typename SvgRenderer::vertex_source_type   ;
+    using attribute_source_type = typename SvgRenderer::attribute_source_type;
+    using pixfmt_type = typename renderer_base::pixfmt_type        ;
 
-    typedef typename std::tuple_element<0,RendererContext>::type BufferType;
-    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
-    typedef typename std::tuple_element<2,RendererContext>::type PixMapType;
+    using BufferType = typename std::tuple_element<0,RendererContext>::type;
+    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
+    using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
     vector_markers_rasterizer_dispatch_grid(vertex_source_type & path,
                                             attribute_source_type const& attrs,

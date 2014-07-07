@@ -61,13 +61,13 @@ namespace mapnik {
 template <typename SvgRenderer, typename Detector, typename RendererContext>
 struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
 {
-    typedef typename SvgRenderer::renderer_base         renderer_base;
-    typedef typename SvgRenderer::vertex_source_type    vertex_source_type;
-    typedef typename SvgRenderer::attribute_source_type attribute_source_type;
-    typedef typename renderer_base::pixfmt_type         pixfmt_type;
+    using renderer_base = typename SvgRenderer::renderer_base        ;
+    using vertex_source_type = typename SvgRenderer::vertex_source_type   ;
+    using attribute_source_type = typename SvgRenderer::attribute_source_type;
+    using pixfmt_type = typename renderer_base::pixfmt_type        ;
 
-    typedef typename std::tuple_element<0,RendererContext>::type BufferType;
-    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
+    using BufferType = typename std::tuple_element<0,RendererContext>::type;
+    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
 
     vector_markers_rasterizer_dispatch(vertex_source_type & path,
                                        attribute_source_type const& attrs,
@@ -187,15 +187,15 @@ private:
 template <typename Detector,typename RendererContext>
 struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
 {
-    typedef typename std::remove_reference<typename std::tuple_element<0,RendererContext>::type>::type BufferType;
-    typedef typename std::tuple_element<1,RendererContext>::type RasterizerType;
+    using BufferType = typename std::remove_reference<typename std::tuple_element<0,RendererContext>::type>::type;
+    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
 
-    typedef agg::rgba8 color_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, BufferType> pixfmt_comp_type;
-    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using pixel_type = agg::pixel32_type;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
+    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
     raster_markers_rasterizer_dispatch(image_data_32 const& src,
                                        agg::trans_affine const& marker_trans,
@@ -284,7 +284,7 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
     void render_raster_marker(agg::trans_affine const& marker_tr,
                               double opacity)
     {
-        typedef agg::pixfmt_rgba32_pre pixfmt_pre;
+        using pixfmt_pre = agg::pixfmt_rgba32_pre;
         agg::scanline_u8 sl_;
         double width  = src_.width();
         double height = src_.height();
@@ -304,13 +304,13 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
         }
         else
         {
-            typedef agg::image_accessor_clone<pixfmt_pre> img_accessor_type;
-            typedef agg::span_interpolator_linear<> interpolator_type;
-            //typedef agg::span_image_filter_rgba_2x2<img_accessor_type,interpolator_type> span_gen_type;
-            typedef agg::span_image_resample_rgba_affine<img_accessor_type> span_gen_type;
-            typedef agg::renderer_scanline_aa_alpha<renderer_base,
-                                                    agg::span_allocator<color_type>,
-                                                    span_gen_type> renderer_type;
+            using img_accessor_type = agg::image_accessor_clone<pixfmt_pre>;
+            using interpolator_type = agg::span_interpolator_linear<>;
+            //using span_gen_type = agg::span_image_filter_rgba_2x2<img_accessor_type,interpolator_type>;
+            using span_gen_type = agg::span_image_resample_rgba_affine<img_accessor_type>;
+            using renderer_type = agg::renderer_scanline_aa_alpha<renderer_base,
+                                                                  agg::span_allocator<color_type>,
+                                                                  span_gen_type>;
 
             double p[8];
             p[0] = 0;     p[1] = 0;

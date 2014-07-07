@@ -38,7 +38,7 @@ namespace mapnik
 
 struct label_collision_detector
 {
-    typedef std::vector<box2d<double> > label_placements;
+    using label_placements = std::vector<box2d<double> >;
 
     bool has_placement(box2d<double> const& box)
     {
@@ -66,7 +66,7 @@ private:
 // quad_tree based label collision detector
 class label_collision_detector2 : mapnik::noncopyable
 {
-    typedef quad_tree<box2d<double> > tree_t;
+    using tree_t = quad_tree<box2d<double> >;
     tree_t tree_;
 public:
 
@@ -100,7 +100,7 @@ public:
 // quad_tree based label collision detector with seperate check/insert
 class label_collision_detector3 : mapnik::noncopyable
 {
-    typedef quad_tree< box2d<double> > tree_t;
+    using tree_t = quad_tree< box2d<double> >;
     tree_t tree_;
 public:
 
@@ -149,11 +149,11 @@ public:
     };
 
 private:
-    typedef quad_tree< label > tree_t;
+    using tree_t = quad_tree< label >;
     tree_t tree_;
 
 public:
-    typedef tree_t::query_iterator query_iterator;
+    using query_iterator = tree_t::query_iterator;
 
     explicit label_collision_detector4(box2d<double> const& extent)
         : tree_(extent) {}

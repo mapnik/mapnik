@@ -90,15 +90,15 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
 
-    typedef agg::rgba8 color;
-    typedef agg::order_rgba order;
-    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
-    typedef agg::pattern_filter_bilinear_rgba8 pattern_filter_type;
-    typedef agg::line_image_pattern<pattern_filter_type> pattern_type;
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
-    typedef agg::renderer_base<pixfmt_type> renderer_base;
-    typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
-    typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
+    using color = agg::rgba8;
+    using order = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+    using pattern_filter_type = agg::pattern_filter_bilinear_rgba8;
+    using pattern_type = agg::line_image_pattern<pattern_filter_type>;
+    using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+    using renderer_base = agg::renderer_base<pixfmt_type>;
+    using renderer_type = agg::renderer_outline_image<renderer_base, pattern_type>;
+    using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     if (filename.empty()) return;
@@ -148,7 +148,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         clip_box.pad(padding);
     }
 
-    typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);

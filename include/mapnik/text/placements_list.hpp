@@ -57,7 +57,7 @@ struct marker_info
     marker_ptr marker;
     agg::trans_affine transform;
 };
-typedef std::shared_ptr<marker_info> marker_info_ptr;
+using marker_info_ptr = std::shared_ptr<marker_info>;
 
 /** Stores positions of glphys.
  *
@@ -66,7 +66,7 @@ typedef std::shared_ptr<marker_info> marker_info_ptr;
 class glyph_positions
 {
 public:
-    typedef std::vector<glyph_position>::const_iterator const_iterator;
+    using const_iterator = std::vector<glyph_position>::const_iterator;
     glyph_positions();
 
     const_iterator begin() const;
@@ -88,8 +88,8 @@ private:
     pixel_position marker_pos_;
     box2d<double> bbox_;
 };
-typedef std::shared_ptr<glyph_positions> glyph_positions_ptr;
+using glyph_positions_ptr = std::shared_ptr<glyph_positions>;
 
-typedef std::list<glyph_positions_ptr> placements_list;
+using placements_list = std::list<glyph_positions_ptr>;
 }
 #endif // PLACEMENTS_LIST_HPP

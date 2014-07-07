@@ -38,7 +38,7 @@ enum CommandType {
 
 template <typename T,int dim>
 struct vertex {
-    typedef T coord_type;
+    using coord_type = T;
 };
 
 template <typename T>
@@ -46,7 +46,7 @@ struct vertex<T,2>
 {
     enum no_init_t { no_init };
 
-    typedef T coord_type;
+    using coord_type = T;
     coord_type x;
     coord_type y;
     unsigned cmd;
@@ -100,8 +100,8 @@ private:
     }
 };
 
-typedef vertex<double,2> vertex2d;
-typedef vertex<int,2> vertex2i;
+using vertex2d = vertex<double,2>;
+using vertex2i = vertex<int,2>;
 
 template <class charT,class traits,class T,int dim>
 inline std::basic_ostream<charT,traits>&

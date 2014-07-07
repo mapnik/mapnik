@@ -64,9 +64,9 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
 {
 
 public:
-    typedef T0 buffer_type;
-    typedef agg_renderer<T0> processor_impl_type;
-    typedef T1 detector_type;
+    using buffer_type = T0;
+    using processor_impl_type = agg_renderer<T0>;
+    using detector_type = T1;
     // create with default, empty placement detector
     agg_renderer(Map const& m, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty

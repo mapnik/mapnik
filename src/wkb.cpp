@@ -36,7 +36,7 @@
 namespace mapnik
 {
 
-typedef coord_array<coord2d> CoordinateArray;
+using CoordinateArray = coord_array<coord2d>;
 
 struct wkb_reader : mapnik::noncopyable
 {

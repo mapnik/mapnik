@@ -47,7 +47,7 @@ struct percent_offset_impl
     template <typename T>
     struct result
     {
-        typedef double type;
+        using type = double;
     };
 
     double operator() (double val) const

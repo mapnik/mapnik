@@ -41,7 +41,7 @@ MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_typ
 
 class MAPNIK_DECL wkt_parser : mapnik::noncopyable
 {
-    typedef std::string::const_iterator iterator_type;
+    using iterator_type = std::string::const_iterator;
 public:
     wkt_parser();
     bool parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);

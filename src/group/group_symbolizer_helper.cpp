@@ -65,8 +65,8 @@ pixel_position_list const& group_symbolizer_helper::get()
         {
             if (clipped_)
             {
-                typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-                typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+                using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+                using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
                 clipped_geometry_type clipped(*geom);
                 clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
@@ -76,7 +76,7 @@ pixel_position_list const& group_symbolizer_helper::get()
             }
             else
             {
-                typedef coord_transform<CoordTransform,geometry_type> path_type;
+                using path_type = coord_transform<CoordTransform,geometry_type>;
                 path_type path(t_, *geom, prj_trans_);
                 find_line_placements(path);
             }

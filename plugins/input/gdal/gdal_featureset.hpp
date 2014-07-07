@@ -35,7 +35,7 @@
 class GDALDataset;
 class GDALRasterBand;
 
-typedef boost::variant<mapnik::query, mapnik::coord2d> gdal_query;
+using gdal_query = boost::variant<mapnik::query, mapnik::coord2d>;
 
 class gdal_featureset : public mapnik::Featureset
 {

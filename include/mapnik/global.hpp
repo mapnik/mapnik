@@ -55,7 +55,7 @@ namespace mapnik
                                 (((std::uint64_t) ((std::uint8_t) (A)[1])) << 48) | \
                                 (((std::uint64_t) ((std::uint8_t) (A)[0])) << 56))
 
-typedef std::uint8_t byte;
+using byte = std::uint8_t;
 #define float8net(V,M)   do { double def_temp;  \
         ((byte*) &def_temp)[0]=(M)[7];          \
         ((byte*) &def_temp)[1]=(M)[6];          \

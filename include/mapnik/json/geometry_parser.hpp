@@ -43,7 +43,7 @@ MAPNIK_DECL bool from_geojson(std::string const& json, boost::ptr_vector<geometr
 template <typename Iterator>
 class MAPNIK_DECL geometry_parser : private mapnik::noncopyable
 {
-    typedef Iterator iterator_type;
+    using iterator_type = Iterator;
 public:
     geometry_parser();
     ~geometry_parser();

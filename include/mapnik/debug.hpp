@@ -61,7 +61,7 @@ namespace mapnik {
             none = 3
         };
 
-        typedef boost::unordered_map<std::string, severity_type> severity_map;
+        using severity_map = boost::unordered_map<std::string, severity_type>;
 
         // global security level
         static severity_type get_severity()
@@ -162,7 +162,7 @@ namespace mapnik {
         class clog_sink
         {
         public:
-            typedef std::basic_ostringstream<Ch, Tr, A> stream_buffer;
+            using stream_buffer = std::basic_ostringstream<Ch, Tr, A>;
 
             void operator()(const logger::severity_type& /*severity*/, const stream_buffer &s)
             {
@@ -189,7 +189,7 @@ namespace mapnik {
         class base_log : public mapnik::noncopyable
         {
         public:
-            typedef OutputPolicy<Ch, Tr, A> output_policy;
+            using output_policy = OutputPolicy<Ch, Tr, A>;
 
             base_log() {}
 
@@ -259,7 +259,7 @@ namespace mapnik {
         class base_log_always : public mapnik::noncopyable
         {
         public:
-            typedef OutputPolicy<Ch, Tr, A> output_policy;
+            using output_policy = OutputPolicy<Ch, Tr, A>;
 
             base_log_always() {}
 
@@ -297,9 +297,9 @@ namespace mapnik {
         };
 
 
-        typedef base_log<clog_sink, logger::debug> base_log_debug;
-        typedef base_log<clog_sink, logger::warn> base_log_warn;
-        typedef base_log_always<clog_sink, logger::error> base_log_error;
+        using base_log_debug = base_log<clog_sink, logger::debug>;
+        using base_log_warn = base_log<clog_sink, logger::warn>;
+        using base_log_error = base_log_always<clog_sink, logger::error>;
 
     } // namespace detail
 

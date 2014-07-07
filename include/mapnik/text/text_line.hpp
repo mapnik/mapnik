@@ -41,8 +41,8 @@ class text_line
 public:
     text_line(unsigned first_char, unsigned last_char);
 
-    typedef std::vector<glyph_info> glyph_vector;
-    typedef glyph_vector::const_iterator const_iterator;
+    using glyph_vector = std::vector<glyph_info>;
+    using const_iterator = glyph_vector::const_iterator;
     /** Get glyph vector. */
     glyph_vector const& glyphs() const { return glyphs_; }
     /** Append glyph. */

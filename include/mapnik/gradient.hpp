@@ -36,8 +36,8 @@
 namespace mapnik
 {
 
-typedef std::pair<double, mapnik::color> stop_pair;
-typedef std::vector<stop_pair > stop_array;
+using stop_pair = std::pair<double, mapnik::color>;
+using stop_array = std::vector<stop_pair >;
 
 enum gradient_enum
 {

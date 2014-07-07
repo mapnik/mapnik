@@ -58,7 +58,7 @@ namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace phoenix = boost::phoenix;
 
-typedef boost::spirit::ascii::space_type ascii_space_type;
+using ascii_space_type = boost::spirit::ascii::space_type;
 
 struct named_colors_ : qi::symbols<char,color>
 {
@@ -79,7 +79,7 @@ struct percent_conv_impl
     template <typename T>
     struct result
     {
-        typedef unsigned type;
+        using type = unsigned;
     };
 
     unsigned operator() (double val) const
@@ -93,7 +93,7 @@ struct alpha_conv_impl
     template <typename T>
     struct result
     {
-        typedef unsigned type;
+        using type = unsigned;
     };
 
     unsigned operator() (double val) const
@@ -107,7 +107,7 @@ struct hsl_conv_impl
     template<typename T>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     template <typename T0,typename T1, typename T2, typename T3>

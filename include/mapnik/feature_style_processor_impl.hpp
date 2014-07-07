@@ -107,6 +107,8 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
     proj_transform const& prj_trans_;
 };
 
+//using no_tag = char (**)[1];
+//using yes_tag = char (**)[2];
 typedef char (&no_tag)[1];
 typedef char (&yes_tag)[2];
 
@@ -119,7 +121,7 @@ template <typename T0, typename T1> yes_tag has_process_helper(process_memfun_he
 template<typename T0,typename T1>
 struct has_process
 {
-    typedef typename T0::processor_impl_type processor_impl_type;
+    using processor_impl_type = typename T0::processor_impl_type;
     BOOST_STATIC_CONSTANT(bool
                           , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag)
         );
@@ -143,7 +145,7 @@ struct layer_rendering_material
         proj1_(lay.srs(),true) {}
 };
 
-typedef std::shared_ptr<layer_rendering_material> layer_rendering_material_ptr;
+using layer_rendering_material_ptr = std::shared_ptr<layer_rendering_material>;
 
 
 template <typename Processor>

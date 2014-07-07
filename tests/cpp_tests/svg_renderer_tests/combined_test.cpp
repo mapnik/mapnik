@@ -28,7 +28,7 @@
 BOOST_AUTO_TEST_CASE(combined_test_case)
 {
     using namespace mapnik;
-    typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
+    using svg_ren = svg_renderer<std::ostream_iterator<char> >;
 
     Map map(800, 600);
     map.set_background(parse_color("white"));
@@ -55,4 +55,3 @@ BOOST_AUTO_TEST_CASE(combined_test_case)
       BOOST_CHECK_EQUAL(actual_output, expected_output);
     */
 }
-

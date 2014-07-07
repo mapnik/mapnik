@@ -35,15 +35,15 @@
 namespace mapnik  {
 
 #ifdef BIGINT
-//typedef boost::long_long_type value_integer;
-typedef long long value_integer;
+//using value_integer = boost::long_long_type;
+using value_integer = long long;
 #else
-typedef int value_integer;
+using value_integer = int;
 #endif
 
-typedef double value_double;
-typedef U_NAMESPACE_QUALIFIER UnicodeString value_unicode_string;
-typedef bool value_bool;
+using value_double = double;
+using value_unicode_string = U_NAMESPACE_QUALIFIER UnicodeString;
+using value_bool = bool;
 
 struct value_null
 {

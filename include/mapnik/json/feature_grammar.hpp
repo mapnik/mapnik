@@ -69,7 +69,7 @@ public:
 
 struct put_property
 {
-    typedef void result_type;
+    using result_type = void;
     explicit put_property(mapnik::transcoder const& tr)
         : tr_(tr) {}
     template <typename T0,typename T1, typename T2>
@@ -82,7 +82,7 @@ struct put_property
 
 struct extract_geometry
 {
-    typedef  boost::ptr_vector<mapnik::geometry_type>& result_type;
+    using result_type =  boost::ptr_vector<mapnik::geometry_type>&;
     template <typename T>
     result_type operator() (T & feature) const
     {

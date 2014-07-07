@@ -39,7 +39,7 @@ using standard_wide::space_type;
 
 struct push_vertex
 {
-    typedef void result_type;
+    using result_type = void;
 
     template <typename T0,typename T1, typename T2, typename T3>
     result_type operator() (T0 c, T1 path, T2 x, T3 y) const
@@ -51,7 +51,7 @@ struct push_vertex
 
 struct close_path
 {
-    typedef void result_type;
+    using result_type = void;
 
     template <typename T>
     result_type operator() (T path) const
@@ -66,7 +66,7 @@ struct close_path
 
 struct cleanup
 {
-    typedef void result_type;
+    using result_type = void;
     template <typename T0>
     void operator() (T0 & path) const
     {
@@ -76,7 +76,7 @@ struct cleanup
 
 struct where_message
 {
-    typedef std::string result_type;
+    using result_type = std::string;
 
     template <typename Iterator>
     std::string operator() (Iterator first, Iterator last, std::size_t size) const
@@ -114,7 +114,7 @@ struct geometry_grammar :
     qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry_collection;
 
     // Nabialek trick //////////////////////////////////////
-    //typedef typename qi::rule<Iterator,void(FeatureType &), space_type> dispatch_rule;
+    //using dispatch_rule = typename qi::rule<Iterator,void(FeatureType &), space_type>;
     //qi::rule<Iterator,qi::locals<dispatch_rule*>, void(FeatureType&),space_type> geometry;
     //qi::symbols<char, dispatch_rule*> geometry_dispatch;
     ////////////////////////////////////////////////////////

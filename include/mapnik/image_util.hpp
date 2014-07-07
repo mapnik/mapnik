@@ -173,7 +173,7 @@ inline bool is_webp (std::string const& filename)
 inline boost::optional<std::string> type_from_filename(std::string const& filename)
 
 {
-    typedef boost::optional<std::string> result_type;
+    using result_type = boost::optional<std::string>;
     if (is_png(filename)) return result_type("png");
     if (is_jpeg(filename)) return result_type("jpeg");
     if (is_tiff(filename)) return result_type("tiff");

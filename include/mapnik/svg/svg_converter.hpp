@@ -57,7 +57,7 @@ public:
         unsigned idx = source_.start_new_path();
         attributes_.add(path_attributes(cur_attr(), idx));
     }
-    
+
     void end_path()
     {
         if(attributes_.size() == 0)
@@ -245,7 +245,7 @@ public:
     {
         return cur_attr().display_flag;
     }
-    
+
     void stroke_width(double w)
     {
         cur_attr().stroke_width = w;
@@ -354,7 +354,7 @@ private:
 };
 
 
-typedef svg_converter<svg_path_adapter,agg::pod_bvector<mapnik::svg::path_attributes> > svg_converter_type;
+using svg_converter_type = svg_converter<svg_path_adapter,agg::pod_bvector<mapnik::svg::path_attributes> >;
 
 }}
 

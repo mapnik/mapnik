@@ -36,7 +36,7 @@ namespace mapnik
 {
 
 class label_collision_detector4;
-typedef label_collision_detector4 DetectorType;
+using DetectorType = label_collision_detector4;
 
 class feature_impl;
 class vertex_cache;

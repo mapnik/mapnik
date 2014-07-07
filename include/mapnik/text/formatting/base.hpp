@@ -38,7 +38,7 @@ class xml_node;
 namespace formatting {
 
 class node;
-typedef std::shared_ptr<node> node_ptr;
+using node_ptr = std::shared_ptr<node>;
 
 class MAPNIK_DECL node
 {

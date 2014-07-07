@@ -50,11 +50,11 @@ namespace mapnik
 {
 
 class stroker;
-typedef std::shared_ptr<stroker> stroker_ptr;
+using stroker_ptr = std::shared_ptr<stroker>;
 class font_face_set;
-typedef std::shared_ptr<font_face_set> face_set_ptr;
+using face_set_ptr = std::shared_ptr<font_face_set>;
 class font_face;
-typedef std::shared_ptr<font_face> face_ptr;
+using face_ptr = std::shared_ptr<font_face>;
 
 
 class MAPNIK_DECL freetype_engine
@@ -93,8 +93,8 @@ private:
 template <typename T>
 class MAPNIK_DECL face_manager : private mapnik::noncopyable
 {
-    typedef T font_engine_type;
-    typedef std::map<std::string, face_ptr> face_ptr_cache_type;
+    using font_engine_type = T;
+    using face_ptr_cache_type = std::map<std::string, face_ptr>;
 
 public:
     face_manager(T & engine)
@@ -116,7 +116,7 @@ private:
     face_ptr_cache_type face_ptr_cache_;
 };
 
-typedef face_manager<freetype_engine> face_manager_freetype;
+using face_manager_freetype = face_manager<freetype_engine>;
 
 }
 

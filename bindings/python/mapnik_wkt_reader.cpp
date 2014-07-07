@@ -33,7 +33,7 @@
 
 namespace  impl {
 
-typedef boost::ptr_vector<mapnik::geometry_type> path_type;
+using path_type = boost::ptr_vector<mapnik::geometry_type>;
 
 std::shared_ptr<path_type> from_wkt(mapnik::wkt_parser & p, std::string const& wkt)
 {

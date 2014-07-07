@@ -202,10 +202,10 @@ void image_32::demultiply()
 
 void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
 {
-    typedef agg::rgba8 color_type;
-    typedef color_type::value_type value_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::comp_op_adaptor_rgba<color_type,order_type> blender_type;
+    using color_type = agg::rgba8;
+    using value_type = color_type::value_type;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba<color_type,order_type>;
 
     if (checkBounds(x,y))
     {

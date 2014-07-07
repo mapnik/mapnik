@@ -40,8 +40,8 @@ template <typename Iterator> struct generic_json;
 template <typename Iterator>
 class MAPNIK_DECL feature_collection_parser : private mapnik::noncopyable
 {
-    typedef Iterator iterator_type;
-    typedef mapnik::feature_impl feature_type;
+    using iterator_type = Iterator;
+    using feature_type = mapnik::feature_impl;
 public:
     feature_collection_parser(generic_json<Iterator> & json, mapnik::context_ptr const& ctx, mapnik::transcoder const& tr);
     ~feature_collection_parser();
