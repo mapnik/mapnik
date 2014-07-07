@@ -107,10 +107,8 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
     proj_transform const& prj_trans_;
 };
 
-//using no_tag = char (**)[1];
-//using yes_tag = char (**)[2];
-typedef char (&no_tag)[1];
-typedef char (&yes_tag)[2];
+using no_tag = char (&)[1];
+using yes_tag = char (&)[2];
 
 template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_impl &, proj_transform const&) >
 struct process_memfun_helper {};
