@@ -215,4 +215,4 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 
 }}
 
-#endif // MAPNIK_FEATURE_GRAMMAR_HPP
+#endif // MAPNIK_SYMBOLIZER_GRAMMAR_HPP
