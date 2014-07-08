@@ -120,6 +120,19 @@ read_int32(const boost::uint8_t** from, boost::uint8_t littleEndian) {
     return read_uint32(from, littleEndian);
 }
 
+float
+read_float32(const uint8_t** from, uint8_t littleEndian) {
+
+    union {
+        float f;
+        uint32_t i;
+    } ret;
+
+    ret.i = read_uint32(from, littleEndian);
+
+    return ret.f;
+}
+
 typedef enum {
     PT_1BB=0,     /* 1-bit boolean            */
     PT_2BUI=1,    /* 2-bit unsigned integer   */
@@ -198,10 +211,20 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
         }
       }
       break;
+    case PT_32BF:
+      val = read_float32(&ptr_, endian_); // nodata, need to read in any case
+      for (int y=0; y<height_; ++y) {
+        for (int x=0; x<width_; ++x) {
+          val = read_float32(&ptr_, endian_);
+          int off = y * width_ + x;
+          data[off] = val;
+        }
+      }
+      break;
     default:
       std::ostringstream err;
       err << "pgraster_wkb_reader: band "
-            "type " << int(type) << " unsupported";
+            "type " << pixtype << " unsupported";
       // TODO: accept policy to decide on throw-or-skip ?
       //MAPNIK_LOG_WARN(pgraster) << err.str();
       throw mapnik::datasource_exception(err.str());
@@ -332,28 +355,27 @@ mapnik::raster_ptr
 pgraster_wkb_reader::get_raster() {
 
     /* Read endianness */
-    boost::uint8_t endian = *ptr_;
-    endian = *ptr_;
+    endian_ = *ptr_;
     ptr_ += 1;
 
     /* Read version of protocol */
-    uint16_t version = read_uint16(&ptr_, endian);
+    uint16_t version = read_uint16(&ptr_, endian_);
     if (version != 0) {
        MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: WKB version "
           << version << " unsupported";
       return mapnik::raster_ptr();
     }
 
-    numBands_ = read_uint16(&ptr_, endian);
-    double scaleX = read_float64(&ptr_, endian);
-    double scaleY = read_float64(&ptr_, endian);
-    double ipX = read_float64(&ptr_, endian);
-    double ipY = read_float64(&ptr_, endian);
-    double skewX = read_float64(&ptr_, endian);
-    double skewY = read_float64(&ptr_, endian);
-    int32_t srid = read_int32(&ptr_, endian);
-    width_ = read_uint16(&ptr_, endian);
-    height_ = read_uint16(&ptr_, endian);
+    numBands_ = read_uint16(&ptr_, endian_);
+    double scaleX = read_float64(&ptr_, endian_);
+    double scaleY = read_float64(&ptr_, endian_);
+    double ipX = read_float64(&ptr_, endian_);
+    double ipY = read_float64(&ptr_, endian_);
+    double skewX = read_float64(&ptr_, endian_);
+    double skewY = read_float64(&ptr_, endian_);
+    int32_t srid = read_int32(&ptr_, endian_);
+    width_ = read_uint16(&ptr_, endian_);
+    height_ = read_uint16(&ptr_, endian_);
 
     MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: numBands=" << numBands_;
     MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: scaleX=" << scaleX;

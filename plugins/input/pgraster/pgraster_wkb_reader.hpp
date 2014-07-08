@@ -70,6 +70,7 @@ private:
   const uint8_t* wkb_;
   const uint8_t* wkbend_;
   const uint8_t* ptr_;
+  uint8_t endian_;
   int bandno_;
   uint16_t numBands_;
   uint16_t width_;
