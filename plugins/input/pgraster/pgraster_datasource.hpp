@@ -118,8 +118,6 @@ private:
     // arrives untouched into the resulting mapnik raster, for threatment
     // by raster colorizer
     int band_;
-    // max scale of master table
-    float maxScale_;
     // Available overviews, ordered by max scale, ascending
     std::vector<pgraster_overview> overviews_;
     mutable bool extent_initialized_;

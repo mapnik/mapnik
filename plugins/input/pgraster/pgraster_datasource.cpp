@@ -78,7 +78,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       type_(datasource::Raster),
       srid_(*params.get<int>("srid", 0)),
       band_(*params.get<int>("band", 0)),
-      maxScale_(0),
       extent_initialized_(false),
       prescale_rasters_(false), // TODO: use params.get<bool> !
       use_overviews_(false), // TODO: use params.get<bool> !
@@ -193,10 +192,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                       s << ", st_xmin(extent) xmin, st_ymin(extent) ymin"
                         << ", st_xmax(extent) xmax, st_ymax(extent) ymax";
                     }
-                    s << ", greatest(scale_x, scale_y) maxscale FROM "
-                      << RASTER_COLUMNS <<" WHERE r_table_name='"
-                      << mapnik::sql_utils::unquote_double(raster_table_)
-                      << "'";
                     if (! schema_.empty())
                     {
                         s << " AND r_table_schema='"
@@ -215,7 +210,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     if (rs->next())
                     {
                         geometryColumn_ = rs->getValue("col");
-                        maxScale_ = atof(rs->getValue("maxscale")); // TODO: check for null ?
                         if ( ! extent_initialized_ ) {
                           double lox, loy, hix, hiy;
                           if (mapnik::util::string2double(rs->getValue("xmin"), lox) &&
@@ -300,15 +294,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 {
                   err << "Pgraster Plugin: unable to lookup available table"
                       << " overviews due to unknown column name";
-                  throw mapnik::datasource_exception(err.str());
-                }
-                if ( ! maxScale_ )
-                {
-                  err << "Pgraster Plugin: unable to use overviews due "
-                      << "to unconstrained scales in column "
-                      << quote_literal(geometryColumn_)
-                      << " of table " << quote_literal(schema_) 
-                      << "." << quote_literal(raster_table_); 
                   throw mapnik::datasource_exception(err.str());
                 }
                 if ( table_[table_.find_first_not_of(" \t\r\n")] == '(' ) 
