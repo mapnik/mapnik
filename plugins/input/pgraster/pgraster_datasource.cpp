@@ -527,7 +527,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                         if (rs_oid->next())
                         {
                             std::string typname(rs_oid->getValue("typname"));
-                            if (typname != "geometry")
+                            if (typname != "geometry" && typname != "raster")
                             {
                                 MAPNIK_LOG_WARN(pgraster) << "pgraster_datasource: Unknown type=" << typname
                                                          << " (oid:" << rs_oid->getValue("oid") << ")";
