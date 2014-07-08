@@ -271,20 +271,18 @@ public:
     {
         std::stringstream ss;
         ss << "Feature ( id=" << id_ << std::endl;
-        context_type::map_type::const_iterator itr = ctx_->mapping_.begin();
-        context_type::map_type::const_iterator end = ctx_->mapping_.end();
-        for ( ;itr!=end; ++itr)
+        for (auto const& kv : ctx_->mapping_)
         {
-            std::size_t index = itr->second;
+            std::size_t index = kv.second;
             if (index < data_.size())
             {
-                if (data_[itr->second] == mapnik::value_null())
+                if (data_[kv.second] == mapnik::value_null())
                 {
-                    ss << "  " << itr->first  << ":null" << std::endl;
+                    ss << "  " << kv.first  << ":null" << std::endl;
                 }
                 else
                 {
-                    ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                    ss << "  " << kv.first  << ":" <<  data_[kv.second] << std::endl;
                 }
             }
         }
