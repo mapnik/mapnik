@@ -265,7 +265,7 @@ xml_node & xml_node::get_child(std::string const& name)
 {
     std::list<xml_node>::iterator itr = children_.begin();
     std::list<xml_node>::iterator end = children_.end();
-    for (; itr != end; itr++)
+    for (; itr != end; ++itr)
     {
         if (!(itr->is_text_) && itr->name_ == name)
         {
