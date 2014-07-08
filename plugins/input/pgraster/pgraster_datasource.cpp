@@ -872,7 +872,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
               break;
             }
           }
-          table_with_bbox = sch + "." + tab;
+          table_with_bbox = "( SELECT * FROM " + sch + "." + tab + ") as zz";
+          table_with_bbox = populate_tokens(table_with_bbox, scale_denom, box, px_gw, px_gh);
         } else {
           table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
         }
