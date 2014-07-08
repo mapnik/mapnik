@@ -192,6 +192,10 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                       s << ", st_xmin(extent) xmin, st_ymin(extent) ymin"
                         << ", st_xmax(extent) xmax, st_ymax(extent) ymax";
                     }
+                    s << " FROM "
+                      << RASTER_COLUMNS << " WHERE r_table_name='"
+                      << mapnik::sql_utils::unquote_double(raster_table_)
+                      << "'";
                     if (! schema_.empty())
                     {
                         s << " AND r_table_schema='"
