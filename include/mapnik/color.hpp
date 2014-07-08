@@ -46,6 +46,7 @@ private:
     std::uint8_t alpha_;
 
 public:
+    // default ctor
     color()
       : red_(0xff),
         green_(0xff),
@@ -60,12 +61,20 @@ public:
         alpha_(alpha)
         {}
 
+    // copy ctor
     color(const color& rhs)
       : red_(rhs.red_),
         green_(rhs.green_),
         blue_(rhs.blue_),
         alpha_(rhs.alpha_)
         {}
+
+    // move ctor
+    color(color && rhs)
+        : red_(std::move(rhs.red_)),
+        green_(std::move(rhs.green_)),
+        blue_(std::move(rhs.blue_)),
+        alpha_(std::move(rhs.alpha_)) {}
 
     color( std::string const& str);
 
