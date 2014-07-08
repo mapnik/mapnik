@@ -393,7 +393,8 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
         """
         libxml2_loader.cpp
         """)
-    lib_env.Append(CPPDEFINES = '-DHAVE_LIBXML2')
+    env2 = lib_env.Clone()
+    env2.Append(CPPDEFINES = '-DHAVE_LIBXML2')
     libmapnik_defines.append('-DHAVE_LIBXML2')
     fixup = ['libxml2_loader.cpp']
     for cpp in fixup:
