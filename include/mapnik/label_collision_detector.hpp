@@ -42,13 +42,9 @@ struct label_collision_detector
 
     bool has_placement(box2d<double> const& box)
     {
-        label_placements::const_iterator itr=labels_.begin();
-        for( ; itr !=labels_.end();++itr)
+        for (auto const& label : labels_)
         {
-            if (itr->intersects(box))
-            {
-                return false;
-            }
+            if (label.intersects(box)) return false;
         }
         labels_.push_back(box);
         return true;
@@ -77,15 +73,10 @@ public:
     {
         tree_t::query_iterator itr = tree_.query_in_box(box);
         tree_t::query_iterator end = tree_.query_end();
-
         for ( ;itr != end; ++itr)
         {
-            if (itr->intersects(box))
-            {
-                return false;
-            }
+            if (itr->intersects(box)) return false;
         }
-
         tree_.insert(box,box);
         return true;
     }
@@ -114,12 +105,8 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->intersects(box))
-            {
-                return false;
-            }
+            if (itr->intersects(box)) return false;
         }
-
         return true;
     }
 
@@ -165,10 +152,7 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->box.intersects(box))
-            {
-                return false;
-            }
+            if (itr->box.intersects(box)) return false;
         }
 
         return true;
@@ -180,14 +164,11 @@ public:
         tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
         tree_t::query_iterator end = tree_.query_end();
 
-        for ( ;itr != end; ++itr)
+        for (;itr != end; ++itr)
         {
             if (itr->box.intersects(box) || (text == itr->text && itr->box.intersects(bigger_box)))
-            {
                 return false;
-            }
         }
-
         return true;
     }
 
@@ -199,10 +180,7 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->box.intersects(bigger_box))
-            {
-                return false;
-            }
+            if (itr->box.intersects(bigger_box)) return false;
         }
 
         return true;

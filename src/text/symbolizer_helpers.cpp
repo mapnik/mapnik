@@ -126,15 +126,13 @@ void base_symbolizer_helper::initialize_points()
     double label_y=0.0;
     double z=0.0;
 
-    std::list<geometry_type*>::const_iterator itr = geometries_to_process_.begin();
-    std::list<geometry_type*>::const_iterator end = geometries_to_process_.end();
-    for (; itr != end; itr++)
+    for (auto * geom_ptr : geometries_to_process_)
     {
-        geometry_type const& geom = **itr;
+        geometry_type const& geom = *geom_ptr;
         if (how_placed == VERTEX_PLACEMENT)
         {
             geom.rewind(0);
-            for(unsigned i = 0; i < geom.size(); i++)
+            for(unsigned i = 0; i < geom.size(); ++i)
             {
                 geom.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);

@@ -81,24 +81,20 @@ struct get_first
 struct multi_geometry_type
 {
     using result_type = std::tuple<unsigned,bool> ;
-    result_type operator() (geometry_container const& geom) const
+    result_type operator() (geometry_container const& cont) const
     {
         unsigned type = 0u;
         bool collection = false;
-
-        geometry_container::const_iterator itr = geom.begin();
-        geometry_container::const_iterator end = geom.end();
-
-        for ( ; itr != end; ++itr)
+        for (auto const& geom : cont)
         {
-            if (type != 0u && itr->type() != type)
+            if (type != 0u && geom.type() != type)
             {
                 collection = true;
                 break;
             }
-            type = itr->type();
+            type = geom.type();
         }
-        if (geom.size() > 1) type +=3;
+        if (cont.size() > 1) type +=3;
         return std::tuple<unsigned,bool>(type, collection);
     }
 };
