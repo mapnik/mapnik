@@ -23,6 +23,7 @@
 #include "pgraster_wkb_reader.hpp"
 
 // mapnik
+#include <mapnik/datasource.hpp> // for datasource_exception
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/ctrans.hpp>
@@ -198,8 +199,12 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
       }
       break;
     default:
-      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band "
-            "type " << type << " unsupported";
+      std::ostringstream err;
+      err << "pgraster_wkb_reader: band "
+            "type " << int(type) << " unsupported";
+      // TODO: accept policy to decide on throw-or-skip ?
+      //MAPNIK_LOG_WARN(pgraster) << err.str();
+      throw mapnik::datasource_exception(err.str());
       break;
   }
 
