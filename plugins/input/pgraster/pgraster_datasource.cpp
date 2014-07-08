@@ -187,7 +187,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
                 try
                 {
-                    s << "SELECT r_raster_column col, srid";
+                    s << "SELECT r_raster_column col, srid, r_table_schema";
                     if ( ! extent_initialized_ ) {
                       s << ", st_xmin(extent) xmin, st_ymin(extent) ymin"
                         << ", st_xmax(extent) xmax, st_ymax(extent) ymax";
@@ -214,7 +214,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     if (rs->next())
                     {
                         geometryColumn_ = rs->getValue("col");
-                        if ( ! extent_initialized_ ) {
+                        if ( ! extent_initialized_ )
+                        {
                           double lox, loy, hix, hiy;
                           if (mapnik::util::string2double(rs->getValue("xmin"), lox) &&
                               mapnik::util::string2double(rs->getValue("ymin"), loy) &&
@@ -242,6 +243,10 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                                     srid_ = result;
                                 }
                             }
+                        }
+                        if ( schema_.empty() )
+                        {
+                            schema_ = rs->getValue("r_table_schema");
                         }
                     }
                     else
