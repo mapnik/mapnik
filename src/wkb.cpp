@@ -249,19 +249,19 @@ private:
     {
         if (! needSwap_)
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_ndr(wkb_ + pos_, ar[i].x);
-                read_double_ndr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_ndr(wkb_ + pos_, coord.x);
+                read_double_ndr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 16; // skip XY
             }
         }
         else
         {
-            for (unsigned i=0;i<ar.size();++i)
+            for (auto & coord : ar)
             {
-                read_double_xdr(wkb_ + pos_, ar[i].x);
-                read_double_xdr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_xdr(wkb_ + pos_, coord.x);
+                read_double_xdr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 16; // skip XY
             }
         }
@@ -271,19 +271,19 @@ private:
     {
         if (! needSwap_)
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_ndr(wkb_ + pos_, ar[i].x);
-                read_double_ndr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_ndr(wkb_ + pos_, coord.x);
+                read_double_ndr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 24; // skip XYZ
             }
         }
         else
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_xdr(wkb_ + pos_, ar[i].x);
-                read_double_xdr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_xdr(wkb_ + pos_, coord.x);
+                read_double_xdr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 24; // skip XYZ
             }
         }
@@ -293,19 +293,19 @@ private:
     {
         if (! needSwap_)
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_ndr(wkb_ + pos_, ar[i].x);
-                read_double_ndr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_ndr(wkb_ + pos_, coord.x);
+                read_double_ndr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 32; // skip XYZM
             }
         }
         else
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_xdr(wkb_ + pos_, ar[i].x);
-                read_double_xdr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_xdr(wkb_ + pos_, coord.x);
+                read_double_xdr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 32; // skip XYZM
             }
         }

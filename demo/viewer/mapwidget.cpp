@@ -191,7 +191,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                 std::get<1>(*itr).to_string().c_str()));
                       }
 
-                      typedef mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type> path_type;
+                      using path_type = mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type>;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
