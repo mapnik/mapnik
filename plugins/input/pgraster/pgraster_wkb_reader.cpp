@@ -189,20 +189,16 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
     return;
   }
 
-  if ( hasnodata ) {
-    MAPNIK_LOG_WARN(pgraster) <<
-      "pgraster_wkb_reader: nodata value unsupported";
-  }
-
   MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: reading " << height_ << "x" << width_ << " pixels";
 
   float* data = (float*)image.getBytes();
-  float val;
+  double val;
 
   // TODO: support all pixel types, use a templated function ?
   switch (pixtype) {
     case PT_8BUI:
       val = read_uint8(&ptr_); // nodata value, need to read in any case
+      if ( hasnodata ) raster->set_nodata(val);
       for (int y=0; y<height_; ++y) {
         for (int x=0; x<width_; ++x) {
           val = read_uint8(&ptr_);
@@ -213,6 +209,7 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
       break;
     case PT_32BF:
       val = read_float32(&ptr_, endian_); // nodata, need to read in any case
+      if ( hasnodata ) raster->set_nodata(val);
       for (int y=0; y<height_; ++y) {
         for (int x=0; x<width_; ++x) {
           val = read_float32(&ptr_, endian_);
@@ -265,14 +262,12 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
     return;
   }
 
-  uint8_t val = read_uint8(&ptr_); // nodata value, need to read anyway
-  if ( hasnodata ) {
-    MAPNIK_LOG_WARN(pgraster) <<
-      "pgraster_wkb_reader: nodata value unsupported";
-  }
+  double nodata = read_uint8(&ptr_); // nodata value, need to read anyway
+  if ( hasnodata ) raster->set_nodata(nodata);
 
   int ps = 4; // sizeof(image_data::pixel_type)
   uint8_t * image_data = image.getBytes();
+  uint8_t val;
   for (int y=0; y<height_; ++y) {
     //uint8_t *optr = image_data + y * width_ * ps;
     for (int x=0; x<width_; ++x) {
