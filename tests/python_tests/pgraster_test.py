@@ -2,6 +2,7 @@
 
 from nose.tools import *
 import atexit
+import cProfile, pstats, io
 import time
 from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
@@ -87,7 +88,11 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     # initialize test database
     postgis_setup()
 
-    def _test_dataraster_16bsi_rendering(overview, rescale, clip):
+    def _test_dataraster_16bsi_rendering(lbl, overview, rescale, clip):
+      if rescale:
+        lbl += ' Sc'
+      if clip:
+        lbl += ' Cl'
       ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table='dataraster',
         band=1,use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
@@ -128,7 +133,10 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mm.layers.append(lyr)
       mm.zoom_to_box(expenv)
       im = mapnik.Image(mm.width, mm.height)
+      t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
       # no data
       eq_(im.view(1,1,1,1).tostring(), '\x00\x00\x00\x00') 
       eq_(im.view(255,255,1,1).tostring(), '\x00\x00\x00\x00') 
@@ -143,17 +151,39 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       eq_(im.view(190, 70,1,1).tostring(), '\x40\x40\x40\xff')
       eq_(im.view(140,170,1,1).tostring(), '\x40\x40\x40\xff')
 
-    def _test_dataraster_16bsi(tilesize, constraint, overview):
+      # Now zoom over a portion of the env (1/10)
+      newenv = mapnik.Box2d(273663,4024478,330738,4072303)
+      mm.zoom_to_box(newenv)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
+      # nodata
+      eq_(im.view(255,255,1,1).tostring(), '\x00\x00\x00\x00') 
+      eq_(im.view(200,254,1,1).tostring(), '\x00\x00\x00\x00') 
+      # A0A0A0
+      eq_(im.view(90,232,1,1).tostring(), '\xa0\xa0\xa0\xff') 
+      eq_(im.view(96,245,1,1).tostring(), '\xa0\xa0\xa0\xff') 
+      # 808080
+      eq_(im.view(1,1,1,1).tostring(), '\x80\x80\x80\xff') 
+      eq_(im.view(128,128,1,1).tostring(), '\x80\x80\x80\xff') 
+      # 404040
+      eq_(im.view(255, 0,1,1).tostring(), '\x40\x40\x40\xff')
+
+    def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
       rf = os.path.join(execution_path('.'),'../data/raster/dataraster.tif')
       print 'tile: ' + tilesize + ' constraints: ' + str(constraint) \
           + ' overviews: ' + overview
       cmd = 'raster2pgsql -Y'
       if constraint:
         cmd += ' -C'
+        lbl += ' C'
       if tilesize:
         cmd += ' -t ' + tilesize
+        lbl += ' T:' + tilesize
       if overview:
         cmd += ' -l ' + overview
+        lbl += ' O:' + overview
       cmd += ' %s dataraster | psql --set ON_ERROR_STOP=1 -q %s' % (rf,MAPNIK_TEST_DBNAME)
       print 'Import call: ' + cmd
       psql_run('DROP TABLE IF EXISTS dataraster;')
@@ -163,13 +193,13 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       call(cmd)
       for prescale in [0,1]:
         for clip in [0,1]:
-          _test_dataraster_16bsi_rendering(overview, prescale, clip)
+          _test_dataraster_16bsi_rendering(lbl, overview, prescale, clip)
 
     def test_dataraster_16bsi():
       for tilesize in ['','256x256']:
         for constraint in [0,1]:
           for overview in ['','4','2,16']:
-            _test_dataraster_16bsi(tilesize, constraint, overview)
+            _test_dataraster_16bsi('data_16bsi', tilesize, constraint, overview)
 
 
     atexit.register(postgis_takedown)
