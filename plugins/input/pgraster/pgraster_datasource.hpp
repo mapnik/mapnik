@@ -124,6 +124,7 @@ private:
     mutable mapnik::box2d<double> extent_;
     bool prescale_rasters_;
     bool use_overviews_;
+    bool clip_rasters_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;

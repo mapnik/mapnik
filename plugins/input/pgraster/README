@@ -9,4 +9,6 @@ with the following differences:
 
  - "use_overviews" introduced
 
+ - "clip_rasters" boolean introduced, defaults to false
+
  - "band" introduced, with same semantic of the GDAL driver

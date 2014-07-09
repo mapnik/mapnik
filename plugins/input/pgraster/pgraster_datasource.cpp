@@ -81,6 +81,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       extent_initialized_(false),
       prescale_rasters_(false), // TODO: use params.get<bool> !
       use_overviews_(false), // TODO: use params.get<bool> !
+      clip_rasters_(*params.get<mapnik::boolean>("clip_rasters", false)),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -884,11 +885,13 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         if (band_) s << "ST_Band(";
 
-        if (prescale_rasters_) {
-          s << "ST_Resize(";
-        }
+        if (prescale_rasters_) s << "ST_Resize(";
+
+        if (clip_rasters_) s << "ST_Clip(";
 
         s << "\"" << col << "\"";
+
+        if (clip_rasters_) s << ", " << sql_bbox(box) << ")"; 
 
         if (prescale_rasters_) {
           const double scale = std::min(px_gw, px_gh);
