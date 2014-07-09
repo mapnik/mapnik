@@ -186,14 +186,14 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         lbl += ' O:' + overview
       cmd += ' %s dataraster | psql --set ON_ERROR_STOP=1 -q %s' % (rf,MAPNIK_TEST_DBNAME)
       print 'Import call: ' + cmd
-      psql_run('DROP TABLE IF EXISTS dataraster;')
-      if overview:
-        for of in overview.split(','):
-          psql_run('DROP TABLE IF EXISTS o_' + of + '_dataraster;')
       call(cmd)
       for prescale in [0,1]:
         for clip in [0,1]:
           _test_dataraster_16bsi_rendering(lbl, overview, prescale, clip)
+      psql_run('DROP TABLE IF EXISTS dataraster;')
+      if overview:
+        for of in overview.split(','):
+          psql_run('DROP TABLE IF EXISTS o_' + of + '_dataraster;')
 
     def test_dataraster_16bsi():
       for tilesize in ['','256x256']:
