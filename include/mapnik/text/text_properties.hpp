@@ -159,6 +159,7 @@ struct MAPNIK_DECL text_layout_properties
     bool wrap_before;
     bool rotate_displacement;
 };
+
 using text_layout_properties_ptr = std::shared_ptr<text_layout_properties>;
 
 class text_layout;
@@ -207,8 +208,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     text_upright_e upright;
 
     /** Default values for text layouts */
-    text_layout_properties_ptr layout_defaults;
-
+    text_layout_properties layout_defaults;
     /** Default values for char_properties. */
     char_properties_ptr format;
 private:

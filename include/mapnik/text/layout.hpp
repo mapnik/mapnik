@@ -49,7 +49,7 @@ public:
     using const_iterator = line_vector::const_iterator;
     using child_iterator = text_layout_vector::const_iterator;
     using shaper_type = harfbuzz_shaper;
-    text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties_ptr properties);
+    text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties);
 
     /** Adds a new text part. Call this function repeatedly to build the complete text. */
     void add_text(mapnik::value_unicode_string const& str, char_properties_ptr format);
@@ -92,7 +92,7 @@ public:
 
     inline face_manager<freetype_engine> &get_font_manager() const { return font_manager_; }
     inline double get_scale_factor() const { return scale_factor_; }
-    inline text_layout_properties_ptr get_layout_properties() const { return properties_; }
+    inline text_layout_properties const& get_layout_properties() const { return properties_; }
 
     inline rotation const& orientation() const { return orientation_; }
     inline pixel_position const& displacement() const { return displacement_; }
@@ -128,7 +128,7 @@ private:
     line_vector lines_;
 
     //text layout properties
-    text_layout_properties_ptr properties_;
+    text_layout_properties properties_;
 
     //alignments
     vertical_alignment_e valign_;

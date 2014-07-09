@@ -79,19 +79,19 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     return n;
 }
 
-void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout& output) const
 {
-    text_layout_properties_ptr new_properties = std::make_shared<text_layout_properties>(*output.get_layout_properties());
-    if (dx) new_properties->displacement.x = *dx;
-    if (dy) new_properties->displacement.y = *dy;
-    if (halign) new_properties->halign = *halign;
-    if (valign) new_properties->valign = *valign;
-    if (jalign) new_properties->jalign = *jalign;
-    if (text_ratio) new_properties->text_ratio = *text_ratio;
-    if (wrap_width) new_properties->wrap_width = *wrap_width;
-    if (wrap_before) new_properties->wrap_before = *wrap_before;
-    if (rotate_displacement) new_properties->rotate_displacement = *rotate_displacement;
-    if (orientation) new_properties->orientation = *orientation;
+    text_layout_properties new_properties(output.get_layout_properties());
+    if (dx) new_properties.displacement.x = *dx;
+    if (dy) new_properties.displacement.y = *dy;
+    if (halign) new_properties.halign = *halign;
+    if (valign) new_properties.valign = *valign;
+    if (jalign) new_properties.jalign = *jalign;
+    if (text_ratio) new_properties.text_ratio = *text_ratio;
+    if (wrap_width) new_properties.wrap_width = *wrap_width;
+    if (wrap_before) new_properties.wrap_before = *wrap_before;
+    if (rotate_displacement) new_properties.rotate_displacement = *rotate_displacement;
+    if (orientation) new_properties.orientation = *orientation;
 
     // starting a new offset child with the new displacement value
     text_layout_ptr child_layout = std::make_shared<text_layout>(output.get_font_manager(), output.get_scale_factor(), new_properties);

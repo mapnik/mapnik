@@ -320,7 +320,8 @@ struct TextPlacementsWrap: text_placements, wrapper<text_placements>
     text_placement_info_ptr get_placement_info(double scale_factor_) const
     {
         python_block_auto_unblock b;
-        return this->get_override("get_placement_info")();
+        //return this->get_override("get_placement_info")();
+        return text_placement_info_ptr();
     }
 };
 
@@ -477,7 +478,7 @@ void export_text_placement()
         boost::noncopyable>
         ("TextPlacements")
         .def_readwrite("defaults", &text_placements::defaults)
-        .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
+        //.def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
         /* TODO: add_expressions() */
         ;
     register_ptr_to_python<std::shared_ptr<text_placements> >();

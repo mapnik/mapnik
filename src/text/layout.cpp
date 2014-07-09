@@ -53,7 +53,7 @@ pixel_position pixel_position::rotate(rotation const& rot) const
     return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
 }
 
-text_layout::text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties_ptr properties)
+text_layout::text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties)
     : font_manager_(font_manager),
       scale_factor_(scale_factor),
       itemizer_(),
@@ -89,13 +89,13 @@ void text_layout::layout()
         std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
         text_line line(line_limits.first, line_limits.second);
         //Break line if neccessary
-        break_line(line, properties_->wrap_width * scale_factor_, properties_->text_ratio, properties_->wrap_before);
+        break_line(line, properties_.wrap_width * scale_factor_, properties_.text_ratio, properties_.wrap_before);
     }
     init_alignment();
 
     /* Find text origin. */
-    displacement_ = scale_factor_ * properties_->displacement + alignment_offset();
-    if (properties_->rotate_displacement) displacement_ = displacement_.rotate(!orientation_);
+    displacement_ = scale_factor_ * properties_.displacement + alignment_offset();
+    if (properties_.rotate_displacement) displacement_ = displacement_.rotate(!orientation_);
 
     /* Find layout bounds, expanded for rotation */
     rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
@@ -237,14 +237,14 @@ void text_layout::shape_text(text_line & line)
 
 void text_layout::init_orientation(feature_impl const& feature, attributes const& attr)
 {
-    if (properties_->orientation)
+    if (properties_.orientation)
     {
         // https://github.com/mapnik/mapnik/issues/1352
         mapnik::evaluate<feature_impl, value_type, attributes> evaluator(feature,attr);
         orientation_.init(
             boost::apply_visitor(
             evaluator,
-            *(properties_->orientation)).to_double() * M_PI / 180.0);
+            *(properties_.orientation)).to_double() * M_PI / 180.0);
     }
     else
     {
@@ -254,7 +254,7 @@ void text_layout::init_orientation(feature_impl const& feature, attributes const
 
 void text_layout::init_alignment()
 {
-    text_layout_properties const& p = *(properties_);
+    text_layout_properties const& p = properties_; // FIXME
     valign_ = p.valign;
     if (valign_ == V_AUTO)
     {

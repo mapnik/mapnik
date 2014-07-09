@@ -44,7 +44,7 @@ placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
                                    DetectorType &detector,
                                    box2d<double> const& extent,
-                                   text_placement_info_ptr placement_info,
+                                   text_placement_info_ptr & placement_info,
                                    face_manager_freetype & font_manager,
                                    double scale_factor)
     : feature_(feature),
@@ -209,7 +209,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
 
-        horizontal_alignment_e halign = info_->properties.layout_defaults->halign;
+        horizontal_alignment_e halign = info_->properties.layout_defaults.halign;
         if (halign == H_LEFT)
         {
             // Don't move
@@ -262,7 +262,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     {
         text_layout const& layout = *layout_ptr;
         pixel_position align_offset = layout.alignment_offset();
-        pixel_position const& layout_displacement = layout.get_layout_properties()->displacement;
+        pixel_position const& layout_displacement = layout.get_layout_properties().displacement;
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
         double offset = align_offset.y + layout_displacement.y * scale_factor_ + sign * layout.height()/2.;
 
@@ -352,7 +352,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
 void placement_finder::path_move_dx(vertex_cache &pp)
 {
-    double dx = info_->properties.layout_defaults->displacement.x * scale_factor_;
+    double dx = info_->properties.layout_defaults.displacement.x * scale_factor_;
     if (dx != 0.0)
     {
         vertex_cache::state state = pp.save_state();

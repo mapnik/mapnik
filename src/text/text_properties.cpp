@@ -39,25 +39,22 @@ namespace mapnik
 {
 using boost::optional;
 
-text_symbolizer_properties::text_symbolizer_properties() :
-    label_placement(POINT_PLACEMENT),
-    label_spacing(0.0),
-    label_position_tolerance(0.0),
-    avoid_edges(false),
-    minimum_distance(0.0),
-    minimum_padding(0.0),
-    minimum_path_length(0.0),
-    max_char_angle_delta(22.5 * M_PI/180.0),
-    force_odd_labels(false),
-    allow_overlap(false),
-    largest_bbox_only(true),
-    upright(UPRIGHT_AUTO),
-    layout_defaults(std::make_shared<text_layout_properties>()),
-    format(std::make_shared<char_properties>()),
-    tree_()
-{
-
-}
+text_symbolizer_properties::text_symbolizer_properties()
+    : label_placement(POINT_PLACEMENT),
+      label_spacing(0.0),
+      label_position_tolerance(0.0),
+      avoid_edges(false),
+      minimum_distance(0.0),
+      minimum_padding(0.0),
+      minimum_path_length(0.0),
+      max_char_angle_delta(22.5 * M_PI/180.0),
+      force_odd_labels(false),
+      allow_overlap(false),
+      largest_bbox_only(true),
+      upright(UPRIGHT_AUTO),
+      layout_defaults(),
+      format(std::make_shared<char_properties>()),
+    tree_() {}
 
 void text_symbolizer_properties::process(text_layout &output, feature_impl const& feature, attributes const& vars) const
 {
@@ -115,7 +112,7 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");
     if (upright_) upright = *upright_;
 
-    layout_defaults->from_xml(sym);
+    layout_defaults.from_xml(sym);
 
     optional<expression_ptr> name_ = sym.get_opt_attr<expression_ptr>("name");
     if (name_)
@@ -179,7 +176,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
         set_attr(node, "upright", upright);
     }
 
-    layout_defaults->to_xml(node, explicit_defaults, *(dfl.layout_defaults));
+    layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
     format->to_xml(node, explicit_defaults, *(dfl.format));
     if (tree_) tree_->to_xml(node);
 }
@@ -187,7 +184,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 
 void text_symbolizer_properties::add_expressions(expression_set &output) const
 {
-    if (layout_defaults) layout_defaults->add_expressions(output);
+    layout_defaults.add_expressions(output);
     if (tree_) tree_->add_expressions(output);
 }
 
