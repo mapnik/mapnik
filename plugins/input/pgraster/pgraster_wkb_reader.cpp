@@ -225,7 +225,6 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
       // TODO: accept policy to decide on throw-or-skip ?
       //MAPNIK_LOG_WARN(pgraster) << err.str();
       throw mapnik::datasource_exception(err.str());
-      break;
   }
 
 }
@@ -257,9 +256,11 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
   }
 
   if ( pixtype > PT_8BUI || pixtype < PT_8BSI ) {
-    MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band "
-          "type " << type << " unsupported";
-    return;
+    std::ostringstream err;
+    err << "pgraster_wkb_reader: grayscale band type "
+        << pixtype << " unsupported";
+    //MAPNIK_LOG_WARN(pgraster) << err.str();
+    throw mapnik::datasource_exception(err.str());
   }
 
   double nodata = read_uint8(&ptr_); // nodata value, need to read anyway
