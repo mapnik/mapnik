@@ -986,6 +986,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
         optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
 
         point_symbolizer sym;
+        parse_symbolizer_base(sym, node);
         // allow-overlap
         set_symbolizer_property<point_symbolizer,boolean>(sym, keys::allow_overlap, node);
         // opacity
@@ -1011,7 +1012,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
             put(sym, keys::file, parse_path(filename));
             set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         }
-        parse_symbolizer_base(sym, node);
+
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
@@ -1064,7 +1065,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         }
 
         markers_symbolizer sym;
-
+        parse_symbolizer_base(sym, node);
         if (!filename.empty())
         {
             ensure_exists(filename);
@@ -1105,7 +1106,6 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         // multi-policy
         set_symbolizer_property<markers_symbolizer,marker_multi_policy_enum>(sym, keys::markers_multipolicy, node);
 
-        parse_symbolizer_base(sym, node);
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
@@ -1138,14 +1138,15 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
+
         line_pattern_symbolizer symbol;
+        parse_symbolizer_base(symbol, node);
         put(symbol, keys::file, parse_path(file));
 
         // offset value
         optional<double> offset = node.get_opt_attr<double>("offset");
         if (offset) put(symbol, keys::offset, *offset);
 
-        parse_symbolizer_base(symbol, node);
         rule.append(std::move(symbol));
     }
     catch (config_error const& ex)
@@ -1181,6 +1182,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
         polygon_pattern_symbolizer symbol;
+        parse_symbolizer_base(symbol, node);
         put(symbol, keys::file, parse_path(file));
 
         // pattern alignment
@@ -1198,7 +1200,6 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         optional<gamma_method_e> gamma_method = node.get_opt_attr<gamma_method_e>("gamma-method");
         if (gamma_method) put(symbol, keys::gamma_method, gamma_method_enum(*gamma_method));
 
-        parse_symbolizer_base(symbol, node);
         rule.append(std::move(symbol));
     }
     catch (config_error const& ex)
@@ -1268,6 +1269,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         }
 
         shield_symbolizer sym;
+        parse_symbolizer_base(sym, node);
         put<text_placements_ptr>(sym, keys::text_placements_, placement_finder);
         // transform
         set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
@@ -1321,7 +1323,6 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
         put(sym, keys::file , parse_path(file));
-        parse_symbolizer_base(sym, node);
         optional<halo_rasterizer_e> halo_rasterizer_ = node.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
         if (halo_rasterizer_) put(sym, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
         rule.append(std::move(sym));
@@ -1445,7 +1446,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & node)
     try
     {
         building_symbolizer building_sym;
-
+        parse_symbolizer_base(building_sym, node);
         // fill
         set_symbolizer_property<building_symbolizer,color>(building_sym, keys::fill, node);
         // fill-opacity
@@ -1453,8 +1454,6 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & node)
         // height
         optional<expression_ptr> height = node.get_opt_attr<expression_ptr>("height");
         if (height) put(building_sym, keys::height, *height);
-
-        parse_symbolizer_base(building_sym, node);
         rule.append(std::move(building_sym));
     }
     catch (config_error const& ex)
@@ -1469,7 +1468,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
     try
     {
         raster_symbolizer raster_sym;
-
+        parse_symbolizer_base(raster_sym, node);
         // mode
         optional<std::string> mode = node.get_opt_attr<std::string>("mode");
         if (mode)
@@ -1542,7 +1541,6 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
             if (parse_raster_colorizer(colorizer, node))
                 put(raster_sym, keys::colorizer, colorizer);
         }
-        parse_symbolizer_base(raster_sym, node);
         rule.append(std::move(raster_sym));
     }
     catch (config_error const& ex)
@@ -1557,6 +1555,7 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const & node)
     try
     {
         group_symbolizer symbol;
+        parse_symbolizer_base(symbol, node);
         group_symbolizer_properties_ptr prop = std::make_shared<group_symbolizer_properties>();
 
         set_symbolizer_property<symbolizer_base, value_integer>(symbol, keys::num_columns, node);
@@ -1593,9 +1592,7 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const & node)
             }
         }
         put(symbol, keys::group_properties, prop);
-
-        parse_symbolizer_base(symbol, node);
-        rule.append(symbol);
+        rule.append(std::move(symbol));
     }
     catch (const config_error & ex)
     {
