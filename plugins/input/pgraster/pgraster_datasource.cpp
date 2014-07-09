@@ -892,7 +892,12 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         s << "\"" << col << "\"";
 
-        if (clip_rasters_) s << ", " << sql_bbox(box) << ")"; 
+        if (clip_rasters_) {
+          s << ", ST_Expand(" << sql_bbox(box)
+            << ", greatest(abs(ST_ScaleX(\""
+            << col << "\")), abs(ST_ScaleY(\""
+            << col << "\")))))"; 
+        }
 
         if (prescale_rasters_) {
           const double scale = std::min(px_gw, px_gh);
