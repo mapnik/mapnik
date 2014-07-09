@@ -853,18 +853,25 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
           std::string sch = schema_;
           std::string tab = raster_table_;
           const double scale = std::min(px_gw, px_gh);
-          for (int i=overviews_.size()-1; i>1; --i) {
-            const pgraster_overview& o = overviews_[i];
+          std::vector<pgraster_overview>::const_reverse_iterator i;
+          for (i=overviews_.rbegin(); i!=overviews_.rend(); ++i) {
+            const pgraster_overview& o = *i;
             if ( o.scale < scale ) {
               sch = o.schema;
               tab = o.table;
               col = o.column;
               MAPNIK_LOG_DEBUG(pgraster)
                 << "pgraster_datasource: using overview "
-                << sch << "." << tab << "." << col
+                << o.schema << "." << o.table << "." << o.column
                 << " with scale=" << o.scale
                 << " for min out scale=" << scale;
               break;
+            } else {
+              MAPNIK_LOG_DEBUG(pgraster)
+                << "pgraster_datasource: overview "
+                << o.schema << "." << o.table << "." << o.column
+                << " with scale=" << o.scale
+                << " not good for min out scale " << scale;
             }
           }
           table_with_bbox = "( SELECT * FROM " + sch + "." + tab + ") as zz";
