@@ -60,6 +60,13 @@ read_uint16(const boost::uint8_t** from, boost::uint8_t littleEndian) {
     return ret;
 }
 
+int16_t
+read_int16(const uint8_t** from, uint8_t littleEndian) {
+    assert(NULL != from);
+
+    return read_uint16(from, littleEndian);
+}
+
 double
 read_float64(const boost::uint8_t** from, boost::uint8_t littleEndian) {
 
@@ -207,6 +214,17 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
         }
       }
       break;
+    case PT_16BSI:
+      val = read_int16(&ptr_, endian_); // nodata, need to read in any case
+      if ( hasnodata ) raster->set_nodata(val);
+      for (int y=0; y<height_; ++y) {
+        for (int x=0; x<width_; ++x) {
+          val = read_int16(&ptr_, endian_);
+          int off = y * width_ + x;
+          data[off] = val;
+        }
+      }
+      break;
     case PT_32BF:
       val = read_float32(&ptr_, endian_); // nodata, need to read in any case
       if ( hasnodata ) raster->set_nodata(val);
@@ -220,8 +238,7 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
       break;
     default:
       std::ostringstream err;
-      err << "pgraster_wkb_reader: band "
-            "type " << pixtype << " unsupported";
+      err << "pgraster_wkb_reader: data band type " << pixtype << " unsupported";
       // TODO: accept policy to decide on throw-or-skip ?
       //MAPNIK_LOG_WARN(pgraster) << err.str();
       throw mapnik::datasource_exception(err.str());
