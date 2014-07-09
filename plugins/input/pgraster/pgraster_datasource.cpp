@@ -79,8 +79,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       srid_(*params.get<int>("srid", 0)),
       band_(*params.get<int>("band", 0)),
       extent_initialized_(false),
-      prescale_rasters_(false), // TODO: use params.get<bool> !
-      use_overviews_(false), // TODO: use params.get<bool> !
+      prescale_rasters_(*params.get<mapnik::boolean>("prescale_rasters", false)),
+      use_overviews_(*params.get<mapnik::boolean>("use_overviews", false)),
       clip_rasters_(*params.get<mapnik::boolean>("clip_rasters", false)),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
@@ -96,6 +96,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       pool_max_size_(*params_.get<int>("max_size", 10)),
       persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
       extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
+      estimate_extent_(*params.get<mapnik::boolean>("estimate_extent", false)),
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
       // params below are for testing purposes only and may be removed at any time
@@ -132,13 +133,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
     boost::optional<int> initial_size = params.get<int>("initial_size", 1);
     boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
-    boost::optional<mapnik::boolean> estimate_extent = params.get<mapnik::boolean>("estimate_extent", false);
-    estimate_extent_ = estimate_extent && *estimate_extent;
-    boost::optional<mapnik::boolean> prescale_opt = params.get<mapnik::boolean>("prescale_rasters", false);
-    prescale_rasters_ = prescale_opt && *prescale_opt;
-
-    boost::optional<mapnik::boolean> overview_opt = params.get<mapnik::boolean>("use_overviews", false);
-    use_overviews_ = overview_opt && *overview_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
