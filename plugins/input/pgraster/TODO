@@ -1,12 +1,19 @@
-- Add automated tests 
-  - Test both tables and subqueries
-  - Test use of overviews
-  - Test prescaling
+- Improve automated tests
+  - Test subqueries
   - Test RGB input
   - Test Grayscale input
-  - Test Data input (with RasterColorizer)
-- Add support for non 8bpp bands
+- Add support for all band types:
+  - PT_1BB    data[ ] rgb[ ] grayscale[ ]
+  - PT_2BUI   data[ ] rgb[ ] grayscale[ ]
+  - PT_4BUI   data[ ] rgb[ ] grayscale[ ]
+  - PT_8BSI   data[ ] rgb[x] grayscale[x]
+  - PT_8BUI   data[x] rgb[x] grayscale[x]
+  - PT_16BSI  data[x] rgb[ ] grayscale[ ]
+  - PT_16BUI  data[ ] rgb[ ] grayscale[ ]
+  - PT_32BSI  data[ ] rgb[ ] grayscale[ ]
+  - PT_32BUI  data[ ] rgb[ ] grayscale[ ]
+  - PT_32BF   data[x] rgb[ ] grayscale[ ]
+  - PT_64BF   data[ ] rgb[ ] grayscale[ ]
 - Use faster ST_Rescale rather than ST_Resize
   Needs this fix: http://trac.osgeo.org/postgis/ticket/2800
 - Make overviews enabled by default if table is not a subquery ?
-- Test with subquery as "table"
