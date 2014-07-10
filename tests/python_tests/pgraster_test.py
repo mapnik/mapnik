@@ -415,6 +415,63 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
           for overview in ['']:
             _test_rgb_8bui('rgb_8bui', tilesize, constraint, overview)
 
+    def _test_grayscale_subquery(lbl,pixtype,value):
+      sql = "(select 3 as i, ST_AsRaster(ST_MakeEnvelope(0,0,10,10), " \
+            "1.0, 1.0, '%s', %s) as r) as foo" % (pixtype,value)
+      overview = ''
+      rescale = 0
+      clip = 0
+      if rescale:
+        lbl += ' Sc'
+      if clip:
+        lbl += ' Cl'
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME, table=sql,
+        raster_field='r', use_overviews=0 if overview else 0,
+        prescale_rasters=rescale,clip_rasters=clip)
+      fs = ds.featureset()
+      feature = fs.next()
+      eq_(feature['i'],3)
+      lyr = mapnik.Layer('grayscale_8bui_subquery')
+      lyr.datasource = ds
+      expenv = mapnik.Box2d(0,0,10,10)
+      env = lyr.envelope()
+      assert_almost_equal(env.minx, expenv.minx, places=0)
+      assert_almost_equal(env.miny, expenv.miny, places=0)
+      assert_almost_equal(env.maxx, expenv.maxx, places=0)
+      assert_almost_equal(env.maxy, expenv.maxy, places=0)
+      mm = mapnik.Map(16, 16)
+      style = mapnik.Style()
+      sym = mapnik.RasterSymbolizer()
+      rule = mapnik.Rule()
+      rule.symbols.append(sym)
+      style.rules.append(rule)
+      mm.append_style('foo', style)
+      lyr.styles.append('foo')
+      mm.layers.append(lyr)
+      mm.zoom_to_box(expenv)
+      im = mapnik.Image(mm.width, mm.height)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      im.save('/tmp/xfull.png') # for debugging
+      h = hex(value)[2:]
+      exphex = h+h+h+'ff'
+      eq_(hexlify(im.view(1,1,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(8,1,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(15,1,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(1,8,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(8,8,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(15,8,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(1,15,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(8,15,1,1).tostring()), exphex);
+      eq_(hexlify(im.view(15,15,1,1).tostring()), exphex);
+
+    def test_grayscale_8bui_subquery():
+      _test_grayscale_subquery('grayscale_8bui_subquery', '8BUI', 88)
+
+    def test_grayscale_16bui_subquery():
+      _test_grayscale_subquery('grayscale_16bui_subquery', '16BUI', 74)
 
     atexit.register(postgis_takedown)
 

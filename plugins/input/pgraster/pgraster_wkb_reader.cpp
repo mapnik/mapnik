@@ -272,31 +272,48 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
     return;
   }
 
-  if ( pixtype > PT_8BUI || pixtype < PT_8BSI ) {
-    std::ostringstream err;
-    err << "pgraster_wkb_reader: grayscale band type "
-        << pixtype << " unsupported";
-    //MAPNIK_LOG_WARN(pgraster) << err.str();
-    throw mapnik::datasource_exception(err.str());
-  }
-
-  double nodata = read_uint8(&ptr_); // nodata value, need to read anyway
-  if ( hasnodata ) raster->set_nodata(nodata);
-
+  int val;
+  uint8_t * data = image.getBytes();
   int ps = 4; // sizeof(image_data::pixel_type)
-  uint8_t * image_data = image.getBytes();
-  uint8_t val;
-  for (int y=0; y<height_; ++y) {
-    //uint8_t *optr = image_data + y * width_ * ps;
-    for (int x=0; x<width_; ++x) {
-      val = read_uint8(&ptr_);
-      int off = y * width_ * ps + x * ps;
-      // Pixel space is RGBA
-      image_data[off+0] = val;
-      image_data[off+1] = val;
-      image_data[off+2] = val;
-    }
+  int off;
+  switch (pixtype) {
+    case PT_8BUI:
+    case PT_8BSI:
+      val = read_uint8(&ptr_); // nodata value, need to read anyway
+      //if ( hasnodata ) raster->set_nodata(val);
+      for (int y=0; y<height_; ++y) {
+        for (int x=0; x<width_; ++x) {
+          val = read_uint8(&ptr_);
+          off = y * width_ * ps + x * ps;
+          // Pixel space is RGBA
+          data[off+0] = val;
+          data[off+1] = val;
+          data[off+2] = val;
+        }
+      }
+      break;
+    case PT_16BUI:
+      val = read_uint16(&ptr_, endian_); // nodata value, need to read anyway
+      //if ( hasnodata ) raster->set_nodata(val);
+      for (int y=0; y<height_; ++y) {
+        for (int x=0; x<width_; ++x) {
+          val = read_uint16(&ptr_, endian_);
+          off = y * width_ * ps + x * ps;
+          // Pixel space is RGBA
+          data[off+0] = val;
+          data[off+1] = val;
+          data[off+2] = val;
+        }
+      }
+      break;
+    default:
+      std::ostringstream err;
+      err << "pgraster_wkb_reader: grayscale band type "
+          << pixtype << " unsupported";
+      //MAPNIK_LOG_WARN(pgraster) << err.str();
+      throw mapnik::datasource_exception(err.str());
   }
+
 }
 
 void
