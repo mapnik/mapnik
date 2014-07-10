@@ -54,6 +54,9 @@ public:
           done_(false)
     {
         rewind();
+
+        coord2d center = size.center();
+        tr_ = agg::trans_affine_translation(-center.x, -center.y) * tr_;
     }
 
     /** Start again at first marker.
