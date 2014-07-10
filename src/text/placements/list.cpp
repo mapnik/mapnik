@@ -23,7 +23,7 @@
 //mapnik
 #include <mapnik/text/placements/list.hpp>
 #include <mapnik/xml_node.hpp>
-
+#include <mapnik/make_unique.hpp>
 //boost
 #include <boost/property_tree/ptree.hpp>
 

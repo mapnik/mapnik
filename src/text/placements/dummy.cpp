@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/text/placements/dummy.hpp>
+#include <mapnik/make_unique.hpp>
 
 namespace mapnik
 {

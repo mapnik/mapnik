@@ -25,7 +25,7 @@
 #include <mapnik/text/placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
-
+#include <mapnik/make_unique.hpp>
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
