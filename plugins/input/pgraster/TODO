@@ -1,5 +1,5 @@
 - Automated tests
-  - Test subqueries      [ ]
+  - Test subqueries      [x]
   - Test Data input      [x]
   - Test RGB input       [x]
   - Test RGBA input      [x]
