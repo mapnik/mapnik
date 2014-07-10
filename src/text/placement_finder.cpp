@@ -44,7 +44,7 @@ placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
                                    DetectorType &detector,
                                    box2d<double> const& extent,
-                                   text_placement_info_ptr & placement_info,
+                                   text_placement_info & placement_info,
                                    face_manager_freetype & font_manager,
                                    double scale_factor)
     : feature_(feature),
@@ -69,15 +69,15 @@ bool placement_finder::next_position()
         MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
         return false;
     }
-    if (!info_->next())
+    if (!info_.next())
     {
         valid_ = false;
         return false;
     }
 
-    text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_->properties.layout_defaults);
+    text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
     layout->init_orientation(feature_, attr_);
-    info_->properties.process(*layout, feature_, attr_);
+    info_.properties.process(*layout, feature_, attr_);
 
     layouts_.clear();
     layouts_.add(layout);
@@ -197,7 +197,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         }
         else
         {
-            if ((pp.length() < info_->properties.minimum_path_length * scale_factor_)
+            if ((pp.length() < info_.properties.minimum_path_length * scale_factor_)
                 ||
                 (pp.length() <= 0.001) /* Clipping removed whole geometry */
                 ||
@@ -209,7 +209,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
 
-        horizontal_alignment_e halign = info_->properties.layout_defaults.halign;
+        horizontal_alignment_e halign = info_.properties.layout_defaults.halign;
         if (halign == H_LEFT)
         {
             // Don't move
@@ -225,14 +225,14 @@ bool placement_finder::find_line_placements(T & path, bool points)
         path_move_dx(pp);
         do
         {
-            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
+            tolerance_iterator tolerance_offset(info_.properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
                 if (pp.move(tolerance_offset.get())
                     && (
                     (points && find_point_placement(pp.current_position()))
-                    || (!points && single_line_placement(pp, info_->properties.upright))))
+                    || (!points && single_line_placement(pp, info_.properties.upright))))
                 {
                     success = true;
                     break;
@@ -296,8 +296,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     // Only calculate new angle at the start of each cluster!
                     angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
-                    if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
-                            std::fabs(normalize_angle(angle-last_cluster_angle)) > info_->properties.max_char_angle_delta)
+                    if ((info_.properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
+                            std::fabs(normalize_angle(angle-last_cluster_angle)) > info_.properties.max_char_angle_delta)
                     {
                         return false;
                     }
@@ -352,7 +352,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
 void placement_finder::path_move_dx(vertex_cache &pp)
 {
-    double dx = info_->properties.layout_defaults.displacement.x * scale_factor_;
+    double dx = info_.properties.layout_defaults.displacement.x * scale_factor_;
     if (dx != 0.0)
     {
         vertex_cache::state state = pp.save_state();
@@ -376,13 +376,13 @@ double placement_finder::normalize_angle(double angle)
 double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
-    if (info_->properties.label_spacing > 0)
+    if (info_.properties.label_spacing > 0)
     {
         num_labels = static_cast<int>(floor(
-            path_length / (info_->properties.label_spacing * scale_factor_ + layout_width)));
+            path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
     }
 
-    if (info_->properties.force_odd_labels && num_labels % 2 == 0)
+    if (info_.properties.force_odd_labels && num_labels % 2 == 0)
     {
         --num_labels;
     }
@@ -397,13 +397,13 @@ bool placement_finder::collision(const box2d<double> &box) const
 {
     if (!detector_.extent().intersects(box)
             ||
-        (info_->properties.avoid_edges && !extent_.contains(box))
+        (info_.properties.avoid_edges && !extent_.contains(box))
             ||
-        (info_->properties.minimum_padding > 0 &&
-         !extent_.contains(box + (scale_factor_ * info_->properties.minimum_padding)))
+        (info_.properties.minimum_padding > 0 &&
+         !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
             ||
-        (!info_->properties.allow_overlap &&
-         !detector_.has_point_placement(box, info_->properties.minimum_distance * scale_factor_))
+        (!info_.properties.allow_overlap &&
+         !detector_.has_point_placement(box, info_.properties.minimum_distance * scale_factor_))
         )
     {
         return true;

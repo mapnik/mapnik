@@ -48,7 +48,7 @@ public:
                         attributes const& attr,
                         DetectorType & detector,
                         box2d<double> const& extent,
-                        text_placement_info_ptr & placement_info,
+                        text_placement_info & placement_info,
                         face_manager_freetype & font_manager,
                         double scale_factor);
 
@@ -81,9 +81,9 @@ private:
     box2d<double> get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     feature_impl const& feature_;
     attributes const& attr_;
-    DetectorType &detector_;
+    DetectorType & detector_;
     box2d<double> const& extent_;
-    text_placement_info_ptr & info_;
+    text_placement_info & info_;
     layout_container layouts_;
     bool valid_;
 
