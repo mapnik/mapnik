@@ -174,7 +174,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       rf = os.path.join(execution_path('.'),'../data/raster/dataraster.tif')
       print 'tile: ' + tilesize + ' constraints: ' + str(constraint) \
           + ' overviews: ' + overview
-      cmd = 'raster2pgsql -Y'
+      cmd = 'raster2pgsql -Y -I'
       if constraint:
         cmd += ' -C'
         lbl += ' C'
