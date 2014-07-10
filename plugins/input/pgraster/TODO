@@ -1,7 +1,7 @@
 - Automated tests
   - Test subqueries      [ ]
   - Test Data input      [x]
-  - Test RGB input       [ ]
+  - Test RGB input       [x]
   - Test RGBA input      [x]
   - Test Grayscale input [ ]
 - Support for all band types:

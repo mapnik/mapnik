@@ -183,16 +183,16 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       lap = time.time() - t0
       print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
       # nodata
-      eq_(im.view(255,255,1,1).tostring(), '\x00\x00\x00\x00') 
-      eq_(im.view(200,254,1,1).tostring(), '\x00\x00\x00\x00') 
+      eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(200,254,1,1).tostring()), '00000000')
       # A0A0A0
-      eq_(im.view(90,232,1,1).tostring(), '\xa0\xa0\xa0\xff') 
-      eq_(im.view(96,245,1,1).tostring(), '\xa0\xa0\xa0\xff') 
+      eq_(hexlify(im.view(90,232,1,1).tostring()), 'a0a0a0ff')
+      eq_(hexlify(im.view(96,245,1,1).tostring()), 'a0a0a0ff')
       # 808080
-      eq_(im.view(1,1,1,1).tostring(), '\x80\x80\x80\xff') 
-      eq_(im.view(128,128,1,1).tostring(), '\x80\x80\x80\xff') 
+      eq_(hexlify(im.view(1,1,1,1).tostring()), '808080ff') 
+      eq_(hexlify(im.view(128,128,1,1).tostring()), '808080ff') 
       # 404040
-      eq_(im.view(255, 0,1,1).tostring(), '\x40\x40\x40\xff')
+      eq_(hexlify(im.view(255, 0,1,1).tostring()), '404040ff')
 
     def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
       rf = os.path.join(execution_path('.'),'../data/raster/dataraster.tif')
@@ -314,6 +314,106 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         for constraint in [0,1]:
           for overview in ['2']:
             _test_rgba_8bui('rgba_8bui', tilesize, constraint, overview)
+
+    # nodata-edge.tif, RGB 8BUI
+    def _test_rgb_8bui_rendering(lbl, tnam, overview, rescale, clip):
+      if rescale:
+        lbl += ' Sc'
+      if clip:
+        lbl += ' Cl'
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table=tnam,
+        use_overviews=1 if overview else 0,
+        prescale_rasters=rescale,clip_rasters=clip)
+      fs = ds.featureset()
+      feature = fs.next()
+      eq_(feature['rid'],1)
+      lyr = mapnik.Layer('rgba_8bui')
+      lyr.datasource = ds
+      expenv = mapnik.Box2d(-12329035.7652168,4508650.39854396, \
+                            -12328653.0279471,4508957.34625536)
+      env = lyr.envelope()
+      # As the input size is a prime number both horizontally
+      # and vertically, we expect the extent of the overview
+      # tables to be a pixel wider than the original, whereas
+      # the pixel size in geographical units depends on the
+      # overview factor. So we start with the original pixel size
+      # as base scale and multiply by the overview factor.
+      # NOTE: the overview table extent only grows north and east
+      pixsize = 2 # see gdalinfo nodata-edge.tif
+      tol = pixsize * max(overview.split(',')) if overview else 0
+      assert_almost_equal(env.minx, expenv.minx, places=0)
+      assert_almost_equal(env.miny, expenv.miny, delta=tol)
+      assert_almost_equal(env.maxx, expenv.maxx, delta=tol)
+      assert_almost_equal(env.maxy, expenv.maxy, places=0)
+      mm = mapnik.Map(256, 256)
+      style = mapnik.Style()
+      sym = mapnik.RasterSymbolizer()
+      rule = mapnik.Rule()
+      rule.symbols.append(sym)
+      style.rules.append(rule)
+      mm.append_style('foo', style)
+      lyr.styles.append('foo')
+      mm.layers.append(lyr)
+      mm.zoom_to_box(expenv)
+      im = mapnik.Image(mm.width, mm.height)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      #im.save('/tmp/xfull.png') # for debugging
+      # no data
+      eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(128,16,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(250,16,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(3,240,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(128,240,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(250,240,1,1).tostring()), '00000000')
+      # dark brown
+      eq_(hexlify(im.view(174,39,1,1).tostring()), 'c3a698ff') 
+      # dark gray
+      eq_(hexlify(im.view(195,132,1,1).tostring()), '575f62ff') 
+      # Now zoom over a portion of the env (1/10)
+      newenv = mapnik.Box2d(-12329035.7652168, 4508926.651484220, \
+                            -12328997.49148983,4508957.34625536)
+      mm.zoom_to_box(newenv)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
+      #im.save('/tmp/xtenth.png') # for debugging
+      # no data
+      eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(128,16,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(250,16,1,1).tostring()), '00000000')
+      # black
+      eq_(hexlify(im.view(3,42,1,1).tostring()), '000000ff')
+      eq_(hexlify(im.view(3,134,1,1).tostring()), '000000ff')
+      eq_(hexlify(im.view(3,244,1,1).tostring()), '000000ff')
+      # gray
+      eq_(hexlify(im.view(135,157,1,1).tostring()), '4e555bff')
+      # brown
+      eq_(hexlify(im.view(195,223,1,1).tostring()), 'f2cdbaff')
+
+    def _test_rgb_8bui(lbl, tilesize, constraint, overview):
+      rf = os.path.join(execution_path('.'),'../data/raster/nodata-edge.tif')
+      tnam = 'nodataedge'
+      import_raster(rf, tnam, tilesize, constraint, overview)
+      if constraint:
+        lbl += ' C'
+      if tilesize:
+        lbl += ' T:' + tilesize
+      if overview:
+        lbl += ' O:' + overview
+      for prescale in [0,1]:
+        for clip in [0,1]:
+          _test_rgb_8bui_rendering(lbl, tnam, overview, prescale, clip)
+      #drop_imported(tnam, overview)
+
+    def test_rgb_8bui():
+      for tilesize in ['64x64']:
+        for constraint in [1]:
+          for overview in ['']:
+            _test_rgb_8bui('rgb_8bui', tilesize, constraint, overview)
 
 
     atexit.register(postgis_takedown)
