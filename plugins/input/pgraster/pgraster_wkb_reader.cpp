@@ -300,7 +300,7 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
 }
 
 void
-pgraster_wkb_reader::read_rgb(mapnik::raster_ptr raster)
+pgraster_wkb_reader::read_rgba(mapnik::raster_ptr raster)
 {
   mapnik::image_data_32 & image = raster->data_;
 
@@ -344,16 +344,8 @@ pgraster_wkb_reader::read_rgb(mapnik::raster_ptr raster)
     int ps = 4; // sizeof(image_data::pixel_type)
     uint8_t * image_data = image.getBytes();
     for (int y=0; y<height_; ++y) {
-      //uint8_t *optr = image_data + y * width_ * ps;
       for (int x=0; x<width_; ++x) {
         uint8_t val = read_uint8(&ptr_);
-        // optr would now point to an ABGR pixel
-        // we'll consider first band  (bn=0) to be R optr[4-0-1] = optr[3]
-        // we'll consider second band (bn=1) to be G optr[4-1-1] = optr[2]
-        // we'll consider third  band (bn=2) to be B optr[4-2-1] = optr[1]
-        // optr[0] will be alpha
-        //optr[0] = 255;
-        ///////////optr[ps - bn - 1] = val;
         // y * width_ * ps is the row (ps is pixel size)
         // x * ps is the column
         int off = y * width_ * ps + x * ps;
@@ -429,11 +421,16 @@ pgraster_wkb_reader::get_raster() {
           read_grayscale(raster);
           break;
         case 3:
-          read_rgb(raster);
+        case 4:
+          read_rgba(raster);
           break;
         default:
-          MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: raster with "
-            << numBands_ << " bands is not supported";
+          std::ostringstream err;
+          err << "pgraster_wkb_reader: raster with "
+              << numBands_
+              << " bands is not supported, specify a band number";
+          //MAPNIK_LOG_WARN(pgraster) << err.str();
+          throw mapnik::datasource_exception(err.str());
           return mapnik::raster_ptr();
       }
     }

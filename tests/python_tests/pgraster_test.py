@@ -9,6 +9,9 @@ from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
 import threading
+import sys
+import re
+from binascii import hexlify, unhexlify
 
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-pgraster-test-db'
@@ -80,6 +83,26 @@ def postgis_takedown():
     # fails as the db is in use: https://github.com/mapnik/mapnik/issues/960
     #call('dropdb %s' % MAPNIK_TEST_DBNAME)
 
+def import_raster(filename, tabname, tilesize, constraint, overview):
+  print 'tile: ' + tilesize + ' constraints: ' + str(constraint) \
+      + ' overviews: ' + overview
+  cmd = 'raster2pgsql -Y -I'
+  if constraint:
+    cmd += ' -C'
+  if tilesize:
+    cmd += ' -t ' + tilesize
+  if overview:
+    cmd += ' -l ' + overview
+  cmd += ' %s %s | psql --set ON_ERROR_STOP=1 -q %s' % (filename,tabname,MAPNIK_TEST_DBNAME)
+  print 'Import call: ' + cmd
+  call(cmd)
+
+def drop_imported(tabname, overview):
+  psql_run('DROP TABLE IF EXISTS "' + tabname + '";')
+  if overview:
+    for of in overview.split(','):
+      psql_run('DROP TABLE IF EXISTS "o_' + of + '_' + tabname + '";')
+
 if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         and createdb_and_dropdb_on_path() \
         and psql_can_connect() \
@@ -88,6 +111,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     # initialize test database
     postgis_setup()
 
+    # dataraster.tif, 2283x1913 int16 single-band
     def _test_dataraster_16bsi_rendering(lbl, overview, rescale, clip):
       if rescale:
         lbl += ' Sc'
@@ -172,28 +196,17 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
 
     def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
       rf = os.path.join(execution_path('.'),'../data/raster/dataraster.tif')
-      print 'tile: ' + tilesize + ' constraints: ' + str(constraint) \
-          + ' overviews: ' + overview
-      cmd = 'raster2pgsql -Y -I'
+      import_raster(rf, 'dataraster', tilesize, constraint, overview)
       if constraint:
-        cmd += ' -C'
         lbl += ' C'
       if tilesize:
-        cmd += ' -t ' + tilesize
         lbl += ' T:' + tilesize
       if overview:
-        cmd += ' -l ' + overview
         lbl += ' O:' + overview
-      cmd += ' %s dataraster | psql --set ON_ERROR_STOP=1 -q %s' % (rf,MAPNIK_TEST_DBNAME)
-      print 'Import call: ' + cmd
-      call(cmd)
       for prescale in [0,1]:
         for clip in [0,1]:
           _test_dataraster_16bsi_rendering(lbl, overview, prescale, clip)
-      psql_run('DROP TABLE IF EXISTS dataraster;')
-      if overview:
-        for of in overview.split(','):
-          psql_run('DROP TABLE IF EXISTS o_' + of + '_dataraster;')
+      drop_imported('dataraster', overview)
 
     def test_dataraster_16bsi():
       for tilesize in ['','256x256']:
@@ -201,9 +214,116 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
           for overview in ['','4','2,16']:
             _test_dataraster_16bsi('data_16bsi', tilesize, constraint, overview)
 
+    # river.tiff, RGBA 8BUI
+    def _test_rgba_8bui_rendering(lbl, overview, rescale, clip):
+      if rescale:
+        lbl += ' Sc'
+      if clip:
+        lbl += ' Cl'
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table='river',
+        use_overviews=1 if overview else 0,
+        prescale_rasters=rescale,clip_rasters=clip)
+      fs = ds.featureset()
+      feature = fs.next()
+      eq_(feature['rid'],1)
+      lyr = mapnik.Layer('rgba_8bui')
+      lyr.datasource = ds
+      expenv = mapnik.Box2d(0, -210, 256, 0)
+      env = lyr.envelope()
+      # As the input size is a prime number both horizontally
+      # and vertically, we expect the extent of the overview
+      # tables to be a pixel wider than the original, whereas
+      # the pixel size in geographical units depends on the
+      # overview factor. So we start with the original pixel size
+      # as base scale and multiply by the overview factor.
+      # NOTE: the overview table extent only grows north and east
+      pixsize = 1 # see gdalinfo river.tif
+      tol = pixsize * max(overview.split(',')) if overview else 0
+      assert_almost_equal(env.minx, expenv.minx)
+      assert_almost_equal(env.miny, expenv.miny, delta=tol) 
+      assert_almost_equal(env.maxx, expenv.maxx, delta=tol)
+      assert_almost_equal(env.maxy, expenv.maxy)
+      mm = mapnik.Map(256, 256)
+      style = mapnik.Style()
+      sym = mapnik.RasterSymbolizer()
+      rule = mapnik.Rule()
+      rule.symbols.append(sym)
+      style.rules.append(rule)
+      mm.append_style('foo', style)
+      lyr.styles.append('foo')
+      mm.layers.append(lyr)
+      mm.zoom_to_box(expenv)
+      im = mapnik.Image(mm.width, mm.height)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      #im.save('/tmp/xfull.png') # for debugging
+      # no data
+      eq_(hexlify(im.view(3,3,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(250,250,1,1).tostring()), '00000000') 
+      # full opaque river color
+      eq_(hexlify(im.view(175,118,1,1).tostring()), 'b9d8f8ff') 
+      # half-transparent pixel
+      pxstr = hexlify(im.view(122,138,1,1).tostring())
+      apat = ".*(..)$"
+      match = re.match(apat, pxstr)
+      assert match, 'pixel ' + pxstr + ' does not match pattern ' + apat
+      alpha = match.group(1)
+      assert alpha != 'ff' and alpha != '00', \
+        'unexpected full transparent/opaque pixel: ' + alpha
+
+      # Now zoom over a portion of the env (1/10)
+      newenv = mapnik.Box2d(166,-105,191,-77)
+      mm.zoom_to_box(newenv)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
+      #im.save('/tmp/xtenth.png') # for debugging
+      # no data
+      eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(200,40,1,1).tostring()), '00000000')
+      # full opaque river color
+      eq_(hexlify(im.view(100,168,1,1).tostring()), 'b9d8f8ff')
+      # half-transparent pixel
+      pxstr = hexlify(im.view(122,138,1,1).tostring())
+      apat = ".*(..)$"
+      match = re.match(apat, pxstr)
+      assert match, 'pixel ' + pxstr + ' does not match pattern ' + apat
+      alpha = match.group(1)
+      assert alpha != 'ff' and alpha != '00', \
+        'unexpected full transparent/opaque pixel: ' + alpha
+
+    def _test_rgba_8bui(lbl, tilesize, constraint, overview):
+      rf = os.path.join(execution_path('.'),'../data/raster/river.tiff')
+      import_raster(rf, 'river', tilesize, constraint, overview)
+      if constraint:
+        lbl += ' C'
+      if tilesize:
+        lbl += ' T:' + tilesize
+      if overview:
+        lbl += ' O:' + overview
+      for prescale in [0,1]:
+        for clip in [0,1]:
+          _test_rgba_8bui_rendering(lbl, overview, prescale, clip)
+      drop_imported('river', overview)
+
+    def test_rgba_8bui():
+      for tilesize in ['','16x16']:
+        for constraint in [0,1]:
+          for overview in ['2']:
+            _test_rgba_8bui('rgba_8bui', tilesize, constraint, overview)
+
 
     atexit.register(postgis_takedown)
 
+def enabled(tname):
+  enabled = len(sys.argv) < 2 or tname in sys.argv
+  if not enabled:
+    print "Skipping " + tname + " as not explicitly enabled"
+  return enabled
+
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    run_all(eval(x) for x in dir() if x.startswith("test_") and enabled(x))
