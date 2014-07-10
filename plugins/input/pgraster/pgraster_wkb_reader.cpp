@@ -36,6 +36,7 @@
 // boost
 #include <boost/cstdint.hpp> // for boost::int8_t
 #include <boost/make_shared.hpp>
+#include <boost/bind.hpp>
 
 namespace {
 
@@ -246,16 +247,40 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
 
 }
 
-void
-pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
+template<typename T>
+void read_grayscale_band(mapnik::raster_ptr raster,
+                         uint16_t width, uint16_t height,
+                         bool hasnodata, T reader)
 {
   mapnik::image_data_32 & image = raster->data_;
 
   // Start with plain white (ABGR or RGBA depending on endiannes)
+  // TODO: set to transparent instead?
   image.set(0xffffffff);
 
   raster->premultiplied_alpha_ = true;
 
+  int val;
+  uint8_t * data = image.getBytes();
+  int ps = 4; // sizeof(image_data::pixel_type)
+  int off;
+  val = reader(); // nodata value, need to read anyway
+  if ( hasnodata ) raster->set_nodata(val);
+  for (int y=0; y<height; ++y) {
+    for (int x=0; x<width; ++x) {
+      val = reader();
+      off = y * width * ps + x * ps;
+      // Pixel space is RGBA
+      data[off+0] = val;
+      data[off+1] = val;
+      data[off+2] = val;
+    }
+  }
+}
+
+void
+pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
+{
   uint8_t type = read_uint8(&ptr_);
 
   int pixtype = BANDTYPE_PIXTYPE(type);
@@ -272,39 +297,19 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
     return;
   }
 
-  int val;
-  uint8_t * data = image.getBytes();
-  int ps = 4; // sizeof(image_data::pixel_type)
-  int off;
   switch (pixtype) {
     case PT_8BUI:
     case PT_8BSI:
-      val = read_uint8(&ptr_); // nodata value, need to read anyway
-      //if ( hasnodata ) raster->set_nodata(val);
-      for (int y=0; y<height_; ++y) {
-        for (int x=0; x<width_; ++x) {
-          val = read_uint8(&ptr_);
-          off = y * width_ * ps + x * ps;
-          // Pixel space is RGBA
-          data[off+0] = val;
-          data[off+1] = val;
-          data[off+2] = val;
-        }
-      }
+      read_grayscale_band(raster, width_, height_, hasnodata,
+                          boost::bind(read_uint8, &ptr_));
       break;
     case PT_16BUI:
-      val = read_uint16(&ptr_, endian_); // nodata value, need to read anyway
-      //if ( hasnodata ) raster->set_nodata(val);
-      for (int y=0; y<height_; ++y) {
-        for (int x=0; x<width_; ++x) {
-          val = read_uint16(&ptr_, endian_);
-          off = y * width_ * ps + x * ps;
-          // Pixel space is RGBA
-          data[off+0] = val;
-          data[off+1] = val;
-          data[off+2] = val;
-        }
-      }
+      read_grayscale_band(raster, width_, height_, hasnodata,
+                          boost::bind(read_uint16, &ptr_, endian_));
+      break;
+    case PT_32BUI:
+      read_grayscale_band(raster, width_, height_, hasnodata,
+                          boost::bind(read_uint32, &ptr_, endian_));
       break;
     default:
       std::ostringstream err;

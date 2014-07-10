@@ -13,7 +13,7 @@
   - PT_16BSI  data[x] rgb[ ] grayscale[ ]
   - PT_16BUI  data[ ] rgb[ ] grayscale[x]
   - PT_32BSI  data[ ] rgb[ ] grayscale[ ]
-  - PT_32BUI  data[ ] rgb[ ] grayscale[ ]
+  - PT_32BUI  data[ ] rgb[ ] grayscale[x]
   - PT_32BF   data[x] rgb[ ] grayscale[ ]
   - PT_64BF   data[ ] rgb[ ] grayscale[ ]
 - Use faster ST_Rescale rather than ST_Resize

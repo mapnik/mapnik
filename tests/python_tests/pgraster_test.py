@@ -473,6 +473,9 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     def test_grayscale_16bui_subquery():
       _test_grayscale_subquery('grayscale_16bui_subquery', '16BUI', 74)
 
+    def test_grayscale_32bui_subquery():
+      _test_grayscale_subquery('grayscale_16bui_subquery', '32BUI', 132)
+
     atexit.register(postgis_takedown)
 
 def enabled(tname):
