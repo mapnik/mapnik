@@ -5,17 +5,17 @@
   - Test RGBA input      [x]
   - Test Grayscale input [x]
 - Support for all band types:
-  - PT_1BB    data[ ] rgb[ ] grayscale[ ]
-  - PT_2BUI   data[ ] rgb[ ] grayscale[x]
-  - PT_4BUI   data[ ] rgb[ ] grayscale[x]
-  - PT_8BSI   data[ ] rgb[x] grayscale[x]
+  - PT_1BB    data[x] rgb[ ] grayscale[x]
+  - PT_2BUI   data[x] rgb[ ] grayscale[x]
+  - PT_4BUI   data[x] rgb[ ] grayscale[x]
+  - PT_8BSI   data[x] rgb[x] grayscale[x]
   - PT_8BUI   data[x] rgb[x] grayscale[x]
-  - PT_16BSI  data[x] rgb[ ] grayscale[ ]
-  - PT_16BUI  data[ ] rgb[ ] grayscale[x]
-  - PT_32BSI  data[ ] rgb[ ] grayscale[ ]
-  - PT_32BUI  data[ ] rgb[ ] grayscale[x]
+  - PT_16BSI  data[x] rgb[ ] grayscale[x]
+  - PT_16BUI  data[x] rgb[ ] grayscale[x]
+  - PT_32BSI  data[x] rgb[ ] grayscale[x]
+  - PT_32BUI  data[x] rgb[ ] grayscale[x]
   - PT_32BF   data[x] rgb[ ] grayscale[ ]
-  - PT_64BF   data[ ] rgb[ ] grayscale[ ]
+  - PT_64BF   data[x] rgb[ ] grayscale[ ]
 - Have pgraster and postgis plugins share the same connection pool
 - Use faster ST_Rescale rather than ST_Resize
   Needs this fix: http://trac.osgeo.org/postgis/ticket/2800

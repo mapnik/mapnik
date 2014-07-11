@@ -502,11 +502,144 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     def test_grayscale_8bui_subquery():
       _test_grayscale_subquery('grayscale_8bui_subquery', '8BUI', 63)
 
+    def test_grayscale_8bsi_subquery():
+      # NOTE: we're using a positive integer because Mapnik
+      #       does not support negative data values anyway
+      _test_grayscale_subquery('grayscale_8bsi_subquery', '8BSI', 69)
+
     def test_grayscale_16bui_subquery():
       _test_grayscale_subquery('grayscale_16bui_subquery', '16BUI', 126)
 
+    def test_grayscale_16bsi_subquery():
+      # NOTE: we're using a positive integer because Mapnik
+      #       does not support negative data values anyway
+      _test_grayscale_subquery('grayscale_16bsi_subquery', '16BSI', 144)
+
     def test_grayscale_32bui_subquery():
       _test_grayscale_subquery('grayscale_32bui_subquery', '32BUI', 255)
+
+    def test_grayscale_32bsi_subquery():
+      # NOTE: we're using a positive integer because Mapnik
+      #       does not support negative data values anyway
+      _test_grayscale_subquery('grayscale_32bsi_subquery', '32BSI', 270)
+
+    def _test_data_subquery(lbl, pixtype, value):
+      #
+      #      3   8   13
+      #    +---+---+---+
+      #  3 | v | v | h |  NOTE: writes different values
+      #    +---+---+---+        in 13,8 and 8,13
+      #  8 | v | v | a |  
+      #    +---+---+---+  
+      # 13 | v | b | v |
+      #    +---+---+---+
+      #
+      val_a = value/3;
+      val_b = val_a*2;
+      sql = "(select 3 as i, " \
+            " ST_SetValues(" \
+            "  ST_SetValues(" \
+            "   ST_AsRaster(" \
+            "    ST_MakeEnvelope(0,0,14,14), " \
+            "    1.0, -1.0, '%s', %s" \
+            "   ), " \
+            "   11, 6, 5, 5, %s::float8" \
+            "  )," \
+            "  6, 11, 5, 5, %s::float8" \
+            " ) as r" \
+            ") as foo" % (pixtype,value, val_a, val_b)
+      overview = ''
+      rescale = 0
+      clip = 0
+      if rescale:
+        lbl += ' Sc'
+      if clip:
+        lbl += ' Cl'
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME, table=sql,
+        raster_field='r', use_overviews=0 if overview else 0,
+        band=1, prescale_rasters=rescale, clip_rasters=clip)
+      fs = ds.featureset()
+      feature = fs.next()
+      eq_(feature['i'],3)
+      lyr = mapnik.Layer('grayscale_8bui_subquery')
+      lyr.datasource = ds
+      expenv = mapnik.Box2d(0,0,14,14)
+      env = lyr.envelope()
+      assert_almost_equal(env.minx, expenv.minx, places=0)
+      assert_almost_equal(env.miny, expenv.miny, places=0)
+      assert_almost_equal(env.maxx, expenv.maxx, places=0)
+      assert_almost_equal(env.maxy, expenv.maxy, places=0)
+      mm = mapnik.Map(15, 15)
+      style = mapnik.Style()
+      col = mapnik.RasterColorizer();
+      col.default_mode = mapnik.COLORIZER_DISCRETE;
+      col.add_stop(val_a, mapnik.Color(0xff,0x00,0x00,255));
+      col.add_stop(val_b, mapnik.Color(0x00,0xff,0x00,255));
+      col.add_stop(value, mapnik.Color(0x00,0x00,0xff,255));
+      sym = mapnik.RasterSymbolizer()
+      sym.colorizer = col
+      rule = mapnik.Rule()
+      rule.symbols.append(sym)
+      style.rules.append(rule)
+      mm.append_style('foo', style)
+      lyr.styles.append('foo')
+      mm.layers.append(lyr)
+      mm.zoom_to_box(expenv)
+      im = mapnik.Image(mm.width, mm.height)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      im.save('/tmp/xfull.png') # for debugging
+      h = format(value, '02x')
+      hex_v = '0000ffff'
+      hex_a = 'ff0000ff'
+      hex_b = '00ff00ff'
+      eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 3, 8,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8, 8,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view(13, 8,1,1).tostring()), hex_a);
+      eq_(hexlify(im.view( 3,13,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8,13,1,1).tostring()), hex_b);
+      eq_(hexlify(im.view(13,13,1,1).tostring()), hex_v);
+
+    def test_data_2bui_subquery():
+      _test_data_subquery('data_2bui_subquery', '2BUI', 3)
+
+    def test_data_4bui_subquery():
+      _test_data_subquery('data_4bui_subquery', '4BUI', 15)
+
+    def test_data_8bui_subquery():
+      _test_data_subquery('data_8bui_subquery', '8BUI', 63)
+
+    def test_data_8bsi_subquery():
+      # NOTE: we're using a positive integer because Mapnik
+      #       does not support negative data values anyway
+      _test_data_subquery('data_8bsi_subquery', '8BSI', 69)
+
+    def test_data_16bui_subquery():
+      _test_data_subquery('data_16bui_subquery', '16BUI', 126)
+
+    def test_data_16bsi_subquery():
+      # NOTE: we're using a positive integer because Mapnik
+      #       does not support negative data values anyway
+      _test_data_subquery('data_16bsi_subquery', '16BSI', 135)
+
+    def test_data_32bui_subquery():
+      _test_data_subquery('data_32bui_subquery', '32BUI', 255)
+
+    def test_data_32bsi_subquery():
+      # NOTE: we're using a positive integer because Mapnik
+      #       does not support negative data values anyway
+      _test_data_subquery('data_32bsi_subquery', '32BSI', 264)
+
+    def test_data_32bf_subquery():
+      _test_data_subquery('data_32bf_subquery', '32BF', 450)
+
+    def test_data_64bf_subquery():
+      _test_data_subquery('data_64bf_subquery', '64BF', 3072)
 
     atexit.register(postgis_takedown)
 

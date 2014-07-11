@@ -174,6 +174,32 @@ typedef enum {
 
 using mapnik::box2d;
 
+template<typename T>
+void read_data_band(mapnik::raster_ptr raster,
+                    uint16_t width, uint16_t height,
+                    bool hasnodata, T reader)
+{
+  mapnik::image_data_32 & image = raster->data_;
+
+  // Start with plain white (ABGR or RGBA depending on endiannes)
+  // TODO: set to transparent instead?
+  image.set(0xffffffff);
+
+  raster->premultiplied_alpha_ = true;
+
+  float* data = (float*)image.getBytes();
+  double val;
+  val = reader(); // nodata value, need to read anyway
+  if ( hasnodata ) raster->set_nodata(val);
+  for (int y=0; y<height; ++y) {
+    for (int x=0; x<width; ++x) {
+      val = reader();
+      int off = y * width + x;
+      data[off] = val;
+    }
+  }
+}
+
 void
 pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
 {
@@ -200,43 +226,36 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
 
   MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: reading " << height_ << "x" << width_ << " pixels";
 
-  float* data = (float*)image.getBytes();
-  double val;
-
-  // TODO: support all pixel types, use a templated function ?
   switch (pixtype) {
+    case PT_1BB:
+    case PT_2BUI:
+    case PT_4BUI:
+      // all <8BPP values are wrote in full bytes anyway
+    case PT_8BSI:
+      // mapnik does not support signed anyway
     case PT_8BUI:
-      val = read_uint8(&ptr_); // nodata value, need to read in any case
-      if ( hasnodata ) raster->set_nodata(val);
-      for (int y=0; y<height_; ++y) {
-        for (int x=0; x<width_; ++x) {
-          val = read_uint8(&ptr_);
-          int off = y * width_ + x;
-          data[off] = val;
-        }
-      }
+      read_data_band(raster, width_, height_, hasnodata,
+                     boost::bind(read_uint8, &ptr_));
       break;
     case PT_16BSI:
-      val = read_int16(&ptr_, endian_); // nodata, need to read in any case
-      if ( hasnodata ) raster->set_nodata(val);
-      for (int y=0; y<height_; ++y) {
-        for (int x=0; x<width_; ++x) {
-          val = read_int16(&ptr_, endian_);
-          int off = y * width_ + x;
-          data[off] = val;
-        }
-      }
+      // mapnik does not support signed anyway
+    case PT_16BUI:
+      read_data_band(raster, width_, height_, hasnodata,
+                     boost::bind(read_uint16, &ptr_, endian_));
+      break;
+    case PT_32BSI:
+      // mapnik does not support signed anyway
+    case PT_32BUI:
+      read_data_band(raster, width_, height_, hasnodata,
+                     boost::bind(read_uint32, &ptr_, endian_));
       break;
     case PT_32BF:
-      val = read_float32(&ptr_, endian_); // nodata, need to read in any case
-      if ( hasnodata ) raster->set_nodata(val);
-      for (int y=0; y<height_; ++y) {
-        for (int x=0; x<width_; ++x) {
-          val = read_float32(&ptr_, endian_);
-          int off = y * width_ + x;
-          data[off] = val;
-        }
-      }
+      read_data_band(raster, width_, height_, hasnodata,
+                     boost::bind(read_float32, &ptr_, endian_));
+      break;
+    case PT_64BF:
+      read_data_band(raster, width_, height_, hasnodata,
+                     boost::bind(read_float64, &ptr_, endian_));
       break;
     default:
       std::ostringstream err;
@@ -302,15 +321,21 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
     case PT_1BB:
     case PT_2BUI:
     case PT_4BUI:
-    case PT_8BUI:
+      // all <8BPP values are wrote in full bytes anyway
     case PT_8BSI:
+      // mapnik does not support signed anyway
+    case PT_8BUI:
       read_grayscale_band(raster, width_, height_, hasnodata,
                           boost::bind(read_uint8, &ptr_));
       break;
+    case PT_16BSI:
+      // mapnik does not support signed anyway
     case PT_16BUI:
       read_grayscale_band(raster, width_, height_, hasnodata,
                           boost::bind(read_uint16, &ptr_, endian_));
       break;
+    case PT_32BSI:
+      // mapnik does not support signed anyway
     case PT_32BUI:
       read_grayscale_band(raster, width_, height_, hasnodata,
                           boost::bind(read_uint32, &ptr_, endian_));
