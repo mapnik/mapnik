@@ -41,6 +41,7 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/gamma_method.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -56,97 +57,6 @@ namespace agg { struct trans_affine; }
 
 namespace mapnik
 {
-
-enum line_cap_enum
-{
-    BUTT_CAP,
-    SQUARE_CAP,
-    ROUND_CAP,
-    line_cap_enum_MAX
-};
-
-DEFINE_ENUM( line_cap_e, line_cap_enum );
-
-enum line_join_enum
-{
-    MITER_JOIN,
-    MITER_REVERT_JOIN,
-    ROUND_JOIN,
-    BEVEL_JOIN,
-    line_join_enum_MAX
-};
-
-DEFINE_ENUM( line_join_e, line_join_enum );
-
-enum line_rasterizer_enum
-{
-    RASTERIZER_FULL,           // agg::renderer_scanline_aa_solid
-    RASTERIZER_FAST,           // agg::rasterizer_outline_aa, twice as fast but only good for thin lines
-    line_rasterizer_enum_MAX
-};
-
-DEFINE_ENUM( line_rasterizer_e, line_rasterizer_enum );
-
-
-enum halo_rasterizer_enum
-{
-    HALO_RASTERIZER_FULL,
-    HALO_RASTERIZER_FAST,
-    halo_rasterizer_enum_MAX
-};
-
-DEFINE_ENUM(halo_rasterizer_e, halo_rasterizer_enum);
-
-enum point_placement_enum
-{
-    CENTROID_POINT_PLACEMENT,
-    INTERIOR_POINT_PLACEMENT,
-    point_placement_enum_MAX
-};
-
-DEFINE_ENUM( point_placement_e, point_placement_enum );
-
-enum pattern_alignment_enum
-{
-    LOCAL_ALIGNMENT,
-    GLOBAL_ALIGNMENT,
-    pattern_alignment_enum_MAX
-};
-
-DEFINE_ENUM( pattern_alignment_e, pattern_alignment_enum );
-
-enum debug_symbolizer_mode_enum
-{
-    DEBUG_SYM_MODE_COLLISION,
-    DEBUG_SYM_MODE_VERTEX,
-    debug_symbolizer_mode_enum_MAX
-};
-
-DEFINE_ENUM( debug_symbolizer_mode_e, debug_symbolizer_mode_enum );
-
-
-// markers
-// TODO - consider merging with text_symbolizer label_placement_e
-enum marker_placement_enum
-{
-    MARKER_POINT_PLACEMENT,
-    MARKER_INTERIOR_PLACEMENT,
-    MARKER_LINE_PLACEMENT,
-    marker_placement_enum_MAX
-};
-
-DEFINE_ENUM( marker_placement_e, marker_placement_enum );
-
-enum marker_multi_policy_enum
-{
-    MARKER_EACH_MULTI, // each component in a multi gets its marker
-    MARKER_WHOLE_MULTI, // consider all components of a multi as a whole
-    MARKER_LARGEST_MULTI, // only the largest component of a multi gets a marker
-    marker_multi_policy_enum_MAX
-};
-
-DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
-
 
 // fwd declares
 // TODO - move these transform declares to own header

@@ -195,6 +195,7 @@ source = Split(
     memory_datasource.cpp
     symbolizer.cpp
     symbolizer_keys.cpp
+    symbolizer_enuerations.cpp
     unicode.cpp
     raster_colorizer.cpp
     wkt/wkt_factory.cpp
