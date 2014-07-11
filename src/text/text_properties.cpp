@@ -29,7 +29,6 @@
 #include <mapnik/text/formatting/text.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
-#include <mapnik/symbolizer.hpp>
 
 // boost
 
@@ -54,7 +53,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       upright(UPRIGHT_AUTO),
       layout_defaults(),
       format(std::make_shared<char_properties>()),
-    tree_() {}
+      tree_() {}
 
 void text_symbolizer_properties::process(text_layout &output, feature_impl const& feature, attributes const& vars) const
 {
@@ -193,19 +192,16 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
     tree_ = std::make_shared<formatting::text_node>(expr);
 }
 
-text_layout_properties::text_layout_properties() :
-    orientation(),
-    displacement(0.0,0.0),
-    halign(H_AUTO),
-    jalign(J_AUTO),
-    valign(V_AUTO),
-    text_ratio(0.0),
-    wrap_width(0.0),
-    wrap_before(false),
-    rotate_displacement(false)
-{
-
-}
+text_layout_properties::text_layout_properties()
+    : orientation(),
+      displacement(0.0,0.0),
+      halign(H_AUTO),
+      jalign(J_AUTO),
+      valign(V_AUTO),
+      text_ratio(0.0),
+      wrap_width(0.0),
+      wrap_before(false),
+      rotate_displacement(false) {}
 
 void text_layout_properties::from_xml(xml_node const &sym)
 {
@@ -227,8 +223,23 @@ void text_layout_properties::from_xml(xml_node const &sym)
     if (wrap_before_) wrap_before = *wrap_before_;
     optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
     if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
-    optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
-    if (orientation_) orientation = *orientation_;
+    // TODO!!
+    try
+    {
+        optional<value_double> val = sym.get_opt_attr<value_double>("orientation");
+        if (val) orientation = *val;
+    }
+    catch (config_error const& ex)
+    {
+        optional<expression_ptr> val = sym.get_opt_attr<expression_ptr>("orientation");
+        if (val) orientation = *val;
+        else
+        {
+            ex.append_context(std::string("text_layout_properties::from_xml 'orientation'"), sym);
+        }
+    }
+    //optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
+    //if (orientation_) orientation = *orientation_;
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree &node,
@@ -271,18 +282,19 @@ void text_layout_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "rotate-displacement", rotate_displacement);
     }
-    if (orientation)
-    {
-        std::string const& orientationstr = to_expression_string(*orientation);
-        if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
-            set_attr(node, "orientation", orientationstr);
-        }
-    }
+    /// TODO
+    //if (orientation)
+    //{
+    //    std::string const& orientationstr = to_expression_string(*orientation);
+    //    if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
+    //        set_attr(node, "orientation", orientationstr);
+    //   }
+    //}
 }
 
 void text_layout_properties::add_expressions(expression_set &output) const
 {
-    output.insert(orientation);
+    //output.insert(orientation);
 }
 
 char_properties::char_properties() :

@@ -237,19 +237,8 @@ void text_layout::shape_text(text_line & line)
 
 void text_layout::init_orientation(feature_impl const& feature, attributes const& attr)
 {
-    if (properties_.orientation)
-    {
-        // https://github.com/mapnik/mapnik/issues/1352
-        mapnik::evaluate<feature_impl, value_type, attributes> evaluator(feature,attr);
-        orientation_.init(
-            boost::apply_visitor(
-            evaluator,
-            *(properties_.orientation)).to_double() * M_PI / 180.0);
-    }
-    else
-    {
-        orientation_.reset();
-    }
+    double angle = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.orientation);
+    orientation_.init(angle * M_PI/ 180.0);
 }
 
 void text_layout::init_alignment()

@@ -19,6 +19,7 @@
 #include <mapnik/save_map.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <vector>
 #include <algorithm>
 #include <mapnik/make_unique.hpp>

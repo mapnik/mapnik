@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef TEXT_PROPERTIES_HPP
-#define TEXT_PROPERTIES_HPP
+#ifndef MAPNIK_TEXT_PROPERTIES_HPP
+#define MAPNIK_TEXT_PROPERTIES_HPP
 
 // mapnik
 #include <mapnik/text/char_properties_ptr.hpp>
@@ -33,7 +33,8 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/pixel_position.hpp>
-
+//#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/symbolizer.hpp>
 // stl
 #include <map>
 
@@ -43,17 +44,6 @@
 
 namespace mapnik
 {
-
-enum text_transform
-{
-    NONE = 0,
-    UPPERCASE,
-    LOWERCASE,
-    CAPITALIZE,
-    text_transform_MAX
-};
-
-DEFINE_ENUM(text_transform_e, text_transform);
 
 using fontset_map = std::map<std::string, font_set>;
 
@@ -78,62 +68,6 @@ struct MAPNIK_DECL char_properties
     double halo_radius;
 };
 
-enum label_placement_enum
-{
-    POINT_PLACEMENT,
-    LINE_PLACEMENT,
-    VERTEX_PLACEMENT,
-    INTERIOR_PLACEMENT,
-    label_placement_enum_MAX
-};
-
-DEFINE_ENUM(label_placement_e, label_placement_enum);
-
-enum vertical_alignment
-{
-    V_TOP = 0,
-    V_MIDDLE,
-    V_BOTTOM,
-    V_AUTO,
-    vertical_alignment_MAX
-};
-
-DEFINE_ENUM(vertical_alignment_e, vertical_alignment);
-
-enum horizontal_alignment
-{
-    H_LEFT = 0,
-    H_MIDDLE,
-    H_RIGHT,
-    H_AUTO,
-    horizontal_alignment_MAX
-};
-
-DEFINE_ENUM(horizontal_alignment_e, horizontal_alignment);
-
-enum justify_alignment
-{
-    J_LEFT = 0,
-    J_MIDDLE,
-    J_RIGHT,
-    J_AUTO,
-    justify_alignment_MAX
-};
-
-DEFINE_ENUM(justify_alignment_e, justify_alignment);
-
-enum text_upright
-{
-    UPRIGHT_AUTO,
-    UPRIGHT_LEFT,
-    UPRIGHT_RIGHT,
-    UPRIGHT_LEFT_ONLY,
-    UPRIGHT_RIGHT_ONLY,
-    text_upright_MAX
-};
-
-DEFINE_ENUM(text_upright_e, text_upright);
-
 // Properties for building the layout of a single text placement
 struct MAPNIK_DECL text_layout_properties
 {
@@ -142,14 +76,16 @@ struct MAPNIK_DECL text_layout_properties
     // Load all values from XML ptree.
     void from_xml(xml_node const &sym);
     // Save all values to XML ptree (but does not create a new parent node!).
-    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_layout_properties const &dfl=text_layout_properties()) const;
+    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults,
+                text_layout_properties const &dfl=text_layout_properties()) const;
 
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
     void add_expressions(expression_set &output) const;
 
     //Per layout options
-    expression_ptr orientation;
+    symbolizer_base::value_type orientation;
+
     pixel_position displacement;
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
@@ -218,4 +154,4 @@ private:
 
 } //ns mapnik
 
-#endif // TEXT_PROPERTIES_HPP
+#endif // MAPNIK_TEXT_PROPERTIES_HPP

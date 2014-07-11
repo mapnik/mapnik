@@ -35,8 +35,6 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/symbolizer_keys.hpp>
-#include <mapnik/text/placements/base.hpp>
-#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/attribute.hpp>
@@ -87,6 +85,9 @@ struct enumeration_wrapper
 };
 
 using dash_array = std::vector<std::pair<double,double> >;
+
+class text_placements;
+using text_placements_ptr = std::shared_ptr<text_placements>;
 
 struct  MAPNIK_DECL symbolizer_base
 {

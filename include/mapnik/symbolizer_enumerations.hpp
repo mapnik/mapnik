@@ -117,7 +117,74 @@ enum marker_multi_policy_enum
 
 DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
 
-}
+enum text_transform
+{
+    NONE = 0,
+    UPPERCASE,
+    LOWERCASE,
+    CAPITALIZE,
+    text_transform_MAX
+};
 
+DEFINE_ENUM(text_transform_e, text_transform);
+
+enum label_placement_enum
+{
+    POINT_PLACEMENT,
+    LINE_PLACEMENT,
+    VERTEX_PLACEMENT,
+    INTERIOR_PLACEMENT,
+    label_placement_enum_MAX
+};
+
+DEFINE_ENUM(label_placement_e, label_placement_enum);
+
+enum vertical_alignment
+{
+    V_TOP = 0,
+    V_MIDDLE,
+    V_BOTTOM,
+    V_AUTO,
+    vertical_alignment_MAX
+};
+
+DEFINE_ENUM(vertical_alignment_e, vertical_alignment);
+
+enum horizontal_alignment
+{
+    H_LEFT = 0,
+    H_MIDDLE,
+    H_RIGHT,
+    H_AUTO,
+    horizontal_alignment_MAX
+};
+
+DEFINE_ENUM(horizontal_alignment_e, horizontal_alignment);
+
+enum justify_alignment
+{
+    J_LEFT = 0,
+    J_MIDDLE,
+    J_RIGHT,
+    J_AUTO,
+    justify_alignment_MAX
+};
+
+DEFINE_ENUM(justify_alignment_e, justify_alignment);
+
+enum text_upright
+{
+    UPRIGHT_AUTO,
+    UPRIGHT_LEFT,
+    UPRIGHT_RIGHT,
+    UPRIGHT_LEFT_ONLY,
+    UPRIGHT_RIGHT_ONLY,
+    text_upright_MAX
+};
+
+DEFINE_ENUM(text_upright_e, text_upright);
+
+
+}
 
 #endif //MAPNIK_SYMBOLIZER_ENUMERATIONS_HPP
