@@ -91,7 +91,7 @@ struct MAPNIK_DECL text_layout_properties
     justify_alignment_e jalign;
     vertical_alignment_e valign;
     double text_ratio;
-    double wrap_width;
+    symbolizer_base::value_type wrap_width;
     bool wrap_before;
     bool rotate_displacement;
 };

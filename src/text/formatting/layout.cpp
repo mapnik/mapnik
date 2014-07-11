@@ -95,7 +95,7 @@ void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attr
 
     // starting a new offset child with the new displacement value
     text_layout_ptr child_layout = std::make_shared<text_layout>(output.get_font_manager(), output.get_scale_factor(), new_properties);
-    child_layout->init_orientation(feature,vars);
+    child_layout->evaluate_properties(feature,vars);
 
     // process contained format tree into the child node
     if (child_) {

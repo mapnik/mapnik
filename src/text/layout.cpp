@@ -89,7 +89,7 @@ void text_layout::layout()
         std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
         text_line line(line_limits.first, line_limits.second);
         //Break line if neccessary
-        break_line(line, properties_.wrap_width * scale_factor_, properties_.text_ratio, properties_.wrap_before);
+        break_line(line, wrap_width_ * scale_factor_, properties_.text_ratio, properties_.wrap_before);
     }
     init_alignment();
 
@@ -150,8 +150,6 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
             current_line_length += width_itr->second;
         }
         if (current_line_length <= wrap_width) continue;
-        /***********************************************/
-
 
         int break_position = wrap_before ? breakitr->preceding(i) : breakitr->following(i);
         // following() returns a break position after the last word. So DONE should only be returned
@@ -235,8 +233,9 @@ void text_layout::shape_text(text_line & line)
     shaper_type::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
 }
 
-void text_layout::init_orientation(feature_impl const& feature, attributes const& attr)
+void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attr)
 {
+    wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.wrap_width);
     double angle = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.orientation);
     orientation_.init(angle * M_PI/ 180.0);
 }

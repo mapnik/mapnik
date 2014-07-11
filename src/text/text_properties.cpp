@@ -193,7 +193,7 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 }
 
 text_layout_properties::text_layout_properties()
-    : orientation(),
+    : orientation(0.0),
       displacement(0.0,0.0),
       halign(H_AUTO),
       jalign(J_AUTO),
@@ -217,13 +217,27 @@ void text_layout_properties::from_xml(xml_node const &sym)
     if (jalign_) jalign = *jalign_;
     optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
     if (text_ratio_) text_ratio = *text_ratio_;
-    optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
-    if (wrap_width_) wrap_width = *wrap_width_;
+
+    try
+    {
+        optional<double> val = sym.get_opt_attr<double>("wrap-width");
+        if (val) wrap_width = *val;
+    }
+    catch (config_error const& ex)
+    {
+        optional<expression_ptr> val = sym.get_opt_attr<expression_ptr>("wrap-width");
+        if (val) wrap_width = *val;
+        else
+        {
+            ex.append_context(std::string("text_layout_properties::from_xml 'wrap-width'"), sym);
+        }
+    }
+
     optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
     if (wrap_before_) wrap_before = *wrap_before_;
     optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
     if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
-    // TODO!!
+
     try
     {
         optional<value_double> val = sym.get_opt_attr<value_double>("orientation");
@@ -238,8 +252,6 @@ void text_layout_properties::from_xml(xml_node const &sym)
             ex.append_context(std::string("text_layout_properties::from_xml 'orientation'"), sym);
         }
     }
-    //optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
-    //if (orientation_) orientation = *orientation_;
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree &node,
@@ -270,10 +282,10 @@ void text_layout_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "text-ratio", text_ratio);
     }
-    if (wrap_width != dfl.wrap_width || explicit_defaults)
-    {
-        set_attr(node, "wrap-width", wrap_width);
-    }
+    //if (wrap_width != dfl.wrap_width || explicit_defaults)
+    //{
+    //    set_attr(node, "wrap-width", wrap_width);
+    //}
     if (wrap_before != dfl.wrap_before || explicit_defaults)
     {
         set_attr(node, "wrap-before", wrap_before);
