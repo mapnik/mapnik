@@ -466,18 +466,12 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
 }
 
 
-/*********************************************************************************************/
-
-
 glyph_positions::glyph_positions()
     : data_(),
       base_point_(),
       marker_(),
       marker_pos_(),
-      bbox_()
-{
-
-}
+      bbox_() {}
 
 glyph_positions::const_iterator glyph_positions::begin() const
 {
@@ -526,7 +520,6 @@ pixel_position const& glyph_positions::marker_pos() const
 }
 
 
-/*************************************************************************************/
 using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
 using ClippedPathType = coord_transform<CoordTransform,clipped_geometry_type>;
 using PathType = coord_transform<CoordTransform,geometry_type>;

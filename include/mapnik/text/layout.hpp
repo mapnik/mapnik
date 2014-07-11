@@ -49,18 +49,19 @@ public:
     using const_iterator = line_vector::const_iterator;
     using child_iterator = text_layout_vector::const_iterator;
     using shaper_type = harfbuzz_shaper;
+
     text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties);
 
-    /** Adds a new text part. Call this function repeatedly to build the complete text. */
+    // Adds a new text part. Call this function repeatedly to build the complete text.
     void add_text(mapnik::value_unicode_string const& str, char_properties_ptr format);
 
-    /** Returns the complete text stored in this layout.*/
+    // Returns the complete text stored in this layout.
     mapnik::value_unicode_string const& text() const;
 
-    /** Processes the text into a list of glyphs, performing RTL/LTR handling, shaping and line breaking. */
+    // Processes the text into a list of glyphs, performing RTL/LTR handling, shaping and line breaking.
     void layout();
 
-    /** Clear all data stored in this object. The object's state is the same as directly after construction. */
+    // Clear all data stored in this object. The object's state is the same as directly after construction.
     void clear();
 
     // Height of all lines together (in pixels).
@@ -88,9 +89,8 @@ public:
 
     void add_child(text_layout_ptr child_layout);
 
-    inline const text_layout_vector &get_child_layouts() const { return child_layout_list_; }
-
-    inline face_manager<freetype_engine> &get_font_manager() const { return font_manager_; }
+    inline text_layout_vector const& get_child_layouts() const { return child_layout_list_; }
+    inline face_manager<freetype_engine> & get_font_manager() const { return font_manager_; }
     inline double get_scale_factor() const { return scale_factor_; }
     inline text_layout_properties const& get_layout_properties() const { return properties_; }
 
@@ -111,7 +111,7 @@ private:
     void init_alignment();
 
     //input
-    face_manager_freetype &font_manager_;
+    face_manager_freetype & font_manager_;
     double scale_factor_;
 
     //processing
@@ -147,7 +147,8 @@ private:
 class layout_container
 {
 public:
-    layout_container() : glyphs_count_(0), line_count_(0) {}
+    layout_container()
+        : glyphs_count_(0), line_count_(0) {}
 
     void add(text_layout_ptr layout);
     void clear();

@@ -31,52 +31,52 @@
 namespace mapnik
 {
 
-/** This class stores all glyphs of a line in left to right order.
- *
- * It can be used for rendering but no text processing (like line breaking)
- * should be done!
- */
+// This class stores all glyphs of a line in left to right order.
+// It can be used for rendering but no text processing (like line breaking)
+// should be done!
+
 class text_line
 {
 public:
-    text_line(unsigned first_char, unsigned last_char);
-
     using glyph_vector = std::vector<glyph_info>;
     using const_iterator = glyph_vector::const_iterator;
-    /** Get glyph vector. */
+
+    text_line(unsigned first_char, unsigned last_char);
+
+    // Get glyph vector.
     glyph_vector const& glyphs() const { return glyphs_; }
-    /** Append glyph. */
+    // Append glyph.
     void add_glyph(glyph_info && glyph, double scale_factor_);
 
-    /** Preallocate memory. */
+    // Preallocate memory.
     void reserve(glyph_vector::size_type length);
-    /** Iterator to first glyph. */
+    // Iterator to first glyph.
     const_iterator begin() const;
-    /** Iterator beyond last glyph. */
+    // Iterator beyond last glyph.
     const_iterator end() const;
 
-    /** Width of all glyphs including character spacing. */
+    // Width of all glyphs including character spacing.
     double width() const { return width_; }
-    /** Real line height. For first line: max_char_height(), for all others: line_height(). */
+    // Real line height. For first line: max_char_height(), for all others: line_height().
     double height() const;
 
-    /** Height of the tallest glyph in this line. */
+    // Height of the tallest glyph in this line.
     double max_char_height() const { return max_char_height_; }
-    /** Called for each font/style to update the maximum height of this line. */
+    // Called for each font/style to update the maximum height of this line.
     void update_max_char_height(double max_char_height);
-    /** Line height including line spacing. */
+    // Line height including line spacing.
     double line_height() const { return line_height_; }
 
-    /** Is this object is the first line of a multi-line text?
-      * Used to exclude linespacing from first line's height. */
+    // Is this object is the first line of a multi-line text?
+    // Used to exclude linespacing from first line's height.
     void set_first_line(bool first_line);
 
-    /** Index of first UTF-16 char. */
+    // Index of first UTF-16 char.
     unsigned first_char() const;
-    /** Index of last UTF-16 char. */
+    // Index of last UTF-16 char.
     unsigned last_char() const;
 
-    /** Number of glyphs. */
+    // Number of glyphs.
     unsigned size() const;
 private:
     glyph_vector glyphs_;
