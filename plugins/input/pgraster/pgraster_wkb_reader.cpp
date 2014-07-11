@@ -141,6 +141,7 @@ read_float32(const uint8_t** from, uint8_t littleEndian) {
     return ret.f;
 }
 
+
 typedef enum {
     PT_1BB=0,     /* 1-bit boolean            */
     PT_2BUI=1,    /* 2-bit unsigned integer   */
@@ -298,6 +299,9 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
   }
 
   switch (pixtype) {
+    case PT_1BB:
+    case PT_2BUI:
+    case PT_4BUI:
     case PT_8BUI:
     case PT_8BSI:
       read_grayscale_band(raster, width_, height_, hasnodata,

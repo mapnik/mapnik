@@ -6,8 +6,8 @@
   - Test Grayscale input [x]
 - Support for all band types:
   - PT_1BB    data[ ] rgb[ ] grayscale[ ]
-  - PT_2BUI   data[ ] rgb[ ] grayscale[ ]
-  - PT_4BUI   data[ ] rgb[ ] grayscale[ ]
+  - PT_2BUI   data[ ] rgb[ ] grayscale[x]
+  - PT_4BUI   data[ ] rgb[ ] grayscale[x]
   - PT_8BSI   data[ ] rgb[x] grayscale[x]
   - PT_8BUI   data[x] rgb[x] grayscale[x]
   - PT_16BSI  data[x] rgb[ ] grayscale[ ]

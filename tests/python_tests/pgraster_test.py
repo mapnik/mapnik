@@ -455,8 +455,18 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       lap = time.time() - t0
       print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
       im.save('/tmp/xfull.png') # for debugging
-      h = hex(value)[2:]
+      h = format(value, '02x')
       exphex = h+h+h+'ff'
+      #
+      #     1    8   15
+      #    +---+---+---+
+      #  1 | h | h | h |  * TODO: write different colors in 
+      #    +---+---+---+          different cells ?
+      #  8 | h | h | a*|          We'd need to ensure the value
+      #    +---+---+---+          can be divided by 3
+      # 15 | h | b*| h |
+      #    +---+---+---+
+      #
       eq_(hexlify(im.view(1,1,1,1).tostring()), exphex);
       eq_(hexlify(im.view(8,1,1,1).tostring()), exphex);
       eq_(hexlify(im.view(15,1,1,1).tostring()), exphex);
@@ -467,14 +477,20 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       eq_(hexlify(im.view(8,15,1,1).tostring()), exphex);
       eq_(hexlify(im.view(15,15,1,1).tostring()), exphex);
 
+    def test_grayscale_2bui_subquery():
+      _test_grayscale_subquery('grayscale_2bui_subquery', '2BUI', 3)
+
+    def test_grayscale_4bui_subquery():
+      _test_grayscale_subquery('grayscale_4bui_subquery', '4BUI', 15)
+
     def test_grayscale_8bui_subquery():
-      _test_grayscale_subquery('grayscale_8bui_subquery', '8BUI', 88)
+      _test_grayscale_subquery('grayscale_8bui_subquery', '8BUI', 63)
 
     def test_grayscale_16bui_subquery():
-      _test_grayscale_subquery('grayscale_16bui_subquery', '16BUI', 74)
+      _test_grayscale_subquery('grayscale_16bui_subquery', '16BUI', 126)
 
     def test_grayscale_32bui_subquery():
-      _test_grayscale_subquery('grayscale_16bui_subquery', '32BUI', 132)
+      _test_grayscale_subquery('grayscale_16bui_subquery', '32BUI', 255)
 
     atexit.register(postgis_takedown)
 
