@@ -16,6 +16,7 @@
   - PT_32BUI  data[ ] rgb[ ] grayscale[x]
   - PT_32BF   data[x] rgb[ ] grayscale[ ]
   - PT_64BF   data[ ] rgb[ ] grayscale[ ]
+- Have pgraster and postgis plugins share the same connection pool
 - Use faster ST_Rescale rather than ST_Resize
   Needs this fix: http://trac.osgeo.org/postgis/ticket/2800
 - Make overviews enabled by default if table is not a subquery ?
