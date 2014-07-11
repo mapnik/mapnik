@@ -254,15 +254,14 @@ void text_layout::init_orientation(feature_impl const& feature, attributes const
 
 void text_layout::init_alignment()
 {
-    text_layout_properties const& p = properties_; // FIXME
-    valign_ = p.valign;
+    valign_ = properties_.valign;
     if (valign_ == V_AUTO)
     {
-        if (p.displacement.y > 0.0)
+        if (properties_.displacement.y > 0.0)
         {
             valign_ = V_BOTTOM;
         }
-        else if (p.displacement.y < 0.0)
+        else if (properties_.displacement.y < 0.0)
         {
             valign_ = V_TOP;
         }
@@ -272,14 +271,14 @@ void text_layout::init_alignment()
         }
     }
 
-    halign_ = p.halign;
+    halign_ = properties_.halign;
     if (halign_ == H_AUTO)
     {
-        if (p.displacement.x > 0.0)
+        if (properties_.displacement.x > 0.0)
         {
             halign_ = H_RIGHT;
         }
-        else if (p.displacement.x < 0.0)
+        else if (properties_.displacement.x < 0.0)
         {
             halign_ = H_LEFT;
         }
@@ -289,14 +288,14 @@ void text_layout::init_alignment()
         }
     }
 
-    jalign_ = p.jalign;
+    jalign_ = properties_.jalign;
     if (jalign_ == J_AUTO)
     {
-        if (p.displacement.x > 0.0)
+        if (properties_.displacement.x > 0.0)
         {
             jalign_ = J_LEFT;
         }
-        else if (p.displacement.x < 0.0)
+        else if (properties_.displacement.x < 0.0)
         {
             jalign_ = J_RIGHT;
         }
