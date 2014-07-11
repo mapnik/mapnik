@@ -21,3 +21,5 @@
   Needs this fix: http://trac.osgeo.org/postgis/ticket/2800
 - Make overviews enabled by default if table is not a subquery ?
 - Make clipping enabled automatically when needed ?
+- Allow more flexible band layout specification, see
+  http://github.com/mapnik/mapnik/wiki/RFC:-Raster-color-interpretation
