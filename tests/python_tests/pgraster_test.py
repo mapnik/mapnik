@@ -416,8 +416,30 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
             _test_rgb_8bui('rgb_8bui', tilesize, constraint, overview)
 
     def _test_grayscale_subquery(lbl,pixtype,value):
-      sql = "(select 3 as i, ST_AsRaster(ST_MakeEnvelope(0,0,10,10), " \
-            "1.0, 1.0, '%s', %s) as r) as foo" % (pixtype,value)
+      #
+      #      3   8   13
+      #    +---+---+---+
+      #  3 | v | v | h |  NOTE: writes different color
+      #    +---+---+---+        in 13,8 and 8,13
+      #  8 | v | v | a |  
+      #    +---+---+---+  
+      # 13 | v | b | v |
+      #    +---+---+---+
+      #
+      val_a = value/3;
+      val_b = val_a*2;
+      sql = "(select 3 as i, " \
+            " ST_SetValues(" \
+            "  ST_SetValues(" \
+            "   ST_AsRaster(" \
+            "    ST_MakeEnvelope(0,0,14,14), " \
+            "    1.0, -1.0, '%s', %s" \
+            "   ), " \
+            "   11, 6, 5, 5, %s::float8" \
+            "  )," \
+            "  6, 11, 5, 5, %s::float8" \
+            " ) as r" \
+            ") as foo" % (pixtype,value, val_a, val_b)
       overview = ''
       rescale = 0
       clip = 0
@@ -433,13 +455,13 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       eq_(feature['i'],3)
       lyr = mapnik.Layer('grayscale_8bui_subquery')
       lyr.datasource = ds
-      expenv = mapnik.Box2d(0,0,10,10)
+      expenv = mapnik.Box2d(0,0,14,14)
       env = lyr.envelope()
       assert_almost_equal(env.minx, expenv.minx, places=0)
       assert_almost_equal(env.miny, expenv.miny, places=0)
       assert_almost_equal(env.maxx, expenv.maxx, places=0)
       assert_almost_equal(env.maxy, expenv.maxy, places=0)
-      mm = mapnik.Map(16, 16)
+      mm = mapnik.Map(15, 15)
       style = mapnik.Style()
       sym = mapnik.RasterSymbolizer()
       rule = mapnik.Rule()
@@ -456,26 +478,20 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
       im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
-      exphex = h+h+h+'ff'
-      #
-      #     1    8   15
-      #    +---+---+---+
-      #  1 | h | h | h |  * TODO: write different colors in 
-      #    +---+---+---+          different cells ?
-      #  8 | h | h | a*|          We'd need to ensure the value
-      #    +---+---+---+          can be divided by 3
-      # 15 | h | b*| h |
-      #    +---+---+---+
-      #
-      eq_(hexlify(im.view(1,1,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(8,1,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(15,1,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(1,8,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(8,8,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(15,8,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(1,15,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(8,15,1,1).tostring()), exphex);
-      eq_(hexlify(im.view(15,15,1,1).tostring()), exphex);
+      hex_v = h+h+h+'ff'
+      h = format(val_a, '02x')
+      hex_a = h+h+h+'ff'
+      h = format(val_b, '02x')
+      hex_b = h+h+h+'ff'
+      eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 3, 8,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8, 8,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view(13, 8,1,1).tostring()), hex_a);
+      eq_(hexlify(im.view( 3,13,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8,13,1,1).tostring()), hex_b);
+      eq_(hexlify(im.view(13,13,1,1).tostring()), hex_v);
 
     def test_grayscale_2bui_subquery():
       _test_grayscale_subquery('grayscale_2bui_subquery', '2BUI', 3)
