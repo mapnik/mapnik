@@ -61,7 +61,7 @@ public:
 
 };
 
-using text_placement_info_ptr = std::shared_ptr<text_placement_info>;
+using text_placement_info_ptr = std::unique_ptr<text_placement_info>;
 
 /** This object handles the management of all TextSymbolizer properties. It can
  * be used as a base class for own objects which implement new processing
@@ -84,8 +84,7 @@ public:
      *     return text_placement_info_ptr(new text_placement_info_XXX(this));
      * }
      */
-    virtual text_placement_info_ptr get_placement_info(
-        double scale_factor_) const =0;
+    virtual text_placement_info_ptr get_placement_info(double scale_factor_) const = 0;
     /** Get a list of all expressions used in any placement.
      * This function is used to collect attributes.
      */

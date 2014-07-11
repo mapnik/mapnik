@@ -23,7 +23,7 @@
 //mapnik
 #include <mapnik/text/placements/list.hpp>
 #include <mapnik/xml_node.hpp>
-
+#include <mapnik/make_unique.hpp>
 //boost
 #include <boost/property_tree/ptree.hpp>
 
@@ -58,17 +58,14 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
     return list_[i];
 }
 
-/***************************************************************************/
 
 text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor) const
 {
-    return std::make_shared<text_placement_info_list>(this, scale_factor);
+    return std::make_unique<text_placement_info_list>(this, scale_factor);
 }
 
-text_placements_list::text_placements_list() : text_placements(), list_(0)
-{
-
-}
+text_placements_list::text_placements_list()
+    : text_placements(), list_(0) {}
 
 void text_placements_list::add_expressions(expression_set &output)
 {
@@ -99,7 +96,7 @@ text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_
         if (itr->is_text() || !itr->is("Placement")) continue;
         text_symbolizer_properties &p = list->add();
         p.format = std::make_shared<char_properties>(*(p.format)); //Make a deep copy
-        p.layout_defaults = std::make_shared<text_layout_properties>(*(p.layout_defaults));
+        //p.layout_defaults = std::make_shared<text_layout_properties>(*(p.layout_defaults));
         //TODO: This needs a real copy constructor for text_symbolizer_properties
         p.from_xml(*itr, fontsets);
 //TODO:        if (strict_ &&

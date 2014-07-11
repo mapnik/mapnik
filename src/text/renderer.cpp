@@ -31,7 +31,8 @@
 namespace mapnik
 {
 
-text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op, composite_mode_e halo_comp_op, double scale_factor, stroker_ptr stroker)
+text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op,
+                              composite_mode_e halo_comp_op, double scale_factor, stroker_ptr stroker)
     : rasterizer_(rasterizer),
       comp_op_(comp_op),
       halo_comp_op_(halo_comp_op),
@@ -82,7 +83,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
         error = FT_Get_Glyph(face->glyph, &image);
         if (error) continue;
 
-        glyphs_.emplace_back(image, glyph.format);
+        glyphs_.emplace_back(image, glyph.format.get());
     }
 }
 
@@ -136,7 +137,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     start_halo.y += halo_transform_.ty * 64;
     //render halo
     double halo_radius = 0;
-    char_properties_ptr format;
+
 
     FT_Matrix halo_matrix;
     halo_matrix.xx = halo_transform_.sx  * 0x10000L;
@@ -150,6 +151,8 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     matrix.yy = transform_.sy  * 0x10000L;
     matrix.yx = transform_.shy * 0x10000L;
 
+    char_properties default_props;
+    char_properties const* format = &default_props;
     for (auto const& glyph : glyphs_)
     {
         if (glyph.properties)
@@ -202,6 +205,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     }
 
     // render actual text
+    format = &default_props;
     for (auto & glyph : glyphs_)
     {
         if (glyph.properties)
@@ -209,7 +213,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
             format = glyph.properties;
         }
         FT_Glyph_Transform(glyph.image, &matrix, &start);
-        error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL,0,1);
+        error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
         {
             FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(glyph.image);

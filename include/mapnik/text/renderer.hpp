@@ -45,16 +45,17 @@ namespace mapnik
 struct glyph_t
 {
     FT_Glyph image;
-    char_properties_ptr properties;
+    char_properties const* properties;
 
-    glyph_t(FT_Glyph image_, char_properties_ptr properties_)
+    glyph_t(FT_Glyph image_, char_properties const* properties_)
         : image(image_), properties(properties_) {}
 
     glyph_t( glyph_t && other) noexcept
     : image(other.image),
-        properties(std::move(other.properties))
+        properties(other.properties)
     {
         other.image = nullptr;
+        other.properties = nullptr;
     }
 
     glyph_t(glyph_t const& ) = delete;

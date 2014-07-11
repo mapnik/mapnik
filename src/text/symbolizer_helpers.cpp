@@ -182,7 +182,7 @@ text_symbolizer_helper::text_symbolizer_helper(
         CoordTransform const& t, FaceManagerT & font_manager,
         DetectorT &detector, const box2d<double> &query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, vars, detector, dims_, placement_, font_manager, scale_factor),
+      finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
       points_on_line_(false)
 {
     if (geometries_to_process_.size()) finder_.next_position();
@@ -279,7 +279,7 @@ text_symbolizer_helper::text_symbolizer_helper(
         CoordTransform const& t, FaceManagerT & font_manager,
         DetectorT &detector, const box2d<double> &query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, vars, detector, dims_, placement_, font_manager, scale_factor),
+      finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
       points_on_line_(true)
 {
     if (geometries_to_process_.size())
