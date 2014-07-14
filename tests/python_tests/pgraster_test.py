@@ -521,7 +521,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     def test_grayscale_32bsi_subquery():
       # NOTE: we're using a positive integer because Mapnik
       #       does not support negative data values anyway
-      _test_grayscale_subquery('grayscale_32bsi_subquery', '32BSI', 270)
+      _test_grayscale_subquery('grayscale_32bsi_subquery', '32BSI', 129)
 
     def _test_data_subquery(lbl, pixtype, value):
       #
@@ -742,4 +742,5 @@ def enabled(tname):
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_") and enabled(x))
+    fail = run_all(eval(x) for x in dir() if x.startswith("test_") and enabled(x))
+    exit(fail)
