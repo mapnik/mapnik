@@ -33,7 +33,6 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/pixel_position.hpp>
-//#include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer.hpp>
 // stl
 #include <map>
