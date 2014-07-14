@@ -192,6 +192,28 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
     tree_ = std::make_shared<formatting::text_node>(expr);
 }
 
+// text_layout_properties
+
+template <typename T>
+void set_property_from_xml(symbolizer_base::value_type & val, char const* name, xml_node  const& node)
+{
+    using target_type = T;
+    try
+    {
+        optional<target_type> val_ = node.get_opt_attr<target_type>(name);
+        if (val_) val = *val_;
+    }
+    catch (config_error const& ex)
+    {
+        optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
+        if (val_) val = *val_;
+        else
+        {
+            ex.append_context(std::string("text_layout_properties::from_xml'"+ std::string(name) + "'"), node);
+        }
+    }
+}
+
 text_layout_properties::text_layout_properties()
     : orientation(0.0),
       displacement(0.0,0.0),
@@ -218,43 +240,17 @@ void text_layout_properties::from_xml(xml_node const &sym)
     optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
     if (text_ratio_) text_ratio = *text_ratio_;
 
-    try
-    {
-        optional<double> val = sym.get_opt_attr<double>("wrap-width");
-        if (val) wrap_width = *val;
-    }
-    catch (config_error const& ex)
-    {
-        optional<expression_ptr> val = sym.get_opt_attr<expression_ptr>("wrap-width");
-        if (val) wrap_width = *val;
-        else
-        {
-            ex.append_context(std::string("text_layout_properties::from_xml 'wrap-width'"), sym);
-        }
-    }
+    set_property_from_xml<double>(wrap_width, "wrap-width", sym);
 
     optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
     if (wrap_before_) wrap_before = *wrap_before_;
     optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
     if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
 
-    try
-    {
-        optional<value_double> val = sym.get_opt_attr<value_double>("orientation");
-        if (val) orientation = *val;
-    }
-    catch (config_error const& ex)
-    {
-        optional<expression_ptr> val = sym.get_opt_attr<expression_ptr>("orientation");
-        if (val) orientation = *val;
-        else
-        {
-            ex.append_context(std::string("text_layout_properties::from_xml 'orientation'"), sym);
-        }
-    }
+    set_property_from_xml<double>(orientation, "orientation", sym);
 }
 
-void text_layout_properties::to_xml(boost::property_tree::ptree &node,
+void text_layout_properties::to_xml(boost::property_tree::ptree & node,
                                         bool explicit_defaults,
                                         text_layout_properties const& dfl) const
 {
