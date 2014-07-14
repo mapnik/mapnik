@@ -89,13 +89,13 @@ void text_layout::layout()
         std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
         text_line line(line_limits.first, line_limits.second);
         //Break line if neccessary
-        break_line(line, wrap_width_ * scale_factor_, properties_.text_ratio, properties_.wrap_before);
+        break_line(line, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
     }
     init_alignment();
 
     /* Find text origin. */
     displacement_ = scale_factor_ * properties_.displacement + alignment_offset();
-    if (properties_.rotate_displacement) displacement_ = displacement_.rotate(!orientation_);
+    if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
 
     /* Find layout bounds, expanded for rotation */
     rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
@@ -238,6 +238,8 @@ void text_layout::evaluate_properties(feature_impl const& feature, attributes co
     wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.wrap_width);
     double angle = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.orientation);
     orientation_.init(angle * M_PI/ 180.0);
+    wrap_before_ = boost::apply_visitor(extract_value<value_bool>(feature,attr), properties_.wrap_before);
+    rotate_displacement_ = boost::apply_visitor(extract_value<value_bool>(feature,attr), properties_.rotate_displacement);
 }
 
 void text_layout::init_alignment()

@@ -75,8 +75,8 @@ struct MAPNIK_DECL text_layout_properties
     // Load all values from XML ptree.
     void from_xml(xml_node const &sym);
     // Save all values to XML ptree (but does not create a new parent node!).
-    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults,
-                text_layout_properties const &dfl=text_layout_properties()) const;
+    void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
+                text_layout_properties const& dfl=text_layout_properties()) const;
 
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
@@ -89,10 +89,11 @@ struct MAPNIK_DECL text_layout_properties
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
     vertical_alignment_e valign;
-    double text_ratio;
+
+    symbolizer_base::value_type text_ratio;
     symbolizer_base::value_type wrap_width;
-    bool wrap_before;
-    bool rotate_displacement;
+    symbolizer_base::value_type wrap_before;
+    symbolizer_base::value_type rotate_displacement;
 };
 
 using text_layout_properties_ptr = std::shared_ptr<text_layout_properties>;

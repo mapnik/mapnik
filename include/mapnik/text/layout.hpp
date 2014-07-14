@@ -138,6 +138,9 @@ private:
     // Precalculated values for maximum performance
     rotation orientation_ = {0,1.0};
     double wrap_width_ = 0.0;
+    bool wrap_before_ = false;
+    bool rotate_displacement_ = false;
+    double text_ratio_ = 0.0;
     pixel_position displacement_;
     box2d<double> bounds_;
 

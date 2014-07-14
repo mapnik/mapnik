@@ -215,15 +215,10 @@ void set_property_from_xml(symbolizer_base::value_type & val, char const* name, 
 }
 
 text_layout_properties::text_layout_properties()
-    : orientation(0.0),
-      displacement(0.0,0.0),
+    : displacement(0.0,0.0),
       halign(H_AUTO),
       jalign(J_AUTO),
-      valign(V_AUTO),
-      text_ratio(0.0),
-      wrap_width(0.0),
-      wrap_before(false),
-      rotate_displacement(false) {}
+      valign(V_AUTO) {}
 
 void text_layout_properties::from_xml(xml_node const &sym)
 {
@@ -237,16 +232,11 @@ void text_layout_properties::from_xml(xml_node const &sym)
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
-    optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
-    if (text_ratio_) text_ratio = *text_ratio_;
 
+    set_property_from_xml<double>(text_ratio, "text-ratio", sym);
     set_property_from_xml<double>(wrap_width, "wrap-width", sym);
-
-    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
-    if (wrap_before_) wrap_before = *wrap_before_;
-    optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
-    if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
-
+    set_property_from_xml<boolean>(wrap_before, "wrap-before", sym);
+    set_property_from_xml<boolean>(rotate_displacement, "rotate-displacement", sym);
     set_property_from_xml<double>(orientation, "orientation", sym);
 }
 
@@ -274,22 +264,22 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
     {
         set_attr(node, "justify-alignment", jalign);
     }
-    if (text_ratio != dfl.text_ratio || explicit_defaults)
-    {
-        set_attr(node, "text-ratio", text_ratio);
-    }
+    //if (text_ratio != dfl.text_ratio || explicit_defaults)
+    //{
+    //    set_attr(node, "text-ratio", text_ratio);
+    //}
     //if (wrap_width != dfl.wrap_width || explicit_defaults)
     //{
     //    set_attr(node, "wrap-width", wrap_width);
     //}
-    if (wrap_before != dfl.wrap_before || explicit_defaults)
-    {
-        set_attr(node, "wrap-before", wrap_before);
-    }
-    if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
-    {
-        set_attr(node, "rotate-displacement", rotate_displacement);
-    }
+    //if (wrap_before != dfl.wrap_before || explicit_defaults)
+    //{
+    //    set_attr(node, "wrap-before", wrap_before);
+    //}
+    //if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
+    //{
+    //    set_attr(node, "rotate-displacement", rotate_displacement);
+    //}
     /// TODO
     //if (orientation)
     //{
@@ -304,21 +294,24 @@ void text_layout_properties::add_expressions(expression_set& output) const
 {
     if (is_expression(orientation)) output.insert(boost::get<expression_ptr>(orientation));
     if (is_expression(wrap_width)) output.insert(boost::get<expression_ptr>(wrap_width));
+    if (is_expression(wrap_before)) output.insert(boost::get<expression_ptr>(wrap_before));
+    if (is_expression(rotate_displacement)) output.insert(boost::get<expression_ptr>(rotate_displacement));
+    if (is_expression(text_ratio)) output.insert(boost::get<expression_ptr>(text_ratio));
 }
 
-char_properties::char_properties() :
-    face_name(),
-    fontset(),
-    text_size(10.0),
-    character_spacing(0),
-    line_spacing(0),
-    text_opacity(1.0),
-    halo_opacity(1.0),
-    wrap_char(' '),
-    text_transform(NONE),
-    fill(color(0,0,0)),
-    halo_fill(color(255,255,255)),
-    halo_radius(0) {}
+char_properties::char_properties()
+    : face_name(),
+      fontset(),
+      text_size(10.0),
+      character_spacing(0),
+      line_spacing(0),
+      text_opacity(1.0),
+      halo_opacity(1.0),
+      wrap_char(' '),
+      text_transform(NONE),
+      fill(color(0,0,0)),
+      halo_fill(color(255,255,255)),
+      halo_radius(0) {}
 
 void char_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
