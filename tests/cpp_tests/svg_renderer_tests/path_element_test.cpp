@@ -12,6 +12,7 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
