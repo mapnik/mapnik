@@ -220,24 +220,24 @@ text_layout_properties::text_layout_properties()
       jalign(J_AUTO),
       valign(V_AUTO) {}
 
-void text_layout_properties::from_xml(xml_node const &sym)
+void text_layout_properties::from_xml(xml_node const &node)
 {
-    optional<double> dx = sym.get_opt_attr<double>("dx");
+    optional<double> dx = node.get_opt_attr<double>("dx");
     if (dx) displacement.x = *dx;
-    optional<double> dy = sym.get_opt_attr<double>("dy");
+    optional<double> dy = node.get_opt_attr<double>("dy");
     if (dy) displacement.y = *dy;
-    optional<vertical_alignment_e> valign_ = sym.get_opt_attr<vertical_alignment_e>("vertical-alignment");
+    optional<vertical_alignment_e> valign_ = node.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
-    optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
+    optional<horizontal_alignment_e> halign_ = node.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
-    optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
+    optional<justify_alignment_e> jalign_ = node.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
 
-    set_property_from_xml<double>(text_ratio, "text-ratio", sym);
-    set_property_from_xml<double>(wrap_width, "wrap-width", sym);
-    set_property_from_xml<boolean>(wrap_before, "wrap-before", sym);
-    set_property_from_xml<boolean>(rotate_displacement, "rotate-displacement", sym);
-    set_property_from_xml<double>(orientation, "orientation", sym);
+    set_property_from_xml<double>(text_ratio, "text-ratio", node);
+    set_property_from_xml<double>(wrap_width, "wrap-width", node);
+    set_property_from_xml<boolean>(wrap_before, "wrap-before", node);
+    set_property_from_xml<boolean>(rotate_displacement, "rotate-displacement", node);
+    set_property_from_xml<double>(orientation, "orientation", node);
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree & node,
