@@ -163,6 +163,12 @@ operator << ( std::basic_ostream<charT, traits> & s, mapnik::color const& c )
     return s;
 }
 
+// hash
+inline std::size_t hash_value(color const& c)
+{
+    return c.rgba();
+}
+
 }
 
 #endif // MAPNIK_COLOR_HPP
