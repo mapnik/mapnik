@@ -109,6 +109,11 @@ struct  MAPNIK_DECL symbolizer_base
     cont_type properties;
 };
 
+inline bool is_expression(symbolizer_base::value_type const& val)
+{
+    return (val.which() == 6);
+}
+
 // symbolizer properties target types
 enum class property_types : std::uint8_t
 {
