@@ -304,9 +304,10 @@ void text_layout_properties::to_xml(boost::property_tree::ptree &node,
     //}
 }
 
-void text_layout_properties::add_expressions(expression_set &output) const
+void text_layout_properties::add_expressions(expression_set& output) const
 {
-    //output.insert(orientation);
+    if (is_expression(orientation)) output.insert(boost::get<expression_ptr>(orientation));
+    if (is_expression(wrap_width)) output.insert(boost::get<expression_ptr>(wrap_width));
 }
 
 char_properties::char_properties() :
@@ -321,10 +322,7 @@ char_properties::char_properties() :
     text_transform(NONE),
     fill(color(0,0,0)),
     halo_fill(color(255,255,255)),
-    halo_radius(0)
-{
-
-}
+    halo_radius(0) {}
 
 void char_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
