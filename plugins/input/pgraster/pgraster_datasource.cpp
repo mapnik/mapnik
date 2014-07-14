@@ -901,14 +901,10 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         if (prescale_rasters_) {
           const double scale = std::min(px_gw, px_gh);
-          s << ", CASE WHEN abs(ST_ScaleX(\"" << col
-            << "\"))::float8 < " << scale << " THEN abs(ST_ScaleX(\""
-            << col << "\"))::float8/"
-            << scale  << " ELSE 1.0 END"
-            << ", CASE WHEN abs(ST_ScaleY(\"" << col
-            << "\"))::float8 < " << scale << " THEN abs(ST_ScaleY(\""
-            << col << "\"))::float8/"
-            << scale << " ELSE 1.0 END)";
+          s << ", least(abs(ST_ScaleX(\"" << col
+            << "\"))::float8/" << scale
+            << ", 1.0), least(abs(ST_ScaleY(\"" << col
+            << "\"))::float8/" << scale << ", 1.0))";
           // TODO: if band_ is given, we'll interpret as indexed so
           //       the rescaling must NOT ruin it (use algorithm mode!)
         }
