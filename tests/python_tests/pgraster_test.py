@@ -419,7 +419,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       #
       #      3   8   13
       #    +---+---+---+
-      #  3 | v | v | h |  NOTE: writes different color
+      #  3 | v | v | v |  NOTE: writes different color
       #    +---+---+---+        in 13,8 and 8,13
       #  8 | v | v | a |  
       #    +---+---+---+  
@@ -453,7 +453,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       fs = ds.featureset()
       feature = fs.next()
       eq_(feature['i'],3)
-      lyr = mapnik.Layer('grayscale_8bui_subquery')
+      lyr = mapnik.Layer('grayscale_subquery')
       lyr.datasource = ds
       expenv = mapnik.Box2d(0,0,14,14)
       env = lyr.envelope()
@@ -476,7 +476,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
-      im.save('/tmp/xfull.png') # for debugging
+      #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
       hex_v = h+h+h+'ff'
       h = format(val_a, '02x')
@@ -527,7 +527,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       #
       #      3   8   13
       #    +---+---+---+
-      #  3 | v | v | h |  NOTE: writes different values
+      #  3 | v | v | v |  NOTE: writes different values
       #    +---+---+---+        in 13,8 and 8,13
       #  8 | v | v | a |  
       #    +---+---+---+  
@@ -561,7 +561,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       fs = ds.featureset()
       feature = fs.next()
       eq_(feature['i'],3)
-      lyr = mapnik.Layer('grayscale_8bui_subquery')
+      lyr = mapnik.Layer('data_subquery')
       lyr.datasource = ds
       expenv = mapnik.Box2d(0,0,14,14)
       env = lyr.envelope()
@@ -590,7 +590,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
-      im.save('/tmp/xfull.png') # for debugging
+      #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
       hex_v = '0000ffff'
       hex_a = 'ff0000ff'
@@ -640,6 +640,97 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
 
     def test_data_64bf_subquery():
       _test_data_subquery('data_64bf_subquery', '64BF', 3072)
+
+    def _test_rgba_subquery(lbl, pixtype, r, g, b, a, g1, b1):
+      #
+      #      3   8   13
+      #    +---+---+---+
+      #  3 | v | v | h |  NOTE: writes different alpha
+      #    +---+---+---+        in 13,8 and 8,13
+      #  8 | v | v | a |  
+      #    +---+---+---+  
+      # 13 | v | b | v |
+      #    +---+---+---+
+      #
+      sql = "(select 3 as i, " \
+            " ST_SetValues(" \
+            "  ST_SetValues(" \
+            "   ST_AddBand(" \
+            "    ST_AddBand(" \
+            "     ST_AddBand(" \
+            "      ST_AsRaster(" \
+            "       ST_MakeEnvelope(0,0,14,14), " \
+            "       1.0, -1.0, '%s', %s" \
+            "      )," \
+            "      '%s', %d::float" \
+            "     ), " \
+            "     '%s', %d::float" \
+            "    ), " \
+            "    '%s', %d::float" \
+            "   ), " \
+            "   2, 11, 6, 5, 5, %s::float8" \
+            "  )," \
+            "  3, 6, 11, 5, 5, %s::float8" \
+            " ) as r" \
+            ") as foo" % (pixtype, r, pixtype, g, pixtype, b, pixtype, a, g1, b1)
+      overview = ''
+      rescale = 0
+      clip = 0
+      if rescale:
+        lbl += ' Sc'
+      if clip:
+        lbl += ' Cl'
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME, table=sql,
+        raster_field='r', use_overviews=0 if overview else 0,
+        prescale_rasters=rescale, clip_rasters=clip)
+      fs = ds.featureset()
+      feature = fs.next()
+      eq_(feature['i'],3)
+      lyr = mapnik.Layer('rgba_subquery')
+      lyr.datasource = ds
+      expenv = mapnik.Box2d(0,0,14,14)
+      env = lyr.envelope()
+      assert_almost_equal(env.minx, expenv.minx, places=0)
+      assert_almost_equal(env.miny, expenv.miny, places=0)
+      assert_almost_equal(env.maxx, expenv.maxx, places=0)
+      assert_almost_equal(env.maxy, expenv.maxy, places=0)
+      mm = mapnik.Map(15, 15)
+      style = mapnik.Style()
+      sym = mapnik.RasterSymbolizer()
+      rule = mapnik.Rule()
+      rule.symbols.append(sym)
+      style.rules.append(rule)
+      mm.append_style('foo', style)
+      lyr.styles.append('foo')
+      mm.layers.append(lyr)
+      mm.zoom_to_box(expenv)
+      im = mapnik.Image(mm.width, mm.height)
+      t0 = time.time() # we want wall time to include IO waits
+      mapnik.render(mm, im)
+      lap = time.time() - t0
+      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      im.save('/tmp/xfull.png') # for debugging
+      hex_v = format(r << 24 | g  << 16 | b  << 8 | a, '08x')
+      hex_a = format(r << 24 | g1 << 16 | b  << 8 | a, '08x')
+      hex_b = format(r << 24 | g  << 16 | b1 << 8 | a, '08x')
+      eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 3, 8,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8, 8,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view(13, 8,1,1).tostring()), hex_a);
+      eq_(hexlify(im.view( 3,13,1,1).tostring()), hex_v);
+      eq_(hexlify(im.view( 8,13,1,1).tostring()), hex_b);
+      eq_(hexlify(im.view(13,13,1,1).tostring()), hex_v);
+
+    def test_rgba_8bui_subquery():
+      _test_rgba_subquery('rgba_8bui_subquery', '8BUI', 255, 0, 0, 255, 255, 255)
+
+    #def test_rgba_16bui_subquery():
+    #  _test_rgba_subquery('rgba_16bui_subquery', '16BUI', 65535, 0, 0, 65535, 65535, 65535)
+
+    #def test_rgba_32bui_subquery():
+    #  _test_rgba_subquery('rgba_32bui_subquery', '32BUI')
 
     atexit.register(postgis_takedown)
 
