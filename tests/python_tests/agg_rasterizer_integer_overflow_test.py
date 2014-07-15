@@ -37,4 +37,4 @@ def test_that_coordinates_do_not_overflow_and_polygon_is_rendered():
   eq_(im.get_pixel(128,128),expected_color.packed())
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))
