@@ -67,7 +67,7 @@ text_placement_info_ptr text_placements_list::get_placement_info(double scale_fa
 text_placements_list::text_placements_list()
     : text_placements(), list_(0) {}
 
-void text_placements_list::add_expressions(expression_set &output)
+void text_placements_list::add_expressions(expression_set & output) const
 {
     defaults.add_expressions(output);
 
@@ -83,7 +83,7 @@ unsigned text_placements_list::size() const
     return list_.size();
 }
 
-text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_map const & fontsets)
+text_placements_ptr text_placements_list::from_xml(xml_node const& xml, fontset_map const & fontsets)
 {
     using boost::property_tree::ptree;
     text_placements_list *list = new text_placements_list;

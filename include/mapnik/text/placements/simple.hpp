@@ -48,9 +48,9 @@ class text_placements_simple: public text_placements
 {
 public:
     text_placements_simple();
-    text_placements_simple(std::string positions);
+    text_placements_simple(std::string const& positions);
     text_placement_info_ptr get_placement_info(double scale_factor) const;
-    void set_positions(std::string positions);
+    void set_positions(std::string const& positions);
     std::string get_positions();
     static text_placements_ptr from_xml(xml_node const &xml, fontset_map const & fontsets);
 private:
@@ -68,9 +68,7 @@ public:
     text_placement_info_simple(text_placements_simple const* parent,
                                double scale_factor)
         : text_placement_info(parent, scale_factor),
-          state(0), position_state(0), parent_(parent)
-    {
-    }
+          state(0), position_state(0), parent_(parent) {}
     bool next();
 protected:
     bool next_position_only();

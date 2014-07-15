@@ -44,18 +44,19 @@ using phoenix::ref;
 
 bool text_placement_info_simple::next()
 {
-    while (1) {
+    while (true)
+    {
         if (state > 0)
         {
             if (state > parent_->text_sizes_.size()) return false;
             properties.format->text_size = parent_->text_sizes_[state-1];
         }
-        if (!next_position_only()) {
-            state++;
+        if (!next_position_only())
+        {
+            ++state;
             position_state = 0;
-        } else {
-            break;
         }
+        else break;
     }
     return true;
 }
@@ -107,18 +108,18 @@ text_placement_info_ptr text_placements_simple::get_placement_info(
     return std::make_unique<text_placement_info_simple>(this, scale_factor);
 }
 
-/** Position string: [POS][SIZE]
- * [POS] is any combination of
- * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
- * [SIZE] is a list of font sizes, separated by commas. The first font size
- * is always the one given in the TextSymbolizer's parameters.
- * First all directions are tried, then font size is reduced
- * and all directions are tried again. The process ends when a placement is
- * found or the last fontsize is tried without success.
- * Example: N,S,15,10,8 (tries placement above, then below and if
- *    that fails it tries the additional font sizes 15, 10 and 8.
- */
-void text_placements_simple::set_positions(std::string positions)
+// Position string: [POS][SIZE]
+// [POS] is any combination of
+// N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
+// [SIZE] is a list of font sizes, separated by commas. The first font size
+// is always the one given in the TextSymbolizer's parameters.
+// First all directions are tried, then font size is reduced
+// and all directions are tried again. The process ends when a placement is
+// found or the last fontsize is tried without success.
+// Example: N,S,15,10,8 (tries placement above, then below and if
+//    that fails it tries the additional font sizes 15, 10 and 8.
+
+void text_placements_simple::set_positions(std::string const& positions)
 {
     positions_ = positions;
     struct direction_name_ : qi::symbols<char, directions_e>
@@ -143,7 +144,7 @@ void text_placements_simple::set_positions(std::string positions)
     qi::_1_type _1;
     qi::float_type float_;
 
-    std::string::iterator first = positions.begin(),  last = positions.end();
+    std::string::const_iterator first = positions.begin(),  last = positions.end();
     qi::phrase_parse(first, last,
                      (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> float_[push_back(phoenix::ref(text_sizes_), _1)]),
                      space
@@ -163,7 +164,7 @@ text_placements_simple::text_placements_simple()
     set_positions("X");
 }
 
-text_placements_simple::text_placements_simple(std::string positions)
+text_placements_simple::text_placements_simple(std::string const& positions)
 {
     set_positions(positions);
 }
@@ -173,7 +174,7 @@ std::string text_placements_simple::get_positions()
     return positions_; //TODO: Build string from data in direction_ and text_sizes_
 }
 
-text_placements_ptr text_placements_simple::from_xml(xml_node const &xml, fontset_map const & fontsets)
+text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
     text_placements_ptr ptr = std::make_shared<text_placements_simple>(
         xml.get_attr<std::string>("placements", "X"));

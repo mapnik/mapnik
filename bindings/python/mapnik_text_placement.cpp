@@ -118,12 +118,12 @@ void set_displacement(text_layout_properties &t, boost::python::tuple arg)
     //t.displacement.set(x, y); FIXME
 }
 
-struct NodeWrap: formatting::node, wrapper<formatting::node>
+/*
+struct NodeWrap
+    : formatting::node, wrapper<formatting::node>
 {
-    NodeWrap() : formatting::node(), wrapper<formatting::node>()
-    {
-
-    }
+    NodeWrap()
+        : formatting::node(), wrapper<formatting::node>() {}
 
     void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
@@ -149,19 +149,16 @@ struct NodeWrap: formatting::node, wrapper<formatting::node>
         formatting::node::add_expressions(output);
     }
 };
-
-
-struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
+*/
+/*
+struct TextNodeWrap
+    : formatting::text_node, wrapper<formatting::text_node>
 {
-    TextNodeWrap(expression_ptr expr) : formatting::text_node(expr), wrapper<formatting::text_node>()
-    {
+    TextNodeWrap(expression_ptr expr)
+        : formatting::text_node(expr), wrapper<formatting::text_node>() {}
 
-    }
-
-    TextNodeWrap(std::string expr_text) : formatting::text_node(expr_text), wrapper<formatting::text_node>()
-    {
-
-    }
+    TextNodeWrap(std::string expr_text)
+        : formatting::text_node(expr_text), wrapper<formatting::text_node>() {}
 
     virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
@@ -181,8 +178,10 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
         formatting::text_node::apply(p, feature, vars, output);
     }
 };
-
-struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
+*/
+/*
+struct FormatNodeWrap
+    : formatting::format_node, wrapper<formatting::format_node>
 {
     virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
@@ -263,8 +262,8 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
         }
     }
 
-    /* TODO: Add constructor taking variable number of arguments.
-       http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function */
+    // TODO: Add constructor taking variable number of arguments.
+       http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function
 
     virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
@@ -314,6 +313,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
         children_.push_back(ptr);
     }
 };
+*/
 
 struct TextPlacementsWrap: text_placements, wrapper<text_placements>
 {
@@ -495,40 +495,30 @@ void export_text_placement()
     register_ptr_to_python<std::shared_ptr<text_placement_info> >();
 
 
-    class_<expression_set,
-        std::shared_ptr<expression_set>,
-        boost::noncopyable>
-        ("ExpressionSet")
+    class_<expression_set,std::shared_ptr<expression_set>,
+           boost::noncopyable>("ExpressionSet")
         .def("insert", &insert_expression);
     ;
 
-
-    //TODO: Python namespace
-    class_<NodeWrap,
-        std::shared_ptr<NodeWrap>,
-        boost::noncopyable>
-        ("FormattingNode")
+/*
+    class_<formatting::node,std::shared_ptr<formatting::node>,
+           boost::noncopyable>("FormattingNode")
         .def("apply", pure_virtual(&formatting::node::apply))
-        .def("add_expressions",
-             &formatting::node::add_expressions,
-             &NodeWrap::default_add_expressions)
+        .def("add_expressions", pure_virtual(&formatting::node::add_expressions))
+        .def("to_xml", pure_virtual(&formatting::node::to_xml))
         ;
+
     register_ptr_to_python<std::shared_ptr<formatting::node> >();
 
-
-    class_<TextNodeWrap,
-        std::shared_ptr<TextNodeWrap>,
-        bases<formatting::node>,
-        boost::noncopyable>
-        ("FormattingText", init<expression_ptr>())
+    class_<formatting::text_node,
+           std::shared_ptr<formatting::text_node>,
+           bases<formatting::node>,boost::noncopyable>("FormattingText", init<expression_ptr>())
         .def(init<std::string>())
-        .def("apply", &formatting::text_node::apply, &TextNodeWrap::default_apply)
-        .add_property("text",
-                      &formatting::text_node::get_text,
-                      &formatting::text_node::set_text)
+        .def("apply", &formatting::text_node::apply)//, &TextNodeWrap::default_apply)
+        .add_property("text",&formatting::text_node::get_text, &formatting::text_node::set_text)
         ;
-    register_ptr_to_python<std::shared_ptr<formatting::text_node> >();
 
+    register_ptr_to_python<std::shared_ptr<formatting::text_node> >();
 
     class_with_converter<FormatNodeWrap,
         std::shared_ptr<FormatNodeWrap>,
@@ -590,6 +580,6 @@ void export_text_placement()
                       &formatting::expression_format::set_child)
         ;
     register_ptr_to_python<std::shared_ptr<formatting::expression_format> >();
-
+*/
     //TODO: registry
 }
