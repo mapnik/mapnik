@@ -63,6 +63,7 @@ bool text_placement_info_simple::next()
 
 bool text_placement_info_simple::next_position_only()
 {
+    //std::cerr << "next_position_only()" << std::endl;
     pixel_position const& pdisp = {0,0};// FIXME parent_->defaults.layout_defaults.displacement;
     pixel_position displacement = {0,0};// FIXME properties.layout_defaults.displacement;
     if (position_state >= parent_->direction_.size()) return false;
@@ -98,12 +99,11 @@ bool text_placement_info_simple::next_position_only()
     default:
         MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
     }
-    position_state++;
+    ++position_state;
     return true;
 }
 
-text_placement_info_ptr text_placements_simple::get_placement_info(
-    double scale_factor) const
+text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor) const
 {
     return std::make_unique<text_placement_info_simple>(this, scale_factor);
 }

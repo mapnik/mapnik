@@ -163,7 +163,7 @@ public:
 
     inline text_layout_vector::const_iterator begin() const { return layouts_.begin(); }
     inline text_layout_vector::const_iterator end() const { return layouts_.end(); }
-
+    inline text_layout_ptr const& back() const { return layouts_.back(); }
     inline mapnik::value_unicode_string const& text() const { return text_; }
 
     inline unsigned glyphs_count() const { return glyphs_count_; }

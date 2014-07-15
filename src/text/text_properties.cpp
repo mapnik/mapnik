@@ -102,18 +102,18 @@ void text_symbolizer_properties::placement_properties_from_xml(xml_node const &s
     if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
 }
 
-void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const & fontsets)
+void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
-    placement_properties_from_xml(sym);
+    placement_properties_from_xml(node);
 
-    optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
+    optional<double> max_char_angle_delta_ = node.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
-    optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");
+    optional<text_upright_e> upright_ = node.get_opt_attr<text_upright_e>("upright");
     if (upright_) upright = *upright_;
 
-    layout_defaults.from_xml(sym);
+    layout_defaults.from_xml(node);
 
-    optional<expression_ptr> name_ = sym.get_opt_attr<expression_ptr>("name");
+    optional<expression_ptr> name_ = node.get_opt_attr<expression_ptr>("name");
     if (name_)
     {
         MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
@@ -121,8 +121,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
         set_old_style_expression(*name_);
     }
 
-    format->from_xml(sym, fontsets);
-    formatting::node_ptr n(formatting::node::from_xml(sym));
+    format->from_xml(node, fontsets);
+    formatting::node_ptr n(formatting::node::from_xml(node));
     if (n) set_format_tree(n);
 }
 
@@ -193,7 +193,6 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 }
 
 // text_layout_properties
-
 template <typename T>
 void set_property_from_xml(symbolizer_base::value_type & val, char const* name, xml_node  const& node)
 {
@@ -201,6 +200,7 @@ void set_property_from_xml(symbolizer_base::value_type & val, char const* name, 
     try
     {
         optional<target_type> val_ = node.get_opt_attr<target_type>(name);
+        //if (val_) std::cerr << std::string(name) << " = " << *val_ << std::endl;
         if (val_) val = *val_;
     }
     catch (config_error const& ex)
@@ -223,7 +223,6 @@ void text_layout_properties::from_xml(xml_node const &node)
 {
     set_property_from_xml<double>(dx, "dx", node);
     set_property_from_xml<double>(dy, "dy", node);
-
     optional<vertical_alignment_e> valign_ = node.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
     optional<horizontal_alignment_e> halign_ = node.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");

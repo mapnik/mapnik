@@ -34,7 +34,6 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 
-
 //agg
 #include "agg_conv_clip_polyline.h"
 
@@ -60,7 +59,7 @@ base_symbolizer_helper::base_symbolizer_helper(
       placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
     initialize_geometries();
-    if (!geometries_to_process_.size()) return;
+    if (!geometries_to_process_.size()) return; // FIXME - bad practise
     initialize_points();
 }
 
@@ -180,7 +179,7 @@ text_symbolizer_helper::text_symbolizer_helper(
         proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
         CoordTransform const& t, FaceManagerT & font_manager,
-        DetectorT &detector, const box2d<double> &query_extent)
+        DetectorT &detector, box2d<double> const& query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
       points_on_line_(false)

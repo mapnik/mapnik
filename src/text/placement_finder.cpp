@@ -117,7 +117,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         text_layout const& layout = *layout_ptr;
         rotation const& orientation = layout.orientation();
 
-        /* Find text origin. */
+        // Find text origin.
         pixel_position layout_center = pos + layout.displacement();
 
         if (!base_point_set)
@@ -129,7 +129,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         box2d<double> bbox = layout.bounds();
         bbox.re_center(layout_center.x, layout_center.y);
 
-        /* For point placements it is faster to just check the bounding box. */
+        // For point placements it is faster to just check the bounding box.
         if (collision(bbox)) return false;
 
         if (layout.num_lines()) bboxes.push_back(std::move(bbox));
@@ -137,12 +137,12 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         pixel_position layout_offset = layout_center - glyphs->get_base_point();
         layout_offset.y = -layout_offset.y;
 
-        /* IMPORTANT NOTE:
-           x and y are relative to the center of the text
-           coordinate system:
-           x: grows from left to right
-           y: grows from bottom to top (opposite of normal computer graphics)
-        */
+        // IMPORTANT NOTE:
+        //   x and y are relative to the center of the text
+        //   coordinate system:
+        //   x: grows from left to right
+        //   y: grows from bottom to top (opposite of normal computer graphics)
+
         double x, y;
 
         // set for upper left corner of text envelope for the first line, top left of first character
@@ -166,7 +166,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         }
     }
 
-    /* add_marker first checks for collision and then updates the detector.*/
+    // add_marker first checks for collision and then updates the detector.
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
 
     for (box2d<double> const& bbox : bboxes)
@@ -199,7 +199,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         {
             if ((pp.length() < info_.properties.minimum_path_length * scale_factor_)
                 ||
-                (pp.length() <= 0.001) /* Clipping removed whole geometry */
+                (pp.length() <= 0.001) // Clipping removed whole geometry
                 ||
                 (pp.length() < layouts_.width()))
                 {
@@ -222,7 +222,8 @@ bool placement_finder::find_line_placements(T & path, bool points)
         {
             pp.forward(pp.length());
         }
-        path_move_dx(pp);
+        double dx = layouts_.back()->displacement().x;
+        if (dx != 0.0) path_move_dx(pp, dx);
         do
         {
             tolerance_iterator tolerance_offset(info_.properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
@@ -264,7 +265,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position align_offset = layout.alignment_offset();
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-        double offset = align_offset.y + layout_displacement.y * scale_factor_ + sign * layout.height()/2.;
+        //double offset = align_offset.y + layout_displacement.y * scale_factor_ + sign * layout.height()/2.0;
+        double offset = layout_displacement.y + 0.5 * sign * layout.height();
 
         for (auto const& line : layout)
         {
@@ -350,14 +352,14 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     return true;
 }
 
-void placement_finder::path_move_dx(vertex_cache & pp)
+void placement_finder::path_move_dx(vertex_cache & pp, double dx)
 {
-    double dx = 0.0;// FIXME info_.properties.layout_defaults.displacement.x * scale_factor_;
-    if (dx != 0.0)
-    {
+    //double dx = 0.0;// FIXME info_.properties.layout_defaults.displacement.x * scale_factor_;
+//    if (dx != 0.0)
+    //  {
         vertex_cache::state state = pp.save_state();
         if (!pp.move(dx)) pp.restore_state(state);
-    }
+        //}
 }
 
 double placement_finder::normalize_angle(double angle)

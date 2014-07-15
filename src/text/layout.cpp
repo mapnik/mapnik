@@ -94,7 +94,6 @@ void text_layout::layout()
     // Find text origin.
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
-
     // Find layout bounds, expanded for rotation
     rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
 }
