@@ -62,9 +62,7 @@ text_layout::text_layout(face_manager_freetype & font_manager, double scale_fact
       height_(0.0),
       glyphs_count_(0),
       lines_(),
-      properties_(properties)
-{
-}
+      properties_(properties) {}
 
 void text_layout::add_text(mapnik::value_unicode_string const& str, char_properties_ptr format)
 {
@@ -93,18 +91,18 @@ void text_layout::layout()
     }
     init_alignment();
 
-    /* Find text origin. */
-    displacement_ = scale_factor_ * properties_.displacement + alignment_offset();
+    // Find text origin.
+    displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
 
-    /* Find layout bounds, expanded for rotation */
+    // Find layout bounds, expanded for rotation
     rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
 }
 
-/* In the Unicode string characters are always stored in logical order.
- * This makes line breaking easy. One word is added to the current line at a time. Once the line is too long
- * we either go back one step or inset the line break at the current position (depending on "wrap_before" setting).
- * At the end everything that is left over is added as the final line. */
+// In the Unicode string characters are always stored in logical order.
+// This makes line breaking easy. One word is added to the current line at a time. Once the line is too long
+// we either go back one step or inset the line break at the current position (depending on "wrap_before" setting).
+// At the end everything that is left over is added as the final line.
 void text_layout::break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before)
 {
     shape_text(line);
@@ -235,8 +233,12 @@ void text_layout::shape_text(text_line & line)
 
 void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attr)
 {
+    double dx = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.dx);
+    double dy = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.dy);
+    displacement_ = {dx, dy};
     wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.wrap_width);
     double angle = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.orientation);
+
     orientation_.init(angle * M_PI/ 180.0);
     wrap_before_ = boost::apply_visitor(extract_value<value_bool>(feature,attr), properties_.wrap_before);
     rotate_displacement_ = boost::apply_visitor(extract_value<value_bool>(feature,attr), properties_.rotate_displacement);
@@ -247,11 +249,11 @@ void text_layout::init_alignment()
     valign_ = properties_.valign;
     if (valign_ == V_AUTO)
     {
-        if (properties_.displacement.y > 0.0)
+        if (displacement_.y > 0.0)
         {
             valign_ = V_BOTTOM;
         }
-        else if (properties_.displacement.y < 0.0)
+        else if (displacement_.y < 0.0)
         {
             valign_ = V_TOP;
         }
@@ -264,11 +266,11 @@ void text_layout::init_alignment()
     halign_ = properties_.halign;
     if (halign_ == H_AUTO)
     {
-        if (properties_.displacement.x > 0.0)
+        if (displacement_.x > 0.0)
         {
             halign_ = H_RIGHT;
         }
-        else if (properties_.displacement.x < 0.0)
+        else if (displacement_.x < 0.0)
         {
             halign_ = H_LEFT;
         }
@@ -281,11 +283,11 @@ void text_layout::init_alignment()
     jalign_ = properties_.jalign;
     if (jalign_ == J_AUTO)
     {
-        if (properties_.displacement.x > 0.0)
+        if (displacement_.x > 0.0)
         {
             jalign_ = J_LEFT;
         }
-        else if (properties_.displacement.x < 0.0)
+        else if (displacement_.x < 0.0)
         {
             jalign_ = J_RIGHT;
         }

@@ -55,7 +55,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       format(std::make_shared<char_properties>()),
       tree_() {}
 
-void text_symbolizer_properties::process(text_layout &output, feature_impl const& feature, attributes const& vars) const
+void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& vars) const
 {
     output.clear();
     if (tree_) {
@@ -215,17 +215,15 @@ void set_property_from_xml(symbolizer_base::value_type & val, char const* name, 
 }
 
 text_layout_properties::text_layout_properties()
-    : displacement(0.0,0.0),
-      halign(H_AUTO),
+    : halign(H_AUTO),
       jalign(J_AUTO),
       valign(V_AUTO) {}
 
 void text_layout_properties::from_xml(xml_node const &node)
 {
-    optional<double> dx = node.get_opt_attr<double>("dx");
-    if (dx) displacement.x = *dx;
-    optional<double> dy = node.get_opt_attr<double>("dy");
-    if (dy) displacement.y = *dy;
+    set_property_from_xml<double>(dx, "dx", node);
+    set_property_from_xml<double>(dy, "dy", node);
+
     optional<vertical_alignment_e> valign_ = node.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
     optional<horizontal_alignment_e> halign_ = node.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
@@ -241,17 +239,17 @@ void text_layout_properties::from_xml(xml_node const &node)
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree & node,
-                                        bool explicit_defaults,
-                                        text_layout_properties const& dfl) const
+                                    bool explicit_defaults,
+                                    text_layout_properties const& dfl) const
 {
-    if (displacement.x != dfl.displacement.x || explicit_defaults)
-    {
-        set_attr(node, "dx", displacement.x);
-    }
-    if (displacement.y != dfl.displacement.y || explicit_defaults)
-    {
-        set_attr(node, "dy", displacement.y);
-    }
+    //if (displacement.x != dfl.displacement.x || explicit_defaults)
+    //{
+    //   set_attr(node, "dx", displacement.x);
+    //}
+    //if (displacement.y != dfl.displacement.y || explicit_defaults)
+    //{
+    //    set_attr(node, "dy", displacement.y);
+    //}
     if (valign != dfl.valign || explicit_defaults)
     {
         set_attr(node, "vertical-alignment", valign);

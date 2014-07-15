@@ -262,7 +262,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     {
         text_layout const& layout = *layout_ptr;
         pixel_position align_offset = layout.alignment_offset();
-        pixel_position const& layout_displacement = layout.get_layout_properties().displacement;
+        pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
         double offset = align_offset.y + layout_displacement.y * scale_factor_ + sign * layout.height()/2.;
 
@@ -350,9 +350,9 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     return true;
 }
 
-void placement_finder::path_move_dx(vertex_cache &pp)
+void placement_finder::path_move_dx(vertex_cache & pp)
 {
-    double dx = info_.properties.layout_defaults.displacement.x * scale_factor_;
+    double dx = 0.0;// FIXME info_.properties.layout_defaults.displacement.x * scale_factor_;
     if (dx != 0.0)
     {
         vertex_cache::state state = pp.save_state();

@@ -141,7 +141,7 @@ private:
     bool wrap_before_ = false;
     bool rotate_displacement_ = false;
     double text_ratio_ = 0.0;
-    pixel_position displacement_;
+    pixel_position displacement_ = {0,0};
     box2d<double> bounds_;
 
     //children

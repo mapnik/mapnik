@@ -99,7 +99,7 @@ public:
 
 boost::python::tuple get_displacement(text_layout_properties const& t)
 {
-    return boost::python::make_tuple(t.displacement.x, t.displacement.y);
+    return boost::python::make_tuple(0.0,0.0);// FIXME t.displacement.x, t.displacement.y);
 }
 
 void set_displacement(text_layout_properties &t, boost::python::tuple arg)
@@ -115,7 +115,7 @@ void set_displacement(text_layout_properties &t, boost::python::tuple arg)
 
     double x = extract<double>(arg[0]);
     double y = extract<double>(arg[1]);
-    t.displacement.set(x, y);
+    //t.displacement.set(x, y); FIXME
 }
 
 struct NodeWrap: formatting::node, wrapper<formatting::node>

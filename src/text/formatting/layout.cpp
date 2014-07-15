@@ -82,8 +82,8 @@ node_ptr layout_node::from_xml(xml_node const& xml)
 void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout& output) const
 {
     text_layout_properties new_properties(output.get_layout_properties());
-    if (dx) new_properties.displacement.x = *dx;
-    if (dy) new_properties.displacement.y = *dy;
+    if (dx) new_properties.dx = *dx;
+    if (dy) new_properties.dy = *dy;
     if (halign) new_properties.halign = *halign;
     if (valign) new_properties.valign = *valign;
     if (jalign) new_properties.jalign = *jalign;

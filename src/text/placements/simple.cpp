@@ -62,8 +62,8 @@ bool text_placement_info_simple::next()
 
 bool text_placement_info_simple::next_position_only()
 {
-    pixel_position const& pdisp = parent_->defaults.layout_defaults.displacement;
-    pixel_position &displacement = properties.layout_defaults.displacement;
+    pixel_position const& pdisp = {0,0};// FIXME parent_->defaults.layout_defaults.displacement;
+    pixel_position displacement = {0,0};// FIXME properties.layout_defaults.displacement;
     if (position_state >= parent_->direction_.size()) return false;
     directions_e dir = parent_->direction_[position_state];
     switch (dir) {
