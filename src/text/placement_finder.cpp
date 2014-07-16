@@ -354,12 +354,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
 void placement_finder::path_move_dx(vertex_cache & pp, double dx)
 {
-    //double dx = 0.0;// FIXME info_.properties.layout_defaults.displacement.x * scale_factor_;
-//    if (dx != 0.0)
-    //  {
-        vertex_cache::state state = pp.save_state();
-        if (!pp.move(dx)) pp.restore_state(state);
-        //}
+    vertex_cache::state state = pp.save_state();
+    if (!pp.move(dx)) pp.restore_state(state);
 }
 
 double placement_finder::normalize_angle(double angle)

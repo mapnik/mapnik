@@ -32,11 +32,22 @@ namespace mapnik
 
 bool text_placement_info_list::next()
 {
-    if (state == 0) {
+    if (state == 0)
+    {
         properties = parent_->defaults;
-    } else {
-        if (state >= parent_->list_.size() + 1) return false;
+    }
+    else
+    {
+        if (state  >= parent_->list_.size() + 1) return false;
         properties = parent_->list_[state-1];
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs),
+                                                 parent_->list_[state-1].layout_defaults.dx);
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs),
+                                                 parent_->list_[state-1].layout_defaults.dy);
+                return pixel_position(dx,dy);
+            };
     }
     ++state;
     return true;
@@ -71,11 +82,9 @@ text_placements_list::text_placements_list()
 void text_placements_list::add_expressions(expression_set & output) const
 {
     defaults.add_expressions(output);
-
-    std::vector<text_symbolizer_properties>::const_iterator it;
-    for (it=list_.begin(); it != list_.end(); it++)
+    for (auto & prop : list_)
     {
-        it->add_expressions(output);
+        prop.add_expressions(output);
     }
 }
 
@@ -87,24 +96,24 @@ unsigned text_placements_list::size() const
 text_placements_ptr text_placements_list::from_xml(xml_node const& xml, fontset_map const & fontsets)
 {
     using boost::property_tree::ptree;
-    text_placements_list *list = new text_placements_list;
-    text_placements_ptr ptr = text_placements_ptr(list);
+    auto list = std::make_shared<text_placements_list>();
+
     list->defaults.from_xml(xml, fontsets);
-    xml_node::const_iterator itr = xml.begin();
-    xml_node::const_iterator end = xml.end();
-    for( ;itr != end; ++itr)
+    for (auto const& node : xml)
     {
-        if (itr->is_text() || !itr->is("Placement")) continue;
+        if (node.is_text() || !node.is("Placement")) continue;
         text_symbolizer_properties & p = list->add();
-        p.format = std::make_shared<char_properties>(*(p.format)); //Make a deep copy
+        p.format = std::make_shared<char_properties>(*(p.format)); //Make a deep copy <-- FIXME
+
         //p.layout_defaults = std::make_shared<text_layout_properties>(*(p.layout_defaults));
         //TODO: This needs a real copy constructor for text_symbolizer_properties
-        p.from_xml(*itr, fontsets);
-//TODO:        if (strict_ &&
+        p.from_xml(node, fontsets);
+
+//TODO: if (strict_ &&
 //                !p.format.fontset.size())
 //            ensure_font_face(p.format.face_name);
     }
-    return ptr;
+    return list;
 }
 
 } //ns mapnik

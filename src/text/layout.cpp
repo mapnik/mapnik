@@ -92,7 +92,6 @@ void text_layout::layout()
     init_alignment();
 
     // Find text origin.
-    std::cerr << displacement_.x << "," << displacement_.y << " " << this << std::endl;
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
     // Find layout bounds, expanded for rotation

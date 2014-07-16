@@ -200,7 +200,6 @@ void set_property_from_xml(symbolizer_base::value_type & val, char const* name, 
     try
     {
         optional<target_type> val_ = node.get_opt_attr<target_type>(name);
-        if (val_) std::cerr << std::string(name) << ":" << *val_ << std::endl;
         if (val_) val = *val_;
     }
     catch (config_error const& ex)
@@ -218,31 +217,24 @@ text_layout_properties::text_layout_properties()
     : halign(H_AUTO),
       jalign(J_AUTO),
       valign(V_AUTO)
-{
-    displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
-        { double dx_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->dx);
-          double dy_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->dy);
-          std::cerr << dx_ << "," << dy_ << std::endl;
-          return pixel_position(dx_,dy_);};
-
-}
+{}
 
 void text_layout_properties::from_xml(xml_node const &node)
 {
     set_property_from_xml<double>(dx, "dx", node);
     set_property_from_xml<double>(dy, "dy", node);
+    set_property_from_xml<double>(text_ratio, "text-ratio", node);
+    set_property_from_xml<double>(wrap_width, "wrap-width", node);
+    set_property_from_xml<boolean>(wrap_before, "wrap-before", node);
+    set_property_from_xml<boolean>(rotate_displacement, "rotate-displacement", node);
+    set_property_from_xml<double>(orientation, "orientation", node);
+    //
     optional<vertical_alignment_e> valign_ = node.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
     optional<horizontal_alignment_e> halign_ = node.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = node.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
-
-    set_property_from_xml<double>(text_ratio, "text-ratio", node);
-    set_property_from_xml<double>(wrap_width, "wrap-width", node);
-    set_property_from_xml<boolean>(wrap_before, "wrap-before", node);
-    set_property_from_xml<boolean>(rotate_displacement, "rotate-displacement", node);
-    set_property_from_xml<double>(orientation, "orientation", node);
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree & node,
