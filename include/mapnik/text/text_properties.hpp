@@ -101,8 +101,6 @@ struct MAPNIK_DECL text_layout_properties
 ;
 };
 
-using text_layout_properties_ptr = std::shared_ptr<text_layout_properties>;
-
 class text_layout;
 
 // Contains all text symbolizer properties which are not directly related to text formatting and layout.
