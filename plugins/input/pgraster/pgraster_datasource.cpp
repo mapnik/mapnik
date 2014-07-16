@@ -148,7 +148,22 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
             if (raster_table_.empty())
             {
-                raster_table_ = mapnik::sql_utils::table_from_sql(table_);
+              raster_table_ = mapnik::sql_utils::table_from_sql(table_);
+              // non-trivial subqueries (having no FROM) make it
+              // impossible to use overviews
+              // TODO: improve "table_from_sql" ?
+              if ( raster_table_[raster_table_.find_first_not_of(" \t\r\n")] == '(' )
+              {
+                raster_table_.clear();
+                if ( use_overviews_ )
+                {
+                  std::ostringstream err;
+                  err << "Pgraster Plugin: overviews cannot be used "
+                         "with non-trivial subqueries";
+                  MAPNIK_LOG_WARN(pgraster) << err.str();
+                  use_overviews_ = false;
+                }
+              }
             }
 
             std::string::size_type idx = raster_table_.find_last_of('.');
@@ -159,6 +174,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
             }
             else
             {
+                // TODO: isn't this useless ?
                 raster_table_ = raster_table_.substr(0);
             }
 
@@ -171,9 +187,13 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
             // from the simplistic table parsing in table_from_sql() or if
             // the table parameter references a table, view, or subselect not
             // registered in the geometry columns.
+            //
             geometryColumn_ = raster_field_;
-            if (geometryColumn_.empty() || srid_ == 0 ||
-                (schema_.empty() && use_overviews_) || ! extent_initialized_)
+            if (!raster_table_.empty() && (
+                  geometryColumn_.empty() || srid_ == 0 ||
+                  (schema_.empty() && use_overviews_) ||
+                  ! extent_initialized_
+               ))
             {
 #ifdef MAPNIK_STATS
                 mapnik::progress_timer __stats2__(std::clog, "pgraster_datasource::init(get_srid_and_geometry_column)");
@@ -300,15 +320,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                       << " overviews due to unknown column name";
                   throw mapnik::datasource_exception(err.str());
                 }
-                if ( table_[table_.find_first_not_of(" \t\r\n")] == '(' ) 
-                {
-                  err << "Pgraster Plugin: overviews cannot be used "
-                         "with subqueries ";
-                  throw mapnik::datasource_exception(err.str());
-                }
-
-                err << "Pgraster Plugin: Error: unimplemented overviews support";
-                //throw mapnik::datasource_exception(err.str());
 
                 std::ostringstream s;
                 s << "select "
@@ -874,7 +885,10 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
                 << " not good for min out scale " << scale;
             }
           }
-          table_with_bbox = "( SELECT * FROM " + sch + "." + tab + ") as zz";
+          table_with_bbox = table_; // "( SELECT * FROM " + sch + "." + tab + ") as zz";
+          boost::algorithm::replace_all(table_with_bbox, raster_table_, tab);
+          boost::algorithm::replace_all(table_with_bbox, schema_, sch);
+          boost::algorithm::replace_all(table_with_bbox, geometryColumn_, col);
           table_with_bbox = populate_tokens(table_with_bbox, scale_denom, box, px_gw, px_gh);
         } else {
           table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
@@ -1065,9 +1079,9 @@ box2d<double> pgraster_datasource::envelope() const
 
             std::string col = geometryColumn_;
             std::string sch = schema_;
-            std::string tab = raster_table_;
+            std::string tab = table_; //raster_table_;
 
-            if ( use_overviews_ && ! overviews_.empty() )
+            if ( ! overviews_.empty() )
             {
               // query from highest-factor overview instead
               const pgraster_overview& o = overviews_.back();

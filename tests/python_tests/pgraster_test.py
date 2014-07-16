@@ -435,12 +435,11 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
             "    ST_MakeEnvelope(0,0,14,14), " \
             "    1.0, -1.0, '%s', %s" \
             "   ), " \
-            "   11, 6, 5, 5, %s::float8" \
+            "   11, 6, 4, 5, %s::float8" \
             "  )," \
-            "  6, 11, 5, 5, %s::float8" \
+            "  6, 11, 5, 4, %s::float8" \
             " ) as r" \
             ") as foo" % (pixtype,value, val_a, val_b)
-      overview = ''
       rescale = 0
       clip = 0
       if rescale:
@@ -448,7 +447,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       if clip:
         lbl += ' Cl'
       ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME, table=sql,
-        raster_field='r', use_overviews=0 if overview else 0,
+        raster_field='r', use_overviews=1,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
       feature = fs.next()
@@ -668,9 +667,9 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
             "    ), " \
             "    '%s', %d::float" \
             "   ), " \
-            "   2, 11, 6, 5, 5, %s::float8" \
+            "   2, 11, 6, 4, 5, %s::float8" \
             "  )," \
-            "  3, 6, 11, 5, 5, %s::float8" \
+            "  3, 6, 11, 5, 4, %s::float8" \
             " ) as r" \
             ") as foo" % (pixtype, r, pixtype, g, pixtype, b, pixtype, a, g1, b1)
       overview = ''
