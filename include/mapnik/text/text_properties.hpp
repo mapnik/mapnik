@@ -36,7 +36,7 @@
 #include <mapnik/symbolizer.hpp>
 // stl
 #include <map>
-
+#include <functional>
 // boost
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -93,7 +93,7 @@ struct MAPNIK_DECL text_layout_properties
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
     vertical_alignment_e valign;
-
+    std::function<pixel_position(feature_impl const& feature, attributes const& attrs)> displacement_evaluator_;
 };
 
 using text_layout_properties_ptr = std::shared_ptr<text_layout_properties>;

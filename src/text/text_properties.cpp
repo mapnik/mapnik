@@ -200,7 +200,7 @@ void set_property_from_xml(symbolizer_base::value_type & val, char const* name, 
     try
     {
         optional<target_type> val_ = node.get_opt_attr<target_type>(name);
-        //if (val_) std::cerr << std::string(name) << " = " << *val_ << std::endl;
+        if (val_) std::cerr << std::string(name) << ":" << *val_ << std::endl;
         if (val_) val = *val_;
     }
     catch (config_error const& ex)
@@ -217,7 +217,15 @@ void set_property_from_xml(symbolizer_base::value_type & val, char const* name, 
 text_layout_properties::text_layout_properties()
     : halign(H_AUTO),
       jalign(J_AUTO),
-      valign(V_AUTO) {}
+      valign(V_AUTO)
+{
+    displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+        { double dx_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->dx);
+          double dy_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->dy);
+          std::cerr << dx_ << "," << dy_ << std::endl;
+          return pixel_position(dx_,dy_);};
+
+}
 
 void text_layout_properties::from_xml(xml_node const &node)
 {
@@ -289,6 +297,8 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
 
 void text_layout_properties::add_expressions(expression_set& output) const
 {
+    if (is_expression(dx)) output.insert(boost::get<expression_ptr>(dx));
+    if (is_expression(dy)) output.insert(boost::get<expression_ptr>(dy));
     if (is_expression(orientation)) output.insert(boost::get<expression_ptr>(orientation));
     if (is_expression(wrap_width)) output.insert(boost::get<expression_ptr>(wrap_width));
     if (is_expression(wrap_before)) output.insert(boost::get<expression_ptr>(wrap_before));

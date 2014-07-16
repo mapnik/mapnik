@@ -92,6 +92,7 @@ void text_layout::layout()
     init_alignment();
 
     // Find text origin.
+    std::cerr << displacement_.x << "," << displacement_.y << " " << this << std::endl;
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
     // Find layout bounds, expanded for rotation
@@ -230,17 +231,18 @@ void text_layout::shape_text(text_line & line)
     shaper_type::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
 }
 
-void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attr)
+void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attrs)
 {
-    double dx = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.dx);
-    double dy = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.dy);
-    displacement_ = {dx, dy};
-    wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.wrap_width);
-    double angle = boost::apply_visitor(extract_value<value_double>(feature,attr), properties_.orientation);
+    // dx,dy
+    displacement_ = properties_.displacement_evaluator_(feature, attrs);
 
+    wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);
+
+    double angle = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.orientation);
     orientation_.init(angle * M_PI/ 180.0);
-    wrap_before_ = boost::apply_visitor(extract_value<value_bool>(feature,attr), properties_.wrap_before);
-    rotate_displacement_ = boost::apply_visitor(extract_value<value_bool>(feature,attr), properties_.rotate_displacement);
+
+    wrap_before_ = boost::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.wrap_before);
+    rotate_displacement_ = boost::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.rotate_displacement);
 }
 
 void text_layout::init_alignment()

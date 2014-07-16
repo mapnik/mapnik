@@ -35,17 +35,17 @@ bool text_placement_info_list::next()
     if (state == 0) {
         properties = parent_->defaults;
     } else {
-        if (state-1 >= parent_->list_.size()) return false;
+        if (state >= parent_->list_.size() + 1) return false;
         properties = parent_->list_[state-1];
     }
-    state++;
+    ++state;
     return true;
 }
 
 text_symbolizer_properties & text_placements_list::add()
 {
     if (list_.size()) {
-        text_symbolizer_properties &last = list_.back();
+        text_symbolizer_properties & last = list_.back();
         list_.push_back(last); //Preinitialize with old values
     } else {
         list_.push_back(defaults);
@@ -65,7 +65,8 @@ text_placement_info_ptr text_placements_list::get_placement_info(double scale_fa
 }
 
 text_placements_list::text_placements_list()
-    : text_placements(), list_(0) {}
+    : text_placements(),
+      list_(0) {}
 
 void text_placements_list::add_expressions(expression_set & output) const
 {
@@ -94,7 +95,7 @@ text_placements_ptr text_placements_list::from_xml(xml_node const& xml, fontset_
     for( ;itr != end; ++itr)
     {
         if (itr->is_text() || !itr->is("Placement")) continue;
-        text_symbolizer_properties &p = list->add();
+        text_symbolizer_properties & p = list->add();
         p.format = std::make_shared<char_properties>(*(p.format)); //Make a deep copy
         //p.layout_defaults = std::make_shared<text_layout_properties>(*(p.layout_defaults));
         //TODO: This needs a real copy constructor for text_symbolizer_properties

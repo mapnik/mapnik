@@ -63,37 +63,77 @@ bool text_placement_info_simple::next()
 
 bool text_placement_info_simple::next_position_only()
 {
-    pixel_position const& pdisp = {0,0};// FIXME parent_->defaults.layout_defaults.displacement;
-    pixel_position displacement = {0,0};// FIXME properties.layout_defaults.displacement;
     if (position_state >= parent_->direction_.size()) return false;
     directions_e dir = parent_->direction_[position_state];
-    switch (dir) {
+    switch (dir)
+    {
     case EXACT_POSITION:
-        displacement = pdisp;
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(dx,dy);
+            };
         break;
     case NORTH:
-        displacement.set(0, -std::abs(pdisp.y));
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(0,-std::abs(dy));
+            };
         break;
     case EAST:
-        displacement.set(std::abs(pdisp.x), 0);
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                return pixel_position(std::abs(dx),0);
+            };
         break;
     case SOUTH:
-        displacement.set(0, std::abs(pdisp.y));
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(0,std::abs(dy));
+            };
         break;
     case WEST:
-        displacement.set(-std::abs(pdisp.x), 0);
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                return pixel_position(-std::abs(dx),0);
+            };
         break;
     case NORTHEAST:
-        displacement.set(std::abs(pdisp.x), -std::abs(pdisp.y));
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(std::abs(dx),-std::abs(dy));
+            };
         break;
     case SOUTHEAST:
-        displacement.set(std::abs(pdisp.x), std::abs(pdisp.y));
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(std::abs(dx),std::abs(dy));
+            };
         break;
     case NORTHWEST:
-        displacement.set(-std::abs(pdisp.x), -std::abs(pdisp.y));
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(-std::abs(dx),-std::abs(dy));
+            };
         break;
     case SOUTHWEST:
-        displacement.set(-std::abs(pdisp.x), std::abs(pdisp.y));
+        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+            {
+                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dx);
+                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), this->parent_->defaults.layout_defaults.dy);
+                return pixel_position(-std::abs(dx),std::abs(dy));
+            };
         break;
     default:
         MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
@@ -145,9 +185,9 @@ void text_placements_simple::set_positions(std::string const& positions)
 
     std::string::const_iterator first = positions.begin(),  last = positions.end();
     qi::phrase_parse(first, last,
-                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> float_[push_back(phoenix::ref(text_sizes_), _1)]),
-                     space
-        );
+                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',')
+                     >> *(',' >> float_[push_back(phoenix::ref(text_sizes_), _1)]),
+                     space);
     if (first != last)
     {
         MAPNIK_LOG_WARN(text_placements) << "Could not parse text_placement_simple placement string ('" << positions << "')";
