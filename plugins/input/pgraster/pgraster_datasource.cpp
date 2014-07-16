@@ -172,11 +172,6 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 schema_ = raster_table_.substr(0, idx);
                 raster_table_ = raster_table_.substr(idx + 1);
             }
-            else
-            {
-                // TODO: isn't this useless ?
-                raster_table_ = raster_table_.substr(0);
-            }
 
             // If we do not know either the geometry_field or the srid or we
             // want to use overviews but do not know about schema, or
