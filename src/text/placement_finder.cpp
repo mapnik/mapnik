@@ -67,6 +67,7 @@ bool placement_finder::next_position()
     {
         text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
         layout->evaluate_properties(feature_, attr_);
+        move_dx_ = layout->displacement().x;
         info_.properties.process(*layout, feature_, attr_);
         layouts_.clear(); // FIXME !!!!
         layouts_.add(layout);
@@ -213,8 +214,9 @@ bool placement_finder::find_line_placements(T & path, bool points)
         {
             pp.forward(pp.length());
         }
-        double dx = layouts_.back()->displacement().x;
-        if (dx != 0.0) path_move_dx(pp, dx);
+
+        if (move_dx_ != 0.0) path_move_dx(pp, move_dx_);
+
         do
         {
             tolerance_iterator tolerance_offset(info_.properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign

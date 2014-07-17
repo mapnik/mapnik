@@ -97,6 +97,7 @@ private:
     box2d<double> marker_box_;
     bool marker_unlocked_;
     pixel_position marker_displacement_;
+    double move_dx_ = 0.0;
 };
 
 }//ns mapnik
