@@ -58,11 +58,8 @@ text_symbolizer_properties::text_symbolizer_properties()
 void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& vars) const
 {
     output.clear();
-    if (tree_) {
-        tree_->apply(format, feature, vars, output);
-    } else {
-        MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
-    }
+    if (tree_) tree_->apply(format, feature, vars, output);
+    else MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
 }
 
 void text_symbolizer_properties::set_format_tree(formatting::node_ptr tree)

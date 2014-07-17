@@ -49,8 +49,13 @@ node_ptr node::from_xml(xml_node const& xml)
     }
     else
     {
-        return node_ptr();
+        return nullptr;
     }
+}
+
+void node::add_expressions(expression_set & /*output*/) const
+{
+    //Do nothing by default
 }
 
 } //ns formatting

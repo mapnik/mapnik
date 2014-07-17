@@ -64,26 +64,18 @@ placement_finder::placement_finder(feature_impl const& feature,
 
 bool placement_finder::next_position()
 {
-    if (!valid_)
+    if (info_.next())
     {
-        MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
-        return false;
+        text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
+        layout->evaluate_properties(feature_, attr_);
+        info_.properties.process(*layout, feature_, attr_);
+        layouts_.clear(); // FIXME !!!!
+        layouts_.add(layout);
+        layouts_.layout();
+        return true;
     }
-    if (!info_.next())
-    {
-        valid_ = false;
-        return false;
-    }
-
-    text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
-    info_.properties.process(*layout, feature_, attr_);
-    layout->evaluate_properties(feature_, attr_);
-
-    layouts_.clear();
-    layouts_.add(layout);
-    layouts_.layout();
-
-    return true;
+    MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
+    return false;
 }
 
 text_upright_e placement_finder::simplify_upright(text_upright_e upright, double angle) const

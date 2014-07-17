@@ -95,7 +95,6 @@ struct MAPNIK_DECL text_layout_properties
     vertical_alignment_e valign;
     std::function<pixel_position(double,double)> displacement_evaluator_ =
         [](double dx, double dy) { return pixel_position(dx,dy);};
-
 };
 
 class text_layout;

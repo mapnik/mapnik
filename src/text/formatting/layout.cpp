@@ -93,7 +93,7 @@ void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attr
     if (rotate_displacement) new_properties.rotate_displacement = *rotate_displacement;
     if (orientation) new_properties.orientation = *orientation;
 
-    // starting a new offset child with the new displacement value
+// starting a new offset child with the new displacement value
     text_layout_ptr child_layout = std::make_shared<text_layout>(output.get_font_manager(), output.get_scale_factor(), new_properties);
     child_layout->evaluate_properties(feature,vars);
 
