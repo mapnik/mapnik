@@ -76,8 +76,8 @@ bool placement_finder::next_position()
     }
 
     text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
-    layout->evaluate_properties(feature_, attr_);
     info_.properties.process(*layout, feature_, attr_);
+    layout->evaluate_properties(feature_, attr_);
 
     layouts_.clear();
     layouts_.add(layout);

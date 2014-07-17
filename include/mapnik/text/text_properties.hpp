@@ -80,7 +80,7 @@ struct MAPNIK_DECL text_layout_properties
 
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
-    void add_expressions(expression_set &output) const;
+    void add_expressions(expression_set & output) const;
 
     //Per layout options
     symbolizer_base::value_type dx;
@@ -93,12 +93,9 @@ struct MAPNIK_DECL text_layout_properties
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
     vertical_alignment_e valign;
-    std::function<pixel_position(feature_impl const& feature, attributes const& attrs)> displacement_evaluator_ =
-        [this](feature_impl const& feature, attributes const& attrs)
-        { double dx_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), dx);
-          double dy_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), dy);
-          return pixel_position(dx_,dy_);};
-;
+    std::function<pixel_position(double,double)> displacement_evaluator_ =
+        [](double dx, double dy) { return pixel_position(dx,dy);};
+
 };
 
 class text_layout;

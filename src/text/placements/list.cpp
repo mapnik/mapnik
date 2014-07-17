@@ -40,12 +40,8 @@ bool text_placement_info_list::next()
     {
         if (state  >= parent_->list_.size() + 1) return false;
         properties = parent_->list_[state-1];
-        properties.layout_defaults.displacement_evaluator_ = [this](feature_impl const& feature, attributes const& attrs)
+        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
             {
-                double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs),
-                                                 parent_->list_[state-1].layout_defaults.dx);
-                double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs),
-                                                 parent_->list_[state-1].layout_defaults.dy);
                 return pixel_position(dx,dy);
             };
     }

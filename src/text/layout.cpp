@@ -233,7 +233,9 @@ void text_layout::shape_text(text_line & line)
 void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attrs)
 {
     // dx,dy
-    displacement_ = properties_.displacement_evaluator_(feature, attrs);
+    double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dx);
+    double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dy);
+    displacement_ = properties_.displacement_evaluator_(dx,dy);
 
     wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);
 
