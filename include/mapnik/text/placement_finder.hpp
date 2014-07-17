@@ -85,7 +85,6 @@ private:
     box2d<double> const& extent_;
     text_placement_info & info_;
     layout_container layouts_;
-    bool valid_;
 
     double scale_factor_;
     face_manager_freetype &font_manager_;
