@@ -32,7 +32,6 @@
 #include <mapnik/text/properties_util.hpp>
 
 // boost
-
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
@@ -73,7 +72,7 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
     return tree_;
 }
 
-void text_symbolizer_properties::placement_properties_from_xml(xml_node const &sym)
+void text_symbolizer_properties::placement_properties_from_xml(xml_node const& sym)
 {
     optional<label_placement_e> placement_ = sym.get_opt_attr<label_placement_e>("placement");
     if (placement_) label_placement = *placement_;
@@ -179,7 +178,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 }
 
 
-void text_symbolizer_properties::add_expressions(expression_set &output) const
+void text_symbolizer_properties::add_expressions(expression_set & output) const
 {
     layout_defaults.add_expressions(output);
     if (tree_) tree_->add_expressions(output);

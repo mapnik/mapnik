@@ -31,7 +31,7 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/symbolizer.hpp>
-
+#include <mapnik/text/properties_util.hpp>
 // boost
 #include <boost/property_tree/ptree.hpp>
 
@@ -44,15 +44,15 @@ void layout_node::to_xml(ptree &xml) const
 {
     ptree &new_node = xml.push_back(ptree::value_type("Layout", ptree()))->second;
 
-    if (dx) set_attr(new_node, "dx", *dx);
-    if (dy) set_attr(new_node, "dy", *dy);
+    //if (dx) set_attr(new_node, "dx", *dx);
+    //if (dy) set_attr(new_node, "dy", *dy);
     if (halign) set_attr(new_node, "horizontal-alignment", *halign);
     if (valign) set_attr(new_node, "vertical-alignment", *valign);
     if (jalign) set_attr(new_node, "justify-alignment", *jalign);
-    if (text_ratio) set_attr(new_node, "text-ratio", *text_ratio);
-    if (wrap_width) set_attr(new_node, "wrap-width", *wrap_width);
-    if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before);
-    if (rotate_displacement) set_attr(new_node, "rotate-displacement", *rotate_displacement);
+    //if (text_ratio) set_attr(new_node, "text-ratio", *text_ratio);
+    //if (wrap_width) set_attr(new_node, "wrap-width", *wrap_width);
+    //if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before);
+    //if (rotate_displacement) set_attr(new_node, "rotate-displacement", *rotate_displacement);
     if (orientation) set_attr(new_node, "orientation", to_expression_string(**orientation));
 
     if (child_) child_->to_xml(new_node);
@@ -65,15 +65,23 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     node_ptr child = node::from_xml(xml);
     n->set_child(child);
 
-    n->dx = xml.get_opt_attr<double>("dx");
-    n->dy = xml.get_opt_attr<double>("dy");
+    if (xml.has_attribute("dx")) set_property_from_xml<double>(n->dx, "dx", xml);
+    if (xml.has_attribute("dy")) set_property_from_xml<double>(n->dy, "dy", xml);
+    if (xml.has_attribute("text-ratio")) set_property_from_xml<double>(n->text_ratio, "text-ratio", xml);
+    if (xml.has_attribute("wrap-width")) set_property_from_xml<double>(n->wrap_width, "wrap-width", xml);
+    if (xml.has_attribute("wrap-before")) set_property_from_xml<boolean>(n->wrap_before, "wrap-before", xml);
+    if (xml.has_attribute("rotate-displacement")) set_property_from_xml<boolean>(n->rotate_displacement, "rotate-displacement", xml);
+
+    //if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
+    //n->dx = xml.get_opt_attr<double>("dx");
+    //n->dy = xml.get_opt_attr<double>("dy");
     n->halign = xml.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     n->valign = xml.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     n->jalign = xml.get_opt_attr<justify_alignment_e>("justify-alignment");
-    n->text_ratio = xml.get_opt_attr<double>("text-ratio");
-    n->wrap_width = xml.get_opt_attr<double>("wrap-width");
-    n->wrap_before = xml.get_opt_attr<boolean>("wrap-before");
-    n->rotate_displacement = xml.get_opt_attr<boolean>("rotate-displacement");
+    //n->text_ratio = xml.get_opt_attr<double>("text-ratio");
+    //n->wrap_width = xml.get_opt_attr<double>("wrap-width");
+    //n->wrap_before = xml.get_opt_attr<boolean>("wrap-before");
+    //n->rotate_displacement = xml.get_opt_attr<boolean>("rotate-displacement");
     n->orientation = xml.get_opt_attr<expression_ptr>("orientation");
 
     return n;
@@ -93,14 +101,17 @@ void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attr
     if (rotate_displacement) new_properties.rotate_displacement = *rotate_displacement;
     if (orientation) new_properties.orientation = *orientation;
 
-// starting a new offset child with the new displacement value
+    // starting a new offset child with the new displacement value
     text_layout_ptr child_layout = std::make_shared<text_layout>(output.get_font_manager(), output.get_scale_factor(), new_properties);
     child_layout->evaluate_properties(feature,vars);
 
     // process contained format tree into the child node
-    if (child_) {
+    if (child_)
+    {
         child_->apply(p, feature, vars, *child_layout);
-    } else {
+    }
+    else
+    {
         MAPNIK_LOG_WARN(format) << "Useless layout node: Contains no text";
     }
     output.add_child(child_layout);
@@ -116,8 +127,16 @@ node_ptr layout_node::get_child() const
     return child_;
 }
 
-void layout_node::add_expressions(expression_set &output) const
+void layout_node::add_expressions(expression_set & output) const
 {
+    if (dx && is_expression(*dx)) output.insert(boost::get<expression_ptr>(*dx));
+    if (dy && is_expression(*dy)) output.insert(boost::get<expression_ptr>(*dy));
+    //if (orientation && is_expression(*orientation)) output.insert(boost::get<expression_ptr>(*orientation));
+    if (wrap_width && is_expression(*wrap_width)) output.insert(boost::get<expression_ptr>(*wrap_width));
+    if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
+    if (rotate_displacement && is_expression(*rotate_displacement)) output.insert(boost::get<expression_ptr>(*rotate_displacement));
+    if (text_ratio && is_expression(*text_ratio)) output.insert(boost::get<expression_ptr>(*text_ratio));
+    //
     if (child_) child_->add_expressions(output);
 }
 

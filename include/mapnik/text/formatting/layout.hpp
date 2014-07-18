@@ -28,9 +28,10 @@
 
 #include <boost/optional.hpp>
 
-namespace mapnik {
-namespace formatting {
-class MAPNIK_DECL layout_node: public node {
+namespace mapnik { namespace formatting {
+
+class MAPNIK_DECL layout_node: public node
+{
 public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);
@@ -38,16 +39,19 @@ public:
     virtual void add_expressions(expression_set &output) const;
     void set_child(node_ptr child);
     node_ptr get_child() const;
+    //
+    boost::optional<symbolizer_base::value_type> dx;
+    boost::optional<symbolizer_base::value_type> dy;
 
-    boost::optional<double> dx;
-    boost::optional<double> dy;
     boost::optional<horizontal_alignment_e> halign;
     boost::optional<vertical_alignment_e> valign;
     boost::optional<justify_alignment_e> jalign;
-    boost::optional<double> text_ratio;
-    boost::optional<double> wrap_width;
-    boost::optional<bool> wrap_before;
-    boost::optional<bool> rotate_displacement;
+
+    boost::optional<symbolizer_base::value_type> text_ratio;
+    boost::optional<symbolizer_base::value_type> wrap_width;
+    boost::optional<symbolizer_base::value_type> wrap_before;
+    boost::optional<symbolizer_base::value_type> rotate_displacement;
+
     boost::optional<expression_ptr> orientation;
 
 private:
