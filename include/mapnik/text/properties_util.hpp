@@ -33,22 +33,22 @@
 namespace mapnik {
 
 // text_layout_properties
-template <typename T>
-void set_property_from_xml(symbolizer_base::value_type & val, char const* name, xml_node  const& node)
+template <typename T0, typename T1>
+void set_property_from_xml(T1 & val, char const* name, xml_node  const& node)
 {
-    using target_type = T;
+    using target_type = T0;
     try
     {
-        optional<target_type> val_ = node.get_opt_attr<target_type>(name);
+        boost::optional<target_type> val_ = node.get_opt_attr<target_type>(name);
         if (val_) val = *val_;
     }
     catch (config_error const& ex)
     {
-        optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
+        boost::optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
         if (val_) val = *val_;
         else
         {
-            ex.append_context(std::string("text_layout_properties::from_xml'"+ std::string(name) + "'"), node);
+            ex.append_context(std::string("set_property_from_xml'"+ std::string(name) + "'"), node);
         }
     }
 }
