@@ -303,6 +303,11 @@ bool xml_node::has_child(std::string const& name) const
     return get_opt_child(name) != 0;
 }
 
+bool xml_node::has_attribute(std::string const& name) const
+{
+    return attributes_.count(name) == 1 ? true : false;
+}
+
 template <typename T>
 boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
 {

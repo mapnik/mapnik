@@ -110,6 +110,7 @@ public:
     xml_node const& get_child(std::string const& name) const;
     xml_node const* get_opt_child(std::string const& name) const;
     bool has_child(std::string const& name) const;
+    bool has_attribute(std::string const& name) const;
 
     template <typename T>
     boost::optional<T> get_opt_attr(std::string const& name) const;
@@ -121,15 +122,12 @@ public:
 
     std::string const& get_text() const;
 
-    xml_tree const& get_tree() const
-    {
-        return tree_;
-    }
+    inline xml_tree const& get_tree() const { return tree_; }
 
     template <typename T>
     T get_value() const;
 private:
-    xml_tree &tree_;
+    xml_tree & tree_;
     std::string name_;
     std::list<xml_node> children_;
     attribute_map attributes_;
