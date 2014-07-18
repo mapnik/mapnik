@@ -29,6 +29,7 @@
 #include <mapnik/text/formatting/text.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/text/properties_util.hpp>
 
 // boost
 
@@ -187,27 +188,6 @@ void text_symbolizer_properties::add_expressions(expression_set &output) const
 void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 {
     tree_ = std::make_shared<formatting::text_node>(expr);
-}
-
-// text_layout_properties
-template <typename T>
-void set_property_from_xml(symbolizer_base::value_type & val, char const* name, xml_node  const& node)
-{
-    using target_type = T;
-    try
-    {
-        optional<target_type> val_ = node.get_opt_attr<target_type>(name);
-        if (val_) val = *val_;
-    }
-    catch (config_error const& ex)
-    {
-        optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
-        if (val_) val = *val_;
-        else
-        {
-            ex.append_context(std::string("text_layout_properties::from_xml'"+ std::string(name) + "'"), node);
-        }
-    }
 }
 
 text_layout_properties::text_layout_properties()
