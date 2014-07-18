@@ -53,7 +53,7 @@ void layout_node::to_xml(ptree &xml) const
     //if (wrap_width) set_attr(new_node, "wrap-width", *wrap_width);
     //if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before);
     //if (rotate_displacement) set_attr(new_node, "rotate-displacement", *rotate_displacement);
-    if (orientation) set_attr(new_node, "orientation", to_expression_string(**orientation));
+    //if (orientation) set_attr(new_node, "orientation", to_expression_string(**orientation));
 
     if (child_) child_->to_xml(new_node);
 }
@@ -71,8 +71,8 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     if (xml.has_attribute("wrap-width")) set_property_from_xml<double>(n->wrap_width, "wrap-width", xml);
     if (xml.has_attribute("wrap-before")) set_property_from_xml<boolean>(n->wrap_before, "wrap-before", xml);
     if (xml.has_attribute("rotate-displacement")) set_property_from_xml<boolean>(n->rotate_displacement, "rotate-displacement", xml);
+    if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
 
-    //if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
     //n->dx = xml.get_opt_attr<double>("dx");
     //n->dy = xml.get_opt_attr<double>("dy");
     n->halign = xml.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
@@ -82,7 +82,7 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     //n->wrap_width = xml.get_opt_attr<double>("wrap-width");
     //n->wrap_before = xml.get_opt_attr<boolean>("wrap-before");
     //n->rotate_displacement = xml.get_opt_attr<boolean>("rotate-displacement");
-    n->orientation = xml.get_opt_attr<expression_ptr>("orientation");
+    //n->orientation = xml.get_opt_attr<expression_ptr>("orientation");
 
     return n;
 }
@@ -131,12 +131,12 @@ void layout_node::add_expressions(expression_set & output) const
 {
     if (dx && is_expression(*dx)) output.insert(boost::get<expression_ptr>(*dx));
     if (dy && is_expression(*dy)) output.insert(boost::get<expression_ptr>(*dy));
-    //if (orientation && is_expression(*orientation)) output.insert(boost::get<expression_ptr>(*orientation));
+    if (orientation && is_expression(*orientation)) output.insert(boost::get<expression_ptr>(*orientation));
     if (wrap_width && is_expression(*wrap_width)) output.insert(boost::get<expression_ptr>(*wrap_width));
     if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
     if (rotate_displacement && is_expression(*rotate_displacement)) output.insert(boost::get<expression_ptr>(*rotate_displacement));
     if (text_ratio && is_expression(*text_ratio)) output.insert(boost::get<expression_ptr>(*text_ratio));
-    //
+
     if (child_) child_->add_expressions(output);
 }
 
