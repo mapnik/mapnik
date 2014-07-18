@@ -379,11 +379,8 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
     std::for_each( begin, end , boost::apply_visitor( serializer ));
 }
 
-void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool explicit_defaults )
+void serialize_style( ptree & map_node, std::string const& name, feature_type_style const& style, bool explicit_defaults )
 {
-    feature_type_style const& style = style_it->second;
-    std::string const& name = style_it->first;
-
     ptree & style_node = map_node.push_back(
         ptree::value_type("Style", ptree()))->second;
 
@@ -668,17 +665,14 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
 
     serialize_parameters( map_node, map.get_extra_parameters());
 
-    Map::const_style_iterator it = map.styles().begin();
-    Map::const_style_iterator end = map.styles().end();
-    for (; it != end; ++it)
+    for ( auto const& kv : map.styles())
     {
-        serialize_style( map_node, it, explicit_defaults);
+        serialize_style( map_node, kv.first, kv.second, explicit_defaults);
     }
 
-    std::vector<layer> const & layers = map.layers();
-    for (unsigned i = 0; i < layers.size(); ++i )
+    for (auto const& layer : map.layers())
     {
-        serialize_layer( map_node, layers[i], explicit_defaults );
+        serialize_layer( map_node, layer, explicit_defaults );
     }
 }
 
@@ -686,7 +680,7 @@ void save_map(Map const & map, std::string const& filename, bool explicit_defaul
 {
     ptree pt;
     serialize_map(pt,map,explicit_defaults);
-    write_xml(filename,pt,std::locale(),boost::property_tree::xml_writer_make_settings(' ',4));
+    write_xml(filename,pt,std::locale(),boost::property_tree::xml_writer_make_settings(' ', 2));
 }
 
 std::string save_map_to_string(Map const & map, bool explicit_defaults)
@@ -694,7 +688,7 @@ std::string save_map_to_string(Map const & map, bool explicit_defaults)
     ptree pt;
     serialize_map(pt,map,explicit_defaults);
     std::ostringstream ss;
-    write_xml(ss,pt,boost::property_tree::xml_writer_make_settings(' ',4));
+    write_xml(ss,pt,boost::property_tree::xml_writer_make_settings(' ', 2));
     return ss.str();
 }
 
