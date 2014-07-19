@@ -41,8 +41,12 @@
 #include <fstream>
 #include <string>
 
-
 namespace mapnik {
+
+#if defined __MINGW__
+class logger;
+template class MAPNIK_DECL singleton<logger, CreateStatic>;
+#endif
 
     /*
         Global logger class that holds the configuration of severity, format

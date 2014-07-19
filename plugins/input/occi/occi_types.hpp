@@ -78,6 +78,12 @@ enum
     SDO_INTERPRETATION_CIRCULAR         = 2
 };
 
+class mapnik::occi_environment;
+
+#if !defined MAPNIK_EXPORTS && defined __MINGW__
+extern template class mapnik::singleton<occi_environment, mapnik::CreateStatic>;
+#endif
+
 class occi_environment : public mapnik::singleton<occi_environment, mapnik::CreateStatic>
 {
     friend class mapnik::CreateStatic<occi_environment>;

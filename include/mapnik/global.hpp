@@ -173,6 +173,15 @@ inline double round(double val)
 
 #endif
 
+#if (__GNUC__==4) && (__GNUC_MINOR__>=7)
+
+#define  _USE_MATH_DEFINES
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#endif
+
 }
 
 

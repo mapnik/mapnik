@@ -38,6 +38,14 @@
 #include <algorithm>
 #include <cmath>
 
+#include <mapnik/config.hpp>
+
+#ifdef __MINGW__
+#  pragma push_macro("MAPNIK_DECL")
+#  undef MAPNIK_DECL
+#  define MAPNIK_DECL
+#endif
+
 namespace mapnik
 {
 
@@ -121,46 +129,46 @@ template <typename T,
 protected:
 
 #ifdef MAPNIK_THREADSAFE
-        static mutex mutex_;
+    static mutex mutex_;
 #endif
-        singleton() {}
-    public:
-        static T& instance()
+    singleton() {}
+public:
+    static T& instance()
+    {
+        if (! pInstance_)
         {
-            if (! pInstance_)
-            {
 #ifdef MAPNIK_THREADSAFE
                 mapnik::scoped_lock lock(mutex_);
 #endif
-                if (! pInstance_)
+            if (! pInstance_)
+            {
+                if (destroyed_)
                 {
-                    if (destroyed_)
-                    {
-                        destroyed_ = false;
-                        onDeadReference();
-                    }
-                    else
-                    {
-                        pInstance_ = CreatePolicy<T>::create();
+                    destroyed_ = false;
+                    onDeadReference();
+                }
+                else
+                {
+                    pInstance_ = CreatePolicy<T>::create();
 
-                        // register destruction
-                        std::atexit(&DestroySingleton);
-                    }
+                    // register destruction
+                    std::atexit(&DestroySingleton);
                 }
             }
+        }
             return *pInstance_;
         }
 };
 
 #ifdef MAPNIK_THREADSAFE
-    template <typename T,
-              template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
+template <typename T,
+          template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
 #endif
 
-    template <typename T,
-              template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
-    template <typename T,
-              template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
+template <typename T,
+          template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
+template <typename T,
+          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
 
 
 #ifdef _WINDOWS
@@ -173,5 +181,9 @@ MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
 #endif  // _WINDOWS
 
 }
+
+#ifdef __MINGW__
+#  pragma pop_macro("MAPNIK_DECL")
+#endif
 
 #endif // MAPNIK_UTILS_HPP

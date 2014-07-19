@@ -30,6 +30,7 @@
 #if BOOST_VERSION < 105300 || defined BOOST_NO_CXX11_SMART_PTR
 
 // https://github.com/mapnik/mapnik/issues/2022
+#include <cmath>
 #include <memory>
 
 namespace boost {

@@ -1,0 +1,13 @@
+/agg_blend_src_over_test-bin.exe
+/clipping_test-bin.exe
+/conversions_test-bin.exe
+/csv_parse_test-bin.exe
+/exceptions_test-bin.exe
+/font_registration_test-bin.exe
+/fontset_runtime_test-bin.exe
+/geometry_converters_test-bin.exe
+/image_io_test-bin.exe
+/label_algo_test-bin.exe
+/map_request_test-bin.exe
+/params_test-bin.exe
+/wkb_formats_test-bin.exe

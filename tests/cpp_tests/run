@@ -5,8 +5,9 @@ cd ../../
 source ./localize.sh
 
 failures=0
-if [ -n "$(find tests/cpp_tests/ -maxdepth 1 -name '*-bin' -print -quit)" ]; then
-    for FILE in tests/cpp_tests/*-bin; do 
+
+if [ -n "$(find tests/cpp_tests/ -maxdepth 1 -name '*-bin*' -print -quit)" ]; then
+    for FILE in tests/cpp_tests/*-bin*; do 
         ${FILE} -q -d .;
       failures=$((failures+$?))
     done
@@ -14,5 +15,16 @@ if [ -n "$(find tests/cpp_tests/ -maxdepth 1 -name '*-bin' -print -quit)" ]; the
 else
     echo 'warning: no c++ tests found'
 fi
+
+if [ -e "tests/cpp_tests/singleton_test/singleton_test" ]; then
+    echo "*** Running singleton test..."
+    INSTANCES=`tests/cpp_tests/singleton_test/singleton_test|grep 'singtest CREATED'|wc -l`
+    
+    if [ $INSTANCES -gt 1 ]; then
+        echo $INSTANCES error detected.
+        failures=$((failures+$INSTANCES))
+    fi
+fi
+
 exit $failures
 

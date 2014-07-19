@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-
+#include <cmath>
 #include <boost/python.hpp>
 #include <mapnik/gamma_method.hpp>
 #include "mapnik_enumeration.hpp"

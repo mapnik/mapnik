@@ -24,6 +24,12 @@ from glob import glob
 
 Import('env')
 lib_env = env.Clone()
+
+ismingwbuild = (env['PLATFORM'] == "MinGW")
+
+if ismingwbuild:
+    lib_env['LIBSUFFIX'] = ".a"
+
 if 'g++' in env['CXX']:
     lib_env.Append(CXXFLAGS='-fPIC')
 lib_env.StaticLibrary('agg', glob('./src/' + '*.cpp'), LIBS=[])

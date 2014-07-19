@@ -38,8 +38,9 @@ source += program_env.Object('box2d-static', '#src/box2d.cpp')
 headers = ['#plugins/input/shape'] + env['CPPPATH'] 
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
+boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
-libraries =  [env['MAPNIK_NAME'], boost_program_options, boost_system]
+libraries =  [env['MAPNIK_NAME'], boost_program_options, boost_filesystem, boost_system]
 if env['RUNTIME_LINK'] == 'static':
     libraries.extend(copy(env['LIBMAPNIK_LIBS']))
     if env['PLATFORM'] == 'Linux':

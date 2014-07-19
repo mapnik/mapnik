@@ -31,8 +31,14 @@
 #include <string>
 #include <map>
 
+#if defined __MINGW__
+namespace mapnik { namespace placements { class registry; }}
+template class MAPNIK_DECL mapnik::singleton<mapnik::placements::registry, mapnik::CreateStatic>;
+#endif
+
 namespace mapnik
 {
+
 namespace placements
 {
 
@@ -53,5 +59,6 @@ private:
 };
 
 } //ns placements
+
 } //ns mapnik
 #endif // PLACEMENTS_REGISTRY_HPP

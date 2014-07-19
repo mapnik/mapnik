@@ -38,7 +38,6 @@ def run_2to3(*args,**kwargs):
 def is_py3():
     return 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
 
-
 prefix = env['PREFIX']
 target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + env['MAPNIK_NAME'])
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
@@ -50,7 +49,7 @@ py_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 py_env['LIBS'] = [env['MAPNIK_NAME'],env['BOOST_PYTHON_LIB']]
 
-link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])
+link_all_libs = env['LINKING'] == 'static' or env['PLATFORM'] == 'MinGW' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])
 
 if link_all_libs:
     py_env.AppendUnique(LIBS=env['LIBMAPNIK_LIBS'])
@@ -181,9 +180,30 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
     if env['HAS_PYCAIRO']:
         py_env.ParseConfig('pkg-config --cflags pycairo')
         py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
+        
+if env['PLATFORM'] == 'MinGW' and env['LINKING'] == 'static':
+    python = 'python%s' % env['PYTHON_VERSION']
+    py_env.AppendUnique(LIBS = ['agg',python]);
 
-py_env.Append(LINKFLAGS=python_link_flag)
-_mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LDMODULEPREFIX='', LDMODULESUFFIX='.so')
+    linkflags = '-Wl,--whole-archive src/libmapnik.a -Wl,--no-whole-archive'
+
+    _mapnik = py_env.SharedLibrary('mapnik/_mapnik', sources, SHLIBPREFIX='', SHLIBSUFFIX='.pyd', LINKFLAGS=linkflags)
+    Depends(_mapnik, env.subst('../../src/libmapnik.a'))
+elif env['PLATFORM'] == 'MinGW':
+    filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
+    regex = 'boost_regex%s' % env['BOOST_APPEND']
+    system = 'boost_system%s' % env['BOOST_APPEND']
+    
+    py_env.AppendUnique(LIBS = [filesystem,system,regex])
+    py_env.AppendUnique(LIBS = [env['ICU_LIB_NAME'],env['ICU_LIB_I18N'],env['ICU_LIB_DATA']])
+    py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
+    py_env.AppendUnique(LIBS = 'python%s' % env['PYTHON_VERSION'])
+
+    _mapnik = py_env.SharedLibrary('mapnik/_mapnik', sources, SHLIBPREFIX='', SHLIBSUFFIX='.pyd') 
+else:
+    py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
+    py_env.Append(LINKFLAGS=python_link_flag)
+    _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LDMODULEPREFIX='', LDMODULESUFFIX='.so')
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

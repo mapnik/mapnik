@@ -69,6 +69,11 @@ bool register_image_reader(std::string const& type, image_reader* (* fun)(Args..
     return factory<image_reader,std::string, Args...>::instance().register_product(type, fun);
 }
 
+#if !defined __MINGW__
+MAPNIK_DECL bool register_image_reader(std::string const& type,image_reader* (*)(std::string const&));
+MAPNIK_DECL bool register_image_reader(std::string const& type,image_reader* (*)(char const*, std::size_t));
+#endif
+
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file,std::string const& type);
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file);
 MAPNIK_DECL image_reader* get_image_reader(char const* data, size_t size);

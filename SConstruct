@@ -21,10 +21,12 @@ import os
 import sys
 import re
 import platform
+import sysconfig
 from glob import glob
 from copy import copy
 from subprocess import Popen, PIPE
 from SCons.SConf import SetCacheMode
+from SCons import Platform
 import pickle
 
 try:
@@ -132,8 +134,23 @@ def init_environment(env):
         env['AR'] = os.environ['AR']
 
 #### SCons build options and initial setup ####
-env = Environment(ENV=os.environ)
+mingwbuild=False
+if (sys.platform == "win32" and sys.version.upper().find('GCC') >= 0):
+    if sysconfig.get_config_var('CFLAGS').find('MINGW')>=0:
+        mingwbuild=True
+    
+if mingwbuild:
+    sys.path.append('mingw')
+    import mingw64
+    env = Environment(platform = Platform.PlatformSpec('mingw64', mingw64.generate), tools = ['mingw'], ENV = os.environ)
+    env['smp'] = 0
+else:
+    env = Environment(ENV = os.environ)
+
 init_environment(env)
+
+env.Decider('MD5-timestamp')
+env.SourceCode(".", None)
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -319,9 +336,9 @@ opts.AddVariables(
 
     # Boost variables
     # default is '/usr/include', see FindBoost method below
-    ('BOOST_INCLUDES', 'Search path for boost include files', '',False),
+    ('BOOST_INCLUDES', 'Search path for boost include files', '$PREFIX/include',False),
     # default is '/usr/' + LIBDIR_SCHEMA, see FindBoost method below
-    ('BOOST_LIBS', 'Search path for boost library files', '',False),
+    ('BOOST_LIBS', 'Search path for boost library files', '$PREFIX' + LIBDIR_SCHEMA_DEFAULT,False),
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
@@ -330,26 +347,29 @@ opts.AddVariables(
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
-    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', ICU_INCLUDES_DEFAULT, PathVariable.PathAccept),
-    PathVariable('ICU_LIBS','Search path for ICU include files',ICU_LIBS_DEFAULT + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
-    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
-    PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    ('ICU_CONFIG', 'The path to the icu-config executable.', 'icu-config'),
+    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('ICU_LIBS','Search path for ICU include files','$PREFIX' + os.sep + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
+    ('ICU_LIB_I18N', 'The international lib for icu', 'icui18n'),
+    ('ICU_LIB_DATA', 'The data lib for icu', 'icudata'),
+    PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('HB_LIBS','Search path for HarfBuzz include files','$PREFIX' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
-    PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('PNG_LIBS','Search path for libpng library files','$PREFIX' + os.sep + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
-    PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '$PREFIX' + os.sep + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('TIFF', 'Build Mapnik with TIFF read and write support', 'True'),
-    PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '$PREFIX' + os.sep + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('WEBP', 'Build Mapnik with WEBP read', 'True'),
-    PathVariable('WEBP_INCLUDES', 'Search path for libwebp include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('WEBP_LIBS','Search path for libwebp library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('WEBP_INCLUDES', 'Search path for libwebp include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('WEBP_LIBS','Search path for libwebp library files','$PREFIX' + os.sep + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('PROJ', 'Build Mapnik with proj4 support to enable transformations between many different projections', 'True'),
-    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '$PREFIX/include', PathVariable.PathAccept),
+    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '$PREFIX' + os.sep + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
 
     # Variables affecting rendering back-ends
@@ -588,9 +608,20 @@ def parse_config(context, config, checks='--libs --cflags'):
     if config in ('GDAL_CONFIG'):
         toolname += ' %s' % checks
     context.Message( 'Checking for %s... ' % toolname)
-    cmd = '%s %s' % (env[config],checks)
-    ret = context.TryAction(cmd)[0]
+    
+    if mingwbuild:
+        cfgPrefix = os.path.realpath(env['PREFIX'])
+        cmd = 'python mingw/mingw-shell-adapter.py %s --prefix="%s" %s' % (env[config],cfgPrefix,checks)
+        ret = context.TryAction(cmd)[0]
+        if not ret:
+            cmd = 'python mingw/mingw-shell-adapter.py %s %s' % (env[config],checks)
+            ret = context.TryAction(cmd)[0]
+    else:
+        cmd = '%s %s' % (env[config],checks)
+        ret = context.TryAction(cmd)[0]
+
     parsed = False
+
     if ret:
         try:
             if 'gdal-config' in cmd:
@@ -625,6 +656,57 @@ def parse_config(context, config, checks='--libs --cflags'):
     context.Result( ret )
     return ret
 
+def get_pkg_inc_libs(context, pkg_name):
+    incpattern = r'-I([^\s]*)'
+    libdirpattern = r'-L([^\s]*)'
+    libpattern = r'-l([^\s]*)'
+    
+    includes = []
+    libdirs = []
+    libraries = []
+    
+    options = '--libs --cflags'
+    
+    env = context.env
+    
+    if env['RUNTIME_LINK'] == 'static':
+        options += ' --static'       
+    
+    context.Message( 'Checking package %s for Libraries and Includes...' % pkg_name)    
+  
+    if mingwbuild:
+        cmd = 'python mingw/mingw-shell-adapter.py pkg-config %s %s' % (options, pkg_name)
+    else:
+        cmd = 'pkg-config %s %s' % (options, pkg_name)  
+
+    ret = context.TryAction(cmd)[0]
+
+    if ret:
+        try:
+            value = call(cmd,silent=True)
+            includes += re.findall(incpattern,value)
+            for inc in includes:
+                if inc in env['CPPPATH']:
+                    includes.remove(inc)
+            libdirs += re.findall(libdirpattern,value)
+            for lib in libdirs:
+                if lib in env['LIBPATH']:
+                    libdirs.remove(lib)
+            libraries += re.findall(libpattern,value)
+            for lib in libraries:
+                if lib in env['LIBS']:
+                    libraries.remove(lib)
+                    
+            context.Message( '\n  Includes Found: %s...' % includes)
+            context.Message( '\n  Library Search Paths Found: %s...' % libdirs)
+            context.Message( '\n  Libraries Found: %s...' % libraries)
+        except Exception, e:
+            ret = False
+            print ' unable to determine pkg-config results:'# %s' % str(e)
+            return None
+    context.Result( ret )
+    return includes, libdirs, libraries    
+
 def get_pkg_lib(context, config, lib):
     libpattern = r'-l([^\s]*)'
     libname = None
@@ -635,11 +717,14 @@ def get_pkg_lib(context, config, lib):
     parsed = False
     if ret:
         try:
-            value = call(cmd,silent=True)
+            if mingwbuild:
+                value = call('%s %s/mingw/mingw-shell-adapter.py %s' % (env['PYTHON'],os.getcwd(),cmd))
+            else:     
+                value = call(cmd,silent=True)
             if ' ' in value:
                 parts = value.split(' ')
                 if len(parts) > 1:
-                    value = parts[1]
+                    value = parts[1]                
             libnames = re.findall(libpattern,value)
             if libnames:
                 libname = libnames[0]
@@ -657,13 +742,21 @@ def parse_pg_config(context, config):
     # TODO - leverage `LDFLAGS_SL` if RUNTIME_LINK==static
     env = context.env
     tool = config.lower()
+    
     context.Message( 'Checking for %s... ' % tool)
     ret = context.TryAction(env[config])[0]
+    
     if ret:
-        lib_path = call('%s --libdir' % env[config])
-        inc_path = call('%s --includedir' % env[config])
+        if mingwbuild:
+            lib_path = call('%s %s/mingw/mingw-shell-adapter.py %s --libdir' % (env['PYTHON'],os.getcwd(),env[config]))
+            inc_path = call('%s %s/mingw/mingw-shell-adapter.py %s --includedir' % (env['PYTHON'],os.getcwd(),env[config]))
+        else:
+            lib_path = call('%s --libdir' % env[config])
+            inc_path = call('%s --includedir' % env[config])
+            
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        
         lpq = env['PLUGINS']['postgis']['lib']
         env.Append(LIBS = lpq)
     else:
@@ -676,6 +769,7 @@ def ogr_enabled(context):
     env = context.env
     context.Message( 'Checking if gdal is ogr enabled... ')
     ret = context.TryAction('%s --ogr-enabled' % env['GDAL_CONFIG'])[0]
+
     if not ret:
         if 'ogr' not in env['SKIPPED_DEPS']:
             env['SKIPPED_DEPS'].append('ogr')
@@ -735,7 +829,7 @@ def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
 
     """
-    context.Message( 'Searching for boost libs and headers... ' )
+    context.Message( 'Searching for boost libs and headers...\n' )
     env = context.env
 
     BOOST_LIB_DIR = None
@@ -753,6 +847,7 @@ def FindBoost(context, prefixes, thread_flag):
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_INCLUDES'])))
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_LIBS'])))
     for searchDir in prefixes:
+        context.Message( 'searching ' + searchDir + '...\n' )
         libItems = glob(os.path.join(searchDir, env['LIBDIR_SCHEMA'], '%s*.*' % search_lib))
         if not libItems:
             libItems = glob(os.path.join(searchDir, 'lib/%s*.*' % search_lib))
@@ -1050,6 +1145,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'parse_config'          : parse_config,
                'parse_pg_config'       : parse_pg_config,
                'ogr_enabled'           : ogr_enabled,
+               'get_pkg_inc_libs'      : get_pkg_inc_libs,
                'get_pkg_lib'           : get_pkg_lib,
                'rollback_option'       : rollback_option,
                'icu_at_least_four_two' : icu_at_least_four_two,
@@ -1060,7 +1156,6 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
 
 
 if not preconfigured:
-
     color_print(4,'Configuring build environment...')
 
     if not env['FAST']:
@@ -1086,7 +1181,11 @@ if not preconfigured:
                     # but if the default is overridden and the file is not found, give warning
                     color_print(1,"SCons CONFIG not found: '%s'" % conf)
             # Recreate the base environment using modified `opts`
-            env = Environment(ENV=os.environ,options=opts)
+
+            if mingwbuild:
+                env = Environment(platform = Platform.PlatformSpec('mingw64', mingw64.generate), tools = ['mingw'], ENV = os.environ, options=opts)
+            else:
+                env = Environment(ENV=os.environ,options=opts)
             init_environment(env)
             env['USE_CONFIG'] = True
     else:
@@ -1099,7 +1198,12 @@ if not preconfigured:
     else:
         mode = 'release mode'
 
-    env['PLATFORM'] = platform.uname()[0]
+    if mingwbuild:
+        env['PLATFORM'] = "MinGW"
+        BOOST_SEARCH_PREFIXES.append(os.path.realpath(env['PREFIX']))
+    else:
+        env['PLATFORM'] = platform.uname()[0]
+
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
     env['MISSING_DEPS'] = []
@@ -1139,8 +1243,13 @@ if not preconfigured:
     # install prefix is a pre-pended base location to
     # re-route the install and only intended for package building
     # we normalize to ensure no trailing slash and proper pre-pending to the absolute prefix
-    install_prefix = os.path.normpath(os.path.realpath(env['DESTDIR'])) + os.path.realpath(env['PREFIX'])
+    if mingwbuild:
+        install_prefix = os.path.realpath(env['PREFIX'])
+    else:
+        install_prefix = os.path.normpath(os.path.realpath(env['DESTDIR'])) + os.path.realpath(env['PREFIX'])
+        
     env['INSTALL_PREFIX'] = strip_first(install_prefix,'//','/')
+    
     # all values from above based on install_prefix
     # if env['DESTDIR'] == '/' these should be unchanged
     env['MAPNIK_LIB_BASE_DEST'] = os.path.join(env['INSTALL_PREFIX'],env['LIBDIR_SCHEMA'])
@@ -1154,6 +1263,8 @@ if not preconfigured:
     if env['LINKING'] == 'static':
        env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}${MAPNIK_NAME}${LIBSUFFIX}'
     else:
+       if mingwbuild:
+            env['LIBSUFFIX'] = ".dll.a"    
        env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}${MAPNIK_NAME}${SHLIBSUFFIX}'
 
     if env['PKG_CONFIG_PATH']:
@@ -1191,6 +1302,10 @@ if not preconfigured:
 
     if env['SHAPE_MEMORY_MAPPED_FILE']:
         env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
+        
+    if mingwbuild:
+        env.Append(CPPDEFINES = '-D__MINGW__')
+        env.Append(CPPDEFINES = '-DBOOST_USE_WINDOWS_H')
 
     # allow for mac osx /usr/lib/libicucore.dylib compatibility
     # requires custom supplied headers since Apple does not include them
@@ -1212,6 +1327,9 @@ if not preconfigured:
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        
+    if conf.parse_config('ICU_CONFIG', checks='--cflags --ldflags'):
+        env['HAS_ICU'] = True        
 
     if conf.parse_config('FREETYPE_CONFIG'):
         # check if freetype links to bz2
@@ -1229,6 +1347,10 @@ if not preconfigured:
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
     if conf.parse_config('XML2_CONFIG',checks='--cflags'):
+        includes,libdirs,libraries = conf.get_pkg_inc_libs('libxml-2.0')
+        env.AppendUnique(CPPPATH = includes)
+        env.AppendUnique(LIBPATH = libdirs)
+        env.AppendUnique(LIBS = libraries)
         env['HAS_LIBXML2'] = True
     else:
         env['MISSING_DEPS'].append('libxml2')
@@ -1500,9 +1622,10 @@ if not preconfigured:
 
     # we rely on an internal, patched copy of agg with critical fixes
     # prepend to make sure we link locally
+    env.Prepend(CPPPATH = '#deps/clipper/include')
+    env.Prepend(LIBPATH = '#deps/clipper')    
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
-    env.Prepend(CPPPATH = '#deps/clipper/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
@@ -1510,11 +1633,11 @@ if not preconfigured:
         if env['CAIRO_LIBS'] or env['CAIRO_INCLUDES']:
             c_inc = env['CAIRO_INCLUDES']
             if env['CAIRO_LIBS']:
-                env["CAIRO_LIBPATHS"].append(os.path.realpath(env['CAIRO_LIBS']))
+                env["CAIRO_LIBPATHS"]+=env['CAIRO_LIBS']
                 if not env['CAIRO_INCLUDES']:
                     c_inc = env['CAIRO_LIBS'].replace('lib','',1)
             if c_inc:
-                c_inc = os.path.normpath(os.path.realpath(env['CAIRO_INCLUDES']))
+                c_inc+=env['CAIRO_INCLUDES']
                 if c_inc.endswith('include'):
                     c_inc = os.path.dirname(c_inc)
                 env["CAIRO_CPPPATHS"].extend(
@@ -1541,28 +1664,21 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairo')
             else:
-                print 'Checking for cairo lib and include paths... ',
-                cmd = 'pkg-config --libs --cflags cairo'
-                if env['RUNTIME_LINK'] == 'static':
-                    cmd += ' --static'
-                cairo_env = env.Clone()
+                print 'Checking for cairo lib and include paths... '
                 try:
-                    cairo_env.ParseConfig(cmd)
-                    for lib in cairo_env['LIBS']:
-                        if not lib in env['LIBS']:
-                            env["CAIRO_ALL_LIBS"].append(lib)
-                    for lpath in cairo_env['LIBPATH']:
-                        if not lpath in env['LIBPATH']:
-                            env["CAIRO_LIBPATHS"].append(lpath)
-                    for inc in cairo_env['CPPPATH']:
-                        if not inc in env['CPPPATH']:
-                            env["CAIRO_CPPPATHS"].append(inc)
+                    includes,libdirs,libraries = conf.get_pkg_inc_libs('cairo')
+                    env['CAIRO_CPPPATHS'] = includes
+                    env['CAIRO_LIBPATHS'] = libdirs
+                    env["CAIRO_ALL_LIBS"] = libraries
                     env['HAS_CAIRO'] = True
                     print 'yes'
                 except OSError,e:
                     color_print(1,'no')
                     env['SKIPPED_DEPS'].append('cairo')
                     color_print(1,'pkg-config reported: %s' % e)
+                    
+        if env['HAS_CAIRO']:
+            env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
     else:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
@@ -1618,7 +1734,9 @@ if not preconfigured:
             env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 
         # if user-requested custom prefix fall back to manual concatenation for building subdirectories
-        if env['PYTHON_PREFIX']:
+        if mingwbuild:
+            env['PYTHON_INSTALL_LOCATION'] = env['PYTHON_SITE_PACKAGES']
+        elif env['PYTHON_PREFIX']:
             py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
             env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_PREFIX'] + os.path.sep +  py_relative_install
         else:
@@ -1764,7 +1882,7 @@ if not preconfigured:
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
-        if env['PLATFORM'] != 'Darwin' and env['CXX'] == 'g++':
+        if env['PLATFORM'] != 'Darwin' and not mingwbuild and env['CXX'] == 'g++':
             env.MergeFlags('-rdynamic')
 
         if env['DEBUG']:
@@ -1776,6 +1894,10 @@ if not preconfigured:
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
         common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+
+        # https://github.com/mapnik/mapnik/issues/1835
+        if (sys.platform == 'darwin' and env['CXX'] == 'g++') or mingwbuild:
+            common_cxx_flags += '-fpermissive '
 
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
@@ -1852,7 +1974,6 @@ Help(opts.GenerateHelpText(env))
 
 #### Builds ####
 if not HELP_REQUESTED:
-
     if 'uninstall' in COMMAND_LINE_TARGETS:
         # dummy action in case there is nothing to uninstall, to avoid phony error..
         env.Alias("uninstall", "")
@@ -1908,6 +2029,10 @@ if not HELP_REQUESTED:
 
     if env['JOBS'] > 1:
         SetOption("num_jobs", env['JOBS'])
+        
+    # clipper has to be statically linked, 
+    # project doesn't share mapnik macros for building shared libraries.
+    SConscript('deps/clipper/build.py')
 
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared':
@@ -2009,6 +2134,9 @@ if not HELP_REQUESTED:
 
     if env['CPP_TESTS'] and env['SVG_RENDERER']:
         SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
+            
+    if mingwbuild:
+        SConscript('tests/cpp_tests/singleton_test/build.py')
 
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')

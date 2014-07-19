@@ -44,18 +44,18 @@ namespace mapnik
 {
 
 #if defined(HAVE_CAIRO)
-template class feature_style_processor<cairo_renderer<cairo_ptr> >;
-template class feature_style_processor<cairo_renderer<cairo_surface_ptr> >;
+template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr> >;
+template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_surface_ptr> >;
 #endif
 
 #if defined(SVG_RENDERER)
-template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
+template class MAPNIK_DECL feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
 #endif
 
 #if defined(GRID_RENDERER)
-template class feature_style_processor<grid_renderer<grid> >;
+template class MAPNIK_DECL feature_style_processor<grid_renderer<grid> >;
 #endif
 
-template class feature_style_processor<agg_renderer<image_32> >;
+template class MAPNIK_DECL feature_style_processor<agg_renderer<image_32> >;
 
 }
