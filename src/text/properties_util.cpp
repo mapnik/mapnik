@@ -56,6 +56,10 @@ struct property_serializer : public boost::static_visitor<>
         node_.put("<xmlattr>." + name_, val );
     }
 
+    void operator() (color const& val) const
+    {
+        node_.put("<xmlattr>." + name_, val );
+    }
 
     template <typename T>
     void operator() (T const& val) const
