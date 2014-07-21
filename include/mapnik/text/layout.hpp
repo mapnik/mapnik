@@ -28,8 +28,6 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/char_properties_ptr.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
-#include <mapnik/text/icu_shaper.hpp>
-#include <mapnik/text/dummy_shaper.hpp>
 #include <mapnik/text/rotation.hpp>
 
 //stl

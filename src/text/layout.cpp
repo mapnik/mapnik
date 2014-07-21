@@ -220,8 +220,8 @@ void text_layout::clear()
     itemizer_.clear();
     lines_.clear();
     width_map_.clear();
-    width_ = 0.;
-    height_ = 0.;
+    width_ = 0.0;
+    height_ = 0.0;
     child_layout_list_.clear();
 }
 
