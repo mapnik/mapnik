@@ -35,25 +35,25 @@
 // boost
 #include <boost/property_tree/ptree.hpp>
 
-namespace mapnik {
-namespace formatting {
+namespace mapnik { namespace formatting {
 
 using boost::property_tree::ptree;
 
 void layout_node::to_xml(ptree &xml) const
 {
-    ptree &new_node = xml.push_back(ptree::value_type("Layout", ptree()))->second;
+    ptree & new_node = xml.push_back(ptree::value_type("Layout", ptree()))->second;
 
-    //if (dx) set_attr(new_node, "dx", *dx);
-    //if (dy) set_attr(new_node, "dy", *dy);
+    if (dx) serialize_property("dx", *dx, new_node);
+    if (dy) serialize_property("dy", *dy, new_node);
+    if (text_ratio) serialize_property("text-ratio", *text_ratio, new_node);
+    if (wrap_width) serialize_property("wrap-width", *wrap_width, new_node);
+    if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
+    if (rotate_displacement) serialize_property("rotate-displacement", *rotate_displacement, new_node);
+    if (orientation) serialize_property("orientation", *orientation, new_node);
+
     if (halign) set_attr(new_node, "horizontal-alignment", *halign);
     if (valign) set_attr(new_node, "vertical-alignment", *valign);
     if (jalign) set_attr(new_node, "justify-alignment", *jalign);
-    //if (text_ratio) set_attr(new_node, "text-ratio", *text_ratio);
-    //if (wrap_width) set_attr(new_node, "wrap-width", *wrap_width);
-    //if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before);
-    //if (rotate_displacement) set_attr(new_node, "rotate-displacement", *rotate_displacement);
-    //if (orientation) set_attr(new_node, "orientation", to_expression_string(**orientation));
 
     if (child_) child_->to_xml(new_node);
 }
@@ -73,16 +73,9 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     if (xml.has_attribute("rotate-displacement")) set_property_from_xml<boolean>(n->rotate_displacement, "rotate-displacement", xml);
     if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
 
-    //n->dx = xml.get_opt_attr<double>("dx");
-    //n->dy = xml.get_opt_attr<double>("dy");
     n->halign = xml.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     n->valign = xml.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     n->jalign = xml.get_opt_attr<justify_alignment_e>("justify-alignment");
-    //n->text_ratio = xml.get_opt_attr<double>("text-ratio");
-    //n->wrap_width = xml.get_opt_attr<double>("wrap-width");
-    //n->wrap_before = xml.get_opt_attr<boolean>("wrap-before");
-    //n->rotate_displacement = xml.get_opt_attr<boolean>("rotate-displacement");
-    //n->orientation = xml.get_opt_attr<expression_ptr>("orientation");
 
     return n;
 }

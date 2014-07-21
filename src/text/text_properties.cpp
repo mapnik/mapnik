@@ -217,50 +217,17 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
                                     bool explicit_defaults,
                                     text_layout_properties const& dfl) const
 {
-    //if (displacement.x != dfl.displacement.x || explicit_defaults)
-    //{
-    //   set_attr(node, "dx", displacement.x);
-    //}
-    //if (displacement.y != dfl.displacement.y || explicit_defaults)
-    //{
-    //    set_attr(node, "dy", displacement.y);
-    //}
-    if (valign != dfl.valign || explicit_defaults)
-    {
-        set_attr(node, "vertical-alignment", valign);
-    }
-    if (halign != dfl.halign || explicit_defaults)
-    {
-        set_attr(node, "horizontal-alignment", halign);
-    }
-    if (jalign != dfl.jalign || explicit_defaults)
-    {
-        set_attr(node, "justify-alignment", jalign);
-    }
-    //if (text_ratio != dfl.text_ratio || explicit_defaults)
-    //{
-    //    set_attr(node, "text-ratio", text_ratio);
-    //}
-    //if (wrap_width != dfl.wrap_width || explicit_defaults)
-    //{
-    //    set_attr(node, "wrap-width", wrap_width);
-    //}
-    //if (wrap_before != dfl.wrap_before || explicit_defaults)
-    //{
-    //    set_attr(node, "wrap-before", wrap_before);
-    //}
-    //if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
-    //{
-    //    set_attr(node, "rotate-displacement", rotate_displacement);
-    //}
-    /// TODO
-    //if (orientation)
-    //{
-    //    std::string const& orientationstr = to_expression_string(*orientation);
-    //    if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
-    //        set_attr(node, "orientation", orientationstr);
-    //   }
-    //}
+    if (!(dx == dfl.dx) || explicit_defaults) serialize_property("dx", dx, node);
+    if (!(dy == dfl.dy) || explicit_defaults) serialize_property("dy", dy, node);
+    if (valign != dfl.valign || explicit_defaults) set_attr(node, "vertical-alignment", valign);
+    if (halign != dfl.halign || explicit_defaults) set_attr(node, "horizontal-alignment", halign);
+    if (jalign != dfl.jalign || explicit_defaults) set_attr(node, "justify-alignment", jalign);
+    if (!(text_ratio == dfl.text_ratio) || explicit_defaults) serialize_property("text-ratio", text_ratio, node);
+    if (!(wrap_width == dfl.wrap_width) || explicit_defaults) serialize_property("wrap-width", wrap_width, node);
+    if (!(wrap_before == dfl.wrap_before) || explicit_defaults) serialize_property("wrap-before", wrap_before, node);
+    if (!(rotate_displacement == dfl.rotate_displacement) || explicit_defaults)
+        serialize_property("rotate-displacement", rotate_displacement, node);
+    if (!(orientation == dfl.orientation) || explicit_defaults) serialize_property("orientation", orientation, node);
 }
 
 void text_layout_properties::add_expressions(expression_set& output) const
