@@ -53,6 +53,8 @@ void set_property_from_xml(T1 & val, char const* name, xml_node  const& node)
     }
 }
 
+void serialize_property(std::string const& name, symbolizer_base::value_type const& val, boost::property_tree::ptree & node);
+
 } // namespace mapnik
 
 #endif // MAPNIK_PROPERTIES_UTIL_HPP

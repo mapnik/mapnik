@@ -220,6 +220,7 @@ source = Split(
     text/scrptrun.cpp
     text/face.cpp
     text/placement_finder.cpp
+    text/properties_util.cpp
     text/renderer.cpp
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
