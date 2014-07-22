@@ -85,7 +85,7 @@ public:
     // Returns the number of glyphs so memory can be preallocated.
     inline unsigned glyphs_count() const { return glyphs_count_;}
 
-    void add_child(text_layout_ptr child_layout);
+    void add_child(text_layout_ptr const& child_layout);
 
     inline text_layout_vector const& get_child_layouts() const { return child_layout_list_; }
     inline face_manager<freetype_engine> & get_font_manager() const { return font_manager_; }

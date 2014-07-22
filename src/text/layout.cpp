@@ -69,7 +69,7 @@ void text_layout::add_text(mapnik::value_unicode_string const& str, char_propert
     itemizer_.add_text(str, format);
 }
 
-void text_layout::add_child(text_layout_ptr child_layout)
+void text_layout::add_child(text_layout_ptr const& child_layout)
 {
     child_layout_list_.push_back(child_layout);
 }
