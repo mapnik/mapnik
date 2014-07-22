@@ -122,7 +122,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
-    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
+    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 

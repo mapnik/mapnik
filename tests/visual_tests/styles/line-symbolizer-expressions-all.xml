@@ -25,15 +25,15 @@
         </Rule>
         <Rule>
             <Filter>[id] = 'stroke-linejoin'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linejoin="bevel" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linejoin="[value]" />
         </Rule>
         <Rule>
             <Filter>[id] = 'stroke-linecap'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linecap="round" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-linecap="[value]" />
         </Rule>
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' comp-op="minus" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' comp-op="[value]" />
         </Rule>
 
         <Rule>

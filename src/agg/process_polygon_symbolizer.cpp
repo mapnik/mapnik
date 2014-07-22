@@ -81,8 +81,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
             using renderer_base = agg::renderer_base<pixfmt_comp_type>;
             using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
             pixfmt_comp_type pixf(buf);
-            auto comp_op = get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over);
-            pixf.comp_op(comp_op);
+            pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
             renderer_base renb(pixf);
             renderer_type ren(renb);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));

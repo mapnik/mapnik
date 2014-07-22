@@ -108,7 +108,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         span_gen_type>;
 
     pixfmt_type pixf(buf);
-    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
+    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
     ren_base renb(pixf);
 
     unsigned w=(*pat)->width();

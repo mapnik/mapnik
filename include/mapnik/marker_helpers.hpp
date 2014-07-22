@@ -94,7 +94,7 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
         scale_factor_(scale_factor),
         snap_to_pixels_(snap_to_pixels)
     {
-        pixf_.comp_op(get<agg::comp_op_e>(sym_, keys::comp_op, feature_, vars_, agg::comp_op_src_over));
+        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature_, vars_, src_over)));
     }
 
     template <typename T>
@@ -219,7 +219,7 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
         scale_factor_(scale_factor),
         snap_to_pixels_(snap_to_pixels)
     {
-        pixf_.comp_op(get<agg::comp_op_e>(sym_, keys::comp_op, feature_, vars_, agg::comp_op_src_over));
+        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature_, vars_, src_over)));
     }
 
     template <typename T>

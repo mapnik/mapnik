@@ -17,7 +17,7 @@
         </Rule>
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
-            <PolygonSymbolizer fill='#0000ff' comp-op='minus' />
+            <PolygonSymbolizer fill='#0000ff' comp-op='[value]' />
         </Rule>
 
         <Rule>

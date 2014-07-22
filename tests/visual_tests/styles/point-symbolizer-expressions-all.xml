@@ -25,9 +25,8 @@
         </Rule>
         <Rule>
             <Filter>[id] = 'comp-op'</Filter>
-            <PointSymbolizer comp-op="src-over" file="../../data/images/crosshair16x16.png" />
+            <PointSymbolizer comp-op="[value]" file="../../data/images/crosshair16x16.png" />
         </Rule>
-
         <Rule>
             <TextSymbolizer dy='-16' face-name='DejaVu Sans Book' halo-fill='#ffffff' halo-radius='1'>[id]</TextSymbolizer>
         </Rule>
@@ -73,7 +72,7 @@ allow-overlap|true|Point(0 -70)
 opacity|.5|Point(130 -70)
 transform|1.2|Point(-130 30)
 ignore-placement|true|Point(0 30)
-comp-op|src_over|Point(130 30)
+comp-op|src-over|Point(130 30)
             </Parameter>
         </Datasource>
     </Layer>
