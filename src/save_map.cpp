@@ -50,7 +50,7 @@
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-
+#include <boost/concept_check.hpp>
 // stl
 #include <iostream>
 
@@ -68,13 +68,13 @@ void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool 
     //   - text_placements_list: list string
 
     text_placements_simple *simple = dynamic_cast<text_placements_simple *>(p.get());
-    text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
-
     if (simple)
     {
         set_attr(node, "placement-type", "simple");
         set_attr(node, "placements", simple->get_positions());
     }
+
+    text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
     if (list)
     {
         set_attr(node, "placement-type", "list");
@@ -109,15 +109,17 @@ void serialize_raster_colorizer(ptree & sym_node,
         set_attr(col_node, "epsilon", colorizer->get_epsilon());
     }
 
-    colorizer_stops const &stops = colorizer->get_stops();
-    for (std::size_t i=0; i<stops.size(); ++i)
+    colorizer_stops const& stops = colorizer->get_stops();
+    for (auto const& stop : stops)
     {
-        ptree &stop_node = col_node.push_back( ptree::value_type("stop", ptree()) )->second;
-        set_attr(stop_node, "value", stops[i].get_value());
-        set_attr(stop_node, "color", stops[i].get_color());
-        set_attr(stop_node, "mode", stops[i].get_mode().as_string());
-        if (stops[i].get_label()!=std::string(""))
-            set_attr(stop_node, "label", stops[i].get_label());
+        ptree & stop_node = col_node.push_back( ptree::value_type("stop", ptree()) )->second;
+        set_attr(stop_node, "value", stop.get_value());
+        set_attr(stop_node, "color", stop.get_color());
+        set_attr(stop_node, "mode", stop.get_mode().as_string());
+        if (!stop.get_label().empty())
+        {
+            set_attr(stop_node, "label", stop.get_label());
+        }
     }
 }
 
@@ -324,7 +326,7 @@ void serialize_group_symbolizer_properties(ptree & sym_node,
     }
 }
 
-void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
+void serialize_rule( ptree & style_node, rule const& r, bool explicit_defaults)
 {
     ptree & rule_node = style_node.push_back(
         ptree::value_type("Rule", ptree() ))->second;
@@ -480,23 +482,27 @@ public:
     serialize_type( boost::property_tree::ptree & node):
         node_(node) {}
 
-    void operator () ( mapnik::value_integer /*val*/ ) const
+    void operator () ( mapnik::value_integer val ) const
     {
+        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "int" );
     }
 
-    void operator () ( mapnik::value_double /*val*/ ) const
+    void operator () ( mapnik::value_double val ) const
     {
+        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "float" );
     }
 
-    void operator () ( std::string const& /*val*/ ) const
+    void operator () ( std::string const& val ) const
     {
+        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "string" );
     }
 
-    void operator () ( mapnik::value_null /*val*/ ) const
+    void operator () ( mapnik::value_null val ) const
     {
+        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "string" );
     }
 
@@ -603,7 +609,7 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
     }
 }
 
-void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
+void serialize_map(ptree & pt, Map const& map, bool explicit_defaults)
 {
 
     ptree & map_node = pt.push_back(ptree::value_type("Map", ptree() ))->second;
@@ -676,14 +682,14 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     }
 }
 
-void save_map(Map const & map, std::string const& filename, bool explicit_defaults)
+void save_map(Map const& map, std::string const& filename, bool explicit_defaults)
 {
     ptree pt;
     serialize_map(pt,map,explicit_defaults);
     write_xml(filename,pt,std::locale(),boost::property_tree::xml_writer_make_settings(' ', 2));
 }
 
-std::string save_map_to_string(Map const & map, bool explicit_defaults)
+std::string save_map_to_string(Map const& map, bool explicit_defaults)
 {
     ptree pt;
     serialize_map(pt,map,explicit_defaults);
