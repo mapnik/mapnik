@@ -381,7 +381,6 @@ struct extract_value : public boost::static_visitor<T>
 
     auto operator() (result_type const& val) const -> result_type
     {
-        boost::ignore_unused_variable_warning(val);
         return val;
     }
 
