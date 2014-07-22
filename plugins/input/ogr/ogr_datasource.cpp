@@ -120,7 +120,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 #if GDAL_VERSION_MAJOR >= 2
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
         const char* papszAllowedDrivers[] = { driver.c_str(), NULL };
-        dataset_ = static_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers,NULL,NULL));
+        dataset_ = reinterpret_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers,NULL,NULL));
 #else
         OGRSFDriver * ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
         if (ogr_driver && ogr_driver != NULL)
@@ -133,7 +133,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     {
         // open ogr driver
 #if GDAL_VERSION_MAJOR >= 2
-        dataset_ = static_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), FALSE, NULL));
+        dataset_ = reinterpret_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), FALSE, NULL));
 #else
         dataset_ = OGRSFDriverRegistrar::Open(dataset_name_.c_str(), FALSE);
 #endif

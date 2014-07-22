@@ -90,16 +90,14 @@ bool freetype_engine::is_font_file(std::string const& file_name)
 }
 
 unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count) {
-    if (count <= 0) return count;
-    std::ifstream * file = static_cast<std::ifstream *>(stream->descriptor.pointer);
-    file->seekg(offset, std::ios::beg);
-    file->read((char*)buffer, count);
-    return file->gcount();
+    if (count <= 0) return 0;
+    FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
+    std::fseek (file , offset , SEEK_SET);
+    return std::fread ((char*)buffer, 1, count, file);
 }
 
 void ft_close_cb(FT_Stream stream) {
-    std::ifstream * file = static_cast<std::ifstream *>(stream->descriptor.pointer);
-    file->close();
+    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -109,13 +107,11 @@ bool freetype_engine::register_font(std::string const& file_name)
 #endif
 
 #ifdef _WINDOWS
-    std::ifstream file(mapnik::utf8_to_utf16(file_name) , std::ios::binary);
+    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(), L"rb");
 #else
-    std::ifstream file(file_name.c_str() , std::ios::binary);
+    FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
-    if (!file.good()) {
-        return false;
-    }
+    if (file == NULL) return false;
 
     FT_Library library = 0;
     FT_Error error = FT_Init_FreeType(&library);
@@ -129,16 +125,13 @@ bool freetype_engine::register_font(std::string const& file_name)
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
-    std::streampos beg = file.tellg();
-    file.seekg (0, std::ios::end);
-    std::streampos end = file.tellg();
-    std::size_t file_size = end - beg;
-    file.seekg (0, std::ios::beg);
-
+    fseek(file, 0, SEEK_END);
+    std::size_t file_size = std::ftell(file);
+    fseek(file, 0, SEEK_SET);
     streamRec.base = 0;
     streamRec.pos = 0;
     streamRec.size = file_size;
-    streamRec.descriptor.pointer = &file;
+    streamRec.descriptor.pointer = file;
     streamRec.read  = ft_read_cb;
     streamRec.close = ft_close_cb;
     args.flags = FT_OPEN_STREAM;
@@ -183,9 +176,8 @@ bool freetype_engine::register_font(std::string const& file_name)
 
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
+        if (face) FT_Done_Face(face);
     }
-    if (face)
-        FT_Done_Face(face);
     if (library)
         FT_Done_FreeType(library);
     return success;
@@ -300,22 +292,33 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mutex::scoped_lock lock(mutex_);
 #endif
-            std::ifstream is(itr->second.second.c_str() , std::ios::binary);
-            std::string buffer((std::istreambuf_iterator<char>(is)),
-                               std::istreambuf_iterator<char>());
-            std::pair<std::map<std::string,std::string>::iterator,bool> result
-                = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
-
-            FT_Error error = FT_New_Memory_Face (library_,
-                                                 reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
-                                                 static_cast<FT_Long>(buffer.size()),
-                                                 itr->second.first,
-                                                 &face);
-            if (!error) return boost::make_shared<font_face>(face);
-            else
+#ifdef _WINDOWS
+            FILE * file = _wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(), L"rb");
+#else
+            FILE * file = std::fopen(itr->second.second.c_str(),"rb");
+#endif
+            if (file != NULL)
             {
-                // we can't load font, erase it.
-                memory_fonts_.erase(result.first);
+                std::fseek(file, 0, SEEK_END);
+                std::size_t file_size = std::ftell(file);
+                std::fseek(file, 0, SEEK_SET);
+                std::string buffer;
+                buffer.resize(file_size);
+                std::fread(&buffer[0], file_size, 1, file);
+                std::pair<std::map<std::string,std::string>::iterator,bool> result =
+                    memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
+                FT_Error error = FT_New_Memory_Face (library_,
+                                                     reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
+                                                     static_cast<FT_Long>(buffer.size()),
+                                                     itr->second.first,
+                                                     &face);
+                std::fclose(file);
+                if (!error) return boost::make_shared<font_face>(face);
+                else
+                {
+                    // we can't load font, erase it.
+                    memory_fonts_.erase(result.first);
+                }
             }
         }
     }
