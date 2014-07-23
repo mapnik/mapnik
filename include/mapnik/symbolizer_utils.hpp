@@ -24,7 +24,12 @@
 #define MAPNIK_SYMBOLIZER_UTILS_HPP
 
 // mapnik
-#include <mapnik/expression_string.hpp>
+#include <mapnik/symbolizer_keys.hpp>
+#include <mapnik/raster_colorizer.hpp>
+#include <mapnik/path_expression.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
