@@ -28,9 +28,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/rule.hpp> // for rule::symbolizers
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
-#include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/parse_path.hpp>  // for path_processor_type
 #include <mapnik/path_expression.hpp>  // for path_expression_ptr
@@ -38,12 +36,12 @@
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/group/group_rule.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 // stl
 #include <set>
@@ -286,9 +284,13 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
                 // Indexed column name. add column name for each index value.
                 for (int col_idx = start; col_idx < end; ++col_idx)
                 {
-                    std::string col_idx_name = col_name;
-                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-                    names_.insert(col_idx_name);
+                    std::string col_idx_str;
+                    if (mapnik::util::to_string(col_idx_str,col_idx))
+                    {
+                        std::string col_idx_name = col_name;
+                        boost::replace_all(col_idx_name, "%", col_idx_str);
+                        names_.insert(col_idx_name);
+                    }
                 }
             }
         }
