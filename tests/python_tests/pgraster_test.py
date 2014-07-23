@@ -46,7 +46,9 @@ def psql_can_connect():
         return False
 
 def psql_run(cmd):
-  cmd = 'psql --set ON_ERROR_STOP=1 %s -c "%s"' % (MAPNIK_TEST_DBNAME,cmd)
+  cmd = 'psql --set ON_ERROR_STOP=1 %s -c "%s"' % \
+    (MAPNIK_TEST_DBNAME, cmd.replace('"', '\\"'))
+  print 'DEBUG: running ' + cmd
   call(cmd)
 
 def raster2pgsql_on_path():
@@ -86,7 +88,7 @@ def postgis_takedown():
 def import_raster(filename, tabname, tilesize, constraint, overview):
   print 'tile: ' + tilesize + ' constraints: ' + str(constraint) \
       + ' overviews: ' + overview
-  cmd = 'raster2pgsql -Y -I'
+  cmd = 'raster2pgsql -Y -I -q'
   if constraint:
     cmd += ' -C'
   if tilesize:
@@ -117,7 +119,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         lbl += ' Sc'
       if clip:
         lbl += ' Cl'
-      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table='dataraster',
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table='"dataRaster"',
         band=1,use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
@@ -196,7 +198,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
 
     def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
       rf = os.path.join(execution_path('.'),'../data/raster/dataraster.tif')
-      import_raster(rf, 'dataraster', tilesize, constraint, overview)
+      import_raster(rf, 'dataRaster', tilesize, constraint, overview)
       if constraint:
         lbl += ' C'
       if tilesize:
@@ -206,7 +208,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       for prescale in [0,1]:
         for clip in [0,1]:
           _test_dataraster_16bsi_rendering(lbl, overview, prescale, clip)
-      drop_imported('dataraster', overview)
+      drop_imported('dataRaster', overview)
 
     def test_dataraster_16bsi():
       for tilesize in ['','256x256']:

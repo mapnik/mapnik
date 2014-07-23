@@ -61,6 +61,11 @@ using mapnik::attribute_descriptor;
 namespace {
   // TODO: move to sql_utils
   std::string quote_literal(std::string& s) {
+    return "'" + s + "'"; // TODO: escape internal quotes
+  }
+
+  // TODO: move to sql_utils
+  std::string quote_ident(std::string& s) {
     return "\"" + s + "\""; // TODO: escape internal quotes
   }
 
@@ -163,6 +168,14 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                   MAPNIK_LOG_WARN(pgraster) << err.str();
                   use_overviews_ = false;
                 }
+                if ( ! extent_from_subquery_ ) {
+                  std::ostringstream err;
+                  err << "Pgraster Plugin: extent can only be computed "
+                         "from subquery as we could not found table source";
+                  MAPNIK_LOG_WARN(pgraster) << err.str();
+                  extent_from_subquery_ = true;
+                }
+
               }
             }
 
@@ -857,7 +870,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         if ( use_overviews_ ) {
           std::string sch = schema_;
-          std::string tab = raster_table_;
+          std::string tab = mapnik::sql_utils::unquote_double(raster_table_);
           const double scale = std::min(px_gw, px_gh);
           std::vector<pgraster_overview>::const_reverse_iterator i;
           for (i=overviews_.rbegin(); i!=overviews_.rend(); ++i) {
@@ -880,11 +893,15 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
                 << " not good for min out scale " << scale;
             }
           }
-          table_with_bbox = table_; // "( SELECT * FROM " + sch + "." + tab + ") as zz";
-          boost::algorithm::replace_all(table_with_bbox, raster_table_, tab);
-          boost::algorithm::replace_all(table_with_bbox, schema_, sch);
-          boost::algorithm::replace_all(table_with_bbox, geometryColumn_, col);
-          table_with_bbox = populate_tokens(table_with_bbox, scale_denom, box, px_gw, px_gh);
+          table_with_bbox = table_; // possibly a subquery
+          boost::algorithm::replace_all(table_with_bbox,
+              mapnik::sql_utils::unquote_double(raster_table_), tab);
+          boost::algorithm::replace_all(table_with_bbox,
+              mapnik::sql_utils::unquote_double(schema_), sch);
+          boost::algorithm::replace_all(table_with_bbox, 
+              mapnik::sql_utils::unquote_double(geometryColumn_), col);
+          table_with_bbox = populate_tokens(table_with_bbox,
+              scale_denom, box, px_gw, px_gh);
         } else {
           table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
         }
@@ -1072,9 +1089,9 @@ box2d<double> pgraster_datasource::envelope() const
         {
             std::ostringstream s;
 
-            std::string col = geometryColumn_;
-            std::string sch = schema_;
-            std::string tab = table_; //raster_table_;
+            std::string col = mapnik::sql_utils::unquote_double(geometryColumn_);
+            std::string sch = mapnik::sql_utils::unquote_double(schema_);
+            std::string tab = mapnik::sql_utils::unquote_double(raster_table_);
 
             if ( ! overviews_.empty() )
             {
@@ -1104,6 +1121,15 @@ box2d<double> pgraster_datasource::envelope() const
 
             if (estimate_extent_)
             {
+                if (tab.empty())
+                {
+                  std::ostringstream s_error;
+                  s_error << "PostGIS: unable to query the layer extent as "
+                          << "we couldn't determine the raster table name.\n"
+                          << "Please provide either an 'extent' parameter to skip this query, "
+                          << "a 'raster_table' parameter, or do not set 'estimate_extent'";
+                  throw mapnik::datasource_exception("Pgraster Plugin: " + s_error.str());
+                }
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
                   << " FROM (SELECT ST_Estimated_Extent('";
 
@@ -1124,18 +1150,18 @@ box2d<double> pgraster_datasource::envelope() const
                 {
                     // if a subselect limits records then calculating the extent upon the
                     // subquery will be faster and the bounds will be more accurate
-                    s << populate_tokens(tab) << ") as tmp";
+                    s << populate_tokens(table_) << ") as tmpx";
                 }
                 else
                 {
                     if (! sch.empty())
                     {
-                        s << sch << ".";
+                        s << quote_ident(sch) << ".";
                     }
 
                     // but if the subquery does not limit records then querying the
                     // actual table will be faster as indexes can be used
-                    s << tab << ") as tmp";
+                    s << quote_ident(tab) << ") as tmp";
                 }
             }
 
