@@ -34,6 +34,7 @@
 // stl
 #include <string>
 #include <cstring> // memset
+#include <memory>
 
 // boost
 #include <boost/optional/optional.hpp>
