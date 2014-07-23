@@ -196,7 +196,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
             // the table parameter references a table, view, or subselect not
             // registered in the geometry columns.
             //
-            geometryColumn_ = raster_field_;
+            geometryColumn_ = mapnik::sql_utils::unquote_double(raster_field_);
             if (!raster_table_.empty() && (
                   geometryColumn_.empty() || srid_ == 0 ||
                   (schema_.empty() && use_overviews_) ||
@@ -1144,7 +1144,7 @@ box2d<double> pgraster_datasource::envelope() const
             else
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent(" << col << "::geometry) as ext from ";
+                  << " FROM (SELECT ST_Extent(" << quote_ident(col) << "::geometry) as ext from ";
 
                 if (extent_from_subquery_)
                 {
