@@ -21,9 +21,9 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/layer.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/layer.hpp>
 
 // stl
 #include <string>

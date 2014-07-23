@@ -28,7 +28,6 @@
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp> // for feature_ptr
 
 // stl
 #include <cstdint>

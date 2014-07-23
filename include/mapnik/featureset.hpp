@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,58 +20,29 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_FEATURESET_BUFFER_HPP
-#define MAPNIK_FEATURESET_BUFFER_HPP
+#ifndef MAPNIK_FEATURESET_HPP
+#define MAPNIK_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/featureset.hpp>
+#include <mapnik/config.hpp>
+#include <mapnik/noncopyable.hpp>
 
-#include <vector>
+// boost
+#include <memory>
 
 namespace mapnik {
 
-class featureset_buffer : public Featureset
+class feature_impl;
+using feature_ptr = std::shared_ptr<feature_impl>;
+
+struct MAPNIK_DECL Featureset : private mapnik::noncopyable
 {
-public:
-    featureset_buffer()
-      : features_(),
-        pos_(),
-        end_()
-    {}
-
-    virtual ~featureset_buffer() {}
-
-    feature_ptr next()
-    {
-        if (pos_ != end_)
-        {
-            return *pos_++;
-        }
-        return feature_ptr();
-    }
-
-    void push(feature_ptr const& feature)
-    {
-        features_.push_back(feature);
-    }
-
-    void prepare()
-    {
-        pos_ = features_.begin();
-        end_ = features_.end();
-    }
-
-    void clear()
-    {
-        features_.clear();
-    }
-
-private:
-    std::vector<feature_ptr> features_;
-    std::vector<feature_ptr>::iterator pos_;
-    std::vector<feature_ptr>::iterator end_;
+    virtual feature_ptr next() = 0;
+    virtual ~Featureset() {}
 };
+
+using featureset_ptr = std::shared_ptr<Featureset>;
 
 }
 
-#endif // MAPNIK_FEATURESET_BUFFER_HPP
+#endif // MAPNIK_FEATURESET_HPP

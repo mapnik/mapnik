@@ -28,6 +28,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
+#include <mapnik/featureset.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
@@ -41,14 +42,6 @@
 #include <string>
 
 namespace mapnik {
-
-struct MAPNIK_DECL Featureset : private mapnik::noncopyable
-{
-    virtual feature_ptr next() = 0;
-    virtual ~Featureset() {}
-};
-
-using featureset_ptr = std::shared_ptr<Featureset>;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
