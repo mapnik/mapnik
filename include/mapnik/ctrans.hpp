@@ -24,12 +24,14 @@
 #define MAPNIK_CTRANS_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/proj_transform.hpp>
 
 // stl
-#include <algorithm>
+#include <cstddef>
 
 namespace mapnik
 {

@@ -22,10 +22,8 @@
 
 #if defined(GRID_RENDERER)
 
-// boost
-
-
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>

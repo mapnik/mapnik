@@ -23,11 +23,11 @@
 #define GROUP_PROPERTIES_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/group/group_layout.hpp>
 
 // stl
 #include <vector>
+#include <memory>
 
 namespace mapnik
 {

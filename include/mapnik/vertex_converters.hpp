@@ -40,15 +40,19 @@
 #include <boost/fusion/container/vector.hpp>
 
 // mapnik
-#include <mapnik/agg_helpers.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/polygon_clipper.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/symbolizer_keys.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // agg
+#include "agg_math_stroke.h"
+#include "agg_trans_affine.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_close_polygon.h"
@@ -217,7 +221,6 @@ template <typename T>
 struct converter_traits<T,mapnik::clip_poly_tag>
 {
     using geometry_type = T;
-    //using conv_type = mapnik::polygon_clipper<geometry_type>;
     using conv_type = typename agg::conv_clip_polygon<geometry_type>;
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)

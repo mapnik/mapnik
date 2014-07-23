@@ -23,8 +23,7 @@
 #ifndef MAPNIK_SYMBOLIZER_KEYS_HPP
 #define MAPNIK_SYMBOLIZER_KEYS_HPP
 
-#include <string>
-#include <tuple>
+#include <cstdint>
 
 namespace mapnik {
 

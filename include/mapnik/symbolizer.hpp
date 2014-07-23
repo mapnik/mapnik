@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
-#include <mapnik/value.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/expression.hpp>

@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>

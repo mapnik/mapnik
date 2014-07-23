@@ -3,7 +3,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -15,9 +14,7 @@
 #include <deque>
 #include <cmath>
 #include <stdexcept>
-
-// boost
-#include <boost/optional.hpp>
+#include <algorithm>
 
 namespace mapnik
 {
@@ -88,16 +85,6 @@ struct sleeve
                 inside=!inside;
         }
         return inside;
-    }
-    void print()
-    {
-        std::cerr << "LINESTRING("
-                  << v[0].x << " " << -v[0].y << ","
-                  << v[1].x << " " << -v[1].y << ","
-                  << v[2].x << " " << -v[2].y << ","
-                  << v[3].x << " " << -v[3].y << ","
-                  << v[0].x << " " << -v[0].y << ")" << std::endl;
-
     }
 };
 
