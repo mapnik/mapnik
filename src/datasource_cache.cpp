@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>

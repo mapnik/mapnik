@@ -23,6 +23,7 @@
 #if defined(SVG_RENDERER)
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
 
 namespace mapnik {

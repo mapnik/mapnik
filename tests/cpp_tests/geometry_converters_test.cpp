@@ -6,6 +6,7 @@
 
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature.hpp>

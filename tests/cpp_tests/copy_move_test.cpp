@@ -2,6 +2,8 @@
 #include <iostream>
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 
 #include <vector>
@@ -66,7 +68,6 @@ int main(int argc, char** argv)
     m2 = std::move(m1);
     BOOST_TEST(m2 == m0);
     BOOST_TEST(m1 != m0);
-
 
     BOOST_TEST(m0 == m2);
 

@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_filter_grammar.hpp>
 
 // spirit

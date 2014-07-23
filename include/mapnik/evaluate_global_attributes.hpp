@@ -26,18 +26,17 @@
 #include <mapnik/map.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/symbolizer_hash.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#else
+#include <boost/regex.hpp>
 #endif
 
 namespace mapnik {

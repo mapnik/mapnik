@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
-#include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
 

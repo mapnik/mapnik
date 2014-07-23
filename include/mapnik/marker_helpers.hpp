@@ -28,24 +28,24 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/expression_node.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/marker.hpp> // for svg_storage_type
-#include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/markers_placement.hpp>
-#include <mapnik/vertex_converters.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/box2d.hpp>
 
 // agg
 #include "agg_ellipse.h"
-#include "agg_basics.h"
 #include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
 #include "agg_scanline_u.h"
 #include "agg_image_filters.h"
-#include "agg_trans_bilinear.h"
+#include "agg_trans_affine.h"
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
@@ -56,7 +56,13 @@
 #include <boost/optional.hpp>
 #include <boost/variant/apply_visitor.hpp>
 
+// stl
+#include <memory>
+#include <type_traits> // remove_reference
+
 namespace mapnik {
+
+struct clip_poly_tag;
 
 template <typename SvgRenderer, typename Detector, typename RendererContext>
 struct vector_markers_rasterizer_dispatch : mapnik::noncopyable

@@ -26,15 +26,12 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
-#include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -47,7 +44,6 @@
 
 // stl
 #include <map>
-#include <vector>
 #include <stdexcept>
 
 // agg
@@ -56,6 +52,7 @@
 namespace mapnik {
 
 class text_path;
+template <typename T> class box2d;
 
 using ErrorStatus = cairo_status_t;
 

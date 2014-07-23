@@ -26,9 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/expression_string.hpp>
 
 // stl
 #include <string>

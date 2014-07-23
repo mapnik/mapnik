@@ -24,6 +24,7 @@
 #define MAPNIK_GRAPHICS_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
@@ -31,20 +32,19 @@
 #include <mapnik/global.hpp>
 
 // stl
-#include <cmath>
 #include <string>
-#include <cstring>
-
-// cairo
-#ifdef HAVE_CAIRO
-#include <mapnik/cairo/cairo_context.hpp>
-#endif
+#include <cstring> // memset
 
 // boost
 #include <boost/optional/optional.hpp>
 
+struct _cairo_surface;
+typedef struct _cairo_surface cairo_surface_t;
+
 namespace mapnik
 {
+
+using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 class MAPNIK_DECL image_32
 {

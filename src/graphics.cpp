@@ -32,6 +32,10 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
 
+#ifdef HAVE_CAIRO
+#include <mapnik/cairo/cairo_context.hpp>
+#endif
+
 namespace mapnik
 {
 image_32::image_32(int width,int height)

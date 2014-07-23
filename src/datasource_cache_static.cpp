@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/datasource.hpp>
 
 #ifdef MAPNIK_STATIC_PLUGINS
 #include <mapnik/params.hpp>
