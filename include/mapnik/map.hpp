@@ -28,8 +28,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/datasource.hpp>  // for featureset_ptr
-#include <mapnik/layer.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -37,11 +36,20 @@
 // boost
 #include <boost/optional.hpp>
 
+// stl
+#include <map>
+#include <memory>
+#include <vector>
+#include <string>
+
 namespace mapnik
 {
 
+struct Featureset;
+using featureset_ptr = std::shared_ptr<Featureset>;
 class feature_type_style;
 class CoordTransform;
+class layer;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {

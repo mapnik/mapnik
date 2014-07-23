@@ -88,6 +88,7 @@ void export_wkt_reader();
 
 #include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/layer.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/rule.hpp>

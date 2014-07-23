@@ -1,10 +1,8 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
-//#include <mapnik/value_types.hpp>
+#include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/datasource_cache.hpp>
-//#include <mapnik/params.hpp>
-//#include <mapnik/boolean.hpp>
 
 #include <vector>
 #include <algorithm>
