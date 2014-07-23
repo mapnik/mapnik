@@ -68,18 +68,21 @@ struct MAPNIK_DECL format_properties
     void from_xml(xml_node const& sym, fontset_map const& fontsets);
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 format_properties const& dfl = format_properties()) const;
-    std::string face_name;
-    boost::optional<font_set> fontset;
+    // expressions
     symbolizer_base::value_type text_size;
     symbolizer_base::value_type character_spacing;
-    double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
-    double text_opacity;
-    double halo_opacity;
-    unsigned wrap_char;
+    symbolizer_base::value_type line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
+    symbolizer_base::value_type text_opacity;
+    symbolizer_base::value_type halo_opacity;
+    symbolizer_base::value_type wrap_char;
+    symbolizer_base::value_type halo_radius;
+    //
+    std::string face_name;
+    boost::optional<font_set> fontset;
     text_transform_e text_transform; //Per expression
     color fill;
     color halo_fill;
-    double halo_radius;
+
 };
 
 
@@ -162,7 +165,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     text_layout_properties layout_defaults;
     // Default values for format_properties.
     //char_properties_ptr format;
-    format_properties format_properties;
+    format_properties format_defaults;
 
 private:
     // A tree of formatting::nodes which contain text and formatting information.

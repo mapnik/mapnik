@@ -1227,9 +1227,9 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
         }
 
         if (strict_ &&
-            !placements->defaults.format_properties.fontset)
+            !placements->defaults.format_defaults.fontset)
         {
-            ensure_font_face(placements->defaults.format_properties.face_name);
+            ensure_font_face(placements->defaults.format_defaults.face_name);
         }
         text_symbolizer sym;
         parse_symbolizer_base(sym, node);
@@ -1264,9 +1264,9 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         }
         placements->defaults.from_xml(node, fontsets_);
         if (strict_ &&
-            !placements->defaults.format_properties.fontset)
+            !placements->defaults.format_defaults.fontset)
         {
-            ensure_font_face(placements->defaults.format_properties.face_name);
+            ensure_font_face(placements->defaults.format_defaults.face_name);
         }
 
         shield_symbolizer sym;

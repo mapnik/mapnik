@@ -49,7 +49,7 @@ bool text_placement_info_simple::next()
         if (state > 0)
         {
             if (state > parent_->text_sizes_.size()) return false;
-            properties.format_properties.text_size = value_double(parent_->text_sizes_[state-1]);
+            properties.format_defaults.text_size = value_double(parent_->text_sizes_[state-1]);
         }
         if (!next_position_only())
         {

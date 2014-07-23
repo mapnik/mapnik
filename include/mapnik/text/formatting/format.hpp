@@ -32,7 +32,8 @@
 
 namespace mapnik { namespace formatting {
 
-class MAPNIK_DECL format_node: public node {
+class MAPNIK_DECL format_node: public node
+{
 public:
     void to_xml(boost::property_tree::ptree & xml) const;
     static node_ptr from_xml(xml_node const& xml);
@@ -45,14 +46,14 @@ public:
     boost::optional<std::string> face_name;
     boost::optional<symbolizer_base::value_type> text_size;
     boost::optional<symbolizer_base::value_type> character_spacing;
-    boost::optional<unsigned> line_spacing;
-    boost::optional<double> text_opacity;
+    boost::optional<symbolizer_base::value_type> line_spacing;
+    boost::optional<symbolizer_base::value_type> text_opacity;
     boost::optional<bool> wrap_before;
-    boost::optional<unsigned> wrap_char;
+    boost::optional<symbolizer_base::value_type> wrap_char;
     boost::optional<text_transform_e> text_transform;
     boost::optional<color> fill;
     boost::optional<color> halo_fill;
-    boost::optional<double> halo_radius;
+    boost::optional<symbolizer_base::value_type> halo_radius;
 
 private:
     node_ptr child_;

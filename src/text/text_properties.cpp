@@ -53,7 +53,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       largest_bbox_only(true),
       upright(UPRIGHT_AUTO),
       layout_defaults(),
-      format_properties(),//std::make_shared<format_properties>()),
+      format_defaults(),//std::make_shared<format_defaults>()),
       tree_() {}
 
 void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) const
@@ -63,18 +63,25 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
     {
         //evaluate format properties
         char_properties_ptr format = std::make_shared<char_properties>();
-        format->face_name = format_properties.face_name;
-        format->fontset = format_properties.fontset;
-        format->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_properties.text_size);
-        format->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_properties.character_spacing);
-        format->line_spacing = format_properties.line_spacing;
-        format->text_opacity = format_properties.text_opacity;
-        format->halo_opacity = format_properties.halo_opacity;
-        format->wrap_char = format_properties.wrap_char;
-        format->text_transform = format_properties.text_transform;
-        format->fill = format_properties.fill;
-        format->halo_fill = format_properties.halo_fill;
-        format->halo_radius = format_properties.halo_radius;
+
+        format->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
+        format->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);
+        format->line_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.line_spacing);
+        format->text_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
+        format->halo_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
+        format->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
+
+        std::string const& wrap_char = boost::apply_visitor(extract_value<std::string>(feature,attrs), format_defaults.wrap_char);
+        if (!wrap_char.empty())
+        {
+            format->wrap_char = wrap_char[0];
+        }
+
+        format->face_name = format_defaults.face_name;
+        format->fontset = format_defaults.fontset;
+        format->text_transform = format_defaults.text_transform;
+        format->fill = format_defaults.fill;
+        format->halo_fill = format_defaults.halo_fill;
 
         tree_->apply(format, feature, attrs, output);
     }
@@ -137,7 +144,7 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
         set_old_style_expression(*name_);
     }
 
-    format_properties.from_xml(node, fontsets);
+    format_defaults.from_xml(node, fontsets);
     formatting::node_ptr n(formatting::node::from_xml(node));
     if (n) set_format_tree(n);
 }
@@ -192,7 +199,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     }
 
     layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
-    format_properties.to_xml(node, explicit_defaults, dfl.format_properties);
+    format_defaults.to_xml(node, explicit_defaults, dfl.format_defaults);
     if (tree_) tree_->to_xml(node);
 }
 
@@ -200,6 +207,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 void text_symbolizer_properties::add_expressions(expression_set & output) const
 {
     layout_defaults.add_expressions(output);
+    //format_defaults.add_expressions(output); FIXME
     if (tree_) tree_->add_expressions(output);
 }
 
@@ -267,45 +275,41 @@ format_properties::format_properties()
       fontset(),
       text_size(10.0),
       character_spacing(0.0),
-      line_spacing(0),
+      line_spacing(0.0),
       text_opacity(1.0),
       halo_opacity(1.0),
-      wrap_char(' '),
+      wrap_char(" "),
       text_transform(NONE),
       fill(color(0,0,0)),
       halo_fill(color(255,255,255)),
-      halo_radius(0) {}
+      halo_radius(0.0) {}
 
 void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
     set_property_from_xml<double>(text_size, "size", node);
     set_property_from_xml<double>(character_spacing, "character-spacing", node);
+    set_property_from_xml<double>(line_spacing, "line-spacing", node);
+    set_property_from_xml<double>(halo_radius, "halo-radius", node);
+    set_property_from_xml<double>(text_opacity, "opacity", node);
+    set_property_from_xml<double>(halo_opacity, "halo-opacity", node);
+    set_property_from_xml<std::string>(wrap_char, "wrap-character", node);
 
-    //optional<double> character_spacing_ = node.get_opt_attr<double>("character-spacing");
-    //if (character_spacing_) character_spacing = *character_spacing_;
     optional<color> fill_ = node.get_opt_attr<color>("fill");
     if (fill_) fill = *fill_;
     optional<color> halo_fill_ = node.get_opt_attr<color>("halo-fill");
     if (halo_fill_) halo_fill = *halo_fill_;
-    optional<double> halo_radius_ = node.get_opt_attr<double>("halo-radius");
-    if (halo_radius_) halo_radius = *halo_radius_;
+
     optional<text_transform_e> tconvert_ = node.get_opt_attr<text_transform_e>("text-transform");
     if (tconvert_) text_transform = *tconvert_;
-    optional<double> line_spacing_ = node.get_opt_attr<double>("line-spacing");
-    if (line_spacing_) line_spacing = *line_spacing_;
-    optional<double> opacity_ = node.get_opt_attr<double>("opacity");
-    if (opacity_) text_opacity = *opacity_;
-    optional<double> halo_opacity_ = node.get_opt_attr<double>("halo-opacity");
-    if (halo_opacity_) halo_opacity = *halo_opacity_;
-    optional<std::string> wrap_char_ = node.get_opt_attr<std::string>("wrap-character");
-    if (wrap_char_ && (*wrap_char_).size() > 0) wrap_char = ((*wrap_char_)[0]);
+
     optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");
     if (face_name_)
     {
         face_name = *face_name_;
     }
     optional<std::string> fontset_name_ = node.get_opt_attr<std::string>("fontset-name");
-    if (fontset_name_) {
+    if (fontset_name_)
+    {
         std::map<std::string,font_set>::const_iterator itr = fontsets.find(*fontset_name_);
         if (itr != fontsets.end())
         {
@@ -339,43 +343,29 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
     }
 
     if (!(text_size == dfl.text_size) || explicit_defaults) serialize_property("size", text_size, node);
+    if (!(character_spacing == dfl.character_spacing) || explicit_defaults) serialize_property("character-spacing", character_spacing, node);
+    if (!(line_spacing == dfl.line_spacing) || explicit_defaults) serialize_property("line-spacing", line_spacing, node);
+    if (!(halo_radius == dfl.halo_radius) || explicit_defaults) serialize_property("halo-radius", halo_radius, node);
+    if (!(wrap_char == dfl.wrap_char) || explicit_defaults) serialize_property("wrap-character", wrap_char, node);
+
+    // for shield_symbolizer this is later overridden -- FIXME
+    if (!(text_opacity == dfl.text_opacity) || explicit_defaults) serialize_property("opacity", text_opacity, node);
+    if (!(halo_opacity == dfl.halo_opacity) || explicit_defaults) serialize_property("halo-opacity", halo_opacity, node);
+    //
 
     if (fill != dfl.fill || explicit_defaults)
     {
         set_attr(node, "fill", fill);
     }
-    if (halo_radius != dfl.halo_radius || explicit_defaults)
-    {
-        set_attr(node, "halo-radius", halo_radius);
-    }
+
     if (halo_fill != dfl.halo_fill || explicit_defaults)
     {
         set_attr(node, "halo-fill", halo_fill);
     }
-    if (wrap_char != dfl.wrap_char || explicit_defaults)
-    {
-        set_attr(node, "wrap-character", std::string(1, wrap_char));
-    }
+
     if (text_transform != dfl.text_transform || explicit_defaults)
     {
         set_attr(node, "text-transform", text_transform);
-    }
-    if (line_spacing != dfl.line_spacing || explicit_defaults)
-    {
-        set_attr(node, "line-spacing", line_spacing);
-    }
-    if (!(character_spacing == dfl.character_spacing) || explicit_defaults)
-        serialize_property("character-spacing", character_spacing, node);
-
-    // for shield_symbolizer this is later overridden
-    if (text_opacity != dfl.text_opacity || explicit_defaults)
-    {
-        set_attr(node, "opacity", text_opacity);
-    }
-    // for shield_symbolizer this is later overridden
-    if (halo_opacity != dfl.halo_opacity || explicit_defaults)
-    {
-        set_attr(node, "halo-opacity", halo_opacity);
     }
 }
 
