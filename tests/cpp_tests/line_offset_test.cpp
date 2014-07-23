@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <tuple>
 #include <algorithm>
 
 // test
@@ -18,7 +19,7 @@
 
 struct fake_path
 {
-    using coord_type = boost::tuple<double, double, unsigned>;
+    using coord_type = std::tuple<double, double, unsigned>;
     using cont_type = std::vector<coord_type>;
     cont_type vertices_;
     cont_type::iterator itr_;
@@ -40,7 +41,7 @@ struct fake_path
             double x = *itr++;
             double y = *itr++;
             unsigned cmd = (i == 0) ? agg::path_cmd_move_to : agg::path_cmd_line_to;
-            vertices_.push_back(boost::make_tuple(x, y, cmd));
+            vertices_.push_back(std::make_tuple(x, y, cmd));
         }
         itr_ = vertices_.begin();
     }
@@ -49,9 +50,9 @@ struct fake_path
         if (itr_ == vertices_.end()) {
             return agg::path_cmd_stop;
         }
-        *x = itr_->get<0>();
-        *y = itr_->get<1>();
-        unsigned cmd = itr_->get<2>();
+        *x = std::get<0>(*itr_);
+        *y = std::get<1>(*itr_);
+        unsigned cmd = std::get<2>(*itr_);
         ++itr_;
         return cmd;
     }

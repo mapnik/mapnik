@@ -26,6 +26,7 @@
 
 // stl
 #include <algorithm>
+#include <cassert>
 
 namespace mapnik
 {

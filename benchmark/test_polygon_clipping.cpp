@@ -6,8 +6,8 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-//#include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/fs.hpp>
 

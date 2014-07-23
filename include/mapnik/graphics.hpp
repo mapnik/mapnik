@@ -33,7 +33,6 @@
 // stl
 #include <cmath>
 #include <string>
-#include <cassert>
 #include <cstring>
 
 // cairo

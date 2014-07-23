@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
+#include <cassert>
 
 namespace mapnik { namespace util {
 

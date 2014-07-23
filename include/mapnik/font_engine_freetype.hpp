@@ -25,11 +25,8 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
-#include <mapnik/pixel_position.hpp>
 
 // boost
 #include <memory>

@@ -30,17 +30,13 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp> // for feature_ptr
 
-// boost
-#include <cstdint>
-
 // stl
+#include <cstdint>
 #include <map>
 #include <set>
 #include <cmath>
 #include <string>
-#include <cassert>
 #include <vector>
-
 
 namespace mapnik {
 

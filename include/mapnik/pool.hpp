@@ -24,7 +24,6 @@
 #define MAPNIK_POOL_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/unique_lock.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -36,10 +35,8 @@
 #endif
 
 // stl
-#include <map>
+#include <algorithm> // std::max
 #include <deque>
-#include <ctime>
-#include <cassert>
 
 namespace mapnik
 {
@@ -86,13 +83,10 @@ public:
             }
             else if ((*itr)->isOK())
             {
-                MAPNIK_LOG_DEBUG(pool) << "pool: Borrow instance=" << (*itr).get();
                 return *itr;
             }
             else
             {
-                MAPNIK_LOG_DEBUG(pool) << "pool: Bad connection (erase) instance=" << (*itr).get();
-
                 itr=pool_.erase(itr);
             }
         }
@@ -103,9 +97,6 @@ public:
             if (conn->isOK())
             {
                 pool_.push_back(conn);
-
-                MAPNIK_LOG_DEBUG(pool) << "pool: Create connection=" << conn.get();
-
                 return conn;
             }
         }

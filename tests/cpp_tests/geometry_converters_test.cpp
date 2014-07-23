@@ -16,6 +16,8 @@
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/util/geometry_to_svg.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 
 // stl
 #include <stdexcept>

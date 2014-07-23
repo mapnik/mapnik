@@ -33,10 +33,10 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <memory>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 // stl
+#include <memory>
 #include <vector>
 #include <map>
 #include <ostream>                      // for basic_ostream, operator<<, etc

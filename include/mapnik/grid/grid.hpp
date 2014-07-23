@@ -34,15 +34,12 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/conversions.hpp>
 
-// boost
-#include <cstdint>
-
 // stl
+#include <cstdint>
 #include <map>
 #include <set>
 #include <cmath>
 #include <string>
-#include <cassert>
 #include <vector>
 
 namespace mapnik

@@ -36,11 +36,10 @@
 
 // boost
 #include <boost/unordered_map.hpp>
-#include <memory>
 #include <boost/optional.hpp>
 
 // stl
-#include <cassert>
+#include <memory>
 #include <cstring>
 
 namespace mapnik

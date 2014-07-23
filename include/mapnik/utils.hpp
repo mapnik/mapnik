@@ -32,12 +32,9 @@
 #endif
 
 // stl
-#include <stdexcept>
-#include <cstdlib>
-#include <limits>
-#include <ctime>
-#include <algorithm>
-#include <cmath>
+#include <stdexcept> // std::runtime_error
+#include <cstdlib> // std::atexit
+#include <new> // operator new
 
 namespace mapnik
 {
