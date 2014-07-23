@@ -222,7 +222,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         lbl += ' Sc'
       if clip:
         lbl += ' Cl'
-      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table='river',
+      ds = mapnik.PgRaster(dbname=MAPNIK_TEST_DBNAME,table='(select * from "River") foo',
         use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
@@ -299,7 +299,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
 
     def _test_rgba_8bui(lbl, tilesize, constraint, overview):
       rf = os.path.join(execution_path('.'),'../data/raster/river.tiff')
-      import_raster(rf, 'river', tilesize, constraint, overview)
+      import_raster(rf, 'River', tilesize, constraint, overview)
       if constraint:
         lbl += ' C'
       if tilesize:
@@ -309,7 +309,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       for prescale in [0,1]:
         for clip in [0,1]:
           _test_rgba_8bui_rendering(lbl, overview, prescale, clip)
-      drop_imported('river', overview)
+      drop_imported('River', overview)
 
     def test_rgba_8bui():
       for tilesize in ['','16x16']:
