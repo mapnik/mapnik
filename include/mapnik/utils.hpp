@@ -24,6 +24,7 @@
 #define MAPNIK_UTILS_HPP
 
 #include <mapnik/config.hpp>
+#include <mapnik/unique_lock.hpp>
 
 // boost
 #ifdef MAPNIK_THREADSAFE

@@ -25,13 +25,14 @@
 
 // mapnik (should not depend on anything that need to use this)
 #include <mapnik/config.hpp>
+#include <mapnik/unique_lock.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/unordered_map.hpp>
 #ifdef MAPNIK_THREADSAFE
-#include <thread>
+#include <mutex>
 #endif
 
 // std

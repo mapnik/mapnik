@@ -30,14 +30,18 @@
 #include <mapnik/expression_node_types.hpp>
 
 // boost
-#include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#else
+#include <boost/regex.hpp>
 #endif
-#include <boost/function.hpp>
+
+#include <functional>
 
 namespace mapnik
 {
+
+using value_type = mapnik::value;
 
 template <typename Tag> struct make_op;
 template <> struct make_op<tags::negate> { using type = std::negate<value_type>;};
@@ -129,7 +133,7 @@ struct function_call
           call_(f) {}
 
     expr_node expr;
-    boost::function<value_type(value_type)> call_;
+    std::function<value_type(value_type)> call_;
 };
 
 // ops

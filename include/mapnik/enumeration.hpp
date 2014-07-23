@@ -27,7 +27,6 @@
 #include <mapnik/config.hpp>
 
 // stl
-#include <vector>
 #include <bitset>
 #include <iostream>
 #include <cstdlib>

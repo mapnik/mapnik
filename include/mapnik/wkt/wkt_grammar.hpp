@@ -34,8 +34,10 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/vertex.hpp>
 
 namespace mapnik { namespace wkt {
 

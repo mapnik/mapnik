@@ -25,13 +25,14 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/unique_lock.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // boost
 #include <memory>
 #ifdef MAPNIK_THREADSAFE
-#include <thread>
+#include <mutex>
 #endif
 
 // stl

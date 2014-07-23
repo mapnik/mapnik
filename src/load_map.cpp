@@ -58,6 +58,7 @@
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
+#include <mapnik/boolean.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -176,7 +177,7 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
         {
             // Check if relative paths should be interpreted as relative to/from XML location
             // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<boolean> paths_from_xml = map_node.get_opt_attr<boolean>("paths-from-xml");
+            optional<mapnik::boolean> paths_from_xml = map_node.get_opt_attr<mapnik::boolean>("paths-from-xml");
             if (paths_from_xml)
             {
                 relative_to_xml_ = *paths_from_xml;
@@ -440,7 +441,7 @@ void map_parser::parse_style(Map & map, xml_node const& node)
         optional<double> opacity = node.get_opt_attr<double>("opacity");
         if (opacity) style.set_opacity(*opacity);
 
-        optional<boolean> image_filters_inflate = node.get_opt_attr<boolean>("image-filters-inflate");
+        optional<mapnik::boolean> image_filters_inflate = node.get_opt_attr<mapnik::boolean>("image-filters-inflate");
         if (image_filters_inflate)
         {
             style.set_image_filters_inflate(*image_filters_inflate);
@@ -566,7 +567,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         }
         layer lyr(name, srs);
 
-        optional<boolean> status = node.get_opt_attr<boolean>("status");
+        optional<mapnik::boolean> status = node.get_opt_attr<mapnik::boolean>("status");
         if (status)
         {
             lyr.set_active(* status);
@@ -585,21 +586,21 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             lyr.set_max_zoom(* max_zoom);
         }
 
-        optional<boolean> queryable = node.get_opt_attr<boolean>("queryable");
+        optional<mapnik::boolean> queryable = node.get_opt_attr<mapnik::boolean>("queryable");
         if (queryable)
         {
             lyr.set_queryable(* queryable);
         }
 
-        optional<boolean> clear_cache =
-            node.get_opt_attr<boolean>("clear-label-cache");
+        optional<mapnik::boolean> clear_cache =
+            node.get_opt_attr<mapnik::boolean>("clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache(* clear_cache);
         }
 
-        optional<boolean> cache_features =
-            node.get_opt_attr<boolean>("cache-features");
+        optional<mapnik::boolean> cache_features =
+            node.get_opt_attr<mapnik::boolean>("cache-features");
         if (cache_features)
         {
             lyr.set_cache_features(* cache_features);
@@ -1290,7 +1291,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<shield_symbolizer,double>(sym, keys::text_opacity, node);
 
         // unlock_image
-        optional<boolean> unlock_image = node.get_opt_attr<boolean>("unlock-image");
+        optional<mapnik::boolean> unlock_image = node.get_opt_attr<mapnik::boolean>("unlock-image");
         if (unlock_image) put(sym, keys::unlock_image, *unlock_image);
 
         std::string file = node.get_attr<std::string>("file");
@@ -1311,7 +1312,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
 
         // no_text - removed property in 2.1.x that used to have a purpose
         // before you could provide an expression with an empty string
-        optional<boolean> no_text = node.get_opt_attr<boolean>("no-text");
+        optional<mapnik::boolean> no_text = node.get_opt_attr<mapnik::boolean>("no-text");
         if (no_text)
         {
             MAPNIK_LOG_ERROR(shield_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
@@ -1519,7 +1520,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
         if (mesh_size) put<value_integer>(raster_sym, keys::mesh_size, *mesh_size);
 
         // premultiplied status of image
-        optional<boolean> premultiplied = node.get_opt_attr<boolean>("premultiplied");
+        optional<mapnik::boolean> premultiplied = node.get_opt_attr<mapnik::boolean>("premultiplied");
         if (premultiplied) put(raster_sym, keys::premultiplied, *premultiplied);
 
         bool found_colorizer = false;

@@ -74,10 +74,10 @@ boost::optional<value_integer> parameters::get(std::string const& key,
                                    value_integer const& default_opt_value) const;
 
 template MAPNIK_DECL
-boost::optional<boolean> parameters::get(std::string const& key) const;
+boost::optional<mapnik::boolean> parameters::get(std::string const& key) const;
 template MAPNIK_DECL
-boost::optional<boolean> parameters::get(std::string const& key,
-                                         boolean const& default_opt_value) const;
+boost::optional<mapnik::boolean> parameters::get(std::string const& key,
+                                         mapnik::boolean const& default_opt_value) const;
 #endif
 
 }

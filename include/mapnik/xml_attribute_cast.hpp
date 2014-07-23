@@ -28,15 +28,20 @@
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/boolean.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/util/conversions.hpp>
+#include <mapnik/attribute.hpp>
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/format.hpp>
 
 // stl
 #include <string>
+#include <map>
+#include <typeinfo>
+#include <utility>
 #include <stdexcept>
 
 namespace mapnik { namespace detail {
@@ -46,7 +51,8 @@ struct do_xml_attribute_cast
 {
     static inline boost::optional<T> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& /*source*/)
     {
-        std::string err_msg = (boost::format("No conversion from std::string to %s") % typeid(T).name()).str();
+        std::string err_msg("No conversion from std::string to");
+        err_msg += std::string(typeid(T).name());
         throw std::runtime_error(err_msg);
     }
 };

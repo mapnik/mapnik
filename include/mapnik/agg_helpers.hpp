@@ -25,13 +25,9 @@
 
 // mapnik
 #include <mapnik/gamma_method.hpp>
-#include <mapnik/symbolizer.hpp>
-
 
 // agg
-#include "agg_gamma_functions.h"        // for gamma_power, gamma_linear, etc
-#include "agg_math_stroke.h"            // for line_join_e::miter_join, etc
-#include "agg_rasterizer_outline_aa.h"
+#include "agg_gamma_functions.h"
 
 namespace mapnik {
 
@@ -60,75 +56,6 @@ void set_gamma_method(T & ras_ptr, double gamma, gamma_method_enum method)
     }
 }
 
-template <typename Symbolizer, typename PathType, typename Feature>
-void set_join_caps(Symbolizer const& sym, PathType & stroke, Feature const& feature, attributes const& vars)
-{
-    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
-    switch (join)
-    {
-    case MITER_JOIN:
-        stroke.generator().line_join(agg::miter_join);
-        break;
-    case MITER_REVERT_JOIN:
-        stroke.generator().line_join(agg::miter_join);
-        break;
-    case ROUND_JOIN:
-        stroke.generator().line_join(agg::round_join);
-        break;
-    default:
-        stroke.generator().line_join(agg::bevel_join);
-    }
-
-    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
-
-    switch (cap)
-    {
-    case BUTT_CAP:
-        stroke.generator().line_cap(agg::butt_cap);
-        break;
-    case SQUARE_CAP:
-        stroke.generator().line_cap(agg::square_cap);
-        break;
-    default:
-        stroke.generator().line_cap(agg::round_cap);
-    }
 }
 
-
-template <typename Symbolizer, typename Rasterizer, typename Feature>
-void set_join_caps_aa(Symbolizer const& sym, Rasterizer & ras, Feature & feature, attributes const& vars)
-{
-    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
-    switch (join)
-    {
-    case MITER_JOIN:
-        ras.line_join(agg::outline_miter_accurate_join);
-        break;
-    case MITER_REVERT_JOIN:
-        ras.line_join(agg::outline_no_join);
-        break;
-    case ROUND_JOIN:
-        ras.line_join(agg::outline_round_join);
-        break;
-    default:
-        ras.line_join(agg::outline_no_join);
-    }
-
-    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
-
-    switch (cap)
-    {
-    case BUTT_CAP:
-        ras.round_cap(false);
-        break;
-    case SQUARE_CAP:
-        ras.round_cap(false);
-        break;
-    default:
-        ras.round_cap(true);
-    }
-}
-
-}
-
-#endif //MAPNIK_AGG_HELPERS_HPP
+#endif // MAPNIK_AGG_HELPERS_HPP

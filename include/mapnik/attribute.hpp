@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/value.hpp>
 
 // stl

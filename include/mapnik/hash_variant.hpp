@@ -11,10 +11,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // TODO: Remove this file once the minimum Boost version is bumped to 1.50
+#include <boost/version.hpp>
+#if BOOST_VERSION < 105000
 
 #ifndef BOOST_HASH_VARIANT_FUNCTION_HPP
 #define BOOST_HASH_VARIANT_FUNCTION_HPP
-
+ 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 # pragma once
 #endif
@@ -44,5 +46,7 @@ namespace boost {
         return seed;
     }
 }
+
+#endif // BOOST_HASH_VARIANT_FUNCTION_HPP
 
 #endif

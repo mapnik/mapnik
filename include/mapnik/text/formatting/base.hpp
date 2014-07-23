@@ -24,6 +24,7 @@
 
 // mapnik
 #include <mapnik/expression.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/text/char_properties_ptr.hpp>
 
 // boost

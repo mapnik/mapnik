@@ -33,18 +33,19 @@
 
 // boost
 #include <memory>
+#include <map>
+#include <utility> // pair
 
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/optional.hpp>
 #ifdef MAPNIK_THREADSAFE
-#include <thread>
+#include <mutex>
 #endif
 
-//// stl
+// stl
 #include <vector>
 
 struct FT_LibraryRec_;
 struct FT_MemoryRec_;
+namespace boost { template <class T> class optional; }
 
 namespace mapnik
 {
@@ -73,7 +74,7 @@ public:
      */
     static bool register_fonts(std::string const& dir, bool recurse = false);
     static std::vector<std::string> face_names();
-    static std::map<std::string,std::pair<int,std::string> > const& get_mapping();
+    static std::map<std::string, std::pair<int,std::string> > const& get_mapping();
     face_ptr create_face(std::string const& family_name);
     stroker_ptr create_stroker();
     virtual ~freetype_engine();

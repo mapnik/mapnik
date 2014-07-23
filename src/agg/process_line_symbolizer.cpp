@@ -24,7 +24,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
@@ -51,6 +50,40 @@
 #include <cmath>
 
 namespace mapnik {
+
+template <typename Symbolizer, typename Rasterizer, typename Feature>
+void set_join_caps_aa(Symbolizer const& sym, Rasterizer & ras, Feature & feature, attributes const& vars)
+{
+    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
+    switch (join)
+    {
+    case MITER_JOIN:
+        ras.line_join(agg::outline_miter_accurate_join);
+        break;
+    case MITER_REVERT_JOIN:
+        ras.line_join(agg::outline_no_join);
+        break;
+    case ROUND_JOIN:
+        ras.line_join(agg::outline_round_join);
+        break;
+    default:
+        ras.line_join(agg::outline_no_join);
+    }
+
+    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
+
+    switch (cap)
+    {
+    case BUTT_CAP:
+        ras.round_cap(false);
+        break;
+    case SQUARE_CAP:
+        ras.round_cap(false);
+        break;
+    default:
+        ras.round_cap(true);
+    }
+}
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(line_symbolizer const& sym,

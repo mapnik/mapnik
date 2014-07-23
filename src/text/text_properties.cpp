@@ -30,6 +30,7 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/text/properties_util.hpp>
+#include <mapnik/boolean.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -91,11 +92,11 @@ void text_symbolizer_properties::placement_properties_from_xml(xml_node const& s
     if (min_padding_) minimum_padding = *min_padding_;
     optional<double> min_path_length_ = sym.get_opt_attr<double>("minimum-path-length");
     if (min_path_length_) minimum_path_length = *min_path_length_;
-    optional<boolean> avoid_edges_ = sym.get_opt_attr<boolean>("avoid-edges");
+    optional<mapnik::boolean> avoid_edges_ = sym.get_opt_attr<mapnik::boolean>("avoid-edges");
     if (avoid_edges_) avoid_edges = *avoid_edges_;
-    optional<boolean> allow_overlap_ = sym.get_opt_attr<boolean>("allow-overlap");
+    optional<mapnik::boolean> allow_overlap_ = sym.get_opt_attr<mapnik::boolean>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
-    optional<boolean> largest_bbox_only_ = sym.get_opt_attr<boolean>("largest-bbox-only");
+    optional<mapnik::boolean> largest_bbox_only_ = sym.get_opt_attr<mapnik::boolean>("largest-bbox-only");
     if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
 }
 
@@ -201,8 +202,8 @@ void text_layout_properties::from_xml(xml_node const &node)
     set_property_from_xml<double>(dy, "dy", node);
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
-    set_property_from_xml<boolean>(wrap_before, "wrap-before", node);
-    set_property_from_xml<boolean>(rotate_displacement, "rotate-displacement", node);
+    set_property_from_xml<mapnik::boolean>(wrap_before, "wrap-before", node);
+    set_property_from_xml<mapnik::boolean>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
     //
     optional<vertical_alignment_e> valign_ = node.get_opt_attr<vertical_alignment_e>("vertical-alignment");

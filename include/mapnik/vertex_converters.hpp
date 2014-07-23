@@ -158,6 +158,40 @@ struct converter_traits<T, mapnik::dash_tag>
     }
 };
 
+template <typename Symbolizer, typename PathType, typename Feature>
+void set_join_caps(Symbolizer const& sym, PathType & stroke, Feature const& feature, attributes const& vars)
+{
+    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
+    switch (join)
+    {
+    case MITER_JOIN:
+        stroke.generator().line_join(agg::miter_join);
+        break;
+    case MITER_REVERT_JOIN:
+        stroke.generator().line_join(agg::miter_join);
+        break;
+    case ROUND_JOIN:
+        stroke.generator().line_join(agg::round_join);
+        break;
+    default:
+        stroke.generator().line_join(agg::bevel_join);
+    }
+
+    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
+
+    switch (cap)
+    {
+    case BUTT_CAP:
+        stroke.generator().line_cap(agg::butt_cap);
+        break;
+    case SQUARE_CAP:
+        stroke.generator().line_cap(agg::square_cap);
+        break;
+    default:
+        stroke.generator().line_cap(agg::round_cap);
+    }
+}
+
 template <typename T>
 struct converter_traits<T, mapnik::stroke_tag>
 {
