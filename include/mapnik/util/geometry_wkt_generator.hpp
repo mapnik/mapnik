@@ -29,7 +29,6 @@
 #include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
 
 // boost
-#include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -39,6 +38,9 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunct
+
+// stl
+#include <tuple>
 
 namespace boost { namespace spirit { namespace traits {
 

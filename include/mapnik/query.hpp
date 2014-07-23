@@ -27,12 +27,10 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/attribute.hpp>
 
-// boost
-#include <boost/tuple/tuple.hpp>
-
 // stl
 #include <set>
 #include <string>
+#include <tuple>
 
 namespace mapnik {
 

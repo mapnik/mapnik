@@ -32,7 +32,6 @@
 #include <mapnik/util/container_adapter.hpp>
 
 // boost
-#include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>

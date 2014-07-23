@@ -32,8 +32,6 @@
 #include <mapnik/geometry.hpp>
 
 // boost
-
-#include <boost/tuple/tuple.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/box.hpp>

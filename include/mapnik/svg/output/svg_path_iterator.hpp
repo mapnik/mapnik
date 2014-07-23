@@ -29,7 +29,6 @@
 
 // boost
 #include <boost/iterator/iterator_adaptor.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <memory>
 
 namespace mapnik {

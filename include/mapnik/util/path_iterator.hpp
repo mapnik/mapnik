@@ -27,8 +27,10 @@
 #include <mapnik/global.hpp>
 
 // boost
-#include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+
+// stl
+#include <tuple>
 
 namespace mapnik { namespace util {
 

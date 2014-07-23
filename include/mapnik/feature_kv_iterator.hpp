@@ -29,7 +29,6 @@
 
 // boost
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
@@ -37,7 +36,7 @@
 
 // stl
 #include <map>
-
+#include <tuple>
 
 namespace mapnik {
 

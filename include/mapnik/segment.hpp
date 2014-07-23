@@ -23,7 +23,8 @@
 #ifndef MAPNIK_SEGMENT_HPP
 #define MAPNIK_SEGMENT_HPP
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
+#include <algorithm>
 
 namespace mapnik
 {

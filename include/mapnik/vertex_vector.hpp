@@ -31,9 +31,8 @@
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/tuple/tuple.hpp>
-
+// stl
+#include <tuple>
 #include <cstring>  // required for memcpy with linux/g++
 
 namespace mapnik
