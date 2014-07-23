@@ -41,18 +41,10 @@
 // stl
 #include <vector>
 
-#ifdef MAPNIK_BIG_ENDIAN
-#define U2RED(x) (((x)>>24)&0xff)
-#define U2GREEN(x) (((x)>>16)&0xff)
-#define U2BLUE(x) (((x)>>8)&0xff)
-#define U2ALPHA(x) ((x)&0xff)
-#else
 #define U2RED(x) ((x)&0xff)
 #define U2GREEN(x) (((x)>>8)&0xff)
 #define U2BLUE(x) (((x)>>16)&0xff)
 #define U2ALPHA(x) (((x)>>24)&0xff)
-#endif
-
 
 namespace mapnik {
 

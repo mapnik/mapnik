@@ -23,9 +23,6 @@
 #ifndef MAPNIK_GLOBAL_HPP
 #define MAPNIK_GLOBAL_HPP
 
-// boost
-#include <boost/detail/endian.hpp>
-
 // stl
 #include <cstdint>
 #include <cstring>
@@ -33,10 +30,6 @@
 
 namespace mapnik
 {
-
-#ifdef BOOST_BIG_ENDIAN
-#define MAPNIK_BIG_ENDIAN
-#endif
 
 #define int2net(A)  (int16_t) (((std::uint16_t) ((std::uint8_t) (A)[1]))      | \
                                (((std::uint16_t) ((std::uint8_t) (A)[0])) << 8))
@@ -77,69 +70,36 @@ using byte = std::uint8_t;
 // read int16_t NDR (little endian)
 inline void read_int16_ndr(const char* data, std::int16_t & val)
 {
-#ifndef MAPNIK_BIG_ENDIAN
     std::memcpy(&val,data,2);
-#else
-    val = (data[0]&0xff) |
-        ((data[1]&0xff)<<8);
-#endif
 }
 
 // read int32_t NDR (little endian)
 inline void read_int32_ndr(const char* data, std::int32_t & val)
 {
-#ifndef MAPNIK_BIG_ENDIAN
     std::memcpy(&val,data,4);
-#else
-    val = (data[0]&0xff)     |
-        ((data[1]&0xff)<<8)  |
-        ((data[2]&0xff)<<16) |
-        ((data[3]&0xff)<<24);
-#endif
 }
 
 // read double NDR (little endian)
 inline void read_double_ndr(const char* data, double & val)
 {
-#ifndef MAPNIK_BIG_ENDIAN
     std::memcpy(&val,&data[0],8);
-#else
-    std::int64_t bits = ((std::int64_t)data[0] & 0xff) |
-        ((std::int64_t)data[1] & 0xff) << 8   |
-        ((std::int64_t)data[2] & 0xff) << 16  |
-        ((std::int64_t)data[3] & 0xff) << 24  |
-        ((std::int64_t)data[4] & 0xff) << 32  |
-        ((std::int64_t)data[5] & 0xff) << 40  |
-        ((std::int64_t)data[6] & 0xff) << 48  |
-        ((std::int64_t)data[7] & 0xff) << 56  ;
-    std::memcpy(&val,&bits,8);
-#endif
 }
 
 // read int16_t XDR (big endian)
 inline void read_int16_xdr(const char* data, std::int16_t & val)
 {
-#ifndef MAPNIK_BIG_ENDIAN
     val = static_cast<std::int16_t>((data[3]&0xff) | ((data[2]&0xff)<<8));
-#else
-    std::memcpy(&val,data,2);
-#endif
 }
 
 // read int32_t XDR (big endian)
 inline void read_int32_xdr(const char* data, std::int32_t & val)
 {
-#ifndef MAPNIK_BIG_ENDIAN
     val = (data[3]&0xff) | ((data[2]&0xff)<<8) | ((data[1]&0xff)<<16) | ((data[0]&0xff)<<24);
-#else
-    std::memcpy(&val,data,4);
-#endif
 }
 
 // read double XDR (big endian)
 inline void read_double_xdr(const char* data, double & val)
 {
-#ifndef MAPNIK_BIG_ENDIAN
     std::int64_t bits = ((std::int64_t)data[7] & 0xff) |
         ((std::int64_t)data[6] & 0xff) << 8   |
         ((std::int64_t)data[5] & 0xff) << 16  |
@@ -149,9 +109,6 @@ inline void read_double_xdr(const char* data, double & val)
         ((std::int64_t)data[1] & 0xff) << 48  |
         ((std::int64_t)data[0] & 0xff) << 56  ;
     std::memcpy(&val,&bits,8);
-#else
-    std::memcpy(&val,&data[0],8);
-#endif
 }
 
 #ifdef _WINDOWS

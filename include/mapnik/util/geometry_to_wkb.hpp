@@ -97,11 +97,7 @@ struct wkb_stream
 template <typename S, typename T>
 inline void write (S & stream, T val, std::size_t size, wkbByteOrder byte_order)
 {
-#ifdef MAPNIK_BIG_ENDIAN
-    bool need_swap =  byte_order ? wkbNDR : wkbXDR;
-#else
     bool need_swap =  byte_order ? wkbXDR : wkbNDR;
-#endif
     char* buf = reinterpret_cast<char*>(&val);
     if (need_swap)
     {

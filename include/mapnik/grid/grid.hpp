@@ -211,11 +211,7 @@ public:
                 for (int x = box.minx(); x < box.maxx(); ++x)
                 {
                     unsigned rgba = row_from[x-x0];
-#ifdef MAPNIK_BIG_ENDIAN
-                    unsigned a = rgba & 0xff;
-#else
                     unsigned a = (rgba >> 24) & 0xff;
-#endif
                     // if the pixel is more than a tenth
                     // opaque then burn in the feature id
                     if (a >= 25)

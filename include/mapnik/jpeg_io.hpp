@@ -116,15 +116,9 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
         int index=0;
         for (int i=0;i<width;++i)
         {
-#ifdef MAPNIK_BIG_ENDIAN
-            row[index++]=(imageRow[i]>>24)&0xff;
-            row[index++]=(imageRow[i]>>16)&0xff;
-            row[index++]=(imageRow[i]>>8)&0xff;
-#else
             row[index++]=(imageRow[i])&0xff;
             row[index++]=(imageRow[i]>>8)&0xff;
             row[index++]=(imageRow[i]>>16)&0xff;
-#endif
         }
         row_pointer[0] = &row[0];
         (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);

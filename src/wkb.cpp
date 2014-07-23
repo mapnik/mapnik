@@ -125,11 +125,7 @@ public:
             break;
         }
 
-#ifndef MAPNIK_BIG_ENDIAN
         needSwap_ = byteOrder_ ? wkbXDR : wkbNDR;
-#else
-        needSwap_ = byteOrder_ ? wkbNDR : wkbXDR;
-#endif
     }
 
     void read(boost::ptr_vector<geometry_type> & paths)

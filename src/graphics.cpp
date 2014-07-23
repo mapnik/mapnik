@@ -108,7 +108,6 @@ void image_32::set_grayscale_to_alpha()
         for (unsigned int x = 0; x < width_; ++x)
         {
             unsigned rgba = row_from[x];
-            // TODO - big endian support
             unsigned r = rgba & 0xff;
             unsigned g = (rgba >> 8 ) & 0xff;
             unsigned b = (rgba >> 16) & 0xff;
@@ -148,20 +147,6 @@ void image_32::set_alpha(float opacity)
         for (unsigned int x = 0; x < width_; ++x)
         {
             unsigned rgba = row_to[x];
-
-#ifdef MAPNIK_BIG_ENDIAN
-            unsigned a0 = (rgba & 0xff);
-            unsigned a1 = int( (rgba & 0xff) * opacity );
-
-            if (a0 == a1) continue;
-
-            unsigned r = (rgba >> 24) & 0xff;
-            unsigned g = (rgba >> 16 ) & 0xff;
-            unsigned b = (rgba >> 8) & 0xff;
-
-            row_to[x] = (a1) | (b << 8) |  (g << 16) | (r << 24) ;
-
-#else
             unsigned a0 = (rgba >> 24) & 0xff;
             unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
             //unsigned a1 = opacity;
@@ -172,7 +157,6 @@ void image_32::set_alpha(float opacity)
             unsigned b = (rgba >> 16) & 0xff;
 
             row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
-#endif
         }
     }
 }
