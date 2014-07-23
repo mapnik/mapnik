@@ -21,6 +21,7 @@
 #include "layer_info_dialog.hpp"
 
 // mapnik
+#include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/params_impl.hpp>
 #include <mapnik/layer.hpp>
@@ -70,4 +71,3 @@ Ui::LayerInfoDialog& layer_info_dialog::getUI()
 {
    return ui;
 }
-

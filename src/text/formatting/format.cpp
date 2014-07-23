@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/text/formatting/format.hpp>
+#include <mapnik/text/properties_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
 
@@ -31,17 +32,18 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-namespace mapnik {
-namespace formatting {
+namespace mapnik { namespace formatting {
 
 using boost::property_tree::ptree;
 
-void format_node::to_xml(ptree &xml) const
+void format_node::to_xml(ptree & xml) const
 {
-    ptree &new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
+    ptree & new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
     if (face_name) set_attr(new_node, "face-name", *face_name);
-    if (text_size) set_attr(new_node, "size", *text_size);
-    if (character_spacing) set_attr(new_node, "character-spacing", *character_spacing);
+
+    if (text_size) serialize_property("size", *text_size, xml);
+    if (character_spacing) serialize_property("character-spacing", *character_spacing, xml);
+
     if (line_spacing) set_attr(new_node, "line-spacing", *line_spacing);
     if (text_opacity) set_attr(new_node, "opacity", *text_opacity);
     if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before);
@@ -63,9 +65,11 @@ node_ptr format_node::from_xml(xml_node const& xml)
     n->set_child(child);
 
     n->face_name = xml.get_opt_attr<std::string>("face-name");
-    /*TODO: Fontset is problematic. We don't have the fontsets pointer here... */
-    n->text_size = xml.get_opt_attr<double>("size");
-    n->character_spacing = xml.get_opt_attr<double>("character-spacing");
+    //TODO: Fontset is problematic. We don't have the fontsets pointer here...
+
+    set_property_from_xml<double>(n->text_size, "size", xml);
+    set_property_from_xml<double>(n->character_spacing, "character-spacing", xml);
+
     n->line_spacing = xml.get_opt_attr<double>("line-spacing");
     n->text_opacity = xml.get_opt_attr<double>("opacity");
     n->wrap_char = xml.get_opt_attr<unsigned>("wrap-character");
@@ -77,12 +81,14 @@ node_ptr format_node::from_xml(xml_node const& xml)
 }
 
 
-void format_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+void format_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& attrs, text_layout &output) const
 {
     char_properties_ptr new_properties = std::make_shared<char_properties>(*p);
     if (face_name) new_properties->face_name = *face_name;
-    if (text_size) new_properties->text_size = *text_size;
-    if (character_spacing) new_properties->character_spacing = *character_spacing;
+
+    if (text_size) new_properties->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), *text_size);
+    if (character_spacing) new_properties->character_spacing =boost::apply_visitor(extract_value<value_double>(feature,attrs), *character_spacing);
+
     if (line_spacing) new_properties->line_spacing = *line_spacing;
     if (text_opacity) new_properties->text_opacity = *text_opacity;
     if (wrap_char) new_properties->wrap_char = *wrap_char;
@@ -91,11 +97,8 @@ void format_node::apply(char_properties_ptr p, feature_impl const& feature, attr
     if (halo_fill) new_properties->halo_fill = *halo_fill;
     if (halo_radius) new_properties->halo_radius = *halo_radius;
 
-    if (child_) {
-        child_->apply(new_properties, feature, vars, output);
-    } else {
-        MAPNIK_LOG_WARN(format) << "Useless format: No text to format";
-    }
+    if (child_) child_->apply(new_properties, feature, attrs, output);
+    else MAPNIK_LOG_WARN(format) << "Useless format: No text to format";
 }
 
 
@@ -110,7 +113,7 @@ node_ptr format_node::get_child() const
     return child_;
 }
 
-void format_node::add_expressions(expression_set &output) const
+void format_node::add_expressions(expression_set & output) const
 {
     if (child_) child_->add_expressions(output);
 }

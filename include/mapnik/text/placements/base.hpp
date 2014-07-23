@@ -49,7 +49,7 @@ public:
     // If this functions returns false the placement data should be
     // considered invalid!
 
-    virtual bool next()=0;
+    virtual bool next() = 0;
     virtual ~text_placement_info() {}
 
     // Properties actually used by placement finder and renderer. Values in
@@ -84,7 +84,7 @@ public:
     //     return text_placement_info_ptr(new text_placement_info_XXX(this));
     // }
 
-    virtual text_placement_info_ptr get_placement_info(double scale_factor_) const = 0;
+    virtual text_placement_info_ptr get_placement_info(double scale_factor) const = 0;
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
 

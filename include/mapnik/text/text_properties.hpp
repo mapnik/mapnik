@@ -48,11 +48,6 @@ using fontset_map = std::map<std::string, font_set>;
 
 struct MAPNIK_DECL char_properties
 {
-    char_properties();
-    // Construct object from XML.
-    void from_xml(xml_node const& sym, fontset_map const& fontsets);
-    // Write object to XML ptree.
-    void to_xml(boost::property_tree::ptree& node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
@@ -66,6 +61,27 @@ struct MAPNIK_DECL char_properties
     color halo_fill;
     double halo_radius;
 };
+
+struct MAPNIK_DECL format_properties
+{
+    format_properties();
+    void from_xml(xml_node const& sym, fontset_map const& fontsets);
+    void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
+                format_properties const& dfl = format_properties()) const;
+    std::string face_name;
+    boost::optional<font_set> fontset;
+    symbolizer_base::value_type text_size;
+    symbolizer_base::value_type character_spacing;
+    double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
+    double text_opacity;
+    double halo_opacity;
+    unsigned wrap_char;
+    text_transform_e text_transform; //Per expression
+    color fill;
+    color halo_fill;
+    double halo_radius;
+};
+
 
 // Properties for building the layout of a single text placement
 struct MAPNIK_DECL text_layout_properties
@@ -104,7 +120,7 @@ struct MAPNIK_DECL text_symbolizer_properties
 {
     text_symbolizer_properties();
     // Load only placement related values from XML ptree.
-    void placement_properties_from_xml(xml_node const& sym);
+    void placement_properties_from_xml(xml_node const& node);
     // Load all values from XML ptree.
     void from_xml(xml_node const& node, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
@@ -144,8 +160,10 @@ struct MAPNIK_DECL text_symbolizer_properties
 
     // Default values for text layouts
     text_layout_properties layout_defaults;
-    // Default values for char_properties.
-    char_properties_ptr format;
+    // Default values for format_properties.
+    //char_properties_ptr format;
+    format_properties format_properties;
+
 private:
     // A tree of formatting::nodes which contain text and formatting information.
     formatting::node_ptr tree_;

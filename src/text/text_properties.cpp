@@ -53,13 +53,31 @@ text_symbolizer_properties::text_symbolizer_properties()
       largest_bbox_only(true),
       upright(UPRIGHT_AUTO),
       layout_defaults(),
-      format(std::make_shared<char_properties>()),
+      format_properties(),//std::make_shared<format_properties>()),
       tree_() {}
 
-void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& vars) const
+void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) const
 {
     output.clear();
-    if (tree_) tree_->apply(format, feature, vars, output);
+    if (tree_)
+    {
+        //evaluate format properties
+        char_properties_ptr format = std::make_shared<char_properties>();
+        format->face_name = format_properties.face_name;
+        format->fontset = format_properties.fontset;
+        format->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_properties.text_size);
+        format->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_properties.character_spacing);
+        format->line_spacing = format_properties.line_spacing;
+        format->text_opacity = format_properties.text_opacity;
+        format->halo_opacity = format_properties.halo_opacity;
+        format->wrap_char = format_properties.wrap_char;
+        format->text_transform = format_properties.text_transform;
+        format->fill = format_properties.fill;
+        format->halo_fill = format_properties.halo_fill;
+        format->halo_radius = format_properties.halo_radius;
+
+        tree_->apply(format, feature, attrs, output);
+    }
     else MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
 }
 
@@ -119,7 +137,7 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
         set_old_style_expression(*name_);
     }
 
-    format->from_xml(node, fontsets);
+    format_properties.from_xml(node, fontsets);
     formatting::node_ptr n(formatting::node::from_xml(node));
     if (n) set_format_tree(n);
 }
@@ -174,7 +192,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     }
 
     layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
-    format->to_xml(node, explicit_defaults, *(dfl.format));
+    format_properties.to_xml(node, explicit_defaults, dfl.format_properties);
     if (tree_) tree_->to_xml(node);
 }
 
@@ -242,11 +260,13 @@ void text_layout_properties::add_expressions(expression_set& output) const
     if (is_expression(text_ratio)) output.insert(boost::get<expression_ptr>(text_ratio));
 }
 
-char_properties::char_properties()
+// text format properties
+
+format_properties::format_properties()
     : face_name(),
       fontset(),
       text_size(10.0),
-      character_spacing(0),
+      character_spacing(0.0),
       line_spacing(0),
       text_opacity(1.0),
       halo_opacity(1.0),
@@ -256,12 +276,13 @@ char_properties::char_properties()
       halo_fill(color(255,255,255)),
       halo_radius(0) {}
 
-void char_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
+void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
-    optional<double> text_size_ = node.get_opt_attr<double>("size");
-    if (text_size_) text_size = *text_size_;
-    optional<double> character_spacing_ = node.get_opt_attr<double>("character-spacing");
-    if (character_spacing_) character_spacing = *character_spacing_;
+    set_property_from_xml<double>(text_size, "size", node);
+    set_property_from_xml<double>(character_spacing, "character-spacing", node);
+
+    //optional<double> character_spacing_ = node.get_opt_attr<double>("character-spacing");
+    //if (character_spacing_) character_spacing = *character_spacing_;
     optional<color> fill_ = node.get_opt_attr<color>("fill");
     if (fill_) fill = *fill_;
     optional<color> halo_fill_ = node.get_opt_attr<color>("halo-fill");
@@ -305,7 +326,7 @@ void char_properties::from_xml(xml_node const& node, fontset_map const& fontsets
     }
 }
 
-void char_properties::to_xml(boost::property_tree::ptree& node, bool explicit_defaults, char_properties const& dfl) const
+void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit_defaults, format_properties const& dfl) const
 {
     if (fontset)
     {
@@ -317,10 +338,7 @@ void char_properties::to_xml(boost::property_tree::ptree& node, bool explicit_de
         set_attr(node, "face-name", face_name);
     }
 
-    if (text_size != dfl.text_size || explicit_defaults)
-    {
-        set_attr(node, "size", text_size);
-    }
+    if (!(text_size == dfl.text_size) || explicit_defaults) serialize_property("size", text_size, node);
 
     if (fill != dfl.fill || explicit_defaults)
     {
@@ -346,10 +364,9 @@ void char_properties::to_xml(boost::property_tree::ptree& node, bool explicit_de
     {
         set_attr(node, "line-spacing", line_spacing);
     }
-    if (character_spacing != dfl.character_spacing || explicit_defaults)
-    {
-        set_attr(node, "character-spacing", character_spacing);
-    }
+    if (!(character_spacing == dfl.character_spacing) || explicit_defaults)
+        serialize_property("character-spacing", character_spacing, node);
+
     // for shield_symbolizer this is later overridden
     if (text_opacity != dfl.text_opacity || explicit_defaults)
     {

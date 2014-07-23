@@ -432,7 +432,7 @@ void export_text_placement()
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
         .def_readwrite("largest_bbox_only", &text_symbolizer_properties::largest_bbox_only)
         .def_readwrite("layout_defaults", &text_symbolizer_properties::layout_defaults)
-        .def_readwrite("format", &text_symbolizer_properties::format)
+        //.def_readwrite("format", &text_symbolizer_properties::format)
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);

@@ -1214,27 +1214,27 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
 {
     try
     {
-        text_placements_ptr placement_finder;
+        text_placements_ptr placements;
         optional<std::string> placement_type = node.get_opt_attr<std::string>("placement-type");
         if (placement_type)
         {
-            placement_finder = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
+            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
         }
         else
         {
-            placement_finder = std::make_shared<text_placements_dummy>();
-            placement_finder->defaults.from_xml(node, fontsets_);
+            placements = std::make_shared<text_placements_dummy>();
+            placements->defaults.from_xml(node, fontsets_);
         }
 
         if (strict_ &&
-            !placement_finder->defaults.format->fontset)
+            !placements->defaults.format_properties.fontset)
         {
-            ensure_font_face(placement_finder->defaults.format->face_name);
+            ensure_font_face(placements->defaults.format_properties.face_name);
         }
         text_symbolizer sym;
         parse_symbolizer_base(sym, node);
         // placement finder
-        put<text_placements_ptr>(sym, keys::text_placements_, placement_finder);
+        put<text_placements_ptr>(sym, keys::text_placements_, placements);
         // halo-comp-op
         set_symbolizer_property<text_symbolizer,composite_mode_e>(sym, keys::halo_comp_op, node);
         // halo-rasterizer
@@ -1254,24 +1254,24 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
 {
     try
     {
-        text_placements_ptr placement_finder;
+        text_placements_ptr placements;
         optional<std::string> placement_type = node.get_opt_attr<std::string>("placement-type");
         if (placement_type)
         {
-            placement_finder = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
+            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
         } else {
-            placement_finder = std::make_shared<text_placements_dummy>();
+            placements = std::make_shared<text_placements_dummy>();
         }
-        placement_finder->defaults.from_xml(node, fontsets_);
+        placements->defaults.from_xml(node, fontsets_);
         if (strict_ &&
-            !placement_finder->defaults.format->fontset)
+            !placements->defaults.format_properties.fontset)
         {
-            ensure_font_face(placement_finder->defaults.format->face_name);
+            ensure_font_face(placements->defaults.format_properties.face_name);
         }
 
         shield_symbolizer sym;
         parse_symbolizer_base(sym, node);
-        put<text_placements_ptr>(sym, keys::text_placements_, placement_finder);
+        put<text_placements_ptr>(sym, keys::text_placements_, placements);
         // transform
         set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         // shield displacements: shield-dx shield-dy
