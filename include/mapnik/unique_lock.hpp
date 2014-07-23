@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,13 +23,11 @@
 #ifndef MAPNIK_UNIQUE_LOCK_HPP
 #define MAPNIK_UNIQUE_LOCK_HPP
 
-#include <boost/thread/locks.hpp>
 #include <mutex>
 
 namespace mapnik
 {
-    // TODO - test using std::unique_lock instead
-    using scoped_lock = boost::unique_lock<std::mutex>;
+    using scoped_lock = std::unique_lock<std::mutex>;
 }
 
 #endif // MAPNIK_UNIQUE_LOCK_HPP
