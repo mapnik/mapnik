@@ -38,6 +38,7 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 #include <mapnik/text/placements_list.hpp>
+#include <mapnik/util/conversions.hpp>
 
 #include <agg_trans_affine.h>
 
@@ -241,9 +242,13 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 else
                 {
                     // indexed column
-                    std::string col_idx_name = col_name;
-                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-                    sub_feature->put(col_name, feature.get(col_idx_name));
+                    std::string col_idx_str;
+                    if (mapnik::util::to_string(col_idx_str,col_idx))
+                    {
+                        std::string col_idx_name = col_name;
+                        boost::replace_all(col_idx_name, "%", col_idx_str);
+                        sub_feature->put(col_name, feature.get(col_idx_name));
+                    }
                 }
             }
             else
