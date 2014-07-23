@@ -850,7 +850,7 @@ namespace detail {
 template <typename Symbolizer, typename T, bool is_enum = false>
 struct set_symbolizer_property_impl
 {
-    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    static void apply(Symbolizer & sym, keys key, xml_node const& node)
     {
         using value_type = T;
         std::string const& name = std::get<0>(get_meta(key));
