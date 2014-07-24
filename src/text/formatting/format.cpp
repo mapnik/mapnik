@@ -127,6 +127,16 @@ node_ptr format_node::get_child() const
 
 void format_node::add_expressions(expression_set & output) const
 {
+    if (text_size && is_expression(*text_size)) output.insert(boost::get<expression_ptr>(*text_size));
+    if (character_spacing && is_expression(*character_spacing)) output.insert(boost::get<expression_ptr>(*character_spacing));
+    if (line_spacing && is_expression(*line_spacing)) output.insert(boost::get<expression_ptr>(*line_spacing));
+    if (halo_radius && is_expression(*halo_radius)) output.insert(boost::get<expression_ptr>(*halo_radius));
+    if (text_opacity && is_expression(*text_opacity)) output.insert(boost::get<expression_ptr>(*text_opacity));
+    //if (halo_opacity && is_expression(*halo_opacity)) output.insert(boost::get<expression_ptr>(*halo_opacity));
+    if (wrap_char && is_expression(*wrap_char)) output.insert(boost::get<expression_ptr>(*wrap_char));
+    if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
+    if (fill && is_expression(*fill)) output.insert(boost::get<expression_ptr>(*fill));
+    if (halo_fill && is_expression(*halo_fill)) output.insert(boost::get<expression_ptr>(*halo_fill));
     if (child_) child_->add_expressions(output);
 }
 
