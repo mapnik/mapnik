@@ -206,7 +206,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 void text_symbolizer_properties::add_expressions(expression_set & output) const
 {
     layout_defaults.add_expressions(output);
-    //format_defaults.add_expressions(output); FIXME
+    format_defaults.add_expressions(output);
     if (tree_) tree_->add_expressions(output);
 }
 
@@ -354,5 +354,19 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
         set_attr(node, "text-transform", text_transform);
     }
 }
+
+void format_properties::add_expressions(expression_set & output) const
+{
+    if (is_expression(text_size)) output.insert(boost::get<expression_ptr>(text_size));
+    if (is_expression(character_spacing)) output.insert(boost::get<expression_ptr>(character_spacing));
+    if (is_expression(line_spacing)) output.insert(boost::get<expression_ptr>(line_spacing));
+    if (is_expression(halo_radius)) output.insert(boost::get<expression_ptr>(halo_radius));
+    if (is_expression(text_opacity)) output.insert(boost::get<expression_ptr>(text_opacity));
+    if (is_expression(halo_opacity)) output.insert(boost::get<expression_ptr>(halo_opacity));
+    if (is_expression(wrap_char)) output.insert(boost::get<expression_ptr>(wrap_char));
+    if (is_expression(fill)) output.insert(boost::get<expression_ptr>(fill));
+    if (is_expression(halo_fill)) output.insert(boost::get<expression_ptr>(halo_fill));
+}
+
 
 } //ns mapnik

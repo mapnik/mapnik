@@ -68,6 +68,8 @@ struct MAPNIK_DECL format_properties
     void from_xml(xml_node const& sym, fontset_map const& fontsets);
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 format_properties const& dfl = format_properties()) const;
+    // collect expressions
+    void add_expressions(expression_set & output) const;
     // expressions
     symbolizer_base::value_type text_size;
     symbolizer_base::value_type character_spacing;
@@ -79,6 +81,7 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type fill;
     symbolizer_base::value_type halo_fill;
     //
+
     std::string face_name;
     boost::optional<font_set> fontset;
     text_transform_e text_transform; //Per expression
