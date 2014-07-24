@@ -72,16 +72,15 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
         format->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
 
         std::string const& wrap_char = boost::apply_visitor(extract_value<std::string>(feature,attrs), format_defaults.wrap_char);
-        if (!wrap_char.empty())
-        {
-            format->wrap_char = wrap_char[0];
-        }
+        if (!wrap_char.empty()) format->wrap_char = wrap_char[0];
+
+        format->fill = boost::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
+        format->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
 
         format->face_name = format_defaults.face_name;
         format->fontset = format_defaults.fontset;
         format->text_transform = format_defaults.text_transform;
-        format->fill = format_defaults.fill;
-        format->halo_fill = format_defaults.halo_fill;
+
 
         tree_->apply(format, feature, attrs, output);
     }
@@ -207,7 +206,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 void text_symbolizer_properties::add_expressions(expression_set & output) const
 {
     layout_defaults.add_expressions(output);
-    //format_defaults.add_expressions(output); FIXME
+    format_defaults.add_expressions(output);
     if (tree_) tree_->add_expressions(output);
 }
 
@@ -293,20 +292,15 @@ void format_properties::from_xml(xml_node const& node, fontset_map const& fontse
     set_property_from_xml<double>(text_opacity, "opacity", node);
     set_property_from_xml<double>(halo_opacity, "halo-opacity", node);
     set_property_from_xml<std::string>(wrap_char, "wrap-character", node);
-
-    optional<color> fill_ = node.get_opt_attr<color>("fill");
-    if (fill_) fill = *fill_;
-    optional<color> halo_fill_ = node.get_opt_attr<color>("halo-fill");
-    if (halo_fill_) halo_fill = *halo_fill_;
+    set_property_from_xml<color>(fill, "fill", node);
+    set_property_from_xml<color>(halo_fill, "halo-fill", node);
 
     optional<text_transform_e> tconvert_ = node.get_opt_attr<text_transform_e>("text-transform");
     if (tconvert_) text_transform = *tconvert_;
 
     optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");
-    if (face_name_)
-    {
-        face_name = *face_name_;
-    }
+    if (face_name_) face_name = *face_name_;
+
     optional<std::string> fontset_name_ = node.get_opt_attr<std::string>("fontset-name");
     if (fontset_name_)
     {
@@ -352,21 +346,27 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
     if (!(text_opacity == dfl.text_opacity) || explicit_defaults) serialize_property("opacity", text_opacity, node);
     if (!(halo_opacity == dfl.halo_opacity) || explicit_defaults) serialize_property("halo-opacity", halo_opacity, node);
     //
-
-    if (fill != dfl.fill || explicit_defaults)
-    {
-        set_attr(node, "fill", fill);
-    }
-
-    if (halo_fill != dfl.halo_fill || explicit_defaults)
-    {
-        set_attr(node, "halo-fill", halo_fill);
-    }
+    if (!(fill == dfl.fill) || explicit_defaults) serialize_property("fill", fill, node);
+    if (!(halo_fill == dfl.halo_fill) || explicit_defaults) serialize_property("halo-fill", halo_fill, node);
 
     if (text_transform != dfl.text_transform || explicit_defaults)
     {
         set_attr(node, "text-transform", text_transform);
     }
 }
+
+void format_properties::add_expressions(expression_set & output) const
+{
+    if (is_expression(text_size)) output.insert(boost::get<expression_ptr>(text_size));
+    if (is_expression(character_spacing)) output.insert(boost::get<expression_ptr>(character_spacing));
+    if (is_expression(line_spacing)) output.insert(boost::get<expression_ptr>(line_spacing));
+    if (is_expression(halo_radius)) output.insert(boost::get<expression_ptr>(halo_radius));
+    if (is_expression(text_opacity)) output.insert(boost::get<expression_ptr>(text_opacity));
+    if (is_expression(halo_opacity)) output.insert(boost::get<expression_ptr>(halo_opacity));
+    if (is_expression(wrap_char)) output.insert(boost::get<expression_ptr>(wrap_char));
+    if (is_expression(fill)) output.insert(boost::get<expression_ptr>(fill));
+    if (is_expression(halo_fill)) output.insert(boost::get<expression_ptr>(halo_fill));
+}
+
 
 } //ns mapnik
