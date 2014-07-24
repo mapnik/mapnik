@@ -1,8 +1,8 @@
 language: cpp
 
 compiler:
- - gcc
  - clang
+ - gcc
 
 addons:
   postgresql: "9.3"
@@ -29,7 +29,7 @@ before_install:
 install:
  - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
  - ./configure CXX="${CXX}" CC="${CC}" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True
- - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=2 make; else JOBS=6 make; fi;
+ - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=3 make; else JOBS=8 make; fi;
 
 before_script:
  - make test
