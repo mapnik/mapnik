@@ -1226,8 +1226,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
             placements->defaults.from_xml(node, fontsets_);
         }
 
-        if (strict_ &&
-            !placements->defaults.format_defaults.fontset)
+        if (strict_ && !placements->defaults.format_defaults.fontset)
         {
             ensure_font_face(placements->defaults.format_defaults.face_name);
         }

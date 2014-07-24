@@ -76,13 +76,12 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type halo_opacity;
     symbolizer_base::value_type wrap_char;
     symbolizer_base::value_type halo_radius;
+    symbolizer_base::value_type fill;
+    symbolizer_base::value_type halo_fill;
     //
     std::string face_name;
     boost::optional<font_set> fontset;
     text_transform_e text_transform; //Per expression
-    color fill;
-    color halo_fill;
-
 };
 
 
@@ -101,7 +100,7 @@ struct MAPNIK_DECL text_layout_properties
     // This function is used to collect attributes.
     void add_expressions(expression_set & output) const;
 
-    //Per layout options
+    // per layout expressions
     symbolizer_base::value_type dx;
     symbolizer_base::value_type dy;
     symbolizer_base::value_type orientation;
