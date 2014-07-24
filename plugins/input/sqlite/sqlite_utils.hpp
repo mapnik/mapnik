@@ -191,7 +191,7 @@ public:
             const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
-                boost::ptr_vector<mapnik::geometry_type> paths;
+                mapnik::geometry_container paths;
                 if (mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto))
                 {
                     for (unsigned i=0; i<paths.size(); ++i)
@@ -278,7 +278,7 @@ public:
                 const char* data = (const char*) rs->column_blob(0, size);
                 if (data)
                 {
-                    boost::ptr_vector<mapnik::geometry_type> paths;
+                    mapnik::geometry_container paths;
                     mapnik::box2d<double> bbox;
                     if (mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto))
                     {
@@ -365,7 +365,7 @@ public:
             const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
-                boost::ptr_vector<mapnik::geometry_type> paths;
+                mapnik::geometry_container paths;
                 if (mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto))
                 {
                     for (unsigned i=0; i<paths.size(); ++i)
