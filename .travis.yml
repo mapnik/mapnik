@@ -29,7 +29,7 @@ before_install:
 install:
  - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
  - ./configure CXX="${CXX}" CC="${CC}" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True
- - JOBS=2 make
+ - JOBS=4 make
 
 before_script:
  - make test
