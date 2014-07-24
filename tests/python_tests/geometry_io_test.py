@@ -122,15 +122,10 @@ def test_geojson_parsing():
             pass
     eq_(count,len(path))
 
-reader = mapnik.WKTReader()
 
 def compare_wkb_from_wkt(wkt,num=None):
 
-    # create a Path from geometry(s)
-    # easy api, but slower
-    #paths = mapnik.Path.from_wkt(wkt)
-    # fast api
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
     f = mapnik.Feature(mapnik.Context(),1)
@@ -160,11 +155,7 @@ def compare_wkb_from_wkt(wkt,num=None):
         eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
 def compare_wkt_from_wkt(wkt,num=None):
-    # create a Path from geometry(s)
-    # easy api, but slower
-    #paths = mapnik.Path.from_wkt(wkt)
-    # fast api
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
     f = mapnik.Feature(mapnik.Context(),1)
@@ -197,7 +188,7 @@ def compare_wkt_from_wkt(wkt,num=None):
         eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
 def compare_wkt_to_geojson(idx,wkt,num=None):
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
     # ensure both have same result
     if num:
         eq_(len(paths),num)
@@ -233,10 +224,7 @@ def test_wkt_to_geojson():
 @raises(IndexError)
 def test_geometry_index_error():
     wkt = 'Point (0 0)'
-    # easy api, but slower
-    #paths = mapnik.Path.from_wkt(wkt)
-    # fast api
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
     paths[3]
     f = mapnik.Feature(mapnik.Context(),1)
     f.add_geometries_from_wkt(wkt)

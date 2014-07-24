@@ -82,7 +82,7 @@ struct put_property
 
 struct extract_geometry
 {
-    using result_type =  boost::ptr_vector<mapnik::geometry_type>&;
+    using result_type =  mapnik::geometry_container&;
     template <typename T>
     result_type operator() (T & feature) const
     {
@@ -95,11 +95,11 @@ struct feature_grammar :
         qi::grammar<Iterator, void(FeatureType&),
                     space_type>
 {
-    feature_grammar(generic_json<Iterator> & json, mapnik::transcoder const& tr);
+    feature_grammar(mapnik::transcoder const& tr);
 
     // start
     // generic JSON
-    generic_json<Iterator> & json_;
+    generic_json<Iterator> json_;
 
     // geoJSON
     qi::rule<Iterator,void(FeatureType&),space_type> feature; // START

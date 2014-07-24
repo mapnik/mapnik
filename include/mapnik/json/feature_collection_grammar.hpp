@@ -59,9 +59,9 @@ template <typename Iterator, typename FeatureType>
 struct feature_collection_grammar :
     qi::grammar<Iterator, std::vector<feature_ptr>(), space_type>
 {
-    feature_collection_grammar( generic_json<Iterator> & json, context_ptr const& ctx, mapnik::transcoder const& tr)
+    feature_collection_grammar(context_ptr const& ctx, mapnik::transcoder const& tr)
         : feature_collection_grammar::base_type(start,"start"),
-          feature_g(json,tr),
+          feature_g(tr),
           ctx_(ctx),
           generate_id_(1)
     {
@@ -81,7 +81,7 @@ struct feature_collection_grammar :
         start = feature_collection | feature_from_geometry(_val) | feature(_val)
             ;
 
-        feature_collection = lit('{') >> (type | features | json.key_value) % lit(',') >> lit('}')
+        feature_collection = lit('{') >> (type | features | feature_g.json_.key_value) % lit(',') >> lit('}')
             ;
 
         type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")

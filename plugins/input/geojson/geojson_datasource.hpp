@@ -71,7 +71,6 @@ private:
     mapnik::layer_descriptor desc_;
     std::string file_;
     mapnik::box2d<double> extent_;
-    std::shared_ptr<mapnik::transcoder> tr_;
     std::vector<mapnik::feature_ptr> features_;
     spatial_index_type tree_;
 };

@@ -24,11 +24,14 @@
 #define MAPNIK_TRANSFORM_EXPRESSION_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
 
 // boost
 #include <boost/optional.hpp>
-#include <memory>
 #include <boost/variant/variant.hpp>
 
 // fusion
@@ -37,6 +40,7 @@
 
 // stl
 #include <vector>
+#include <memory>
 
 namespace mapnik {
 

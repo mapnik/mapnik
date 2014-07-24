@@ -56,6 +56,4 @@ path_expression_grammar<Iterator>::path_expression_grammar()
     str  %= lexeme[+(char_ -'[')];
 }
 
-template struct mapnik::path_expression_grammar<std::string::const_iterator>;
-
 }

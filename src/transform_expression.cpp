@@ -24,9 +24,6 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/transform_expression.hpp>
 
-// boost
-
-
 // stl
 #include <sstream>
 

@@ -154,17 +154,14 @@ source = Split(
     css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
-    image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
     expression_node.cpp
-    expression_grammar.cpp
     expression_string.cpp
     expression.cpp
-    transform_expression_grammar.cpp
     transform_expression.cpp
     feature_kv_iterator.cpp
     feature_style_processor.cpp
@@ -183,7 +180,6 @@ source = Split(
     parse_path.cpp
     parse_transform.cpp
     palette.cpp
-    path_expression_grammar.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
@@ -198,8 +194,6 @@ source = Split(
     symbolizer_enumerations.cpp
     unicode.cpp
     raster_colorizer.cpp
-    wkt/wkt_factory.cpp
-    wkt/wkt_generator.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
     svg/svg_parser.cpp
@@ -207,12 +201,6 @@ source = Split(
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
     warp.cpp
-    json/geometry_grammar.cpp
-    json/geometry_parser.cpp
-    json/feature_grammar.cpp
-    json/feature_parser.cpp
-    json/feature_collection_parser.cpp
-    json/geojson_generator.cpp
     text/vertex_cache.cpp
     text/layout.cpp
     text/text_line.cpp

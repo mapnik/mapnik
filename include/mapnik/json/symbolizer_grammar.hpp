@@ -116,9 +116,9 @@ template <typename Iterator>
 struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 {
     using json_value_type = boost::variant<value_null,value_bool,value_integer,value_double, std::string>;
-    symbolizer_grammar(generic_json<Iterator> & json)
+    symbolizer_grammar()
         : symbolizer_grammar::base_type(sym, "symbolizer"),
-          json_(json)
+          json_()
     {
         using qi::lit;
         using qi::double_;
@@ -201,7 +201,7 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
     }
 
     // generic JSON
-    generic_json<Iterator> & json_;
+    generic_json<Iterator> json_;
     // symbolizer
     qi::rule<Iterator, space_type, mapnik::symbolizer()> sym;
     qi::rule<Iterator,qi::locals<std::string>, void(mapnik::symbolizer&),space_type> property;

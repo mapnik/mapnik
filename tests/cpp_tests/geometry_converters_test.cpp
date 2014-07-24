@@ -13,10 +13,10 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <mapnik/well_known_srs.hpp>
-#include <mapnik/util/geometry_to_wkb.hpp>
-#include <mapnik/util/geometry_to_wkt.hpp>
-#include <mapnik/util/geometry_to_svg.hpp>
+#include <mapnik/wkt/wkt_generator_grammar.hpp>
+#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 
@@ -25,7 +25,7 @@
 
 struct output_geometry_backend
 {
-    output_geometry_backend(boost::ptr_vector<mapnik::geometry_type> & paths, mapnik::geometry_type::types type)
+    output_geometry_backend(mapnik::geometry_container & paths, mapnik::geometry_type::types type)
         : paths_(paths),
           type_(type) {}
 
@@ -43,7 +43,7 @@ struct output_geometry_backend
         }
         paths_.push_back(geom_ptr.release());
     }
-    boost::ptr_vector<mapnik::geometry_type> &  paths_;
+    mapnik::geometry_container &  paths_;
     mapnik::geometry_type::types type_;
 };
 
@@ -57,7 +57,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     proj_transform prj_trans(src,dst);
     line_symbolizer sym;
     CoordTransform t(bbox.width(),bbox.height(), bbox);
-    boost::ptr_vector<mapnik::geometry_type> output_paths;
+    mapnik::geometry_container output_paths;
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::LineString);
 
     using conv_types = boost::mpl::vector<clip_line_tag>;
@@ -69,7 +69,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
 
     converter.set<clip_line_tag>();
 
-    boost::ptr_vector<geometry_type> p;
+    mapnik::geometry_container p;
     if (!mapnik::from_wkt(wkt_in , p))
     {
         throw std::runtime_error("Failed to parse WKT");
@@ -80,12 +80,14 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
         converter.apply(geom);
     }
 
-    std::string wkt_out;
-    if (mapnik::util::to_wkt(wkt_out, output_paths))
+    using sink_type = std::back_insert_iterator<std::string>;
+    std::string wkt; // Use Python String directly ?
+    sink_type sink(wkt);
+    static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    if (boost::spirit::karma::generate(sink, generator, output_paths))
     {
-        return boost::optional<std::string>(wkt_out);
+        return boost::optional<std::string>(wkt);
     }
-
     return boost::optional<std::string>();
 }
 
@@ -99,7 +101,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     proj_transform prj_trans(src,dst);
     polygon_symbolizer sym;
     CoordTransform t(bbox.width(),bbox.height(), bbox);
-    boost::ptr_vector<mapnik::geometry_type> output_paths;
+    mapnik::geometry_container output_paths;
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::Polygon);
 
     using conv_types = boost::mpl::vector<clip_poly_tag>;
@@ -111,7 +113,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 
     converter.set<clip_poly_tag>();
 
-    boost::ptr_vector<geometry_type> p;
+    mapnik::geometry_container p;
     if (!mapnik::from_wkt(wkt_in , p))
     {
         throw std::runtime_error("Failed to parse WKT");
@@ -122,10 +124,13 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
         converter.apply(geom);
     }
 
-    std::string wkt_out;
-    if (mapnik::util::to_wkt(wkt_out, output_paths))
+    using sink_type = std::back_insert_iterator<std::string>;
+    std::string wkt; // Use Python String directly ?
+    sink_type sink(wkt);
+    static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    if (boost::spirit::karma::generate(sink, generator, output_paths))
     {
-        return boost::optional<std::string>(wkt_out);
+        return boost::optional<std::string>(wkt);
     }
 
     return boost::optional<std::string>();

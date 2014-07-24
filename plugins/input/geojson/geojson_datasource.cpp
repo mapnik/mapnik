@@ -47,8 +47,11 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-#include <mapnik/json/feature_collection_parser.hpp>
-#include <mapnik/json/generic_json.hpp>
+#include <mapnik/json/feature_collection_grammar.hpp>
+#include <mapnik/json/feature_grammar_impl.hpp>
+#include <mapnik/json/geometry_grammar_impl.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -100,7 +103,6 @@ geojson_datasource::geojson_datasource(parameters const& params)
           *params.get<std::string>("encoding","utf-8")),
     file_(*params.get<std::string>("file","")),
     extent_(),
-    tr_(new mapnik::transcoder(*params.get<std::string>("encoding","utf-8"))),
     features_(),
     tree_(16,1)
 {
@@ -131,11 +133,10 @@ geojson_datasource::geojson_datasource(parameters const& params)
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    mapnik::json::generic_json<boost::spirit::multi_pass<base_iterator_type> > json;
-    // TODO - make it possible for this to be static const
-    // by avoiding ctor taking arg - https://github.com/mapnik/mapnik/pull/2231
-    mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(json, ctx,*tr_);
-    bool result = p.parse(begin,end, features_);
+    static const mapnik::transcoder tr("utf8");
+    static const mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(ctx, tr);
+    boost::spirit::standard_wide::space_type space;
+    bool result = boost::spirit::qi::phrase_parse(begin, end, fc_grammar, space, features_);
     if (!result)
     {
         throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + file_ + "'");
