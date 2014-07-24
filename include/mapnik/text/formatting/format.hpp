@@ -48,11 +48,11 @@ public:
     boost::optional<symbolizer_base::value_type> character_spacing;
     boost::optional<symbolizer_base::value_type> line_spacing;
     boost::optional<symbolizer_base::value_type> text_opacity;
-    boost::optional<bool> wrap_before;
+    boost::optional<symbolizer_base::value_type> wrap_before;
     boost::optional<symbolizer_base::value_type> wrap_char;
     boost::optional<text_transform_e> text_transform;
-    boost::optional<color> fill;
-    boost::optional<color> halo_fill;
+    boost::optional<symbolizer_base::value_type> fill;
+    boost::optional<symbolizer_base::value_type> halo_fill;
     boost::optional<symbolizer_base::value_type> halo_radius;
 
 private:

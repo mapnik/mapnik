@@ -39,23 +39,19 @@ using boost::property_tree::ptree;
 void format_node::to_xml(ptree & xml) const
 {
     ptree & new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
-    if (face_name) set_attr(new_node, "face-name", *face_name);
 
     if (text_size) serialize_property("size", *text_size, new_node);
     if (character_spacing) serialize_property("character-spacing", *character_spacing, new_node);
-
     if (line_spacing) serialize_property("line-spacing", *line_spacing, new_node);
     if (text_opacity) serialize_property("opacity", *text_opacity, new_node);
-
-    if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before); // FIXME!!!
-
+    if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
     if (wrap_char) serialize_property("wrap_char", *wrap_char, new_node);
-
-    if (text_transform) set_attr(new_node, "text-transform", *text_transform);
-    if (fill) set_attr(new_node, "fill", *fill);
-    if (halo_fill) set_attr(new_node, "halo-fill", *halo_fill);
-
+    if (fill) serialize_property("fill", *fill, new_node);
+    if (halo_fill) serialize_property("halo-fill", *halo_fill, new_node);
     if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
+
+    if (face_name) set_attr(new_node, "face-name", *face_name);
+    if (text_transform) set_attr(new_node, "text-transform", *text_transform);
 
     if (child_) child_->to_xml(new_node);
 }
@@ -69,7 +65,6 @@ node_ptr format_node::from_xml(xml_node const& xml)
     node_ptr child = node::from_xml(xml);
     n->set_child(child);
 
-    n->face_name = xml.get_opt_attr<std::string>("face-name");
     //TODO: Fontset is problematic. We don't have the fontsets pointer here...
     // exprs
     set_property_from_xml<double>(n->text_size, "size", xml);
@@ -80,9 +75,11 @@ node_ptr format_node::from_xml(xml_node const& xml)
     set_property_from_xml<double>(n->halo_radius, "halo-radius", xml);
     set_property_from_xml<std::string>(n->wrap_char, "wrap-character", xml);
     //
+    set_property_from_xml<color>(n->fill, "fill", xml);
+    set_property_from_xml<color>(n->halo_fill, "halo-fill", xml);
+
+    n->face_name = xml.get_opt_attr<std::string>("face-name");
     n->text_transform = xml.get_opt_attr<text_transform_e>("text-transform");
-    n->fill = xml.get_opt_attr<color>("fill");
-    n->halo_fill = xml.get_opt_attr<color>("halo-fill");
 
     return np;
 }
@@ -106,11 +103,11 @@ void format_node::apply(char_properties_ptr p, feature_impl const& feature, attr
         }
     }
     if (halo_radius) new_properties->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), *halo_radius);
+    if (fill) new_properties->fill = boost::apply_visitor(extract_value<color>(feature,attrs), *fill);
+    if (halo_fill) new_properties->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
 
     if (face_name) new_properties->face_name = *face_name;
     if (text_transform) new_properties->text_transform = *text_transform;
-    if (fill) new_properties->fill = *fill;
-    if (halo_fill) new_properties->halo_fill = *halo_fill;
 
     if (child_) child_->apply(new_properties, feature, attrs, output);
     else MAPNIK_LOG_WARN(format) << "Useless format: No text to format";
