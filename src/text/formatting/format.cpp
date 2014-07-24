@@ -41,21 +41,21 @@ void format_node::to_xml(ptree & xml) const
     ptree & new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
     if (face_name) set_attr(new_node, "face-name", *face_name);
 
-    if (text_size) serialize_property("size", *text_size, xml);
-    if (character_spacing) serialize_property("character-spacing", *character_spacing, xml);
+    if (text_size) serialize_property("size", *text_size, new_node);
+    if (character_spacing) serialize_property("character-spacing", *character_spacing, new_node);
 
-    if (line_spacing) serialize_property("line-spacing", *line_spacing, xml);
-    if (text_opacity) serialize_property("opacity", *text_opacity, xml);
+    if (line_spacing) serialize_property("line-spacing", *line_spacing, new_node);
+    if (text_opacity) serialize_property("opacity", *text_opacity, new_node);
 
     if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before); // FIXME!!!
 
-    if (wrap_char) serialize_property("wrap_char", *wrap_char, xml);
+    if (wrap_char) serialize_property("wrap_char", *wrap_char, new_node);
 
     if (text_transform) set_attr(new_node, "text-transform", *text_transform);
     if (fill) set_attr(new_node, "fill", *fill);
     if (halo_fill) set_attr(new_node, "halo-fill", *halo_fill);
 
-    if (halo_radius) serialize_property("halo-radius", *halo_radius, xml);
+    if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
 
     if (child_) child_->to_xml(new_node);
 }
