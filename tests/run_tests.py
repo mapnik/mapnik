@@ -10,7 +10,7 @@ except ImportError, e:
     sys.exit(1)
 
 try:
-    import mapnik3
+    import mapnik
 except ImportError:
     print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % 'import mapnik failed - tests require python bindings'
     sys.exit(0)

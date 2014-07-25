@@ -4,7 +4,7 @@
 import sys
 
 try:
-    import mapnik3
+    import mapnik
     mapnik.logger.set_severity(mapnik.severity_type.None)
     #mapnik.logger.set_severity(mapnik.severity_type.Debug)
 except ImportError:
