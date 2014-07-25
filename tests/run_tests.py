@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 
@@ -7,6 +8,12 @@ try:
 except ImportError, e:
     sys.stderr.write("Unable to run python tests: the third party 'nose' module is required\nTo install 'nose' do:\n\tsudo pip install nose (or on debian systems: apt-get install python-nose): %s\n" % e)
     sys.exit(1)
+
+try:
+    import mapnik3
+except ImportError:
+    print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % 'import mapnik failed - tests require python bindings'
+    sys.exit(0)
     
 from python_tests.utilities import TodoPlugin
 from nose.plugins.doctests import Doctest
