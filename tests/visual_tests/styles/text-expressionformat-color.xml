@@ -14,8 +14,8 @@
     <Rule>
       <PointSymbolizer/>
       <TextSymbolizer allow-overlap="true" face-name="DejaVu Sans Book" size="16" placement="point" dy="5">
-        <ExpressionFormat fill="'#ff0000'">"red text"+'&#10;'</ExpressionFormat>
-        <ExpressionFormat fill="[color]">"test"</ExpressionFormat>
+        <Format fill="'#ff0000'">"red text"+'&#10;'</Format>
+        <Format fill="[color]">"test"</Format>
       </TextSymbolizer>
     </Rule>
   </Style>
