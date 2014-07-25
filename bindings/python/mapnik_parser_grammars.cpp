@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,31 +20,13 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/json/feature_parser.hpp>
-#include <mapnik/json/feature_grammar.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/wkt/wkt_grammar_impl.hpp>
+#include <mapnik/json/feature_grammar_impl.hpp>
+#include <mapnik/json/geometry_grammar_impl.hpp>
+#include <string>
 
-// boost
-#include <boost/version.hpp>
-#include <boost/spirit/include/qi.hpp>
-
-namespace mapnik { namespace json {
-
-    template <typename Iterator>
-    feature_parser<Iterator>::feature_parser(generic_json<Iterator> & json, mapnik::transcoder const& tr)
-        : grammar_(new feature_grammar<iterator_type,feature_type>(json, tr)) {}
-
-    template <typename Iterator>
-    feature_parser<Iterator>::~feature_parser() {}
-
-    template <typename Iterator>
-    bool feature_parser<Iterator>::parse(iterator_type first, iterator_type last, mapnik::feature_impl & f)
-    {
-        using namespace boost::spirit;
-        standard_wide::space_type space;
-        return qi::phrase_parse(first, last, (*grammar_)(boost::phoenix::ref(f)), space);
-    }
-
-template class feature_parser<std::string::const_iterator>;
-
-}}
+using iterator_type = std::string::const_iterator;
+template struct mapnik::wkt::wkt_collection_grammar<iterator_type>;
+template struct mapnik::json::feature_grammar<iterator_type,mapnik::feature_impl>;
+template struct mapnik::json::geometry_grammar<iterator_type>;

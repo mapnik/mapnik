@@ -444,7 +444,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             const char* data = (const char*) rs->column_blob(0, size);
             if (data)
             {
-                boost::ptr_vector<mapnik::geometry_type> paths;
+                mapnik::geometry_container paths;
                 if (mapnik::geometry_utils::from_wkb(paths, data, size, format_))
                 {
                     mapnik::util::to_ds_type(paths,result);

@@ -158,7 +158,4 @@ geometry_grammar<Iterator>::geometry_grammar()
             );
 }
 
-template struct mapnik::json::geometry_grammar<std::string::const_iterator>;
-template struct mapnik::json::geometry_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
-
 }}

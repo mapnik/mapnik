@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko, Jean-Francois Doyon
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,37 +20,26 @@
  *
  *****************************************************************************/
 
-#include "boost_std_shared_shim.hpp"
+#ifndef MAPNIK_JSON_FEATURE_GENERATOR_HPP
+#define MAPNIK_JSON_FEATURE_GENERATOR_HPP
+
+// mapnik
+#include <mapnik/feature.hpp>
+#include <mapnik/json/feature_generator_grammar.hpp>
 
 // boost
-#include <boost/python.hpp>
-#include <boost/noncopyable.hpp>
-#include <memory>
-#include <boost/ptr_container/ptr_vector.hpp>
-// mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/wkt/wkt_factory.hpp>
+#include <boost/spirit/include/karma.hpp>
 
-namespace  impl {
+namespace mapnik { namespace json {
 
-using path_type = boost::ptr_vector<mapnik::geometry_type>;
-
-std::shared_ptr<path_type> from_wkt(mapnik::wkt_parser & p, std::string const& wkt)
+inline bool to_geojson(std::string & json, mapnik::feature_impl const& feature)
 {
-    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
-    if (!p.parse(wkt, *paths))
-        throw std::runtime_error("Failed to parse WKT");
-    return paths;
+    using sink_type = std::back_insert_iterator<std::string>;
+    static const mapnik::json::feature_generator_grammar<sink_type> grammar;
+    sink_type sink(json);
+    return boost::spirit::karma::generate(sink, grammar, feature);
 }
 
-}
+}}
 
-void export_wkt_reader()
-{
-    using mapnik::wkt_parser;
-    using namespace boost::python;
-
-    class_<wkt_parser, boost::noncopyable>("WKTReader",init<>())
-        .def("read",&impl::from_wkt)
-        ;
-}
+#endif // MAPNIK_JSON_FEATURE_GENERATOR_HPP

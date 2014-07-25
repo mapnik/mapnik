@@ -33,7 +33,6 @@
 #include <mapnik/expression_evaluator.hpp>
 
 // boost
-
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/range/adaptor/reversed.hpp>

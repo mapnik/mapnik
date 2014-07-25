@@ -27,6 +27,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
+#include <mapnik/util/container_adapter.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -37,22 +38,12 @@
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
-#include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunct
+#include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
 
 // stl
 #include <tuple>
 
-namespace boost { namespace spirit { namespace traits {
-
-// make gcc and darwin toolsets happy.
-template <>
-struct is_container<mapnik::geometry_container>
-    : mpl::false_
-{};
-
-}}}
-
-namespace mapnik { namespace util {
+namespace mapnik { namespace wkt {
 
 namespace karma = boost::spirit::karma;
 namespace phoenix = boost::phoenix;

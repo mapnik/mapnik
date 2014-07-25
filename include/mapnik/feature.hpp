@@ -32,9 +32,6 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/ptr_container/ptr_vector.hpp>
-
 // stl
 #include <memory>
 #include <vector>
@@ -196,12 +193,12 @@ public:
         return ctx_;
     }
 
-    inline boost::ptr_vector<geometry_type> const& paths() const
+    inline geometry_container const& paths() const
     {
         return geom_cont_;
     }
 
-    inline boost::ptr_vector<geometry_type> & paths()
+    inline geometry_container & paths()
     {
         return geom_cont_;
     }
@@ -294,7 +291,7 @@ private:
     mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
-    boost::ptr_vector<geometry_type> geom_cont_;
+    geometry_container geom_cont_;
     raster_ptr raster_;
 };
 

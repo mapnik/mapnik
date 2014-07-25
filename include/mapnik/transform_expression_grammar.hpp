@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/expression_grammar.hpp>
+#include <mapnik/expression_node_types.hpp>
 #include <mapnik/transform_expression.hpp>
 
 // spirit

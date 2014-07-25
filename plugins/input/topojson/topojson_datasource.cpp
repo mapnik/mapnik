@@ -41,6 +41,7 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/topojson_grammar.hpp>
+#include <mapnik/json/topojson_grammar_impl.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 
 using mapnik::datasource;

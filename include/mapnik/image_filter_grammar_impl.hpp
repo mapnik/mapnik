@@ -126,6 +126,4 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     no_args = -(lit('(') >> lit(')'));
 }
 
-template struct mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> >;
-
 }

@@ -42,6 +42,8 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/wkt/wkt_grammar_impl.hpp>
+#include <mapnik/json/geometry_grammar_impl.hpp>
 
 // stl
 #include <sstream>

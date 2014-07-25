@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,16 +20,17 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/json/topojson_grammar_impl.hpp>
-// stl
+#include <mapnik/geometry.hpp>
+#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
+#include <mapnik/json/feature_generator_grammar_impl.hpp>
+#include <mapnik/json/geometry_generator_grammar_impl.hpp>
+#include <mapnik/svg/geometry_svg_generator_impl.hpp>
 #include <string>
-// boost
-#include <boost/spirit/include/support_multi_pass.hpp>
 
-namespace mapnik { namespace topojson {
-
-//template struct topojson_grammar<std::string::const_iterator>;
-template struct topojson_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
-
-}}
+using sink_type = std::back_insert_iterator<std::string>;
+template struct mapnik::json::feature_generator_grammar<sink_type>;
+template struct mapnik::json::geometry_generator_grammar<sink_type>;
+template struct mapnik::json::multi_geometry_generator_grammar<sink_type>;
+template struct mapnik::svg::svg_path_generator<sink_type, mapnik::geometry_type>;
+template struct mapnik::wkt::wkt_generator<sink_type, mapnik::geometry_type>;
+template struct mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container>;

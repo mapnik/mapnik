@@ -21,12 +21,11 @@
  *****************************************************************************/
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/util/geometry_wkt_generator.hpp>
-#include <mapnik/util/geometry_to_wkt.hpp>
+#include <mapnik/wkt/wkt_generator_grammar.hpp>
 #include <mapnik/util/path_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
 
-namespace mapnik { namespace util {
+namespace mapnik { namespace wkt {
 
 template <typename T>
 std::tuple<unsigned,bool> detail::multi_geometry_type<T>::operator() (T const& geom) const
@@ -143,27 +142,6 @@ wkt_multi_generator<OutputIterator, GeometryContainer>::wkt_multi_generator()
     multi_geometry = -(path % lit(','))
         ;
 
-}
-
-template struct mapnik::util::wkt_generator<std::back_insert_iterator<std::string>, mapnik::geometry_type>;
-template struct mapnik::util::wkt_multi_generator<std::back_insert_iterator<std::string>, mapnik::geometry_container >;
-
-bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
-{
-    using sink_type = std::back_insert_iterator<std::string>;
-    sink_type sink(wkt);
-    wkt_generator<sink_type, mapnik::geometry_type> generator(true);
-    bool result = karma::generate(sink, generator, geom);
-    return result;
-}
-
-bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
-{
-    using sink_type = std::back_insert_iterator<std::string>;
-    sink_type sink(wkt);
-    wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
-    bool result = karma::generate(sink, generator, geom);
-    return result;
 }
 
 }}

@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/transform_expression_grammar.hpp>
+#include <mapnik/expression_grammar_impl.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>
@@ -126,7 +127,5 @@ transform_expression_grammar<Iterator>::transform_expression_grammar()
     attr = g_.attr.alias();
     expr = g_.expr.alias();
 }
-
-template struct mapnik::transform_expression_grammar<std::string::const_iterator>;
 
 }

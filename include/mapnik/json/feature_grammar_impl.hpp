@@ -30,9 +30,9 @@
 namespace mapnik { namespace json {
 
 template <typename Iterator, typename FeatureType>
-feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & json,  mapnik::transcoder const& tr)
+feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const& tr)
     : feature_grammar::base_type(feature,"feature"),
-      json_(json),
+      json_(),
       put_property_(put_property(tr))
 {
     qi::lit_type lit;
@@ -133,8 +133,5 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(generic_json<Iterator> & 
             );
 
 }
-
-template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik::feature_impl>;
-template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::feature_impl>;
 
 }}

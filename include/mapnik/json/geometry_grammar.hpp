@@ -90,28 +90,28 @@ struct where_message
 
 template <typename Iterator>
 struct geometry_grammar :
-        qi::grammar<Iterator,qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& )
+        qi::grammar<Iterator,qi::locals<int>, void(mapnik::geometry_container& )
         , space_type>
 {
     geometry_grammar();
-    qi::rule<Iterator, qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry;
+    qi::rule<Iterator, qi::locals<int>, void(mapnik::geometry_container& ),space_type> geometry;
     qi::symbols<char, int> geometry_dispatch;
 
     qi::rule<Iterator,void(CommandType,geometry_type*),space_type> point;
     qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),space_type> points;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>&,int),space_type> coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container&,int),space_type> coordinates;
     //
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> point_coordinates;
+             void(mapnik::geometry_container& ),space_type> point_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> linestring_coordinates;
+             void(mapnik::geometry_container& ),space_type> linestring_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> polygon_coordinates;
+             void(mapnik::geometry_container& ),space_type> polygon_coordinates;
 
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipoint_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multilinestring_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipolygon_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry_collection;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipoint_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multilinestring_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipolygon_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> geometry_collection;
 
     // Nabialek trick //////////////////////////////////////
     //using dispatch_rule = typename qi::rule<Iterator,void(FeatureType &), space_type>;

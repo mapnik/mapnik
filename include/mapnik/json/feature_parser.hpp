@@ -20,39 +20,30 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_FEATURE_PARSER_HPP
-#define MAPNIK_FEATURE_PARSER_HPP
+#ifndef MAPNIK_JSON_FEATURE_PARSER_HPP
+#define MAPNIK_JSON_FEATURE_PARSER_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/noncopyable.hpp>
-#include <mapnik/unicode.hpp>
+#include <mapnik/json/feature_grammar.hpp>
 
 // boost
-
-
-// stl
-#include <vector>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
 
 namespace mapnik { namespace json {
 
-template <typename Iterator, typename FeatureType> struct feature_grammar;
-template <typename Iterator> struct generic_json;
-
-template <typename Iterator>
-class MAPNIK_DECL feature_parser : private mapnik::noncopyable
+inline bool from_geojson(std::string const& json, mapnik::feature_impl & feature)
 {
-    using iterator_type = Iterator;
-    using feature_type = mapnik::feature_impl;
-public:
-    feature_parser(generic_json<Iterator> & json, mapnik::transcoder const& tr);
-    ~feature_parser();
-    bool parse(iterator_type first, iterator_type last, mapnik::feature_impl & f);
-private:
-    const std::unique_ptr<feature_grammar<iterator_type,feature_type> > grammar_;
-};
+    static const mapnik::transcoder tr("utf8");
+    using iterator_type = std::string::const_iterator;
+    static const mapnik::json::feature_grammar<iterator_type,mapnik::feature_impl> g(tr);
+    using namespace boost::spirit;
+    standard_wide::space_type space;
+    return qi::phrase_parse(json.begin(), json.end(), (g)(boost::phoenix::ref(feature)), space);
+}
 
 }}
 
-#endif //MAPNIK_FEATURE_PARSER_HPP
+#endif // MAPNIK_JSON_FEATURE_PARSER_HPP
