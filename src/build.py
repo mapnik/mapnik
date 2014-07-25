@@ -213,7 +213,6 @@ source = Split(
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
     text/formatting/base.cpp
-    text/formatting/expression.cpp
     text/formatting/list.cpp
     text/formatting/text.cpp
     text/formatting/format.cpp
