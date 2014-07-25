@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-
-try:
-    import mapnik
-    mapnik.logger.set_severity(mapnik.severity_type.None)
-    #mapnik.logger.set_severity(mapnik.severity_type.Debug)
-except ImportError:
-    print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % 'import mapnik failed - tests require python bindings'
-    sys.exit(0)
+import mapnik
+mapnik.logger.set_severity(mapnik.severity_type.None)
 
 import shutil
+import sys
 import os.path
 from compare import compare, compare_grids
 
