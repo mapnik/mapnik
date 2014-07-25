@@ -25,7 +25,9 @@
 
 // boost
 #include <boost/spirit/include/karma.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/fusion/include/at.hpp>
 
 namespace mapnik { namespace json {
