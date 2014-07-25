@@ -92,7 +92,7 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
 
     polygon_coord %= ( &uint_(mapnik::SEG_MOVETO)
                        << eps[_r1 += 1][_a  = _x(_val)][ _b = _y(_val)]
-                       << kstring[ if_ (_r1 > 1) [_1 = "),("]
+                       << kstring[ if_ (_r1 > 1u) [_1 = "),("]
                                   .else_[_1 = "("]]
                        |
                        &uint_(mapnik::SEG_LINETO)
