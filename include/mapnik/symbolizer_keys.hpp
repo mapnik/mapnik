@@ -84,6 +84,10 @@ enum class keys : std::uint8_t
     largest_box_only,
     minimum_path_length,
     halo_comp_op,
+    text_transform,
+    horizontal_alignment,
+    justify_alignment,
+    vertical_alignment,
     MAX_SYMBOLIZER_KEY
 };
 

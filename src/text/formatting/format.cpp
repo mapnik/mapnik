@@ -49,9 +49,9 @@ void format_node::to_xml(ptree & xml) const
     if (fill) serialize_property("fill", *fill, new_node);
     if (halo_fill) serialize_property("halo-fill", *halo_fill, new_node);
     if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
+    if (text_transform) serialize_property("text-transform", *text_transform, new_node);
 
     if (face_name) set_attr(new_node, "face-name", *face_name);
-    if (text_transform) set_attr(new_node, "text-transform", *text_transform);
 
     if (child_) child_->to_xml(new_node);
 }
@@ -77,10 +77,9 @@ node_ptr format_node::from_xml(xml_node const& xml)
     //
     set_property_from_xml<color>(n->fill, "fill", xml);
     set_property_from_xml<color>(n->halo_fill, "halo-fill", xml);
+    set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
 
     n->face_name = xml.get_opt_attr<std::string>("face-name");
-    n->text_transform = xml.get_opt_attr<text_transform_e>("text-transform");
-
     return np;
 }
 
@@ -105,9 +104,10 @@ void format_node::apply(char_properties_ptr p, feature_impl const& feature, attr
     if (halo_radius) new_properties->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), *halo_radius);
     if (fill) new_properties->fill = boost::apply_visitor(extract_value<color>(feature,attrs), *fill);
     if (halo_fill) new_properties->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
+    if (text_transform) new_properties->text_transform = boost::apply_visitor(extract_value<text_transform_enum>(feature,attrs), *text_transform);
 
     if (face_name) new_properties->face_name = *face_name;
-    if (text_transform) new_properties->text_transform = *text_transform;
+
 
     if (child_) child_->apply(new_properties, feature, attrs, output);
     else MAPNIK_LOG_WARN(format) << "Useless format: No text to format";
@@ -137,6 +137,7 @@ void format_node::add_expressions(expression_set & output) const
     if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
     if (fill && is_expression(*fill)) output.insert(boost::get<expression_ptr>(*fill));
     if (halo_fill && is_expression(*halo_fill)) output.insert(boost::get<expression_ptr>(*halo_fill));
+    if (text_transform && is_expression(*text_transform)) output.insert(boost::get<expression_ptr>(*text_transform));
     if (child_) child_->add_expressions(output);
 }
 

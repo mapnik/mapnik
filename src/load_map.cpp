@@ -919,7 +919,7 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                     optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
                     if (val)
                     {
-                        // first try pre-evaluate expressions which don't have dynamic properties
+                        // first try pre-evaluating expression
                         auto result = pre_evaluate_expression<value>(*val);
                         if (std::get<1>(result))
                         {

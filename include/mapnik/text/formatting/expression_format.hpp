@@ -36,7 +36,8 @@ class xml_node;
 struct char_properties;
 
 namespace formatting {
-class MAPNIK_DECL expression_format: public node {
+class MAPNIK_DECL expression_format: public node
+{
 public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);

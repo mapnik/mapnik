@@ -99,6 +99,18 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
     property_meta_type{ "minimum-path-length", false, nullptr, property_types::target_double },
     property_meta_type{ "halo-comp-op", enumeration_wrapper(src_over),
                         [](enumeration_wrapper e) { return *comp_op_to_string(composite_mode_e(e.value)); }, property_types::target_halo_comp_op},
+    property_meta_type{ "text-transform", enumeration_wrapper(NONE), [](enumeration_wrapper e)
+                        {return enumeration<text_transform_enum,text_transform_enum_MAX>(text_transform_enum(e.value)).as_string();}, property_types::target_text_transform},
+    property_meta_type{ "horizontal-alignment", enumeration_wrapper(H_LEFT), [](enumeration_wrapper e)
+                        {return enumeration<horizontal_alignment_enum,horizontal_alignment_enum_MAX>(horizontal_alignment_enum(e.value)).as_string();},
+                        property_types::target_horizontal_alignment},
+    property_meta_type{ "justify-alignment", enumeration_wrapper(J_LEFT), [](enumeration_wrapper e)
+                        {return enumeration<justify_alignment_enum,justify_alignment_enum_MAX>(justify_alignment_enum(e.value)).as_string();},
+                        property_types::target_justify_alignment},
+    property_meta_type{ "vertical-alignment", enumeration_wrapper(V_TOP), [](enumeration_wrapper e)
+                        {return enumeration<vertical_alignment_enum,vertical_alignment_enum_MAX>(vertical_alignment_enum(e.value)).as_string();},
+                        property_types::target_vertical_alignment},
+
 };
 
 property_meta_type const& get_meta(mapnik::keys key)

@@ -160,7 +160,6 @@ static const char * text_transform_strings[] = {
     ""
 };
 
-
 IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 static const char * text_upright_strings[] = {

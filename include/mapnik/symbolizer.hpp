@@ -142,7 +142,11 @@ enum class property_types : std::uint8_t
     target_simplify_algorithm,
     target_markers_placement,
     target_markers_multipolicy,
-    target_gamma_method
+    target_gamma_method,
+    target_text_transform,
+    target_horizontal_alignment,
+    target_justify_alignment,
+    target_vertical_alignment
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
@@ -233,6 +237,8 @@ ENUM_FROM_STRING( gamma_method_enum )
 ENUM_FROM_STRING( line_rasterizer_enum )
 ENUM_FROM_STRING( marker_multi_policy_enum )
 ENUM_FROM_STRING( halo_rasterizer_enum )
+ENUM_FROM_STRING( text_transform_enum )
+
 // enum
 template <typename T, bool is_enum = true>
 struct expression_result

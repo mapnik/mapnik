@@ -80,11 +80,12 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type fill;
     symbolizer_base::value_type halo_fill;
+    symbolizer_base::value_type text_transform;
     //
 
     std::string face_name;
     boost::optional<font_set> fontset;
-    text_transform_e text_transform; //Per expression
+
 };
 
 
@@ -111,9 +112,15 @@ struct MAPNIK_DECL text_layout_properties
     symbolizer_base::value_type wrap_width;
     symbolizer_base::value_type wrap_before;
     symbolizer_base::value_type rotate_displacement;
+
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
     vertical_alignment_e valign;
+
+    //symbolizer_base::value_type halign;
+    //symbolizer_base::value_type jalign;
+    //symbolizer_base::value_type valign;
+
     std::function<pixel_position(double,double)> displacement_evaluator_ =
         [](double dx, double dy) { return pixel_position(dx,dy);};
 };

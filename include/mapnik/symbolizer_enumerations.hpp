@@ -117,16 +117,16 @@ enum marker_multi_policy_enum
 
 DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
 
-enum text_transform
+enum text_transform_enum
 {
     NONE = 0,
     UPPERCASE,
     LOWERCASE,
     CAPITALIZE,
-    text_transform_MAX
+    text_transform_enum_MAX
 };
 
-DEFINE_ENUM(text_transform_e, text_transform);
+DEFINE_ENUM(text_transform_e, text_transform_enum);
 
 enum label_placement_enum
 {
@@ -139,38 +139,38 @@ enum label_placement_enum
 
 DEFINE_ENUM(label_placement_e, label_placement_enum);
 
-enum vertical_alignment
+enum vertical_alignment_enum
 {
     V_TOP = 0,
     V_MIDDLE,
     V_BOTTOM,
     V_AUTO,
-    vertical_alignment_MAX
+    vertical_alignment_enum_MAX
 };
 
-DEFINE_ENUM(vertical_alignment_e, vertical_alignment);
+DEFINE_ENUM(vertical_alignment_e, vertical_alignment_enum);
 
-enum horizontal_alignment
+enum horizontal_alignment_enum
 {
     H_LEFT = 0,
     H_MIDDLE,
     H_RIGHT,
     H_AUTO,
-    horizontal_alignment_MAX
+    horizontal_alignment_enum_MAX
 };
 
-DEFINE_ENUM(horizontal_alignment_e, horizontal_alignment);
+DEFINE_ENUM(horizontal_alignment_e, horizontal_alignment_enum);
 
-enum justify_alignment
+enum justify_alignment_enum
 {
     J_LEFT = 0,
     J_MIDDLE,
     J_RIGHT,
     J_AUTO,
-    justify_alignment_MAX
+    justify_alignment_enum_MAX
 };
 
-DEFINE_ENUM(justify_alignment_e, justify_alignment);
+DEFINE_ENUM(justify_alignment_e, justify_alignment_enum);
 
 enum text_upright
 {

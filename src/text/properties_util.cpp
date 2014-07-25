@@ -61,6 +61,12 @@ struct property_serializer : public boost::static_visitor<>
         node_.put("<xmlattr>." + name_, val );
     }
 
+    void operator() (enumeration_wrapper const& val) const
+    {
+        std::string str = std::get<2>(get_meta(get_key(name_)))(val);
+        node_.put("<xmlattr>." + name_, str);
+    }
+
     template <typename T>
     void operator() (T const& val) const
     {
