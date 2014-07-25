@@ -144,6 +144,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    expression_grammar.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp
@@ -151,7 +152,6 @@ source = Split(
     image_filter_types.cpp
     miniz_png.cpp
     color.cpp
-    css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
     image_scaling.cpp
@@ -171,14 +171,13 @@ source = Split(
     gamma_method.cpp
     gradient.cpp
     graphics.cpp
+    parse_path.cpp
     image_reader.cpp
     image_util.cpp
     layer.cpp
     map.cpp
     load_map.cpp
     memory.cpp
-    parse_path.cpp
-    parse_transform.cpp
     palette.cpp
     plugin.cpp
     rule.cpp
@@ -188,6 +187,7 @@ source = Split(
     proj_transform.cpp
     scale_denominator.cpp
     simplify.cpp
+    parse_transform.cpp
     memory_datasource.cpp
     symbolizer.cpp
     symbolizer_keys.cpp
@@ -201,6 +201,7 @@ source = Split(
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
     warp.cpp
+    css_color_grammar.cpp
     text/vertex_cache.cpp
     text/layout.cpp
     text/text_line.cpp

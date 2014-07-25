@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/transform_expression_grammar.hpp>
-#include <mapnik/expression_grammar_impl.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>

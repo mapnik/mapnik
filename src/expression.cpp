@@ -26,7 +26,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_grammar.hpp>
-#include <mapnik/expression_grammar_impl.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>

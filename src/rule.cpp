@@ -22,17 +22,10 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
-#include <mapnik/expression_node.hpp>
-#include <mapnik/debug.hpp>
-#include <mapnik/raster_colorizer.hpp>
-#include <mapnik/expression_string.hpp>
-
-// boost
-#include <memory>
-#include <boost/concept_check.hpp>
 
 // stl
 #include <limits>
+#include <memory>
 
 namespace mapnik
 {

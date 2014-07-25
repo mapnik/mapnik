@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,31 +20,11 @@
  *
  *****************************************************************************/
 
-#include <mapnik/parse_transform.hpp>
-#include <mapnik/transform_expression_grammar.hpp>
-
-// stl
+// NOTE: we define this here in a cpp because def is needed twice:
+// once by src/expression.cpp and once by mapnik/transform_expression_grammar_impl.hpp
+#include <mapnik/expression_grammar_impl.hpp>
+#include <mapnik/transform_expression_grammar_impl.hpp>
 #include <string>
-#include <stdexcept>
 
-namespace mapnik {
-
-transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
-{
-    static const transform_expression_grammar<std::string::const_iterator> g;
-    transform_list_ptr tl = std::make_shared<transform_list>();
-    std::string::const_iterator itr = str.begin();
-    std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space_type(), *tl);
-    if (r && itr == end)
-    {
-        return tl;
-    }
-    else
-    {
-        throw std::runtime_error("Failed to parse transform: \"" + str + "\"");
-    }
-}
-
-
-} // namespace mapnik
+template struct mapnik::expression_grammar<std::string::const_iterator>;
+template struct mapnik::transform_expression_grammar<std::string::const_iterator>;
