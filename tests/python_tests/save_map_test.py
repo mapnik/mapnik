@@ -23,7 +23,7 @@ def compare_map(xml):
     m = mapnik.Map(256, 256)
     absolute_base = os.path.abspath(os.path.dirname(xml))
     try:
-        mapnik.load_map(m, xml, False, absolute_base)
+        mapnik.load_map(m, xml, True, absolute_base)
     except RuntimeError, e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
@@ -37,7 +37,7 @@ def compare_map(xml):
         os.remove(test_map)
     mapnik.save_map(m, test_map)
     new_map = mapnik.Map(256, 256)
-    mapnik.load_map(new_map, test_map,False,absolute_base)
+    mapnik.load_map(new_map, test_map, True, absolute_base)
     open(test_map2,'w').write(mapnik.save_map_to_string(new_map))
     diff = ' diff %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
     try:

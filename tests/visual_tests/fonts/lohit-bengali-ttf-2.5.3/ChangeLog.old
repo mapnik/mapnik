@@ -1,0 +1,175 @@
+				  fonts-indic
+Current Version :- 2.4.3
+* Wed Sep 09 2009 Pravin Satpute <psatpute@redhat.com> - 2.4.3
+- updated conf file for all language
+- added changelog for individual lang
+- modified makedist.sh generate.sh for releasing new tarballs
+
+* Fri Aug 28 2009 Pravin Satpute <psatpute@redhat.com> - 2.4.2
+- added conf file for all fonts 
+- contributions from Parag Nemade <pnemade@redhat.com> for conf files
+
+* Wed Aug 12 2009 Pravin Satpute <psatpute@redhat.com> - 2.4.1
+- Update Copyright 
+
+* Tue Aug 04 2009 Pravin Satpute <psatpute@redhat.com> - 2.4.0
+- Added Unicode 5.1 support in All Lohit fonts 
+
+* Thu Mar 05 2009 Rahul Bhalerao <rbhalera@redhat.com> - 2.3.8
+- Bug 428427 - [kn_IN][fonts-indic] - 0CB5+0CCA is wrongly rendering 
+- Bug 450699 - [ta_IN]Errors in "sh" and "shrI" in Lohit Tamil font (fixed in font, needs rendering update)
+- Bug 476427 - [te_IN] - Consonant+Virama+Consonant+Virama+space renders the second virama as a separate glyph in lohit-telugu font
+- Bug 479100 - [kn_IN] Conjunct combination of U0C9D with U0CCA/U0CCB is rendering wrongly
+- Bug 483530 - [bn_IN]Lohit Bengali font cheating about character support
+- Added Lohit-Assamese
+- Modified README file.
+
+* Tue Sep 09 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.3.1
+- Bug 216400: [te_IN] - Anaconda GUI - Release Notes button is overlapping
+with other texts in a specific page
+
+* Wed Aug 20 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.3.0
+- Bug 215902: [hi_IN, mr_IN]Incorrect extent of 0x093f when attached to a composite character which has width greater than a single character (hi_IN & maybe others)
+- Forked Lohit Hindi into Marathi, Maithili, Kashmiri, Konkani, Sindhi and Nepali.
+
+* Fri Jun 06 2008 Rahul Bhalerao <rbhalera@redhat.com>
+- Bug 445176: [ml_IN] Conjuncts combining with 0D30 do not form the pre based glyph
+
+* Fri Jun 06 2008 Rahul Bhalerao <rbhalera@redhat.com>
+- Improved Anchoring(blwm Anchor-0) for Hindi font.
+- Corrected positioning of U+0953 for Hindi font.
+
+* Tue Apr 29 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.2.1
+- Resolved bugs (bugzilla.redhat.com):
+- Bug 444559 Processed: [ml_IN] Wrong shape for conjuncts formed using 0D30
+(xRa) in a word
+- Bug 444561 Processed: [ml_IN] Conjuncts does not get combined with 0D30 to
+form the pre based glyph
+- Bug 444563: [ml_IN] When 0D2F is combined with a consonant and followed by
+0D15, 0D2F joins with 0D15
+
+* Tue Apr 08 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.2.0
+- Resolved bugs (bugzilla.redhat.com):
+- Bug 202400: [hi_IN] New codepoints/glyphs in Unicode 5.0
+- Bug 205981: [hi_IN]The font file of Devanagari(lohit_hi.ttf) lacks the glyph
+of U+0x0904
+- Bug 206426: [hi_IN, mr_IN] Some Glyphs are missing and some GPOS shapes
+should be more perfect - Priority - C
+- Bug 239630: [hi_IN] the glyph of 0x0953 in lohit_hi.ttf is wrong.
+- Bug 428427: [kn_IN][fonts-indic] - 0CB5+0CCA is wrongly rendering
+
+* Thu Feb 28 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.1.9
+- Resolved bugs(bugzilla.redhat.com):
+- Bug 431035: [ml_IN] Glyph to be formed for nine consonants + 0D4D + 0D32 
+- Bug 433437: [ml_IN] Rendering combination incorrect with 0D35
+- Bug 433440: [ml_IN] Rendering combination incorrect with 0D2F
+- Contributions from Hiran Venugopalan (xRa glyphs and few other)
+
+* Fri Jan 25 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.1.8
+- Bug 192812: [ml_IN]GPOS issues in new Malayalam font
+- Bug 402321: [ml_IN} Wrong combinations used for the conjunct 'ന്പ'
+- Bug 402331: [ml_IN] Wrong combinations used for conjunct 'ന്‍റ'
+- Bug 424701: [ml_IN] words are shown joined (very low space shown on screen)
+- Bug 429526: [ml_IN]: Removal of a glyph from font file
+- Bug 247233: Additional special character rendering for assamese [as-IN] and bengali [bn-IN]
+
+* Tue Jan 15 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.1.7
+- Updated the makedist.sh script
+
+* Tue Jan 15 2008 Rahul Bhalerao <rbhalera@redhat.com> - 2.1.7
+- Bug 233419: 	[kn_IN] GSUB's combinaing with additional dependent vowel are
+not rendering correctly
+
+* Fri Dec 14 2007 Rahul Bhalerao <rbhalera@redhat.com> - 2.1.6
+- Bug 234284:  	[pa_IN] Enlarge size for asterik(*)
+
+* Mon Mar 26 2007 Parag Nemade <pnemade@redhat.com> - 2.1.5
+- Resolved Bugs from Parag Nemade
+- Bug 231965: [kn_IN] wrong Conjuct combines during the formation kannada letter [yo]
+- Bug 233257: [kn_IN] Conjuct combination of U0CAE with U0CCB is rendering wrongly
+- Bug 233415: [kn_IN] GSUB's combinaing with additional dependent vowel are not rendering correctly
+- Bug 233554: [kn_IN] GSUB's combinaing with additional dependent vowel U0CC0 are not rendering correctly
+- Bug 233555: [kn_IN] GSUB's combinaing with additional dependent vowel U0CC7 are not rendering correctly
+- Bug 233556: [kn_IN] GSUB's combinaing with additional dependent vowel U0CC6 are not rendering correctly
+- Bug 233557: [kn_IN] GSUB's combinaing with additional dependent vowel U0CC8 are not rendering correctly
+- Bug 233558: [kn_IN] GSUB's combinaing with additional dependent vowel U0CCBare not rendering correctly
+- Bug 233559: [kn_IN] GSUB's combinaing with additional dependent vowel U0CBE are not rendering correctly
+- Bug 233560: [kn_IN] GSUB's combinaing with additional dependent vowel U0CBF are not rendering correctly
+
+* Mon Mar 05 2007 Parag Nemade <pnemade@redhat.com> - 2.1.4
+- Resolved Bugs from Parag Nemade
+- Bug 221383: [kn_IN] GSUB combinations has problem with Ra
+
+* Mon Feb 19 2007 Parag Nemade <pnemade@redhat.com> - 2.1.3
+- Resolved Bugs from Parag Nemade
+- Bug 202401: [ta_IN] New codepoints/glyphs in Unicode 5.0
+- Bug 223774: [kn_IN] Some Ligature rules are wrong in the font file
+- Bug 223971: [kn_IN] Consonant + Halant + Consonant + Dependent Vowel not appearing properly in some rare cases
+- Bug 227971: [kn_IN] Combinations with 2 Halants not rendering properly
+
+* Tue Jan 16 2007 Parag Nemade <pnemade@redhat.com> - 2.1.2
+- Resolved Bugs from Parag Nemade
+- Bug 222407: [or_IN] [fonts-indic] - One GSUB Conjunct is not appearing with its correct shape
+- Bug 206434: [ml_IN] Digits are appearing in English instead of malayalam - Priority C
+- Bug 215894: Relative height of 0x0901 (and 0x0902) on 0x0915 is different than other devnagari characters (hi_IN, mr_IN)
+- Bug 222408: [te_IN] [fonts-indic] - Danda and Double Danda to be implemented with 0964 && 0965
+- Bug 222409: [kn_IN] [fonts-indic] - Danda and Double Danda to be implemented with 0964 && 0965
+- Bug 221384: [kn_IN] - shape of ra (U+0CB0) is not corret in combined character (below base)
+
+* Tue Jan 16 2007 Parag Nemade <pnemade@redhat.com> - 2.1.1
+- Added makedist.sh, generate.sh and generate.pe script files.
+
+* Fri Jan 12 2007 Parag Nemade <pnemade@redhat.com> - 2.0.13
+- Resolved Bugs from Parag Nemade
+- Bug 220880: [or_IN] Danda need to move from 0B64/0B65 to 0964/0965
+- Bug 222406: [ml_IN] Danda need to move from 0D64/0D65 to 0964/0965
+
+* Wed Jan 02 2007 Parag Nemade <pnemade@redhat.com> - 2.0.12
+- Resolved Bugs from Parag Nemade
+- Bug 220881: [ta_IN] [fonts-tamil] - Warning showing in the terminal when run apps with ta_IN locale
+- Bug 220882: [hi_IN] rendering problem for number "5" in postscript file
+
+* Wed Dec 13 2006 Parag Nemade <pnemade@redhat.com> - 2.0.11
+- Resolved Bugs from Parag Nemade
+- Bug 216639: [kn_IN] OTF rules to be fixed - Priority A
+- Bug 217482: [kn_IN] - pango - Composed Char not rendered properly
+- Bug 219583: [pa_IN] Punjabi fonts' size is big as compared to English
+- Bug 218588: [gu_IN] Qt doesn't display virama properly
+
+* Tue Dec 06 2006 Parag Nemade <pnemade@redhat.com> - 2.0.10
+- Resolved Bugs from Parag Nemade
+- Bug 207269: [ta_IN] - Some conjunct characters not appearing with proper shape - Priority - B
+- Bug 217482: [kn_IN] - pango - Composed Char not rendered properly
+- Bug 216628: [ml] characters are not shown bold during selecting BOLD font
+- Bug 218588: [gu_IN] Qt doesn't display virama properly
+- Bug 206599: [te_IN] - Some of the Priority - C GSUB Conjuncts are not appearing with its actual shape
+- Resolved Bugs from LingNing Zhang
+- Bug 218586: [ml_IN] 0d2f+0d4d combination is invaild when put in word
+- Bug 218587: [ml_IN] 0d35+0d4d combination is invaild (should not combine)
+
+* Tue Nov 21 2006 Parag Nemade <pnemade@redhat.com> - 2.0.9
+- Fixed Bugs from Parag Nemade 
+- Bug 216060: [pa_IN]Lohit Punjabi: (U+0A03) Gurmukhi Sign Visarga right margin is too wide.
+
+* Tue Nov 21 2006 Parag Nemade <pnemade@redhat.com> - 2.0.8
+- Fixed Bugs from Parag Nemade 
+- Bug 216629 : [te_IN] GPOS position should be at middle instead of left hand side - Priority B
+- Bug 216631 : [or_IN] one GSUB Rule is wrongly defined - Priority A
+- Bug 216628 : [ml] characters are not shown bold during selecting BOLD font
+- Bug 216624 : [pa_IN] 0a01/0a03/0964/0965 is missing from font
+- Bug 216634 : Glyphs for two combinations are wrong in Gujarati (gu_IN)
+- Bug 197216 : [bn_IN]Incorrect glyph for conjunct
+- Bug 215894 : Relative height of 0x0901 (and 0x0902) on 0x0915 is different than
+	       other devnagari characters (hi_IN, mr_IN) 
+- Fixed Bugs from LingNing Zhang
+- Bug 216626 : [as_IN] Pango - A particular char when Conjuncts, creates Cursor Nevigation Problem
+- Bug 216627 : [ml_IN] The glyph of 0x25CC is not existing in lohit_ml.ttf
+- Bug 216639 : [kn_IN] OTF rules to be fixed - Priority A
+
+* Tue 17 oct 2006 Leon Ho <llch@redhat.com> - 2.0.7
+- Bug 206601: [ta_IN] Glyph is missing for Unicode U+0BB6 - Priority - A (Rahul Bhalerao)
+- Bug 216639: [kn_IN] OTF rules to be fixed - Priority A (Ramakrishna Reddy)
+
+* Fri 29 Sep 2006 Leon Ho <llch@redhat.com> - 2.0.6
+- Bug 208525: [ml_IN]the glyph of 0d33+0d4d+0d33 is wrong (LingNing Zhang)
+- Bug 208540: [ml_IN]the glyph of 0d2f+0d4d and the glyph of 0d2f+0d4d+0d2f are wrong (LingNing Zhang)
