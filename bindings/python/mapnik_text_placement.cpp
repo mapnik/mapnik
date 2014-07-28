@@ -33,7 +33,7 @@
 #include <mapnik/text/formatting/list.hpp>
 #include <mapnik/text/formatting/format.hpp>
 #include <mapnik/text/formatting/layout.hpp>
-#include <mapnik/text/layout.hpp>
+#include <mapnik/text/text_layout.hpp>
 #include <mapnik/symbolizer.hpp>
 
 #include "mapnik_enumeration.hpp"

@@ -25,7 +25,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text/placement_finder.hpp>
-#include <mapnik/text/layout.hpp>
+#include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/vertex_cache.hpp>
@@ -57,9 +57,7 @@ placement_finder::placement_finder(feature_impl const& feature,
       placements_(),
       has_marker_(false),
       marker_(),
-      marker_box_()
-{
-}
+      marker_box_() {}
 
 bool placement_finder::next_position()
 {

@@ -26,7 +26,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/text/layout.hpp>
+#include <mapnik/text/text_layout.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>

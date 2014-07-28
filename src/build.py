@@ -203,7 +203,7 @@ source = Split(
     warp.cpp
     css_color_grammar.cpp
     text/vertex_cache.cpp
-    text/layout.cpp
+    text/text_layout.cpp
     text/text_line.cpp
     text/itemizer.cpp
     text/scrptrun.cpp
