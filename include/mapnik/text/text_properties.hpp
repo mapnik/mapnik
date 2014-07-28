@@ -71,6 +71,9 @@ struct MAPNIK_DECL format_properties
                 format_properties const& dfl = format_properties()) const;
     // collect expressions
     void add_expressions(expression_set & output) const;
+
+    std::string face_name;
+    boost::optional<font_set> fontset;
     // expressions
     symbolizer_base::value_type text_size;
     symbolizer_base::value_type character_spacing;
@@ -78,14 +81,10 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type text_opacity;
     symbolizer_base::value_type halo_opacity;
     symbolizer_base::value_type wrap_char;
-    symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type fill;
     symbolizer_base::value_type halo_fill;
+    symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type text_transform;
-    //
-
-    std::string face_name;
-    boost::optional<font_set> fontset;
 
 };
 

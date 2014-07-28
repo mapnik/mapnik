@@ -274,10 +274,10 @@ format_properties::format_properties()
       text_opacity(1.0),
       halo_opacity(1.0),
       wrap_char(" "),
-      text_transform(enumeration_wrapper(NONE)),
       fill(color(0,0,0)),
       halo_fill(color(255,255,255)),
-      halo_radius(0.0) {}
+      halo_radius(0.0),
+      text_transform(enumeration_wrapper(NONE)) {}
 
 void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
