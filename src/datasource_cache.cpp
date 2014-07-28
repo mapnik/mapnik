@@ -80,24 +80,27 @@ datasource_ptr datasource_cache::create(parameters const& params)
     }
 #endif
 
-#ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
-#endif
-
-    std::map<std::string,std::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
-    if (itr == plugins_.end())
+    std::map<std::string,std::shared_ptr<PluginInfo> >::iterator itr;
+    // add scope to ensure lock is released asap
     {
-        std::string s("Could not create datasource for type: '");
-        s += *type + "'";
-        if (plugin_directories_.empty())
+#ifdef MAPNIK_THREADSAFE
+        mapnik::scoped_lock lock(mutex_);
+#endif
+        itr=plugins_.find(*type);
+        if (itr == plugins_.end())
         {
-            s += " (no datasource plugin directories have been successfully registered)";
+            std::string s("Could not create datasource for type: '");
+            s += *type + "'";
+            if (plugin_directories_.empty())
+            {
+                s += " (no datasource plugin directories have been successfully registered)";
+            }
+            else
+            {
+                s += " (searched for datasource plugins in '" + plugin_directories() + "')";
+            }
+            throw config_error(s);
         }
-        else
-        {
-            s += " (searched for datasource plugins in '" + plugin_directories() + "')";
-        }
-        throw config_error(s);
     }
 
     if (! itr->second->valid())
