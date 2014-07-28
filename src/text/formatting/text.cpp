@@ -38,10 +38,9 @@ namespace formatting
 
 using boost::property_tree::ptree;
 
-void text_node::to_xml(ptree &xml) const
+void text_node::to_xml(ptree & xml) const
 {
-    ptree &new_node = xml.push_back(ptree::value_type(
-                                        "<xmltext>", ptree()))->second;
+    ptree & new_node = xml.push_back(ptree::value_type("<xmltext>", ptree()))->second;
     new_node.put_value(to_expression_string(*text_));
 }
 

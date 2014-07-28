@@ -59,9 +59,7 @@ void format_node::to_xml(ptree & xml) const
 
 node_ptr format_node::from_xml(xml_node const& xml)
 {
-    format_node *n = new format_node();
-    node_ptr np(n);
-
+    auto n = std::make_shared<format_node>();
     node_ptr child = node::from_xml(xml);
     n->set_child(child);
 
@@ -80,7 +78,7 @@ node_ptr format_node::from_xml(xml_node const& xml)
     set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
 
     n->face_name = xml.get_opt_attr<std::string>("face-name");
-    return np;
+    return n;
 }
 
 

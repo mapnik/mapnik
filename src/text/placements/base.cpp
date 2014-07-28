@@ -37,10 +37,6 @@ void text_placements::add_expressions(expression_set & output) const
 text_placement_info::text_placement_info(text_placements const* parent,
                                          double scale_factor_)
     : properties(parent->defaults),
-      scale_factor(scale_factor_)
-{
-    //properties.format = std::make_shared<char_properties>(*(properties.format));
-    //properties.layout_defaults = std::make_shared<text_layout_properties>(*(properties.layout_defaults));
-}
+      scale_factor(scale_factor_) {}
 
 } //ns mapnik

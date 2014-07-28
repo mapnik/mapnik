@@ -61,8 +61,7 @@ void layout_node::to_xml(ptree &xml) const
 
 node_ptr layout_node::from_xml(xml_node const& xml)
 {
-    std::shared_ptr<layout_node> n = std::make_shared<layout_node>();
-
+    auto n = std::make_shared<layout_node>();
     node_ptr child = node::from_xml(xml);
     n->set_child(child);
 

@@ -28,7 +28,7 @@ namespace mapnik
 bool text_placement_info_dummy::next()
 {
     if (state) return false;
-    state++;
+    ++state;
     return true;
 }
 
