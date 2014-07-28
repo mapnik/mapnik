@@ -65,15 +65,18 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    template <typename T>
+    void parse_geojson(T & stream);
 private:
     mapnik::datasource::datasource_t type_;
     std::map<std::string, mapnik::parameters> statistics_;
     mapnik::layer_descriptor desc_;
-    std::string file_;
+    std::string filename_;
+    std::string inline_string_;
     mapnik::box2d<double> extent_;
     std::vector<mapnik::feature_ptr> features_;
     spatial_index_type tree_;
 };
 
 
-#endif // FILE_DATASOURCE_HPP
+#endif // GEOJSON_DATASOURCE_HPP
