@@ -237,9 +237,10 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
 bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
-    /********************************************************************************
-     * IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! *
-     ********************************************************************************/
+    //
+    // IMPORTANT NOTE: See note about coordinate systems in find_point_placement()!
+    //
+
     vertex_cache::scoped_state begin(pp);
     text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
 
@@ -256,7 +257,6 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position align_offset = layout.alignment_offset();
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-        //double offset = align_offset.y + layout_displacement.y * scale_factor_ + sign * layout.height()/2.0;
         double offset = layout_displacement.y + 0.5 * sign * layout.height();
 
         for (auto const& line : layout)
