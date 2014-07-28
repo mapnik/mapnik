@@ -54,76 +54,11 @@ struct generate_id
     mutable int id_;
 };
 
-
 template <typename Iterator, typename FeatureType>
 struct feature_collection_grammar :
     qi::grammar<Iterator, std::vector<feature_ptr>(), space_type>
 {
-    feature_collection_grammar(context_ptr const& ctx, mapnik::transcoder const& tr)
-        : feature_collection_grammar::base_type(start,"start"),
-          feature_g(tr),
-          ctx_(ctx),
-          generate_id_(1)
-    {
-        qi::lit_type lit;
-        qi::eps_type eps;
-        qi::_4_type _4;
-        qi::_3_type _2;
-        qi::_2_type _3;
-        qi::_a_type _a;
-        qi::_val_type _val;
-        qi::_r1_type _r1;
-        using phoenix::push_back;
-        using phoenix::construct;
-        using phoenix::new_;
-        using phoenix::val;
-
-        start = feature_collection | feature_from_geometry(_val) | feature(_val)
-            ;
-
-        feature_collection = lit('{') >> (type | features | feature_g.json_.key_value) % lit(',') >> lit('}')
-            ;
-
-        type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
-            ;
-
-        features = lit("\"features\"")
-            >> lit(':')
-            >> lit('[')
-            >> -(feature(_val) % lit(','))
-            >> lit(']')
-            ;
-
-        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
-            >> feature_g(*_a)[push_back(_r1,_a)]
-            ;
-
-        feature_from_geometry =
-            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
-            >> geometry_g(extract_geometry_(*_a)) [push_back(_r1, _a)]
-            ;
-
-        start.name("start");
-        type.name("type");
-        features.name("features");
-        feature.name("feature");
-        feature_from_geometry.name("feature-from-geometry");
-        feature_g.name("feature-grammar");
-        geometry_g.name("geometry-grammar");
-
-        qi::on_error<qi::fail>
-            (
-                feature_collection
-                , std::clog
-                << phoenix::val("Error parsing GeoJSON ")
-                << _4
-                << phoenix::val(" here: \"")
-                << construct<std::string>(_3, _2)
-                << phoenix::val('\"')
-                << std::endl
-                );
-    }
-
+    feature_collection_grammar(context_ptr const& ctx, mapnik::transcoder const& tr);
     feature_grammar<Iterator,FeatureType> feature_g;
     geometry_grammar<Iterator> geometry_g;
     phoenix::function<extract_geometry> extract_geometry_;
