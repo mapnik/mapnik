@@ -23,7 +23,7 @@
 #define MAPNIK_TEXT_PROPERTIES_HPP
 
 // mapnik
-#include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/value.hpp>
@@ -41,18 +41,15 @@
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
 
-namespace mapnik
-{
+namespace mapnik { namespace detail {
 
-using fontset_map = std::map<std::string, font_set>;
-
-struct MAPNIK_DECL char_properties
+struct evaluated_format_properties
 {
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
     double character_spacing;
-    double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
+    double line_spacing;
     double text_opacity;
     double halo_opacity;
     unsigned wrap_char;
@@ -61,6 +58,10 @@ struct MAPNIK_DECL char_properties
     color halo_fill;
     double halo_radius;
 };
+
+}
+
+using fontset_map = std::map<std::string, font_set>;
 
 struct MAPNIK_DECL format_properties
 {
@@ -168,7 +169,6 @@ struct MAPNIK_DECL text_symbolizer_properties
     // Default values for text layouts
     text_layout_properties layout_defaults;
     // Default values for format_properties.
-    //char_properties_ptr format;
     format_properties format_defaults;
 
 private:

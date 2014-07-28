@@ -78,7 +78,7 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     return n;
 }
 
-void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const
+void layout_node::apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const
 {
     text_layout_properties new_properties(output.get_layout_properties());
     if (dx) new_properties.dx = *dx;

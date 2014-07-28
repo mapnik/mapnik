@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef CHAR_PROPERTIES_PTR_HPP
-#define CHAR_PROPERTIES_PTR_HPP
+#ifndef EVALUATED_FORMAT_PROPERTIES_PTR_HPP
+#define EVALUATED_FORMAT_PROPERTIES_PTR_HPP
 
 #include <memory>
 
-namespace mapnik
-{
-struct char_properties;
-using char_properties_ptr = std::shared_ptr<char_properties>;
+namespace mapnik { namespace detail {
+struct evaluated_format_properties;
+}
+using evaluated_format_properties_ptr = std::shared_ptr<detail::evaluated_format_properties>;
 }
 
-#endif // CHAR_PROPERTIES_PTR_HPP
+#endif // EVALUATED_FORMAT_PROPERTIES_PTR_HPP

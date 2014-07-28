@@ -124,7 +124,7 @@ struct NodeWrap
     NodeWrap()
         : formatting::node(), wrapper<formatting::node>() {}
 
-    void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         python_block_auto_unblock b;
         this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&vars), ptr(&output));
@@ -159,7 +159,7 @@ struct TextNodeWrap
     TextNodeWrap(std::string expr_text)
         : formatting::text_node(expr_text), wrapper<formatting::text_node>() {}
 
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -172,7 +172,7 @@ struct TextNodeWrap
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    void default_apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         formatting::text_node::apply(p, feature, vars, output);
     }
@@ -182,7 +182,7 @@ struct TextNodeWrap
 struct FormatNodeWrap
     : formatting::format_node, wrapper<formatting::format_node>
 {
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -195,7 +195,7 @@ struct FormatNodeWrap
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    void default_apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         formatting::format_node::apply(p, feature, vars, output);
     }
@@ -203,7 +203,7 @@ struct FormatNodeWrap
 
 struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expression_format>
 {
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -216,7 +216,7 @@ struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expres
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    void default_apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         formatting::expression_format::apply(p, feature, vars, output);
     }
@@ -224,7 +224,7 @@ struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expres
 
 struct LayoutNodeWrap: formatting::layout_node, wrapper<formatting::layout_node>
 {
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -237,7 +237,7 @@ struct LayoutNodeWrap: formatting::layout_node, wrapper<formatting::layout_node>
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    void default_apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         formatting::layout_node::apply(p, feature, vars, output);
     }
@@ -264,7 +264,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
     // TODO: Add constructor taking variable number of arguments.
        http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function
 
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -277,7 +277,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
         }
     }
 
-    void default_apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+    void default_apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
     {
         formatting::list_node::apply(p, feature, vars, output);
     }
@@ -346,12 +346,12 @@ void insert_expression(expression_set *set, expression_ptr p)
 }
 
 /*
-char_properties_ptr get_format(text_symbolizer const& sym)
+evaluated_format_properties_ptr get_format(text_symbolizer const& sym)
 {
     return sym.get_placement_options()->defaults.format;
 }
 
-void set_format(text_symbolizer const& sym, char_properties_ptr format)
+void set_format(text_symbolizer const& sym, evaluated_format_properties_ptr format)
 {
     sym.get_placement_options()->defaults.format = format;
 }
@@ -453,25 +453,25 @@ void export_text_placement()
         .def_readwrite("orientation", &text_layout_properties::orientation)
         .def_readwrite("rotate_displacement", &text_layout_properties::rotate_displacement)
         .add_property("displacement", &get_displacement, &set_displacement);
-
-    class_with_converter<char_properties>
+/*
+    class_with_converter<detail::evaluated_format_properties>
         ("CharProperties")
-        .def_readwrite_convert("text_transform", &char_properties::text_transform)
-        .def_readwrite_convert("fontset", &char_properties::fontset)
-        .def(init<char_properties const&>()) //Copy constructor
-        .def_readwrite("face_name", &char_properties::face_name)
-        .def_readwrite("text_size", &char_properties::text_size)
-        .def_readwrite("character_spacing", &char_properties::character_spacing)
-        .def_readwrite("line_spacing", &char_properties::line_spacing)
-        .def_readwrite("text_opacity", &char_properties::text_opacity)
-        .def_readwrite("wrap_char", &char_properties::wrap_char)
-        .def_readwrite("wrap_character", &char_properties::wrap_char)
-        .def_readwrite("fill", &char_properties::fill)
-        .def_readwrite("halo_fill", &char_properties::halo_fill)
-        .def_readwrite("halo_radius", &char_properties::halo_radius)
-        /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
+        .def_readwrite_convert("text_transform", &detail::evaluated_format_properties::text_transform)
+        .def_readwrite_convert("fontset", &detail::evaluated_format_properties::fontset)
+        .def(init<detail::evaluated_format_properties const&>()) //Copy constructor
+        .def_readwrite("face_name", &detail::evaluated_format_properties::face_name)
+        .def_readwrite("text_size", &detail::evaluated_format_properties::text_size)
+        .def_readwrite("character_spacing", &detail::evaluated_format_properties::character_spacing)
+        .def_readwrite("line_spacing", &detail::evaluated_format_properties::line_spacing)
+        .def_readwrite("text_opacity", &detail::evaluated_format_properties::text_opacity)
+        .def_readwrite("wrap_char", &detail::evaluated_format_properties::wrap_char)
+        .def_readwrite("wrap_character", &detail::evaluated_format_properties::wrap_char)
+        .def_readwrite("fill", &detail::evaluated_format_properties::fill)
+        .def_readwrite("halo_fill", &detail::evaluated_format_properties::halo_fill)
+        .def_readwrite("halo_radius", &evaluated_format_properties::halo_radius)
+        //from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
         ;
-
+*/
     class_<TextPlacementsWrap,
         std::shared_ptr<TextPlacementsWrap>,
         boost::noncopyable>

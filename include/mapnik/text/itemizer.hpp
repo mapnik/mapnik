@@ -24,7 +24,7 @@
 #define MAPNIK_TEXT_ITEMIZER_HPP
 
 //mapnik
-#include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/value_types.hpp>
 
 // stl
@@ -47,7 +47,7 @@ struct text_item
     unsigned end = 0u;
     UScriptCode script = USCRIPT_INVALID_CODE;
     UBiDiDirection rtl = UBIDI_LTR;
-    char_properties_ptr format;
+    evaluated_format_properties_ptr format;
 };
 
 // This class splits text into parts which all have the same
@@ -59,7 +59,7 @@ class text_itemizer
 {
 public:
     text_itemizer();
-    void add_text(value_unicode_string const& str, char_properties_ptr format);
+    void add_text(value_unicode_string const& str, evaluated_format_properties_ptr format);
     std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
     void clear();
     value_unicode_string const& text() const { return text_; }
@@ -76,7 +76,7 @@ private:
         unsigned end;
         T data;
     };
-    using format_run_t = run<char_properties_ptr>;
+    using format_run_t = run<evaluated_format_properties_ptr>;
     using direction_run_t = run<UBiDiDirection>;
     using script_run_t = run<UScriptCode>;
     using format_run_list = std::list<format_run_t>;

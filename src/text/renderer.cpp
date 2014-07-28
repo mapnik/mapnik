@@ -151,8 +151,8 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     matrix.yy = transform_.sy  * 0x10000L;
     matrix.yx = transform_.shy * 0x10000L;
 
-    char_properties default_props;
-    char_properties const* format = &default_props;
+    detail::evaluated_format_properties default_props;
+    detail::evaluated_format_properties const* format = &default_props;
     for (auto const& glyph : glyphs_)
     {
         if (glyph.properties)

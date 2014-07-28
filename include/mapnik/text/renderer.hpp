@@ -45,9 +45,9 @@ namespace mapnik
 struct glyph_t
 {
     FT_Glyph image;
-    char_properties const* properties;
+    detail::evaluated_format_properties const* properties;
 
-    glyph_t(FT_Glyph image_, char_properties const* properties_)
+    glyph_t(FT_Glyph image_, detail::evaluated_format_properties const* properties_)
         : image(image_), properties(properties_) {}
 
     glyph_t( glyph_t && other) noexcept

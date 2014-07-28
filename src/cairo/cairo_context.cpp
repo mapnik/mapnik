@@ -440,7 +440,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
 
     //render halo
     double halo_radius = 0;
-    char_properties_ptr format;
+    evaluated_format_properties_ptr format;
     set_operator(halo_comp_op);
     for (auto const& glyph_pos : *path)
     {

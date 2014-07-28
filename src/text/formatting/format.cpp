@@ -82,9 +82,9 @@ node_ptr format_node::from_xml(xml_node const& xml)
 }
 
 
-void format_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& attrs, text_layout &output) const
+void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& attrs, text_layout &output) const
 {
-    char_properties_ptr new_properties = std::make_shared<char_properties>(*p);
+    evaluated_format_properties_ptr new_properties = std::make_shared<detail::evaluated_format_properties>(*p);
 
     if (text_size) new_properties->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), *text_size);
     if (character_spacing) new_properties->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), *character_spacing);

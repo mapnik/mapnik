@@ -26,7 +26,7 @@
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/glyph_info.hpp>
-#include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
 #include <mapnik/text/rotation.hpp>
 
@@ -51,7 +51,7 @@ public:
     text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties);
 
     // Adds a new text part. Call this function repeatedly to build the complete text.
-    void add_text(mapnik::value_unicode_string const& str, char_properties_ptr format);
+    void add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format);
 
     // Returns the complete text stored in this layout.
     mapnik::value_unicode_string const& text() const;

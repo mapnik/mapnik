@@ -62,7 +62,7 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
     if (tree_)
     {
         //evaluate format properties
-        char_properties_ptr format = std::make_shared<char_properties>();
+        evaluated_format_properties_ptr format = std::make_shared<detail::evaluated_format_properties>();
 
         format->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
         format->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);

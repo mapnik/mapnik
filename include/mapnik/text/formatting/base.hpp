@@ -25,7 +25,7 @@
 // mapnik
 #include <mapnik/expression.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -47,7 +47,7 @@ public:
     virtual ~node() {}
     virtual void to_xml(boost::property_tree::ptree & xml) const = 0;
     static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const = 0;
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const = 0;
     virtual void add_expressions(expression_set & output) const = 0;
 };
 } //ns formatting

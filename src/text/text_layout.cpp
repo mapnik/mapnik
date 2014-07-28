@@ -64,7 +64,7 @@ text_layout::text_layout(face_manager_freetype & font_manager, double scale_fact
       lines_(),
       properties_(properties) {}
 
-void text_layout::add_text(mapnik::value_unicode_string const& str, char_properties_ptr format)
+void text_layout::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format)
 {
     itemizer_.add_text(str, format);
 }
