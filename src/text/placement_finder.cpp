@@ -70,6 +70,7 @@ bool placement_finder::next_position()
         layouts_.clear(); // FIXME !!!!
         layouts_.add(layout);
         layouts_.layout();
+        horizontal_alignment_ = layout->horizontal_alignment();
         return true;
     }
     MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
@@ -199,16 +200,14 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
 
-        horizontal_alignment_e halign = info_.properties.layout_defaults.halign;
-        if (halign == H_LEFT)
-        {
-            // Don't move
-        }
-        else if (halign == H_MIDDLE || halign == H_AUTO)
+        //horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
+
+        // halign == H_LEFT -> don't move
+        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO)
         {
             pp.forward(spacing/2.0);
         }
-        else if (halign == H_RIGHT)
+        else if (horizontal_alignment_ == H_RIGHT)
         {
             pp.forward(pp.length());
         }

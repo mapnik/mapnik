@@ -42,11 +42,9 @@ public:
     //
     boost::optional<symbolizer_base::value_type> dx;
     boost::optional<symbolizer_base::value_type> dy;
-
-    boost::optional<horizontal_alignment_e> halign;
-    boost::optional<vertical_alignment_e> valign;
-    boost::optional<justify_alignment_e> jalign;
-
+    boost::optional<symbolizer_base::value_type> halign;
+    boost::optional<symbolizer_base::value_type> valign;
+    boost::optional<symbolizer_base::value_type> jalign;
     boost::optional<symbolizer_base::value_type> text_ratio;
     boost::optional<symbolizer_base::value_type> wrap_width;
     boost::optional<symbolizer_base::value_type> wrap_before;

@@ -66,7 +66,7 @@ public:
 private:
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
     // Moves dx pixels but makes sure not to fall of the end.
-    void path_move_dx(vertex_cache &pp, double dx);
+    void path_move_dx(vertex_cache & pp, double dx);
     // Normalize angle in range [-pi, +pi].
     static double normalize_angle(double angle);
     // Adjusts user defined spacing to place an integer number of labels.
@@ -98,6 +98,7 @@ private:
     bool marker_unlocked_;
     pixel_position marker_displacement_;
     double move_dx_ = 0.0;
+    horizontal_alignment_e horizontal_alignment_ = H_LEFT;
 };
 
 }//ns mapnik

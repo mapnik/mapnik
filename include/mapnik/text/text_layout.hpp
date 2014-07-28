@@ -95,7 +95,7 @@ public:
     inline rotation const& orientation() const { return orientation_; }
     inline pixel_position const& displacement() const { return displacement_; }
     inline box2d<double> const& bounds() const { return bounds_; }
-
+    inline horizontal_alignment_e horizontal_alignment() const { return halign_; }
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
 
@@ -106,7 +106,7 @@ private:
     void shape_text(text_line & line);
     void add_line(text_line & line);
     void clear_cluster_widths(unsigned first, unsigned last);
-    void init_alignment();
+    void init_auto_alignment();
 
     //input
     face_manager_freetype & font_manager_;

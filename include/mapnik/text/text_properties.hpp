@@ -112,14 +112,9 @@ struct MAPNIK_DECL text_layout_properties
     symbolizer_base::value_type wrap_width;
     symbolizer_base::value_type wrap_before;
     symbolizer_base::value_type rotate_displacement;
-
-    horizontal_alignment_e halign;
-    justify_alignment_e jalign;
-    vertical_alignment_e valign;
-
-    //symbolizer_base::value_type halign;
-    //symbolizer_base::value_type jalign;
-    //symbolizer_base::value_type valign;
+    symbolizer_base::value_type halign;
+    symbolizer_base::value_type jalign;
+    symbolizer_base::value_type valign;
 
     std::function<pixel_position(double,double)> displacement_evaluator_ =
         [](double dx, double dy) { return pixel_position(dx,dy);};

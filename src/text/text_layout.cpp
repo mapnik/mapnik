@@ -89,7 +89,8 @@ void text_layout::layout()
         //Break line if neccessary
         break_line(line, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
     }
-    init_alignment();
+
+    init_auto_alignment();
 
     // Find text origin.
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
@@ -244,59 +245,32 @@ void text_layout::evaluate_properties(feature_impl const& feature, attributes co
 
     wrap_before_ = boost::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.wrap_before);
     rotate_displacement_ = boost::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.rotate_displacement);
+
+    valign_ = boost::apply_visitor(extract_value<vertical_alignment_enum>(feature,attrs),properties_.valign);
+    halign_ = boost::apply_visitor(extract_value<horizontal_alignment_enum>(feature,attrs),properties_.halign);
+    jalign_ = boost::apply_visitor(extract_value<justify_alignment_enum>(feature,attrs),properties_.jalign);
+
 }
 
-void text_layout::init_alignment()
+void text_layout::init_auto_alignment()
 {
-    valign_ = properties_.valign;
     if (valign_ == V_AUTO)
     {
-        if (displacement_.y > 0.0)
-        {
-            valign_ = V_BOTTOM;
-        }
-        else if (displacement_.y < 0.0)
-        {
-            valign_ = V_TOP;
-        }
-        else
-        {
-            valign_ = V_MIDDLE;
-        }
+        if (displacement_.y > 0.0) valign_ = V_BOTTOM;
+        else if (displacement_.y < 0.0) valign_ = V_TOP;
+        else valign_ = V_MIDDLE;
     }
-
-    halign_ = properties_.halign;
     if (halign_ == H_AUTO)
     {
-        if (displacement_.x > 0.0)
-        {
-            halign_ = H_RIGHT;
-        }
-        else if (displacement_.x < 0.0)
-        {
-            halign_ = H_LEFT;
-        }
-        else
-        {
-            halign_ = H_MIDDLE;
-        }
+        if (displacement_.x > 0.0) halign_ = H_RIGHT;
+        else if (displacement_.x < 0.0) halign_ = H_LEFT;
+        else halign_ = H_MIDDLE;
     }
-
-    jalign_ = properties_.jalign;
     if (jalign_ == J_AUTO)
     {
-        if (displacement_.x > 0.0)
-        {
-            jalign_ = J_LEFT;
-        }
-        else if (displacement_.x < 0.0)
-        {
-            jalign_ = J_RIGHT;
-        }
-        else
-        {
-            jalign_ = J_MIDDLE;
-        }
+        if (displacement_.x > 0.0) jalign_ = J_LEFT;
+        else if (displacement_.x < 0.0) jalign_ = J_RIGHT;
+        else jalign_ = J_MIDDLE;
     }
 }
 

@@ -52,10 +52,9 @@ void layout_node::to_xml(ptree &xml) const
     if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
     if (rotate_displacement) serialize_property("rotate-displacement", *rotate_displacement, new_node);
     if (orientation) serialize_property("orientation", *orientation, new_node);
-
-    if (halign) set_attr(new_node, "horizontal-alignment", *halign);
-    if (valign) set_attr(new_node, "vertical-alignment", *valign);
-    if (jalign) set_attr(new_node, "justify-alignment", *jalign);
+    if (halign) serialize_property("horizontal-alignment", *halign, new_node);
+    if (valign) serialize_property("vertical-alignment", *valign, new_node);
+    if (jalign) serialize_property("justify-alignment", *jalign, new_node);
 
     if (child_) child_->to_xml(new_node);
 }
@@ -74,27 +73,25 @@ node_ptr layout_node::from_xml(xml_node const& xml)
     if (xml.has_attribute("wrap-before")) set_property_from_xml<mapnik::boolean>(n->wrap_before, "wrap-before", xml);
     if (xml.has_attribute("rotate-displacement")) set_property_from_xml<mapnik::boolean>(n->rotate_displacement, "rotate-displacement", xml);
     if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
-
-    n->halign = xml.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
-    n->valign = xml.get_opt_attr<vertical_alignment_e>("vertical-alignment");
-    n->jalign = xml.get_opt_attr<justify_alignment_e>("justify-alignment");
-
+    if (xml.has_attribute("horizontal-alignment")) set_property_from_xml<horizontal_alignment_e>(n->halign, "horizontal-alignment", xml);
+    if (xml.has_attribute("vertical-alignment")) set_property_from_xml<vertical_alignment_e>(n->valign, "vertical-alignment", xml);
+    if (xml.has_attribute("justify-alignment")) set_property_from_xml<justify_alignment_e>(n->jalign, "justify-alignment", xml);
     return n;
 }
 
-void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout& output) const
+void layout_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const
 {
     text_layout_properties new_properties(output.get_layout_properties());
     if (dx) new_properties.dx = *dx;
     if (dy) new_properties.dy = *dy;
-    if (halign) new_properties.halign = *halign;
-    if (valign) new_properties.valign = *valign;
-    if (jalign) new_properties.jalign = *jalign;
     if (text_ratio) new_properties.text_ratio = *text_ratio;
     if (wrap_width) new_properties.wrap_width = *wrap_width;
     if (wrap_before) new_properties.wrap_before = *wrap_before;
     if (rotate_displacement) new_properties.rotate_displacement = *rotate_displacement;
     if (orientation) new_properties.orientation = *orientation;
+    if (halign) new_properties.halign = *halign;
+    if (valign) new_properties.valign = *valign;
+    if (jalign) new_properties.jalign = *jalign;
 
     // starting a new offset child with the new displacement value
     text_layout_ptr child_layout = std::make_shared<text_layout>(output.get_font_manager(), output.get_scale_factor(), new_properties);
@@ -131,6 +128,9 @@ void layout_node::add_expressions(expression_set & output) const
     if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
     if (rotate_displacement && is_expression(*rotate_displacement)) output.insert(boost::get<expression_ptr>(*rotate_displacement));
     if (text_ratio && is_expression(*text_ratio)) output.insert(boost::get<expression_ptr>(*text_ratio));
+    if (halign && is_expression(*halign)) output.insert(boost::get<expression_ptr>(*halign));
+    if (valign && is_expression(*valign)) output.insert(boost::get<expression_ptr>(*valign));
+    if (jalign && is_expression(*jalign)) output.insert(boost::get<expression_ptr>(*jalign));
 
     if (child_) child_->add_expressions(output);
 }

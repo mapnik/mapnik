@@ -214,10 +214,9 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 }
 
 text_layout_properties::text_layout_properties()
-    : halign(H_AUTO),
-      jalign(J_AUTO),
-      valign(V_AUTO)
-{}
+    : halign(enumeration_wrapper(H_AUTO)),
+      jalign(enumeration_wrapper(J_AUTO)),
+      valign(enumeration_wrapper(V_AUTO)) {}
 
 void text_layout_properties::from_xml(xml_node const &node)
 {
@@ -228,13 +227,9 @@ void text_layout_properties::from_xml(xml_node const &node)
     set_property_from_xml<mapnik::boolean>(wrap_before, "wrap-before", node);
     set_property_from_xml<mapnik::boolean>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
-    //
-    optional<vertical_alignment_e> valign_ = node.get_opt_attr<vertical_alignment_e>("vertical-alignment");
-    if (valign_) valign = *valign_;
-    optional<horizontal_alignment_e> halign_ = node.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
-    if (halign_) halign = *halign_;
-    optional<justify_alignment_e> jalign_ = node.get_opt_attr<justify_alignment_e>("justify-alignment");
-    if (jalign_) jalign = *jalign_;
+    set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
+    set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);
+    set_property_from_xml<justify_alignment_e>(jalign, "justify-alignment", node);
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree & node,
@@ -243,9 +238,9 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
 {
     if (!(dx == dfl.dx) || explicit_defaults) serialize_property("dx", dx, node);
     if (!(dy == dfl.dy) || explicit_defaults) serialize_property("dy", dy, node);
-    if (valign != dfl.valign || explicit_defaults) set_attr(node, "vertical-alignment", valign);
-    if (halign != dfl.halign || explicit_defaults) set_attr(node, "horizontal-alignment", halign);
-    if (jalign != dfl.jalign || explicit_defaults) set_attr(node, "justify-alignment", jalign);
+    if (!(valign == dfl.valign) || explicit_defaults) serialize_property("vertical-alignment", valign, node);
+    if (!(halign == dfl.halign) || explicit_defaults) serialize_property("horizontal-alignment", halign, node);
+    if (!(jalign == dfl.jalign) || explicit_defaults) serialize_property("justify-alignment", jalign, node);
     if (!(text_ratio == dfl.text_ratio) || explicit_defaults) serialize_property("text-ratio", text_ratio, node);
     if (!(wrap_width == dfl.wrap_width) || explicit_defaults) serialize_property("wrap-width", wrap_width, node);
     if (!(wrap_before == dfl.wrap_before) || explicit_defaults) serialize_property("wrap-before", wrap_before, node);
@@ -263,6 +258,9 @@ void text_layout_properties::add_expressions(expression_set & output) const
     if (is_expression(wrap_before)) output.insert(boost::get<expression_ptr>(wrap_before));
     if (is_expression(rotate_displacement)) output.insert(boost::get<expression_ptr>(rotate_displacement));
     if (is_expression(text_ratio)) output.insert(boost::get<expression_ptr>(text_ratio));
+    if (is_expression(halign)) output.insert(boost::get<expression_ptr>(halign));
+    if (is_expression(valign)) output.insert(boost::get<expression_ptr>(valign));
+    if (is_expression(jalign)) output.insert(boost::get<expression_ptr>(jalign));
 }
 
 // text format properties
