@@ -26,6 +26,8 @@
 #include <mapnik/markers_placements/line.hpp>
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/markers_placements/interior.hpp>
+#include <mapnik/markers_placements/vertext_first.hpp>
+#include <mapnik/markers_placements/vertext_last.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 
 #include <boost/variant.hpp>
@@ -41,7 +43,9 @@ class markers_placement_finder : mapnik::noncopyable
 public:
     using markers_placement = boost::variant<markers_point_placement<Locator, Detector>,
                                              markers_line_placement<Locator, Detector>,
-                                             markers_interior_placement<Locator, Detector>>;
+                                             markers_interior_placement<Locator, Detector>,
+                                             markers_vertex_first_placement<Locator, Detector>,
+                                             markers_vertex_last_placement<Locator, Detector>>;
 
     class get_point_visitor : public boost::static_visitor<bool>
     {
@@ -110,7 +114,9 @@ private:
             {
                 { MARKER_POINT_PLACEMENT, boost::value_factory<markers_point_placement<Locator, Detector>>() },
                 { MARKER_INTERIOR_PLACEMENT, boost::value_factory<markers_interior_placement<Locator, Detector>>() },
-                { MARKER_LINE_PLACEMENT, boost::value_factory<markers_line_placement<Locator, Detector>>() }
+                { MARKER_LINE_PLACEMENT, boost::value_factory<markers_line_placement<Locator, Detector>>() },
+                { MARKER_VERTEX_FIRST_PLACEMENT, boost::value_factory<markers_vertex_first_placement<Locator, Detector>>() },
+                { MARKER_VERTEX_LAST_PLACEMENT, boost::value_factory<markers_vertex_last_placement<Locator, Detector>>() }
             };
         return factories.at(placement_type)(locator, size, tr, detector, spacing, max_error, allow_overlap);
     }
