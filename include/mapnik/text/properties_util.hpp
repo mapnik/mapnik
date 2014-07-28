@@ -32,9 +32,19 @@
 
 namespace mapnik { namespace detail {
 
-// text_layout_properties
+template <typename T, class Enable = void>
+struct is_mapnik_enumeration
+{
+    static constexpr bool value = false;
+};
 
-template <typename T0, typename T1>
+template <typename T>
+struct is_mapnik_enumeration<T, typename std::enable_if<std::is_enum<typename T::native_type>::value>::type>
+{
+    static constexpr bool value = true;
+};
+
+template <typename T0, typename T1, bool is_mapnik_enumeration = false>
 struct set_property_from_xml_impl
 {
     using target_type = T0;
@@ -57,30 +67,29 @@ struct set_property_from_xml_impl
     }
 };
 
-template <typename T>
-struct set_property_from_xml_impl<text_transform_e, T>
+template <typename T0, typename T1>
+struct set_property_from_xml_impl<T0, T1, true>
 {
-    using target_type = T;
-    static void apply(T & val, char const* name, xml_node const& node)
+    using target_enum_type = T0;
+    static void apply(T1 & val, char const* name, xml_node const& node)
     {
         try
         {
             boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
             if (enum_str)
             {
-                text_transform_e e;
+                target_enum_type e;
                 e.from_string(*enum_str);
                 val = enumeration_wrapper(e);
             }
         }
-        catch (...)//config_error const& ex)
+        catch (...)
         {
             boost::optional<expression_ptr> expr = node.get_opt_attr<expression_ptr>(name);
             if (expr) val = *expr;
             else
             {
                 throw config_error(std::string("set_property_from_xml'"+ std::string(name)));
-                //ex.append_context(std::string("set_property_from_xml'"+ std::string(name) + "'"), node);
             }
         }
     }
@@ -91,7 +100,7 @@ struct set_property_from_xml_impl<text_transform_e, T>
 template <typename T0, typename T1>
 void set_property_from_xml(T1 & val, char const* name, xml_node const& node)
 {
-    detail::set_property_from_xml_impl<T0,T1>::apply(val, name, node);
+    detail::set_property_from_xml_impl<T0, T1, detail::is_mapnik_enumeration<T0>::value>::apply(val, name, node);
 }
 
 void serialize_property(std::string const& name, symbolizer_base::value_type const& val, boost::property_tree::ptree & node);
