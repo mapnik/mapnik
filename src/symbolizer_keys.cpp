@@ -109,7 +109,7 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         property_types::target_justify_alignment},
     property_meta_type{ "vertical-alignment", enumeration_wrapper(V_TOP), [](enumeration_wrapper e)
                         {return enumeration<vertical_alignment_enum,vertical_alignment_enum_MAX>(vertical_alignment_enum(e.value)).as_string();},
-                        property_types::target_vertical_alignment},
+                        property_types::target_vertical_alignment}
 
 };
 
