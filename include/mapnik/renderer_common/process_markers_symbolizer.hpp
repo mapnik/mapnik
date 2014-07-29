@@ -48,7 +48,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     using svg_attribute_type = agg::pod_bvector<path_attributes>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
-    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
     double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, false);
 
     // https://github.com/mapnik/mapnik/issues/1316

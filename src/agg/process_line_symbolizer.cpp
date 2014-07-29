@@ -132,7 +132,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent();
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
     double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
     double opacity = get<value_double>(sym,keys::stroke_opacity,feature, common_.vars_, 1.0);
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);

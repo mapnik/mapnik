@@ -114,7 +114,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
     //double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0); TODO
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);

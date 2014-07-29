@@ -344,7 +344,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
 					  dash_tag, stroke_tag>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
     double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
@@ -690,7 +690,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
 

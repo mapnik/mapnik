@@ -55,7 +55,7 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      clipped_(get<bool>(sym_, keys::clip, feature_, vars, true)),
+      clipped_(get<bool>(sym_, keys::clip, feature_, vars_, false)),
       placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
     initialize_geometries();
