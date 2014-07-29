@@ -369,11 +369,6 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
         num_labels = static_cast<int>(floor(
             path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
     }
-
-    if (info_.properties.force_odd_labels && num_labels % 2 == 0)
-    {
-        --num_labels;
-    }
     if (num_labels <= 0)
     {
         num_labels = 1;

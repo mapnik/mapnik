@@ -133,7 +133,6 @@
 #     eq_(s.face_name, 'DejaVu Sans Bold')
 #     eq_(s.allow_overlap, False)
 #     eq_(s.fill, mapnik.Color('#000000'))
-#     eq_(s.force_odd_labels, False)
 #     eq_(s.halo_fill, mapnik.Color('rgb(255,255,255)'))
 #     eq_(s.halo_radius, 0)
 #     eq_(s.label_placement, mapnik.label_placement.POINT_PLACEMENT)

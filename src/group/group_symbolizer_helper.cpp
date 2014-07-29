@@ -182,11 +182,6 @@ double group_symbolizer_helper::get_spacing(double path_length) const
         num_labels = static_cast<int>(floor(
             path_length / (placement_->properties.label_spacing * scale_factor_)));
     }
-
-    if (placement_->properties.force_odd_labels && num_labels % 2 == 0)
-    {
-        --num_labels;
-    }
     if (num_labels <= 0)
     {
         num_labels = 1;

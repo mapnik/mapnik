@@ -987,17 +987,6 @@ class _TextSymbolizer(TextSymbolizer,_injector):
         self.properties.maximum_angle_char_delta = maximum_angle_char_delta
 
 
-
-    @property
-    def force_odd_labels(self):
-        return self.properties.force_odd_labels
-
-    @force_odd_labels.setter
-    def force_odd_labels(self, force_odd_labels):
-        self.properties.force_odd_labels = force_odd_labels
-
-
-
     @property
     def allow_overlap(self):
         return self.properties.allow_overlap

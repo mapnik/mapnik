@@ -132,7 +132,6 @@ struct text_properties_expressions
     symbolizer_base::value_type minimum_padding = 0.0;
     symbolizer_base::value_type minimum_path_length = 0.0;
     symbolizer_base::value_type max_char_angle_delta = 22.5;
-    symbolizer_base::value_type force_odd_labels = false;
     symbolizer_base::value_type allow_overlap = false;
     symbolizer_base::value_type largest_bbox_only = true;
     symbolizer_base::value_type upright = enumeration_wrapper(UPRIGHT_AUTO);
@@ -175,8 +174,6 @@ struct MAPNIK_DECL text_symbolizer_properties
     double minimum_padding;
     double minimum_path_length;
     double max_char_angle_delta;
-    // Always try render an odd amount of labels
-    bool force_odd_labels;
     bool allow_overlap;
     // Only consider geometry with largest bbox (polygons)
     bool largest_bbox_only;

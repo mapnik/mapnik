@@ -48,7 +48,6 @@ text_symbolizer_properties::text_symbolizer_properties()
       minimum_padding(0.0),
       minimum_path_length(0.0),
       max_char_angle_delta(22.5 * M_PI/180.0),
-      force_odd_labels(false),
       allow_overlap(false),
       largest_bbox_only(true),
       upright(UPRIGHT_AUTO),
@@ -67,7 +66,6 @@ void text_symbolizer_properties::evaluate_text_properties(feature_impl const& fe
     minimum_padding = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
     minimum_path_length = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
     max_char_angle_delta = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.max_char_angle_delta) * M_PI/180;
-    force_odd_labels = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.force_odd_labels);
     allow_overlap = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.allow_overlap);
     largest_bbox_only = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.largest_bbox_only);
     upright = boost::apply_visitor(extract_value<text_upright_enum>(feature,attrs), expressions.upright);
@@ -125,7 +123,6 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
     set_property_from_xml<boolean_type>(expressions.avoid_edges, "avoid-edges", node);
     set_property_from_xml<boolean_type>(expressions.allow_overlap, "allow-overlap", node);
     set_property_from_xml<boolean_type>(expressions.largest_bbox_only, "largest-bbox-only", node);
-    set_property_from_xml<boolean_type>(expressions.force_odd_labels, "force-odd-labels", node);
     set_property_from_xml<value_double>(expressions.max_char_angle_delta, "max-char-angle-delta", node);
     set_property_from_xml<text_upright_e>(expressions.upright, "upright", node);
 }
@@ -211,7 +208,6 @@ void text_symbolizer_properties::add_expressions(expression_set & output) const
     if (is_expression(expressions.minimum_padding)) output.insert(boost::get<expression_ptr>(expressions.minimum_padding));
     if (is_expression(expressions.minimum_path_length)) output.insert(boost::get<expression_ptr>(expressions.minimum_path_length));
     if (is_expression(expressions.max_char_angle_delta)) output.insert(boost::get<expression_ptr>(expressions.max_char_angle_delta));
-    if (is_expression(expressions.force_odd_labels)) output.insert(boost::get<expression_ptr>(expressions.force_odd_labels));
     if (is_expression(expressions.allow_overlap)) output.insert(boost::get<expression_ptr>(expressions.allow_overlap));
     if (is_expression(expressions.largest_bbox_only)) output.insert(boost::get<expression_ptr>(expressions.largest_bbox_only));
     if (is_expression(expressions.upright)) output.insert(boost::get<expression_ptr>(expressions.upright));
