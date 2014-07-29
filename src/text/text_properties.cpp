@@ -53,14 +53,33 @@ text_symbolizer_properties::text_symbolizer_properties()
       largest_bbox_only(true),
       upright(UPRIGHT_AUTO),
       layout_defaults(),
-      format_defaults(),//std::make_shared<format_defaults>()),
+      format_defaults(),
       tree_() {}
 
-void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) const
+
+void text_symbolizer_properties::evaluate_text_properties(feature_impl const& feature, attributes const& attrs)
+{
+    label_placement = boost::apply_visitor(extract_value<label_placement_enum>(feature,attrs), expressions.label_placement);
+    label_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
+    label_position_tolerance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
+    avoid_edges = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
+    minimum_distance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
+    minimum_padding = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
+    minimum_path_length = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
+    max_char_angle_delta = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.max_char_angle_delta) * M_PI/180;
+    force_odd_labels = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.force_odd_labels);
+    allow_overlap = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.allow_overlap);
+    largest_bbox_only = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.largest_bbox_only);
+    upright = boost::apply_visitor(extract_value<text_upright_enum>(feature,attrs), expressions.upright);
+}
+
+void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) //const
 {
     output.clear();
+
     if (tree_)
     {
+        evaluate_text_properties(feature, attrs);
         //evaluate format properties
         evaluated_format_properties_ptr format = std::make_shared<detail::evaluated_format_properties>();
 
@@ -97,33 +116,18 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
 
 void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 {
-    optional<label_placement_e> placement_ = node.get_opt_attr<label_placement_e>("placement");
-    if (placement_) label_placement = *placement_;
-    optional<double> label_position_tolerance_ = node.get_opt_attr<double>("label-position-tolerance");
-    if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
-    optional<double> spacing_ = node.get_opt_attr<double>("spacing");
-    if (spacing_) label_spacing = *spacing_;
-    else {
-        // https://github.com/mapnik/mapnik/issues/1427
-        spacing_ = node.get_opt_attr<double>("label-spacing");
-        if (spacing_) label_spacing = *spacing_;
-    }
-    optional<double> minimum_distance_ = node.get_opt_attr<double>("minimum-distance");
-    if (minimum_distance_) minimum_distance = *minimum_distance_;
-    optional<double> min_padding_ = node.get_opt_attr<double>("minimum-padding");
-    if (min_padding_) minimum_padding = *min_padding_;
-    optional<double> min_path_length_ = node.get_opt_attr<double>("minimum-path-length");
-    if (min_path_length_) minimum_path_length = *min_path_length_;
-    optional<mapnik::boolean_type> avoid_edges_ = node.get_opt_attr<mapnik::boolean_type>("avoid-edges");
-    if (avoid_edges_) avoid_edges = *avoid_edges_;
-    optional<mapnik::boolean_type> allow_overlap_ = node.get_opt_attr<mapnik::boolean_type>("allow-overlap");
-    if (allow_overlap_) allow_overlap = *allow_overlap_;
-    optional<mapnik::boolean_type> largest_bbox_only_ = node.get_opt_attr<mapnik::boolean_type>("largest-bbox-only");
-    if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
-    optional<double> max_char_angle_delta_ = node.get_opt_attr<double>("max-char-angle-delta");
-    if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
-    optional<text_upright_e> upright_ = node.get_opt_attr<text_upright_e>("upright");
-    if (upright_) upright = *upright_;
+    set_property_from_xml<label_placement_e>(expressions.label_placement, "placement", node);
+    set_property_from_xml<value_double>(expressions.label_spacing, "spacing", node);
+    set_property_from_xml<value_double>(expressions.label_position_tolerance, "label-position-tolerance", node);
+    set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
+    set_property_from_xml<value_double>(expressions.minimum_padding, "minimum-padding", node);
+    set_property_from_xml<value_double>(expressions.minimum_path_length, "minimum-path-length", node);
+    set_property_from_xml<boolean_type>(expressions.avoid_edges, "avoid-edges", node);
+    set_property_from_xml<boolean_type>(expressions.allow_overlap, "allow-overlap", node);
+    set_property_from_xml<boolean_type>(expressions.largest_bbox_only, "largest-bbox-only", node);
+    set_property_from_xml<boolean_type>(expressions.force_odd_labels, "force-odd-labels", node);
+    set_property_from_xml<value_double>(expressions.max_char_angle_delta, "max-char-angle-delta", node);
+    set_property_from_xml<text_upright_e>(expressions.upright, "upright", node);
 }
 
 void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
@@ -146,49 +150,49 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
                                         bool explicit_defaults,
                                         text_symbolizer_properties const& dfl) const
 {
-    if (label_placement != dfl.label_placement || explicit_defaults)
+    if (!(expressions.label_placement == dfl.expressions.label_placement) || explicit_defaults)
     {
-        set_attr(node, "placement", label_placement);
+        serialize_property("placement", expressions.label_placement, node);
     }
-    if (label_position_tolerance != dfl.label_position_tolerance || explicit_defaults)
+    if (!(expressions.label_position_tolerance == dfl.expressions.label_position_tolerance) || explicit_defaults)
     {
-        set_attr(node, "label-position-tolerance", label_position_tolerance);
+        serialize_property("label-position-tolerance", expressions.label_position_tolerance,node);
     }
-    if (label_spacing != dfl.label_spacing || explicit_defaults)
+    if (!(expressions.label_spacing == dfl.expressions.label_spacing) || explicit_defaults)
     {
-        set_attr(node, "spacing", label_spacing);
+        serialize_property("spacing", expressions.label_spacing, node);
     }
-    if (minimum_distance != dfl.minimum_distance || explicit_defaults)
+    if (!(expressions.minimum_distance == dfl.expressions.minimum_distance) || explicit_defaults)
     {
-        set_attr(node, "minimum-distance", minimum_distance);
+        serialize_property("minimum-distance", expressions.minimum_distance, node);
     }
-    if (minimum_padding != dfl.minimum_padding || explicit_defaults)
+    if (!(expressions.minimum_padding == dfl.expressions.minimum_padding) || explicit_defaults)
     {
-        set_attr(node, "minimum-padding", minimum_padding);
+        serialize_property("minimum-padding", expressions.minimum_padding, node);
     }
-    if (minimum_path_length != dfl.minimum_path_length || explicit_defaults)
+    if (!(expressions.minimum_path_length == dfl.expressions.minimum_path_length) || explicit_defaults)
     {
-        set_attr(node, "minimum-path-length", minimum_path_length);
+        serialize_property("minimum-path-length", expressions.minimum_path_length, node);
     }
-    if (avoid_edges != dfl.avoid_edges || explicit_defaults)
+    if (!(expressions.avoid_edges == dfl.expressions.avoid_edges) || explicit_defaults)
     {
-        set_attr(node, "avoid-edges", avoid_edges);
+        serialize_property("avoid-edges", expressions.avoid_edges, node);
     }
-    if (allow_overlap != dfl.allow_overlap || explicit_defaults)
+    if (!(expressions.allow_overlap == dfl.expressions.allow_overlap) || explicit_defaults)
     {
-        set_attr(node, "allow-overlap", allow_overlap);
+        serialize_property("allow-overlap", expressions.allow_overlap, node);
     }
-    if (largest_bbox_only != dfl.largest_bbox_only || explicit_defaults)
+    if (!(expressions.largest_bbox_only == dfl.expressions.largest_bbox_only) || explicit_defaults)
     {
-        set_attr(node, "largest-bbox-only", largest_bbox_only);
+        serialize_property("largest-bbox-only", expressions.largest_bbox_only, node);
     }
-    if (max_char_angle_delta != dfl.max_char_angle_delta || explicit_defaults)
+    if (!(expressions.max_char_angle_delta == dfl.expressions.max_char_angle_delta) || explicit_defaults)
     {
-        set_attr(node, "max-char-angle-delta", max_char_angle_delta/(M_PI/180));
+        serialize_property("max-char-angle-delta", expressions.max_char_angle_delta, node);
     }
-    if (upright != dfl.upright || explicit_defaults)
+    if (!(expressions.upright == dfl.expressions.upright) || explicit_defaults)
     {
-        set_attr(node, "upright", upright);
+        serialize_property("upright", expressions.upright, node);
     }
 
     layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
@@ -199,6 +203,19 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 
 void text_symbolizer_properties::add_expressions(expression_set & output) const
 {
+    if (is_expression(expressions.label_placement)) output.insert(boost::get<expression_ptr>(expressions.label_placement));
+    if (is_expression(expressions.label_spacing)) output.insert(boost::get<expression_ptr>(expressions.label_spacing));
+    if (is_expression(expressions.label_position_tolerance)) output.insert(boost::get<expression_ptr>(expressions.label_position_tolerance));
+    if (is_expression(expressions.avoid_edges)) output.insert(boost::get<expression_ptr>(expressions.avoid_edges));
+    if (is_expression(expressions.minimum_distance)) output.insert(boost::get<expression_ptr>(expressions.minimum_distance));
+    if (is_expression(expressions.minimum_padding)) output.insert(boost::get<expression_ptr>(expressions.minimum_padding));
+    if (is_expression(expressions.minimum_path_length)) output.insert(boost::get<expression_ptr>(expressions.minimum_path_length));
+    if (is_expression(expressions.max_char_angle_delta)) output.insert(boost::get<expression_ptr>(expressions.max_char_angle_delta));
+    if (is_expression(expressions.force_odd_labels)) output.insert(boost::get<expression_ptr>(expressions.force_odd_labels));
+    if (is_expression(expressions.allow_overlap)) output.insert(boost::get<expression_ptr>(expressions.allow_overlap));
+    if (is_expression(expressions.largest_bbox_only)) output.insert(boost::get<expression_ptr>(expressions.largest_bbox_only));
+    if (is_expression(expressions.upright)) output.insert(boost::get<expression_ptr>(expressions.upright));
+
     layout_defaults.add_expressions(output);
     format_defaults.add_expressions(output);
     if (tree_) tree_->add_expressions(output);
@@ -220,8 +237,8 @@ void text_layout_properties::from_xml(xml_node const &node)
     set_property_from_xml<double>(dy, "dy", node);
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
-    set_property_from_xml<mapnik::boolean_type>(wrap_before, "wrap-before", node);
-    set_property_from_xml<mapnik::boolean_type>(rotate_displacement, "rotate-displacement", node);
+    set_property_from_xml<boolean_type>(wrap_before, "wrap-before", node);
+    set_property_from_xml<boolean_type>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);
@@ -260,7 +277,6 @@ void text_layout_properties::add_expressions(expression_set & output) const
 }
 
 // text format properties
-
 format_properties::format_properties()
     : face_name(),
       fontset(),

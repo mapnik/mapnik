@@ -83,11 +83,14 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
     property_meta_type{ "halo-rasterizer", enumeration_wrapper(HALO_RASTERIZER_FULL),
                         [](enumeration_wrapper e) { return enumeration<halo_rasterizer_enum,halo_rasterizer_enum_MAX>(halo_rasterizer_enum(e.value)).as_string();}, property_types::target_halo_rasterizer },
     property_meta_type{ "text-placements", false, nullptr, property_types::target_double },
-    property_meta_type{ "placement", enumeration_wrapper(MARKER_POINT_PLACEMENT),
-                        [](enumeration_wrapper e) { return enumeration<marker_placement_enum,marker_placement_enum_MAX>(marker_placement_enum(e.value)).as_string();}, property_types::target_markers_placement }, // FIXME - rename to "markers-placement-type"
+    property_meta_type{ "placement", enumeration_wrapper(POINT_PLACEMENT),
+                        [](enumeration_wrapper e)
+                        { return enumeration<label_placement_enum,label_placement_enum_MAX>(label_placement_enum(e.value)).as_string();}, property_types::target_placement },
+    property_meta_type{ "placement", enumeration_wrapper(MARKER_POINT_PLACEMENT), // FIXME - change property name
+                        [](enumeration_wrapper e) { return enumeration<marker_placement_enum,marker_placement_enum_MAX>(marker_placement_enum(e.value)).as_string();}, property_types::target_markers_placement },
     property_meta_type{ "multi-policy", enumeration_wrapper(MARKER_EACH_MULTI),
                         [](enumeration_wrapper e) { return enumeration<marker_multi_policy_enum,marker_multi_policy_enum_MAX>(marker_multi_policy_enum(e.value)).as_string();}, property_types::target_markers_multipolicy },
-    property_meta_type{ "placement", enumeration_wrapper(CENTROID_POINT_PLACEMENT),
+    property_meta_type{ "placement", enumeration_wrapper(CENTROID_POINT_PLACEMENT), // FIXME - change property name
                         [](enumeration_wrapper e) { return enumeration<point_placement_enum,point_placement_enum_MAX>(point_placement_enum(e.value)).as_string();}, property_types::target_double },
     property_meta_type{ "colorizer", nullptr, nullptr, property_types::target_colorizer},
     property_meta_type{ "halo-transform", false, nullptr, property_types::target_transform },
@@ -109,7 +112,10 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         property_types::target_justify_alignment},
     property_meta_type{ "vertical-alignment", enumeration_wrapper(V_TOP), [](enumeration_wrapper e)
                         {return enumeration<vertical_alignment_enum,vertical_alignment_enum_MAX>(vertical_alignment_enum(e.value)).as_string();},
-                        property_types::target_vertical_alignment}
+                        property_types::target_vertical_alignment},
+    property_meta_type{ "upright", enumeration_wrapper(UPRIGHT_AUTO), [](enumeration_wrapper e)
+                        {return enumeration<text_upright_enum,text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();},
+                        property_types::target_upright}
 
 };
 

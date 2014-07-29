@@ -72,6 +72,7 @@ enum class keys : std::uint8_t
     simplify_tolerance,
     halo_rasterizer,
     text_placements_,
+    label_placement,
     markers_placement_type,
     markers_multipolicy,
     point_placement_type,
@@ -88,6 +89,7 @@ enum class keys : std::uint8_t
     horizontal_alignment,
     justify_alignment,
     vertical_alignment,
+    upright,
     MAX_SYMBOLIZER_KEY
 };
 

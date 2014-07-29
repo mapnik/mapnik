@@ -146,7 +146,8 @@ enum class property_types : std::uint8_t
     target_text_transform,
     target_horizontal_alignment,
     target_justify_alignment,
-    target_vertical_alignment
+    target_vertical_alignment,
+    target_upright
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)

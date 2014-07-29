@@ -172,17 +172,17 @@ enum justify_alignment_enum
 
 DEFINE_ENUM(justify_alignment_e, justify_alignment_enum);
 
-enum text_upright
+enum text_upright_enum
 {
     UPRIGHT_AUTO,
     UPRIGHT_LEFT,
     UPRIGHT_RIGHT,
     UPRIGHT_LEFT_ONLY,
     UPRIGHT_RIGHT_ONLY,
-    text_upright_MAX
+    text_upright_enum_MAX
 };
 
-DEFINE_ENUM(text_upright_e, text_upright);
+DEFINE_ENUM(text_upright_e, text_upright_enum);
 
 
 }

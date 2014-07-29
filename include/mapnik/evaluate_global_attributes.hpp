@@ -24,6 +24,7 @@
 #define MAPNIK_EVALUATE_GLOBAL_ATTRIBUTES_HPP
 
 #include <mapnik/map.hpp>
+#include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/attribute.hpp>

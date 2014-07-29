@@ -122,7 +122,21 @@ struct MAPNIK_DECL text_layout_properties
 
 class text_layout;
 
-struct text_properties_expressions : symbolizer_base {};
+struct text_properties_expressions
+{
+    symbolizer_base::value_type label_placement = enumeration_wrapper(POINT_PLACEMENT);
+    symbolizer_base::value_type label_spacing = 0.0;
+    symbolizer_base::value_type label_position_tolerance = 0.0;
+    symbolizer_base::value_type avoid_edges = false;
+    symbolizer_base::value_type minimum_distance = 0.0;
+    symbolizer_base::value_type minimum_padding = 0.0;
+    symbolizer_base::value_type minimum_path_length = 0.0;
+    symbolizer_base::value_type max_char_angle_delta = 22.5;
+    symbolizer_base::value_type force_odd_labels = false;
+    symbolizer_base::value_type allow_overlap = false;
+    symbolizer_base::value_type largest_bbox_only = true;
+    symbolizer_base::value_type upright = enumeration_wrapper(UPRIGHT_AUTO);
+};
 
 // Contains all text symbolizer properties which are not directly related to text formatting and layout.
 struct MAPNIK_DECL text_symbolizer_properties
@@ -138,7 +152,8 @@ struct MAPNIK_DECL text_symbolizer_properties
 
     // Takes a feature and produces formated text as output.
     // The output object has to be created by the caller and passed in for thread safety.
-    void process(text_layout &output, feature_impl const& feature, attributes const& vars) const;
+    void process(text_layout &output, feature_impl const& feature, attributes const& vars);
+    void evaluate_text_properties(feature_impl const& feature, attributes const& attrs);
     // Automatically create processing instructions for a single expression.
     void set_old_style_expression(expression_ptr expr);
     // Sets new format tree.

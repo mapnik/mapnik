@@ -58,6 +58,7 @@ base_symbolizer_helper::base_symbolizer_helper(
       clipped_(get<bool>(sym_, keys::clip, feature_, vars_, false)),
       placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
+    placement_->properties.evaluate_text_properties(feature_, vars_);
     initialize_geometries();
     if (!geometries_to_process_.size()) return; // FIXME - bad practise
     initialize_points();
