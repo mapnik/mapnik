@@ -937,10 +937,6 @@ public:
         return vertices_[idx].cmd;
     }
 
-    box2d<double> const& bounding_box() const
-    {
-        vertices_.bounding_box();
-    }
 private:
     Container & vertices_;
 };
