@@ -72,7 +72,8 @@ layer::layer(layer && rhs)
       styles_(std::move(rhs.styles_)),
       ds_(std::move(rhs.ds_)),
       buffer_size_(std::move(rhs.buffer_size_)),
-      maximum_extent_(std::move(rhs.maximum_extent_)) {}
+      maximum_extent_(std::move(rhs.maximum_extent_)),
+      opacity_(std::move(rhs.opacity_)) {}
 
 layer& layer::operator=(layer rhs)
 {
