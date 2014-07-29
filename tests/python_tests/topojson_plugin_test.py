@@ -24,34 +24,35 @@ if 'topojson' in mapnik.DatasourceCache.plugin_names():
 
     def test_topojson_properties():
         ds = mapnik.Datasource(type='topojson',file='../data/json/escaped.topojson')
-        f = ds.features_at_point(s.envelope().center()).features[0]
-
+        f = ds.features_at_point(ds.envelope().center()).features[0]
+        eq_(len(ds.fields()),7)
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
-        eq_(f['name'], u'test')
-        eq_(f['description'], u'Test: \u005C')
+        eq_(f['name'], u'Test')
         eq_(f['int'], 1)
-        eq_(f['double'], u'Quebec')
+        eq_(f['description'], u'Test: \u005C')
+        eq_(f['spaces'], u'this has spaces')
+        eq_(f['double'], 1.1)
         eq_(f['boolean'], True)
         eq_(f['NOM_FR'], u'Qu\xe9bec')
         eq_(f['NOM_FR'], u'Québec')
 
-    def test_topojson_properties():
         ds = mapnik.Datasource(type='topojson',file='../data/json/escaped.topojson')
         f = ds.all_features()[0]
+        eq_(len(ds.fields()),7)
 
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
         eq_(f['name'], u'Test')
         eq_(f['int'], 1)
+        eq_(f['description'], u'Test: \u005C')
+        eq_(f['spaces'], u'this has spaces')
         eq_(f['double'], 1.1)
         eq_(f['boolean'], True)
         eq_(f['NOM_FR'], u'Qu\xe9bec')
         eq_(f['NOM_FR'], u'Québec')
-        eq_(f['spaces'], u'this has spaces')
-        eq_(f['description'], u'Test: \u005C')
 
 #    @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
