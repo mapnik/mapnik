@@ -155,9 +155,12 @@ void geojson_datasource::parse_geojson(T & stream)
     boost::spirit::multi_pass<base_iterator_type> end =
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
+    // FIXME - for perf we need to declare grammar as 'static const'
+    // but we cannot because then all features will interact only with the first context_ptr
+    // created in the process which leads to very odd bugs
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    static const mapnik::transcoder tr("utf8");
-    static const mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(ctx, tr);
+    mapnik::transcoder tr("utf8");
+    mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(ctx, tr);
     boost::spirit::standard_wide::space_type space;
     bool result = boost::spirit::qi::phrase_parse(begin, end, fc_grammar, space, features_);
     if (!result)
