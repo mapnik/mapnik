@@ -146,33 +146,55 @@ topojson_datasource::topojson_datasource(parameters const& params)
     type_(datasource::Vector),
     desc_(topojson_datasource::name(),
           *params.get<std::string>("encoding","utf-8")),
-    file_(*params.get<std::string>("file","")),
+    filename_(),
+    inline_string_(),
     extent_(),
     tr_(new mapnik::transcoder(*params.get<std::string>("encoding","utf-8"))),
     tree_(16,1)
 {
-    if (file_.empty()) throw mapnik::datasource_exception("TopoJSON Plugin: missing <file> parameter");
-
-    boost::optional<std::string> base = params.get<std::string>("base");
-    if (base)
+    boost::optional<std::string> inline_string = params.get<std::string>("inline");
+    if (inline_string)
     {
-        file_ = *base + "/" + file_;
+        inline_string_ = *inline_string;
     }
+    else
+    {
+        boost::optional<std::string> file = params.get<std::string>("file");
+        if (!file) throw mapnik::datasource_exception("TopoJSON Plugin: missing <file> parameter");
 
-    using base_iterator_type = std::istreambuf_iterator<char>;
-
+        boost::optional<std::string> base = params.get<std::string>("base");
+        if (base)
+            filename_ = *base + "/" + *file;
+        else
+            filename_ = *file;
+    }
+    if (!inline_string_.empty())
+    {
+        std::istringstream in(inline_string_);
+        parse_topojson(in);
+    }
+    else
+    {
 #if defined (_WINDOWS)
-    std::ifstream is(mapnik::utf8_to_utf16(file_),std::ios_base::in | std::ios_base::binary);
+        std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
 #else
-    std::ifstream is(file_.c_str(),std::ios_base::in | std::ios_base::binary);
+        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
 #endif
-    if (!is.is_open())
-    {
-        throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + file_ + "'");
+        if (!in.is_open())
+        {
+            throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
+        }
+        parse_topojson(in);
+        in.close();
     }
+}
 
+template <typename T>
+void topojson_datasource::parse_topojson(T & stream)
+{
+    using base_iterator_type = std::istreambuf_iterator<char>;
     boost::spirit::multi_pass<base_iterator_type> begin =
-        boost::spirit::make_default_multi_pass(base_iterator_type(is));
+        boost::spirit::make_default_multi_pass(base_iterator_type(stream));
 
     boost::spirit::multi_pass<base_iterator_type> end =
         boost::spirit::make_default_multi_pass(base_iterator_type());
@@ -182,7 +204,7 @@ topojson_datasource::topojson_datasource(parameters const& params)
     bool result = boost::spirit::qi::phrase_parse(begin, end, g, space, topo_);
     if (!result)
     {
-        throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + file_ + "'");
+        throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
     std::size_t count = 0;
