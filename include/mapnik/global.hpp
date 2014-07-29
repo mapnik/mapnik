@@ -49,21 +49,22 @@ namespace mapnik
                                 (((std::uint64_t) ((std::uint8_t) (A)[0])) << 56))
 
 using byte = std::uint8_t;
+
 #define float8net(V,M)   do { double def_temp;  \
-        ((byte*) &def_temp)[0]=(M)[7];          \
-        ((byte*) &def_temp)[1]=(M)[6];          \
-        ((byte*) &def_temp)[2]=(M)[5];          \
-        ((byte*) &def_temp)[3]=(M)[4];          \
-        ((byte*) &def_temp)[4]=(M)[3];          \
-        ((byte*) &def_temp)[5]=(M)[2];          \
-        ((byte*) &def_temp)[6]=(M)[1];          \
-        ((byte*) &def_temp)[7]=(M)[0];          \
+        ((std::uint8_t*) &def_temp)[0]=(M)[7];          \
+        ((std::uint8_t*) &def_temp)[1]=(M)[6];          \
+        ((std::uint8_t*) &def_temp)[2]=(M)[5];          \
+        ((std::uint8_t*) &def_temp)[3]=(M)[4];          \
+        ((std::uint8_t*) &def_temp)[4]=(M)[3];          \
+        ((std::uint8_t*) &def_temp)[5]=(M)[2];          \
+        ((std::uint8_t*) &def_temp)[6]=(M)[1];          \
+        ((std::uint8_t*) &def_temp)[7]=(M)[0];          \
         (V) = def_temp; } while(0)
 #define float4net(V,M)   do { float def_temp;   \
-        ((byte*) &def_temp)[0]=(M)[3];          \
-        ((byte*) &def_temp)[1]=(M)[2];          \
-        ((byte*) &def_temp)[2]=(M)[1];          \
-        ((byte*) &def_temp)[3]=(M)[0];          \
+        ((std::uint8_t*) &def_temp)[0]=(M)[3];          \
+        ((std::uint8_t*) &def_temp)[1]=(M)[2];          \
+        ((std::uint8_t*) &def_temp)[2]=(M)[1];          \
+        ((std::uint8_t*) &def_temp)[3]=(M)[0];          \
         (V)=def_temp; } while(0)
 
 
