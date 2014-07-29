@@ -85,14 +85,27 @@ struct MAPNIK_DECL coord_transform
 
     unsigned vertex(double *x, double *y) const
     {
-        unsigned command = geom_.vertex(x, y);
-        if ( command != SEG_END)
+        unsigned command;
+        bool ok = false;
+        bool skipped_points = false;
+        while (!ok)
         {
-            double z = 0;
-            if (!prj_trans_->backward(*x, *y, z))
-                return SEG_END;
+            command = geom_.vertex(x,y);
+            if (command == SEG_END)
+            {
+                return command;
+            }
+            double z=0;
+            ok = prj_trans_->backward(*x, *y, z);
+            if (!ok) {
+                skipped_points = true;
+            }
         }
-        t_->forward(x, y);
+        if (skipped_points && (command == SEG_LINETO))
+        {
+            command = SEG_MOVETO;
+        }
+        t_->forward(x,y);
         return command;
     }
 
