@@ -114,11 +114,11 @@ void text_symbolizer_properties::placement_properties_from_xml(xml_node const& s
     if (min_padding_) minimum_padding = *min_padding_;
     optional<double> min_path_length_ = sym.get_opt_attr<double>("minimum-path-length");
     if (min_path_length_) minimum_path_length = *min_path_length_;
-    optional<mapnik::boolean> avoid_edges_ = sym.get_opt_attr<mapnik::boolean>("avoid-edges");
+    optional<mapnik::boolean_type> avoid_edges_ = sym.get_opt_attr<mapnik::boolean_type>("avoid-edges");
     if (avoid_edges_) avoid_edges = *avoid_edges_;
-    optional<mapnik::boolean> allow_overlap_ = sym.get_opt_attr<mapnik::boolean>("allow-overlap");
+    optional<mapnik::boolean_type> allow_overlap_ = sym.get_opt_attr<mapnik::boolean_type>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
-    optional<mapnik::boolean> largest_bbox_only_ = sym.get_opt_attr<mapnik::boolean>("largest-bbox-only");
+    optional<mapnik::boolean_type> largest_bbox_only_ = sym.get_opt_attr<mapnik::boolean_type>("largest-bbox-only");
     if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
 }
 
@@ -224,8 +224,8 @@ void text_layout_properties::from_xml(xml_node const &node)
     set_property_from_xml<double>(dy, "dy", node);
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
-    set_property_from_xml<mapnik::boolean>(wrap_before, "wrap-before", node);
-    set_property_from_xml<mapnik::boolean>(rotate_displacement, "rotate-displacement", node);
+    set_property_from_xml<mapnik::boolean_type>(wrap_before, "wrap-before", node);
+    set_property_from_xml<mapnik::boolean_type>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);

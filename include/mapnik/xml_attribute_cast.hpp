@@ -57,16 +57,16 @@ struct do_xml_attribute_cast
     }
 };
 
-// specialization for mapnik::boolean
+// specialization for mapnik::boolean_type
 template <>
-struct do_xml_attribute_cast<mapnik::boolean>
+struct do_xml_attribute_cast<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::boolean_type> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean>(result);
-        return boost::optional<mapnik::boolean>();
+            return boost::optional<mapnik::boolean_type>(result);
+        return boost::optional<mapnik::boolean_type>();
     }
 };
 

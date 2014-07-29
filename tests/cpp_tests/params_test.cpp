@@ -20,47 +20,47 @@ int main(int argc, char** argv)
 
     // true
     params["bool"] = mapnik::value_integer(true);
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     params["bool"] = "true";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     params["bool"] = mapnik::value_integer(1);
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     params["bool"] = "1";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     params["bool"] = "True";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     params["bool"] = "on";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     params["bool"] = "yes";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == true));
 
     // false
     params["bool"] = mapnik::value_integer(false);
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false) );
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false) );
 
     params["bool"] = "false";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false) );
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false) );
 
     params["bool"] = mapnik::value_integer(0);
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false));
 
     params["bool"] = "0";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false));
 
     params["bool"] = "False";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false));
 
     params["bool"] = "off";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false));
 
     params["bool"] = "no";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    BOOST_TEST( (params.get<mapnik::boolean_type>("bool") && *params.get<mapnik::boolean_type>("bool") == false));
 
     // strings
     params["string"] = "hello";

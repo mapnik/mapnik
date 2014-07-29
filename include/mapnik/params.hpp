@@ -38,7 +38,7 @@ namespace mapnik
 {
 
 // fwd declare
-class boolean;
+class boolean_type;
 
 using value_holder = boost::variant<value_null,value_integer,value_double,std::string>;
 using parameter = std::pair<std::string, value_holder>;
@@ -74,10 +74,10 @@ boost::optional<value_integer> parameters::get(std::string const& key,
                                    value_integer const& default_opt_value) const;
 
 template MAPNIK_DECL
-boost::optional<mapnik::boolean> parameters::get(std::string const& key) const;
+boost::optional<mapnik::boolean_type> parameters::get(std::string const& key) const;
 template MAPNIK_DECL
-boost::optional<mapnik::boolean> parameters::get(std::string const& key,
-                                         mapnik::boolean const& default_opt_value) const;
+boost::optional<mapnik::boolean_type> parameters::get(std::string const& key,
+                                         mapnik::boolean_type const& default_opt_value) const;
 #endif
 
 }

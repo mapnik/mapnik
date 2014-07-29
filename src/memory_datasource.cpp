@@ -75,7 +75,7 @@ memory_datasource::memory_datasource(parameters const& params)
       desc_(memory_datasource::name(),
             *params.get<std::string>("encoding","utf-8")),
       type_(datasource::Vector),
-      bbox_check_(*params.get<boolean>("bbox_check", true)) {}
+      bbox_check_(*params.get<boolean_type>("bbox_check", true)) {}
 
 memory_datasource::~memory_datasource() {}
 

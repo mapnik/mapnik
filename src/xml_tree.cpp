@@ -42,7 +42,7 @@
 namespace mapnik
 {
 
-class boolean;
+class boolean_type;
 template <typename T>
 struct name_trait
 {
@@ -68,7 +68,7 @@ struct name_trait
 DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
-DEFINE_NAME_TRAIT( boolean, "boolean")
+DEFINE_NAME_TRAIT( boolean_type, "boolean_type")
 #ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
 #else
@@ -394,7 +394,7 @@ std::string xml_node::line_to_string() const
 #define compile_get_attr(T) template T xml_node::get_attr<T>(std::string const&) const; template T xml_node::get_attr<T>(std::string const&, T const&) const
 #define compile_get_value(T) template T xml_node::get_value<T>() const
 
-compile_get_opt_attr(boolean);
+compile_get_opt_attr(boolean_type);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(unsigned);
 compile_get_opt_attr(mapnik::value_integer);

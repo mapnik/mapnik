@@ -55,14 +55,14 @@ struct extract_value
 };
 
 template <>
-struct extract_value<mapnik::boolean>
+struct extract_value<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean> do_extract_from_string(std::string const& source)
+    static inline boost::optional<mapnik::boolean_type> do_extract_from_string(std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean>(result);
-        return boost::optional<mapnik::boolean>();
+            return boost::optional<mapnik::boolean_type>(result);
+        return boost::optional<mapnik::boolean_type>();
     }
 };
 

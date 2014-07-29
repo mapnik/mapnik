@@ -77,7 +77,7 @@ occi_datasource::occi_datasource(parameters const& params)
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
       desc_(occi_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
-      use_wkb_(*params.get<mapnik::boolean>("use_wkb", false)),
+      use_wkb_(*params.get<mapnik::boolean_type>("use_wkb", false)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       row_prefetch_(*params.get<int>("row_prefetch", 100)),
       pool_(0),
@@ -100,9 +100,9 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         table_ = *table;
     }
-    estimate_extent_ = *params.get<mapnik::boolean>("estimate_extent",false);
-    use_spatial_index_ = *params.get<mapnik::boolean>("use_spatial_index",true);
-    use_connection_pool_ = *params.get<mapnik::boolean>("use_connection_pool",true);
+    estimate_extent_ = *params.get<mapnik::boolean_type>("estimate_extent",false);
+    use_spatial_index_ = *params.get<mapnik::boolean_type>("use_spatial_index",true);
+    use_connection_pool_ = *params.get<mapnik::boolean_type>("use_connection_pool",true);
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);

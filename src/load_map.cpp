@@ -431,7 +431,7 @@ void map_parser::parse_style(Map & map, xml_node const& node)
         optional<double> opacity = node.get_opt_attr<double>("opacity");
         if (opacity) style.set_opacity(*opacity);
 
-        optional<mapnik::boolean> image_filters_inflate = node.get_opt_attr<mapnik::boolean>("image-filters-inflate");
+        optional<mapnik::boolean_type> image_filters_inflate = node.get_opt_attr<mapnik::boolean_type>("image-filters-inflate");
         if (image_filters_inflate)
         {
             style.set_image_filters_inflate(*image_filters_inflate);
@@ -557,7 +557,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         }
         layer lyr(name, srs);
 
-        optional<mapnik::boolean> status = node.get_opt_attr<mapnik::boolean>("status");
+        optional<mapnik::boolean_type> status = node.get_opt_attr<mapnik::boolean_type>("status");
         if (status)
         {
             lyr.set_active(* status);
@@ -576,21 +576,21 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             lyr.set_max_zoom(* max_zoom);
         }
 
-        optional<mapnik::boolean> queryable = node.get_opt_attr<mapnik::boolean>("queryable");
+        optional<mapnik::boolean_type> queryable = node.get_opt_attr<mapnik::boolean_type>("queryable");
         if (queryable)
         {
             lyr.set_queryable(* queryable);
         }
 
-        optional<mapnik::boolean> clear_cache =
-            node.get_opt_attr<mapnik::boolean>("clear-label-cache");
+        optional<mapnik::boolean_type> clear_cache =
+            node.get_opt_attr<mapnik::boolean_type>("clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache(* clear_cache);
         }
 
-        optional<mapnik::boolean> cache_features =
-            node.get_opt_attr<mapnik::boolean>("cache-features");
+        optional<mapnik::boolean_type> cache_features =
+            node.get_opt_attr<mapnik::boolean_type>("cache-features");
         if (cache_features)
         {
             lyr.set_cache_features(* cache_features);
@@ -959,7 +959,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& nod
     // geometry transform
     set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::geometry_transform, node);
     // clip
-    set_symbolizer_property<symbolizer_base, boolean>(sym, keys::clip, node);
+    set_symbolizer_property<symbolizer_base, boolean_type>(sym, keys::clip, node);
     // simplify algorithm
     set_symbolizer_property<symbolizer_base, simplify_algorithm_e>(sym, keys::simplify_algorithm, node);
     // simplify value
@@ -979,11 +979,11 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
         point_symbolizer sym;
         parse_symbolizer_base(sym, node);
         // allow-overlap
-        set_symbolizer_property<point_symbolizer,boolean>(sym, keys::allow_overlap, node);
+        set_symbolizer_property<point_symbolizer,boolean_type>(sym, keys::allow_overlap, node);
         // opacity
         set_symbolizer_property<point_symbolizer,double>(sym, keys::opacity, node);
         // ignore-placement
-        set_symbolizer_property<point_symbolizer,boolean>(sym, keys::ignore_placement, node);
+        set_symbolizer_property<point_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
         // point placement
         set_symbolizer_property<symbolizer_base,point_placement_enum>(sym, keys::point_placement_type, node);
         if (file && !file->empty())
@@ -1076,9 +1076,9 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         // max-error
         set_symbolizer_property<markers_symbolizer,double>(sym, keys::max_error, node);
         // allow-overlap
-        set_symbolizer_property<markers_symbolizer,boolean>(sym, keys::allow_overlap, node);
+        set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::allow_overlap, node);
         // ignore-placement
-        set_symbolizer_property<markers_symbolizer,boolean>(sym, keys::ignore_placement, node);
+        set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
         // width
         //set_symbolizer_property<markers_symbolizer,double>(sym, keys::width, node);
         // height
@@ -1280,7 +1280,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<shield_symbolizer,double>(sym, keys::text_opacity, node);
 
         // unlock_image
-        optional<mapnik::boolean> unlock_image = node.get_opt_attr<mapnik::boolean>("unlock-image");
+        optional<mapnik::boolean_type> unlock_image = node.get_opt_attr<mapnik::boolean_type>("unlock-image");
         if (unlock_image) put(sym, keys::unlock_image, *unlock_image);
 
         std::string file = node.get_attr<std::string>("file");
@@ -1301,7 +1301,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
 
         // no_text - removed property in 2.1.x that used to have a purpose
         // before you could provide an expression with an empty string
-        optional<mapnik::boolean> no_text = node.get_opt_attr<mapnik::boolean>("no-text");
+        optional<mapnik::boolean_type> no_text = node.get_opt_attr<mapnik::boolean_type>("no-text");
         if (no_text)
         {
             MAPNIK_LOG_ERROR(shield_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
@@ -1509,7 +1509,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
         if (mesh_size) put<value_integer>(raster_sym, keys::mesh_size, *mesh_size);
 
         // premultiplied status of image
-        optional<mapnik::boolean> premultiplied = node.get_opt_attr<mapnik::boolean>("premultiplied");
+        optional<mapnik::boolean_type> premultiplied = node.get_opt_attr<mapnik::boolean_type>("premultiplied");
         if (premultiplied) put(raster_sym, keys::premultiplied, *premultiplied);
 
         bool found_colorizer = false;
