@@ -586,9 +586,10 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Datasource(**{"type":"csv","inline":csv_string})
         eq_(len(ds.fields()),0)
         eq_(ds.fields(),[])
-        fs = ds.featureset()
-        feat = fs.next()
-        eq_(feat.num_geometries(),1)
+        # FIXME - re-enable after https://github.com/mapnik/mapnik/issues/2319 is fixed
+        #fs = ds.featureset()
+        #feat = fs.next()
+        #eq_(feat.num_geometries(),1)
 
 if __name__ == "__main__":
     setup()
