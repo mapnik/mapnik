@@ -25,6 +25,7 @@
 #include <mapnik/value_types.hpp>
 
 #include <cstring>
+#include <algorithm>
 
 #include <boost/spirit/include/qi.hpp>
 
@@ -33,23 +34,17 @@
 #endif
 
 #define BOOST_SPIRIT_AUTO(domain_, name, expr)                  \
-    typedef boost::proto::result_of::                           \
-    deep_copy<BOOST_TYPEOF(expr)>::type name##_expr_type;       \
+    using name##_expr_type = boost::proto::result_of::          \
+        deep_copy<BOOST_TYPEOF(expr)>::type ;                   \
     BOOST_SPIRIT_ASSERT_MATCH(                                  \
         boost::spirit::domain_::domain, name##_expr_type);      \
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
 
-// karma is used by default unless
-// the boost version is too old
+// karma is used by default
 #define MAPNIK_KARMA_TO_STRING
 
 #ifdef MAPNIK_KARMA_TO_STRING
-  #include <boost/version.hpp>
-  #if BOOST_VERSION < 104500
-    #undef MAPNIK_KARMA_TO_STRING
-  #else
-    #include <boost/spirit/include/karma.hpp>
-  #endif
+  #include <boost/spirit/include/karma.hpp>
 #endif
 
 namespace mapnik {
@@ -58,99 +53,76 @@ namespace util {
 
 using namespace boost::spirit;
 
-BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_)
+BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_type())
 #ifdef BIGINT
-BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long)
+BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long_type())
 #endif
-BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
-BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
-
-struct bool_symbols : qi::symbols<char,bool>
-{
-    bool_symbols()
-    {
-        add("true",true)
-            ("false",false)
-            ("yes",true)
-            ("no",false)
-            ("on",true)
-            ("off",false)
-            ("1",true)
-            ("0",false);
-    }
-};
-
-bool string2bool(const char * iter, const char * end, bool & result)
-{
-    using boost::spirit::qi::no_case;
-    bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
-    return r && (iter == end);
-}
-
-bool string2bool(std::string const& value, bool & result)
-{
-    using boost::spirit::qi::no_case;
-    std::string::const_iterator str_beg = value.begin();
-    std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],ascii::space,result);
-    return r && (str_beg == str_end);
-}
+BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_type())
+BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_type())
 
 bool string2int(const char * iter, const char * end, int & result)
 {
-    bool r = qi::phrase_parse(iter,end,INTEGER,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,INTEGER,space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, int & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,INTEGER,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,INTEGER,space,result);
     return r && (str_beg == str_end);
 }
 
 #ifdef BIGINT
 bool string2int(const char * iter, const char * end, mapnik::value_integer & result)
 {
-    bool r = qi::phrase_parse(iter,end,LONGLONG,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,LONGLONG,space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, mapnik::value_integer & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,space,result);
     return r && (str_beg == str_end);
 }
 #endif
 
 bool string2double(std::string const& value, double & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,DOUBLE,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,DOUBLE,space,result);
     return r && (str_beg == str_end);
 }
 
 bool string2double(const char * iter, const char * end, double & result)
 {
-    bool r = qi::phrase_parse(iter,end,DOUBLE,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,DOUBLE,space,result);
     return r && (iter == end);
 }
 
 bool string2float(std::string const& value, float & result)
 {
+    ascii::space_type space;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,FLOAT,ascii::space,result);
+    bool r = qi::phrase_parse(str_beg,str_end,FLOAT,space,result);
     return r && (str_beg == str_end);
 }
 
 bool string2float(const char * iter, const char * end, float & result)
 {
-    bool r = qi::phrase_parse(iter,end,FLOAT,ascii::space,result);
+    ascii::space_type space;
+    bool r = qi::phrase_parse(iter,end,FLOAT,space,result);
     return r && (iter == end);
 }
 

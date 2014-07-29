@@ -1,0 +1,19 @@
+<Map srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over" background-color="white">
+
+<Style name="test">
+  <Rule>
+    <RasterSymbolizer scaling="bilinear" />
+  </Rule>
+</Style>
+
+<Layer name="test" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+    <StyleName>test</StyleName>
+    <Datasource>
+        <Parameter name="file">../data/Yosemite_L9.tif</Parameter>
+        <Parameter name="type">gdal</Parameter>
+        <Parameter name="nodata">255</Parameter>
+        <Parameter name="nodata_tolerance">100</Parameter>
+    </Datasource>
+</Layer>
+
+</Map>

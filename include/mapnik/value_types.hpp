@@ -35,15 +35,15 @@
 namespace mapnik  {
 
 #ifdef BIGINT
-//typedef boost::long_long_type value_integer;
-typedef long long value_integer;
+//using value_integer = boost::long_long_type;
+using value_integer = long long;
 #else
-typedef int value_integer;
+using value_integer = int;
 #endif
 
-typedef double value_double;
-typedef U_NAMESPACE_QUALIFIER UnicodeString value_unicode_string;
-typedef bool value_bool;
+using value_double = double;
+using value_unicode_string = U_NAMESPACE_QUALIFIER UnicodeString;
+using value_bool = bool;
 
 struct value_null
 {
@@ -53,10 +53,24 @@ struct value_null
         return true;
     }
 
+    template <typename T>
+    bool operator==(T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return false;
+    }
+
     bool operator!=(value_null const& other) const
     {
         boost::ignore_unused_variable_warning(other);
         return false;
+    }
+
+    template <typename T>
+    bool operator!=(T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return true;
     }
 
     template <typename T>
@@ -106,6 +120,12 @@ inline std::ostream& operator<< (std::ostream & out,value_null const& v)
     boost::ignore_unused_variable_warning(v);
     return out;
 }
+inline std::istream& operator>> ( std::istream & s, value_null & null )
+{
+    boost::ignore_unused_variable_warning(null);
+    return s;
+}
+
 
 } // namespace mapnik
 

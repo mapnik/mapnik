@@ -35,10 +35,14 @@ namespace boost { namespace spirit { namespace traits {
 template <>
 struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
 
+// make gcc and darwin toolsets happy.
+template <>
+struct is_container<mapnik::geometry_container const> : mpl::false_ {} ;
+
 template <>
 struct container_iterator<mapnik::geometry_type const>
 {
-    typedef mapnik::util::path_iterator<mapnik::geometry_type> type;
+    using type = mapnik::util::path_iterator<mapnik::geometry_type>;
 };
 
 template <>

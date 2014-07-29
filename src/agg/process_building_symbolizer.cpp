@@ -21,17 +21,16 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/make_unique.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/building_symbolizer.hpp>
 #include <mapnik/expression.hpp>
-
-// boost
-#include <boost/scoped_ptr.hpp>
+#include <mapnik/renderer_common/process_building_symbolizer.hpp>
 
 // stl
 #include <deque>
@@ -49,134 +48,64 @@
 namespace mapnik
 {
 
-template <typename T>
-void agg_renderer<T>::process(building_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+template <typename T0,typename T1>
+void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
 {
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_pre> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+    using path_type = coord_transform<CoordTransform,geometry_type>;
+    using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
+    using renderer = agg::renderer_scanline_aa_solid<ren_base>;
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
 
-    color const& fill_  = sym.get_fill();
-    unsigned r=fill_.red();
-    unsigned g=fill_.green();
-    unsigned b=fill_.blue();
-    unsigned a=fill_.alpha();
+    double opacity = get<value_double>(sym,keys::fill_opacity,feature, common_.vars_, 1.0);
+    color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
+    unsigned r=fill.red();
+    unsigned g=fill.green();
+    unsigned b=fill.blue();
+    unsigned a=fill.alpha();
     renderer ren(renb);
     agg::scanline_u8 sl;
 
     ras_ptr->reset();
-    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
+    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
+    if (gamma != gamma_ || gamma_method != gamma_method_)
     {
-        ras_ptr->gamma(agg::gamma_power());
-        gamma_method_ = GAMMA_POWER;
-        gamma_ = 1.0;
+        set_gamma_method(ras_ptr, gamma, gamma_method);
+        gamma_method_ = gamma_method;
+        gamma_ = gamma;
     }
 
-    double height = 0.0;
-    expression_ptr height_expr = sym.height();
-    if (height_expr)
-    {
-        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
-        height = result.to_double() * scale_factor_;
-    }
+    double height = get<double>(sym, keys::height, feature, common_.vars_,0.0) * common_.scale_factor_;
 
-    for (std::size_t i=0;i<feature.num_geometries();++i)
-    {
-        geometry_type const& geom = feature.get_geometry(i);
-        if (geom.size() > 2)
-        {
-            boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
-            boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
-            std::deque<segment_t> face_segments;
-            double x0 = 0;
-            double y0 = 0;
-            double x,y;
-            geom.rewind(0);
-            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
-                 cm = geom.vertex(&x, &y))
-            {
-                if (cm == SEG_MOVETO)
-                {
-                    frame->move_to(x,y);
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    frame->line_to(x,y);
-                    face_segments.push_back(segment_t(x0,y0,x,y));
-                }
-                else if (cm == SEG_CLOSE)
-                {
-                    frame->close_path();
-                }
-                x0 = x;
-                y0 = y;
-            }
-
-            std::sort(face_segments.begin(),face_segments.end(), y_order);
-            std::deque<segment_t>::const_iterator itr=face_segments.begin();
-            std::deque<segment_t>::const_iterator end=face_segments.end();
-
-            for (; itr!=end; ++itr)
-            {
-                boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
-                faces->move_to(itr->get<0>(),itr->get<1>());
-                faces->line_to(itr->get<2>(),itr->get<3>());
-                faces->line_to(itr->get<2>(),itr->get<3>() + height);
-                faces->line_to(itr->get<0>(),itr->get<1>() + height);
-
-                path_type faces_path (t_,*faces,prj_trans);
-                ras_ptr->add_path(faces_path);
-                ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
-                agg::render_scanlines(*ras_ptr, sl, ren);
-                ras_ptr->reset();
-                //
-                frame->move_to(itr->get<0>(),itr->get<1>());
-                frame->line_to(itr->get<0>(),itr->get<1>()+height);
-
-            }
-
-            geom.rewind(0);
-            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
-                 cm = geom.vertex(&x, &y))
-            {
-                if (cm == SEG_MOVETO)
-                {
-                    frame->move_to(x,y+height);
-                    roof->move_to(x,y+height);
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    frame->line_to(x,y+height);
-                    roof->line_to(x,y+height);
-                }
-                else if (cm == SEG_CLOSE)
-                {
-                    frame->close_path();
-                    roof->close_path();
-                }
-            }
-
-            path_type path(t_,*frame,prj_trans);
+    render_building_symbolizer(
+        feature, height,
+        [&,r,g,b,a,opacity](geometry_type &faces) {
+            path_type faces_path (this->common_.t_,faces,prj_trans);
+            ras_ptr->add_path(faces_path);
+            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
+            agg::render_scanlines(*ras_ptr, sl, ren);
+            this->ras_ptr->reset();
+        },
+        [&,r,g,b,a,opacity](geometry_type &frame) {
+            path_type path(common_.t_,frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
-            stroke.width(scale_factor_);
+            stroke.width(common_.scale_factor_);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
-
-            path_type roof_path (t_,*roof,prj_trans);
+        },
+        [&,r,g,b,a,opacity](geometry_type &roof) {
+            path_type roof_path (common_.t_,roof,prj_trans);
             ras_ptr->add_path(roof_path);
-            ren.color(agg::rgba8_pre(r, g, b, int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
-
-        }
-    }
+        });
 }
 
 template void agg_renderer<image_32>::process(building_symbolizer const&,

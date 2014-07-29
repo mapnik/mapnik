@@ -1,0 +1,12 @@
+<Map>
+    <Layer>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+                x,y
+                0,0
+            </Parameter>
+            <Parameter name="empty">''</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

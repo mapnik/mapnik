@@ -20,12 +20,15 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 // boost
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 // mapnik
 #include <mapnik/value_error.hpp>
+#include <mapnik/rule.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/image_filter_types.hpp> // generate_image_filters
@@ -45,13 +48,17 @@ std::string get_image_filters(feature_type_style & style)
 void set_image_filters(feature_type_style & style, std::string const& filters)
 {
     std::vector<mapnik::filter::filter_type> new_filters;
-
     bool result = parse_image_filters(filters, new_filters);
     if (!result)
     {
         throw mapnik::value_error("failed to parse image-filters: '" + filters + "'");
     }
-    style.image_filters().swap(new_filters);
+#ifdef _WINDOWS
+    style.image_filters() = new_filters;
+    // FIXME : https://svn.boost.org/trac/boost/ticket/2839
+#else
+    style.image_filters() = std::move(new_filters);
+#endif
 }
 
 void export_style()
@@ -91,6 +98,10 @@ void export_style()
                       &feature_type_style::comp_op,
                       &feature_type_style::set_comp_op,
                       "Set/get the comp-op (composite operation) of the style")
+        .add_property("image_filters_inflate",
+                      &feature_type_style::image_filters_inflate,
+                      &feature_type_style::image_filters_inflate,
+                      "Set/get the image_filters_inflate property of the style")
         .add_property("image_filters",
                       get_image_filters,
                       set_image_filters,

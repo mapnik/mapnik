@@ -20,15 +20,19 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 // boost
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 // mapnik
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/symbolizer.hpp>
 
 using mapnik::raster_colorizer;
 using mapnik::raster_colorizer_ptr;
+using mapnik::symbolizer_base;
 using mapnik::colorizer_stop;
 using mapnik::colorizer_stops;
 using mapnik::colorizer_mode_enum;
@@ -78,6 +82,8 @@ colorizer_stops const& get_stops(raster_colorizer_ptr & rc)
 void export_raster_colorizer()
 {
     using namespace boost::python;
+
+    implicitly_convertible<raster_colorizer_ptr, mapnik::symbolizer_base::value_type>();
 
     class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer",
                                                   "A Raster Colorizer object.",

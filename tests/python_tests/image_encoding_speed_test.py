@@ -42,8 +42,10 @@ combinations = ['png',
                 'png:z=1:s=filtered',
                 'png:z=1:s=huff',
                 'png:z=1:s=rle',
-                'png:m=h;g=2.0',
-                'png:m=h;g=1.0',
+                'png:m=h:g=2.0',
+                'png:m=h:g=1.0',
+                'png:e=miniz',
+                'png8:e=miniz'
                ]
 
 tiles = [
@@ -122,4 +124,4 @@ def do_encoding():
 if __name__ == "__main__":
     setup()
     do_encoding()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

@@ -28,8 +28,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/datasource.hpp>  // for featureset_ptr
-#include <mapnik/layer.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -37,13 +36,22 @@
 // boost
 #include <boost/optional.hpp>
 
+// stl
+#include <map>
+#include <memory>
+#include <vector>
+#include <string>
+
 namespace mapnik
 {
 
+struct Featureset;
+using featureset_ptr = std::shared_ptr<Featureset>;
 class feature_type_style;
 class CoordTransform;
+class layer;
 
-class MAPNIK_DECL Map
+class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
 public:
 
@@ -91,10 +99,10 @@ private:
 
 public:
 
-    typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
-    typedef std::map<std::string,feature_type_style>::iterator style_iterator;
-    typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
-    typedef std::map<std::string,font_set>::iterator fontset_iterator;
+    using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
+    using style_iterator = std::map<std::string,feature_type_style>::iterator;
+    using const_fontset_iterator = std::map<std::string,font_set>::const_iterator;
+    using fontset_iterator = std::map<std::string,font_set>::iterator;
 
     /*! \brief Default constructor.
      *
@@ -110,7 +118,7 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs=MAPNIK_LONGLAT_PROJ);
+    Map(int width, int height, std::string const& srs = MAPNIK_LONGLAT_PROJ);
 
     /*! \brief Copy Constructor.
      *
@@ -118,12 +126,14 @@ public:
      */
     Map(Map const& rhs);
 
-    /*! \brief Assignment operator
-     *
-     *  TODO: to be documented
-     *
-     */
-    Map& operator=(Map const& rhs);
+    // move ctor
+    Map(Map && other);
+
+    // assignment operator
+    Map& operator=(Map rhs);
+
+    // comparison op
+    bool operator==(Map const& other) const;
 
     /*! \brief Get all styles
      * @return Const reference to styles
@@ -161,7 +171,7 @@ public:
      *  @return true If success.
      *          false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style const& style);
+    bool insert_style(std::string const& name,feature_type_style style);
 
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
@@ -180,7 +190,7 @@ public:
      *  @return true If success.
      *          false If failure.
      */
-    bool insert_fontset(std::string const& name, font_set const& fontset);
+    bool insert_fontset(std::string const& name, font_set fontset);
 
     /*! \brief Find a fontset.
      *  @param name The name of the fontset.
@@ -205,24 +215,24 @@ public:
     /*! \brief Add a layer to the map.
      *  @param l The layer to add.
      */
-    void addLayer(layer const& l);
+    void add_layer(layer l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
      *  @return Constant layer.
      */
-    layer const& getLayer(size_t index) const;
+    layer const& get_layer(size_t index) const;
 
     /*! \brief Get a layer.
      *  @param index layer number.
      *  @return Non-constant layer.
      */
-    layer& getLayer(size_t index);
+    layer& get_layer(size_t index);
 
     /*! \brief Remove a layer.
      *  @param index layer number.
      */
-    void removeLayer(size_t index);
+    void remove_layer(size_t index);
 
     /*! \brief Get all layers.
      *  @return Constant layers.
@@ -389,7 +399,7 @@ public:
      * @param index The index of the layer to query from.
      * @param x The x coordinate where to query.
      * @param y The y coordinate where to query.
-     * @return A Mapnik Featureset if successful otherwise will return NULL.
+     * @return A Mapnik Featureset if successful otherwise will return nullptr.
      */
     featureset_ptr query_point(unsigned index, double x, double y) const;
 
@@ -402,7 +412,7 @@ public:
      * @param index The index of the layer to query from.
      * @param x The x coordinate where to query.
      * @param y The y coordinate where to query.
-     * @return A Mapnik Featureset if successful otherwise will return NULL.
+     * @return A Mapnik Featureset if successful otherwise will return nullptr.
      */
     featureset_ptr query_map_point(unsigned index, double x, double y) const;
 
@@ -427,6 +437,7 @@ public:
     void set_extra_parameters(parameters& params);
 
 private:
+    friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
 };
 

@@ -92,25 +92,25 @@ def test_compare_images():
         a.demultiply()
         if not validate_pixels_are_not_premultiplied(a):
             fails.append('%s not validly demultiplied' % (name))
-        a.save(actual)
+        a.save(actual,'png32')
         if not os.path.exists(expected):
             print 'generating expected test image: %s' % expected
-            a.save(expected)
+            a.save(expected,'png32')
         expected_im = mapnik.Image.open(expected)
         # compare them
-        if a.tostring() == expected_im.tostring():
+        if a.tostring('png32') == expected_im.tostring('png32'):
             successes.append(name)
         else:
             fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
             fail_im = side_by_side_image(expected_im, a)
-            fail_im.save('/tmp/mapnik-comp-op-test-' + name + '.fail.png')
+            fail_im.save('/tmp/mapnik-comp-op-test-' + name + '.fail.png','png32')
     eq_(len(successes),num_ops,'\n'+'\n'.join(fails))
     b.demultiply()
     # b will be slightly modified by pre and then de multiplication rounding errors
     # TODO - write test to ensure the image is 99% the same.
     #expected_b = mapnik.Image.open('./images/support/b.png')
     #b.save('/tmp/mapnik-comp-op-test-original-mask.png')
-    #eq_(b.tostring(),expected_b.tostring(), '/tmp/mapnik-comp-op-test-original-mask.png is no longer equivalent to original mask: ./images/support/b.png')
+    #eq_(b.tostring('png32'),expected_b.tostring('png32'), '/tmp/mapnik-comp-op-test-original-mask.png is no longer equivalent to original mask: ./images/support/b.png')
 
 def test_pre_multiply_status():
     b = mapnik.Image.open('./images/support/b.png')
@@ -166,18 +166,18 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             mapnik.render(m, im)
             actual = '/tmp/mapnik-style-comp-op-' + name + '.png'
             expected = 'images/style-comp-op/' + name + '.png'
-            im.save(actual)
+            im.save(actual,'png32')
             if not os.path.exists(expected):
                 print 'generating expected test image: %s' % expected
-                im.save(expected)
+                im.save(expected,'png32')
             expected_im = mapnik.Image.open(expected)
             # compare them
-            if im.tostring() == expected_im.tostring():
+            if im.tostring('png32') == expected_im.tostring('png32'):
                 successes.append(name)
             else:
                 fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
                 fail_im = side_by_side_image(expected_im, im)
-                fail_im.save('/tmp/mapnik-style-comp-op-' + name + '.fail.png')
+                fail_im.save('/tmp/mapnik-style-comp-op-' + name + '.fail.png','png32')
         eq_(len(fails), 0, '\n'+'\n'.join(fails))
 
     def test_style_level_opacity():
@@ -188,9 +188,9 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         mapnik.render(m,im)
         actual = '/tmp/mapnik-style-level-opacity.png'
         expected = 'images/support/mapnik-style-level-opacity.png'
-        im.save(actual)
+        im.save(actual,'png32')
         expected_im = mapnik.Image.open(expected)
-        eq_(im.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
+        eq_(im.tostring('png32'),expected_im.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
 
 def test_rounding_and_color_expectations():
     m = mapnik.Map(1,1)
@@ -259,4 +259,4 @@ def test_background_image_with_alpha_and_background_color_against_composited_con
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

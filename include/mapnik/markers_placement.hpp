@@ -76,13 +76,13 @@ public:
         spacing_left_(0.0),
         marker_nr_(0)
     {
-      if (spacing >= 0)
+      if (spacing >= 1)
       {
           spacing_ = spacing;
       }
-      else if (spacing < 0)
+      else
       {
-          spacing_ = find_optimal_spacing(-spacing);
+          spacing_ = 100;
       }
       rewind();
     }
@@ -140,20 +140,20 @@ public:
         spacing_left_ -= error_;
         error_ = 0.0;
         double max_err_allowed = max_error_ * spacing_;
-        //Loop exits when a position is found or when no more segments are available
+        // Loop exits when a position is found or when no more segments are available
         while (true)
         {
-            //Do not place markers too close to the beginning of a segment
+            // Do not place markers too close to the beginning of a segment
             if (spacing_left_ < marker_width_/2)
             {
                 set_spacing_left(marker_width_/2); //Only moves forward
             }
-            //Error for this marker is too large. Skip to the next position.
+            // Error for this marker is too large. Skip to the next position.
             if (std::fabs(error_) > max_err_allowed)
             {
-                while (error_ > spacing_)
+                if (error_ > spacing_)
                 {
-                    error_ -= spacing_; //Avoid moving backwards
+                    error_ = spacing_; // Avoid moving backwards
                 }
                 spacing_left_ += spacing_ - error_;
                 error_ = 0.0;
@@ -215,7 +215,7 @@ public:
             box2d<double> box = perform_transform(angle, x, y);
             if (!allow_overlap_ && !detector_.has_placement(box))
             {
-                //10.0 is the approxmiate number of positions tried and choosen arbitrarily
+                //10.0 is the approximate number of positions tried and choosen arbitrarily
                 set_spacing_left(spacing_left_ + spacing_ * max_error_ / 10.0); //Only moves forward
                 continue;
             }
@@ -267,32 +267,6 @@ private:
         result.expand_to_include(xB, yB);
         result.expand_to_include(xD, yD);
         return result;
-    }
-
-    /** Automatically chooses spacing. */
-    double find_optimal_spacing(double s)
-    {
-        rewind();
-        //Calculate total path length
-        unsigned cmd = agg::path_cmd_move_to;
-        double length = 0;
-        while (!agg::is_stop(cmd))
-        {
-            double dx = next_x - last_x;
-            double dy = next_y - last_y;
-            length += std::sqrt(dx * dx + dy * dy);
-            last_x = next_x;
-            last_y = next_y;
-            while (agg::is_move_to(cmd = locator_.vertex(&next_x, &next_y)))
-            {
-                //Skip over "move" commands
-                last_x = next_x;
-                last_y = next_y;
-            }
-        }
-        unsigned points = static_cast<unsigned>(round(length / s));
-        if (points == 0) return 0.0; //Path to short
-        return length / points;
     }
 
     /** Set spacing_left_, adjusts error_ and performs sanity checks. */

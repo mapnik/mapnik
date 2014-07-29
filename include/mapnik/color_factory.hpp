@@ -25,14 +25,13 @@
 
 // mapnik
 #include <mapnik/color.hpp>
-#include <mapnik/css_color_grammar.hpp>
 
+//stl
 #include <string>
 
 namespace mapnik {
 
 MAPNIK_DECL mapnik::color parse_color(std::string const& str);
-MAPNIK_DECL mapnik::color parse_color(std::string const& str, mapnik::css_color_grammar<std::string::const_iterator> const& g);
 
 }
 

@@ -239,15 +239,9 @@ void save_as_tiff(T1 & file, T2 const& image)
 
         for (int i = 0, index = 0; i < width; ++i)
         {
-#ifdef MAPNIK_BIG_ENDIAN
-            row[index++] = (imageRow[i] >> 24) & 0xff;
-            row[index++] = (imageRow[i] >> 16) & 0xff;
-            row[index++] = (imageRow[i] >> 8) & 0xff;
-#else
             row[index++] = (imageRow[i]) & 0xff;
             row[index++] = (imageRow[i] >> 8) & 0xff;
             row[index++] = (imageRow[i] >> 16) & 0xff;
-#endif
         }
 
         TIFFWriteScanline(output, row, next_scanline, 0);

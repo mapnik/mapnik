@@ -43,6 +43,7 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/util/timer.hpp>
 #endif
 
 // qt
@@ -52,6 +53,9 @@
 #include "layerwidget.hpp"
 #include "layerdelegate.hpp"
 #include "about_dialog.hpp"
+
+// boost
+#include <boost/algorithm/string.hpp>
 
 MainWindow::MainWindow()
     : filename_(),
@@ -182,13 +186,14 @@ void MainWindow::save()
 
 void MainWindow::load_map_file(QString const& filename)
 {
-    std::cout<<"loading "<< filename.toStdString() << std::endl;
+    std::cout << "loading "<< filename.toStdString() << std::endl;
     unsigned width = mapWidget_->width();
     unsigned height = mapWidget_->height();
-    boost::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height));
+    std::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height));
     mapWidget_->setMap(map);
     try
     {
+        mapnik::auto_cpu_timer t(std::clog, "loading map took: ");
         mapnik::load_map(*map,filename.toStdString());
     }
     catch (mapnik::config_error & ex)
@@ -412,7 +417,7 @@ void MainWindow::set_default_extent(double x0,double y0, double x1, double y1)
 {
     try
     {
-        boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
+        std::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
         if (map_ptr)
         {
             mapnik::projection prj(map_ptr->srs());
@@ -433,11 +438,16 @@ void MainWindow::set_scaling_factor(double scaling_factor)
 
 void MainWindow::zoom_all()
 {
-    boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
+    std::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
     if (map_ptr)
     {
         map_ptr->zoom_all();
         mapnik::box2d<double> const& ext = map_ptr->get_current_extent();
         mapWidget_->zoomToBox(ext);
     }
+}
+
+std::shared_ptr<mapnik::Map> MainWindow::get_map()
+{
+    return mapWidget_->getMap();
 }

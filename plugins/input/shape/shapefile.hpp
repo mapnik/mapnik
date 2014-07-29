@@ -27,7 +27,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdexcept>
-
+#include <cstdint>
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -40,9 +40,6 @@
 #endif
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/cstdint.hpp>
-
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
 using mapnik::read_int32_xdr;
@@ -52,7 +49,7 @@ using mapnik::read_double_xdr;
 
 struct RecordTag
 {
-    typedef char* data_type;
+    using data_type = char*;
     static data_type alloc(unsigned size)
     {
         return static_cast<data_type>(::operator new(sizeof(char)*size));
@@ -66,7 +63,7 @@ struct RecordTag
 
 struct MappedRecordTag
 {
-    typedef const char* data_type;
+    using data_type = const char*;
     static data_type alloc(unsigned) { return 0; }
     static void dealloc(data_type ) {}
 };
@@ -106,7 +103,7 @@ struct shape_record
 
     int read_ndr_integer()
     {
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_ndr(&data[pos], val);
         pos += 4;
         return val;
@@ -114,7 +111,7 @@ struct shape_record
 
     int read_xdr_integer()
     {
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_xdr(&data[pos], val);
         pos += 4;
         return val;
@@ -139,12 +136,12 @@ class shape_file : mapnik::noncopyable
 public:
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    typedef boost::interprocess::ibufferstream file_source_type;
-    typedef shape_record<MappedRecordTag> record_type;
+    using file_source_type = boost::interprocess::ibufferstream;
+    using record_type = shape_record<MappedRecordTag>;
     mapnik::mapped_region_ptr mapped_region_;
 #else
-    typedef std::ifstream file_source_type;
-    typedef shape_record<RecordTag> record_type;
+    using file_source_type = std::ifstream;
+    using record_type = shape_record<RecordTag>;
 #endif
 
     file_source_type file_;
@@ -167,7 +164,7 @@ public:
         if (memory)
         {
             mapped_region_ = *memory;
-            file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+            file_.buffer(static_cast<char*>(mapped_region_->get_address()),mapped_region_->get_size());
         }
         else
         {
@@ -183,7 +180,7 @@ public:
         return file_;
     }
 
-    inline bool is_open()
+    inline bool is_open() const
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         return (file_.buffer().second > 0);
@@ -206,7 +203,7 @@ public:
     {
         char b[4];
         file_.read(b, 4);
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_xdr(b, val);
         return val;
     }
@@ -215,7 +212,7 @@ public:
     {
         char b[4];
         file_.read(b, 4);
-        boost::int32_t val;
+        std::int32_t val;
         read_int32_ndr(b, val);
         return val;
     }

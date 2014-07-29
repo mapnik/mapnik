@@ -30,6 +30,7 @@
 
 // stl
 #include <vector>
+#include <cstring>
 #include <deque>
 #include <algorithm>
 
@@ -62,7 +63,7 @@ class octree : private mapnik::noncopyable
                children_count(0),
                index(0)
         {
-            memset(&children_[0],0,sizeof(children_));
+            std::memset(&children_[0],0,sizeof(children_));
         }
 
         ~node()
@@ -82,9 +83,9 @@ class octree : private mapnik::noncopyable
             return count == 0;
         }
         node * children_[8];
-        boost::uint64_t reds;
-        boost::uint64_t greens;
-        boost::uint64_t blues;
+        std::uint64_t reds;
+        std::uint64_t greens;
+        std::uint64_t blues;
         unsigned count;
         double reduce_cost;
         unsigned count_cum;

@@ -35,7 +35,6 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 
 // stl
 #include <fstream>
@@ -62,7 +61,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
     : datasource(params),
       extent_(),
       type_(datasource::Vector),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+      desc_(ogr_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
       indexed_(false)
 {
     init(params);
@@ -72,7 +71,11 @@ ogr_datasource::~ogr_datasource()
 {
     // free layer before destroying the datasource
     layer_.free_layer();
+#if GDAL_VERSION_MAJOR >= 2
+    GDALClose(( GDALDatasetH) dataset_);
+#else
     OGRDataSource::DestroyDataSource (dataset_);
+#endif
 }
 
 void ogr_datasource::init(mapnik::parameters const& params)
@@ -82,6 +85,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 #endif
 
     // initialize ogr formats
+    // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
     OGRRegisterAll();
 
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -112,17 +116,26 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (! driver.empty())
     {
+#if GDAL_VERSION_MAJOR >= 2
+        unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
+        const char* papszAllowedDrivers[] = { driver.c_str(), nullptr };
+        dataset_ = reinterpret_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers, nullptr, nullptr));
+#else
         OGRSFDriver * ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
-        if (ogr_driver && ogr_driver != NULL)
+        if (ogr_driver && ogr_driver != nullptr)
         {
-            dataset_ = ogr_driver->Open((dataset_name_).c_str(), FALSE);
+            dataset_ = ogr_driver->Open((dataset_name_).c_str(), false);
         }
-
+#endif
     }
     else
     {
         // open ogr driver
-        dataset_ = OGRSFDriverRegistrar::Open((dataset_name_).c_str(), FALSE);
+#if GDAL_VERSION_MAJOR >= 2
+        dataset_ = reinterpret_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), false, nullptr));
+#else
+        dataset_ = OGRSFDriverRegistrar::Open(dataset_name_.c_str(), false);
+#endif
     }
 
     if (! dataset_)
@@ -140,7 +153,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     // initialize layer
     boost::optional<std::string> layer_by_name = params.get<std::string>("layer");
-    boost::optional<int> layer_by_index = params.get<int>("layer_by_index");
+    boost::optional<mapnik::value_integer> layer_by_index = params.get<mapnik::value_integer>("layer_by_index");
     boost::optional<std::string> layer_by_sql = params.get<std::string>("layer_by_sql");
 
     int passed_parameters = 0;
@@ -166,8 +179,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
         int num_layers = dataset_->GetLayerCount();
         if (*layer_by_index >= num_layers)
         {
-            std::ostringstream s("OGR Plugin: only ");
-            s << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
+            std::ostringstream s;
+            s << "OGR Plugin: only " << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
             throw datasource_exception(s.str());
         }
 
@@ -215,7 +228,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (! layer_.is_valid())
     {
-        std::ostringstream s("OGR Plugin: ");
+        std::ostringstream s;
+        s << "OGR Plugin: ";
 
         if (layer_by_name)
         {
@@ -383,7 +397,7 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                     //layer->ResetReading();
                     layer->SetNextByIndex(0);
                     OGRFeature *poFeature;
-                    while ((poFeature = layer->GetNextFeature()) != NULL)
+                    while ((poFeature = layer->GetNextFeature()) != nullptr)
                     {
                         OGRGeometry* geom = poFeature->GetGeometryRef();
                         if (geom && ! geom->IsEmpty())
@@ -453,8 +467,8 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
 
         if (! found_name)
         {
-            std::ostringstream s("OGR Plugin: no attribute '");
-            s << *pos << "'. Valid attributes are: ";
+            std::ostringstream s;
+            s << "OGR Plugin: no attribute named '" << *pos << "'. Valid attributes are: ";
             std::vector<attribute_descriptor>::const_iterator e_itr = names.begin();
             std::vector<attribute_descriptor>::const_iterator e_end = names.end();
             for ( ;e_itr!=e_end;++e_itr)
@@ -478,7 +492,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
         // feature context (schema)
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
@@ -521,7 +535,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
     {
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
         // feature context (schema)
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();

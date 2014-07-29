@@ -1,4 +1,3 @@
-
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/conversions.hpp>
@@ -7,8 +6,6 @@
 // boost
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
-#include <boost/version.hpp>
 
 // stl
 #include <stdexcept>
@@ -46,7 +43,7 @@ std::string dump_path(T & path)
 std::string clip_line(mapnik::box2d<double> const& bbox,
                       mapnik::geometry_type & geom)
 {
-    typedef agg::conv_clip_polyline<mapnik::geometry_type> line_clipper;
+    using line_clipper = agg::conv_clip_polyline<mapnik::geometry_type>;
     line_clipper clipped(geom);
     clipped.clip_box(bbox.minx(),bbox.miny(),bbox.maxx(),bbox.maxy());
     return dump_path(clipped);
@@ -56,7 +53,7 @@ void parse_geom(mapnik::geometry_type & geom,
                 std::string const& geom_string) {
     std::vector<std::string> vertices;
     boost::split(vertices, geom_string, boost::is_any_of(","));
-    BOOST_FOREACH(std::string const& vert, vertices)
+    for (std::string const& vert : vertices)
     {
         std::vector<std::string> commands;
         boost::split(commands, vert, boost::is_any_of(" "));
@@ -127,9 +124,7 @@ int main(int argc, char** argv)
     {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ clipping: \x1b[1;32m✓ \x1b[0m\n";
-#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
-#endif
     }
     else
     {

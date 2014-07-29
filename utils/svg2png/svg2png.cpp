@@ -141,9 +141,9 @@ int main (int argc,char** argv)
                 continue;
             }
 
-            typedef agg::pixfmt_rgba32_pre pixfmt;
-            typedef agg::renderer_base<pixfmt> renderer_base;
-            typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
+            using pixfmt = agg::pixfmt_rgba32_pre;
+            using renderer_base = agg::renderer_base<pixfmt>;
+            using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
             agg::rasterizer_scanline_aa<> ras_ptr;
             agg::scanline_u8 sl;
 

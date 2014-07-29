@@ -32,13 +32,13 @@ namespace mapnik
 {
 
 // Helper for class bool
-class boolean {
+class boolean_type {
 public:
-    boolean()
+    boolean_type()
         : b_(false)  {}
-    boolean(bool b)
+    boolean_type(bool b)
         : b_(b) {}
-    boolean(boolean const& b)
+    boolean_type(boolean_type const& b)
         : b_(b.b_) {}
 
     operator bool() const
@@ -46,7 +46,7 @@ public:
         return b_;
     }
 
-    boolean & operator =(boolean const& other)
+    boolean_type & operator =(boolean_type const& other)
     {
         if (this == &other)
             return *this;
@@ -58,10 +58,10 @@ private:
     bool b_;
 };
 
-// Special stream input operator for boolean values
+// Special stream input operator for boolean_type values
 template <typename charT, typename traits>
 std::basic_istream<charT, traits> &
-operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
+operator >> ( std::basic_istream<charT, traits> & s, boolean_type & b )
 {
     std::string word;
     s >> word;
@@ -88,7 +88,7 @@ operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
 
 template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
-operator << ( std::basic_ostream<charT, traits> & s, boolean const& b )
+operator << ( std::basic_ostream<charT, traits> & s, boolean_type const& b )
 {
     s << ( b ? "true" : "false" );
     return s;

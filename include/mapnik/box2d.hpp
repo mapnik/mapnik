@@ -51,19 +51,27 @@ template <typename T> class MAPNIK_DECL box2d
                                                               boost::multipliable2<box2d<T>, T > > > >
 {
 public:
-    typedef box2d<T> box2d_type;
+    using box2d_type = box2d<T>;
 private:
     T minx_;
     T miny_;
     T maxx_;
     T maxy_;
-    void swap(box2d_type & rhs);
+    friend inline void swap(box2d_type & lhs, box2d_type & rhs)
+    {
+        using std::swap;
+        swap(lhs.minx_, rhs.minx_);
+        swap(lhs.miny_, rhs.miny_);
+        swap(lhs.maxx_, rhs.maxx_);
+        swap(lhs.maxy_, rhs.maxy_);
+    }
 public:
     box2d();
     box2d(T minx,T miny,T maxx,T maxy);
     box2d(coord<T,2> const& c0, coord<T,2> const& c1);
     box2d(box2d_type const& rhs);
     box2d(box2d_type const& rhs, agg::trans_affine const& tr);
+    box2d(box2d_type&& rhs);
     box2d_type& operator=(box2d_type other);
     T minx() const;
     T miny() const;
@@ -96,12 +104,15 @@ public:
     void pad(T padding);
     bool from_string(std::string const& str);
     bool valid() const;
+    void move(T x, T y);
 
     // define some operators
     box2d_type& operator+=(box2d_type const& other);
     box2d_type& operator*=(T);
     box2d_type& operator/=(T);
     T operator[](int index) const;
+    box2d_type operator +(T other) const; //enlarge box by given amount
+    box2d_type& operator +=(T other); //enlarge box by given amount
 
     // compute the bounding box of this one transformed
     box2d_type  operator* (agg::trans_affine const& tr) const;

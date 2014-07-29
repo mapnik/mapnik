@@ -33,7 +33,7 @@
 namespace mapnik {
 template <typename T,int dim>
 struct coord {
-    typedef T type;
+    using type = T;
 };
 
 template <typename T>
@@ -46,7 +46,7 @@ struct coord<T,2>
                                                                                                 boost::multipliable2<coord<T,2>, T > > > > > >
 
 {
-    typedef T type;
+    using type = T;
     T x;
     T y;
 public:
@@ -54,22 +54,34 @@ public:
         : x(),y() {}
     coord(T x_,T y_)
         : x(x_),y(y_) {}
+
+    coord(coord<T,2> const& rhs)
+        : x(rhs.x),
+          y(rhs.y) {}
+
     template <typename T2>
-    coord (const coord<T2,2>& rhs)
+    coord (coord<T2,2> const& rhs)
         : x(type(rhs.x)),
           y(type(rhs.y)) {}
+
+    coord(coord<T,2> && rhs) noexcept
+        : x(std::move(rhs.x)),
+          y(std::move(rhs.y)) {}
+
+    coord<T,2>& operator=(coord<T,2> rhs)
+    {
+        swap(rhs);
+        return *this;
+    }
 
     template <typename T2>
     coord<T,2>& operator=(const coord<T2,2>& rhs)
     {
-        if ((void*)this==(void*)&rhs)
-        {
-            return *this;
-        }
-        x=type(rhs.x);
-        y=type(rhs.y);
+        coord<T,2> tmp(rhs);
+        swap(rhs);
         return *this;
     }
+
     template <typename T2>
     bool operator==(coord<T2,2> const& rhs)
     {
@@ -116,12 +128,18 @@ public:
         y/=t;
         return *this;
     }
+private:
+    void swap(coord<T,2> & rhs)
+    {
+        std::swap(this->x, rhs.x);
+        std::swap(this->y, rhs.y);
+    }
 };
 
 template <typename T>
 struct coord<T,3>
 {
-    typedef T type;
+    using type = T;
     T x;
     T y;
     T z;
@@ -130,28 +148,42 @@ public:
         : x(),y(),z() {}
     coord(T x_,T y_,T z_)
         : x(x_),y(y_),z(z_) {}
+
     template <typename T2>
-    coord (const coord<T2,3>& rhs)
+    coord (coord<T2,3> const& rhs)
         : x(type(rhs.x)),
           y(type(rhs.y)),
           z(type(rhs.z)) {}
 
-    template <typename T2>
-    coord<T,3>& operator=(const coord<T2,3>& rhs)
+    coord(coord<T,3> && rhs) noexcept
+        : x(std::move(rhs.x)),
+          y(std::move(rhs.y)),
+          z(std::move(rhs.z)) {}
+
+    coord<T,3> operator=(coord<T,3> rhs)
     {
-        if ((void*)this==(void*)&rhs)
-        {
-            return *this;
-        }
-        x=type(rhs.x);
-        y=type(rhs.y);
-        z=type(rhs.z);
+        swap(rhs);
         return *this;
+    }
+
+    template <typename T2>
+    coord<T,3>& operator=(coord<T2,3> const& rhs)
+    {
+        coord<T,3> tmp(rhs);
+        swap(tmp);
+        return *this;
+    }
+private:
+    void swap(coord<T,3> & rhs)
+    {
+        std::swap(this->x, rhs.x);
+        std::swap(this->y, rhs.y);
+        std::swap(this->z, rhs.z);
     }
 };
 
-typedef coord<double,2> coord2d;
-typedef coord<int,2> coord2i;
+using coord2d = coord<double,2>;
+using coord2i = coord<int,2>;
 
 
 template <typename charT,typename traits,typename T ,int dim>

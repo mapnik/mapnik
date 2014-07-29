@@ -20,10 +20,13 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 #include <boost/python.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/utils.hpp>
 
 void export_font_engine()
 {

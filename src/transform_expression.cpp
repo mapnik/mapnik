@@ -24,9 +24,6 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/transform_expression.hpp>
 
-// boost
-#include <boost/foreach.hpp>
-
 // stl
 #include <sstream>
 
@@ -132,7 +129,7 @@ std::string to_expression_string(transform_list const& list)
     std::streamsize first = 1;
     transform_node_to_expression_string to_string(os);
 
-    BOOST_FOREACH (transform_node const& node, list)
+    for (transform_node const& node : list)
     {
         os.write(" ", first ? (first = 0) : 1);
         boost::apply_visitor(to_string, *node);

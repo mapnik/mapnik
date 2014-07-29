@@ -51,7 +51,7 @@ if env['PLUGIN_LINKING'] == 'shared':
     install_dest = env['MAPNIK_INPUT_PLUGINS_DEST']
 
     # only link mapnik if we are build an external shared object
-    libraries.append('mapnik')
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary(
                   # the name of the target to build, eg 'sqlite.input'
@@ -63,13 +63,7 @@ if env['PLUGIN_LINKING'] == 'shared':
                   # list of source files to compile
                   source=plugin_sources,
                   # libraries to link to
-                  LIBS=libraries,
-                  # any custom linkflags, eg. LDFLAGS
-                  # in this case CUSTOM_LDFLAGS comes
-                  # from Mapnik's main SConstruct file
-                  # and can be removed here if you do
-                  # not need it
-                  LINKFLAGS=env.get('CUSTOM_LDFLAGS')
+                  LIBS=libraries
                   )
 
     # if the plugin links to libmapnik ensure it is built first

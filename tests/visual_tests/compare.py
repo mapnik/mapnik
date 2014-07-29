@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import mapnik
 
@@ -9,6 +10,11 @@ except ImportError:
     import simplejson as json
 
 COMPUTE_THRESHOLD = 16
+
+# testcase images are generated on OS X
+# so they should exactly match
+if os.uname()[0] == 'Darwin':
+    COMPUTE_THRESHOLD = 2
 
 # returns true if pixels are not identical
 def compare_pixels(pixel1, pixel2, alpha=True):

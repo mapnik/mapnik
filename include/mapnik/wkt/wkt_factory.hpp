@@ -24,38 +24,24 @@
 #define MAPNIK_WKT_FACTORY_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
-#include <mapnik/noncopyable.hpp>
-
-// boost
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/version.hpp>
 
 // stl
 #include <string>
 
 namespace mapnik {
 
-MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
-
-#if BOOST_VERSION >= 104700
-
-class MAPNIK_DECL wkt_parser : mapnik::noncopyable
+inline bool from_wkt(std::string const& wkt, mapnik::geometry_container & paths)
 {
-    typedef std::string::const_iterator iterator_type;
-public:
-    wkt_parser();
-    bool parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
-private:
-    boost::scoped_ptr<mapnik::wkt::wkt_collection_grammar<iterator_type> > grammar_;
-};
-
-#endif
-
+    using namespace boost::spirit;
+    static const mapnik::wkt::wkt_collection_grammar<std::string::const_iterator> g;
+    ascii::space_type space;
+    std::string::const_iterator first = wkt.begin();
+    std::string::const_iterator last =  wkt.end();
+    return qi::phrase_parse(first, last, g, space, paths);
 }
 
+}
 
 #endif // MAPNIK_WKT_FACTORY_HPP

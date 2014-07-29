@@ -23,59 +23,48 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_util.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/font_util.hpp>
-
-// boost
-#include <boost/make_shared.hpp>
+#include <mapnik/text/renderer.hpp>
 
 namespace mapnik {
 
-template <typename T>
-void  agg_renderer<T>::process(shield_symbolizer const& sym,
+template <typename T0, typename T1>
+void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
     box2d<double> clip_box = clipping_extent();
-    shield_symbolizer_helper<face_manager<freetype_engine>,
-        label_collision_detector4> helper(
-            sym, feature, prj_trans,
-            width_, height_,
-            scale_factor_,
-            t_, font_manager_, *detector_,
+    text_symbolizer_helper helper(
+            sym, feature, common_.vars_, prj_trans,
+            common_.width_, common_.height_,
+            common_.scale_factor_,
+            common_.t_, common_.font_manager_, *common_.detector_,
             clip_box);
 
-    text_renderer<T> ren(*current_buffer_,
-                         font_manager_,
-                         sym.get_halo_rasterizer(),
-                         sym.comp_op(),
-                         scale_factor_);
+    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature, common_.vars_, HALO_RASTERIZER_FULL);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
+    agg_text_renderer<T0> ren(*current_buffer_,
+                              halo_rasterizer,
+                              comp_op,
+                              halo_comp_op,
+                              common_.scale_factor_,
+                              common_.font_manager_.get_stroker());
 
-    while (helper.next())
+    double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
+
+    placements_list const& placements = helper.get();
+    for (glyph_positions_ptr glyphs : placements)
     {
-        placements_type const& placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
-        {
-            // get_marker_position returns (minx,miny) corner position,
-            // while (currently only) agg_renderer::render_marker newly
-            // expects center position;
-            // until all renderers and shield_symbolizer_helper are
-            // modified accordingly, we must adjust the position here
-            pixel_position pos = helper.get_marker_position(placements[ii]);
-            pos.x += 0.5 * helper.get_marker_width();
-            pos.y += 0.5 * helper.get_marker_height();
-            render_marker(pos,
-                          helper.get_marker(),
-                          helper.get_image_transform(),
-                          sym.get_opacity(),
-                          sym.comp_op());
-
-            ren.prepare_glyphs(placements[ii]);
-            ren.render(placements[ii].center);
-        }
+        if (glyphs->marker())
+            render_marker(glyphs->marker_pos(),
+                          *(glyphs->marker()->marker),
+                          glyphs->marker()->transform,
+                          opacity, comp_op);
+        ren.render(*glyphs);
     }
 }
 

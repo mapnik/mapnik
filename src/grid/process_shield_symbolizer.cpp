@@ -21,15 +21,17 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/font_util.hpp>
+#include <mapnik/text/renderer.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -41,50 +43,42 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                 mapnik::feature_impl & feature,
                                 proj_transform const& prj_trans)
 {
-    shield_symbolizer_helper<face_manager<freetype_engine>,
-        label_collision_detector4> helper(
-            sym, feature, prj_trans,
-            width_, height_,
-            scale_factor_,
-            t_, font_manager_, *detector_,
-            query_extent_);
+    text_symbolizer_helper helper(
+            sym, feature, common_.vars_, prj_trans,
+            common_.width_, common_.height_,
+            common_.scale_factor_,
+            common_.t_, common_.font_manager_, *common_.detector_,
+            common_.query_extent_);
     bool placement_found = false;
 
-    text_renderer<T> ren(pixmap_,
-                         font_manager_,
-                         sym.get_halo_rasterizer(),
-                         sym.comp_op(),
-                         scale_factor_);
+    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
 
-    text_placement_info_ptr placement;
-    while (helper.next())
+    grid_text_renderer<T> ren(pixmap_,
+                              comp_op,
+                              common_.scale_factor_);
+
+    placements_list const& placements = helper.get();
+    value_integer feature_id = feature.id();
+    
+    for (glyph_positions_ptr glyphs : placements)
     {
-        placement_found = true;
-        placements_type const& placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
+        if (glyphs->marker())
         {
-            // get_marker_position returns (minx,miny) corner position,
-            // while (currently only) agg_renderer::render_marker newly
-            // expects center position;
-            // until all renderers and shield_symbolizer_helper are
-            // modified accordingly, we must adjust the position here
-            pixel_position pos = helper.get_marker_position(placements[ii]);
-            pos.x += 0.5 * helper.get_marker_width();
-            pos.y += 0.5 * helper.get_marker_height();
-            render_marker(feature,
+            render_marker(feature, 
                           pixmap_.get_resolution(),
-                          pos,
-                          helper.get_marker(),
-                          helper.get_image_transform(),
-                          sym.get_opacity(),
-                          sym.comp_op());
-
-            ren.prepare_glyphs(placements[ii]);
-            ren.render_id(feature.id(), placements[ii].center);
+                          glyphs->marker_pos(),
+                          *(glyphs->marker()->marker),
+                          glyphs->marker()->transform,
+                          opacity, comp_op);
         }
+        ren.render(*glyphs, feature_id);
+        placement_found = true;
     }
     if (placement_found)
+    {
         pixmap_.add_feature(feature);
+    }
 }
 
 template void grid_renderer<grid>::process(shield_symbolizer const&,
@@ -92,3 +86,5 @@ template void grid_renderer<grid>::process(shield_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif

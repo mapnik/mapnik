@@ -25,27 +25,31 @@
 
 // mapnik
 #include <mapnik/attribute.hpp>
-#include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/expression_node.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#else
+#include <boost/regex.hpp>
 #endif
 
 namespace mapnik
 {
-template <typename T0, typename T1>
+
+template <typename T0, typename T1, typename T2>
 struct evaluate : boost::static_visitor<T1>
 {
-    typedef T0 feature_type;
-    typedef T1 value_type;
+    using feature_type = T0;
+    using value_type = T1;
+    using variable_type = T2;
 
-    explicit evaluate(feature_type const& f)
-        : feature_(f) {}
+    explicit evaluate(feature_type const& f, variable_type const& v)
+        : feature_(f),
+          vars_(v) {}
 
     value_integer operator() (value_integer val) const
     {
@@ -77,6 +81,16 @@ struct evaluate : boost::static_visitor<T1>
         return attr.value<value_type,feature_type>(feature_);
     }
 
+    value_type operator() (global_attribute const& attr) const
+    {
+        auto itr = vars_.find(attr.name);
+        if (itr != vars_.end())
+        {
+            return itr->second;
+        }
+        return value_type();// throw?
+    }
+
     value_type operator() (geometry_type_attribute const& geom) const
     {
         return geom.value<value_type,feature_type>(feature_);
@@ -84,22 +98,22 @@ struct evaluate : boost::static_visitor<T1>
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {
-        return (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left).to_bool())
-            && (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right).to_bool());
+        return (boost::apply_visitor(*this, x.left).to_bool())
+            && (boost::apply_visitor(*this, x.right).to_bool());
     }
 
     value_type operator() (binary_node<tags::logical_or> const & x) const
     {
-        return (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left).to_bool())
-            || (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right).to_bool());
+        return (boost::apply_visitor(*this,x.left).to_bool())
+            || (boost::apply_visitor(*this,x.right).to_bool());
     }
 
     template <typename Tag>
     value_type operator() (binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
-        return operation(boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left),
-                         boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right));
+        return operation(boost::apply_visitor(*this, x.left),
+                         boost::apply_visitor(*this, x.right));
     }
 
     template <typename Tag>
@@ -111,12 +125,12 @@ struct evaluate : boost::static_visitor<T1>
 
     value_type operator() (unary_node<tags::logical_not> const& x) const
     {
-        return ! (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr).to_bool());
+        return ! (boost::apply_visitor(*this,x.expr).to_bool());
     }
 
     value_type operator() (regex_match_node const& x) const
     {
-        value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
+        value_type v = boost::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_match(v.to_unicode(),x.pattern);
 #else
@@ -127,7 +141,7 @@ struct evaluate : boost::static_visitor<T1>
 
     value_type operator() (regex_replace_node const& x) const
     {
-        value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
+        value_type v = boost::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
 #else
@@ -138,6 +152,7 @@ struct evaluate : boost::static_visitor<T1>
     }
 
     feature_type const& feature_;
+    variable_type const& vars_;
 };
 
 }

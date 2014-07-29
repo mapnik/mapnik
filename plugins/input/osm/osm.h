@@ -61,6 +61,7 @@ public:
         ptypes.push_back(std::pair<std::string, std::string>("landuse", "forest"));
         ptypes.push_back(std::pair<std::string, std::string>("landuse", "industrial"));
         ptypes.push_back(std::pair<std::string, std::string>("leisure", "park"));
+        ptypes.push_back(std::pair<std::string, std::string>("area", "yes"));
     }
 };
 
@@ -108,9 +109,6 @@ public:
     ~osm_dataset();
 
     bool load(const char* name, std::string const& parser = "libxml2");
-    bool load_from_url(std::string const&,
-                       std::string const&,
-                       std::string const& parser = "libxml2");
     void clear();
     void add_node(osm_node* n) { nodes.push_back(n); }
     void add_way(osm_way* w) { ways.push_back(w); }

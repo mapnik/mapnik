@@ -35,7 +35,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/algorithms/area.hpp>
@@ -51,10 +51,10 @@
 class geojson_datasource : public mapnik::datasource
 {
 public:
-    typedef boost::geometry::model::d2::point_xy<double> point_type;
-    typedef boost::geometry::model::box<point_type> box_type;
-    typedef boost::geometry::index::rtree<box_type,std::size_t> spatial_index_type;
-    
+    using point_type = boost::geometry::model::d2::point_xy<double>;
+    using box_type = boost::geometry::model::box<point_type>;
+    using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
+
     // constructor
     geojson_datasource(mapnik::parameters const& params);
     virtual ~geojson_datasource ();
@@ -65,17 +65,18 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    template <typename T>
+    void parse_geojson(T & stream);
 private:
     mapnik::datasource::datasource_t type_;
     std::map<std::string, mapnik::parameters> statistics_;
     mapnik::layer_descriptor desc_;
-    std::string file_;
+    std::string filename_;
+    std::string inline_string_;
     mapnik::box2d<double> extent_;
-    boost::shared_ptr<mapnik::transcoder> tr_;
     std::vector<mapnik::feature_ptr> features_;
     spatial_index_type tree_;
-    mutable std::deque<std::size_t> index_array_;
 };
 
 
-#endif // FILE_DATASOURCE_HPP
+#endif // GEOJSON_DATASOURCE_HPP

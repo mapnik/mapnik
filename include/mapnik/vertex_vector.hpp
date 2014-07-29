@@ -31,9 +31,8 @@
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/tuple/tuple.hpp>
-
+// stl
+#include <tuple>
 #include <cstring>  // required for memcpy with linux/g++
 
 namespace mapnik
@@ -42,9 +41,7 @@ namespace mapnik
 template <typename T>
 class vertex_vector : private mapnik::noncopyable
 {
-    typedef T coord_type;
-    typedef vertex<coord_type,2> vertex_type;
-
+    using coord_type = T;
     enum block_e {
         block_shift = 8,
         block_size  = 1<<block_shift,
@@ -53,9 +50,9 @@ class vertex_vector : private mapnik::noncopyable
     };
 public:
     // required for iterators support
-    typedef boost::tuple<unsigned,coord_type,coord_type> value_type;
-    typedef std::size_t size_type;
-    typedef unsigned char command_size;
+    using value_type = std::tuple<unsigned,coord_type,coord_type>;
+    using size_type = std::size_t;
+    using command_size = std::uint8_t;
 private:
     unsigned num_blocks_;
     unsigned max_blocks_;

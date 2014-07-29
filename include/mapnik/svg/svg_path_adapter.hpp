@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/noncopyable.hpp>
-
+#include <mapnik/box2d.hpp>
 // agg
 #include "agg_math.h"
 #include "agg_array.h"
@@ -43,8 +43,8 @@ using namespace agg;
 template<class VertexContainer> class path_adapter : mapnik::noncopyable
 {
 public:
-    typedef VertexContainer            container_type;
-    typedef path_adapter<VertexContainer> self_type;
+    using container_type = VertexContainer           ;
+    using self_type = path_adapter<VertexContainer>;
 
     //--------------------------------------------------------------------
     path_adapter(VertexContainer & vertices) : vertices_(vertices), iterator_(0) {}
@@ -842,8 +842,8 @@ template<class Container> class vertex_stl_adapter : mapnik::noncopyable
 {
 public:
 
-    typedef typename Container::value_type vertex_type;
-    typedef typename vertex_type::value_type value_type;
+    using vertex_type = typename Container::value_type;
+    using value_type = typename vertex_type::value_type;
 
     explicit vertex_stl_adapter(Container & vertices)
         : vertices_(vertices) {}
@@ -942,9 +942,9 @@ private:
 };
 
 
-typedef std::vector<vertex_d> svg_path_storage;
+using svg_path_storage = std::vector<vertex_d>;
 
-typedef path_adapter<vertex_stl_adapter<svg_path_storage> > svg_path_adapter;
+using svg_path_adapter = path_adapter<vertex_stl_adapter<svg_path_storage> >;
 
 }}
 

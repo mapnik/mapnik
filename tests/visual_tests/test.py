@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import mapnik
 mapnik.logger.set_severity(mapnik.severity_type.None)
-
+#mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
 import sys
 import os.path
@@ -25,12 +26,14 @@ defaults = {
 }
 
 cairo_threshold = 10
+agg_threshold = 0
 if 'Linux' == os.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
     # to generate the expected images, so we'll rachet back the threshold
     # https://github.com/mapnik/mapnik/issues/1868
-    cairo_threshold = 181
+    cairo_threshold = 230
+    agg_threshold = 12
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
@@ -48,7 +51,7 @@ renderers = [
     { 'name': 'agg',
       'render': lambda m, output, scale_factor: mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
       'compare': lambda actual, reference: compare(actual, reference, alpha=True),
-      'threshold': 0,
+      'threshold': agg_threshold,
       'filetype': 'png',
       'dir': 'images'
     },
@@ -62,7 +65,7 @@ renderers = [
     { 'name': 'grid',
       'render': render_grid,
       'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
-      'threshold': 0,
+      'threshold': agg_threshold,
       'filetype': 'json',
       'dir': 'grids'
     }
@@ -95,6 +98,10 @@ files = {
     'lines-4': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-5': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-6': {'sizes': sizes_few_square,'bbox':default_text_box},
+    'lines-7': {'sizes': sizes_few_square,'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
+    'lines-multi-layout-1': {'sizes': [(800,800)],'bbox':default_text_box},
+    'lines-multi-layout-2': {'sizes': [(800,800)],'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
+    'lines-multi-layout-shield': {'sizes': [(800,800)],'bbox':default_text_box},
     'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
     'collision': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
@@ -118,6 +125,7 @@ files = {
     'whole-centroid': {'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     'text-halo-rasterizer': {'sizes':[(600,400)]},
+    'text-halo-transform': {'sizes':[(600,400)]},
     'simple-E': {'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
     'simple-NE': {'bbox':default_text_box},
     'simple-NW': {'bbox':default_text_box},
@@ -153,9 +161,10 @@ files = {
     'text-bug2037': {'sizes': [(800, 300)], 'bbox': default_text_box},
     'text-expressionformat-color': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
-    # Disabled by default as the required font isn't shipped with mapnik
-    #'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
-    #'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-multi-layout-1': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
+    'text-multi-layout-2': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     'tiff-alpha-gdal': {'sizes':[(600,400)]},
     'tiff-alpha-broken-assoc-alpha-gdal': {'sizes':[(600,400)]},
@@ -214,7 +223,32 @@ files = {
     'colorize-alpha3':{'sizes':[(512,512)]},
     'image-filters-galore':{'sizes':[(512,512)]},
     'image-filters-multi-blur':{'sizes':[(512,512)]},
-    'line-opacity-multi-render':{'sizes':[(512,512)]}
+    'image-filters-multi-blur-inflate':{'sizes':[(512,512)]},
+    'line-opacity-multi-render':{'sizes':[(512,512)]},
+    'tiff-nodata-rgb':{'sizes':[(512,512)]},
+    'tiff-nodata-rgba':{'sizes':[(512,512)]},
+    'tiff-nodata-tolerance':{'sizes':[(512,512)]},
+    'tiff-nodata-edge-rgba':{'sizes':[(512,512)]},
+    'marker-vs-point':{'sizes':[(512,512)]},
+    'line-symbolizer-expressions':{'sizes':[(256,256)]},
+    'line-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'point-symbolizer-expressions':{'sizes':[(256,256)]},
+    'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
+    'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'group-symbolizer-1':{'sizes':[(512,512)]},
+    'group-symbolizer-2':{'sizes':[(512,512)]},
+    'group-symbolizer-line-1':{'sizes':[(512,512)]},
+    'group-symbolizer-line-2':{'sizes':[(512,512)]},
+    'text-charplacement':{'sizes':[(512,512)]},
+    'text-displacement':{'sizes':[(512,512)]},
+    'text-overlap':{'sizes':[(512,512)]},
+    'text-spacing':{'sizes':[(512,512)]},
+    'text-halo-opacity':{'sizes':[(512,512)]},
+    # https://github.com/mapnik/mapnik/issues/2202
+    'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
+    'marker-whole-multi-polygon':{'sizes':[(512,512)]}
     }
 
 class Reporting:
@@ -288,9 +322,6 @@ class Reporting:
         return item
 
     def summary(self):
-        if self.passed == 0:
-            print '\nNOTICE: No valid visual tests were run'
-            return 0
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
@@ -338,7 +369,7 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
     postfix = "%s-%d-%d-%s" % (filename, width, height, scale_factor)
 
     try:
-        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
+        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), True)
         if bbox is not None:
             m.zoom_to_box(bbox)
         else:

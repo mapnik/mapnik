@@ -44,8 +44,8 @@ namespace mapnik {
 // mutexes
 
 #ifdef MAPNIK_THREADSAFE
-boost::mutex logger::severity_mutex_;
-boost::mutex logger::format_mutex_;
+std::mutex logger::severity_mutex_;
+std::mutex logger::format_mutex_;
 #endif
 
 
@@ -91,7 +91,7 @@ std::string logger::str()
         logger::format_env_check_ = false;
 
         const char* log_format = getenv("MAPNIK_LOG_FORMAT");
-        if (log_format != NULL)
+        if (log_format != nullptr)
         {
             logger::format_ = log_format;
         }

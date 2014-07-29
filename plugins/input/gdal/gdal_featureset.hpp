@@ -35,10 +35,28 @@
 class GDALDataset;
 class GDALRasterBand;
 
-typedef boost::variant<mapnik::query, mapnik::coord2d> gdal_query;
+using gdal_query = boost::variant<mapnik::query, mapnik::coord2d>;
 
 class gdal_featureset : public mapnik::Featureset
 {
+    struct query_dispatch : public boost::static_visitor<mapnik::feature_ptr>
+    {
+        query_dispatch( gdal_featureset & featureset)
+            : featureset_(featureset) {}
+
+        mapnik::feature_ptr operator() (mapnik::query const& q) const
+        {
+            return featureset_.get_feature(q);
+        }
+
+        mapnik::feature_ptr operator() (mapnik::coord2d const& p) const
+        {
+            return featureset_.get_feature_at_point(p);
+        }
+
+        gdal_featureset & featureset_;
+    };
+
 public:
     gdal_featureset(GDALDataset& dataset,
                     int band,
@@ -49,7 +67,8 @@ public:
                     int nbands,
                     double dx,
                     double dy,
-                    boost::optional<double> const& nodata);
+                    boost::optional<double> const& nodata,
+                    double nodata_tolerance);
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
 
@@ -72,6 +91,7 @@ private:
     double dy_;
     int nbands_;
     boost::optional<double> nodata_value_;
+    double nodata_tolerance_;
     bool first_;
 };
 

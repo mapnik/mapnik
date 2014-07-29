@@ -35,8 +35,6 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <boost/foreach.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <string>
@@ -69,11 +67,11 @@ void parse_gradient_stop(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_attr(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_attr(svg_parser & parser,const xmlChar * name, const xmlChar * value );
 
-typedef std::vector<std::pair<double, agg::rgba8> > color_lookup_type;
+using color_lookup_type = std::vector<std::pair<double, agg::rgba8> >;
 
 namespace qi = boost::spirit::qi;
 
-typedef std::vector<std::pair<std::string, std::string> > pairs_type;
+using pairs_type = std::vector<std::pair<std::string, std::string> >;
 
 template <typename Iterator,typename SkipType>
 struct key_value_sequence_ordered
@@ -82,10 +80,12 @@ struct key_value_sequence_ordered
     key_value_sequence_ordered()
         : key_value_sequence_ordered::base_type(query)
     {
-        query =  pair >> *( qi::lit(';') >> pair);
+        qi::lit_type lit;
+        qi::char_type char_;
+        query =  pair >> *( lit(';') >> pair);
         pair  =  key >> -(':' >> value);
-        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9-");
-        value = +(qi::char_ - qi::lit(';'));
+        key   =  char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-");
+        value = +(char_ - lit(';'));
     }
 
     qi::rule<Iterator, pairs_type(), SkipType> query;
@@ -110,6 +110,7 @@ agg::rgba8 parse_color(const char* str)
 double parse_double(const char* str)
 {
     using namespace boost::spirit::qi;
+    qi::double_type double_;
     double val = 0.0;
     parse(str, str + std::strlen(str),double_,val);
     return val;
@@ -123,7 +124,9 @@ double parse_double_optional_percent(const char* str, bool &percent)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
-    using qi::_1;
+    qi::_1_type _1;
+    qi::double_type double_;
+    qi::char_type char_;
 
     double val = 0.0;
     char unit='\0';
@@ -143,7 +146,7 @@ double parse_double_optional_percent(const char* str, bool &percent)
 bool parse_style (const char* str, pairs_type & v)
 {
     using namespace boost::spirit::qi;
-    typedef boost::spirit::ascii::space_type skip_type;
+    using skip_type = boost::spirit::ascii::space_type;
     key_value_sequence_ordered<const char*, skip_type> kv_parser;
     return phrase_parse(str, str + std::strlen(str), kv_parser, skip_type(), v);
 }
@@ -300,7 +303,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     if (xmlStrEqual(name, BAD_CAST "transform"))
     {
         agg::trans_affine tr;
-        mapnik::svg::parse_transform((const char*) value,tr);
+        mapnik::svg::parse_svg_transform((const char*) value,tr);
         parser.path_.transform().premultiply(tr);
     }
     else if (xmlStrEqual(name, BAD_CAST "fill"))
@@ -430,11 +433,11 @@ void parse_attr(svg_parser & parser, xmlTextReaderPtr reader)
 
             if (xmlStrEqual(name, BAD_CAST "style"))
             {
-                typedef std::vector<std::pair<std::string,std::string> > cont_type;
-                typedef cont_type::value_type value_type;
+                using cont_type = std::vector<std::pair<std::string,std::string> >;
+                using value_type = cont_type::value_type;
                 cont_type vec;
                 parse_style((const char*)value, vec);
-                BOOST_FOREACH(value_type kv , vec )
+                for (value_type kv : vec )
                 {
                     parse_attr(parser,BAD_CAST kv.first.c_str(),BAD_CAST kv.second.c_str());
                 }
@@ -791,12 +794,12 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "style");
     if (value)
     {
-        typedef std::vector<std::pair<std::string,std::string> > cont_type;
-        typedef cont_type::value_type value_type;
+        using cont_type = std::vector<std::pair<std::string,std::string> >;
+        using value_type = cont_type::value_type;
         cont_type vec;
         parse_style((const char*)value, vec);
 
-        BOOST_FOREACH(value_type kv , vec )
+        for (value_type kv : vec )
         {
             if (kv.first == "stop-color")
             {
@@ -908,7 +911,7 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     if (value)
     {
         agg::trans_affine tr;
-        mapnik::svg::parse_transform((const char*) value,tr);
+        mapnik::svg::parse_svg_transform((const char*) value,tr);
         parser.temporary_gradient_.second.set_transform(tr);
         xmlFree(value);
     }
@@ -1056,7 +1059,7 @@ svg_parser::~svg_parser() {}
 void svg_parser::parse(std::string const& filename)
 {
     xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
-    if (reader == NULL)
+    if (reader == nullptr)
     {
         MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
     }
@@ -1068,9 +1071,9 @@ void svg_parser::parse(std::string const& filename)
 
 void svg_parser::parse_from_string(std::string const& svg)
 {
-    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),NULL,NULL,
+    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),nullptr,nullptr,
         (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
-    if (reader == NULL)
+    if (reader == nullptr)
     {
         MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
     }

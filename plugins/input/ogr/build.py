@@ -39,26 +39,19 @@ plugin_sources = Split(
 
 cxxflags = []
 plugin_env['LIBS'] = []
+plugin_env.Append(LIBS=env['PLUGINS']['ogr']['lib'])
 
 if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     plugin_env.ParseConfig(cmd)
 
 # Link Library to Dependencies
-plugin_env.Append(LIBS=env['PLUGINS']['ogr']['lib'])
 libraries = copy(plugin_env['LIBS'])
-
-if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
-    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-    if boost_version_from_header < 46:
-        # avoid ubuntu issue with boost interprocess:
-        # https://github.com/mapnik/mapnik/issues/1082
-        cxxflags.append('-fpermissive')
 
 plugin_env.Append(CXXFLAGS=cxxflags)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.insert(0,env['MAPNIK_NAME'])
     libraries.append(env['ICU_LIB_NAME'])
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
@@ -66,8 +59,7 @@ if env['PLUGIN_LINKING'] == 'shared':
                                       SHLIBPREFIX='',
                                       SHLIBSUFFIX='.input',
                                       source=plugin_sources,
-                                      LIBS=libraries,
-                                      LINKFLAGS=env['CUSTOM_LDFLAGS'])
+                                      LIBS=libraries)
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

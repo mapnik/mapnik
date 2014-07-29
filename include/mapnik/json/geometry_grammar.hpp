@@ -37,10 +37,9 @@ namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
 struct push_vertex
 {
-    typedef void result_type;
+    using result_type = void;
 
     template <typename T0,typename T1, typename T2, typename T3>
     result_type operator() (T0 c, T1 path, T2 x, T3 y) const
@@ -52,7 +51,7 @@ struct push_vertex
 
 struct close_path
 {
-    typedef void result_type;
+    using result_type = void;
 
     template <typename T>
     result_type operator() (T path) const
@@ -67,7 +66,7 @@ struct close_path
 
 struct cleanup
 {
-    typedef void result_type;
+    using result_type = void;
     template <typename T0>
     void operator() (T0 & path) const
     {
@@ -77,7 +76,7 @@ struct cleanup
 
 struct where_message
 {
-    typedef std::string result_type;
+    using result_type = std::string;
 
     template <typename Iterator>
     std::string operator() (Iterator first, Iterator last, std::size_t size) const
@@ -88,104 +87,34 @@ struct where_message
         return str;
     }
 };
-#else
-struct push_vertex
-{
-    template <typename T0,typename T1, typename T2, typename T3>
-    struct result
-    {
-        typedef void type;
-    };
-
-    template <typename T0,typename T1, typename T2, typename T3>
-    void operator() (T0 c, T1 path, T2 x, T3 y) const
-    {
-        BOOST_ASSERT( path!=0 );
-        path->push_vertex(x,y,c);
-    }
-};
-
-struct close_path
-{
-    template <typename T>
-    struct result
-    {
-        typedef void type;
-    };
-
-    template <typename T>
-    void operator() (T path) const
-    {
-        BOOST_ASSERT( path!=0 );
-        if (path->size() > 2u) // to form a polygon ring we need at least 3 vertices
-        {
-            path->close_path();
-        }
-   }
-};
-
-struct cleanup
-{
-    template <typename T0>
-    struct result
-    {
-        typedef void type;
-    };
-
-    template <typename T0>
-    void operator() (T0 & path) const
-    {
-        if (path) delete path, path=0;
-    }
-};
-
-struct where_message
-{
-    template <typename T0,typename T1,typename T2>
-    struct result
-    {
-        typedef std::string type;
-    };
-
-    template <typename Iterator>
-    std::string operator() (Iterator first, Iterator last, std::size_t size) const
-    {
-        std::string str(first, last);
-        if (str.length() > size)
-            return str.substr(0, size) + "..." ;
-        return str;
-    }
-};
-#endif
-
 
 template <typename Iterator>
 struct geometry_grammar :
-        qi::grammar<Iterator,qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& )
+        qi::grammar<Iterator,qi::locals<int>, void(mapnik::geometry_container& )
         , space_type>
 {
     geometry_grammar();
-    qi::rule<Iterator, qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry;
+    qi::rule<Iterator, qi::locals<int>, void(mapnik::geometry_container& ),space_type> geometry;
     qi::symbols<char, int> geometry_dispatch;
 
     qi::rule<Iterator,void(CommandType,geometry_type*),space_type> point;
     qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),space_type> points;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>&,int),space_type> coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container&,int),space_type> coordinates;
     //
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> point_coordinates;
+             void(mapnik::geometry_container& ),space_type> point_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> linestring_coordinates;
+             void(mapnik::geometry_container& ),space_type> linestring_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> polygon_coordinates;
+             void(mapnik::geometry_container& ),space_type> polygon_coordinates;
 
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipoint_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multilinestring_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipolygon_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry_collection;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipoint_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multilinestring_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipolygon_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> geometry_collection;
 
     // Nabialek trick //////////////////////////////////////
-    //typedef typename qi::rule<Iterator,void(FeatureType &), space_type> dispatch_rule;
+    //using dispatch_rule = typename qi::rule<Iterator,void(FeatureType &), space_type>;
     //qi::rule<Iterator,qi::locals<dispatch_rule*>, void(FeatureType&),space_type> geometry;
     //qi::symbols<char, dispatch_rule*> geometry_dispatch;
     ////////////////////////////////////////////////////////

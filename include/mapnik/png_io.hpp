@@ -34,10 +34,7 @@
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
 
 // boost
-#include <boost/scoped_array.hpp>
 
-// stl
-#include <cassert>
 
 extern "C"
 {
@@ -140,13 +137,13 @@ void save_as_png(T1 & file,
     png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
                  (opts.trans_mode == 0) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    boost::scoped_array<png_byte*> row_pointers(new png_bytep[image.height()]);
+    const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
         row_pointers[i] = (png_bytep)image.getRow(i);
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
-    png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, NULL);
+    png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 
@@ -542,11 +539,9 @@ void save_as_png8_oct(T1 & file,
             std::vector<rgb> pal;
             trees[j].setOffset( static_cast<unsigned>(palette.size()));
             trees[j].create_palette(pal);
-            assert(pal.size() <= opts.colors);
             leftovers = cols[j] - static_cast<unsigned>(pal.size());
             cols[j] = static_cast<unsigned>(pal.size());
             palette.insert(palette.begin(), pal.begin(), pal.end());
-            assert(palette.size() <= 256);
         }
     }
 
@@ -684,10 +679,9 @@ void save_as_png8_hex(T1 & file,
     //transparency values per palette index
     std::vector<mapnik::rgba> pal;
     tree.create_palette(pal);
-    assert(int(pal.size()) <= opts.colors);
     std::vector<mapnik::rgb> palette;
     std::vector<unsigned> alphaTable;
-    for(unsigned i=0; i<pal.size(); i++)
+    for (unsigned i=0; i<pal.size(); ++i)
     {
         palette.push_back(rgb(pal[i].r, pal[i].g, pal[i].b));
         alphaTable.push_back(pal[i].a);

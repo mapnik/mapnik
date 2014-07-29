@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
 #include <mapnik/noncopyable.hpp>       // for noncopyable
 #include <mapnik/rule.hpp>              // for rule, symbolizers
 #include <mapnik/box2d.hpp>     // for box2d
@@ -35,12 +34,13 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
-
+#include <mapnik/gamma_method.hpp>
+#include <mapnik/renderer_common.hpp>
 // boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 
-// fwd declaration to avoid depedence on agg headers
+#include <memory>
+
+// fwd declaration to avoid dependence on agg headers
 namespace agg { struct trans_affine; }
 
 // fwd declarations to speed up compile
@@ -57,21 +57,22 @@ namespace mapnik {
 
 namespace mapnik {
 
-template <typename T>
-class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
+template <typename T0, typename T1=label_collision_detector4>
+class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0> >,
                                  private mapnik::noncopyable
 {
 
 public:
-    typedef T buffer_type;
-    typedef agg_renderer<T> processor_impl_type;
+    using buffer_type = T0;
+    using processor_impl_type = agg_renderer<T0>;
+    using detector_type = T1;
     // create with default, empty placement detector
-    agg_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    agg_renderer(Map const& m, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
-    agg_renderer(Map const &m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
+    agg_renderer(Map const &m, buffer_type & pixmap, std::shared_ptr<detector_type> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // pass in mapnik::request object to provide the mutable things per render
-    agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    agg_renderer(Map const& m, request const& req, attributes const& vars, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -114,13 +115,16 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
+    void process(group_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans);
     void process(debug_symbolizer const& sym,
                  feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    inline bool process(rule::symbolizers const& /*syms*/,
-                        mapnik::feature_impl & /*feature*/,
-                        proj_transform const& /*prj_trans*/)
+    inline bool process(rule::symbolizers const&,
+                        mapnik::feature_impl&,
+                        proj_transform const& )
     {
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
@@ -134,22 +138,27 @@ public:
 
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
+    }
+
+    inline attributes const& variables() const
+    {
+        return common_.vars_;
     }
 
     inline box2d<double> clipping_extent() const
     {
-        if (t_.offset() > 0)
+        if (common_.t_.offset() > 0)
         {
-            box2d<double> box = query_extent_;
-            double scale = static_cast<double>(query_extent_.width())/static_cast<double>(width_);
+            box2d<double> box = common_.query_extent_;
+            double scale = static_cast<double>(common_.query_extent_.width())/static_cast<double>(common_.width_);
             // 3 is used here because at least 3 was needed for the 'style-level-compositing-tiled-0,1' visual test to pass
             // TODO - add more tests to hone in on a more robust #
-            scale *= t_.offset()*3;
+            scale *= common_.t_.offset()*3;
             box.pad(scale);
             return box;
         }
-        return query_extent_;
+        return common_.query_extent_;
     }
 
 protected:
@@ -162,23 +171,16 @@ protected:
 
 private:
     buffer_type & pixmap_;
-    boost::shared_ptr<buffer_type> internal_buffer_;
-    boost::shared_ptr<buffer_type> internal_buffer2_;
+    std::shared_ptr<buffer_type> internal_buffer_;
+    std::shared_ptr<buffer_type> internal_buffer2_;
     mutable buffer_type * current_layer_buffer_;
     mutable buffer_type * current_buffer_;
-    CoordTransform t_;
     mutable bool style_level_compositing_;
     mutable bool layer_level_opacity_;
-    unsigned width_;
-    unsigned height_;
-    double scale_factor_;
-    freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
-    boost::shared_ptr<label_collision_detector4> detector_;
-    boost::scoped_ptr<rasterizer> ras_ptr;
-    box2d<double> query_extent_;
-    gamma_method_e gamma_method_;
+    const std::unique_ptr<rasterizer> ras_ptr;
+    gamma_method_enum gamma_method_;
     double gamma_;
+    renderer_common common_;
     void setup(Map const& m);
 };
 }

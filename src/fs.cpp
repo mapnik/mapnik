@@ -33,7 +33,7 @@
 #include <stdexcept>
 
 #if (BOOST_FILESYSTEM_VERSION <= 2)
-#include <boost/scoped_array.hpp>
+
 
 namespace boost {
 namespace filesystem {
@@ -44,7 +44,7 @@ path read_symlink(const path& p)
 #ifdef BOOST_POSIX_API
     for (std::size_t path_max = 64;; path_max *= 2)// loop 'til buffer is large enough
     {
-        boost::scoped_array<char> buf(new char[path_max]);
+        const std::unique_ptr<char[]> buf(new char[path_max]);
         ssize_t result;
         if ((result=::readlink(p.string().c_str(), buf.get(), path_max))== -1)
         {
@@ -85,6 +85,15 @@ namespace util {
         return boost::filesystem::is_directory(mapnik::utf8_to_utf16(filepath));
 #else
         return boost::filesystem::is_directory(filepath);
+#endif
+    }
+
+    bool is_regular_file(std::string const& filepath)
+    {
+#ifdef _WINDOWS
+        return boost::filesystem::is_regular_file(mapnik::utf8_to_utf16(filepath));
+#else
+        return boost::filesystem::is_regular_file(filepath);
 #endif
     }
 

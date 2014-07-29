@@ -25,11 +25,16 @@
 
 // mapnik
 #include <mapnik/palette.hpp>
+#include <mapnik/config.hpp>
 
 // stl
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+
+#ifdef _MSC_VER
+#include <mapnik/graphics.hpp>
+#endif
 
 /* miniz.c porting issues:
   - duplicate symbols in python bindings require moving miniz.c include to just cpp file
@@ -48,7 +53,7 @@ namespace mapnik { namespace MiniZ {
 
 using mapnik::rgb;
 
-class PNGWriter {
+class MAPNIK_DECL PNGWriter {
 
 public:
     PNGWriter(int level, int strategy);
@@ -78,6 +83,15 @@ private:
     static const unsigned char IDAT_tpl[];
     static const unsigned char IEND_tpl[];
 };
+
+#ifdef _MSC_VER
+template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_8>(image_data_8 const& image);
+template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_8> >(image_view<image_data_8> const& image);
+template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_32>(image_data_32 const& image);
+template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_32> >(image_view<image_data_32> const& image);
+template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_data_32>(image_data_32 const& image);
+template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_view<image_data_32> >(image_view<image_data_32> const& image);
+#endif
 
 }}
 

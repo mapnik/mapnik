@@ -1,5 +1,3 @@
-#include <boost/version.hpp>
-
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <mapnik/image_reader.hpp>
@@ -23,8 +21,15 @@ int main(int argc, char** argv)
     boost::optional<std::string> type;
     try
     {
-        BOOST_TEST(set_working_dir(args));
+        mapnik::image_data_32 im(256,256);
+        unsigned char* bytes = im.getBytes();
+        mapnik::image_data_32 * im_ptr = new mapnik::image_data_32(256,256,(unsigned int *)bytes);
+        unsigned char* same_bytes = im_ptr->getBytes();
+        BOOST_TEST(bytes == same_bytes);
+        delete im_ptr;
+        BOOST_TEST(bytes == same_bytes);
 
+        BOOST_TEST(set_working_dir(args));
 
 #if defined(HAVE_JPEG)
         should_throw = "./tests/cpp_tests/data/blank.jpg";
@@ -33,8 +38,8 @@ int main(int argc, char** argv)
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            if (reader.get()) BOOST_TEST( false );
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
@@ -49,21 +54,22 @@ int main(int argc, char** argv)
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            if (reader.get()) BOOST_TEST( false );
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
             BOOST_TEST( true );
         }
+
         should_throw = "./tests/data/images/xcode-CgBI.png";
         BOOST_TEST( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            if (reader.get()) BOOST_TEST( false );
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
@@ -78,8 +84,8 @@ int main(int argc, char** argv)
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            if (reader.get()) BOOST_TEST( false );
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
@@ -94,7 +100,7 @@ int main(int argc, char** argv)
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
             BOOST_TEST( false );
         }
         catch (std::exception const&)
@@ -112,9 +118,7 @@ int main(int argc, char** argv)
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ image i/o: \x1b[1;32m✓ \x1b[0m\n";
-#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
-#endif
     } else {
         return ::boost::report_errors();
     }

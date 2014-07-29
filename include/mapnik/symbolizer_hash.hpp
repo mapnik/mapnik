@@ -23,43 +23,82 @@
 #ifndef MAPNIK_SYMBOLIZER_HASH_HPP
 #define MAPNIK_SYMBOLIZER_HASH_HPP
 
-#include <mapnik/map.hpp>
-#include <mapnik/feature_type_style.hpp>
-
-#include <boost/functional/hash.hpp>
+// mapnik
+#include <mapnik/symbolizer.hpp>
+// boost
 #include <boost/variant/static_visitor.hpp>
+// stl
+#include <typeinfo>
+#include <typeindex>
+#include <functional>
 
 namespace mapnik {
+
+struct property_value_hash_visitor : boost::static_visitor<std::size_t>
+{
+    std::size_t operator() (color val) const
+    {
+        return val.rgba();
+    }
+
+    std::size_t operator() (transform_type const& val) const
+    {
+        return 0; //FIXME
+    }
+
+    std::size_t operator() (enumeration_wrapper const& val) const
+    {
+        return 0; //FIXME
+    }
+
+    std::size_t operator() (dash_array const&  val) const
+    {
+        return 0; //FIXME
+    }
+
+    template <typename T>
+    std::size_t operator() (T const& val) const
+    {
+        return std::hash<T>()(val);
+    }
+};
 
 struct symbolizer_hash
 {
     template <typename T>
-    static std::size_t value(T const& /*sym*/)
+    static std::size_t value(T const& sym)
     {
-        return 0;
-    }
-    // specialisation for polygon_symbolizer
-    static std::size_t value(polygon_symbolizer const& sym)
-    {
-        std::size_t seed = Polygon;
-        boost::hash_combine(seed, sym.get_fill().rgba());
-        boost::hash_combine(seed, sym.get_opacity());
-        return seed;
-    }
-
-    // specialisation for line_symbolizer
-    static std::size_t value(line_symbolizer const& sym)
-    {
-        std::size_t seed = LineString;
-        boost::hash_combine(seed, sym.get_stroke().get_color().rgba());
-        boost::hash_combine(seed, sym.get_stroke().get_width());
-        boost::hash_combine(seed, sym.get_stroke().get_opacity());
-        boost::hash_combine(seed, static_cast<int>(sym.get_stroke().get_line_cap()));
-        boost::hash_combine(seed, static_cast<int>(sym.get_stroke().get_line_join()));
+        std::size_t seed = std::hash<std::type_index>()(typeid(sym));
+        for (auto const& prop : sym.properties)
+        {
+            seed ^= std::hash<std::size_t>()(static_cast<std::size_t>(prop.first));
+            seed ^= boost::apply_visitor(property_value_hash_visitor(), prop.second);
+        }
         return seed;
     }
 };
 
+struct hash_visitor : boost::static_visitor<std::size_t>
+{
+    template <typename Symbolizer>
+    std::size_t operator() (Symbolizer const& sym) const
+    {
+        return symbolizer_hash::value(sym);
+    }
+};
+
+}
+
+namespace std {
+
+template<>
+struct hash<mapnik::symbolizer>
+{
+    std::size_t operator()(mapnik::symbolizer const& sym) const
+    {
+        return boost::apply_visitor(mapnik::hash_visitor(),sym);
+    }
+};
 }
 
 #endif // MAPNIK_SYMBOLIZER_HASH_HPP

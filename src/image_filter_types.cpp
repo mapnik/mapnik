@@ -21,7 +21,8 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/image_filter_types.hpp>
-#include <mapnik/image_filter_grammar.hpp> // image_filter_grammar
+#include <mapnik/image_filter_grammar.hpp>
+#include <mapnik/image_filter_grammar_impl.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -36,7 +37,7 @@ namespace filter {
 
 bool generate_image_filters(std::back_insert_iterator<std::string>& sink, std::vector<filter_type> const& filters)
 {
-    using boost::spirit::karma::stream;
+    boost::spirit::karma::stream_type stream;
     using boost::spirit::karma::generate;
     bool r = generate(sink, stream % ' ', filters);
     return r;
@@ -46,11 +47,12 @@ bool parse_image_filters(std::string const& filters, std::vector<filter_type>& i
 {
     std::string::const_iterator itr = filters.begin();
     std::string::const_iterator end = filters.end();
-    mapnik::image_filter_grammar<std::string::const_iterator,
+    static const mapnik::image_filter_grammar<std::string::const_iterator,
                                  std::vector<mapnik::filter::filter_type> > filter_grammar;
+    boost::spirit::qi::ascii::space_type space;
     bool r = boost::spirit::qi::phrase_parse(itr,end,
                                              filter_grammar,
-                                             boost::spirit::qi::ascii::space,
+                                             space,
                                              image_filters);
     return r && itr==end;
 }

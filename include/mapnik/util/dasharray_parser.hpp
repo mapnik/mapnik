@@ -27,36 +27,29 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace util {
 
 template <typename Iterator>
 bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharray)
 {
-    using qi::double_;
-    using qi::phrase_parse;
-    using qi::_1;
-    using qi::lit;
-    using qi::char_;
-#if BOOST_VERSION > 104200
-    using qi::no_skip;
-#else
-    using qi::lexeme;
-#endif
-    using phoenix::push_back;
+    using namespace boost::spirit;
+    qi::double_type double_;
+    qi::_1_type _1;
+    qi::lit_type lit;
+    qi::char_type char_;
+    qi::ascii::space_type space;
+    qi::no_skip_type no_skip;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
     // no support for 'percentage' as viewport is unknown at load_map
     //
-    bool r = phrase_parse(first, last,
-                          (double_[push_back(phoenix::ref(dasharray), _1)] %
-#if BOOST_VERSION > 104200
+    bool r = qi::phrase_parse(first, last,
+                          (double_[boost::phoenix::push_back(boost::phoenix::ref(dasharray), _1)] %
                           no_skip[char_(", ")]
-#else
-                          lexeme[char_(", ")]
-#endif
                           | lit("none")),
-                          qi::ascii::space);
+                          space);
     if (first != last)
     {
         return false;

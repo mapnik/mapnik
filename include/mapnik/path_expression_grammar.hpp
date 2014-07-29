@@ -26,9 +26,8 @@
 // mapnik
 #include <mapnik/path_expression.hpp>
 
-// spirit2
+// boost
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_action.hpp>
 
 // stl
 #include <string>

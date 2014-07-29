@@ -13,6 +13,7 @@ def test_style_init():
    eq_(s.opacity,1)
    eq_(s.comp_op,None)
    eq_(s.image_filters,"")
+   eq_(s.image_filters_inflate,False)
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

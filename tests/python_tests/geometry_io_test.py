@@ -68,17 +68,6 @@ wkbs = [
     [ 0, "LINESTRING EMPTY", '010200000000000000'],
     [ 0, "MULTILINESTRING EMPTY", '010500000000000000'],
     [ 0, "Polygon EMPTY", '010300000000000000'],
-    [ 0, "MULTIPOLYGON EMPTY", '010600000000000000'],
-    [ 0, "TRIANGLE EMPTY", '011100000000000000'],
-
-    [ 0, "CircularString EMPTY", '010800000000000000'],
-    [ 0, "CurvePolygon EMPTY", '010A00000000000000'],
-    [ 0, "CompoundCurve EMPTY", '010900000000000000'],
-    [ 0, "MultiCurve EMPTY", '010B00000000000000'],
-
-    [ 0, "MultiSurface EMPTY", '010C00000000000000'],
-    [ 0, "PolyhedralSurface EMPTY", '010F00000000000000'],
-    [ 0, "TIN EMPTY", '011000000000000000'],
     [ 0, "GEOMETRYCOLLECTION EMPTY", '010700000000000000'],
     [ 2, "GEOMETRYCOLLECTION(MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10)),LINESTRING EMPTY)", '010700000002000000010500000002000000010200000003000000000000000000244000000000000024400000000000003440000000000000344000000000000024400000000000004440010200000004000000000000000000444000000000000044400000000000003e400000000000003e40000000000000444000000000000034400000000000003e400000000000002440010200000000000000'
     ],
@@ -88,10 +77,22 @@ wkbs = [
     [ 1, "GEOMETRYCOLLECTION(POINT EMPTY,MULTIPOINT(0 0))", '010700000002000000010400000000000000010400000001000000010100000000000000000000000000000000000000'],
     [ 0, "LINESTRING EMPTY", '010200000000000000' ],
     [ 1, "Point(0 0)", '010100000000000000000000000000000000000000' ],
-    # a few bogus inputs
-    [ 0, "", '' ],
-    [ 0, "00", '01' ],
-    [ 0, "0000", '0104' ],
+    # unsupported types
+    [ 0, "MULTIPOLYGON EMPTY", '010600000000000000'],
+    [ 0, "TRIANGLE EMPTY", '011100000000000000'],
+    [ 0, "CircularString EMPTY", '010800000000000000'],
+    [ 0, "CurvePolygon EMPTY", '010A00000000000000'],
+    [ 0, "CompoundCurve EMPTY", '010900000000000000'],
+    [ 0, "MultiCurve EMPTY", '010B00000000000000'],
+    [ 0, "MultiSurface EMPTY", '010C00000000000000'],
+    [ 0, "PolyhedralSurface EMPTY", '010F00000000000000'],
+    [ 0, "TIN EMPTY", '011000000000000000'],
+    # TODO - a few bogus inputs
+    # enable if we start range checking to avoid crashing on invalid input?
+    # https://github.com/mapnik/mapnik/issues/2236
+    #[ 0, "", '' ],
+    #[ 0, "00", '01' ],
+    #[ 0, "0000", '0104' ],
 ]
 
 def test_path_geo_interface():
@@ -121,15 +122,10 @@ def test_geojson_parsing():
             pass
     eq_(count,len(path))
 
-reader = mapnik.WKTReader()
 
 def compare_wkb_from_wkt(wkt,num=None):
 
-    # create a Path from geometry(s)
-    # easy api, but slower
-    #paths = mapnik.Path.from_wkt(wkt)
-    # fast api
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
     f = mapnik.Feature(mapnik.Context(),1)
@@ -159,11 +155,7 @@ def compare_wkb_from_wkt(wkt,num=None):
         eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
 def compare_wkt_from_wkt(wkt,num=None):
-    # create a Path from geometry(s)
-    # easy api, but slower
-    #paths = mapnik.Path.from_wkt(wkt)
-    # fast api
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
     f = mapnik.Feature(mapnik.Context(),1)
@@ -196,7 +188,7 @@ def compare_wkt_from_wkt(wkt,num=None):
         eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
 def compare_wkt_to_geojson(idx,wkt,num=None):
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
     # ensure both have same result
     if num:
         eq_(len(paths),num)
@@ -232,10 +224,7 @@ def test_wkt_to_geojson():
 @raises(IndexError)
 def test_geometry_index_error():
     wkt = 'Point (0 0)'
-    # easy api, but slower
-    #paths = mapnik.Path.from_wkt(wkt)
-    # fast api
-    paths = reader.read(wkt);
+    paths = mapnik.Path.from_wkt(wkt)
     paths[3]
     f = mapnik.Feature(mapnik.Context(),1)
     f.add_geometries_from_wkt(wkt)
@@ -300,4 +289,4 @@ def test_handling_geojson_null_geoms():
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

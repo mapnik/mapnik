@@ -45,25 +45,17 @@ libraries.append('boost_system%s' % env['BOOST_APPEND'])
 cppdefines = []
 cxxflags = []
 
-if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
-    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-    if boost_version_from_header < 46:
-        # avoid ubuntu issue with boost interprocess:
-        # https://github.com/mapnik/mapnik/issues/1082
-        cxxflags.append('-fpermissive')
-
 plugin_env.Append(CXXFLAGS=cxxflags)
 plugin_env.Append(CPPDEFINES=cppdefines)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../shape',
                                       SHLIBSUFFIX='.input',
                                       SHLIBPREFIX='',
                                       source=plugin_sources,
-                                      LIBS=libraries,
-                                      LINKFLAGS=env['CUSTOM_LDFLAGS'])
+                                      LIBS=libraries)
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

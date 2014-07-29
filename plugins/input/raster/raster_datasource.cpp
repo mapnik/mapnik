@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 // boost
-#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/util/fs.hpp>
@@ -47,8 +46,8 @@ using mapnik::image_reader;
 DATASOURCE_PLUGIN(raster_datasource)
 
 raster_datasource::raster_datasource(parameters const& params)
-: datasource(params),
-    desc_(*params.get<std::string>("type"), "utf-8"),
+  : datasource(params),
+    desc_(raster_datasource::name(), "utf-8"),
     extent_initialized_(false)
 {
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";
@@ -62,17 +61,17 @@ raster_datasource::raster_datasource(parameters const& params)
     else
         filename_ = *file;
 
-    multi_tiles_ = *params.get<mapnik::boolean>("multi", false);
-    tile_size_ = *params.get<int>("tile_size", 256);
-    tile_stride_ = *params.get<int>("tile_stride", 1);
+    multi_tiles_ = *params.get<mapnik::boolean_type>("multi", false);
+    tile_size_ = *params.get<mapnik::value_integer>("tile_size", 256);
+    tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
     boost::optional<std::string> format_from_filename = mapnik::type_from_filename(*file);
     format_ = *params.get<std::string>("format",format_from_filename?(*format_from_filename) : "tiff");
 
-    boost::optional<double> lox = params.get<double>("lox");
-    boost::optional<double> loy = params.get<double>("loy");
-    boost::optional<double> hix = params.get<double>("hix");
-    boost::optional<double> hiy = params.get<double>("hiy");
+    boost::optional<mapnik::value_double> lox = params.get<mapnik::value_double>("lox");
+    boost::optional<mapnik::value_double> loy = params.get<mapnik::value_double>("loy");
+    boost::optional<mapnik::value_double> hix = params.get<mapnik::value_double>("hix");
+    boost::optional<mapnik::value_double> hiy = params.get<mapnik::value_double>("hiy");
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
 
@@ -93,8 +92,8 @@ raster_datasource::raster_datasource(parameters const& params)
 
     if (multi_tiles_)
     {
-        boost::optional<int> x_width = params.get<int>("x_width");
-        boost::optional<int> y_width = params.get<int>("y_width");
+        boost::optional<mapnik::value_integer> x_width = params.get<mapnik::value_integer>("x_width");
+        boost::optional<mapnik::value_integer> y_width = params.get<mapnik::value_integer>("y_width");
 
         if (! x_width)
         {
@@ -118,7 +117,7 @@ raster_datasource::raster_datasource(parameters const& params)
 
         try
         {
-            std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
+            std::unique_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
             if (reader.get())
             {
                 width_ = reader->width();
@@ -189,7 +188,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         tiled_multi_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_, tile_stride_);
 
-        return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
+        return std::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
     else if (width * height > static_cast<int>(tile_size_ * tile_size_ << 2))
     {
@@ -197,7 +196,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         tiled_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_);
 
-        return boost::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
+        return std::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
     }
     else
     {
@@ -206,7 +205,7 @@ featureset_ptr raster_datasource::features(query const& q) const
         raster_info info(filename_, format_, extent_, width_, height_);
         single_file_policy policy(info);
 
-        return boost::make_shared<raster_featureset<single_file_policy> >(policy, extent_, q);
+        return std::make_shared<raster_featureset<single_file_policy> >(policy, extent_, q);
     }
 }
 

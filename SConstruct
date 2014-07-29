@@ -41,6 +41,8 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "gcc"
 DEFAULT_CXX = "g++"
+DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
+DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
     DEFAULT_CC = "clang"
     DEFAULT_CXX = "clang++"
@@ -81,6 +83,7 @@ pretty_dep_names = {
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
     'webp':'WEBP C library | configure with WEBP_LIBS & WEBP_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
+    'harfbuzz':'HarfBuzz text shaping library | configure with HB_LIBS & HB_INCLUDES',
     'z':'Z compression library | more info: http://www.zlib.net/',
     'm':'Basic math library, part of C++ stlib',
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
@@ -90,7 +93,6 @@ pretty_dep_names = {
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
     'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
-    'curl':'libcurl is required for the "osm" plugin - more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
     'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
@@ -109,13 +111,14 @@ PLUGINS = { # plugins with external dependencies
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
 
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
+            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C'},
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'python':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
 
@@ -189,7 +192,7 @@ def shortest_name(libs):
 
 def rm_path(item,set,_env):
     for i in _env[set]:
-        if item in i:
+        if i.startswith(item):
             _env[set].remove(i)
 
 def sort_paths(items,priority):
@@ -312,6 +315,7 @@ opts.AddVariables(
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
     ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths (create multiple excludes separated by :)', ''),
     ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
+    ('MAPNIK_NAME', 'Name of library', 'mapnik'),
 
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -329,7 +333,8 @@ opts.AddVariables(
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', ICU_INCLUDES_DEFAULT, PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files',ICU_LIBS_DEFAULT + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
-
+    PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
@@ -385,7 +390,8 @@ opts.AddVariables(
     BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
     BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'True'),
     ('FRAMEWORK_SEARCH_PATH','Custom framework search path on Mac OS X', ''),
-    BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
+    BoolVariable('FULL_LIB_PATH', 'Embed the full and absolute path to libmapnik when linking ("install_name" on OS X/rpath on Linux)', 'True'),
+    BoolVariable('ENABLE_SONAME', 'Embed a soname in libmapnik on Linux', 'True'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
@@ -394,6 +400,7 @@ opts.AddVariables(
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
+    BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
@@ -484,9 +491,6 @@ command_line_args = sys.argv[1:]
 HELP_REQUESTED = False
 
 if ('-h' in command_line_args) or ('--help' in command_line_args):
-    HELP_REQUESTED = True
-
-if ('install' not in command_line_args) and ('-c' in command_line_args) or ('--clean' in command_line_args):
     HELP_REQUESTED = True
 
 if 'configure' in command_line_args and not HELP_REQUESTED:
@@ -609,10 +613,12 @@ def parse_config(context, config, checks='--libs --cflags'):
     if not parsed:
         if config in ('GDAL_CONFIG'):
             # optional deps...
-            env['SKIPPED_DEPS'].append(tool)
+            if tool not in env['SKIPPED_DEPS']:
+                env['SKIPPED_DEPS'].append(tool)
             conf.rollback_option(config)
         else: # freetype and libxml2, not optional
-            env['MISSING_DEPS'].append(tool)
+            if tool not in env['MISSING_DEPS']:
+                env['MISSING_DEPS'].append(tool)
     context.Result( ret )
     return ret
 
@@ -668,7 +674,8 @@ def ogr_enabled(context):
     context.Message( 'Checking if gdal is ogr enabled... ')
     ret = context.TryAction('%s --ogr-enabled' % env['GDAL_CONFIG'])[0]
     if not ret:
-        env['SKIPPED_DEPS'].append('ogr')
+        if 'ogr' not in env['SKIPPED_DEPS']:
+            env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
 
@@ -761,16 +768,20 @@ def FindBoost(context, prefixes, thread_flag):
     if BOOST_LIB_DIR:
         msg += '\nFound boost libs: %s' % BOOST_LIB_DIR
         env['BOOST_LIBS'] = BOOST_LIB_DIR
-    else:
+    elif not env['BOOST_LIBS']:
         env['BOOST_LIBS'] = '/usr/' + env['LIBDIR_SCHEMA']
         msg += '\nUsing default boost lib dir: %s' % env['BOOST_LIBS']
+    else:
+        msg += '\nUsing boost lib dir: %s' % env['BOOST_LIBS']
 
     if BOOST_INCLUDE_DIR:
         msg += '\nFound boost headers: %s' % BOOST_INCLUDE_DIR
         env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
-    else:
+    elif not env['BOOST_INCLUDES']:
         env['BOOST_INCLUDES'] = '/usr/include'
         msg += '\nUsing default boost include dir: %s' % env['BOOST_INCLUDES']
+    else:
+        msg += '\nUsing boost include dir: %s' % env['BOOST_INCLUDES']
 
     if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
         if BOOST_APPEND:
@@ -923,7 +934,11 @@ int main()
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
-        context.env.AppendUnique(LIBS='icudata')
+        # re-order icu libs to ensure linux linker is happy
+        for lib_name in ['icui18n',env['ICU_LIB_NAME'],'icudata']:
+            if lib_name in context.env['LIBS']:
+                context.env['LIBS'].remove(lib_name)
+            context.env.Append(LIBS=lib_name)
     ret = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
@@ -996,6 +1011,30 @@ int main()
         return True
     return False
 
+def supports_cxx11(context,silent=False):
+    ret = context.TryRun("""
+
+int main()
+{
+#if __cplusplus >= 201103
+    return 0;
+#else
+    return -1;
+#endif
+}
+
+""", '.cpp')
+    if not silent:
+        context.Message('Checking if compiler (%s) supports -std=c++11 flag... ' % context.env.get('CXX','CXX'))
+    if silent:
+        context.did_show_result=1
+    context.Result(ret[0])
+    if ret[0]:
+        return True
+    return False
+
+
+
 conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGConfig'        : CheckPKGConfig,
                'CheckPKG'              : CheckPKG,
@@ -1013,6 +1052,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'icu_at_least_four_two' : icu_at_least_four_two,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
+               'supports_cxx11'        : supports_cxx11,
                }
 
 
@@ -1109,9 +1149,9 @@ if not preconfigured:
         env['MAPNIK_FONTS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'fonts')
 
     if env['LINKING'] == 'static':
-       env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik${LIBSUFFIX}'
+       env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}${MAPNIK_NAME}${LIBSUFFIX}'
     else:
-       env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}mapnik${SHLIBSUFFIX}'
+       env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}${MAPNIK_NAME}${SHLIBSUFFIX}'
 
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
@@ -1123,16 +1163,20 @@ if not preconfigured:
     if env['SYSTEM_FONTS']:
         if not os.path.isdir(env['SYSTEM_FONTS']):
             color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
-    #### Libraries and headers dependency checks ####
 
     # Set up for libraries and headers dependency checks
     env['CPPPATH'] = ['#include', '#']
     env['LIBPATH'] = ['#src']
 
     # set any custom cxxflags and ldflags to come first
+    if sys.platform == 'darwin' and not env['HOST']:
+        DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
+        DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
+    env.Append(CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
+    env.Append(LINKFLAGS = DEFAULT_CXX11_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
@@ -1160,7 +1204,7 @@ if not preconfigured:
 
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('ICU', 'SQLITE'):
+    for required in ('ICU', 'SQLITE', 'HB'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1172,6 +1216,7 @@ if not preconfigured:
             temp_env = env.Clone()
             temp_env['LIBS'] = []
             try:
+                # TODO - freetype-config accepts --static as of v2.5.3
                 temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
                 if 'bz2' in temp_env['LIBS']:
                     env['EXTRA_FREETYPE_LIBS'].append('bz2')
@@ -1188,6 +1233,7 @@ if not preconfigured:
     REQUIRED_LIBSHEADERS = [
         ['z', 'zlib.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
+        ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
     ]
 
     OPTIONAL_LIBSHEADERS = []
@@ -1240,6 +1286,11 @@ if not preconfigured:
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
+
+    # test for C++11 support, which is required
+    if not conf.supports_cxx11():
+        color_print(1,"C++ compiler does not support C++11 standard, which is required. Please use Mapnik 2.x instead of 3.x as an alternative")
+        Exit(1)
 
     if not env['HOST']:
         for libname, headers, required, lang in REQUIRED_LIBSHEADERS:
@@ -1323,7 +1374,6 @@ if not preconfigured:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
         # we need libicui18n if using static boost libraries, so it is
         # important to try this check with the library linked
-        env.AppendUnique(LIBS='icui18n')
         if conf.boost_regex_has_icu():
             # TODO - should avoid having this be globally defined...
             env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')
@@ -1377,18 +1427,17 @@ if not preconfigured:
                     conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
                     if conf.ogr_enabled():
-                        if not 'gdal' in env['REQUESTED_PLUGINS']:
-                            conf.parse_config('GDAL_CONFIG',checks='--libs')
+                        if conf.parse_config('GDAL_CONFIG',checks='--libs'):
                             conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                        libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
-                        if libname:
-                            if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
-                                if 'gdal' not in env['SKIPPED_DEPS']:
-                                    env['SKIPPED_DEPS'].append('gdal')
-                                if libname in env['LIBS']:
-                                     env['LIBS'].remove(libname)
-                            else:
-                                details['lib'] = libname
+                            libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
+                            if libname:
+                                if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                                    if 'gdal' not in env['SKIPPED_DEPS']:
+                                        env['SKIPPED_DEPS'].append('gdal')
+                                    if libname in env['LIBS']:
+                                         env['LIBS'].remove(libname)
+                                else:
+                                    details['lib'] = libname
                 elif details['path'] and details['lib'] and details['inc']:
                     backup = env.Clone().Dictionary()
                     # Note, the 'delete_existing' keyword makes sure that these paths are prepended
@@ -1671,15 +1720,18 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
+        # faster compile
+        # http://www.boost.org/doc/libs/1_47_0/libs/spirit/doc/html/spirit/what_s_new/spirit_2_5.html#spirit.what_s_new.spirit_2_5.breaking_changes
+        env.Append(CPPDEFINES = '-DBOOST_SPIRIT_NO_PREDEFINED_TERMINALS=1')
+        env.Append(CPPDEFINES = '-DBOOST_PHOENIX_NO_PREDEFINED_TERMINALS=1')
         # c++11 support / https://github.com/mapnik/mapnik/issues/1683
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
-        if 'c++11' in env['CUSTOM_CXXFLAGS']:
-            env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
-            #  - workaround boost gil channel_algorithm.hpp narrowing error
-            # TODO - remove when building against >= 1.55
-            # https://github.com/mapnik/mapnik/issues/1970
-            if 'clang++' in env['CXX']:
-                env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+        env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
+        #  - workaround boost gil channel_algorithm.hpp narrowing error
+        # TODO - remove when building against >= 1.55
+        # https://github.com/mapnik/mapnik/issues/1970
+        if 'clang++' in env['CXX']:
+            env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1721,10 +1773,6 @@ if not preconfigured:
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
         common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
-
-        # https://github.com/mapnik/mapnik/issues/1835
-        if sys.platform == 'darwin' and env['CXX'] == 'g++':
-            common_cxx_flags += '-fpermissive '
 
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
@@ -1932,6 +1980,8 @@ if not HELP_REQUESTED:
                 SConscript('utils/pgsql2sqlite/build.py')
             if env['SVG2PNG']:
                 SConscript('utils/svg2png/build.py')
+            if env['NIK2IMG']:
+                SConscript('utils/nik2img/build.py')
             # devtools not ready for public
             #SConscript('utils/ogrindex/build.py')
             env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
@@ -1961,7 +2011,7 @@ if not HELP_REQUESTED:
         SConscript('benchmark/build.py')
 
     # install pkg-config script and mapnik-config script
-    SConscript('utils/mapnik-config/build.py')
+    SConscript('bin/build.py')
 
     # write the viewer.ini file
     SConscript('demo/viewer/build.py')

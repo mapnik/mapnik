@@ -24,25 +24,23 @@
 #define MAPNIK_UTILS_HPP
 
 #include <mapnik/config.hpp>
+#include <mapnik/unique_lock.hpp>
 
 // boost
 #ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #endif
 
 // stl
-#include <stdexcept>
-#include <cstdlib>
-#include <limits>
-#include <ctime>
-#include <algorithm>
-#include <cmath>
+#include <stdexcept> // std::runtime_error
+#include <cstdlib> // std::atexit
+#include <new> // operator new
 
 namespace mapnik
 {
 
 #ifdef MAPNIK_THREADSAFE
-using boost::mutex;
+using std::mutex;
 #endif
 
 template <typename T>
@@ -130,7 +128,7 @@ protected:
             if (! pInstance_)
             {
 #ifdef MAPNIK_THREADSAFE
-                mutex::scoped_lock lock(mutex_);
+                mapnik::scoped_lock lock(mutex_);
 #endif
                 if (! pInstance_)
                 {

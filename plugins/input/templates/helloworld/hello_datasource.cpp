@@ -3,7 +3,6 @@
 #include "hello_featureset.hpp"
 
 // boost
-#include <boost/make_shared.hpp>
 
 
 using mapnik::datasource;
@@ -12,8 +11,8 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(hello_datasource)
 
 hello_datasource::hello_datasource(parameters const& params)
-: datasource(params),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+  : datasource(params),
+    desc_(hello_datasource::name(), *params.get<std::string>("encoding","utf-8")),
     extent_()
 {
     this->init(params);
@@ -62,7 +61,7 @@ mapnik::featureset_ptr hello_datasource::features(mapnik::query const& q) const
     // if the query box intersects our world extent then query for features
     if (extent_.intersects(q.get_bbox()))
     {
-        return boost::make_shared<hello_featureset>(q.get_bbox(),desc_.get_encoding());
+        return std::make_shared<hello_featureset>(q.get_bbox(),desc_.get_encoding());
     }
 
     // otherwise return an empty featureset pointer

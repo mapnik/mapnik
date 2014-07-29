@@ -40,7 +40,6 @@
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
 // boost
-#include <boost/make_shared.hpp>
 
 // stl
 #include <stdexcept>
@@ -100,27 +99,74 @@ Map::Map(Map const& rhs)
       base_path_(rhs.base_path_),
       extra_params_(rhs.extra_params_) {}
 
+
+Map::Map(Map && rhs)
+    : width_(std::move(rhs.width_)),
+      height_(std::move(rhs.height_)),
+      srs_(std::move(rhs.srs_)),
+      buffer_size_(std::move(rhs.buffer_size_)),
+      background_(std::move(rhs.background_)),
+      background_image_(std::move(rhs.background_image_)),
+      background_image_comp_op_(std::move(rhs.background_image_comp_op_)),
+      background_image_opacity_(std::move(rhs.background_image_opacity_)),
+      styles_(std::move(rhs.styles_)),
+      fontsets_(std::move(rhs.fontsets_)),
+      layers_(std::move(rhs.layers_)),
+      aspectFixMode_(std::move(rhs.aspectFixMode_)),
+      current_extent_(std::move(rhs.current_extent_)),
+      maximum_extent_(std::move(rhs.maximum_extent_)),
+      base_path_(std::move(rhs.base_path_)),
+      extra_params_(std::move(rhs.extra_params_)) {}
+
 Map::~Map() {}
 
-Map& Map::operator=(Map const& rhs)
+
+Map& Map::operator=(Map rhs)
 {
-    if (this==&rhs) return *this;
-    width_=rhs.width_;
-    height_=rhs.height_;
-    srs_=rhs.srs_;
-    buffer_size_ = rhs.buffer_size_;
-    background_=rhs.background_;
-    background_image_=rhs.background_image_;
-    background_image_comp_op_=rhs.background_image_comp_op_;
-    background_image_opacity_=rhs.background_image_opacity_;
-    styles_=rhs.styles_;
-    fontsets_ = rhs.fontsets_;
-    layers_=rhs.layers_;
-    aspectFixMode_=rhs.aspectFixMode_;
-    maximum_extent_=rhs.maximum_extent_;
-    base_path_=rhs.base_path_;
-    extra_params_=rhs.extra_params_;
+    swap(*this, rhs);
     return *this;
+}
+
+void swap (Map & lhs, Map & rhs)
+{
+    using std::swap;
+    std::swap(lhs.width_,  rhs.width_);
+    std::swap(lhs.height_, rhs.height_);
+    std::swap(lhs.srs_, rhs.srs_);
+    std::swap(lhs.buffer_size_, rhs.buffer_size_);
+    std::swap(lhs.background_, rhs.background_);
+    std::swap(lhs.background_image_, rhs.background_image_);
+    std::swap(lhs.background_image_comp_op_, rhs.background_image_comp_op_);
+    std::swap(lhs.background_image_opacity_, rhs.background_image_opacity_);
+    std::swap(lhs.styles_, rhs.styles_);
+    std::swap(lhs.fontsets_, rhs.fontsets_);
+    std::swap(lhs.layers_, rhs.layers_);
+    std::swap(lhs.aspectFixMode_, rhs.aspectFixMode_);
+    std::swap(lhs.current_extent_, rhs.current_extent_);
+    std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
+    std::swap(lhs.base_path_, rhs.base_path_);
+    std::swap(lhs.extra_params_, rhs.extra_params_);
+}
+
+
+bool Map::operator==(Map const& rhs) const
+{
+    return (width_ == rhs.width_) &&
+        (height_ == rhs.height_) &&
+        (srs_ == rhs.srs_) &&
+        (buffer_size_ == rhs.buffer_size_) &&
+        (background_ == rhs.background_) &&
+        (background_image_ == rhs.background_image_) &&
+        (background_image_comp_op_ == rhs.background_image_comp_op_) &&
+        (background_image_opacity_ == rhs.background_image_opacity_) &&
+        (styles_ == rhs.styles_) &&
+        (fontsets_ == rhs.fontsets_) &&
+        (layers_ == rhs.layers_) &&
+        (aspectFixMode_ == rhs.aspectFixMode_) &&
+        (current_extent_ == rhs.current_extent_) &&
+        (maximum_extent_ == rhs.maximum_extent_) &&
+        (base_path_ == rhs.base_path_) &&
+        (extra_params_ == rhs.extra_params_);
 }
 
 std::map<std::string,feature_type_style> const& Map::styles() const
@@ -153,9 +199,9 @@ Map::const_style_iterator Map::end_styles() const
     return styles_.end();
 }
 
-bool Map::insert_style(std::string const& name,feature_type_style const& style)
+bool Map::insert_style(std::string const& name,feature_type_style style)
 {
-    return styles_.insert(make_pair(name,style)).second;
+    return styles_.insert(make_pair(name, std::move(style))).second;
 }
 
 void Map::remove_style(std::string const& name)
@@ -172,16 +218,16 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
 
-bool Map::insert_fontset(std::string const& name, font_set const& fontset)
+bool Map::insert_fontset(std::string const& name, font_set fontset)
 {
     if (fontset.get_name() != name)
     {
         throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
     }
-    return fontsets_.insert(make_pair(name, fontset)).second;
+    return fontsets_.insert(make_pair(name, std::move(fontset))).second;
 }
 
-boost::optional<font_set const&>  Map::find_fontset(std::string const& name) const
+boost::optional<font_set const&> Map::find_fontset(std::string const& name) const
 {
     std::map<std::string,font_set>::const_iterator itr = fontsets_.find(name);
     if (itr != fontsets_.end())
@@ -205,12 +251,12 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-void Map::addLayer(layer const& l)
+void Map::add_layer(layer l)
 {
-    layers_.push_back(l);
+    layers_.push_back(std::move(l));
 }
 
-void Map::removeLayer(size_t index)
+void Map::remove_layer(size_t index)
 {
     layers_.erase(layers_.begin()+index);
 }
@@ -221,12 +267,12 @@ void Map::remove_all()
     styles_.clear();
 }
 
-layer const& Map::getLayer(size_t index) const
+layer const& Map::get_layer(size_t index) const
 {
     return layers_[index];
 }
 
-layer& Map::getLayer(size_t index)
+layer& Map::get_layer(size_t index)
 {
     return layers_[index];
 }
@@ -276,7 +322,7 @@ void Map::set_height(unsigned height)
 void Map::resize(unsigned width,unsigned height)
 {
     if ((width != width_ ||
-        height != height_) &&
+         height != height_) &&
         width >= MIN_MAPSIZE &&
         width <= MAX_MAPSIZE &&
         height >= MIN_MAPSIZE &&
@@ -437,7 +483,7 @@ void Map::zoom_all()
             if (maximum_extent_)
             {
                 MAPNIK_LOG_ERROR(map) << "could not zoom to combined layer extents"
-                    << " so falling back to maximum-extent for zoom_all result";
+                                      << " so falling back to maximum-extent for zoom_all result";
                 zoom_to_box(*maximum_extent_);
             }
             else
@@ -611,8 +657,8 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
             if (fs)
             {
-                return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                               hit_test_filter(x,y,tol));
+                return std::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                                                             hit_test_filter(x,y,tol));
             }
         }
     }

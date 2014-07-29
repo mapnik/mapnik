@@ -30,13 +30,13 @@
 #include <mapnik/utils.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/optional.hpp>
 
 // stl
 #include <string>
 #include <sstream>
+#include <memory>
 
 using mapnik::Pool;
 using mapnik::singleton;
@@ -102,13 +102,13 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 {
 
 public:
-    typedef Pool<Connection,ConnectionCreator> PoolType;
+    using PoolType = Pool<Connection,ConnectionCreator>;
 
 private:
     friend class CreateStatic<ConnectionManager>;
 
-    typedef std::map<std::string,boost::shared_ptr<PoolType> > ContType;
-    typedef boost::shared_ptr<Connection> HolderType;
+    using ContType = std::map<std::string,std::shared_ptr<PoolType> >;
+    using HolderType = std::shared_ptr<Connection>;
     ContType pools_;
 
 public:
@@ -126,20 +126,20 @@ public:
         {
             return pools_.insert(
                 std::make_pair(creator.id(),
-                               boost::make_shared<PoolType>(creator,initialSize,maxSize))).second;
+                               std::make_shared<PoolType>(creator,initialSize,maxSize))).second;
         }
         return false;
 
     }
 
-    boost::shared_ptr<PoolType> getPool(std::string const& key)
+    std::shared_ptr<PoolType> getPool(std::string const& key)
     {
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end())
         {
             return itr->second;
         }
-        static const boost::shared_ptr<PoolType> emptyPool;
+        static const std::shared_ptr<PoolType> emptyPool;
         return emptyPool;
     }
 

@@ -163,7 +163,10 @@ if mapnik.has_pycairo():
                         shutil.copy(test_cairo_file,expected_cairo_file)
                     diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
                     msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
-                    eq_( diff < 2100, True, msg)
+                    if os.uname()[0] == 'Darwin':
+                        eq_( diff < 2100, True, msg)
+                    else:
+                        eq_( diff < 23000, True, msg)
                     os.remove(test_cairo_file)
                     return True
                 else:
@@ -190,4 +193,4 @@ if mapnik.has_pycairo():
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

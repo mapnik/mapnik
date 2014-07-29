@@ -41,17 +41,16 @@ libraries.append('boost_system%s' % env['BOOST_APPEND'])
 linkflags = []
 if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
+    plugin_env.Append(LINKFLAGS=linkflags)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
-    linkflags.append(env['CUSTOM_LDFLAGS'])
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                        SHLIBPREFIX='',
                                        SHLIBSUFFIX='.input',
                                        source=plugin_sources,
-                                       LIBS=libraries,
-                                       LINKFLAGS=(' ').join(linkflags))
+                                       LIBS=libraries)
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

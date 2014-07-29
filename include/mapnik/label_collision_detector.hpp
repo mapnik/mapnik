@@ -38,17 +38,13 @@ namespace mapnik
 
 struct label_collision_detector
 {
-    typedef std::vector<box2d<double> > label_placements;
+    using label_placements = std::vector<box2d<double> >;
 
     bool has_placement(box2d<double> const& box)
     {
-        label_placements::const_iterator itr=labels_.begin();
-        for( ; itr !=labels_.end();++itr)
+        for (auto const& label : labels_)
         {
-            if (itr->intersects(box))
-            {
-                return false;
-            }
+            if (label.intersects(box)) return false;
         }
         labels_.push_back(box);
         return true;
@@ -66,7 +62,7 @@ private:
 // quad_tree based label collision detector
 class label_collision_detector2 : mapnik::noncopyable
 {
-    typedef quad_tree<box2d<double> > tree_t;
+    using tree_t = quad_tree<box2d<double> >;
     tree_t tree_;
 public:
 
@@ -77,15 +73,10 @@ public:
     {
         tree_t::query_iterator itr = tree_.query_in_box(box);
         tree_t::query_iterator end = tree_.query_end();
-
         for ( ;itr != end; ++itr)
         {
-            if (itr->intersects(box))
-            {
-                return false;
-            }
+            if (itr->intersects(box)) return false;
         }
-
         tree_.insert(box,box);
         return true;
     }
@@ -100,7 +91,7 @@ public:
 // quad_tree based label collision detector with seperate check/insert
 class label_collision_detector3 : mapnik::noncopyable
 {
-    typedef quad_tree< box2d<double> > tree_t;
+    using tree_t = quad_tree< box2d<double> >;
     tree_t tree_;
 public:
 
@@ -114,12 +105,8 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->intersects(box))
-            {
-                return false;
-            }
+            if (itr->intersects(box)) return false;
         }
-
         return true;
     }
 
@@ -149,11 +136,11 @@ public:
     };
 
 private:
-    typedef quad_tree< label > tree_t;
+    using tree_t = quad_tree< label >;
     tree_t tree_;
 
 public:
-    typedef tree_t::query_iterator query_iterator;
+    using query_iterator = tree_t::query_iterator;
 
     explicit label_collision_detector4(box2d<double> const& extent)
         : tree_(extent) {}
@@ -165,10 +152,7 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->box.intersects(box))
-            {
-                return false;
-            }
+            if (itr->box.intersects(box)) return false;
         }
 
         return true;
@@ -180,14 +164,11 @@ public:
         tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
         tree_t::query_iterator end = tree_.query_end();
 
-        for ( ;itr != end; ++itr)
+        for (;itr != end; ++itr)
         {
             if (itr->box.intersects(box) || (text == itr->text && itr->box.intersects(bigger_box)))
-            {
                 return false;
-            }
         }
-
         return true;
     }
 
@@ -199,10 +180,7 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->box.intersects(bigger_box))
-            {
-                return false;
-            }
+            if (itr->box.intersects(bigger_box)) return false;
         }
 
         return true;

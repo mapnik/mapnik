@@ -104,6 +104,23 @@ MAPNIK_DECL std::string save_to_string(T const& image,
                                        rgba_palette const& palette);
 
 template <typename T>
+MAPNIK_DECL void save_to_stream
+(
+    T const& image,
+    std::ostream & stream,
+    std::string const& type,
+    rgba_palette const& palette
+);
+
+template <typename T>
+MAPNIK_DECL void save_to_stream
+(
+    T const& image,
+    std::ostream & stream,
+    std::string const& type
+);
+
+template <typename T>
 void save_as_png(T const& image,
                  std::string const& filename,
                  rgba_palette const& palette);
@@ -156,7 +173,7 @@ inline bool is_webp (std::string const& filename)
 inline boost::optional<std::string> type_from_filename(std::string const& filename)
 
 {
-    typedef boost::optional<std::string> result_type;
+    using result_type = boost::optional<std::string>;
     if (is_png(filename)) return result_type("png");
     if (is_jpeg(filename)) return result_type("jpeg");
     if (is_tiff(filename)) return result_type("tiff");
@@ -203,7 +220,7 @@ void add_border(T & image)
 
 
 
-/////////// save_to_file ////////////////////////////////////////////////
+/////////// save_to_file //////////////////////////////////////////////////
 
 MAPNIK_DECL void save_to_file(image_32 const& image,
                               std::string const& file);
@@ -217,7 +234,7 @@ MAPNIK_DECL void save_to_file (image_32 const& image,
                                std::string const& type,
                                rgba_palette const& palette);
 
-//////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 
 MAPNIK_DECL std::string save_to_string(image_32 const& image,
@@ -226,6 +243,17 @@ MAPNIK_DECL std::string save_to_string(image_32 const& image,
 MAPNIK_DECL std::string save_to_string(image_32 const& image,
                                        std::string const& type,
                                        rgba_palette const& palette);
+
+///////////////////////////////////////////////////////////////////////////
+
+MAPNIK_DECL void save_to_stream(image_32 const& image,
+                                std::ostream & stream,
+                                std::string const& type,
+                                rgba_palette const& palette);
+
+MAPNIK_DECL void save_to_stream(image_32 const& image,
+                                std::ostream & stream,
+                                std::string const& type);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -263,6 +291,8 @@ template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<i
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                     std::string const&);
 
+template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
+                                                               std::string const&);
 
 template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
                                                                std::string const&,
@@ -274,6 +304,32 @@ template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (ima
 template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                              std::string const&,
                                                                              rgba_palette const&);
+
+template MAPNIK_DECL void save_to_stream<image_data_32>(
+    image_data_32 const& image,
+    std::ostream & stream,
+    std::string const& type,
+    rgba_palette const& palette
+);
+
+template MAPNIK_DECL void save_to_stream<image_data_32>(
+    image_data_32 const& image,
+    std::ostream & stream,
+    std::string const& type
+);
+
+template MAPNIK_DECL void save_to_stream<image_view<image_data_32> > (
+    image_view<image_data_32> const& image,
+    std::ostream & stream,
+    std::string const& type,
+    rgba_palette const& palette
+);
+
+template MAPNIK_DECL void save_to_stream<image_view<image_data_32> > (
+    image_view<image_data_32> const& image,
+    std::ostream & stream,
+    std::string const& type
+);
 #endif
 
 }

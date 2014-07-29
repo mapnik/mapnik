@@ -56,6 +56,12 @@ struct expression_string : boost::static_visitor<void>
         str_ += "]";
     }
 
+    void operator() (global_attribute const& attr) const
+    {
+        str_ += "@";
+        str_ += attr.name;
+    }
+
     void operator() (geometry_type_attribute const& /*attr*/) const
     {
         str_ += "[mapnik::geometry_type]";

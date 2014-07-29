@@ -31,7 +31,7 @@
 class CursorResultSet : public IResultSet, private mapnik::noncopyable
 {
 public:
-    CursorResultSet(boost::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)
+    CursorResultSet(std::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)
         : conn_(conn),
           cursorName_(cursorName),
           fetch_size_(fetch_count),
@@ -135,9 +135,9 @@ private:
         MAPNIK_LOG_DEBUG(postgis) << "postgis_cursor_resultset: FETCH result (" << cursorName_ << "): " << rs_->size() << " rows";
     }
 
-    boost::shared_ptr<Connection> conn_;
+    std::shared_ptr<Connection> conn_;
     std::string cursorName_;
-    boost::shared_ptr<ResultSet> rs_;
+    std::shared_ptr<ResultSet> rs_;
     int fetch_size_;
     bool is_closed_;
 

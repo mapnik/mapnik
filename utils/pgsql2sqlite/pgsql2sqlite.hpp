@@ -34,23 +34,22 @@
 #include "cursorresultset.hpp"
 
 // boost
-#include <boost/cstdint.hpp>
-#include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 
-//stl
+//st
+#include <cstdint>
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 static std::string numeric2string(const char* buf)
 {
-    boost::int16_t ndigits = int2net(buf);
-    boost::int16_t weight  = int2net(buf+2);
-    boost::int16_t sign    = int2net(buf+4);
-    boost::int16_t dscale  = int2net(buf+6);
+    std::int16_t ndigits = int2net(buf);
+    std::int16_t weight  = int2net(buf+2);
+    std::int16_t sign    = int2net(buf+4);
+    std::int16_t dscale  = int2net(buf+6);
 
-    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    const std::unique_ptr<std::int16_t[]> digits(new std::int16_t[ndigits]);
     for (int n=0; n < ndigits ;++n)
     {
         digits[n] = int2net(buf+8+n*2);
@@ -60,7 +59,7 @@ static std::string numeric2string(const char* buf)
 
     if (sign == 0x4000) ss << "-";
 
-    int i = std::max(weight,boost::int16_t(0));
+    int i = std::max(weight,std::int16_t(0));
     int d = 0;
 
     // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.
@@ -167,7 +166,7 @@ void pgsql2sqlite(Connection conn,
     namespace sqlite = mapnik::sqlite;
     sqlite::database db(output_filename);
 
-    boost::shared_ptr<ResultSet> rs = conn->executeQuery("select * from (" + query + ") as query limit 0;");
+    std::shared_ptr<ResultSet> rs = conn->executeQuery("select * from (" + query + ") as query limit 0;");
     int count = rs->getNumFields();
 
     std::ostringstream select_sql;
@@ -234,7 +233,7 @@ void pgsql2sqlite(Connection conn,
     cursor_sql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << select_sql_str << " FOR READ ONLY";
     conn->execute(cursor_sql.str());
 
-    boost::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
+    std::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
 
     unsigned num_fields = cursor->getNumFields();
 
@@ -249,7 +248,7 @@ void pgsql2sqlite(Connection conn,
 
     std::string output_table_insert_sql = "insert into " + output_table_name + " values (?";
 
-    context_ptr ctx = boost::make_shared<context_type>();
+    context_ptr ctx = std::make_shared<context_type>();
 
     for ( unsigned pos = 0; pos < num_fields ; ++pos)
     {

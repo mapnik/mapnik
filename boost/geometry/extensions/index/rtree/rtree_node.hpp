@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <boost/geometry/algorithms/area.hpp>
 #include <boost/geometry/algorithms/assign.hpp>
@@ -37,8 +37,8 @@ class rtree_node
 {
 public:
 
-    typedef boost::shared_ptr<rtree_node<Box, Value> > node_pointer;
-    typedef boost::shared_ptr<rtree_leaf<Box, Value> > leaf_pointer;
+    typedef std::shared_ptr<rtree_node<Box, Value> > node_pointer;
+    typedef std::shared_ptr<rtree_leaf<Box, Value> > leaf_pointer;
 
     /// type for the node map
     typedef std::vector<std::pair<Box, node_pointer > > node_map;

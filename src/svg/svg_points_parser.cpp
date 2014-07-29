@@ -34,8 +34,8 @@ namespace mapnik { namespace svg {
     bool parse_points(const char* wkt, PathType & p)
     {
         using namespace boost::spirit;
-        typedef const char*  iterator_type;
-        typedef ascii::space_type skip_type;
+        using iterator_type = const char* ;
+        using skip_type = ascii::space_type;
         svg_points_grammar<iterator_type,skip_type,PathType> g(p);
         iterator_type first = wkt;
         iterator_type last =  wkt + std::strlen(wkt);

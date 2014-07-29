@@ -34,7 +34,7 @@
 #include <mapnik/value_types.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 #include <boost/utility.hpp>
 
 #include "shape_datasource.hpp"
@@ -50,7 +50,7 @@ class shape_index_featureset : public Featureset
 {
 public:
     shape_index_featureset(filterT const& filter,
-                           shape_io & shape,
+                           std::unique_ptr<shape_io> && shape_ptr,
                            std::set<std::string> const& attribute_names,
                            std::string const& encoding,
                            std::string const& shape_name,
@@ -61,8 +61,8 @@ public:
 private:
     filterT filter_;
     context_ptr ctx_;
-    shape_io & shape_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    std::unique_ptr<shape_io> shape_ptr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     std::vector<std::streampos> offsets_;
     std::vector<std::streampos>::iterator itr_;
     std::vector<int> attr_ids_;

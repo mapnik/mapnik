@@ -28,11 +28,10 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
 
 // boost
-#include <boost/foreach.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -45,14 +44,14 @@ BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, cs::cartesian, x, y)
 namespace boost { namespace geometry { namespace traits
 {
 
-template<> struct tag<mapnik::box2d<double> > { typedef box_tag type; };
+template<> struct tag<mapnik::box2d<double> > { using type = box_tag; };
 
-template<> struct point_type<mapnik::box2d<double> > { typedef mapnik::coord2d type; };
+template<> struct point_type<mapnik::box2d<double> > { using type = mapnik::coord2d; };
 
 template <>
 struct indexed_access<mapnik::box2d<double>, min_corner, 0>
 {
-    typedef coordinate_type<mapnik::coord2d>::type ct;
+    using ct = coordinate_type<mapnik::coord2d>::type;
     static inline ct get(mapnik::box2d<double> const& b) { return b.minx();}
     static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_minx(value); }
 };
@@ -60,7 +59,7 @@ struct indexed_access<mapnik::box2d<double>, min_corner, 0>
 template <>
 struct indexed_access<mapnik::box2d<double>, min_corner, 1>
 {
-    typedef coordinate_type<mapnik::coord2d>::type ct;
+    using ct = coordinate_type<mapnik::coord2d>::type;
     static inline ct get(mapnik::box2d<double> const& b) { return b.miny();}
     static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_miny(value); }
 };
@@ -68,7 +67,7 @@ struct indexed_access<mapnik::box2d<double>, min_corner, 1>
 template <>
 struct indexed_access<mapnik::box2d<double>, max_corner, 0>
 {
-    typedef coordinate_type<mapnik::coord2d>::type ct;
+    using ct = coordinate_type<mapnik::coord2d>::type;
     static inline ct get(mapnik::box2d<double> const& b) { return b.maxx();}
     static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_maxx(value); }
 };
@@ -76,7 +75,7 @@ struct indexed_access<mapnik::box2d<double>, max_corner, 0>
 template <>
 struct indexed_access<mapnik::box2d<double>, max_corner, 1>
 {
-    typedef coordinate_type<mapnik::coord2d>::type ct;
+    using ct = coordinate_type<mapnik::coord2d>::type;
     static inline ct get(mapnik::box2d<double> const& b) { return b.maxy();}
     static inline void set(mapnik::box2d<double> &b , ct const& value) { b.set_maxy(value); }
 };
@@ -90,26 +89,37 @@ using namespace boost::geometry;
 template <typename Geometry>
 struct polygon_clipper
 {
-    typedef mapnik::coord2d point_2d;
-    typedef model::polygon<mapnik::coord2d> polygon_2d;
-    typedef std::deque<polygon_2d> polygon_list;
+    using point_2d = mapnik::coord2d;
+    using polygon_2d = model::polygon<mapnik::coord2d>;
+    using polygon_list = std::deque<polygon_2d>;
+
+    enum
+    {
+        clip = 1,
+        no_clip = 2,
+        ignore = 3
+
+    } state_;
 
     polygon_clipper(Geometry & geom)
-        : clip_box_(),
+        : state_(clip),
+          clip_box_(),
           geom_(geom)
     {
 
     }
 
-    polygon_clipper( box2d<double> const& clip_box,Geometry & geom)
-        : clip_box_(clip_box),
-          geom_(geom)
+    polygon_clipper(box2d<double> const& clip_box, Geometry & geom)
+        :state_(clip),
+         clip_box_(clip_box),
+         geom_(geom)
     {
         init();
     }
 
     void set_clip_box(box2d<double> const& clip_box)
     {
+        state_ = clip;
         clip_box_ = clip_box;
         init();
     }
@@ -121,21 +131,48 @@ struct polygon_clipper
 
     void rewind(unsigned path_id)
     {
-        output_.rewind(path_id);
+        if (state_ == clip) output_.rewind(path_id);
+        else geom_.rewind(path_id);
     }
 
     unsigned vertex (double * x, double * y)
     {
-        return output_.vertex(x,y);
+        switch (state_)
+        {
+        case clip:
+            return output_.vertex(x,y);
+        case no_clip:
+            return geom_.vertex(x,y);
+        case ignore:
+            return SEG_END;
+        }
+        return SEG_END;
     }
 
 private:
 
     void init()
     {
+        geom_.rewind(0);
+        box2d<double> bbox = geom_.envelope();
+        if (clip_box_.contains(bbox))
+        {
+            // shortcut to original geometry (no-clipping)
+            state_ = no_clip;
+            return;
+        }
+        else if (!clip_box_.intersects(bbox))
+        {
+            // polygon is outside of clipping box
+            state_ = ignore;
+            return;
+        }
+
         polygon_2d subject_poly;
-        double x,y;
-        double prev_x, prev_y;
+        double x = 0;
+        double y = 0;
+        double prev_x = 0;
+        double prev_y = 0;
         geom_.rewind(0);
         unsigned ring_count = 0;
         while (true)
@@ -161,12 +198,15 @@ private:
             {
                 if (std::abs(x - prev_x) < 1e-12 && std::abs(y - prev_y) < 1e-12)
                 {
-                    std::cerr << std::setprecision(12) << "coincident vertices:(" << prev_x << ","
-                              <<  prev_y << ") , (" << x << "," << y <<  ")" << std::endl;
+#ifdef MAPNIK_LOG
+                    MAPNIK_LOG_WARN(polygon_clipper)
+                        << std::setprecision(12) << "coincident vertices:(" << prev_x << ","
+                        <<  prev_y << ") , (" << x << "," << y <<  ")";
+#endif
                     continue;
                 }
                 prev_x = x;
-                prev_x = y;
+                prev_y = y;
                 if (ring_count == 1)
                 {
                     append(subject_poly, make<point_2d>(x,y));
@@ -179,7 +219,13 @@ private:
         }
 
         polygon_list clipped_polygons;
-
+#ifdef MAPNIK_LOG
+        double area = boost::geometry::area(subject_poly);
+        if (area < 0)
+        {
+            MAPNIK_LOG_ERROR(polygon_clipper) << "negative area detected for polygon indicating incorrect winding order";
+        }
+#endif
         try
         {
             boost::geometry::intersection(clip_box_, subject_poly, clipped_polygons);
@@ -189,10 +235,10 @@ private:
             std::cerr << ex.what() << std::endl;
         }
 
-        BOOST_FOREACH(polygon_2d const& poly, clipped_polygons)
+        for (polygon_2d const& poly : clipped_polygons)
         {
             bool move_to = true;
-            BOOST_FOREACH(point_2d const& c, boost::geometry::exterior_ring(poly))
+            for (point_2d const& c : boost::geometry::exterior_ring(poly))
             {
                 if (move_to)
                 {
@@ -206,10 +252,10 @@ private:
             }
             output_.close_path();
             // interior rings
-            BOOST_FOREACH(polygon_2d::inner_container_type::value_type const& ring, boost::geometry::interior_rings(poly))
+            for (polygon_2d::inner_container_type::value_type const& ring : boost::geometry::interior_rings(poly))
             {
                 move_to = true;
-                BOOST_FOREACH(point_2d const& c, ring)
+                for (point_2d const& c : ring)
                 {
                     if (move_to)
                     {

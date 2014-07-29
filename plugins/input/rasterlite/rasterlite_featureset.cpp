@@ -31,9 +31,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 
-// boost
-#include <boost/make_shared.hpp>
-
+#include <cstring>
 
 using mapnik::coord2d;
 using mapnik::box2d;
@@ -48,7 +46,7 @@ rasterlite_featureset::rasterlite_featureset(void* dataset,
     : dataset_(dataset),
       gquery_(q),
       first_(true),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(std::make_shared<mapnik::context_type>())
 {
     rasterliteSetBackgroundColor(dataset_, 255, 0, 255);
     rasterliteSetTransparentColor(dataset_, 255, 0, 255);
@@ -66,21 +64,8 @@ feature_ptr rasterlite_featureset::next()
     if (first_)
     {
         first_ = false;
-
-        query *q = boost::get<query>(&gquery_);
-        if (q)
-        {
-            return get_feature(*q);
-        }
-        else
-        {
-            coord2d *p = boost::get<coord2d>(&gquery_);
-            if (p)
-            {
-                return get_feature_at_point(*p);
-            }
-        }
-        // should never reach here
+        MAPNIK_LOG_DEBUG(gdal) << "rasterlite_featureset: Next feature in Dataset=" << &dataset_;
+        return boost::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
 }
@@ -97,8 +82,8 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     box2d<double> raster_extent(x0, y0, x1, y1);
     box2d<double> intersect = raster_extent.intersect(q.get_bbox());
 
-    const int width = static_cast<int>(boost::get<0>(q.resolution()) * intersect.width() + 0.5);
-    const int height = static_cast<int>(boost::get<0>(q.resolution()) * intersect.height() + 0.5);
+    const int width = static_cast<int>(std::get<0>(q.resolution()) * intersect.width() + 0.5);
+    const int height = static_cast<int>(std::get<0>(q.resolution()) * intersect.height() + 0.5);
 
     const double pixel_size = (intersect.width() >= intersect.height()) ?
         (intersect.width() / (double) width) : (intersect.height() / (double) height);
@@ -106,7 +91,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Raster extent=" << raster_extent;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: View extent=" << q.get_bbox();
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Intersect extent=" << intersect;
-    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Query resolution=" << boost::get<0>(q.resolution())  << "," << boost::get<1>(q.resolution());
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Query resolution=" << std::get<0>(q.resolution())  << "," << std::get<1>(q.resolution());
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Size=" << width << " " << height;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Pixel Size=" << pixel_size;
 
@@ -129,14 +114,14 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         {
             if (size > 0)
             {
-                mapnik::raster_ptr rasterp = boost::make_shared<mapnik::raster>(intersect, width, height);
+                mapnik::raster_ptr rasterp = std::make_shared<mapnik::raster>(intersect, width, height);
                 mapnik::image_data_32 & image = rasterp->data_;
                 image.set(0xffffffff);
 
                 unsigned char* raster_data = static_cast<unsigned char*>(raster);
                 unsigned char* image_data = image.getBytes();
 
-                memcpy (image_data, raster_data, size);
+                std::memcpy(image_data, raster_data, size);
 
                 feature->set_raster(rasterp);
 

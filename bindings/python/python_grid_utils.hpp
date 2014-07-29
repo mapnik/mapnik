@@ -76,14 +76,6 @@ void render_layer_for_grid(const mapnik::Map& map,
                                   unsigned layer_idx, // TODO - layer by name or index
                                   boost::python::list const& fields);
 
-/* old, original impl - to be removed after further testing
- * grid object is created on the fly at potentially reduced size
- */
-boost::python::dict render_grid(const mapnik::Map& map,
-                                       unsigned layer_idx, // layer
-                                       std::string const& key, // key_name
-                                       unsigned int step, // resolution
-                                       boost::python::list const& fields);
 }
 
 #endif // MAPNIK_PYTHON_BINDING_GRID_UTILS_INCLUDED

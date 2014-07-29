@@ -23,13 +23,10 @@
 #ifndef FEATURE_STYLE_PROCESSOR_CONTEXT_HPP
 #define FEATURE_STYLE_PROCESSOR_CONTEXT_HPP
 
-// boost
-#include <boost/utility.hpp>
-#include <boost/shared_ptr.hpp>
-
 // stl
 #include <map>
 #include <string>
+#include <memory>
 
 namespace mapnik {
 
@@ -39,9 +36,9 @@ public:
     virtual ~IProcessorContext() {}
 };
 
-typedef boost::shared_ptr<IProcessorContext> processor_context_ptr;
-typedef std::map<std::string, processor_context_ptr > feature_style_context_map;
+using processor_context_ptr = std::shared_ptr<IProcessorContext>;
+using feature_style_context_map = std::map<std::string, processor_context_ptr >;
 
 }
 
-#endif /* FEATURE_STYLE_PROCESSOR_CONTEXT_HPP */
+#endif // FEATURE_STYLE_PROCESSOR_CONTEXT_HPP

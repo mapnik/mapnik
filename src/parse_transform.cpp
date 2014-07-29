@@ -22,46 +22,29 @@
 
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/transform_expression_grammar.hpp>
-#include <mapnik/transform_processor.hpp>
-#include <mapnik/debug.hpp>
 
-#include <boost/make_shared.hpp>
+// stl
+#include <string>
+#include <stdexcept>
 
 namespace mapnik {
 
-transform_list_ptr parse_transform(std::string const& str)
-{
-    return parse_transform(str, "utf-8");
-}
-
 transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
 {
-    transform_list_ptr tl = boost::make_shared<transform_list>();
-    transcoder tc(encoding);
-    expression_grammar<std::string::const_iterator> ge(tc);
-    transform_expression_grammar_string gte(ge);
-
-    if (!parse_transform(*tl, str, gte))
-    {
-        tl.reset();
-    }
-    return tl;
-}
-
-bool parse_transform(transform_list& transform,
-                     std::string const& str,
-                     transform_expression_grammar_string const& g)
-{
+    static const transform_expression_grammar<std::string::const_iterator> g;
+    transform_list_ptr tl = std::make_shared<transform_list>();
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space_type(), transform);
-
-    #ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(load_map) << "map_parser: Parsed transform [ "
-        << transform_processor_type::to_string(transform) << " ]";
-    #endif
-
-    return (r && itr==end);
+    bool r = qi::phrase_parse(itr, end, g, space_type(), *tl);
+    if (r && itr == end)
+    {
+        return tl;
+    }
+    else
+    {
+        throw std::runtime_error("Failed to parse transform: \"" + str + "\"");
+    }
 }
+
 
 } // namespace mapnik

@@ -581,6 +581,16 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(b.maxx,180)
         eq_(b.maxy,90)
 
+    def test_inline_geojson(**kwargs):
+        csv_string = "geojson\n'{\"coordinates\":[-92.22568,38.59553],\"type\":\"Point\"}'"
+        ds = mapnik.Datasource(**{"type":"csv","inline":csv_string})
+        eq_(len(ds.fields()),0)
+        eq_(ds.fields(),[])
+        # FIXME - re-enable after https://github.com/mapnik/mapnik/issues/2319 is fixed
+        #fs = ds.featureset()
+        #feat = fs.next()
+        #eq_(feat.num_geometries(),1)
+
 if __name__ == "__main__":
     setup()
     [eval(run)(visual=True) for run in dir() if 'test_' in run]

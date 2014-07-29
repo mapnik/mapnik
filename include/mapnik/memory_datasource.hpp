@@ -36,16 +36,18 @@ class MAPNIK_DECL memory_datasource : public datasource
 {
     friend class memory_featureset;
 public:
-    memory_datasource(datasource::datasource_t type=datasource::Vector, bool bbox_check=true);
+    memory_datasource(parameters const& params);
+    static const char * name();
     virtual ~memory_datasource();
+    virtual datasource::datasource_t type() const;
+    virtual featureset_ptr features(query const& q) const;
+    virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
+    virtual box2d<double> envelope() const;
+    virtual boost::optional<geometry_t> get_geometry_type() const;
+    virtual layer_descriptor get_descriptor() const;
+    //
     void push(feature_ptr feature);
-    datasource::datasource_t type() const;
-    featureset_ptr features(query const& q) const;
-    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     void set_envelope(box2d<double> const& box);
-    box2d<double> envelope() const;
-    boost::optional<geometry_t> get_geometry_type() const;
-    layer_descriptor get_descriptor() const;
     size_t size() const;
     void clear();
 private:

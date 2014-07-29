@@ -46,6 +46,8 @@ class MainWindow : public QMainWindow
     virtual ~MainWindow();
     void set_default_extent(double x0,double y0,double x1, double y1);
     void set_scaling_factor(double scaling_factor);
+public :
+    std::shared_ptr<mapnik::Map> get_map();
 protected:
     void closeEvent(QCloseEvent* event);
 public slots:
@@ -69,7 +71,6 @@ private:
     void createToolBars();
     void createContextMenu();
     void load_map_file(QString const& filename);
-
 
     QString currentPath;
     QString filename_;

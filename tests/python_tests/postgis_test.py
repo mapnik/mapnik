@@ -164,6 +164,34 @@ INSERT INTO test11(label,geom) values ('label_7',GeomFromEWKT('SRID=4326;MULTIPO
 INSERT INTO test11(label,geom) values ('label_8',GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POLYGON((1 1, 2 1, 2 2, 1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))'));
 """
 
+insert_table_12 = """
+CREATE TABLE test12(gid serial PRIMARY KEY, name varchar(40), geom geometry);
+INSERT INTO test12(name,geom) values ('Point',GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test12(name,geom) values ('PointZ',GeomFromEWKT('SRID=4326;POINTZ(0 0 0)'));
+INSERT INTO test12(name,geom) values ('PointM',GeomFromEWKT('SRID=4326;POINTM(0 0 0)'));
+INSERT INTO test12(name,geom) values ('PointZM',GeomFromEWKT('SRID=4326;POINTZM(0 0 0 0)'));
+INSERT INTO test12(name,geom) values ('MultiPoint',GeomFromEWKT('SRID=4326;MULTIPOINT(0 0, 1 1)'));
+INSERT INTO test12(name,geom) values ('MultiPointZ',GeomFromEWKT('SRID=4326;MULTIPOINTZ(0 0 0, 1 1 1)'));
+INSERT INTO test12(name,geom) values ('MultiPointM',GeomFromEWKT('SRID=4326;MULTIPOINTM(0 0 0, 1 1 1)'));
+INSERT INTO test12(name,geom) values ('MultiPointZM',GeomFromEWKT('SRID=4326;MULTIPOINTZM(0 0 0 0, 1 1 1 1)'));
+INSERT INTO test12(name,geom) values ('LineString',GeomFromEWKT('SRID=4326;LINESTRING(0 0, 1 1)'));
+INSERT INTO test12(name,geom) values ('LineStringZ',GeomFromEWKT('SRID=4326;LINESTRINGZ(0 0 0, 1 1 1)'));
+INSERT INTO test12(name,geom) values ('LineStringM',GeomFromEWKT('SRID=4326;LINESTRINGM(0 0 0, 1 1 1)'));
+INSERT INTO test12(name,geom) values ('LineStringZM',GeomFromEWKT('SRID=4326;LINESTRINGZM(0 0 0 0, 1 1 1 1)'));
+INSERT INTO test12(name,geom) values ('Polygon',GeomFromEWKT('SRID=4326;POLYGON((0 0, 1 1, 2 2, 0 0))'));
+INSERT INTO test12(name,geom) values ('PolygonZ',GeomFromEWKT('SRID=4326;POLYGONZ((0 0 0, 1 1 1, 2 2 2, 0 0 0))'));
+INSERT INTO test12(name,geom) values ('PolygonM',GeomFromEWKT('SRID=4326;POLYGONZ((0 0 0, 1 1 1, 2 2 2, 0 0 0))'));
+INSERT INTO test12(name,geom) values ('PolygonZM',GeomFromEWKT('SRID=4326;POLYGONZM((0 0 0 0, 1 1 1 1, 2 2 2 2, 0 0 0 0))'));
+INSERT INTO test12(name,geom) values ('MultiLineString',GeomFromEWKT('SRID=4326;MULTILINESTRING((0 0, 1 1),(2 2, 3 3))'));
+INSERT INTO test12(name,geom) values ('MultiLineStringZ',GeomFromEWKT('SRID=4326;MULTILINESTRINGZ((0 0 0, 1 1 1),(2 2 2, 3 3 3))'));
+INSERT INTO test12(name,geom) values ('MultiLineStringM',GeomFromEWKT('SRID=4326;MULTILINESTRINGM((0 0 0, 1 1 1),(2 2 2, 3 3 3))'));
+INSERT INTO test12(name,geom) values ('MultiLineStringZM',GeomFromEWKT('SRID=4326;MULTILINESTRINGZM((0 0 0 0, 1 1 1 1),(2 2 2 2, 3 3 3 3))'));
+INSERT INTO test12(name,geom) values ('MultiPolygon',GeomFromEWKT('SRID=4326;MULTIPOLYGON(((0 0, 1 1, 2 2, 0 0)),((0 0, 1 1, 2 2, 0 0)))'));
+INSERT INTO test12(name,geom) values ('MultiPolygonZ',GeomFromEWKT('SRID=4326;MULTIPOLYGONZ(((0 0 0, 1 1 1, 2 2 2, 0 0 0)),((0 0 0, 1 1 1, 2 2 2, 0 0 0)))'));
+INSERT INTO test12(name,geom) values ('MultiPolygonM',GeomFromEWKT('SRID=4326;MULTIPOLYGONM(((0 0 0, 1 1 1, 2 2 2, 0 0 0)),((0 0 0, 1 1 1, 2 2 2, 0 0 0)))'));
+INSERT INTO test12(name,geom) values ('MultiPolygonZM',GeomFromEWKT('SRID=4326;MULTIPOLYGONZM(((0 0 0 0, 1 1 1 1, 2 2 2 2, 0 0 0 0)),((0 0 0 0, 1 1 1 1, 2 2 2 2, 0 0 0 0)))'));
+"""
+
 
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
@@ -182,6 +210,7 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_9),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_10),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_11),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_12),silent=False)
 
 def postgis_takedown():
     pass
@@ -249,7 +278,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         except StopIteration:
             pass
         eq_(feature,None)
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
+        eq_(ds.describe()['geometry_type'],None)
 
     def test_geometry_detection():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
@@ -706,14 +735,14 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         map1 = mapnik.Map(600,300)
         s = mapnik.Style()
         r = mapnik.Rule()
-        r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#f2eff9')))
+        r.symbols.append(mapnik.PolygonSymbolizer())
         s.rules.append(r)
         map1.append_style('style',s)
 
         # This layer will fail after a while
         buggy_s = mapnik.Style()
         buggy_r = mapnik.Rule()
-        buggy_r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#ff0000')))
+        buggy_r.symbols.append(mapnik.PolygonSymbolizer())
         buggy_r.filter = mapnik.Filter("[fips] = 'FR'")
         buggy_s.rules.append(buggy_r)
         map1.append_style('style for buggy layer',buggy_s)
@@ -736,8 +765,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         map2.background = mapnik.Color('steelblue')
         s = mapnik.Style()
         r = mapnik.Rule()
-        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
-        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
+        r.symbols.append(mapnik.LineSymbolizer())
+        r.symbols.append(mapnik.LineSymbolizer())
         s.rules.append(r)
         map2.append_style('style',s)
         layer1 = mapnik.Layer('layer1')
@@ -749,17 +778,251 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
         # We expect this to trigger a PSQL error
         try:
-            mapnik.render_to_file(map1,'world.png', 'png')
+            mapnik.render_to_file(map1,'/tmp/mapnik-postgis-test-map1.png', 'png')
             # Test must fail if error was not raised just above
             eq_(False,True)
         except RuntimeError:
             pass
         # This used to raise an exception before correction of issue 2042
-        mapnik.render_to_file(map2,'world2.png', 'png')
+        mapnik.render_to_file(map2,'/tmp/mapnik-postgis-test-map2.png', 'png')
+
+    def test_handling_of_zm_dimensions():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                            table='(select gid,ST_CoordDim(geom) as dim,name,geom from test12) as tmp',
+                            geometry_field='geom')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['gid', 'dim', 'name'])
+        eq_(ds.field_types(),['int', 'int', 'str'])
+        fs = ds.featureset()
+        # Point (2d)
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['gid'],1)
+        eq_(feat['dim'],2)
+        eq_(feat['name'],'Point')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        # PointZ
+        feat = fs.next()
+        eq_(feat.id(),2)
+        eq_(feat['gid'],2)
+        eq_(feat['dim'],3)
+        eq_(feat['name'],'PointZ')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        # PointM
+        feat = fs.next()
+        eq_(feat.id(),3)
+        eq_(feat['gid'],3)
+        eq_(feat['dim'],3)
+        eq_(feat['name'],'PointM')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        # PointZM
+        feat = fs.next()
+        eq_(feat.id(),4)
+        eq_(feat['gid'],4)
+        eq_(feat['dim'],4)
+        eq_(feat['name'],'PointZM')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        # MultiPoint
+        feat = fs.next()
+        eq_(feat.id(),5)
+        eq_(feat['gid'],5)
+        eq_(feat['dim'],2)
+        eq_(feat['name'],'MultiPoint')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        # MultiPointZ
+        feat = fs.next()
+        eq_(feat.id(),6)
+        eq_(feat['gid'],6)
+        eq_(feat['dim'],3)
+        eq_(feat['name'],'MultiPointZ')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        # MultiPointM
+        feat = fs.next()
+        eq_(feat.id(),7)
+        eq_(feat['gid'],7)
+        eq_(feat['dim'],3)
+        eq_(feat['name'],'MultiPointM')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        # MultiPointZM
+        feat = fs.next()
+        eq_(feat.id(),8)
+        eq_(feat['gid'],8)
+        eq_(feat['dim'],4)
+        eq_(feat['name'],'MultiPointZM')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        # LineString
+        feat = fs.next()
+        eq_(feat.id(),9)
+        eq_(feat['gid'],9)
+        eq_(feat['dim'],2)
+        eq_(feat['name'],'LineString')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        # LineStringZ
+        feat = fs.next()
+        eq_(feat.id(),10)
+        eq_(feat['gid'],10)
+        eq_(feat['dim'],3)
+        eq_(feat['name'],'LineStringZ')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        # LineStringM
+        feat = fs.next()
+        eq_(feat.id(),11)
+        eq_(feat['gid'],11)
+        eq_(feat['dim'],3)
+        eq_(feat['name'],'LineStringM')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        # LineStringZM
+        feat = fs.next()
+        eq_(feat.id(),12)
+        eq_(feat['gid'],12)
+        eq_(feat['dim'],4)
+        eq_(feat['name'],'LineStringZM')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        # Polygon
+        feat = fs.next()
+        eq_(feat.id(),13)
+        eq_(feat['gid'],13)
+        eq_(feat['name'],'Polygon')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # PolygonZ
+        feat = fs.next()
+        eq_(feat.id(),14)
+        eq_(feat['gid'],14)
+        eq_(feat['name'],'PolygonZ')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # PolygonM
+        feat = fs.next()
+        eq_(feat.id(),15)
+        eq_(feat['gid'],15)
+        eq_(feat['name'],'PolygonM')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # PolygonZM
+        feat = fs.next()
+        eq_(feat.id(),16)
+        eq_(feat['gid'],16)
+        eq_(feat['name'],'PolygonZM')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # MultiLineString
+        feat = fs.next()
+        eq_(feat.id(),17)
+        eq_(feat['gid'],17)
+        eq_(feat['name'],'MultiLineString')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        # MultiLineStringZ
+        feat = fs.next()
+        eq_(feat.id(),18)
+        eq_(feat['gid'],18)
+        eq_(feat['name'],'MultiLineStringZ')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        # MultiLineStringM
+        feat = fs.next()
+        eq_(feat.id(),19)
+        eq_(feat['gid'],19)
+        eq_(feat['name'],'MultiLineStringM')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        # MultiLineStringZM
+        feat = fs.next()
+        eq_(feat.id(),20)
+        eq_(feat['gid'],20)
+        eq_(feat['name'],'MultiLineStringZM')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        # MultiPolygon
+        feat = fs.next()
+        eq_(feat.id(),21)
+        eq_(feat['gid'],21)
+        eq_(feat['name'],'MultiPolygon')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # MultiPolygonZ
+        feat = fs.next()
+        eq_(feat.id(),22)
+        eq_(feat['gid'],22)
+        eq_(feat['name'],'MultiPolygonZ')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # MultiPolygonM
+        feat = fs.next()
+        eq_(feat.id(),23)
+        eq_(feat['gid'],23)
+        eq_(feat['name'],'MultiPolygonM')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        # MultiPolygonZM
+        feat = fs.next()
+        eq_(feat.id(),24)
+        eq_(feat['gid'],24)
+        eq_(feat['name'],'MultiPolygonZM')
+        geoms = feat.geometries()
+        eq_(len(geoms),2)
+        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+
+    def test_variable_in_subquery1():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
+           (select * from test where @zoom = 30 ) as tmp''',
+                            geometry_field='geom',
+                            autodetect_key_field=True)
+        fs = ds.featureset(variables={'zoom':30})
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
 
 
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

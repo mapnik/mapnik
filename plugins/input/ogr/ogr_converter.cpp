@@ -79,21 +79,21 @@ void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature)
 
 void ogr_converter::convert_point(OGRPoint* geom, feature_ptr feature)
 {
-    std::auto_ptr<geometry_type> point(new geometry_type(mapnik::Point));
+    std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
     point->move_to(geom->getX(), geom->getY());
-    feature->paths().push_back(point);
+    feature->paths().push_back(point.release());
 }
 
 void ogr_converter::convert_linestring(OGRLineString* geom, feature_ptr feature)
 {
     int num_points = geom->getNumPoints();
-    std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
+    std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
     line->move_to(geom->getX(0), geom->getY(0));
     for (int i = 1; i < num_points; ++i)
     {
         line->line_to (geom->getX(i), geom->getY(i));
     }
-    feature->paths().push_back(line);
+    feature->paths().push_back(line.release());
 }
 
 void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
@@ -108,7 +108,7 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
         capacity += interior->getNumPoints();
     }
 
-    std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
+    std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
 
     poly->move_to(exterior->getX(0), exterior->getY(0));
     for (int i = 1; i < num_points; ++i)
@@ -127,7 +127,7 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
         }
         poly->close_path();
     }
-    feature->paths().push_back(poly);
+    feature->paths().push_back(poly.release());
 }
 
 void ogr_converter::convert_multipoint(OGRMultiPoint* geom, feature_ptr feature)
@@ -163,7 +163,7 @@ void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr 
     for (int i = 0; i < num_geometries; ++i)
     {
         OGRGeometry* g = geom->getGeometryRef(i);
-        if (g != NULL)
+        if (g != nullptr)
         {
             convert_geometry(g, feature);
         }

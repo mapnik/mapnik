@@ -47,7 +47,7 @@ program_env.PrependUnique(CPPPATH=['#plugins/input/postgis'])
 
 libraries = []
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries.extend([boost_program_options,'sqlite3','pq','mapnik','icuuc'])
+libraries.extend([boost_program_options,'sqlite3','pq',env['MAPNIK_NAME'],'icuuc'])
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
@@ -55,9 +55,8 @@ if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
         boost_system = 'boost_system%s' % env['BOOST_APPEND']
         libraries.extend([boost_system])
 
-linkflags = env['CUSTOM_LDFLAGS']
 if env['SQLITE_LINKFLAGS']:
-    linkflags.append(env['SQLITE_LINKFLAGS'])
+    program_env.Append(LINKFLAGS=env['SQLITE_LINKFLAGS'])
 
 if env['RUNTIME_LINK'] == 'static':
     if env['PLATFORM'] == 'Darwin':
@@ -67,7 +66,7 @@ if env['RUNTIME_LINK'] == 'static':
         program_env.ParseConfig('pg_config --libs')
         libraries.append('dl')
 
-pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries, LINKFLAGS=linkflags)
+pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:

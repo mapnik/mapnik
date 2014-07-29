@@ -24,17 +24,21 @@
 #define MAPNIK_WEBP_IO_HPP
 
 // mapnik
+#include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>
 
 // webp
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 #include <webp/encode.h>
+#pragma clang diagnostic pop
 
 // stl
 #include <stdexcept>
 #include <string>
 
 // boost
-#include <boost/scoped_array.hpp>
+
 
 
 namespace mapnik {

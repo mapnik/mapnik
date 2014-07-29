@@ -54,7 +54,7 @@ extern "C"
 #include <mapnik/util/conversions.hpp>
 
 #ifdef HAVE_CAIRO
-#include <mapnik/cairo_renderer.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #include <cairo.h>
 #ifdef CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>
@@ -68,7 +68,7 @@ extern "C"
 #endif
 
 // boost
-#include <boost/foreach.hpp>
+
 #include <boost/tokenizer.hpp>
 
 // stl
@@ -147,7 +147,7 @@ void handle_png_options(std::string const& type,
     boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
     bool set_colors = false;
     bool set_gamma = false;
-    BOOST_FOREACH(std::string const& t, tokens)
+    for (std::string const& t : tokens)
     {
         if (t == "png" || t == "png8")
         {
@@ -268,7 +268,7 @@ void handle_webp_options(std::string const& type,
     if (type.length() > 4){
         boost::char_separator<char> sep(":");
         boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        BOOST_FOREACH(std::string const& t, tokens)
+        for (auto const& t : tokens)
         {
             if (t == "webp")
             {

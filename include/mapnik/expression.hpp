@@ -28,7 +28,7 @@
 #include <mapnik/expression_node_types.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string>
@@ -38,13 +38,10 @@ namespace mapnik
 {
 
 // fwd declare to reduce compile time
-template <typename Iterator> struct expression_grammar;
-typedef boost::shared_ptr<expr_node> expression_ptr;
-typedef std::set<expression_ptr> expression_set;
-
+using expression_ptr = std::shared_ptr<expr_node>;
+using expression_set = std::set<expression_ptr>;
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding = "UTF8");
-MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, mapnik::expression_grammar<std::string::const_iterator> const& g);
 }
 
 #endif // MAPNIK_EXPRESSION_HPP

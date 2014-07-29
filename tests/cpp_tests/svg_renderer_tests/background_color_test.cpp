@@ -1,3 +1,5 @@
+#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
+
 #define BOOST_TEST_MODULE background_color_test
 
 /*

@@ -29,7 +29,7 @@ template <typename T>
 class image_view
 {
 public:
-    typedef typename T::pixel_type pixel_type;
+    using pixel_type = typename T::pixel_type;
 
     image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data)
         : x_(x),

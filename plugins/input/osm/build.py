@@ -21,6 +21,7 @@
 
 Import ('plugin_base')
 Import ('env')
+from copy import copy
 
 PLUGIN_NAME = 'osm'
 
@@ -33,25 +34,25 @@ plugin_sources = Split(
   %(PLUGIN_NAME)s_featureset.cpp
   osmparser.cpp
   dataset_deliverer.cpp
-  basiccurl.cpp
   """ % locals()
 )
 
+plugin_env['LIBS'] = []
+plugin_env.Append(LIBS='xml2')
+
 # Link Library to Dependencies
-libraries = [ 'xml2' ]
-libraries.append('curl')
+libraries = copy(plugin_env['LIBS'])
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    libraries.append(env['MAPNIK_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                       SHLIBPREFIX='',
                                       SHLIBSUFFIX='.input',
                                       source=plugin_sources,
-                                      LIBS=libraries,
-                                      LINKFLAGS=env['CUSTOM_LDFLAGS'])
+                                      LIBS=libraries)
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

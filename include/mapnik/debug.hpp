@@ -25,13 +25,14 @@
 
 // mapnik (should not depend on anything that need to use this)
 #include <mapnik/config.hpp>
+#include <mapnik/unique_lock.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #endif
 
 // std
@@ -61,7 +62,7 @@ namespace mapnik {
             none = 3
         };
 
-        typedef boost::unordered_map<std::string, severity_type> severity_map;
+        using severity_map = std::unordered_map<std::string, severity_type>;
 
         // global security level
         static severity_type get_severity()
@@ -69,10 +70,10 @@ namespace mapnik {
             return severity_level_;
         }
 
-        static void set_severity(const severity_type& severity_level)
+        static void set_severity(severity_type const& severity_level)
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(severity_mutex_);
+            mapnik::scoped_lock lock(severity_mutex_);
 #endif
 
             severity_level_ = severity_level;
@@ -93,10 +94,10 @@ namespace mapnik {
         }
 
         static void set_object_severity(std::string const& object_name,
-                                        const severity_type& security_level)
+                                        severity_type const& security_level)
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(severity_mutex_);
+            mapnik::scoped_lock lock(severity_mutex_);
 #endif
             if (! object_name.empty())
             {
@@ -107,7 +108,7 @@ namespace mapnik {
         static void clear_object_severity()
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(severity_mutex_);
+            mapnik::scoped_lock lock(severity_mutex_);
 #endif
 
             object_severity_level_.clear();
@@ -122,7 +123,7 @@ namespace mapnik {
         static void set_format(std::string const& format)
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(format_mutex_);
+            mapnik::scoped_lock lock(format_mutex_);
 #endif
             format_ = format;
         }
@@ -147,8 +148,8 @@ namespace mapnik {
         static std::streambuf* saved_buf_;
 
 #ifdef MAPNIK_THREADSAFE
-        static boost::mutex severity_mutex_;
-        static boost::mutex format_mutex_;
+        static std::mutex severity_mutex_;
+        static std::mutex format_mutex_;
 #endif
     };
 
@@ -162,13 +163,13 @@ namespace mapnik {
         class clog_sink
         {
         public:
-            typedef std::basic_ostringstream<Ch, Tr, A> stream_buffer;
+            using stream_buffer = std::basic_ostringstream<Ch, Tr, A>;
 
-            void operator()(const logger::severity_type& /*severity*/, const stream_buffer &s)
+            void operator()(logger::severity_type const& /*severity*/, stream_buffer const& s)
             {
 #ifdef MAPNIK_THREADSAFE
-                static boost::mutex mutex;
-                boost::mutex::scoped_lock lock(mutex);
+                static std::mutex mutex;
+                mapnik::scoped_lock lock(mutex);
 #endif
                 std::clog << logger::str() << " " << s.str() << std::endl;
             }
@@ -189,14 +190,14 @@ namespace mapnik {
         class base_log : public mapnik::noncopyable
         {
         public:
-            typedef OutputPolicy<Ch, Tr, A> output_policy;
+            using output_policy = OutputPolicy<Ch, Tr, A>;
 
             base_log() {}
 
 #ifdef MAPNIK_LOG
             base_log(const char* object_name)
             {
-                if (object_name != NULL)
+                if (object_name != nullptr)
                 {
                     object_name_ = object_name;
                 }
@@ -219,14 +220,14 @@ namespace mapnik {
 
             template<class T>
 #ifdef MAPNIK_LOG
-            base_log &operator<<(const T &x)
+            base_log &operator<<(T const& x)
             {
 
                 streambuf_ << x;
                 return *this;
             }
 #else
-            base_log &operator<<(const T& /*x*/)
+            base_log &operator<<(T const& /*x*/)
             {
 
                 return *this;
@@ -259,13 +260,13 @@ namespace mapnik {
         class base_log_always : public mapnik::noncopyable
         {
         public:
-            typedef OutputPolicy<Ch, Tr, A> output_policy;
+            using output_policy = OutputPolicy<Ch, Tr, A>;
 
             base_log_always() {}
 
             base_log_always(const char* object_name)
             {
-                if (object_name != NULL)
+                if (object_name != nullptr)
                 {
                     object_name_ = object_name;
                 }
@@ -280,7 +281,7 @@ namespace mapnik {
             }
 
             template<class T>
-            base_log_always &operator<<(const T &x)
+            base_log_always &operator<<(T const& x)
             {
                 streambuf_ << x;
                 return *this;
@@ -297,9 +298,9 @@ namespace mapnik {
         };
 
 
-        typedef base_log<clog_sink, logger::debug> base_log_debug;
-        typedef base_log<clog_sink, logger::warn> base_log_warn;
-        typedef base_log_always<clog_sink, logger::error> base_log_error;
+        using base_log_debug = base_log<clog_sink, logger::debug>;
+        using base_log_warn = base_log<clog_sink, logger::warn>;
+        using base_log_error = base_log_always<clog_sink, logger::error>;
 
     } // namespace detail
 

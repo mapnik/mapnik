@@ -1,4 +1,3 @@
-#include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
 #include <iostream>
@@ -6,8 +5,7 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #if defined(HAVE_CAIRO)
-#include <mapnik/cairo_renderer.hpp>
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
@@ -17,29 +15,28 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/feature_style_processor.hpp>
-#include <boost/foreach.hpp>
+
 #include <vector>
 #include <algorithm>
-
 #include "utils.hpp"
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
     using namespace mapnik;
-    std::auto_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
     if (!reader1.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
     }
-    boost::shared_ptr<image_32> image_ptr1 = boost::make_shared<image_32>(reader1->width(),reader1->height());
+    std::shared_ptr<image_32> image_ptr1 = std::make_shared<image_32>(reader1->width(),reader1->height());
     reader1->read(0,0,image_ptr1->data());
 
-    std::auto_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
     if (!reader2.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
     }
-    boost::shared_ptr<image_32> image_ptr2 = boost::make_shared<image_32>(reader2->width(),reader2->height());
+    std::shared_ptr<image_32> image_ptr2 = std::make_shared<image_32>(reader2->width(),reader2->height());
     reader2->read(0,0,image_ptr2->data());
 
     image_data_32 const& dest = image_ptr1->data();
@@ -116,7 +113,7 @@ int main(int argc, char** argv)
         mapnik::projection map_proj(m.srs(),true);
         double scale_denom = mapnik::scale_denominator(req.scale(),map_proj.is_geographic());
         scale_denom *= scale_factor;
-        BOOST_FOREACH ( mapnik::layer const& lyr, m.layers() )
+        for (mapnik::layer const& lyr : m.layers() )
         {
             if (lyr.visible(scale_denom))
             {
@@ -161,9 +158,7 @@ int main(int argc, char** argv)
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ Map Request rendering hook: \x1b[1;32m✓ \x1b[0m\n";
-#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
-#endif
     } else {
         return ::boost::report_errors();
     }

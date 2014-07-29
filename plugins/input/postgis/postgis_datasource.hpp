@@ -33,13 +33,14 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/attribute.hpp>
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/regex.hpp>
 
 // stl
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -59,7 +60,7 @@ using mapnik::query;
 using mapnik::parameters;
 using mapnik::coord2d;
 
-typedef boost::shared_ptr< ConnectionManager::PoolType> CnxPool_ptr;
+using CnxPool_ptr = std::shared_ptr< ConnectionManager::PoolType>;
 
 class postgis_datasource : public datasource
 {
@@ -78,9 +79,14 @@ public:
 
 private:
     std::string sql_bbox(box2d<double> const& env) const;
-    std::string populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const;
+    std::string populate_tokens(std::string const& sql,
+                                double scale_denom,
+                                box2d<double> const& env,
+                                double pixel_width,
+                                double pixel_height,
+                                mapnik::attributes const& vars) const;
     std::string populate_tokens(std::string const& sql) const;
-    boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
+    std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
     static const double FMAX;
@@ -113,6 +119,7 @@ private:
     bool estimate_extent_;
     int max_async_connections_;
     bool asynchronous_request_;
+    boost::regex pattern_;
     int intersect_min_scale_;
     int intersect_max_scale_;
 };

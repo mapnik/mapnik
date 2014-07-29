@@ -29,6 +29,10 @@
 #include <boost/optional.hpp>
 #include <mapnik/config.hpp>
 
+#ifdef _MSC_VER
+#include <mapnik/image_data.hpp>
+#endif
+
 namespace mapnik
 {
 
@@ -54,18 +58,30 @@ enum scaling_method_e
     SCALING_BILINEAR8
 };
 
-boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
-boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
+MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
+MAPNIK_DECL boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
 
 template <typename Image>
-void scale_image_agg(Image & target,
+MAPNIK_DECL void scale_image_agg(Image & target,
                       Image const& source,
                       scaling_method_e scaling_method,
                       double image_ratio_x,
                       double image_ratio_y,
-                      double x_off_f=0,
-                      double y_off_f=0,
-                      double filter_radius=2);
+                      double x_off_f,
+                      double y_off_f,
+                      double filter_factor);
+
+#ifdef _MSC_VER
+template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
+                      mapnik::image_data_32 & target,
+                      mapnik::image_data_32 const& source,
+                      scaling_method_e scaling_method,
+                      double image_ratio_x,
+                      double image_ratio_y,
+                      double x_off_f,
+                      double y_off_f,
+                      double filter_radius);
+#endif
 
 template <typename Image>
 void scale_image_bilinear_old(Image & target,

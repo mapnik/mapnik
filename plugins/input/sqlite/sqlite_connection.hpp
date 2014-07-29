@@ -32,8 +32,7 @@
 #include <mapnik/timer.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/algorithm/string.hpp>
 
 // sqlite
@@ -116,7 +115,7 @@ public:
         throw mapnik::datasource_exception (s.str());
     }
 
-    boost::shared_ptr<sqlite_resultset> execute_query(std::string const& sql)
+    std::shared_ptr<sqlite_resultset> execute_query(std::string const& sql)
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute_query ") + sql);
@@ -129,7 +128,7 @@ public:
             throw_sqlite_error(sql);
         }
 
-        return boost::make_shared<sqlite_resultset>(stmt);
+        return std::make_shared<sqlite_resultset>(stmt);
     }
 
     void execute(std::string const& sql)

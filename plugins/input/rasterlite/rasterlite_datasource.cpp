@@ -24,7 +24,6 @@
 #include "rasterlite_featureset.hpp"
 
 // boost
-#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/util/fs.hpp>
@@ -73,7 +72,7 @@ inline void* rasterlite_datasource::open_dataset() const
 
 rasterlite_datasource::rasterlite_datasource(parameters const& params)
     : datasource(params),
-      desc_(*params.get<std::string>("type"),"utf-8")
+      desc_(rasterlite_datasource::name(),"utf-8")
 {
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Initializing...";
 
@@ -182,12 +181,11 @@ layer_descriptor rasterlite_datasource::get_descriptor() const
 featureset_ptr rasterlite_datasource::features(query const& q) const
 {
     rasterlite_query gq = q;
-    return boost::make_shared<rasterlite_featureset>(open_dataset(), gq);
+    return std::make_shared<rasterlite_featureset>(open_dataset(), gq);
 }
 
 featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     rasterlite_query gq = pt;
-    return boost::make_shared<rasterlite_featureset>(open_dataset(), gq);
+    return std::make_shared<rasterlite_featureset>(open_dataset(), gq);
 }
-

@@ -24,6 +24,8 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/memory.hpp>
 
+#include <cassert>
+
 namespace mapnik
 {
 void* Object::operator new(size_t size)

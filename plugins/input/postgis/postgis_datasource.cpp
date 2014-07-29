@@ -38,9 +38,10 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 
 // stl
+#include <memory>
 #include <string>
 #include <algorithm>
 #include <set>
@@ -49,11 +50,11 @@
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
-const double postgis_datasource::FMAX = std::numeric_limits<double>::max();
+const double postgis_datasource::FMAX = std::numeric_limits<float>::max();
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
-using boost::shared_ptr;
+using std::shared_ptr;
 using mapnik::attribute_descriptor;
 
 postgis_datasource::postgis_datasource(parameters const& params)
@@ -64,12 +65,12 @@ postgis_datasource::postgis_datasource(parameters const& params)
       geometry_field_(*params.get<std::string>("geometry_field", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
-      row_limit_(*params.get<int>("row_limit", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       type_(datasource::Vector),
-      srid_(*params.get<int>("srid", 0)),
+      srid_(*params.get<mapnik::value_integer>("srid", 0)),
       extent_initialized_(false),
       simplify_geometries_(false),
-      desc_(*params.get<std::string>("type"), "utf-8"),
+      desc_(postgis_datasource::name(), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
              params.get<std::string>("dbname"),
@@ -80,14 +81,16 @@ postgis_datasource::postgis_datasource(parameters const& params)
       scale_denom_token_("!scale_denominator!"),
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
-      pool_max_size_(*params_.get<int>("max_size", 10)),
-      persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
-      extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
-      max_async_connections_(*params_.get<int>("max_async_connection", 1)),
+      pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10)),
+      persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
+      extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
+      max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1)),
       asynchronous_request_(false),
+      // TODO - use for known tokens too: "(@\\w+|!\\w+!)"
+      pattern_(boost::regex("(@\\w+)",boost::regex::normal | boost::regbase::icase)),
       // params below are for testing purposes only and may be removed at any time
-      intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
-      intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
+      intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
+      intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");
@@ -117,11 +120,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    boost::optional<int> initial_size = params.get<int>("initial_size", 1);
-    boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
-    boost::optional<mapnik::boolean> estimate_extent = params.get<mapnik::boolean>("estimate_extent", false);
+    boost::optional<mapnik::value_integer> initial_size = params.get<mapnik::value_integer>("initial_size", 1);
+    boost::optional<mapnik::boolean_type> autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    boost::optional<mapnik::boolean_type> estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
-    boost::optional<mapnik::boolean> simplify_opt = params.get<mapnik::boolean>("simplify_geometries", false);
+    boost::optional<mapnik::boolean_type> simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
@@ -191,7 +194,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         if (srid_ == 0)
                         {
                             const char* srid_c = rs->getValue("srid");
-                            if (srid_c != NULL)
+                            if (srid_c != nullptr)
                             {
                                 int result = 0;
                                 const char * end = srid_c + std::strlen(srid_c);
@@ -223,7 +226,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     if (rs->next())
                     {
                         const char* srid_c = rs->getValue("srid");
-                        if (srid_c != NULL)
+                        if (srid_c != nullptr)
                         {
                             int result = 0;
                             const char * end = srid_c + std::strlen(srid_c);
@@ -445,10 +448,19 @@ postgis_datasource::~postgis_datasource()
         CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
         if (pool)
         {
-            shared_ptr<Connection> conn = pool->borrowObject();
-            if (conn)
-            {
-                conn->close();
+            try {
+              shared_ptr<Connection> conn = pool->borrowObject();
+              if (conn)
+              {
+                  conn->close();
+              }
+            } catch (mapnik::datasource_exception const& ex) {
+              // happens when borrowObject tries to
+              // create a new connection and fails.
+              // In turn, new connection would be needed
+              // when our broke and was thus no good to
+              // be borrowed
+              // See https://github.com/mapnik/mapnik/issues/2191
             }
         }
     }
@@ -511,22 +523,34 @@ std::string postgis_datasource::populate_tokens(std::string const& sql) const
 
     if (boost::algorithm::icontains(sql, pixel_width_token_))
     {
-        std::ostringstream ss;
-        ss << 0;
-        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
+        boost::algorithm::replace_all(populated_sql, pixel_width_token_, "0");
     }
 
     if (boost::algorithm::icontains(sql, pixel_height_token_))
     {
-        std::ostringstream ss;
-        ss << 0;
-        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
+        boost::algorithm::replace_all(populated_sql, pixel_height_token_, "0");
     }
 
+    std::string copy2 = populated_sql;
+    std::list<std::string> l;
+    boost::regex_split(std::back_inserter(l), copy2, pattern_);
+    if (!l.empty())
+    {
+        for (auto const & token: l)
+        {
+            boost::algorithm::replace_all(populated_sql, token, "null");
+        }
+    }
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+std::string postgis_datasource::populate_tokens(
+                                std::string const& sql,
+                                double scale_denom,
+                                box2d<double> const& env,
+                                double pixel_width,
+                                double pixel_height,
+                                mapnik::attributes const& vars) const
 {
     std::string populated_sql = sql;
     std::string box = sql_bbox(env);
@@ -555,7 +579,6 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
     if (boost::algorithm::icontains(populated_sql, bbox_token_))
     {
         boost::algorithm::replace_all(populated_sql, bbox_token_, box);
-        return populated_sql;
     }
     else
     {
@@ -573,13 +596,31 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
         {
             s << " WHERE \"" << geometryColumn_ << "\" && " << box;
         }
-
-        return populated_sql + s.str();
+        populated_sql += s.str();
     }
+    std::string copy2 = populated_sql;
+    std::list<std::string> l;
+    boost::regex_split(std::back_inserter(l), copy2, pattern_);
+    if (!l.empty())
+    {
+        for (auto const & token: l)
+        {
+            auto itr = vars.find(token.substr(1,std::string::npos));
+            if (itr != vars.end())
+            {
+                boost::algorithm::replace_all(populated_sql, token, itr->second.to_string());
+            }
+            else
+            {
+                boost::algorithm::replace_all(populated_sql, token, "null");
+            }
+        }
+    }
+    return populated_sql;
 }
 
 
-boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
+std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
 {
 
     if (!ctx)
@@ -599,7 +640,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
                 throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
             }
 
-            return boost::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
+            return std::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
 
         }
         else
@@ -611,17 +652,17 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
     else
     {   // asynchronous requests
 
-        boost::shared_ptr<postgis_processor_context> pgis_ctxt = boost::static_pointer_cast<postgis_processor_context>(ctx);
+        std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(ctx);
         if (conn)
         {
             // lauch async req & create asyncresult with conn
             conn->executeAsyncQuery(sql, 1);
-            return boost::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
+            return std::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
         }
         else
         {
             // create asyncresult  with  null connection
-            boost::shared_ptr<AsyncResultSet> res = boost::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
+            std::shared_ptr<AsyncResultSet> res = std::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
             pgis_ctxt->add_request(res);
             return res;
         }
@@ -643,7 +684,7 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     }
     else
     {
-        return ctx.insert(std::make_pair(ds_name,boost::make_shared<postgis_processor_context>())).first->second;
+        return ctx.insert(std::make_pair(ds_name,std::make_shared<postgis_processor_context>())).first->second;
     }
 }
 
@@ -652,7 +693,7 @@ featureset_ptr postgis_datasource::features(query const& q) const
     // if the driver is in asynchronous mode, return the appropriate fetaures
     if (asynchronous_request_ )
     {
-        return features_with_context(q,boost::make_shared<postgis_processor_context>());
+        return features_with_context(q,std::make_shared<postgis_processor_context>());
     }
     else
     {
@@ -680,7 +721,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         if ( asynchronous_request_ )
         {
             // limit use to num_async_request_ => if reached don't borrow the last connexion object
-            boost::shared_ptr<postgis_processor_context> pgis_ctxt = boost::static_pointer_cast<postgis_processor_context>(proc_ctx);
+            std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(proc_ctx);
             if ( pgis_ctxt->num_async_requests_ < max_async_connections_ )
             {
                 conn = pool->borrowObject();
@@ -722,8 +763,8 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         std::ostringstream s;
 
-        const double px_gw = 1.0 / boost::get<0>(q.resolution());
-        const double px_gh = 1.0 / boost::get<1>(q.resolution());
+        const double px_gw = 1.0 / std::get<0>(q.resolution());
+        const double px_gh = 1.0 / std::get<1>(q.resolution());
 
         s << "SELECT ST_AsBinary(";
 
@@ -743,7 +784,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         s << ") AS geom";
 
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
@@ -771,7 +812,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             }
         }
 
-        std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
+        std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh, q.variables());
 
         s << " FROM " << table_with_bbox;
 
@@ -780,8 +821,8 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             s << " LIMIT " << row_limit_;
         }
 
-        boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+        std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
+        return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
 
     }
 
@@ -827,7 +868,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
@@ -854,7 +895,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             box2d<double> box(pt.x - tol, pt.y - tol, pt.x + tol, pt.y + tol);
-            std::string table_with_bbox = populate_tokens(table_, FMAX, box, 0, 0);
+            std::string table_with_bbox = populate_tokens(table_, FMAX, box, 0, 0, mapnik::attributes());
 
             s << " FROM " << table_with_bbox;
 
@@ -863,8 +904,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
                 s << " LIMIT " << row_limit_;
             }
 
-            boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
+            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
     }
 
@@ -1017,8 +1058,7 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
                     }
                     else // geometry
                     {
-                        result.reset(mapnik::datasource::Collection);
-                        return result;
+                        g_type = "";
                     }
                 }
             }

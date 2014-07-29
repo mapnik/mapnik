@@ -31,17 +31,18 @@
 #include <cstring>
 #include <stdexcept>
 
-
 namespace mapnik
 {
-template <class T> class ImageData
+template <typename T>
+class ImageData
 {
 public:
-    typedef T pixel_type;
+    using pixel_type = T;
 
-    ImageData(int width,int height)
+    ImageData(int width, int height)
         : width_(static_cast<unsigned>(width)),
-          height_(static_cast<unsigned>(height))
+          height_(static_cast<unsigned>(height)),
+          owns_data_(true)
     {
         if (width < 0)
         {
@@ -55,14 +56,55 @@ public:
         if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
     }
 
-    ImageData(const ImageData<T>& rhs)
+    ImageData(int width, int height, T * data)
+        : width_(static_cast<unsigned>(width)),
+          height_(static_cast<unsigned>(height)),
+          owns_data_(false),
+          pData_(data)
+    {
+        if (width < 0)
+        {
+            throw std::runtime_error("negative width not allowed for image_data");
+        }
+        if (height < 0)
+        {
+            throw std::runtime_error("negative height not allowed for image_data");
+        }
+    }
+
+    ImageData(ImageData<T> const& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
+         owns_data_(true),
          pData_((rhs.width_!=0 && rhs.height_!=0)?
                 static_cast<T*>(::operator new(sizeof(T)*rhs.width_*rhs.height_)) :0)
     {
         if (pData_) std::memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
     }
+
+    ImageData(ImageData<T> && rhs) noexcept
+        : width_(rhs.width_),
+          height_(rhs.height_),
+          pData_(rhs.pData_)
+    {
+        rhs.width_ = 0;
+        rhs.height_ = 0;
+        rhs.pData_ = nullptr;
+    }
+
+    ImageData<T>& operator=(ImageData<T> rhs)
+    {
+        swap(rhs);
+        return *this;
+    }
+
+    void swap(ImageData<T> & rhs)
+    {
+        std::swap(width_, rhs.width_);
+        std::swap(height_, rhs.height_);
+        std::swap(pData_, rhs.pData_);
+    }
+
     inline T& operator() (unsigned i,unsigned j)
     {
         assert(i<width_ && j<height_);
@@ -136,18 +178,22 @@ public:
 
     inline ~ImageData()
     {
-        ::operator delete(pData_),pData_=0;
+        if (owns_data_)
+        {
+            ::operator delete(pData_),pData_=0;
+        }
     }
 
 private:
-    const unsigned width_;
-    const unsigned height_;
+    unsigned width_;
+    unsigned height_;
+    bool owns_data_;
     T *pData_;
-    ImageData& operator=(const ImageData&);
+    ImageData& operator=(ImageData const&);
 };
 
-typedef ImageData<unsigned> image_data_32;
-typedef ImageData<byte>  image_data_8;
+using image_data_32 = ImageData<unsigned>;
+using image_data_8 = ImageData<byte> ;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP

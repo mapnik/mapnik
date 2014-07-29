@@ -29,14 +29,14 @@
 
 // boost
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 
 // stl
 #include <map>
-
+#include <tuple>
 
 namespace mapnik {
 
@@ -44,11 +44,11 @@ class feature_impl;
 
 class MAPNIK_DECL feature_kv_iterator :
         public boost::iterator_facade<feature_kv_iterator,
-                                      boost::tuple<std::string , value> const,
+                                      std::tuple<std::string , value> const,
                                       boost::forward_traversal_tag>
 {
 public:
-    typedef boost::tuple<std::string,value> value_type;
+    using value_type = std::tuple<std::string,value>;
 
     feature_kv_iterator (feature_impl const& f, bool begin = false);
 private:
@@ -70,13 +70,12 @@ struct value_not_null
 {
     bool operator() (feature_kv_iterator::value_type const& kv) const
     {
-        return !boost::apply_visitor(is_null, boost::get<1>(kv).base());
+        return !boost::apply_visitor(is_null, std::get<1>(kv).base());
     }
 };
 
-typedef boost::filter_iterator<value_not_null, feature_kv_iterator> feature_kv_iterator2;
+using feature_kv_iterator2 = boost::filter_iterator<value_not_null, feature_kv_iterator>;
 
 }
 
 #endif // MAPNIK_FEATURE_KV_ITERATOR_HPP
-

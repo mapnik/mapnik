@@ -431,6 +431,15 @@ def test_truthyness_comparision():
     eq_(mapnik.Expression("[prop] = true").to_bool(f),True)
     eq_(mapnik.Expression("[prop] != true").to_bool(f),False)
 
+def test_division_by_zero():
+    expr = mapnik.Expression('[a]/[b]')
+    c = mapnik.Context()
+    c.push('a')
+    c.push('b')
+    f = mapnik.Feature(c,0);
+    f['a'] = 1
+    f['b'] = 0
+    eq_(expr.evaluate(f),None)
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

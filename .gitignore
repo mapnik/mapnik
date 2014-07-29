@@ -19,12 +19,12 @@ demo/viewer/viewer.ini
 tests/cpp_tests/font_registration_test
 tests/python_tests/raster_colorizer_test.png
 tests/python_tests/raster_colorizer_test_save.xml
-utils/mapnik-config/mapnik-config
-utils/mapnik-config/mapnik2.pc
+bin/mapnik-config
 utils/shapeindex/shapeindex
 utils/ogrindex/ogrindex
 utils/pgsql2sqlite/pgsql2sqlite
 utils/svg2png/svg2png
+utils/nik2img/nik2img
 demo/python/demo*
 demo/python/map.xml
 tests/cpp_tests/svg_renderer_tests/background_color_test

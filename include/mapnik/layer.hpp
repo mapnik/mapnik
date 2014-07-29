@@ -24,15 +24,19 @@
 #define MAPNIK_LAYER_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/well_known_srs.hpp>
+#include <mapnik/box2d.hpp>
 
 // stl
 #include <vector>
+#include <memory>
 
 namespace mapnik
 {
+
+class datasource;
+using datasource_ptr = std::shared_ptr<datasource>;
+
 /*!
  * @brief A Mapnik map layer.
  *
@@ -46,9 +50,11 @@ class MAPNIK_DECL layer
 public:
     layer(std::string const& name,
           std::string const& srs=MAPNIK_LONGLAT_PROJ);
-
+    // copy
     layer(layer const& l);
-    layer& operator=(layer const& rhs);
+    // move
+    layer(layer && l);
+    layer& operator=(layer rhs);
     bool operator==(layer const& other) const;
     ~layer();
 
@@ -201,11 +207,9 @@ public:
     void set_opacity(float opacity);
     float get_opacity() const;
 private:
-    void swap(layer& other);
-
+    friend void swap(layer & lhs, layer & rhs);
     std::string name_;
     std::string srs_;
-
     double min_zoom_;
     double max_zoom_;
     bool active_;

@@ -1,0 +1,20 @@
+Lohit Fonts Project
+
+Scripts Usage:-
+Lohit CVS is now included with 2 shell scripts 
+1)generate.sh
+  Once you checkout the .sfd files from lohit CVS, you just need to execute this script 
+  and you will get all .ttf files in respective language directory. You can then install those font files
+  by copying them to ~/.fonts directory. Then execute fc-cache command and then relogin to use that font.
+  
+2)makedist.sh
+  Use this script to generate upstream tarball used by fonts-indic SPEC to build rpms.
+  e.g. 
+   To generate lohit-lang-$version.tar.gz follow steps as
+   1) Anonymous CVS access
+       $ svn co http://svn.fedorahosted.org/svn/lohit
+   1) cd lohit
+   2) sh makedist.sh
+    You will get upstream tarball used to build lohit-fonts-$version-1 rpm.
+  NOTE:- This script can be used only from 2.1.1 and above version of this package.
+

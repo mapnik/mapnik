@@ -33,7 +33,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
 
 // stl
 #include <string>
@@ -77,8 +76,8 @@ occi_datasource::occi_datasource(parameters const& params)
       scale_denom_token_("!scale_denominator!"),
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
-      use_wkb_(*params.get<mapnik::boolean>("use_wkb", false)),
+      desc_(occi_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      use_wkb_(*params.get<mapnik::boolean_type>("use_wkb", false)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       row_prefetch_(*params.get<int>("row_prefetch", 100)),
       pool_(0),
@@ -101,9 +100,9 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         table_ = *table;
     }
-    estimate_extent_ = *params.get<mapnik::boolean>("estimate_extent",false);
-    use_spatial_index_ = *params.get<mapnik::boolean>("use_spatial_index",true);
-    use_connection_pool_ = *params.get<mapnik::boolean>("use_connection_pool",true);
+    estimate_extent_ = *params.get<mapnik::boolean_type>("estimate_extent",false);
+    use_spatial_index_ = *params.get<mapnik::boolean_type>("use_spatial_index",true);
+    use_connection_pool_ = *params.get<mapnik::boolean_type>("use_connection_pool",true);
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
@@ -506,8 +505,8 @@ featureset_ptr occi_datasource::features(query const& q) const
 #endif
 
     box2d<double> const& box = q.get_bbox();
-    const double px_gw = 1.0 / boost::get<0>(q.resolution());
-    const double px_gh = 1.0 / boost::get<1>(q.resolution());
+    const double px_gw = 1.0 / std::get<0>(q.resolution());
+    const double px_gh = 1.0 / std::get<1>(q.resolution());
     const double scale_denom = q.scale_denominator();
 
     std::ostringstream s;
@@ -523,7 +522,7 @@ featureset_ptr occi_datasource::features(query const& q) const
     std::set<std::string> const& props = q.property_names();
     std::set<std::string>::const_iterator pos = props.begin();
     std::set<std::string>::const_iterator end = props.end();
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     for (; pos != end; ++pos)
     {
         s << ", " << *pos;
@@ -562,7 +561,7 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
-    return boost::make_shared<occi_featureset>(pool_,
+    return std::make_shared<occi_featureset>(pool_,
                                                 conn_,
                                                 ctx,
                                                 s.str(),
@@ -590,7 +589,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
     }
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     while (itr != end)
     {
         s << ", " << itr->get_name();
@@ -631,7 +630,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
 
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
-    return boost::make_shared<occi_featureset>(pool_,
+    return std::make_shared<occi_featureset>(pool_,
                                                 conn_,
                                                 ctx,
                                                 s.str(),

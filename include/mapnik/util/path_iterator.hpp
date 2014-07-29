@@ -27,22 +27,24 @@
 #include <mapnik/global.hpp>
 
 // boost
-#include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+
+// stl
+#include <tuple>
 
 namespace mapnik { namespace util {
 
 template <typename T>
 class path_iterator
     : public boost::iterator_facade< path_iterator<T>,
-                                     boost::tuple<unsigned,double,double> const,
+                                     std::tuple<unsigned,double,double> const,
                                      boost::forward_traversal_tag
                                      >
 {
 
 public:
-    typedef T path_type;
-    typedef typename boost::tuple<unsigned, double, double> value_type;
+    using path_type = T;
+    using value_type = typename std::tuple<unsigned, double, double>;
 
     path_iterator()
         : v_(mapnik::SEG_END,0,0),
@@ -61,12 +63,12 @@ private:
 
     void increment()
     {
-        boost::get<0>(v_) = vertices_->vertex( &boost::get<1>(v_), &boost::get<2>(v_));
+        std::get<0>(v_) = vertices_->vertex( &std::get<1>(v_), &std::get<2>(v_));
     }
 
     bool equal( path_iterator const& other) const
     {
-        return boost::get<0>(v_) == boost::get<0>(other.v_);
+        return std::get<0>(v_) == std::get<0>(other.v_);
     }
 
     value_type const& dereference() const

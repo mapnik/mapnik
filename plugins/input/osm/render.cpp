@@ -56,8 +56,8 @@ int main(int argc,char *argv[])
         p["file"] = argv[6];
         for (int count = 0; count < m.layer_count(); count++)
         {
-            mapnik::parameters q = m.getLayer(count).datasource()->params();
-            m.getLayer(count).set_datasource(mapnik::datasource_cache::instance().create(p));
+            mapnik::parameters q = m.get_layer(count).datasource()->params();
+            m.get_layer(count).set_datasource(mapnik::datasource_cache::instance().create(p));
         }
     }
 

@@ -1,5 +1,3 @@
-
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -44,7 +42,7 @@ namespace mapnik
 class rapidxml_loader : mapnik::noncopyable
 {
 public:
-    rapidxml_loader(const char *encoding = NULL) :
+    rapidxml_loader(const char *encoding = nullptr) :
         filename_()
     {
 
@@ -81,7 +79,7 @@ public:
             // Parse using appropriate flags
             // https://github.com/mapnik/mapnik/issues/1856
             // const int f_tws = rapidxml::parse_normalize_whitespace;
-            const int f_tws = rapidxml::parse_trim_whitespace;
+            const int f_tws = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
             rapidxml::xml_document<> doc;
             doc.parse<f_tws>(&v.front());
 
@@ -143,7 +141,10 @@ private:
         case rapidxml::node_data:
         case rapidxml::node_cdata:
         {
-            node.add_child(cur_node->value(), 0, true);
+            if (cur_node->value_size() > 0) // Don't add empty text nodes
+            {
+                node.add_child(cur_node->value(), 0, true);
+            }
         }
         break;
         default:

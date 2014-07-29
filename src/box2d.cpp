@@ -71,19 +71,17 @@ box2d<T>::box2d(box2d_type const& rhs)
       maxy_(rhs.maxy_) {}
 
 template <typename T>
-box2d<T>& box2d<T>::operator=(box2d_type other)
-{
-    swap(other);
-    return *this;
-}
+box2d<T>::box2d(box2d_type && rhs)
+    : minx_(std::move(rhs.minx_)),
+      miny_(std::move(rhs.miny_)),
+      maxx_(std::move(rhs.maxx_)),
+      maxy_(std::move(rhs.maxy_)) {}
 
 template <typename T>
-void box2d<T>::swap(box2d_type & other)
+box2d<T>& box2d<T>::operator=(box2d_type other)
 {
-    std::swap(minx_, other.minx_);
-    std::swap(miny_, other.miny_);
-    std::swap(maxx_, other.maxx_);
-    std::swap(maxy_, other.maxy_);
+    swap(*this, other);
+    return *this;
 }
 
 template <typename T>
@@ -335,9 +333,9 @@ void box2d<T>::pad(T padding)
 template <typename T>
 bool box2d<T>::from_string(std::string const& str)
 {
-    using boost::spirit::qi::lit;
-    using boost::spirit::qi::double_;
-    using boost::spirit::ascii::space;
+    boost::spirit::qi::lit_type lit;
+    boost::spirit::qi::double_type double_;
+    boost::spirit::ascii::space_type space;
     bool r = boost::spirit::qi::phrase_parse(str.begin(),
                                              str.end(),
                                              double_ >> -lit(',') >> double_ >> -lit(',')
@@ -354,9 +352,34 @@ bool box2d<T>::valid() const
 }
 
 template <typename T>
+void box2d<T>::move(T x, T y)
+{
+    minx_ += x;
+    maxx_ += x;
+    miny_ += y;
+    maxy_ += y;
+}
+
+template <typename T>
 box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
 {
     expand_to_include(other);
+    return *this;
+}
+
+template <typename T>
+box2d<T> box2d<T>::operator+ (T other) const
+{
+    return box2d<T>(minx_ - other, miny_ - other, maxx_ + other, maxy_ + other);
+}
+
+template <typename T>
+box2d<T>& box2d<T>::operator+= (T other)
+{
+    minx_ -= other;
+    miny_ -= other;
+    maxx_ += other;
+    maxy_ += other;
     return *this;
 }
 
@@ -439,4 +462,5 @@ box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
 
 template class box2d<int>;
 template class box2d<double>;
+
 }

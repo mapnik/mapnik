@@ -14,7 +14,7 @@
     <Rule>
       <PointSymbolizer/>
       <TextSymbolizer face-name="DejaVu Sans Book" placement="point" dx="0" dy="5">
-          <ExpressionFormat size="[nr]" opacity="1">[name]</ExpressionFormat>
+          <Format size="[nr]" opacity="1">[name]</Format>
       </TextSymbolizer>
     </Rule>
   </Style>

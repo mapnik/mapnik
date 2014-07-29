@@ -21,9 +21,7 @@ import os
 from glob import glob
 
 Import('env')
-
-clipper_env = env.Clone()
-
-cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
-
-clipper_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+lib_env = env.Clone()
+if 'g++' in env['CXX']:
+    lib_env.Append(CXXFLAGS='-fPIC')
+lib_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[])

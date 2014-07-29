@@ -26,10 +26,6 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include "mainwindow.hpp"
 
-// boost
-#include <boost/algorithm/string.hpp>
-
-
 int main( int argc, char **argv )
 {
     using mapnik::datasource_cache;
@@ -75,7 +71,8 @@ int main( int argc, char **argv )
         }
         else
         {
-            window.zoom_all();
+            std::shared_ptr<mapnik::Map> map = window.get_map();
+            if (map) map->zoom_all();
         }
         if (argc == 4)
         {

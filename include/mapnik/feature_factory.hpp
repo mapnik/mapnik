@@ -28,18 +28,17 @@
 #include <mapnik/value_types.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 //#include <boost/pool/pool_alloc.hpp>
 
 namespace mapnik
 {
 struct feature_factory
 {
-    static boost::shared_ptr<feature_impl> create (context_ptr const& ctx, mapnik::value_integer fid)
+    static std::shared_ptr<feature_impl> create (context_ptr const& ctx, mapnik::value_integer fid)
     {
         //return boost::allocate_shared<feature_impl>(boost::pool_allocator<feature_impl>(),fid);
         //return boost::allocate_shared<feature_impl>(boost::fast_pool_allocator<feature_impl>(),fid);
-        return boost::make_shared<feature_impl>(ctx,fid);
+        return std::make_shared<feature_impl>(ctx,fid);
     }
 };
 }

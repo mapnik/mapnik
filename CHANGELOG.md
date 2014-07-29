@@ -14,6 +14,20 @@ Released ...
 
 Summary: TODO
 
+- PostGIS: Added support for rendering 3D and 4D geometries (previously silently skipped) (#44)
+
+- AGG renderer: fixed geometry offsetting to work after smoothing to produce more consistent results (#2202)
+
+- AGG renderer: increased `vertex_dist_epsilon` to ensure nearly coincident points are discarded more readily (#2196)
+
+- GDAL plugin: Added back support for user driven `nodata` on rgb(a) images (#2023)
+
+- GDAL plugin: Allowed nodata to override alpha band if set on rgba images (#2023)
+
+- GDAL plugin: Added `nodata_tolerance` option to set nearby pixels transparent (has similar effect to the `nearblack` program) (#2023)
+
+- Added support for web fonts: .woff format (#2113)
+
 - Added missing support for `geometry-transform` in `line-pattern` and `polygon-pattern` symbolizers (#2065)
 
 - Dropped support for Sun compiler

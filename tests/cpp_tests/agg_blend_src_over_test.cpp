@@ -1,7 +1,7 @@
-#include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -11,8 +11,8 @@
 #include "agg_rendering_buffer.h"
 #include "agg_renderer_base.h"
 
-typedef agg::rgba8 color;
-typedef agg::order_rgba order;
+using color = agg::rgba8;
+using order = agg::order_rgba;
 
 std::string to_string(color const& c)
 {
@@ -33,7 +33,7 @@ color blend(color const& source, color const& dest, unsigned cover=255)
     dest_pre.premultiply();
 
     unsigned char* buffer = new unsigned char[size*size*stride];
-    memset(buffer, 0, size*size*stride);
+    std::memset(buffer, 0, size*size*stride);
     buffer[0] = dest_pre.r;
     buffer[1] = dest_pre.g;
     buffer[2] = dest_pre.b;
@@ -54,7 +54,7 @@ color blend(color const& source, color const& dest, unsigned cover=255)
 // agg::pixfmt_alpha_blend_rgba
 color normal_blend(color const& source, color const& dest, unsigned cover=255)
 {
-    typedef agg::renderer_base<agg::pixfmt_rgba32_pre> renderer_type;
+    using renderer_type = agg::renderer_base<agg::pixfmt_rgba32_pre>;
     unsigned stride = 4;
     unsigned size = 1;
     color source_pre = source;
@@ -63,7 +63,7 @@ color normal_blend(color const& source, color const& dest, unsigned cover=255)
     dest_pre.premultiply();
     // source buffer
     unsigned char* source_buffer = new unsigned char[size*size*stride];
-    memset(source_buffer, 0, size*size*stride);
+    std::memset(source_buffer, 0, size*size*stride);
     source_buffer[0] = source_pre.r;
     source_buffer[1] = source_pre.g;
     source_buffer[2] = source_pre.b;
@@ -73,7 +73,7 @@ color normal_blend(color const& source, color const& dest, unsigned cover=255)
 
     // destination buffer
     unsigned char* dest_buffer = new unsigned char[size*size*stride];
-    memset(dest_buffer, 0, size*size*stride);
+    std::memset(dest_buffer, 0, size*size*stride);
     dest_buffer[0] = dest_pre.r;
     dest_buffer[1] = dest_pre.g;
     dest_buffer[2] = dest_pre.b;
@@ -99,10 +99,10 @@ namespace agg {
 // before we changed A as per https://github.com/mapnik/mapnik/issues/1452
 template<class ColorT, class Order> struct comp_op_rgba_src_over2
 {
-    typedef ColorT color_type;
-    typedef Order order_type;
-    typedef typename color_type::value_type value_type;
-    typedef typename color_type::calc_type calc_type;
+    using color_type = ColorT;
+    using order_type = Order;
+    using value_type = typename color_type::value_type;
+    using calc_type = typename color_type::calc_type;
     enum base_scale_e
     {
         base_shift = color_type::base_shift,
@@ -141,8 +141,8 @@ int main(int argc, char** argv)
     }
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
-    typedef agg::comp_op_rgba_src_over2<color, agg::order_rgba> source_over_old_agg;
-    typedef agg::comp_op_rgba_src_over<color, agg::order_rgba> source_over;
+    using source_over_old_agg = agg::comp_op_rgba_src_over2<color, agg::order_rgba>;
+    using source_over = agg::comp_op_rgba_src_over<color, agg::order_rgba>;
 
     color white(255,255,255,255);
     color black(0,0,0,255);
@@ -205,9 +205,7 @@ int main(int argc, char** argv)
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ AGG blending: \x1b[1;32m✓ \x1b[0m\n";
-#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
-#endif
     } else {
         std::clog << "C++ AGG blending: ";
         return ::boost::report_errors();

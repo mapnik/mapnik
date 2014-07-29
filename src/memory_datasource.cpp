@@ -26,12 +26,16 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
-
+#include <mapnik/boolean.hpp>
 // boost
-#include <boost/make_shared.hpp>
 
 // stl
 #include <algorithm>
+
+using mapnik::datasource;
+using mapnik::parameters;
+
+DATASOURCE_PLUGIN(mapnik::memory_datasource)
 
 namespace mapnik {
 
@@ -61,11 +65,17 @@ struct accumulate_extent
     bool first_;
 };
 
-memory_datasource::memory_datasource(datasource::datasource_t type, bool bbox_check)
-    : datasource(parameters()),
-      desc_("in-memory datasource","utf-8"),
-      type_(type),
-      bbox_check_(bbox_check) {}
+const char * memory_datasource::name()
+{
+    return "memory";
+}
+
+memory_datasource::memory_datasource(parameters const& params)
+    : datasource(params),
+      desc_(memory_datasource::name(),
+            *params.get<std::string>("encoding","utf-8")),
+      type_(datasource::Vector),
+      bbox_check_(*params.get<boolean_type>("bbox_check", true)) {}
 
 memory_datasource::~memory_datasource() {}
 
@@ -83,7 +93,7 @@ datasource::datasource_t memory_datasource::type() const
 
 featureset_ptr memory_datasource::features(const query& q) const
 {
-    return boost::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
+    return std::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
 }
 
 
@@ -92,7 +102,7 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double to
     box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
     box.pad(tol);
     MAPNIK_LOG_DEBUG(memory_datasource) << "memory_datasource: Box=" << box << ", Point x=" << pt.x << ",y=" << pt.y;
-    return boost::make_shared<memory_featureset>(box,*this);
+    return std::make_shared<memory_featureset>(box,*this);
 }
 
 void memory_datasource::set_envelope(box2d<double> const& box)

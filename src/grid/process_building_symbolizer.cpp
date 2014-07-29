@@ -20,7 +20,10 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // mapnik
+#include <mapnik/make_unique.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
@@ -28,11 +31,11 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/building_symbolizer.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/renderer_common/process_building_symbolizer.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 // stl
 #include <deque>
@@ -51,13 +54,13 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+    using path_type = coord_transform<CoordTransform,geometry_type>;
     agg::scanline_bin sl;
 
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     pixfmt_type pixf(buf);
 
     grid_renderer_base_type renb(pixf);
@@ -65,92 +68,32 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    double height = 0.0;
-    expression_ptr height_expr = sym.height();
-    if (height_expr)
-    {
-        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
-        height = result.to_double() * scale_factor_;
-    }
+    double height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
 
-    for (std::size_t i=0;i<feature.num_geometries();++i)
-    {
-        geometry_type & geom = feature.get_geometry(i);
-        if (geom.size() > 2)
-        {
-            boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
-            boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
-            std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
-            unsigned cm = geom.vertex(&x0,&y0);
-            for (unsigned j=1;j<geom.size();++j)
-            {
-                double x(0);
-                double y(0);
-                cm = geom.vertex(&x,&y);
-                if (cm == SEG_MOVETO)
-                {
-                    frame->move_to(x,y);
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    frame->line_to(x,y);
-                    face_segments.push_back(segment_t(x0,y0,x,y));
-                }
-
-                x0 = x;
-                y0 = y;
-            }
-            std::sort(face_segments.begin(),face_segments.end(), y_order);
-            std::deque<segment_t>::const_iterator itr=face_segments.begin();
-            for (;itr!=face_segments.end();++itr)
-            {
-                boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
-                faces->move_to(itr->get<0>(),itr->get<1>());
-                faces->line_to(itr->get<2>(),itr->get<3>());
-                faces->line_to(itr->get<2>(),itr->get<3>() + height);
-                faces->line_to(itr->get<0>(),itr->get<1>() + height);
-
-                path_type faces_path (t_,*faces,prj_trans);
-                ras_ptr->add_path(faces_path);
-                ren.color(color_type(feature.id()));
-                agg::render_scanlines(*ras_ptr, sl, ren);
-                ras_ptr->reset();
-
-                frame->move_to(itr->get<0>(),itr->get<1>());
-                frame->line_to(itr->get<0>(),itr->get<1>()+height);
-            }
-
-            geom.rewind(0);
-            for (unsigned j=0;j<geom.size();++j)
-            {
-                double x,y;
-                cm = geom.vertex(&x,&y);
-                if (cm == SEG_MOVETO)
-                {
-                    frame->move_to(x,y+height);
-                    roof->move_to(x,y+height);
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    frame->line_to(x,y+height);
-                    roof->line_to(x,y+height);
-                }
-            }
-            path_type path(t_,*frame,prj_trans);
+    render_building_symbolizer(
+        feature, height,
+        [&](geometry_type &faces) {
+            path_type faces_path (common_.t_,faces,prj_trans);
+            ras_ptr->add_path(faces_path);
+            ren.color(color_type(feature.id()));
+            agg::render_scanlines(*ras_ptr, sl, ren);
+            ras_ptr->reset();
+        },
+        [&](geometry_type &frame) {
+            path_type path(common_.t_,frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
-
-            path_type roof_path (t_,*roof,prj_trans);
+        },
+        [&](geometry_type &roof) {
+            path_type roof_path (common_.t_,roof,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
-        }
-    }
+        });
+
     pixmap_.add_feature(feature);
 }
 
@@ -159,3 +102,5 @@ template void grid_renderer<grid>::process(building_symbolizer const&,
                                            proj_transform const&);
 
 }
+
+#endif

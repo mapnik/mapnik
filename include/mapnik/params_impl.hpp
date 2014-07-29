@@ -55,30 +55,16 @@ struct extract_value
 };
 
 template <>
-struct extract_value<mapnik::boolean>
+struct extract_value<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean> do_extract_from_string(std::string const& source)
+    static inline boost::optional<mapnik::boolean_type> do_extract_from_string(std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean>(result);
-        return boost::optional<mapnik::boolean>();
+            return boost::optional<mapnik::boolean_type>(result);
+        return boost::optional<mapnik::boolean_type>();
     }
 };
-
-template <>
-struct extract_value<int>
-{
-    static inline boost::optional<int> do_extract_from_string(std::string const& source)
-    {
-        mapnik::value_integer result;
-        if (mapnik::util::string2int(source, result))
-            return boost::optional<int>(result);
-        return boost::optional<int>();
-    }
-};
-
-#ifdef BIGINT
 
 template <>
 struct extract_value<mapnik::value_integer>
@@ -91,8 +77,6 @@ struct extract_value<mapnik::value_integer>
         return boost::optional<mapnik::value_integer>();
     }
 };
-
-#endif
 
 template <>
 struct extract_value<mapnik::value_double>
@@ -149,7 +133,7 @@ struct value_extractor_visitor : public boost::static_visitor<>
     }
 
     template <typename T1>
-    void operator () (T1 val) const
+    void operator () (T1 const& val) const
     {
         try
         {
@@ -164,7 +148,6 @@ struct value_extractor_visitor : public boost::static_visitor<>
         }
     }
 
-
     boost::optional<T> & var_;
 };
 
@@ -173,8 +156,8 @@ namespace params_detail {
 template <typename T>
 struct converter
 {
-    typedef T value_type;
-    typedef boost::optional<value_type> return_type;
+    using value_type = T;
+    using return_type = boost::optional<value_type>;
     static return_type extract(parameters const& params,
                                std::string const& name,
                                boost::optional<T> const& default_opt_value)

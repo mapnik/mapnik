@@ -34,15 +34,12 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/conversions.hpp>
 
-// boost
-#include <boost/cstdint.hpp>
-
 // stl
+#include <cstdint>
 #include <map>
 #include <set>
 #include <cmath>
 #include <string>
-#include <cassert>
 #include <vector>
 
 namespace mapnik
@@ -52,12 +49,12 @@ template <typename T>
 class MAPNIK_DECL hit_grid
 {
 public:
-    typedef T value_type;
-    typedef mapnik::ImageData<value_type> data_type;
-    typedef std::string lookup_type;
+    using value_type = T;
+    using data_type = mapnik::ImageData<value_type>;
+    using lookup_type = std::string;
     // mapping between pixel id and key
-    typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<lookup_type, mapnik::feature_ptr> feature_type;
+    using feature_key_type = std::map<value_type, lookup_type>;
+    using feature_type = std::map<lookup_type, mapnik::feature_ptr>;
     static const value_type base_mask;
 
 private:
@@ -98,7 +95,7 @@ public:
         return id_name_;
     }
 
-    void add_feature(mapnik::feature_impl & feature);
+    void add_feature(mapnik::feature_impl const& feature);
 
     inline void add_property_name(std::string const& name)
     {
@@ -214,11 +211,7 @@ public:
                 for (int x = box.minx(); x < box.maxx(); ++x)
                 {
                     unsigned rgba = row_from[x-x0];
-#ifdef MAPNIK_BIG_ENDIAN
-                    unsigned a = rgba & 0xff;
-#else
                     unsigned a = (rgba >> 24) & 0xff;
-#endif
                     // if the pixel is more than a tenth
                     // opaque then burn in the feature id
                     if (a >= 25)
@@ -232,7 +225,7 @@ public:
 
 };
 
-typedef hit_grid<mapnik::value_integer> grid;
+using grid = hit_grid<mapnik::value_integer>;
 
 }
 #endif //MAPNIK_GRID_HPP

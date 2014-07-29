@@ -1,11 +1,5 @@
 UNAME := $(shell uname)
-LINK_FIX=LD_LIBRARY_PATH
-ifeq ($(UNAME), Darwin)
-	LINK_FIX=DYLD_LIBRARY_PATH
-else
-endif
-
-OS:=$(shell uname -s)
+OS := $(shell uname -s)
 
 ifeq ($(JOBS),)
 	JOBS:=1
@@ -20,10 +14,10 @@ endif
 all: mapnik
 
 install:
-	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
+	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
+	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
 clean:
 	@python scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
@@ -32,6 +26,8 @@ clean:
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@find ./ -name "*.os" -exec rm {} \;
+	@find ./ -name "*.dylib" -exec rm {} \;
+	@find ./ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
@@ -49,25 +45,26 @@ uninstall:
 	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@ ./run_tests
+	./run_tests
 
 test-local:
-	@echo "*** Boostrapping local test environment..."
-	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
-	export PATH=`pwd`/utils/mapnik-config/:${PATH} && \
-	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
-	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
-	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
 	make test
 
-bench:
-	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
-	./benchmark/run
+test-visual:
+	bash -c "source ./localize.sh && python tests/visual_tests/test.py -q"
+
+test-python:
+	bash -c "source ./localize.sh && python tests/run_tests.py -q"
+
+test-cpp:
+	./tests/cpp_tests/run
 
 check: test-local
 
+bench:
+	./benchmark/run
+
 demo:
-	@echo "*** Running rundemo.cpp…"
 	cd demo/c++; ./rundemo `mapnik-config --prefix`
 
 pep8:

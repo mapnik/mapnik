@@ -24,6 +24,7 @@
 #define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
+#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -37,11 +38,12 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
+#include <mapnik/renderer_common.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 
 // stl
 #include <string>
@@ -70,9 +72,9 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
                                  private mapnik::noncopyable
 {
 public:
-    typedef svg_renderer<OutputIterator> processor_impl_type;
+    using processor_impl_type = svg_renderer<OutputIterator>;
     svg_renderer(Map const& m, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
-    svg_renderer(Map const& m, request const& req, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    svg_renderer(Map const& m, request const& req, attributes const& vars, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~svg_renderer();
 
     void start_map_processing(Map const& map);
@@ -118,6 +120,9 @@ public:
     void process(debug_symbolizer const& /*sym*/,
                  mapnik::feature_impl & /*feature*/,
                  proj_transform const& /*prj_trans*/) {}
+    void process(group_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans);
 
     /*!
      * @brief Overload that process the whole set of symbolizers of a rule.
@@ -139,7 +144,12 @@ public:
 
     inline double scale_factor() const
     {
-        return scale_factor_;
+        return common_.scale_factor_;
+    }
+
+    inline attributes const& variables() const
+    {
+        return common_.vars_;
     }
 
     inline OutputIterator& get_output_iterator()
@@ -154,17 +164,10 @@ public:
 
 private:
     OutputIterator& output_iterator_;
-    const int width_;
-    const int height_;
-    double scale_factor_;
-    CoordTransform t_;
     svg::path_output_attributes path_attributes_;
-    freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
-    boost::shared_ptr<label_collision_detector4> detector_;
     svg::svg_generator<OutputIterator> generator_;
-    box2d<double> query_extent_;
     bool painted_;
+    renderer_common common_;
 
     /*!
      * @brief Visitor that makes the calls to process each symbolizer when stored in a boost::variant.

@@ -35,16 +35,22 @@ namespace mapnik
 class MAPNIK_DECL font_set
 {
 public:
+    // ctor/copy/move/dtor
     font_set(std::string const& name);
     font_set(font_set const& rhs);
-    font_set& operator=(font_set const& rhs);
+    font_set(font_set &&);
+    font_set& operator=(font_set rhs);
+    ~font_set();
+    // comparison
+    bool operator==(font_set const& rhs) const;
     std::size_t size() const;
     void set_name(std::string const& name);
     std::string const& get_name() const;
-    void add_face_name(std::string const& face_name);
+    void add_face_name(std::string face_name);
     std::vector<std::string> const& get_face_names() const;
-    ~font_set();
+
 private:
+    friend void swap(font_set & lhs, font_set & rhs);
     std::string name_;
     std::vector<std::string> face_names_;
 };

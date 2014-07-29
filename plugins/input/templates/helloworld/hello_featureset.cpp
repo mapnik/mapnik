@@ -4,7 +4,6 @@
 #include <mapnik/value_types.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 #include "hello_featureset.hpp"
 
@@ -12,7 +11,7 @@ hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string
     : box_(box),
       feature_id_(1),
       tr_(new mapnik::transcoder(encoding)),
-      ctx_(boost::make_shared<mapnik::context_type>()) { }
+      ctx_(std::make_shared<mapnik::context_type>()) { }
 
 hello_featureset::~hello_featureset() { }
 
@@ -42,7 +41,7 @@ mapnik::feature_ptr hello_featureset::next()
         mapnik::coord2d center = box_.center();
 
         // create a new point geometry
-        mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
+        mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::geometry_type::types::Point);
 
         // we use path type geometries in Mapnik to fit nicely with AGG and Cairo
         // here we stick an x,y pair into the geometry using move_to()
@@ -54,7 +53,7 @@ mapnik::feature_ptr hello_featureset::next()
         // A feature usually will have just one geometry of a given type
         // but mapnik does support many geometries per feature of any type
         // so here we draw a line around the point
-        mapnik::geometry_type * line = new mapnik::geometry_type(mapnik::LineString);
+        mapnik::geometry_type * line = new mapnik::geometry_type(mapnik::geometry_type::types::LineString);
         line->move_to(box_.minx(),box_.miny());
         line->line_to(box_.minx(),box_.maxy());
         line->line_to(box_.maxx(),box_.maxy());
@@ -69,4 +68,3 @@ mapnik::feature_ptr hello_featureset::next()
     // otherwise return an empty feature
     return mapnik::feature_ptr();
 }
-

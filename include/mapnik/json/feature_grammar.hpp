@@ -67,10 +67,9 @@ public:
     mapnik::transcoder const& tr_;
 };
 
-#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
 struct put_property
 {
-    typedef void result_type;
+    using result_type = void;
     explicit put_property(mapnik::transcoder const& tr)
         : tr_(tr) {}
     template <typename T0,typename T1, typename T2>
@@ -83,60 +82,24 @@ struct put_property
 
 struct extract_geometry
 {
-    typedef  boost::ptr_vector<mapnik::geometry_type>& result_type;
+    using result_type =  mapnik::geometry_container&;
     template <typename T>
     result_type operator() (T & feature) const
     {
         return feature.paths();
     }
 };
-#else
-struct put_property
-{
-    template <typename T0,typename T1, typename T2>
-    struct result
-    {
-        typedef void type;
-    };
-    explicit put_property(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    template <typename T0,typename T1, typename T2>
-    void operator() (T0 & feature, T1 const& key, T2 const& val) const
-    {
-        mapnik::value v = boost::apply_visitor(attribute_value_visitor(tr_),val); // TODO: optimize
-        feature.put_new(key, v);
-    }
-
-    mapnik::transcoder const& tr_;
-};
-
-struct extract_geometry
-{
-    template <typename T>
-    struct result
-    {
-        typedef boost::ptr_vector<mapnik::geometry_type>& type;
-    };
-
-    template <typename T>
-    boost::ptr_vector<mapnik::geometry_type>& operator() (T & feature) const
-    {
-        return feature.paths();
-    }
-};
-#endif
 
 template <typename Iterator, typename FeatureType>
 struct feature_grammar :
         qi::grammar<Iterator, void(FeatureType&),
-        space_type>
+                    space_type>
 {
-    feature_grammar(generic_json<Iterator> & json, mapnik::transcoder const& tr);
+    feature_grammar(mapnik::transcoder const& tr);
 
     // start
     // generic JSON
-    generic_json<Iterator> & json_;
+    generic_json<Iterator> json_;
 
     // geoJSON
     qi::rule<Iterator,void(FeatureType&),space_type> feature; // START

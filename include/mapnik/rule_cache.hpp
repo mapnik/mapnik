@@ -25,14 +25,11 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
-#include <mapnik/feature_type_style.hpp>
 #include <mapnik/noncopyable.hpp>
-
-// boost
-#include <boost/foreach.hpp>
 
 // stl
 #include <vector>
+#include <type_traits>
 
 namespace mapnik
 {
@@ -40,11 +37,25 @@ namespace mapnik
 class rule_cache : private noncopyable
 {
 public:
-    typedef std::vector<rule const*> rule_ptrs;
+    using rule_ptrs = std::vector<rule const*>;
     rule_cache()
-     : if_rules_(),
-       else_rules_(),
-       also_rules_() {}
+        : if_rules_(),
+          else_rules_(),
+          also_rules_() {}
+
+    rule_cache(rule_cache && rhs) // move ctor
+        :  if_rules_(std::move(rhs.if_rules_)),
+           else_rules_(std::move(rhs.else_rules_)),
+           also_rules_(std::move(rhs.also_rules_))
+    {}
+
+    rule_cache& operator=(rule_cache && rhs) // move assign
+    {
+        std::swap(if_rules_, rhs.if_rules_);
+        std::swap(else_rules_,rhs.else_rules_);
+        std::swap(also_rules_, rhs.also_rules_);
+        return *this;
+    }
 
     void add_rule(rule const& r)
     {
@@ -66,12 +77,12 @@ public:
     {
         return if_rules_;
     }
-    
+
     rule_ptrs const& get_else_rules() const
     {
         return else_rules_;
     }
-    
+
     rule_ptrs const& get_also_rules() const
     {
         return also_rules_;

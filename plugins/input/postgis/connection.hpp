@@ -28,10 +28,8 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/timer.hpp>
 
-// boost
-#include <boost/make_shared.hpp>
-
 // std
+#include <memory>
 #include <sstream>
 #include <iostream>
 
@@ -67,6 +65,17 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
+        PGresult *result = PQexec(conn_, "SET DEFAULT_TRANSACTION_READ_ONLY = TRUE;");
+        bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
+        if ( result ) PQclear(result);
+        if ( ! ok ) {
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
+            err_msg += "\nConnection string: '";
+            err_msg += connection_str;
+            err_msg += "'\n";
+            throw mapnik::datasource_exception(err_msg);
+        }
     }
 
     ~Connection()
@@ -79,32 +88,38 @@ public:
         }
     }
 
-    bool execute(std::string const& sql) const
+    bool execute(std::string const& sql)
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute ") + sql);
 #endif
 
-        PGresult *result = PQexec(conn_, sql.c_str());
+        if ( ! executeAsyncQuery(sql) ) return false;
+        PGresult *result = 0;
+        // fetch multiple times until NULL is returned,
+        // to handle multi-statement queries
+        while ( PGresult *tmp = getResult() ) {
+          if ( result ) PQclear(result);
+          result = tmp;
+        }
         bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
-        PQclear(result);
+        if ( result ) PQclear(result);
         return ok;
     }
 
-    boost::shared_ptr<ResultSet> executeQuery(std::string const& sql, int type = 0) const
+    std::shared_ptr<ResultSet> executeQuery(std::string const& sql, int type = 0)
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute_query ") + sql);
 #endif
-
         PGresult* result = 0;
-        if (type == 1)
-        {
-            result = PQexecParams(conn_,sql.c_str(), 0, 0, 0, 0, 0, 1);
-        }
-        else
-        {
-            result = PQexec(conn_, sql.c_str());
+        if ( executeAsyncQuery(sql, type) ) {
+          // fetch multiple times until NULL is returned,
+          // to handle multi-statement queries
+          while ( PGresult *tmp = getResult() ) {
+            if ( result ) PQclear(result);
+            result = tmp;
+          }
         }
 
         if (! result || (PQresultStatus(result) != PGRES_TUPLES_OK))
@@ -114,14 +129,11 @@ public:
             err_msg += "\nin executeQuery Full sql was: '";
             err_msg += sql;
             err_msg += "'\n";
-            if (result)
-            {
-                PQclear(result);
-            }
+            if ( result ) PQclear(result);
             throw mapnik::datasource_exception(err_msg);
         }
 
-        return boost::make_shared<ResultSet>(result);
+        return std::make_shared<ResultSet>(result);
     }
 
     std::string status() const
@@ -129,7 +141,8 @@ public:
         std::string status;
         if (conn_)
         {
-            status = PQerrorMessage(conn_);
+            if ( isOK() ) return PQerrorMessage(conn_);
+            else return "Bad connection";
         }
         else
         {
@@ -164,10 +177,15 @@ public:
         return result;
     }
 
-
-    boost::shared_ptr<ResultSet> getNextAsyncResult()
+    PGresult* getResult()
     {
         PGresult *result = PQgetResult(conn_);
+        return result;
+    }
+
+    std::shared_ptr<ResultSet> getNextAsyncResult()
+    {
+        PGresult *result = getResult();
         if( result && (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
             std::string err_msg = "Postgis Plugin: ";
@@ -179,12 +197,12 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
-       return boost::make_shared<ResultSet>(result);
+       return std::make_shared<ResultSet>(result);
     }
 
-    boost::shared_ptr<ResultSet> getAsyncResult()
+    std::shared_ptr<ResultSet> getAsyncResult()
     {
-        PGresult *result = PQgetResult(conn_);
+        PGresult *result = getResult();
         if ( !result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
             std::string err_msg = "Postgis Plugin: ";
@@ -196,7 +214,7 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
-        return boost::make_shared<ResultSet>(result);
+        return std::make_shared<ResultSet>(result);
     }
 
     std::string client_encoding() const

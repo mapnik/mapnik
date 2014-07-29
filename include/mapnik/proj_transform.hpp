@@ -24,11 +24,13 @@
 #define MAPNIK_PROJ_TRANSFORM_HPP
 
 // mapnik
-#include <mapnik/projection.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
 
 namespace mapnik {
+
+class projection;
+template <typename T> class box2d;
 
 class MAPNIK_DECL proj_transform : private mapnik::noncopyable
 {

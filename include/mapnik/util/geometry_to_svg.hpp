@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/util/geometry_svg_generator.hpp>
+#include <mapnik/svg/geometry_svg_generator.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -35,11 +35,11 @@ namespace mapnik { namespace util {
 
 namespace karma = boost::spirit::karma;
 
-bool to_svg(std::string & svg, mapnik::geometry_type const& geom)
+inline bool to_svg(std::string & svg, mapnik::geometry_type const& geom)
 {
-    typedef std::back_insert_iterator<std::string> sink_type;
+    using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(svg);
-    svg_generator<sink_type, mapnik::geometry_type> generator;
+    static const svg::svg_path_generator<sink_type, mapnik::geometry_type> generator;
     bool result = karma::generate(sink, generator, geom);
     return result;
 }
@@ -49,7 +49,7 @@ bool to_svg(std::string & svg, mapnik::geometry_type const& geom)
 /*
 bool to_svg(std::string & svg, mapnik::geometry_container const& geom)
 {
-    typedef std::back_insert_iterator<std::string> sink_type;
+    using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(svg);
     svg_multi_generator<sink_type> generator;
     bool result = karma::generate(sink, generator, geom);

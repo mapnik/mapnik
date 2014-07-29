@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/make_unique.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_attribute_cast.hpp>
 #include <mapnik/util/conversions.hpp>
@@ -28,20 +29,20 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/line_symbolizer.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
+
+#include <mapnik/expression.hpp>
+
+// stl
+#include <type_traits>
 
 namespace mapnik
 {
 
-class boolean;
+class boolean_type;
 template <typename T>
 struct name_trait
 {
@@ -53,7 +54,7 @@ struct name_trait
     // if you get here you are probably using a new type
     // in the XML file. Just add a name trait for the new
     // type below.
-    BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+    static_assert( sizeof(T) == 0, "missing name_trait for the type");
 };
 
 #define DEFINE_NAME_TRAIT( type, type_name )                            \
@@ -67,7 +68,7 @@ struct name_trait
 DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
-DEFINE_NAME_TRAIT( boolean, "boolean")
+DEFINE_NAME_TRAIT( boolean_type, "boolean_type")
 #ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
 #else
@@ -80,7 +81,7 @@ DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
 {
-    typedef enumeration<ENUM, MAX> Enum;
+    using Enum = enumeration<ENUM, MAX>;
 
     static std::string name()
     {
@@ -98,18 +99,12 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 
 xml_tree::xml_tree(std::string const& encoding)
     : node_(*this, "<root>"),
-      file_(),
-      tr_(encoding),
-      color_grammar(),
-      expr_grammar(tr_),
-      path_expr_grammar(),
-      transform_expr_grammar(expr_grammar),
-      image_filters_grammar()
+      file_()
 {
     node_.set_processed(true); //root node is always processed
 }
 
-void xml_tree::set_filename(std::string fn)
+void xml_tree::set_filename(std::string const& fn)
 {
     file_ = fn;
 }
@@ -129,8 +124,9 @@ const xml_node &xml_tree::root() const
     return node_;
 }
 
-xml_attribute::xml_attribute(std::string const& value_)
-    : value(value_), processed(false)
+xml_attribute::xml_attribute(const char * value_)
+    : value(value_),
+      processed(false)
 {
 
 }
@@ -170,9 +166,9 @@ const char* more_than_one_child::what() const throw()
 
 more_than_one_child::~more_than_one_child() throw() {}
 
-xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool is_text)
+xml_node::xml_node(xml_tree &tree, std::string && name, unsigned line, bool is_text)
     : tree_(tree),
-      name_(name),
+      name_(std::move(name)),
       is_text_(is_text),
       line_(line),
       processed_(false) {}
@@ -224,13 +220,13 @@ bool xml_node::is(std::string const& name) const
     return false;
 }
 
-xml_node &xml_node::add_child(std::string const& name, unsigned line, bool is_text)
+xml_node &xml_node::add_child(std::string && name, unsigned line, bool is_text)
 {
-    children_.push_back(xml_node(tree_, name, line, is_text));
+    children_.emplace_back(tree_, std::move(name), line, is_text);
     return children_.back();
 }
 
-void xml_node::add_attribute(std::string const& name, std::string const& value)
+void xml_node::add_attribute(const char * name, const char * value)
 {
     attributes_.insert(std::make_pair(name,xml_attribute(value)));
 }
@@ -250,6 +246,11 @@ bool xml_node::processed() const
     return processed_;
 }
 
+std::size_t xml_node::size() const
+{
+    return children_.size();
+}
+
 xml_node::const_iterator xml_node::begin() const
 {
     return children_.begin();
@@ -264,7 +265,7 @@ xml_node & xml_node::get_child(std::string const& name)
 {
     std::list<xml_node>::iterator itr = children_.begin();
     std::list<xml_node>::iterator end = children_.end();
-    for (; itr != end; itr++)
+    for (; itr != end; ++itr)
     {
         if (!(itr->is_text_) && itr->name_ == name)
         {
@@ -302,9 +303,15 @@ bool xml_node::has_child(std::string const& name) const
     return get_opt_child(name) != 0;
 }
 
+bool xml_node::has_attribute(std::string const& name) const
+{
+    return attributes_.count(name) == 1 ? true : false;
+}
+
 template <typename T>
 boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
 {
+    if (attributes_.empty()) return boost::optional<T>();
     std::map<std::string, xml_attribute>::const_iterator itr = attributes_.find(name);
     if (itr ==  attributes_.end()) return boost::optional<T>();
     itr->second.processed = true;
@@ -334,9 +341,10 @@ T xml_node::get_attr(std::string const& name) const
     throw attribute_not_found(name_, name);
 }
 
-std::string xml_node::get_text() const
+std::string const& xml_node::get_text() const
 {
-    if (children_.size() == 0)
+    // FIXME : return boost::optional<std::string const&>
+    if (children_.empty())
     {
         if (is_text_)
         {
@@ -344,7 +352,8 @@ std::string xml_node::get_text() const
         }
         else
         {
-            return "";
+            const static std::string empty;
+            return empty;
         }
     }
     if (children_.size() == 1)
@@ -385,7 +394,7 @@ std::string xml_node::line_to_string() const
 #define compile_get_attr(T) template T xml_node::get_attr<T>(std::string const&) const; template T xml_node::get_attr<T>(std::string const&, T const&) const
 #define compile_get_value(T) template T xml_node::get_value<T>() const
 
-compile_get_opt_attr(boolean);
+compile_get_opt_attr(boolean_type);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(unsigned);
 compile_get_opt_attr(mapnik::value_integer);
@@ -400,6 +409,7 @@ compile_get_opt_attr(label_placement_e);
 compile_get_opt_attr(vertical_alignment_e);
 compile_get_opt_attr(horizontal_alignment_e);
 compile_get_opt_attr(justify_alignment_e);
+compile_get_opt_attr(text_upright_e);
 compile_get_opt_attr(halo_rasterizer_e);
 compile_get_opt_attr(expression_ptr);
 compile_get_attr(std::string);

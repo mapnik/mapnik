@@ -24,34 +24,26 @@
 #define MAPNIK_JSON_GEOMETRY_PARSER_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/json/geometry_grammar.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
-
-// stl
-//#include <vector>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
 
 namespace mapnik { namespace json {
 
-template <typename Iterator> struct geometry_grammar;
-
-MAPNIK_DECL bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths);
-
-template <typename Iterator>
-class MAPNIK_DECL geometry_parser : private mapnik::noncopyable
+inline bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths)
 {
-    typedef Iterator iterator_type;
-public:
-    geometry_parser();
-    ~geometry_parser();
-    bool parse(iterator_type first, iterator_type last, boost::ptr_vector<mapnik::geometry_type>&);
-private:
-    const boost::scoped_ptr<geometry_grammar<iterator_type> > grammar_;
-};
+    using namespace boost::spirit;
+    static const geometry_grammar<std::string::const_iterator> g;
+    standard_wide::space_type space;
+    std::string::const_iterator start = json.begin();
+    std::string::const_iterator end = json.end();
+    return qi::phrase_parse(start, end, (g)(boost::phoenix::ref(paths)), space);
+}
 
 }}
 
-#endif //MAPNIK_FEATURE_COLLECTION_PARSER_HPP
+#endif // MAPNIK_JSON_GEOMETRY_PARSER_HPP

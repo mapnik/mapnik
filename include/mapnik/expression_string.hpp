@@ -28,7 +28,7 @@
 #include <mapnik/expression_node_types.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string>
@@ -56,7 +56,7 @@ std::string to_expression_string(T const* expr_node_ptr)
 }
 
 template <typename T>
-std::string to_expression_string(boost::shared_ptr<T> const& expr_node_ptr)
+std::string to_expression_string(std::shared_ptr<T> const& expr_node_ptr)
 {
     throw std::logic_error("to_expression_string() called with pointer argument");
     // compile error intended here; comment on the next line shows in clang output

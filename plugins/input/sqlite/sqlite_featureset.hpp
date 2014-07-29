@@ -29,8 +29,8 @@
 #include <mapnik/wkb.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 
 // sqlite
 #include "sqlite_resultset.hpp"
@@ -39,7 +39,7 @@
 class sqlite_featureset : public mapnik::Featureset
 {
 public:
-    sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+    sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                       mapnik::context_ptr const& ctx,
                       std::string const& encoding,
                       mapnik::box2d<double> const& bbox,
@@ -50,9 +50,9 @@ public:
     mapnik::feature_ptr next();
 
 private:
-    boost::shared_ptr<sqlite_resultset> rs_;
+    std::shared_ptr<sqlite_resultset> rs_;
     mapnik::context_ptr ctx_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::box2d<double> bbox_;
     mapnik::wkbFormat format_;
     bool spatial_index_;

@@ -13,7 +13,8 @@ def setup():
 
 def test_introspect_symbolizers():
     # create a symbolizer
-    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
+    p = mapnik.PointSymbolizer()
+    p.file = "../data/images/dummy.png"
     p.allow_overlap = True
     p.opacity = 0.5
 
@@ -48,24 +49,13 @@ def test_introspect_symbolizers():
 
     ## TODO here, we can do...
     sym = syms[0]
-    # this is hackish at best
-    p2 = sym.symbol()
+    p2 = sym.extract()
     assert isinstance(p2,mapnik.PointSymbolizer)
 
     eq_(p2.allow_overlap, True)
     eq_(p2.opacity, 0.5)
     eq_(p2.filename,'../data/images/dummy.png')
-
-    ## but we need to be able to do:
-    p2 = syms[0] # get the actual symbolizer, not the variant object
-    # this will throw for now...
-    assert isinstance(p2,mapnik.PointSymbolizer)
-
-    eq_(p2.allow_overlap, True)
-    eq_(p2.opacity, 0.5)
-    eq_(p2.filename,'../data/images/dummy.png')
-
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

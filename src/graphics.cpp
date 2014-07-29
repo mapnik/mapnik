@@ -32,12 +32,8 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
 
-// boost
-#include <boost/scoped_array.hpp>
-
-// cairo
 #ifdef HAVE_CAIRO
-#include <mapnik/cairo_context.hpp>
+#include <mapnik/cairo/cairo_context.hpp>
 #endif
 
 namespace mapnik
@@ -72,7 +68,7 @@ image_32::image_32(cairo_surface_ptr const& surface)
 
     int stride = cairo_image_surface_get_stride(&*surface) / 4;
 
-    boost::scoped_array<unsigned int> out_row(new unsigned int[width_]);
+    const std::unique_ptr<unsigned int[]> out_row(new unsigned int[width_]);
     const unsigned int *in_row = (const unsigned int *)cairo_image_surface_get_data(&*surface);
 
     for (unsigned int row = 0; row < height_; row++, in_row += stride)
@@ -112,7 +108,6 @@ void image_32::set_grayscale_to_alpha()
         for (unsigned int x = 0; x < width_; ++x)
         {
             unsigned rgba = row_from[x];
-            // TODO - big endian support
             unsigned r = rgba & 0xff;
             unsigned g = (rgba >> 8 ) & 0xff;
             unsigned b = (rgba >> 16) & 0xff;
@@ -152,20 +147,6 @@ void image_32::set_alpha(float opacity)
         for (unsigned int x = 0; x < width_; ++x)
         {
             unsigned rgba = row_to[x];
-
-#ifdef MAPNIK_BIG_ENDIAN
-            unsigned a0 = (rgba & 0xff);
-            unsigned a1 = int( (rgba & 0xff) * opacity );
-
-            if (a0 == a1) continue;
-
-            unsigned r = (rgba >> 24) & 0xff;
-            unsigned g = (rgba >> 16 ) & 0xff;
-            unsigned b = (rgba >> 8) & 0xff;
-
-            row_to[x] = (a1) | (b << 8) |  (g << 16) | (r << 24) ;
-
-#else
             unsigned a0 = (rgba >> 24) & 0xff;
             unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
             //unsigned a1 = opacity;
@@ -176,7 +157,6 @@ void image_32::set_alpha(float opacity)
             unsigned b = (rgba >> 16) & 0xff;
 
             row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
-#endif
         }
     }
 }
@@ -210,10 +190,10 @@ void image_32::demultiply()
 
 void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
 {
-    typedef agg::rgba8 color_type;
-    typedef color_type::value_type value_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::comp_op_adaptor_rgba<color_type,order_type> blender_type;
+    using color_type = agg::rgba8;
+    using value_type = color_type::value_type;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba<color_type,order_type>;
 
     if (checkBounds(x,y))
     {

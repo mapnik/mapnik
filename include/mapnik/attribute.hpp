@@ -25,10 +25,11 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
-#include <mapnik/geometry.hpp>
+#include <mapnik/value.hpp>
 
 // stl
 #include <string>
+#include <unordered_map>
 
 namespace mapnik {
 
@@ -53,19 +54,32 @@ struct geometry_type_attribute
     V value(F const& f) const
     {
         mapnik::value_integer type = 0;
-        geometry_container::const_iterator itr = f.paths().begin();
-        geometry_container::const_iterator end = f.paths().end();
-        for ( ; itr != end; ++itr)
+        for (auto const& geom : f.paths())
         {
-            if (type != 0 && itr->type() != type)
+            if (type != 0 && geom.type() != type)
             {
                 return value_integer(4); // Collection
             }
-            type = itr->type();
+            type = geom.type();
         }
         return type;
     }
 };
+
+struct global_attribute
+{
+    std::string name;
+    explicit global_attribute(std::string const& name_)
+        : name(name_) {}
+
+    template <typename V, typename C>
+    V const& operator() (C const& ctx)
+    {
+        return ctx.get(name);
+    }
+};
+
+using attributes = std::unordered_map<std::string, value>;
 
 }
 

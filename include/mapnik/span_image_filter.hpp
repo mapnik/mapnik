@@ -20,10 +20,10 @@
  *
  *****************************************************************************/
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include "agg_span_image_filter_rgba.h"
 
-namespace mapnik { 
+namespace mapnik {
 
 using namespace agg;
 
@@ -32,13 +32,13 @@ class span_image_resample_rgba_affine :
         public span_image_resample_affine<Source>
 {
 public:
-    typedef Source source_type;
-    typedef typename source_type::color_type color_type;
-    typedef typename source_type::order_type order_type;
-    typedef span_image_resample_affine<source_type> base_type;
-    typedef typename base_type::interpolator_type interpolator_type;
-    typedef typename color_type::value_type value_type;
-    typedef typename color_type::long_type long_type;
+    using source_type = Source;
+    using color_type = typename source_type::color_type;
+    using order_type = typename source_type::order_type;
+    using base_type = span_image_resample_affine<source_type>;
+    using interpolator_type = typename base_type::interpolator_type;
+    using value_type = typename color_type::value_type;
+    using long_type = typename color_type::long_type;
     enum base_scale_e
     {
         base_shift      = color_type::base_shift,
@@ -71,7 +71,7 @@ public:
             (diameter * base_type::m_rx + image_subpixel_mask) >>
             image_subpixel_shift;
 
-        const boost::int16_t* weight_array = base_type::filter().weight_array();
+        const std::int16_t* weight_array = base_type::filter().weight_array();
 
         do
         {
@@ -104,7 +104,7 @@ public:
                     int weight = (weight_y * weight_array[x_hr] +
                                   image_filter_scale / 2) >>
                         downscale_shift;
-                    
+
                     fg[0] += *fg_ptr++ * weight;
                     fg[1] += *fg_ptr++ * weight;
                     fg[2] += *fg_ptr++ * weight;
@@ -144,7 +144,7 @@ public:
             if(fg[order_type::G] > base_mask)         fg[order_type::G] = base_mask;
             if(fg[order_type::B] > base_mask)         fg[order_type::B] = base_mask;
             if(fg[order_type::A] > base_mask)         fg[order_type::A] = base_mask;
-            
+
             span->r = (value_type)fg[order_type::R];
             span->g = (value_type)fg[order_type::G];
             span->b = (value_type)fg[order_type::B];

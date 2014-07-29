@@ -24,14 +24,14 @@
 #define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp> // for featureset_ptr
+#include <mapnik/box2d.hpp>
+#include <mapnik/featureset.hpp>
 #include <mapnik/config.hpp>
-
+#include <mapnik/feature_style_processor_context.hpp>
 
 // stl
 #include <set>
 #include <string>
-#include <vector>
 
 namespace mapnik
 {

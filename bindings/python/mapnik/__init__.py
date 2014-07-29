@@ -267,15 +267,17 @@ class _Path(Path,_injector):
 
 class _Datasource(Datasource,_injector):
 
-    def all_features(self,fields=None):
+    def all_features(self,fields=None,variables={}):
         query = Query(self.envelope())
+        query.set_variables(variables);
         attributes = fields or self.fields()
         for fld in attributes:
             query.add_property_name(fld)
         return self.features(query).features
 
-    def featureset(self,fields=None):
+    def featureset(self,fields=None,variables={}):
         query = Query(self.envelope())
+        query.set_variables(variables);
         attributes = fields or self.fields()
         for fld in attributes:
             query.add_property_name(fld)
@@ -285,16 +287,15 @@ class _Color(Color,_injector):
     def __repr__(self):
         return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
 
-class _ProcessedText(ProcessedText, _injector):
-    def append(self, properties, text):
-        #More pythonic name
-        self.push_back(properties, text)
+class _SymbolizerBase(SymbolizerBase,_injector):
+     # back compatibility
+     @property
+     def filename(self):
+         return self['file']
 
-class _Symbolizers(Symbolizers,_injector):
-
-    def __getitem__(self, idx):
-        sym = Symbolizers._c___getitem__(self, idx)
-        return sym.symbol()
+     @filename.setter
+     def filename(self, val):
+         self['file'] = val
 
 def _add_symbol_method_to_symbolizers(vars=globals()):
 
@@ -428,7 +429,7 @@ def PostGIS(**keywords):
       cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
 
     >>> from mapnik import PostGIS, Layer
-    >>> params = dict(dbname='mapnik',table='osm',user='postgres',password='gis')
+    >>> params = dict(dbname=env['MAPNIK_NAME'],table='osm',user='postgres',password='gis')
     >>> params['estimate_extent'] = False
     >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
     >>> postgis = PostGIS(**params)
@@ -625,6 +626,16 @@ def Python(**keywords):
     """
     keywords['type'] = 'python'
     return CreateDatasource(keywords)
+
+def MemoryDatasource(**keywords):
+    """Create a Memory Datasource.
+
+    Optional keyword arguments:
+        (TODO)
+    """
+    params = Parameters()
+    params.append(Parameter('type','memory'))
+    return MemoryDatasourceBase(params)
 
 class PythonDatasource(object):
     """A base class for a Python data source.
@@ -976,17 +987,6 @@ class _TextSymbolizer(TextSymbolizer,_injector):
         self.properties.maximum_angle_char_delta = maximum_angle_char_delta
 
 
-
-    @property
-    def force_odd_labels(self):
-        return self.properties.force_odd_labels
-
-    @force_odd_labels.setter
-    def force_odd_labels(self, force_odd_labels):
-        self.properties.force_odd_labels = force_odd_labels
-
-
-
     @property
     def allow_overlap(self):
         return self.properties.allow_overlap
@@ -1030,7 +1030,7 @@ def register_plugins(path=None):
             path = inputpluginspath
     DatasourceCache.register_datasources(path)
 
-def register_fonts(path=None,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
+def register_fonts(path=None,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont','.woff']):
     """Recursively register fonts using path argument as base directory"""
     if not path:
        if os.environ.has_key('MAPNIK_FONT_DIRECTORY'):

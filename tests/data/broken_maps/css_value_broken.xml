@@ -2,7 +2,7 @@
 <Map minimum-version="0.7.2">
     <Style name="some_style">
       <Rule>
-        <LineSymbolizer stroke-width="foobar"/>
+        <LineSymbolizer stroke-width="foobar  2"/>
       </Rule>
     </Style>
 </Map>

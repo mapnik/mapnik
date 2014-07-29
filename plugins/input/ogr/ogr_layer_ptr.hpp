@@ -29,15 +29,22 @@
 // stl
 #include <stdexcept>
 
-// ogr
+// gdal
+#include <gdal_version.h>
 #include <ogrsf_frmts.h>
+
+#if GDAL_VERSION_MAJOR >= 2
+using gdal_dataset_type = GDALDataset*;
+#else
+using gdal_dataset_type = OGRDataSource*;
+#endif
 
 class ogr_layer_ptr
 {
 public:
     ogr_layer_ptr()
-        : datasource_(NULL),
-          layer_(NULL),
+        : datasource_(nullptr),
+          layer_(nullptr),
           owns_layer_(false),
           is_valid_(false)
     {
@@ -50,19 +57,19 @@ public:
 
     void free_layer()
     {
-        if (owns_layer_ && layer_ != NULL && datasource_ != NULL)
+        if (owns_layer_ && layer_ != nullptr && datasource_ != nullptr)
         {
             datasource_->ReleaseResultSet(layer_);
         }
 
-        datasource_ = NULL;
-        layer_ = NULL;
+        datasource_ = nullptr;
+        layer_ = nullptr;
         layer_name_ = "";
         owns_layer_ = false;
         is_valid_ = false;
     }
 
-    void layer_by_name(OGRDataSource* const datasource,
+    void layer_by_name(gdal_dataset_type const datasource,
                        std::string const& layer_name)
     {
         free_layer();
@@ -84,7 +91,7 @@ public:
 #endif
     }
 
-    void layer_by_index(OGRDataSource* const datasource,
+    void layer_by_index(gdal_dataset_type const datasource,
                         int layer_index)
     {
         free_layer();
@@ -110,7 +117,7 @@ public:
 #endif
     }
 
-    void layer_by_sql(OGRDataSource* const datasource,
+    void layer_by_sql(gdal_dataset_type const datasource,
                       std::string const& layer_sql)
     {
         free_layer();
@@ -122,8 +129,8 @@ public:
         // http://trac.osgeo.org/gdal/wiki/rfc29_desired_fields
         // http://trac.osgeo.org/gdal/wiki/rfc28_sqlfunc
 
-        OGRGeometry* spatial_filter = NULL;
-        const char* sql_dialect = NULL;
+        OGRGeometry* spatial_filter = nullptr;
+        const char* sql_dialect = nullptr;
         OGRLayer* ogr_layer = datasource_->ExecuteSQL(layer_sql.c_str(), spatial_filter, sql_dialect);
 
         if (ogr_layer)
@@ -179,7 +186,7 @@ private:
     }
 #endif
 
-    OGRDataSource* datasource_;
+    gdal_dataset_type datasource_;
     OGRLayer* layer_;
     std::string layer_name_;
     bool owns_layer_;

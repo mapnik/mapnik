@@ -28,19 +28,14 @@
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp> // for feature_ptr
-
-// boost
-#include <boost/cstdint.hpp>
 
 // stl
+#include <cstdint>
 #include <map>
 #include <set>
 #include <cmath>
 #include <string>
-#include <cassert>
 #include <vector>
-
 
 namespace mapnik {
 
@@ -48,12 +43,12 @@ template <typename T>
 class hit_grid_view
 {
 public:
-    typedef T data_type;
-    typedef typename T::pixel_type value_type;
-    typedef typename T::pixel_type pixel_type;
-    typedef std::string lookup_type;
-    typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<std::string, mapnik::feature_ptr> feature_type;
+    using data_type = T;
+    using value_type = typename T::pixel_type;
+    using pixel_type = typename T::pixel_type;
+    using lookup_type = std::string;
+    using feature_key_type = std::map<value_type, lookup_type>;
+    using feature_type = std::map<std::string, mapnik::feature_ptr>;
 
     hit_grid_view(unsigned x, unsigned y,
                   unsigned width, unsigned height,
@@ -201,7 +196,7 @@ private:
     feature_type const& features_;
 };
 
-typedef hit_grid_view<mapnik::ImageData<mapnik::value_integer> > grid_view;
+using grid_view = hit_grid_view<mapnik::ImageData<mapnik::value_integer> >;
 
 }
 

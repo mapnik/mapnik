@@ -25,11 +25,9 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/geometry.hpp> // for eGeomType (TODO: avoid this interdependence)
-
-// boost
-#include <boost/tuple/tuple.hpp>
+#include <mapnik/geometry.hpp> // for geometry_type::types (TODO: avoid this interdependence)
 
 // stl
 #include <cmath>
@@ -94,21 +92,21 @@ template <typename Iter>
 inline bool point_inside_path(double x,double y,Iter start,Iter end)
 {
     bool inside=false;
-    double x0=boost::get<0>(*start);
-    double y0=boost::get<1>(*start);
+    double x0=std::get<0>(*start);
+    double y0=std::get<1>(*start);
 
     double x1 = 0;
     double y1 = 0;
     while (++start!=end)
     {
-        if ( boost::get<2>(*start) == SEG_MOVETO)
+        if ( std::get<2>(*start) == SEG_MOVETO)
         {
-            x0 = boost::get<0>(*start);
-            y0 = boost::get<1>(*start);
+            x0 = std::get<0>(*start);
+            y0 = std::get<1>(*start);
             continue;
         }
-        x1=boost::get<0>(*start);
-        y1=boost::get<1>(*start);
+        x1=std::get<0>(*start);
+        y1=std::get<1>(*start);
 
         if ((((y1 <= y) && (y < y0)) ||
              ((y0 <= y) && (y < y1))) &&
@@ -173,20 +171,20 @@ inline double point_to_segment_distance(double x, double y,
 template <typename Iter>
 inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 {
-    double x0=boost::get<0>(*start);
-    double y0=boost::get<1>(*start);
+    double x0=std::get<0>(*start);
+    double y0=std::get<1>(*start);
     double x1 = 0;
     double y1 = 0;
     while (++start != end)
     {
-        if ( boost::get<2>(*start) == SEG_MOVETO)
+        if ( std::get<2>(*start) == SEG_MOVETO)
         {
-            x0 = boost::get<0>(*start);
-            y0 = boost::get<1>(*start);
+            x0 = std::get<0>(*start);
+            y0 = std::get<1>(*start);
             continue;
         }
-        x1=boost::get<0>(*start);
-        y1=boost::get<1>(*start);
+        x1=std::get<0>(*start);
+        y1=std::get<1>(*start);
 
         double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
         if (distance < tol)
@@ -245,6 +243,46 @@ double path_length(PathType & path)
         y0 = y1;
     }
     return length;
+}
+
+template <typename PathType>
+bool hit_test_first(PathType & path, double x, double y, double tol)
+{
+    bool inside=false;
+    double x0 = 0;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
+    path.rewind(0);
+    unsigned command = path.vertex(&x0, &y0);
+    if (command == SEG_END)
+    {
+        return false;
+    }
+    unsigned count = 0;
+    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    {
+        if (command == SEG_CLOSE)
+        {
+            break;
+        }
+        ++count;
+        if (command == SEG_MOVETO)
+        {
+            x0 = x1;
+            y0 = y1;
+            continue;
+        }
+
+        if ((((y1 <= y) && (y < y0)) ||
+             ((y0 <= y) && (y < y1))) &&
+            (x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
+            inside=!inside;
+
+        x0 = x1;
+        y0 = y1;
+    }
+    return inside;
 }
 
 namespace label {
@@ -355,7 +393,7 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
 
   while (start!=end)
   {
-    typename Iter::value_type & path = *start++;
+    typename Iter::value_type const& path = *start++;
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END) continue;
@@ -420,7 +458,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         return false;
     }
     unsigned count = 0;
-    mapnik::eGeomType geom_type = static_cast<mapnik::eGeomType>(path.type());
+    mapnik::geometry_type::types geom_type = static_cast<mapnik::geometry_type::types>(path.type());
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         if (command == SEG_CLOSE)
@@ -436,7 +474,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         }
         switch(geom_type)
         {
-        case mapnik::Polygon:
+        case mapnik::geometry_type::types::Polygon:
         {
             if ((((y1 <= y) && (y < y0)) ||
                  ((y0 <= y) && (y < y1))) &&
@@ -444,7 +482,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
                 inside=!inside;
             break;
         }
-        case mapnik::LineString:
+        case mapnik::geometry_type::types::LineString:
         {
             double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
             if (distance < tol)

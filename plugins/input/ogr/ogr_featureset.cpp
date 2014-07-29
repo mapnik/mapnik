@@ -44,6 +44,22 @@ using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
 
+
+ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
+                               OGRLayer & layer,
+                               OGRGeometry & extent,
+                               std::string const& encoding)
+    : ctx_(ctx),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn ()),
+      count_(0)
+
+{
+    layer_.SetSpatialFilter (&extent);
+}
+
 ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
                                OGRLayer & layer,
                                mapnik::box2d<double> const& extent,
@@ -52,7 +68,7 @@ ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn()),
+      fidcolumn_(layer_.GetFIDColumn()), // TODO - unused
       count_(0)
 {
     layer_.SetSpatialFilterRect (extent.minx(),
@@ -67,8 +83,15 @@ ogr_featureset::~ogr_featureset()
 
 feature_ptr ogr_featureset::next()
 {
+    if (count_ == 0)
+    {
+        // Reset the layer reading on the first feature read
+        // this is a hack, but needed due to https://github.com/mapnik/mapnik/issues/2048
+        // Proper solution is to avoid storing layer state in featureset
+        layer_.ResetReading();
+    }
     OGRFeature *poFeature;
-    while ((poFeature = layer_.GetNextFeature()) != NULL)
+    while ((poFeature = layer_.GetNextFeature()) != nullptr)
     {
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1

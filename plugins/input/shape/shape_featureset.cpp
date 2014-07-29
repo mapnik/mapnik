@@ -29,7 +29,6 @@
 #include <mapnik/unicode.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 #include "shape_featureset.hpp"
 #include "shape_utils.hpp"
@@ -53,7 +52,7 @@ shape_featureset<filterT>::shape_featureset(filterT const& filter,
       file_length_(file_length),
       row_limit_(row_limit),
       count_(0),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(std::make_shared<mapnik::context_type>())
 {
     shape_.shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
@@ -89,9 +88,9 @@ feature_ptr shape_featureset<filterT>::next()
             double y = record.read_double();
             if (!filter_.pass(mapnik::box2d<double>(x,y,x,y)))
                 continue;
-            std::auto_ptr<geometry_type> point(new geometry_type(mapnik::Point));
+            std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
             point->move_to(x, y);
-            feature->paths().push_back(point);
+            feature->paths().push_back(point.release());
             break;
         }
         case shape_io::shape_multipoint:
@@ -105,9 +104,9 @@ feature_ptr shape_featureset<filterT>::next()
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                std::auto_ptr<geometry_type> point(new geometry_type(mapnik::Point));
+                std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
                 point->move_to(x, y);
-                feature->paths().push_back(point);
+                feature->paths().push_back(point.release());
             }
             break;
         }

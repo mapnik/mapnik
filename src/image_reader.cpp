@@ -28,16 +28,9 @@
 namespace mapnik
 {
 
-typedef factory<image_reader,std::string,
-                image_reader* (*)(std::string const&)>  ImageReaderFactory;
-
-typedef factory<image_reader,std::string,
-                image_reader* (*)(char const*, std::size_t)>  MemImageReaderFactory;
-
-
 inline boost::optional<std::string> type_from_bytes(char const* data, size_t size)
 {
-    typedef boost::optional<std::string> result_type;
+    using result_type = boost::optional<std::string>;
     if (size >= 4)
     {
         unsigned int magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
@@ -70,27 +63,18 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
     return result_type();
 }
 
-bool register_image_reader(std::string const& type,image_reader* (* fun)(std::string const&))
-{
-    return ImageReaderFactory::instance().register_product(type,fun);
-}
-
-bool register_image_reader(std::string const& type,image_reader* (* fun)(char const*, std::size_t))
-{
-    return MemImageReaderFactory::instance().register_product(type,fun);
-}
-
 image_reader* get_image_reader(char const* data, size_t size)
 {
     boost::optional<std::string> type = type_from_bytes(data,size);
     if (type)
-        return MemImageReaderFactory::instance().create_object(*type, data,size);
-    return 0;
+        return factory<image_reader,std::string,char const*,size_t>::instance().create_object(*type, data,size);
+    else
+        throw image_reader_exception("image_reader: can't determine type from input data");
 }
 
 image_reader* get_image_reader(std::string const& filename,std::string const& type)
 {
-    return ImageReaderFactory::instance().create_object(type,filename);
+    return factory<image_reader,std::string,std::string const&>::instance().create_object(type,filename);
 }
 
 image_reader* get_image_reader(std::string const& filename)
@@ -98,7 +82,7 @@ image_reader* get_image_reader(std::string const& filename)
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        return ImageReaderFactory::instance().create_object(*type,filename);
+        return factory<image_reader,std::string,std::string const&>::instance().create_object(*type,filename);
     }
     return 0;
 }

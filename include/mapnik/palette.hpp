@@ -32,34 +32,25 @@
 
 #ifdef USE_DENSE_HASH_MAP
     #include <mapnik/sparsehash/dense_hash_map>
-    typedef google::dense_hash_map<unsigned int, unsigned char> rgba_hash_table;
+    using rgba_hash_table = google::dense_hash_map<unsigned int, unsigned char>;
 #else
     #include <boost/unordered_map.hpp>
-    typedef boost::unordered_map<unsigned int, unsigned char> rgba_hash_table;
+    using rgba_hash_table = boost::unordered_map<unsigned int, unsigned char>;
 #endif
 
 // stl
 #include <vector>
 
-#ifdef MAPNIK_BIG_ENDIAN
-#define U2RED(x) (((x)>>24)&0xff)
-#define U2GREEN(x) (((x)>>16)&0xff)
-#define U2BLUE(x) (((x)>>8)&0xff)
-#define U2ALPHA(x) ((x)&0xff)
-#else
 #define U2RED(x) ((x)&0xff)
 #define U2GREEN(x) (((x)>>8)&0xff)
 #define U2BLUE(x) (((x)>>16)&0xff)
 #define U2ALPHA(x) (((x)>>24)&0xff)
-#endif
-
 
 namespace mapnik {
 
-typedef boost::uint8_t byte;
 struct rgba;
 
-struct rgb {
+struct MAPNIK_DECL rgb {
     byte r;
     byte g;
     byte b;
@@ -73,7 +64,7 @@ struct rgb {
     }
 };
 
-struct rgba
+struct MAPNIK_DECL rgba
 {
     byte r;
     byte g;
@@ -104,7 +95,7 @@ struct rgba
     }
 
     // ordering by mean(a,r,g,b), a, r, g, b
-    struct mean_sort_cmp
+    struct MAPNIK_DECL mean_sort_cmp
     {
         bool operator() (const rgba& x, const rgba& y) const;
     };
@@ -142,4 +133,3 @@ private:
 } // namespace mapnik
 
 #endif // MAPNIK_PALETTE_HPP
-

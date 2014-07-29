@@ -30,7 +30,6 @@
 #include <mapnik/value_types.hpp>
 
 // boost
-#include <boost/version.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
@@ -65,28 +64,28 @@ expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const
 }
 
 template <typename Iterator>
-expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
+expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     : expression_grammar::base_type(expr),
-      unicode_(unicode_impl(tr)),
-      regex_match_(regex_match_impl(tr)),
-      regex_replace_(regex_replace_impl(tr))
+      tr_(encoding),
+      unicode_(unicode_impl(tr_)),
+      regex_match_(regex_match_impl(tr_)),
+      regex_replace_(regex_replace_impl(tr_))
 {
+    qi::_1_type _1;
+    qi::_a_type _a;
+    qi::_b_type _b;
+    qi::_r1_type _r1;
+    qi::no_skip_type no_skip;
+    qi::_val_type _val;
+    qi::lit_type lit;
+    qi::double_type double_;
+    qi::hex_type hex;
+    qi::omit_type omit;
+    qi::alpha_type alpha;
+    qi::alnum_type alnum;
+    standard_wide::char_type char_;
+    standard_wide::no_case_type no_case;
     using boost::phoenix::construct;
-    using qi::_1;
-    using qi::_a;
-    using qi::_b;
-    using qi::_r1;
-#if BOOST_VERSION > 104200
-    using qi::no_skip;
-#endif
-    using qi::lexeme;
-    using qi::_val;
-    using qi::lit;
-    using qi::double_;
-    using qi::hex;
-    using qi::omit;
-    using standard_wide::char_;
-    using standard_wide::no_case;
 
     expr = logical_expr.alias();
 
@@ -114,16 +113,16 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
 
     regex_match_expr = lit(".match")
         >> lit('(')
-        >> ustring [_val = _1]
+        >> quoted_ustring [_val = _1]
         >> lit(')')
         ;
 
     regex_replace_expr =
         lit(".replace")
         >> lit('(')
-        >> ustring           [_a = _1]
+        >> quoted_ustring           [_a = _1]
         >> lit(',')
-        >> ustring           [_b = _1]
+        >> quoted_ustring           [_b = _1]
         >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
         ;
 
@@ -162,10 +161,13 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         | no_case[lit("false")] [_val = false]
         | no_case[lit("null")] [_val = value_null() ]
         | no_case[geom_type][_val = _1 ]
-        | ustring [_val = unicode_(_1) ]
+        | quoted_ustring [_val = unicode_(_1)]
         | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
+        | global_attr [_val = construct<mapnik::global_attribute>( _1 )]
+        | lit("not") >> expr [_val =  !_1]
         | '(' >> expr [_val = _1 ] >> ')'
+        | ustring[_val = unicode_(_1)] // if we get here then try parsing as unquoted string
         ;
 
     unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
@@ -173,18 +175,13 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         ("\\\'", '\'')("\\\"", '\"')
         ;
 
-#if BOOST_VERSION > 104500
+    ustring %= no_skip[alpha >> *alnum];
     quote_char %= char_('\'') | char_('"');
-    ustring %= omit[quote_char[_a = _1]]
+    quoted_ustring %= omit[quote_char[_a = _1]]
         >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
         >> lit(_a);
     attr %= '[' >> no_skip[+~char_(']')] >> ']';
-#else
-    ustring %= lit('\'')
-        >> *(unesc_char | "\\x" >> hex | (char_ - lit('\'')))
-        >> lit('\'');
-    attr %= '[' >> lexeme[+(char_ - ']')] >> ']';
-#endif
+    global_attr %= '@' >> no_skip[alpha >> * (alnum | char_('-'))];
 
 }
 

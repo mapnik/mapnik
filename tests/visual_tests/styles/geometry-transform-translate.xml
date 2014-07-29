@@ -48,7 +48,7 @@
             <Parameter name="type">csv</Parameter>
             <Parameter name="inline">
 wkt
-"POLYGON ((1 1, 4 1, 4 4, 1 4, 1 1), (2 2, 2 3, 3 3, 3 2, 2 2))"
+"POLYGON ((1 1, 1 4, 4 4, 4 1, 1 1), (2 2, 3 2, 3 3, 2 3, 2 2))"
             </Parameter>
         </Datasource>
     </Layer>

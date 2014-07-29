@@ -34,15 +34,11 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/global.hpp> // for int2net
-#include <boost/scoped_array.hpp>
-
-
-// boost
-#include <boost/cstdint.hpp> // for boost::int16_t
 
 // stl
 #include <sstream>
 #include <string>
+#include <memory>
 
 using mapnik::geometry_type;
 using mapnik::byte;
@@ -50,7 +46,7 @@ using mapnik::geometry_utils;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 
-postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
+postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
                                        bool key_field)
@@ -233,12 +229,12 @@ postgis_featureset::~postgis_featureset()
 
 std::string numeric2string(const char* buf)
 {
-    boost::int16_t ndigits = int2net(buf);
-    boost::int16_t weight  = int2net(buf+2);
-    boost::int16_t sign    = int2net(buf+4);
-    boost::int16_t dscale  = int2net(buf+6);
+    std::int16_t ndigits = int2net(buf);
+    std::int16_t weight  = int2net(buf+2);
+    std::int16_t sign    = int2net(buf+4);
+    std::int16_t dscale  = int2net(buf+6);
 
-    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    const std::unique_ptr<std::int16_t[]> digits(new std::int16_t[ndigits]);
     for (int n=0; n < ndigits ;++n)
     {
         digits[n] = int2net(buf+8+n*2);
@@ -248,7 +244,7 @@ std::string numeric2string(const char* buf)
 
     if (sign == 0x4000) ss << "-";
 
-    int i = std::max(weight,boost::int16_t(0));
+    int i = std::max(weight,std::int16_t(0));
     int d = 0;
 
     // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.

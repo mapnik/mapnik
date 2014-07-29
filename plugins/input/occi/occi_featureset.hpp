@@ -30,8 +30,8 @@
 #include <mapnik/unicode.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 
 // oci
 #include "occi_types.hpp"
@@ -55,7 +55,7 @@ public:
 private:
     void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature);
     void convert_ordinates (mapnik::feature_ptr feature,
-                            const mapnik::eGeomType& geom_type,
+                            const mapnik::geometry_type::types& geom_type,
                             const std::vector<oracle::occi::Number>& elem_info,
                             const std::vector<oracle::occi::Number>& ordinates,
                             const int dimensions,
@@ -70,7 +70,7 @@ private:
 
     occi_connection_ptr conn_;
     oracle::occi::ResultSet* rs_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::value_integer feature_id_;
     mapnik::context_ptr ctx_;
     bool use_wkb_;

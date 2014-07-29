@@ -3,7 +3,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -15,9 +14,7 @@
 #include <deque>
 #include <cmath>
 #include <stdexcept>
-
-// boost
-#include <boost/optional.hpp>
+#include <algorithm>
 
 namespace mapnik
 {
@@ -32,12 +29,12 @@ struct weighted_vertex : private mapnik::noncopyable
     weighted_vertex(vertex2d coord_) :
         coord(coord_),
         weight(std::numeric_limits<double>::infinity()),
-        prev(NULL),
-        next(NULL) {}
+        prev(nullptr),
+        next(nullptr) {}
 
     double nominalWeight()
     {
-        if (prev == NULL || next == NULL || coord.cmd != SEG_LINETO) {
+        if (prev == nullptr || next == nullptr || coord.cmd != SEG_LINETO) {
             return std::numeric_limits<double>::infinity();
         }
         vertex2d const& A = prev->coord;
@@ -88,16 +85,6 @@ struct sleeve
                 inside=!inside;
         }
         return inside;
-    }
-    void print()
-    {
-        std::cerr << "LINESTRING("
-                  << v[0].x << " " << -v[0].y << ","
-                  << v[1].x << " " << -v[1].y << ","
-                  << v[2].x << " " << -v[2].y << ","
-                  << v[3].x << " " << -v[3].y << ","
-                  << v[0].x << " " << -v[0].y << ")" << std::endl;
-
     }
 };
 
@@ -374,8 +361,8 @@ private:
 
     status init_vertices_visvalingam_whyatt()
     {
-        typedef std::set<weighted_vertex *, weighted_vertex::ascending_sort> VertexSet;
-        typedef std::vector<weighted_vertex *> VertexList;
+        using VertexSet = std::set<weighted_vertex *, weighted_vertex::ascending_sort>;
+        using VertexList = std::vector<weighted_vertex *>;
 
         std::vector<weighted_vertex *> v_list;
         vertex2d vtx(vertex2d::no_init);
@@ -392,8 +379,8 @@ private:
         VertexSet v;
         for (VertexList::iterator i = v_list.begin(); i != v_list.end(); ++i)
         {
-            (*i)->prev = i == v_list.begin() ? NULL : *(i - 1);
-            (*i)->next = i + 1 == v_list.end() ? NULL : *(i + 1);
+            (*i)->prev = i == v_list.begin() ? nullptr : *(i - 1);
+            (*i)->next = i + 1 == v_list.end() ? nullptr : *(i + 1);
             (*i)->weight = (*i)->nominalWeight();
             v.insert(*i);
         }

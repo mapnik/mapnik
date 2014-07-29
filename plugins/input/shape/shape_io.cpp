@@ -24,14 +24,15 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/geom_util.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 using mapnik::datasource_exception;
 using mapnik::geometry_type;
-
+using mapnik::hit_test_first;
 const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
@@ -53,7 +54,7 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
     {
         try
         {
-            index_= boost::make_shared<shape_file>(shape_name + INDEX);
+            index_ = std::make_unique<shape_file>(shape_name + INDEX);
         }
         catch (...)
         {
@@ -96,7 +97,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
     int num_points = record.read_ndr_integer();
     if (num_parts == 1)
     {
-        std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
+        std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
         record.skip(4);
         double x = record.read_double();
         double y = record.read_double();
@@ -107,7 +108,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
             y = record.read_double();
             line->line_to(x, y);
         }
-        geom.push_back(line);
+        geom.push_back(line.release());
     }
     else
     {
@@ -120,7 +121,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
         int start, end;
         for (int k = 0; k < num_parts; ++k)
         {
-            std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
+            std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
             start = parts[k];
             if (k == num_parts - 1)
             {
@@ -141,7 +142,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
                 y = record.read_double();
                 line->line_to(x, y);
             }
-            geom.push_back(line);
+            geom.push_back(line.release());
         }
     }
 }
@@ -157,9 +158,9 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
         parts[i] = record.read_ndr_integer();
     }
 
+    std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
     for (int k = 0; k < num_parts; ++k)
     {
-        std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
         int start = parts[k];
         int end;
         if (k == num_parts - 1)
@@ -173,14 +174,19 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
 
         double x = record.read_double();
         double y = record.read_double();
+        if (k > 0 && !hit_test_first(*poly, x, y, 0))
+        {
+            geom.push_back(poly.release());
+            poly.reset(new geometry_type(mapnik::geometry_type::types::Polygon));
+        }
         poly->move_to(x, y);
-        for (int j=start+1;j<end;j++)
+        for (int j = start + 1; j < end; ++j)
         {
             x = record.read_double();
             y = record.read_double();
             poly->line_to(x, y);
         }
         poly->close_path();
-        geom.push_back(poly);
     }
+    geom.push_back(poly.release());
 }

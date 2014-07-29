@@ -30,6 +30,8 @@
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_utils.hpp>
+#include <mapnik/gamma_method.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
@@ -41,9 +43,8 @@
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/text_placements/registry.hpp>
-#include <mapnik/text_placements/dummy.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/text/placements/registry.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
@@ -53,6 +54,11 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/group/group_rule.hpp>
+#include <mapnik/transform_expression.hpp>
+#include <mapnik/evaluate_global_attributes.hpp>
+#include <mapnik/boolean.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -71,48 +77,51 @@ namespace mapnik
 {
 using boost::optional;
 
-class map_parser : mapnik::noncopyable {
+constexpr unsigned name2int(const char *str, int off = 0)
+{
+    return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ str[off];
+}
+
+class map_parser : mapnik::noncopyable
+{
 public:
     map_parser(bool strict, std::string const& filename = "") :
         strict_(strict),
         filename_(filename),
-        relative_to_xml_(true),
         font_manager_(font_engine_),
         xml_base_path_()
     {}
 
-    void parse_map(Map & map, xml_node const& sty, std::string const& base_path);
+    void parse_map(Map & map, xml_node const& node, std::string const& base_path);
 private:
-    void parse_map_include(Map & map, xml_node const& include);
-    void parse_style(Map & map, xml_node const& sty);
-    void parse_layer(Map & map, xml_node const& lay);
-    void parse_symbolizer_base(symbolizer_base &sym, xml_node const& pt);
-
-    void parse_fontset(Map & map, xml_node const & fset);
+    void parse_map_include(Map & map, xml_node const& node);
+    void parse_style(Map & map, xml_node const& node);
+    void parse_layer(Map & map, xml_node const& node);
+    void parse_symbolizer_base(symbolizer_base &sym, xml_node const& node);
+    void parse_fontset(Map & map, xml_node const & node);
     bool parse_font(font_set & fset, xml_node const& f);
-
-    void parse_rule(feature_type_style & style, xml_node const & r);
-
-    void parse_point_symbolizer(rule & rule, xml_node const& sym);
-    void parse_line_pattern_symbolizer(rule & rule, xml_node const& sym);
-    void parse_polygon_pattern_symbolizer(rule & rule, xml_node const& sym);
-    void parse_text_symbolizer(rule & rule, xml_node const& sym);
-    void parse_shield_symbolizer(rule & rule, xml_node const& sym);
-    void parse_line_symbolizer(rule & rule, xml_node const& sym);
-    void parse_polygon_symbolizer(rule & rule, xml_node const& sym);
-    void parse_building_symbolizer(rule & rule, xml_node const& sym);
-    void parse_raster_symbolizer(rule & rule, xml_node const& sym);
-    void parse_markers_symbolizer(rule & rule, xml_node const& sym);
-    void parse_debug_symbolizer(rule & rule, xml_node const& sym);
-
+    void parse_rule(feature_type_style & style, xml_node const & node);
+    void parse_symbolizers(rule & rule, xml_node const & node);
+    void parse_point_symbolizer(rule & rule, xml_node const& node);
+    void parse_line_pattern_symbolizer(rule & rule, xml_node const& node);
+    void parse_polygon_pattern_symbolizer(rule & rule, xml_node const& node);
+    void parse_text_symbolizer(rule & rule, xml_node const& node);
+    void parse_shield_symbolizer(rule & rule, xml_node const& node);
+    void parse_line_symbolizer(rule & rule, xml_node const& node);
+    void parse_polygon_symbolizer(rule & rule, xml_node const& node);
+    void parse_building_symbolizer(rule & rule, xml_node const& node);
+    void parse_raster_symbolizer(rule & rule, xml_node const& node);
+    void parse_markers_symbolizer(rule & rule, xml_node const& node);
+    void parse_group_symbolizer(rule &rule, xml_node const& node);
+    void parse_debug_symbolizer(rule & rule, xml_node const& node);
+    void parse_group_rule(group_symbolizer_properties &prop, xml_node const& node);
+    void parse_simple_layout(group_symbolizer_properties &prop, xml_node const& node);
+    void parse_pair_layout(group_symbolizer_properties &prop, xml_node const& node);
     bool parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
-    bool parse_stroke(stroke & strk, xml_node const & sym);
-
+    void parse_stroke(symbolizer_base & symbol, xml_node const& node);
     void ensure_font_face(std::string const& face_name);
     void find_unused_nodes(xml_node const& root);
     void find_unused_nodes_recursive(xml_node const& node, std::string & error_text);
-
-
     std::string ensure_relative_to_xml(boost::optional<std::string> const& opt_path);
     void ensure_exists(std::string const& file_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
@@ -120,7 +129,6 @@ private:
 
     bool strict_;
     std::string filename_;
-    bool relative_to_xml_;
     std::map<std::string,parameters> datasource_templates_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
@@ -157,21 +165,13 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     parser.parse_map(map, tree.root(), base_path);
 }
 
-void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& base_path)
+void map_parser::parse_map(Map & map, xml_node const& node, std::string const& base_path)
 {
     try
     {
-        xml_node const& map_node = pt.get_child("Map");
+        xml_node const& map_node = node.get_child("Map");
         try
         {
-            // Check if relative paths should be interpreted as relative to/from XML location
-            // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<boolean> paths_from_xml = map_node.get_opt_attr<boolean>("paths-from-xml");
-            if (paths_from_xml)
-            {
-                relative_to_xml_ = *paths_from_xml;
-            }
-
             optional<std::string> base_path_from_xml = map_node.get_opt_attr<std::string>("base");
             if (!base_path.empty())
             {
@@ -212,8 +212,8 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                     throw config_error("failed to parse background-image-comp-op: '" + *comp_op_name + "'");
                 }
             }
-    
-            optional<float> opacity = map_node.get_opt_attr<float>("background-image-opacity");
+
+            optional<double> opacity = map_node.get_opt_attr<double>("background-image-opacity");
             if (opacity)
             {
                 map.set_background_image_opacity(*opacity);
@@ -223,9 +223,9 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             try
             {
                 // create throwaway projection object here to ensure it is valid
-                projection proj(srs);
+                projection proj(srs,true);
             }
-            catch (proj_init_error const& ex)
+            catch (std::exception const& ex)
             {
                 throw mapnik::config_error(ex.what());
             }
@@ -281,14 +281,13 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 unsigned i = 0;
                 bool success = false;
                 int n[3];
-                for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tokens.begin();
-                     beg != tokens.end(); ++beg)
+                for (auto const& beg : tokens)
                 {
-                    std::string item = mapnik::util::trim_copy(*beg);
+                    std::string item = mapnik::util::trim_copy(beg);
                     if (!mapnik::util::string2int(item,n[i]))
                     {
                         throw config_error(std::string("Invalid version string encountered: '")
-                            + *beg + "' in '" + *min_version_string + "'");
+                                           + beg + "' in '" + *min_version_string + "'");
                     }
                     if (i==2)
                     {
@@ -321,114 +320,100 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
     {
         throw config_error("Not a map file. Node 'Map' not found.");
     }
-    find_unused_nodes(pt);
+    find_unused_nodes(node);
 }
 
-void map_parser::parse_map_include(Map & map, xml_node const& include)
+void map_parser::parse_map_include(Map & map, xml_node const& node)
 {
     try
     {
-        xml_node::const_iterator itr = include.begin();
-        xml_node::const_iterator end = include.end();
-
-        for (; itr != end; ++itr)
+        for (auto const& n : node)
         {
-            if (itr->is_text()) continue;
-            if (itr->is("Include"))
+            if (n.is_text()) continue;
+            if (n.is("Include"))
             {
-                parse_map_include(map, *itr);
+                parse_map_include(map, n);
             }
-            else if (itr->is("Style"))
+            else if (n.is("Style"))
             {
-                parse_style(map, *itr);
+                parse_style(map, n);
             }
-            else if (itr->is("Layer"))
+            else if (n.is("Layer"))
             {
-                parse_layer(map, *itr);
+                parse_layer(map, n);
             }
-            else if (itr->is("FontSet"))
+            else if (n.is("FontSet"))
             {
-                parse_fontset(map, *itr);
+                parse_fontset(map, n);
             }
-            else if (itr->is("FileSource"))
+            else if (n.is("FileSource"))
             {
-                std::string name = itr->get_attr<std::string>("name");
-                std::string value = itr->get_text();
-                file_sources_[name] = value;
+                file_sources_[n.get_attr<std::string>("name")] = n.get_text();
             }
-            else if (itr->is("Datasource"))
+            else if (n.is("Datasource"))
             {
-                std::string name = itr->get_attr("name", std::string("Unnamed"));
+                std::string name = n.get_attr("name", std::string("Unnamed"));
                 parameters params;
-                xml_node::const_iterator paramIter = itr->begin();
-                xml_node::const_iterator endParam = itr->end();
-                for (; paramIter != endParam; ++paramIter)
+                for (auto const& p: n)
                 {
-                    if (paramIter->is("Parameter"))
+                    if (p.is("Parameter"))
                     {
-                        std::string param_name = paramIter->get_attr<std::string>("name");
-                        std::string value = paramIter->get_text();
-                        params[param_name] = value;
+                        params[p.get_attr<std::string>("name")] = p.get_text();
                     }
                 }
-                datasource_templates_[name] = params;
+                datasource_templates_[std::move(name)] = std::move(params);
             }
-            else if (itr->is("Parameters"))
+            else if (n.is("Parameters"))
             {
                 parameters & params = map.get_extra_parameters();
-                xml_node::const_iterator paramIter = itr->begin();
-                xml_node::const_iterator endParam = itr->end();
-                for (; paramIter != endParam; ++paramIter)
+                for (auto const& p: n)
                 {
-                    if (paramIter->is("Parameter"))
+                    if (p.is("Parameter"))
                     {
-                        std::string name = paramIter->get_attr<std::string>("name");
                         bool is_string = true;
-                        boost::optional<std::string> type = paramIter->get_opt_attr<std::string>("type");
+                        boost::optional<std::string> type = p.get_opt_attr<std::string>("type");
                         if (type)
                         {
                             if (*type == "int")
                             {
                                 is_string = false;
-                                mapnik::value_integer value = paramIter->get_value<mapnik::value_integer>();
-                                params[name] = value;
+                                params[p.get_attr<std::string>("name")] = p.get_value<mapnik::value_integer>();
                             }
                             else if (*type == "float")
                             {
                                 is_string = false;
-                                double value = paramIter->get_value<mapnik::value_double>();
-                                params[name] = value;
+                                params[p.get_attr<std::string>("name")] = p.get_value<mapnik::value_double>();
                             }
                         }
-
                         if (is_string)
                         {
-                            std::string value = paramIter->get_text();
-                            params[name] = value;
+                            params[p.get_attr<std::string>("name")] = p.get_text();
                         }
                     }
                 }
             }
         }
-    } catch (config_error const& ex) {
-        ex.append_context(include);
+    }
+    catch (config_error const& ex)
+    {
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_style(Map & map, xml_node const& sty)
+void map_parser::parse_style(Map & map, xml_node const& node)
 {
     std::string name("<missing name>");
     try
     {
-        name = sty.get_attr<std::string>("name");
+        name = node.get_attr<std::string>("name");
         feature_type_style style;
 
-        filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
+        filter_mode_e filter_mode = node.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
 
         // compositing
-        optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
+        optional<std::string> comp_op_name = node.get_opt_attr<std::string>("comp-op");
         if (comp_op_name)
         {
             optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
@@ -442,21 +427,21 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             }
         }
 
-        optional<float> opacity = sty.get_opt_attr<float>("opacity");
-        if (opacity)
+        optional<double> opacity = node.get_opt_attr<double>("opacity");
+        if (opacity) style.set_opacity(*opacity);
+
+        optional<mapnik::boolean_type> image_filters_inflate = node.get_opt_attr<mapnik::boolean_type>("image-filters-inflate");
+        if (image_filters_inflate)
         {
-            style.set_opacity(*opacity);
+            style.set_image_filters_inflate(*image_filters_inflate);
         }
 
         // image filters
-        optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
+        optional<std::string> filters = node.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
-            std::string filter_str = *filters;
-            bool result = filter::parse_image_filters(filter_str, style.image_filters());
-            if (!result)
-            {
-                throw config_error("failed to parse image-filters: '" + filter_str + "'");
+            if (!parse_image_filters(*filters, style.image_filters())) {
+                throw config_error("failed to parse image-filters: '" + *filters + "'");
             }
         }
 
@@ -464,57 +449,45 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         // TODO : consider creating a separate XML node e.g
         // <ImageFilter name="myfilter" op="blur emboss"/>
         //
-        optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
+        optional<std::string> direct_filters = node.get_opt_attr<std::string>("direct-image-filters");
         if (direct_filters)
         {
-            std::string filter_str = *direct_filters;
-            std::string::const_iterator itr = filter_str.begin();
-            std::string::const_iterator end = filter_str.end();
-            bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          sty.get_tree().image_filters_grammar,
-                                                          boost::spirit::qi::ascii::space,
-                                                          style.direct_image_filters());
-            if (!result || itr!=end)
-            {
-                throw config_error("failed to parse direct-image-filters: '" + std::string(itr,end) + "'");
+            if (!parse_image_filters(*direct_filters, style.direct_image_filters())) {
+                throw config_error("failed to parse direct-image-filters: '" + *direct_filters + "'");
             }
         }
 
+        style.reserve(node.size());
         // rules
-        xml_node::const_iterator ruleIter = sty.begin();
-        xml_node::const_iterator endRule = sty.end();
-
-        for (; ruleIter!=endRule; ++ruleIter)
+        for (auto const& rule_ : node)
         {
-            if (ruleIter->is("Rule"))
+            if (rule_.is("Rule"))
             {
-                parse_rule(style, *ruleIter);
+                parse_rule(style, rule_);
             }
         }
-
-        map.insert_style(name, style);
-    } catch (config_error const& ex) {
-        ex.append_context(std::string("in style '") + name + "'", sty);
+        map.insert_style(name, std::move(style));
+    }
+    catch (config_error const& ex)
+    {
+        ex.append_context(std::string("in style '") + name + "'", node);
         throw;
     }
 }
 
-void map_parser::parse_fontset(Map & map, xml_node const& fset)
+void map_parser::parse_fontset(Map & map, xml_node const& node)
 {
     std::string name("<missing name>");
     try
     {
-        name = fset.get_attr<std::string>("name");
+        name = node.get_attr<std::string>("name");
         font_set fontset(name);
-        xml_node::const_iterator itr = fset.begin();
-        xml_node::const_iterator end = fset.end();
-
         bool success = false;
-        for (; itr != end; ++itr)
+        for (auto const& n: node)
         {
-            if (itr->is("Font"))
+            if (n.is("Font"))
             {
-                if (parse_font(fontset, *itr))
+                if (parse_font(fontset, n))
                 {
                     success = true;
                 }
@@ -527,15 +500,14 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
             throw mapnik::config_error("no valid fonts could be loaded");
         }
 
-        map.insert_fontset(name, fontset);
-
         // XXX Hack because map object isn't accessible by text_symbolizer
         // when it's parsed
-        fontsets_.insert(std::pair<std::string, font_set>(name, fontset));
+        fontsets_.insert(std::make_pair(name, fontset));
+        map.insert_fontset(name, std::move(fontset));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(std::string("in FontSet '") + name + "'", fset);
+        ex.append_context(std::string("in FontSet '") + name + "'", node);
         throw;
     }
 }
@@ -576,15 +548,15 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         try
         {
             // create throwaway projection object here to ensure it is valid
-            projection proj(srs);
+            projection proj(srs,true);
         }
-        catch (proj_init_error const& ex)
+        catch (std::exception const& ex)
         {
             throw mapnik::config_error(ex.what());
         }
         layer lyr(name, srs);
 
-        optional<boolean> status = node.get_opt_attr<boolean>("status");
+        optional<mapnik::boolean_type> status = node.get_opt_attr<mapnik::boolean_type>("status");
         if (status)
         {
             lyr.set_active(* status);
@@ -603,21 +575,21 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             lyr.set_max_zoom(* max_zoom);
         }
 
-        optional<boolean> queryable = node.get_opt_attr<boolean>("queryable");
+        optional<mapnik::boolean_type> queryable = node.get_opt_attr<mapnik::boolean_type>("queryable");
         if (queryable)
         {
             lyr.set_queryable(* queryable);
         }
 
-        optional<boolean> clear_cache =
-            node.get_opt_attr<boolean>("clear-label-cache");
+        optional<mapnik::boolean_type> clear_cache =
+            node.get_opt_attr<mapnik::boolean_type>("clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache(* clear_cache);
         }
 
-        optional<boolean> cache_features =
-            node.get_opt_attr<boolean>("cache-features");
+        optional<mapnik::boolean_type> cache_features =
+            node.get_opt_attr<mapnik::boolean_type>("cache-features");
         if (cache_features)
         {
             lyr.set_cache_features(* cache_features);
@@ -646,16 +618,16 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             }
             else
             {
-                    std::string s_err("failed to parse Layer maximum-extent '");
-                    s_err += *maximum_extent + "' for '" + name + "'";
-                    if (strict_)
-                    {
-                        throw config_error(s_err);
-                    }
-                    else
-                    {
-                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
-                    }
+                std::string s_err("failed to parse Layer maximum-extent '");
+                s_err += *maximum_extent + "' for '" + name + "'";
+                if (strict_)
+                {
+                    throw config_error(s_err);
+                }
+                else
+                {
+                    MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
+                }
             }
         }
 
@@ -665,15 +637,12 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             lyr.set_opacity(* opacity);
         }
 
-        xml_node::const_iterator child = node.begin();
-        xml_node::const_iterator end = node.end();
-
-        for(; child != end; ++child)
+        for (auto const& child: node)
         {
 
-            if (child->is("StyleName"))
+            if (child.is("StyleName"))
             {
-                std::string style_name = child->get_text();
+                std::string const& style_name = child.get_text();
                 if (style_name.empty())
                 {
                     std::string ss("StyleName is empty in Layer: '");
@@ -692,51 +661,49 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                     lyr.add_style(style_name);
                 }
             }
-            else if (child->is("Datasource"))
+            else if (child.is("Datasource"))
             {
                 parameters params;
-                optional<std::string> base = child->get_opt_attr<std::string>("base");
+                optional<std::string> base = child.get_opt_attr<std::string>("base");
                 if(base)
                 {
                     std::map<std::string,parameters>::const_iterator base_itr = datasource_templates_.find(*base);
-                    if (base_itr!=datasource_templates_.end())
+                    if (base_itr != datasource_templates_.end())
                     {
                         params = base_itr->second;
                     }
                     else
                     {
                         MAPNIK_LOG_ERROR(datasource) << "Datasource template '" << *base
-                            << "' not found for layer '" << name << "'";
+                                                     << "' not found for layer '" << name << "'";
                     }
                 }
 
-                xml_node::const_iterator paramIter = child->begin();
-                xml_node::const_iterator endParam = child->end();
-                for (; paramIter != endParam; ++paramIter)
+                for (auto const& n : child)
                 {
-                    if (paramIter->is("Parameter"))
+                    if (n.is("Parameter"))
                     {
-                        std::string param_name = paramIter->get_attr<std::string>("name");
-                        std::string value = paramIter->get_text();
-                        params[param_name] = value;
+                        params[n.get_attr<std::string>("name")] = n.get_text();
                     }
                 }
 
                 boost::optional<std::string> base_param = params.get<std::string>("base");
                 boost::optional<std::string> file_param = params.get<std::string>("file");
 
-                if (base_param){
+                if (base_param)
+                {
                     params["base"] = ensure_relative_to_xml(base_param);
                 }
 
-                else if (file_param){
+                else if (file_param)
+                {
                     params["file"] = ensure_relative_to_xml(file_param);
                 }
 
                 //now we are ready to create datasource
                 try
                 {
-                    boost::shared_ptr<datasource> ds =
+                    std::shared_ptr<datasource> ds =
                         datasource_cache::instance().create(params);
                     lyr.set_datasource(ds);
                 }
@@ -750,7 +717,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 }
             }
         }
-        map.addLayer(lyr);
+        map.add_layer(std::move(lyr));
     }
     catch (config_error const& ex)
     {
@@ -762,190 +729,151 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
     }
 }
 
-void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
+void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
 {
     std::string name;
     try
     {
-        name = r.get_attr("name", std::string());
+        name = node.get_attr("name", std::string());
         rule rule(name);
 
-        xml_node const* child = r.get_opt_child("Filter");
+        xml_node const* child = node.get_opt_child("Filter");
         if (child)
         {
             rule.set_filter(child->get_value<expression_ptr>());
         }
 
-        if (r.has_child("ElseFilter"))
+        if (node.has_child("ElseFilter"))
         {
             rule.set_else(true);
         }
 
-        if (r.has_child("AlsoFilter"))
+        if (node.has_child("AlsoFilter"))
         {
             rule.set_also(true);
         }
 
-        child = r.get_opt_child("MinScaleDenominator");
+        child = node.get_opt_child("MinScaleDenominator");
         if (child)
         {
             rule.set_min_scale(child->get_value<double>());
         }
 
-        child = r.get_opt_child("MaxScaleDenominator");
+        child = node.get_opt_child("MaxScaleDenominator");
         if (child)
         {
             rule.set_max_scale(child->get_value<double>());
         }
 
-        xml_node::const_iterator symIter = r.begin();
-        xml_node::const_iterator endSym = r.end();
-
-        for(;symIter != endSym; ++symIter)
-        {
-
-            if (symIter->is("PointSymbolizer"))
-            {
-                parse_point_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("LinePatternSymbolizer"))
-            {
-                parse_line_pattern_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("PolygonPatternSymbolizer"))
-            {
-                parse_polygon_pattern_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("TextSymbolizer"))
-            {
-                parse_text_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("ShieldSymbolizer"))
-            {
-                parse_shield_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("LineSymbolizer"))
-            {
-                parse_line_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("PolygonSymbolizer"))
-            {
-                parse_polygon_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("BuildingSymbolizer"))
-            {
-                parse_building_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("RasterSymbolizer"))
-            {
-                parse_raster_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("MarkersSymbolizer"))
-            {
-                parse_markers_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("DebugSymbolizer"))
-            {
-                parse_debug_symbolizer(rule, *symIter);
-            }
-        }
-        style.add_rule(rule);
+        parse_symbolizers(rule, node);
+        style.add_rule(std::move(rule));
 
     }
     catch (config_error const& ex)
     {
         if (!name.empty())
         {
-            ex.append_context(std::string("in rule '") + name + "'", r);
+            ex.append_context(std::string("in rule '") + name + "'", node);
         }
         throw;
     }
 }
 
-void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
+void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
 {
-    optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
-    if (comp_op_name)
+    rule.reserve(node.size());
+    for (auto const& sym_node : node)
     {
-        optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
-        if (comp_op)
+        switch (name2int(sym_node.name().c_str()))
         {
-            sym.set_comp_op(*comp_op);
-        }
-        else
-        {
-            throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
+        case name2int("PointSymbolizer"):
+            parse_point_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("LinePatternSymbolizer"):
+            parse_line_pattern_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("PolygonPatternSymbolizer"):
+            parse_polygon_pattern_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("TextSymbolizer"):
+            parse_text_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("ShieldSymbolizer"):
+            parse_shield_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("LineSymbolizer"):
+            parse_line_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("PolygonSymbolizer"):
+            parse_polygon_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("BuildingSymbolizer"):
+            parse_building_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("RasterSymbolizer"):
+            parse_raster_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("MarkersSymbolizer"):
+            parse_markers_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("GroupSymbolizer"):
+            parse_group_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        case name2int("DebugSymbolizer"):
+            parse_debug_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+        default:
+            break;
         }
     }
-
-    optional<std::string> geometry_transform_wkt = pt.get_opt_attr<std::string>("geometry-transform");
-    if (geometry_transform_wkt)
-    {
-        mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-        if (!mapnik::parse_transform(*tl, *geometry_transform_wkt, pt.get_tree().transform_expr_grammar))
-        {
-            std::string ss("Could not parse transform from '");
-            ss += *geometry_transform_wkt + "', expected transform attribute";
-            throw config_error(ss);
-        }
-        sym.set_transform(tl);
-    }
-
-    optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
-    if (clip) sym.set_clip(*clip);
-
-    // simplify algorithm
-    optional<std::string> simplify_algorithm_name = pt.get_opt_attr<std::string>("simplify-algorithm");
-    if (simplify_algorithm_name)
-    {
-        optional<simplify_algorithm_e> simplify_algorithm = simplify_algorithm_from_string(*simplify_algorithm_name);
-        if (simplify_algorithm)
-        {
-            sym.set_simplify_algorithm(*simplify_algorithm);
-        }
-        else
-        {
-            throw config_error("failed to parse simplify-algorithm: '" + *simplify_algorithm_name + "'");
-        }
-    }
-
-    // simplify value
-    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify");
-    if (simplify_tolerance) sym.set_simplify_tolerance(*simplify_tolerance);
-
-    // smooth value
-    optional<double> smooth = pt.get_opt_attr<double>("smooth");
-    if (smooth) sym.set_smooth(*smooth);
 }
 
-void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& node)
+{
+    // comp-op
+    set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, node);
+    // geometry transform
+    set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::geometry_transform, node);
+    // clip
+    set_symbolizer_property<symbolizer_base, boolean_type>(sym, keys::clip, node);
+    // simplify algorithm
+    set_symbolizer_property<symbolizer_base, simplify_algorithm_e>(sym, keys::simplify_algorithm, node);
+    // simplify value
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::simplify_tolerance, node);
+    // smooth value
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::smooth, node);
+}
+
+void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
-        optional<std::string> file = sym.get_opt_attr<std::string>("file");
-        optional<std::string> base = sym.get_opt_attr<std::string>("base");
-        optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
-        optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
+        optional<std::string> file = node.get_opt_attr<std::string>("file");
+        optional<std::string> base = node.get_opt_attr<std::string>("base");
+        optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
 
-        point_symbolizer symbol;
-        if (allow_overlap)
-        {
-            symbol.set_allow_overlap(* allow_overlap);
-        }
-        if (opacity)
-        {
-            symbol.set_opacity(* opacity);
-        }
-        if (ignore_placement)
-        {
-            symbol.set_ignore_placement(* ignore_placement);
-        }
-        point_placement_e placement =
-            sym.get_attr<point_placement_e>("placement", symbol.get_point_placement());
-        symbol.set_point_placement(placement);
-
+        point_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        // allow-overlap
+        set_symbolizer_property<point_symbolizer,boolean_type>(sym, keys::allow_overlap, node);
+        // opacity
+        set_symbolizer_property<point_symbolizer,double>(sym, keys::opacity, node);
+        // ignore-placement
+        set_symbolizer_property<point_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
+        // point placement
+        set_symbolizer_property<symbolizer_base,point_placement_enum>(sym, keys::point_placement_type, node);
         if (file && !file->empty())
         {
             if(base)
@@ -960,35 +888,26 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             *file = ensure_relative_to_xml(file);
             std::string filename = *file;
             ensure_exists(filename);
-            symbol.set_filename( parse_path(filename, sym.get_tree().path_expr_grammar) );
-
-            if (image_transform_wkt)
-            {
-                mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-                if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
-                {
-                    throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
-                }
-                symbol.set_image_transform(tl);
-            }
+            put(sym, keys::file, parse_path(filename));
+            set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         }
-        parse_symbolizer_base(symbol, sym);
-        rule.append(symbol);
+
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
+void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 {
     try
     {
         std::string filename("");
-        optional<std::string> file = sym.get_opt_attr<std::string>("file");
-        optional<std::string> base = sym.get_opt_attr<std::string>("base");
+        optional<std::string> file = node.get_opt_attr<std::string>("file");
+        optional<std::string> base = node.get_opt_attr<std::string>("base");
 
         if (file && !file->empty())
         {
@@ -1004,7 +923,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             filename = ensure_relative_to_xml(file);
         }
 
-        optional<std::string> marker_type = sym.get_opt_attr<std::string>("marker-type");
+        optional<std::string> marker_type = node.get_opt_attr<std::string>("marker-type");
         if (marker_type)
         {
             // TODO - revisit whether to officially deprecate marker-type
@@ -1024,86 +943,68 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             }
         }
 
-        markers_symbolizer symbol;
-
+        markers_symbolizer sym;
+        parse_symbolizer_base(sym, node);
         if (!filename.empty())
         {
             ensure_exists(filename);
-            symbol.set_filename( parse_path(filename, sym.get_tree().path_expr_grammar) );
+            put(sym,keys::file, parse_path(filename));
         }
 
         // overall opacity to be applied to all paths
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        if (opacity) symbol.set_opacity(*opacity);
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::opacity, node);
+        // fill opacity
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::fill_opacity, node);
+        // transform
+        set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
+        // fill
+        set_symbolizer_property<markers_symbolizer,color>(sym, keys::fill, node);
+        // spacing
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::spacing, node);
+        // max-error
+        set_symbolizer_property<markers_symbolizer,double>(sym, keys::max_error, node);
+        // allow-overlap
+        set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::allow_overlap, node);
+        // ignore-placement
+        set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
+        // width
+        //set_symbolizer_property<markers_symbolizer,double>(sym, keys::width, node);
+        // height
+        //set_symbolizer_property<markers_symbolizer,double>(sym, keys::height, node);
 
-        optional<float> fill_opacity = sym.get_opt_attr<float>("fill-opacity");
-        if (fill_opacity) symbol.set_fill_opacity(*fill_opacity);
+        optional<expression_ptr> width = node.get_opt_attr<expression_ptr>("width");
+        if (width) put(sym, keys::width, *width );
 
-        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
-        if (image_transform_wkt)
-        {
-            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
-            {
-                throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
-            }
-            symbol.set_image_transform(tl);
-        }
+        optional<expression_ptr> height = node.get_opt_attr<expression_ptr>("height");
+        if (height) put(sym, keys::height, *height);
 
-        optional<color> c = sym.get_opt_attr<color>("fill");
-        if (c) symbol.set_fill(*c);
+        // stroke
+        parse_stroke(sym,node);
+        // marker placement
+        set_symbolizer_property<markers_symbolizer,marker_placement_enum>(sym, keys::markers_placement_type, node);
+        // multi-policy
+        set_symbolizer_property<markers_symbolizer,marker_multi_policy_enum>(sym, keys::markers_multipolicy, node);
 
-        optional<double> spacing = sym.get_opt_attr<double>("spacing");
-        if (spacing) symbol.set_spacing(*spacing);
-
-        optional<double> max_error = sym.get_opt_attr<double>("max-error");
-        if (max_error) symbol.set_max_error(*max_error);
-
-        optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
-        if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
-
-        optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
-        if (ignore_placement) symbol.set_ignore_placement(*ignore_placement);
-
-        optional<expression_ptr> width = sym.get_opt_attr<expression_ptr>("width");
-        if (width) symbol.set_width(*width);
-
-        optional<expression_ptr> height = sym.get_opt_attr<expression_ptr>("height");
-        if (height) symbol.set_height(*height);
-
-        stroke strk;
-        if (parse_stroke(strk,sym))
-        {
-            symbol.set_stroke(strk);
-        }
-
-        marker_placement_e placement = sym.get_attr<marker_placement_e>("placement",symbol.get_marker_placement());
-        symbol.set_marker_placement(placement);
-
-        marker_multi_policy_e mpolicy = sym.get_attr<marker_multi_policy_e>("multi-policy",symbol.get_marker_multi_policy());
-        symbol.set_marker_multi_policy(mpolicy);
-
-        parse_symbolizer_base(symbol, sym);
-        rule.append(symbol);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
-        std::string file = sym.get_attr<std::string>("file");
+        std::string file = node.get_attr<std::string>("file");
         if (file.empty())
         {
             throw config_error("empty file attribute");
         }
 
-        optional<std::string> base = sym.get_opt_attr<std::string>("base");
+        optional<std::string> base = node.get_opt_attr<std::string>("base");
 
         if(base)
         {
@@ -1116,39 +1017,41 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
-        line_pattern_symbolizer symbol( parse_path(file, sym.get_tree().path_expr_grammar) );
+
+        line_pattern_symbolizer symbol;
+        parse_symbolizer_base(symbol, node);
+        put(symbol, keys::file, parse_path(file));
 
         // offset value
-        optional<double> offset = sym.get_opt_attr<double>("offset");
-        if (offset) symbol.set_offset(*offset);
+        optional<double> offset = node.get_opt_attr<double>("offset");
+        if (offset) put(symbol, keys::offset, *offset);
 
-        parse_symbolizer_base(symbol, sym);
-        rule.append(symbol);
+        rule.append(std::move(symbol));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
 void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
-                                                  xml_node const & sym)
+                                                  xml_node const & node)
 {
     try
     {
-        std::string file = sym.get_attr<std::string>("file");
+        std::string file = node.get_attr<std::string>("file");
 
         if (file.empty())
         {
             throw config_error("empty file attribute");
         }
 
-        optional<std::string> base = sym.get_opt_attr<std::string>("base");
+        optional<std::string> base = node.get_opt_attr<std::string>("base");
 
         if(base)
         {
-            std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
+            std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
             if (itr!=file_sources_.end())
             {
                 file = itr->second + "/" + file;
@@ -1157,134 +1060,124 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
-        polygon_pattern_symbolizer symbol( parse_path(file, sym.get_tree().path_expr_grammar) );
+        polygon_pattern_symbolizer symbol;
+        parse_symbolizer_base(symbol, node);
+        put(symbol, keys::file, parse_path(file));
 
         // pattern alignment
-        pattern_alignment_e p_alignment = sym.get_attr<pattern_alignment_e>("alignment",LOCAL_ALIGNMENT);
-        symbol.set_alignment(p_alignment);
+        optional<pattern_alignment_e> p_alignment = node.get_opt_attr<pattern_alignment_e>("alignment");
+        if (p_alignment) put(symbol, keys::alignment, pattern_alignment_enum(*p_alignment));
 
         // opacity
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        if (opacity) symbol.set_opacity(*opacity);
+        set_symbolizer_property<polygon_pattern_symbolizer,double>(symbol, keys::opacity, node);
 
         // gamma
-        optional<double> gamma = sym.get_opt_attr<double>("gamma");
-        if (gamma)  symbol.set_gamma(*gamma);
+        optional<double> gamma = node.get_opt_attr<double>("gamma");
+        if (gamma)  put(symbol, keys::gamma, *gamma);
 
         // gamma method
-        optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
-        if (gamma_method) symbol.set_gamma_method(*gamma_method);
+        optional<gamma_method_e> gamma_method = node.get_opt_attr<gamma_method_e>("gamma-method");
+        if (gamma_method) put(symbol, keys::gamma_method, gamma_method_enum(*gamma_method));
 
-        parse_symbolizer_base(symbol, sym);
-        rule.append(symbol);
+        rule.append(std::move(symbol));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
+void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
 {
     try
     {
-        text_placements_ptr placement_finder;
-        optional<std::string> placement_type = sym.get_opt_attr<std::string>("placement-type");
-        if (placement_type) {
-            placement_finder = placements::registry::instance().from_xml(*placement_type, sym, fontsets_);
-        } else {
-            placement_finder = boost::make_shared<text_placements_dummy>();
-            placement_finder->defaults.from_xml(sym, fontsets_);
-        }
-        if (strict_ &&
-            !placement_finder->defaults.format.fontset)
+        text_placements_ptr placements;
+        optional<std::string> placement_type = node.get_opt_attr<std::string>("placement-type");
+        if (placement_type)
         {
-            ensure_font_face(placement_finder->defaults.format.face_name);
+            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
+        }
+        else
+        {
+            placements = std::make_shared<text_placements_dummy>();
+            placements->defaults.from_xml(node, fontsets_);
         }
 
-        text_symbolizer text_symbol = text_symbolizer(placement_finder);
-        parse_symbolizer_base(text_symbol, sym);
-        optional<halo_rasterizer_e> halo_rasterizer = sym.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
-        if (halo_rasterizer) text_symbol.set_halo_rasterizer(*halo_rasterizer);
-
-        rule.append(text_symbol);
+        if (strict_ && !placements->defaults.format_defaults.fontset)
+        {
+            ensure_font_face(placements->defaults.format_defaults.face_name);
+        }
+        text_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        // placement finder
+        put<text_placements_ptr>(sym, keys::text_placements_, placements);
+        // halo-comp-op
+        set_symbolizer_property<text_symbolizer,composite_mode_e>(sym, keys::halo_comp_op, node);
+        // halo-rasterizer
+        set_symbolizer_property<text_symbolizer, halo_rasterizer_enum>(sym, keys::halo_rasterizer, node);
+        // halo-transform
+        set_symbolizer_property<text_symbolizer, transform_type>(sym, keys::halo_transform, node);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
+void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
 {
     try
     {
-        text_placements_ptr placement_finder;
-        optional<std::string> placement_type = sym.get_opt_attr<std::string>("placement-type");
-        if (placement_type) {
-            placement_finder = placements::registry::instance().from_xml(*placement_type, sym, fontsets_);
+        text_placements_ptr placements;
+        optional<std::string> placement_type = node.get_opt_attr<std::string>("placement-type");
+        if (placement_type)
+        {
+            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
         } else {
-            placement_finder = boost::make_shared<text_placements_dummy>();
+            placements = std::make_shared<text_placements_dummy>();
         }
-        placement_finder->defaults.from_xml(sym, fontsets_);
+        placements->defaults.from_xml(node, fontsets_);
         if (strict_ &&
-            !placement_finder->defaults.format.fontset)
+            !placements->defaults.format_defaults.fontset)
         {
-            ensure_font_face(placement_finder->defaults.format.face_name);
+            ensure_font_face(placements->defaults.format_defaults.face_name);
         }
 
-        shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
+        shield_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        put<text_placements_ptr>(sym, keys::text_placements_, placements);
+        // transform
+        set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
+        // shield displacements: shield-dx shield-dy
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::shield_dx, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::shield_dy, node);
 
-        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
-        if (image_transform_wkt)
-        {
-            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
-            {
-                throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
-            }
-            shield_symbol.set_image_transform(tl);
-        }
+        //optional<double> shield_dx = node.get_opt_attr<double>("shield-dx");
+        //if (shield_dx) put(shield_symbol, keys::shield_dx, *shield_dx);
 
-        // shield displacement
-        double shield_dx = sym.get_attr("shield-dx", 0.0);
-        double shield_dy = sym.get_attr("shield-dy", 0.0);
-        shield_symbol.set_shield_displacement(shield_dx,shield_dy);
+        //optional<double> shield_dy = node.get_opt_attr<double>("shield-dy");
+        //if (shield_dy) put(shield_symbol, keys::shield_dy, *shield_dy);
 
         // opacity
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        if (opacity)
-        {
-            shield_symbol.set_opacity(*opacity);
-        }
+        set_symbolizer_property<shield_symbolizer,double>(sym, keys::opacity, node);
 
         // text-opacity
-        // TODO: Could be problematic because it is named opacity in TextSymbolizer but opacity has a diffrent meaning here.
-        optional<double> text_opacity =
-            sym.get_opt_attr<double>("text-opacity");
-        if (text_opacity)
-        {
-            shield_symbol.set_text_opacity(* text_opacity);
-        }
+        set_symbolizer_property<shield_symbolizer,double>(sym, keys::text_opacity, node);
 
         // unlock_image
-        optional<boolean> unlock_image =
-            sym.get_opt_attr<boolean>("unlock-image");
-        if (unlock_image)
-        {
-            shield_symbol.set_unlock_image(* unlock_image);
-        }
+        optional<mapnik::boolean_type> unlock_image = node.get_opt_attr<mapnik::boolean_type>("unlock-image");
+        if (unlock_image) put(sym, keys::unlock_image, *unlock_image);
 
-        std::string file = sym.get_attr<std::string>("file");
+        std::string file = node.get_attr<std::string>("file");
         if (file.empty())
         {
             throw config_error("empty file attribute");
         }
 
-        optional<std::string> base = sym.get_opt_attr<std::string>("base");
-
+        optional<std::string> base = node.get_opt_attr<std::string>("base");
         if(base)
         {
             std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
@@ -1296,95 +1189,77 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
         // no_text - removed property in 2.1.x that used to have a purpose
         // before you could provide an expression with an empty string
-        optional<boolean> no_text =
-            sym.get_opt_attr<boolean>("no-text");
+        optional<mapnik::boolean_type> no_text = node.get_opt_attr<mapnik::boolean_type>("no-text");
         if (no_text)
         {
             MAPNIK_LOG_ERROR(shield_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
-            if (*no_text)
-                shield_symbol.set_name(parse_expression("' '"));
+            // FIXME
+//            if (*no_text)
+            //              put(shield_symbol, "no-text", set_name(parse_expression("' '"));
         }
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
-        shield_symbol.set_filename( parse_path(file, sym.get_tree().path_expr_grammar) );
-        parse_symbolizer_base(shield_symbol, sym);
-        rule.append(shield_symbol);
+        put(sym, keys::file , parse_path(file));
+        optional<halo_rasterizer_e> halo_rasterizer_ = node.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
+        if (halo_rasterizer_) put(sym, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
+void map_parser::parse_stroke(symbolizer_base & sym, xml_node const & node)
 {
-    bool result = false;
-
-    // stroke color
-    optional<color> c = sym.get_opt_attr<color>("stroke");
-    if (c)
-    {
-        result = true;
-        strk.set_color(*c);
-    }
-
+    // stroke
+    set_symbolizer_property<symbolizer_base,color>(sym, keys::stroke, node);
     // stroke-width
-    optional<double> width = sym.get_opt_attr<double>("stroke-width");
-    if (width)
-    {
-        result = true;
-        strk.set_width(*width);
-    }
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_width, node);
     // stroke-opacity
-    optional<double> opacity = sym.get_opt_attr<double>("stroke-opacity");
-    if (opacity)
-    {
-        result = true;
-        strk.set_opacity(*opacity);
-    }
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_opacity, node);
     // stroke-linejoin
-    optional<line_join_e> line_join = sym.get_opt_attr<line_join_e>("stroke-linejoin");
-    if (line_join) strk.set_line_join(*line_join);
-
+    set_symbolizer_property<symbolizer_base,line_join_enum>(sym, keys::stroke_linejoin, node);
     // stroke-linecap
-    optional<line_cap_e> line_cap = sym.get_opt_attr<line_cap_e>("stroke-linecap");
-    if (line_cap) strk.set_line_cap(*line_cap);
-
+    set_symbolizer_property<symbolizer_base,line_cap_enum>(sym, keys::stroke_linecap, node);
     // stroke-gamma
-    optional<double> gamma = sym.get_opt_attr<double>("stroke-gamma");
-    if (gamma) strk.set_gamma(*gamma);
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_gamma, node);
     // stroke-gamma-method
-    optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("stroke-gamma-method");
-    if (gamma_method) strk.set_gamma_method(*gamma_method);
-
+    set_symbolizer_property<symbolizer_base,gamma_method_enum>(sym, keys::stroke_gamma_method, node);
     // stroke-dashoffset
-    optional<double> dash_offset = sym.get_opt_attr<double>("stroke-dashoffset");
-    if (dash_offset) strk.set_dash_offset(*dash_offset);
-
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_dashoffset, node);
+    // stroke-miterlimit
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_miterlimit, node);
     // stroke-dasharray
-    optional<std::string> str = sym.get_opt_attr<std::string>("stroke-dasharray");
+    optional<std::string> str = node.get_opt_attr<std::string>("stroke-dasharray");
     if (str)
     {
-        std::vector<double> dash_array;
-        if (util::parse_dasharray((*str).begin(),(*str).end(),dash_array))
+        std::vector<double> buf;
+        if (util::parse_dasharray((*str).begin(),(*str).end(),buf))
         {
-            if (!dash_array.empty())
+            if (!buf.empty())
             {
-                size_t size = dash_array.size();
+                size_t size = buf.size();
                 if (size % 2 == 1)
-                    dash_array.insert(dash_array.end(),dash_array.begin(),dash_array.end());
+                {
+                    buf.insert(buf.end(),buf.begin(),buf.end());
+                }
 
-                std::vector<double>::const_iterator pos = dash_array.begin();
-                while (pos != dash_array.end())
+                dash_array dash;
+                std::vector<double>::const_iterator pos = buf.begin();
+                while (pos != buf.end())
                 {
                     if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
-                        strk.add_dash(*pos,*(pos + 1));
+                    {
+                        dash.emplace_back(*pos,*(pos + 1));
+                    }
                     pos +=2;
+                }
+                if (dash.size() > 0)
+                {
+                    put(sym,keys::stroke_dasharray,dash);
                 }
             }
         }
@@ -1396,100 +1271,84 @@ bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
         }
     }
 
-    // stroke-miterlimit
-    optional<double> miterlimit = sym.get_opt_attr<double>("stroke-miterlimit");
-    if (miterlimit) strk.set_miterlimit(*miterlimit);
-    return result;
+
 }
 
-void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_line_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
-        stroke strk;
-        parse_stroke(strk,sym);
-        line_symbolizer symbol = line_symbolizer(strk);
-
-        // offset value
-        optional<double> offset = sym.get_opt_attr<double>("offset");
-        if (offset) symbol.set_offset(*offset);
-
-        line_rasterizer_e rasterizer = sym.get_attr<line_rasterizer_e>("rasterizer", RASTERIZER_FULL);
-        symbol.set_rasterizer(rasterizer);
-
-        parse_symbolizer_base(symbol, sym);
-        rule.append(symbol);
+        line_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        // stroke parameters
+        parse_stroke(sym, node);
+        // offset
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
+        // rasterizer
+        set_symbolizer_property<symbolizer_base,line_rasterizer_enum>(sym, keys::line_rasterizer, node);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-
-void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
-        polygon_symbolizer poly_sym;
+        polygon_symbolizer sym;
+        parse_symbolizer_base(sym, node);
         // fill
-        optional<color> fill = sym.get_opt_attr<color>("fill");
-        if (fill) poly_sym.set_fill(*fill);
+        set_symbolizer_property<symbolizer_base,color>(sym, keys::fill, node);
         // fill-opacity
-        optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
-        if (opacity) poly_sym.set_opacity(*opacity);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::fill_opacity, node);
         // gamma
-        optional<double> gamma = sym.get_opt_attr<double>("gamma");
-        if (gamma)  poly_sym.set_gamma(*gamma);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::gamma, node);
         // gamma method
-        optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
-        if (gamma_method) poly_sym.set_gamma_method(*gamma_method);
+        set_symbolizer_property<symbolizer_base,gamma_method_enum>(sym, keys::gamma_method, node);
 
-        parse_symbolizer_base(poly_sym, sym);
-        rule.append(poly_sym);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_building_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
         building_symbolizer building_sym;
-
+        parse_symbolizer_base(building_sym, node);
         // fill
-        optional<color> fill = sym.get_opt_attr<color>("fill");
-        if (fill) building_sym.set_fill(*fill);
+        set_symbolizer_property<building_symbolizer,color>(building_sym, keys::fill, node);
         // fill-opacity
-        optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
-        if (opacity) building_sym.set_opacity(*opacity);
+        set_symbolizer_property<building_symbolizer,double>(building_sym, keys::fill_opacity, node);
         // height
-        optional<expression_ptr> height = sym.get_opt_attr<expression_ptr>("height");
-        if (height) building_sym.set_height(*height);
-
-        parse_symbolizer_base(building_sym, sym);
-        rule.append(building_sym);
+        optional<expression_ptr> height = node.get_opt_attr<expression_ptr>("height");
+        if (height) put(building_sym, keys::height, *height);
+        rule.append(std::move(building_sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
         raster_symbolizer raster_sym;
-
+        parse_symbolizer_base(raster_sym, node);
         // mode
-        optional<std::string> mode = sym.get_opt_attr<std::string>("mode");
+        optional<std::string> mode = node.get_opt_attr<std::string>("mode");
         if (mode)
         {
             std::string mode_string = *mode;
@@ -1498,25 +1357,25 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
                 MAPNIK_LOG_ERROR(raster_symbolizer) << "'mode' values using \"_\" are deprecated and will be removed in Mapnik 3.x, use \"-\"instead";
                 boost::algorithm::replace_all(mode_string,"_","-");
             }
-            raster_sym.set_mode(mode_string);
+            put(raster_sym, keys::mode, mode_string);
         }
 
         // scaling
-        optional<std::string> scaling = sym.get_opt_attr<std::string>("scaling");
+        optional<std::string> scaling = node.get_opt_attr<std::string>("scaling");
         if (scaling)
         {
             std::string scaling_method = *scaling;
             if (scaling_method == "fast")
             {
                 MAPNIK_LOG_ERROR(raster_symbolizer) << "'scaling' value of 'fast' is deprecated and will be removed in Mapnik 3.x, use 'near' with Mapnik >= 2.1.x";
-                raster_sym.set_scaling_method(SCALING_NEAR);
+                put(raster_sym, keys::scaling, SCALING_NEAR);
             }
             else
             {
                 boost::optional<scaling_method_e> method = scaling_method_from_string(scaling_method);
                 if (method)
                 {
-                    raster_sym.set_scaling_method(*method);
+                    put(raster_sym, keys::scaling, *method);
                 }
                 else
                 {
@@ -1526,62 +1385,107 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         }
 
         // opacity
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        if (opacity) raster_sym.set_opacity(*opacity);
+        optional<double> opacity = node.get_opt_attr<double>("opacity");
+        if (opacity) put(raster_sym, keys::opacity, *opacity);
 
         // filter factor
-        optional<double> filter_factor = sym.get_opt_attr<double>("filter-factor");
-        if (filter_factor) raster_sym.set_filter_factor(*filter_factor);
+        optional<double> filter_factor = node.get_opt_attr<double>("filter-factor");
+        if (filter_factor) put(raster_sym, keys::filter_factor, *filter_factor);
 
         // mesh-size
-        optional<unsigned> mesh_size = sym.get_opt_attr<unsigned>("mesh-size");
-        if (mesh_size) raster_sym.set_mesh_size(*mesh_size);
+        optional<unsigned> mesh_size = node.get_opt_attr<unsigned>("mesh-size");
+        if (mesh_size) put<value_integer>(raster_sym, keys::mesh_size, *mesh_size);
 
         // premultiplied status of image
-        optional<boolean> premultiplied = sym.get_opt_attr<boolean>("premultiplied");
-        if (premultiplied) raster_sym.set_premultiplied(*premultiplied);
-
-        xml_node::const_iterator cssIter = sym.begin();
-        xml_node::const_iterator endCss = sym.end();
+        optional<mapnik::boolean_type> premultiplied = node.get_opt_attr<mapnik::boolean_type>("premultiplied");
+        if (premultiplied) put(raster_sym, keys::premultiplied, *premultiplied);
 
         bool found_colorizer = false;
-        for(; cssIter != endCss; ++cssIter)
+        for ( auto const& css : node)
         {
-            if (cssIter->is("RasterColorizer"))
+            if (css.is("RasterColorizer"))
             {
                 found_colorizer = true;
-                raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
-                raster_sym.set_colorizer(colorizer);
-                if (parse_raster_colorizer(colorizer, *cssIter))
-                    raster_sym.set_colorizer(colorizer);
-
+                raster_colorizer_ptr colorizer = std::make_shared<raster_colorizer>();
+                put(raster_sym, keys::colorizer, colorizer);
+                if (parse_raster_colorizer(colorizer, css))
+                    put(raster_sym, keys::colorizer, colorizer);
             }
         }
-        // look for properties one level up
+        //look for properties one level up
         if (!found_colorizer)
         {
-            raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
-            if (parse_raster_colorizer(colorizer, sym))
-                raster_sym.set_colorizer(colorizer);
+            raster_colorizer_ptr colorizer = std::make_shared<raster_colorizer>();
+            if (parse_raster_colorizer(colorizer, node))
+                put(raster_sym, keys::colorizer, colorizer);
         }
-        parse_symbolizer_base(raster_sym, sym);
-        rule.append(raster_sym);
+        rule.append(std::move(raster_sym));
     }
     catch (config_error const& ex)
     {
-        ex.append_context(sym);
+        ex.append_context(node);
         throw;
     }
 }
 
-void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
+void map_parser::parse_group_symbolizer(rule & rule, xml_node const & node)
+{
+    try
+    {
+        group_symbolizer symbol;
+        parse_symbolizer_base(symbol, node);
+        group_symbolizer_properties_ptr prop = std::make_shared<group_symbolizer_properties>();
+
+        set_symbolizer_property<symbolizer_base, value_integer>(symbol, keys::num_columns, node);
+        set_symbolizer_property<symbolizer_base, value_integer>(symbol, keys::start_column, node);
+        set_symbolizer_property<symbolizer_base, expression_ptr>(symbol, keys::repeat_key, node);
+
+        text_placements_ptr placements = std::make_shared<text_placements_dummy>();
+        placements->defaults.text_properties_from_xml(node);
+        put<text_placements_ptr>(symbol, keys::text_placements_, placements);
+
+        size_t layout_count = 0;
+        for (auto const& child_node : node)
+        {
+            if (child_node.is("GroupRule"))
+            {
+                parse_group_rule(*prop, child_node);
+                child_node.set_processed(true);
+            }
+            else if (child_node.is("SimpleLayout"))
+            {
+                parse_simple_layout(*prop, child_node);
+                child_node.set_processed(true);
+                ++layout_count;
+            }
+            else if (child_node.is("PairLayout"))
+            {
+                parse_pair_layout(*prop, child_node);
+                child_node.set_processed(true);
+                ++layout_count;
+            }
+            if (layout_count > 1)
+            {
+                throw config_error("Provide only one layout for a GroupSymbolizer.");
+            }
+        }
+        put(symbol, keys::group_properties, prop);
+        rule.append(std::move(symbol));
+    }
+    catch (const config_error & ex)
+    {
+        ex.append_context(node);
+        throw;
+    }
+}
+
+void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & node)
 {
     debug_symbolizer symbol;
-    parse_symbolizer_base(symbol, sym);
-    debug_symbolizer_mode_e mode =
-        sym.get_attr<debug_symbolizer_mode_e>("mode", DEBUG_SYM_MODE_COLLISION);
-    symbol.set_mode(mode);
-    rule.append(symbol);
+    parse_symbolizer_base(symbol, node);
+    optional<debug_symbolizer_mode_e> mode = node.get_opt_attr<debug_symbolizer_mode_e>("mode");
+    if (mode) put(symbol, keys::mode, debug_symbolizer_mode_enum(*mode));
+    rule.append(std::move(symbol));
 }
 
 bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
@@ -1594,7 +1498,8 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         colorizer_mode default_mode =
             node.get_attr<colorizer_mode>("default-mode", COLORIZER_LINEAR);
 
-        if(default_mode == COLORIZER_INHERIT) {
+        if(default_mode == COLORIZER_INHERIT)
+        {
             throw config_error("RasterColorizer mode must not be INHERIT. ");
         }
         rc->set_default_mode(default_mode);
@@ -1611,47 +1516,44 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         optional<float> eps = node.get_opt_attr<float>("epsilon");
         if (eps)
         {
-            if(*eps < 0) {
+            if(*eps < 0)
+            {
                 throw config_error("RasterColorizer epsilon must be > 0. ");
             }
             rc->set_epsilon(*eps);
         }
 
-
-        xml_node::const_iterator stopIter = node.begin();
-        xml_node::const_iterator endStop = node.end();
         float maximumValue = -std::numeric_limits<float>::max();
-
-        for(; stopIter != endStop; ++stopIter)
+        for (auto const& n : node)
         {
-            if (stopIter->is("stop"))
+            if (n.is("stop"))
             {
                 found_stops = true;
                 // colour is optional.
-                optional<color> stopcolor = stopIter->get_opt_attr<color>("color");
-                if (!stopcolor) {
+                optional<color> stopcolor = n.get_opt_attr<color>("color");
+                if (!stopcolor)
+                {
                     *stopcolor = *default_color;
                 }
 
                 // mode default to INHERIT
-                colorizer_mode mode =
-                    stopIter->get_attr<colorizer_mode>("mode", COLORIZER_INHERIT);
+                colorizer_mode mode = n.get_attr<colorizer_mode>("mode", COLORIZER_INHERIT);
 
                 // value is required, and it must be bigger than the previous
-                optional<float> value =
-                    stopIter->get_opt_attr<float>("value");
+                optional<float> value = n.get_opt_attr<float>("value");
 
-                if(!value) {
+                if(!value)
+                {
                     throw config_error("stop tag missing value");
                 }
 
-                if(value < maximumValue) {
+                if(value < maximumValue)
+                {
                     throw config_error("stop tag values must be in ascending order");
                 }
                 maximumValue = *value;
 
-                optional<std::string> label =
-                    stopIter->get_opt_attr<std::string>("label");
+                optional<std::string> label = n.get_opt_attr<std::string>("label");
 
                 //append the stop
                 colorizer_stop tmpStop;
@@ -1659,7 +1561,9 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                 tmpStop.set_mode(mode);
                 tmpStop.set_value(*value);
                 if (label)
+                {
                     tmpStop.set_label(*label);
+                }
 
                 rc->add_stop(tmpStop);
             }
@@ -1671,6 +1575,71 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         throw;
     }
     return found_stops;
+}
+
+void map_parser::parse_group_rule(group_symbolizer_properties & prop, xml_node const & node)
+{
+    try
+    {
+        rule fake_rule;
+        expression_ptr filter, repeat_key;
+
+        xml_node const *filter_child = node.get_opt_child("Filter"),
+                       *rptkey_child = node.get_opt_child("RepeatKey");
+
+        if (filter_child)
+        {
+            filter = filter_child->get_value<expression_ptr>();
+        }
+        else
+        {
+            filter = std::make_shared<mapnik::expr_node>(true);
+        }
+
+        if (rptkey_child)
+        {
+            repeat_key = rptkey_child->get_value<expression_ptr>();
+        }
+
+        group_rule_ptr rule = std::make_shared<group_rule>(filter, repeat_key);
+
+        parse_symbolizers(fake_rule, node);
+
+        for (auto const& sym : fake_rule)
+        {
+           rule->append(sym);
+        }
+
+        prop.add_rule(rule);
+     }
+     catch (const config_error & ex)
+     {
+         ex.append_context(node);
+         throw;
+     }
+}
+
+void map_parser::parse_simple_layout(group_symbolizer_properties & prop, xml_node const & node)
+{
+    simple_row_layout layout;
+
+    optional<double> item_margin = node.get_opt_attr<double>("item-margin");
+    if (item_margin) layout.set_item_margin(*item_margin);
+
+    prop.set_layout(std::move(layout));
+}
+
+void map_parser::parse_pair_layout(group_symbolizer_properties & prop, xml_node const & node)
+{
+    pair_layout layout;
+
+    optional<double> item_margin = node.get_opt_attr<double>("item-margin");
+    if (item_margin) layout.set_item_margin(*item_margin);
+
+    optional<double> max_difference = node.get_opt_attr<double>("max-difference");
+    if (max_difference) layout.set_max_difference(*max_difference);
+
+    prop.set_layout(std::move(layout));
 }
 
 void map_parser::ensure_font_face(std::string const& face_name)
@@ -1687,7 +1656,7 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;
 
-    if (!xml_base_path_.empty() && relative_to_xml_)
+    if (!xml_base_path_.empty())
     {
         std::string starting_path = *opt_path;
         if (mapnik::util::is_relative(starting_path))
@@ -1705,10 +1674,10 @@ void map_parser::ensure_exists(std::string const& file_path)
     // validate that the filename exists if it is not a dynamic PathExpression
     if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))
     {
-       if (!mapnik::util::exists(file_path))
-       {
-           throw mapnik::config_error("file could not be found: '" + file_path + "'");
-       }
+        if (!mapnik::util::exists(file_path))
+        {
+            throw mapnik::config_error("file could not be found: '" + file_path + "'");
+        }
     }
 }
 
@@ -1734,30 +1703,30 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
 {
     if (!node.processed())
     {
-        if (node.is_text()) {
+        if (node.is_text())
+        {
             error_message += "\n* text '" + node.text() + "'";
-        } else {
+        }
+        else
+        {
             error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
         }
         return; //All attributes and children are automatically unprocessed, too.
     }
-    xml_node::attribute_map const& attr = node.get_attributes();
-    xml_node::attribute_map::const_iterator aitr = attr.begin();
-    xml_node::attribute_map::const_iterator aend = attr.end();
-    for (;aitr!=aend; aitr++)
+    xml_node::attribute_map const& attrs = node.get_attributes();
+    for (auto const& attr : attrs)
     {
-        if (!aitr->second.processed)
+        if (!attr.second.processed)
         {
-            error_message += "\n* attribute '" + aitr->first +
-                "' with value '" + aitr->second.value +
+            error_message += "\n* attribute '" + attr.first +
+                "' with value '" + attr.second.value +
                 "' at line " + node.line_to_string();
         }
     }
-    xml_node::const_iterator itr = node.begin();
-    xml_node::const_iterator end = node.end();
-    for (; itr!=end; itr++)
+
+    for (auto const& child_node : node)
     {
-        find_unused_nodes_recursive(*itr, error_message);
+        find_unused_nodes_recursive(child_node, error_message);
     }
 }
 

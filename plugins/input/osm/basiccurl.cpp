@@ -23,6 +23,7 @@
 #include "basiccurl.h"
 
 #include <iostream>
+#include <cstring>
 
 CURL_LOAD_DATA* grab_http_response(const char* url)
 {
@@ -36,13 +37,13 @@ CURL_LOAD_DATA* grab_http_response(const char* url)
         curl_easy_cleanup(curl);
         return data;
     }
-    return NULL;
+    return nullptr;
 }
 
 CURL_LOAD_DATA* do_grab(CURL* curl,const char* url)
 {
     CURL_LOAD_DATA* data = (CURL_LOAD_DATA*)malloc(sizeof(CURL_LOAD_DATA));
-    data->data = NULL;
+    data->data = nullptr;
     data->nbytes = 0;
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -65,7 +66,7 @@ size_t response_callback(void* ptr, size_t size, size_t nmemb, void* d)
     // fprintf(stderr,"rsize is %d\n", rsize);
 
     data->data = (char*)realloc(data->data, (data->nbytes + rsize) * sizeof(char));
-    memcpy(&(data->data[data->nbytes]), ptr, rsize);
+    std::memcpy(&(data->data[data->nbytes]), ptr, rsize);
     data->nbytes += rsize;
 
     // fprintf(stderr,"data->nbytes is %d\n", data->nbytes);

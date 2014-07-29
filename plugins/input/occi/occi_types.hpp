@@ -27,11 +27,6 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
 
-// boost
-#ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
-#endif
-
 // occi
 #include <occi.h>
 

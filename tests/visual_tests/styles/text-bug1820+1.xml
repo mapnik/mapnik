@@ -13,7 +13,7 @@
     <Style name="My Style">
         <Rule>
             <PointSymbolizer opacity="0.5" ignore-placement="true"/>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" wrap-width="4" placement="point" dx="0" dy="1"><ExpressionFormat line-spacing="[nr]*10+1">[name]</ExpressionFormat></TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" wrap-width="4" placement="point" dx="0" dy="1"><Format line-spacing="[nr]*10+1">[name]</Format></TextSymbolizer>
         </Rule>
     </Style>
 

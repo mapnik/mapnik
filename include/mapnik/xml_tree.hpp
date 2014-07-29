@@ -25,39 +25,27 @@
 
 // mapnik
 #include <mapnik/xml_node.hpp>
-#include <mapnik/expression_grammar.hpp>
-#include <mapnik/path_expression_grammar.hpp>
-#include <mapnik/transform_expression_grammar.hpp>
-#include <mapnik/image_filter_grammar.hpp>
-#include <mapnik/image_filter.hpp>
-#include <mapnik/css_color_grammar.hpp>
-#include <mapnik/unicode.hpp>
+#include <mapnik/expression.hpp>
 
 //stl
 #include <string>
 
-
 namespace mapnik
 {
+
 class xml_tree
 {
 public:
     xml_tree(std::string const& encoding="utf8");
-    void set_filename(std::string fn);
+    void set_filename(std::string const& fn);
     std::string const& filename() const;
     xml_node &root();
     xml_node const& root() const;
 private:
     xml_node node_;
     std::string file_;
-    transcoder tr_;
 public:
-    mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
-    mapnik::expression_grammar<std::string::const_iterator> expr_grammar;
-    path_expression_grammar<std::string::const_iterator> path_expr_grammar;
-    transform_expression_grammar<std::string::const_iterator> transform_expr_grammar;
-    image_filter_grammar<std::string::const_iterator,std::vector<filter::filter_type> > image_filters_grammar;
-
+    mutable std::map<std::string,mapnik::expression_ptr> expr_cache_;
 };
 
 } //ns mapnik

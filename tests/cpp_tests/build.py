@@ -10,7 +10,7 @@ if not env['CPP_TESTS']:
     for cpp_test_bin in glob.glob('*-bin'):
         os.unlink(cpp_test_bin)
 else:
-    test_env['LIBS'] = ['mapnik']
+    test_env['LIBS'] = [env['MAPNIK_NAME']]
     test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
     if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
         test_env.AppendUnique(LIBS='dl')
@@ -36,12 +36,12 @@ else:
             agg_env.Append(CPPPATH = '#deps/agg/include')
             agg_env.Append(LIBPATH = '#deps/agg')
             agg_env['CPPPATH'] = ['#deps/agg/include',env['BOOST_INCLUDES']]
-            test_program = agg_env.Program(name, source=source_files, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+            test_program = agg_env.Program(name, source=source_files)
         else:
             test_env_local = test_env.Clone()
             if 'csv_parse' in cpp_test:
                 source_files += glob.glob('../../plugins/input/csv/' + '*.cpp')
-            test_program = test_env_local.Program(name, source=source_files, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+            test_program = test_env_local.Program(name, source=source_files)
             Depends(test_program, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
         # build locally if installing
         if 'install' in COMMAND_LINE_TARGETS:

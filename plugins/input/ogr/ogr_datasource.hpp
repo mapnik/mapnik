@@ -34,7 +34,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <vector>
@@ -56,14 +56,14 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    
+
 private:
     void init(mapnik::parameters const& params);
     mapnik::box2d<double> extent_;
     mapnik::datasource::datasource_t type_;
     std::string dataset_name_;
     std::string index_name_;
-    OGRDataSource* dataset_;
+    gdal_dataset_type dataset_;
     ogr_layer_ptr layer_;
     std::string layer_name_;
     mapnik::layer_descriptor desc_;

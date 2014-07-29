@@ -27,18 +27,18 @@ namespace mapnik {
 
 namespace non_copyable_
 {
-  class noncopyable
-  {
-   protected:
-      noncopyable() {}
-      ~noncopyable() {}
-   private:
-      noncopyable( const noncopyable& );
-      const noncopyable& operator=( const noncopyable& );
-  };
+
+class noncopyable
+{
+protected:
+    constexpr noncopyable() = default;
+    ~noncopyable() = default;
+    noncopyable( noncopyable const& ) = delete;
+    noncopyable& operator=(noncopyable const& ) = delete;
+};
 }
 
-typedef non_copyable_::noncopyable noncopyable;
+using noncopyable = non_copyable_::noncopyable;
 
 } // namespace mapnik
 

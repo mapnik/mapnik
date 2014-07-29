@@ -28,15 +28,20 @@
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/boolean.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/util/conversions.hpp>
+#include <mapnik/attribute.hpp>
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/format.hpp>
 
 // stl
 #include <string>
+#include <map>
+#include <typeinfo>
+#include <utility>
 #include <stdexcept>
 
 namespace mapnik { namespace detail {
@@ -46,21 +51,22 @@ struct do_xml_attribute_cast
 {
     static inline boost::optional<T> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& /*source*/)
     {
-        std::string err_msg = (boost::format("No conversion from std::string to %s") % typeid(T).name()).str();
+        std::string err_msg("No conversion from std::string to");
+        err_msg += std::string(typeid(T).name());
         throw std::runtime_error(err_msg);
     }
 };
 
-// specialization for mapnik::boolean
+// specialization for mapnik::boolean_type
 template <>
-struct do_xml_attribute_cast<mapnik::boolean>
+struct do_xml_attribute_cast<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::boolean_type> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean>(result);
-        return boost::optional<mapnik::boolean>();
+            return boost::optional<mapnik::boolean_type>(result);
+        return boost::optional<mapnik::boolean_type>();
     }
 };
 
@@ -139,7 +145,7 @@ struct do_xml_attribute_cast<mapnik::enumeration<T,MAX> >
 {
     static inline boost::optional<mapnik::enumeration<T,MAX> > xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
-        typedef typename boost::optional<mapnik::enumeration<T,MAX> > result_type;
+        using result_type = typename boost::optional<mapnik::enumeration<T,MAX> >;
         try
         {
             mapnik::enumeration<T,MAX> e;
@@ -160,7 +166,7 @@ struct do_xml_attribute_cast<mapnik::color>
 {
     static inline boost::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
     {
-        return parse_color(source, tree.color_grammar);
+        return parse_color(source);
     }
 };
 
@@ -180,7 +186,17 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
 {
     static inline boost::optional<mapnik::expression_ptr> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
     {
-        return parse_expression(source, tree.expr_grammar);
+        std::map<std::string,mapnik::expression_ptr>::const_iterator itr = tree.expr_cache_.find(source);
+        if (itr != tree.expr_cache_.end())
+        {
+            return itr->second;
+        }
+        else
+        {
+            mapnik::expression_ptr expr = parse_expression(source);
+            tree.expr_cache_.insert(std::make_pair(source,expr));
+            return expr;
+        }
     }
 };
 

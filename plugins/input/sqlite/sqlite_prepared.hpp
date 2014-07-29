@@ -31,7 +31,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string.h>
@@ -47,7 +47,7 @@ class prepared_index_statement : mapnik::noncopyable
 {
 
 public:
-    prepared_index_statement(boost::shared_ptr<sqlite_connection> ds, std::string const& sql)
+    prepared_index_statement(std::shared_ptr<sqlite_connection> ds, std::string const& sql)
         : ds_(ds),
           stmt_(0)
     {
@@ -133,7 +133,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<sqlite_connection> ds_;
+    std::shared_ptr<sqlite_connection> ds_;
     sqlite3_stmt * stmt_;
 };
 

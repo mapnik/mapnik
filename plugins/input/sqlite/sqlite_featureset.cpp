@@ -43,7 +43,7 @@ using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
 
-sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                                      mapnik::context_ptr const& ctx,
                                      std::string const& encoding,
                                      mapnik::box2d<double> const& bbox,

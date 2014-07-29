@@ -32,6 +32,8 @@ if mapnik.has_png():
     'png8:m=h:c=1:t=0',
     'png8:m=h:t=1',
     'png8:m=h:t=2',
+    'png:e=miniz',
+    'png8:e=miniz'
     ]
 
     # Todo - use itertools.product
@@ -44,6 +46,7 @@ if mapnik.has_png():
     generate = False
 
     def test_expected_encodings():
+        # blank image
         im = mapnik.Image(256,256)
         for opt in opts:
             expected = gen_filepath('solid',opt)
@@ -53,10 +56,12 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-            eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+              eq_(mapnik.Image.open(actual).tostring('png32'),
+                mapnik.Image.open(expected).tostring('png32'),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
+        # solid image
+        im.background = mapnik.Color('green');
         for opt in opts:
             expected = gen_filepath('blank',opt)
             actual = os.path.join(tmp_dir,os.path.basename(expected))
@@ -65,8 +70,22 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-            eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+              eq_(mapnik.Image.open(actual).tostring('png32'),
+                mapnik.Image.open(expected).tostring('png32'),
+                '%s (actual) not == to %s (expected)' % (actual,expected))
+
+        # aerial
+        im = mapnik.Image.open('./images/support/transparency/aerial_rgba.png')
+        for opt in opts:
+            expected = gen_filepath('aerial_rgba',opt)
+            actual = os.path.join(tmp_dir,os.path.basename(expected))
+            if generate or not os.path.exists(expected):
+              print 'generating expected image %s' % expected
+              im.save(expected,opt)
+            else:
+              im.save(actual,opt)
+              eq_(mapnik.Image.open(actual).tostring('png32'),
+                mapnik.Image.open(expected).tostring('png32'),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
     def test_transparency_levels():
@@ -142,4 +161,4 @@ if mapnik.has_png():
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

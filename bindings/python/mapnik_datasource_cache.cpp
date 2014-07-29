@@ -20,16 +20,20 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 #include <boost/python.hpp>
 #include <boost/noncopyable.hpp>
-
+#include <mapnik/value_types.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 
 namespace  {
 
 using namespace boost::python;
 
-boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+std::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
 {
     mapnik::parameters params;
     boost::python::list keys=d.keys();
