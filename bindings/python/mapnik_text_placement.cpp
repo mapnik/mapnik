@@ -112,8 +112,8 @@ void set_displacement(text_layout_properties &t, boost::python::tuple arg)
         throw_error_already_set();
     }
 
-    double x = extract<double>(arg[0]);
-    double y = extract<double>(arg[1]);
+    //double x = extract<double>(arg[0]);
+    //double y = extract<double>(arg[1]);
     //t.displacement.set(x, y); FIXME
 }
 
