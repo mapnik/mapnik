@@ -371,7 +371,6 @@ lib_env_final.Prepend(LINKFLAGS=mapnik_lib_link_flag)
 # cache library values for other builds to use
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
 env['LIBMAPNIK_LINKFLAGS'] = copy(lib_env['LINKFLAGS'])
-env.Append(LIBMAPNIK_LINKFLAGS=env['CUSTOM_LDFLAGS'])
 env['LIBMAPNIK_CXXFLAGS'] = libmapnik_cxxflags
 env['LIBMAPNIK_DEFINES'] = libmapnik_defines
 
