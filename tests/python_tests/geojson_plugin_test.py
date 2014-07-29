@@ -23,7 +23,7 @@ if 'geojson' in mapnik.DatasourceCache.plugin_names():
     def test_geojson_properties():
         ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.geojson')
         f = ds.features_at_point(ds.envelope().center()).features[0]
-
+        eq_(len(ds.fields()),7)
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
@@ -38,6 +38,7 @@ if 'geojson' in mapnik.DatasourceCache.plugin_names():
 
         ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.geojson')
         f = ds.all_features()[0]
+        eq_(len(ds.fields()),7)
 
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
@@ -52,25 +53,20 @@ if 'geojson' in mapnik.DatasourceCache.plugin_names():
         eq_(f['NOM_FR'], u'Québec')
 
     def test_geojson_from_in_memory_string():
-        ds = mapnik.Datasource(type='geojson',inline='{"type":"LineString","coordinates":[[0,0],[10,10]]}')
+        # will silently fail since it is a geometry and needs to be a featurecollection.
+        #ds = mapnik.Datasource(type='geojson',inline='{"type":"LineString","coordinates":[[0,0],[10,10]]}')
+        # works since it is a featurecollection
+        ds = mapnik.Datasource(type='geojson',inline='{ "type":"FeatureCollection", "features": [ { "type":"Feature", "properties":{"name":"test"}, "geometry": { "type":"LineString","coordinates":[[0,0],[10,10]] } } ]}')
+        eq_(len(ds.fields()),1)
         f = ds.all_features()[0]
-
         desc = ds.describe()
-        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
-
-        eq_(f['name'], u'Test')
-        eq_(f['int'], 1)
-        eq_(f['description'], u'Test: \u005C')
-        eq_(f['spaces'], u'this has spaces')
-        eq_(f['double'], 1.1)
-        eq_(f['boolean'], True)
-        eq_(f['NOM_FR'], u'Qu\xe9bec')
-        eq_(f['NOM_FR'], u'Québec')
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.LineString)
+        eq_(f['name'], u'test')
 
 #    @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
         ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.geojson')
-        eq_(len(ds.fields()),8)
+        eq_(len(ds.fields()),7)
         # TODO - this sorting is messed up
         #eq_(ds.fields(),['name', 'int', 'double', 'description', 'boolean', 'NOM_FR'])
         #eq_(ds.field_types(),['str', 'int', 'float', 'str', 'bool', 'str'])
