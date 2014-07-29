@@ -33,7 +33,10 @@
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
-
+#include <mapnik/xml_tree.hpp>
+#include <mapnik/config_error.hpp>
+#include <mapnik/evaluate_global_attributes.hpp>
+#include <mapnik/parse_transform.hpp>
 // boost
 #include <boost/variant/apply_visitor.hpp>
 
@@ -335,6 +338,124 @@ inline void set_property_from_value(Symbolizer & sym, mapnik::keys key, T const&
     default:
         break;
     }
+}
+
+namespace detail {
+// helpers
+template <typename Symbolizer, typename T, bool is_enum = false>
+struct set_symbolizer_property_impl
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const& node)
+    {
+        using value_type = T;
+        std::string const& name = std::get<0>(get_meta(key));
+        try
+        {
+            boost::optional<value_type> val = node.get_opt_attr<value_type>(name);
+            if (val) put(sym, key, *val);
+        }
+        catch (config_error const& ex)
+        {
+            // try parsing as an expression
+            boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+            if (val)
+            {
+                // first try pre-evaluate expressions which don't have dynamic properties
+                auto result = pre_evaluate_expression<mapnik::value>(*val);
+                if (std::get<1>(result))
+                {
+                    set_property_from_value(sym, key,std::get<0>(result));
+                }
+                else
+                {
+                    // expression_ptr
+                    put(sym, key, *val);
+                }
+            }
+            else
+            {
+                ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
+                throw;
+            }
+        }
+    }
+};
+
+template <typename Symbolizer>
+struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    {
+        std::string const& name = std::get<0>(get_meta(key));
+        boost::optional<std::string> transform = node.get_opt_attr<std::string>(name);
+        if (transform) put(sym, key, mapnik::parse_transform(*transform));
+    }
+};
+
+template <typename Symbolizer, typename T>
+struct set_symbolizer_property_impl<Symbolizer, T, true>
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    {
+        using value_type = T;
+        std::string const& name = std::get<0>(get_meta(key));
+        try
+        {
+            boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
+            if (enum_str)
+            {
+                boost::optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);
+                if (enum_val)
+                {
+                    put(sym, key, *enum_val);
+                }
+                else
+                {
+                    boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+                    if (val)
+                    {
+                        // first try pre-evaluating expression
+                        auto result = pre_evaluate_expression<value>(*val);
+                        if (std::get<1>(result))
+                        {
+                            boost::optional<T> enum_val = detail::enum_traits<T>::from_string(std::get<0>(result).to_string());
+                            if (enum_val)
+                            {
+                                put(sym, key, *enum_val);
+                            }
+                            else
+                            {
+                                // can't evaluate
+                                throw config_error("failed to parse symbolizer property: '" + name + "'");
+                            }
+                        }
+                        else
+                        {
+                            // put expression_ptr
+                            put(sym, key, *val);
+                        }
+                    }
+                    else
+                    {
+                        throw config_error("failed to parse symbolizer property: '" + name + "'");
+                    }
+                }
+            }
+        }
+        catch (config_error const& ex)
+        {
+            ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
+            throw;
+        }
+    }
+};
+
+} // namespace detail
+
+template <typename Symbolizer, typename T>
+void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
+{
+    detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,node);
 }
 
 

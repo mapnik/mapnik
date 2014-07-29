@@ -117,7 +117,6 @@ private:
     void parse_group_rule(group_symbolizer_properties &prop, xml_node const& node);
     void parse_simple_layout(group_symbolizer_properties &prop, xml_node const& node);
     void parse_pair_layout(group_symbolizer_properties &prop, xml_node const& node);
-
     bool parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     void parse_stroke(symbolizer_base & symbol, xml_node const& node);
     void ensure_font_face(std::string const& face_name);
@@ -833,123 +832,6 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
             break;
         }
     }
-}
-
-namespace detail {
-// helpers
-template <typename Symbolizer, typename T, bool is_enum = false>
-struct set_symbolizer_property_impl
-{
-    static void apply(Symbolizer & sym, keys key, xml_node const& node)
-    {
-        using value_type = T;
-        std::string const& name = std::get<0>(get_meta(key));
-        try
-        {
-            optional<value_type> val = node.get_opt_attr<value_type>(name);
-            if (val) put(sym, key, *val);
-        }
-        catch (config_error const& ex)
-        {
-            // try parsing as an expression
-            optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-            if (val)
-            {
-                // first try pre-evaluate expressions which don't have dynamic properties
-                auto result = pre_evaluate_expression<mapnik::value>(*val);
-                if (std::get<1>(result))
-                {
-                    set_property_from_value(sym, key,std::get<0>(result));
-                }
-                else
-                {
-                    // expression_ptr
-                    put(sym, key, *val);
-                }
-            }
-            else
-            {
-                ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
-                throw;
-            }
-        }
-    }
-};
-
-template <typename Symbolizer>
-struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
-{
-    static void apply(Symbolizer & sym, keys key, xml_node const & node)
-    {
-        std::string const& name = std::get<0>(get_meta(key));
-        optional<std::string> transform = node.get_opt_attr<std::string>(name);
-        if (transform) put(sym, key, mapnik::parse_transform(*transform));
-    }
-};
-
-template <typename Symbolizer, typename T>
-struct set_symbolizer_property_impl<Symbolizer, T, true>
-{
-    static void apply(Symbolizer & sym, keys key, xml_node const & node)
-    {
-        using value_type = T;
-        std::string const& name = std::get<0>(get_meta(key));
-        try
-        {
-            optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
-            if (enum_str)
-            {
-                optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);
-                if (enum_val)
-                {
-                    put(sym, key, *enum_val);
-                }
-                else
-                {
-                    optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-                    if (val)
-                    {
-                        // first try pre-evaluating expression
-                        auto result = pre_evaluate_expression<value>(*val);
-                        if (std::get<1>(result))
-                        {
-                            optional<T> enum_val = detail::enum_traits<T>::from_string(std::get<0>(result).to_string());
-                            if (enum_val)
-                            {
-                                put(sym, key, *enum_val);
-                            }
-                            else
-                            {
-                                // can't evaluate
-                                throw config_error("failed to parse symbolizer property: '" + name + "'");
-                            }
-                        }
-                        else
-                        {
-                            // put expression_ptr
-                            put(sym, key, *val);
-                        }
-                    }
-                    else
-                    {
-                        throw config_error("failed to parse symbolizer property: '" + name + "'");
-                    }
-                }
-            }
-        }
-        catch (config_error const& ex)
-        {
-            ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
-            throw;
-        }
-    }
-};
-} // namespace detail
-
-template <typename Symbolizer, typename T>
-void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
-{
-    detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,node);
 }
 
 void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& node)
