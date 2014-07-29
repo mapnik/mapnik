@@ -1540,7 +1540,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
     }
 }
 
-void map_parser::parse_group_symbolizer(rule &rule, xml_node const & node)
+void map_parser::parse_group_symbolizer(rule & rule, xml_node const & node)
 {
     try
     {
@@ -1553,7 +1553,7 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const & node)
         set_symbolizer_property<symbolizer_base, expression_ptr>(symbol, keys::repeat_key, node);
 
         text_placements_ptr placements = std::make_shared<text_placements_dummy>();
-        placements->defaults.placement_properties_from_xml(node);
+        placements->defaults.text_properties_from_xml(node);
         put<text_placements_ptr>(symbol, keys::text_placements_, placements);
 
         size_t layout_count = 0;

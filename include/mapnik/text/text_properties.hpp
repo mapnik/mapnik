@@ -122,12 +122,14 @@ struct MAPNIK_DECL text_layout_properties
 
 class text_layout;
 
+struct text_properties_expressions : symbolizer_base {};
+
 // Contains all text symbolizer properties which are not directly related to text formatting and layout.
 struct MAPNIK_DECL text_symbolizer_properties
 {
     text_symbolizer_properties();
     // Load only placement related values from XML ptree.
-    void placement_properties_from_xml(xml_node const& node);
+    void text_properties_from_xml(xml_node const& node);
     // Load all values from XML ptree.
     void from_xml(xml_node const& node, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
@@ -165,6 +167,8 @@ struct MAPNIK_DECL text_symbolizer_properties
     bool largest_bbox_only;
     text_upright_e upright;
 
+    // Expressions
+    text_properties_expressions expressions;
     // Default values for text layouts
     text_layout_properties layout_defaults;
     // Default values for format_properties.

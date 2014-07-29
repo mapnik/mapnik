@@ -95,49 +95,45 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
     return tree_;
 }
 
-void text_symbolizer_properties::placement_properties_from_xml(xml_node const& sym)
+void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 {
-    optional<label_placement_e> placement_ = sym.get_opt_attr<label_placement_e>("placement");
+    optional<label_placement_e> placement_ = node.get_opt_attr<label_placement_e>("placement");
     if (placement_) label_placement = *placement_;
-    optional<double> label_position_tolerance_ = sym.get_opt_attr<double>("label-position-tolerance");
+    optional<double> label_position_tolerance_ = node.get_opt_attr<double>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
-    optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
+    optional<double> spacing_ = node.get_opt_attr<double>("spacing");
     if (spacing_) label_spacing = *spacing_;
     else {
         // https://github.com/mapnik/mapnik/issues/1427
-        spacing_ = sym.get_opt_attr<double>("label-spacing");
+        spacing_ = node.get_opt_attr<double>("label-spacing");
         if (spacing_) label_spacing = *spacing_;
     }
-    optional<double> minimum_distance_ = sym.get_opt_attr<double>("minimum-distance");
+    optional<double> minimum_distance_ = node.get_opt_attr<double>("minimum-distance");
     if (minimum_distance_) minimum_distance = *minimum_distance_;
-    optional<double> min_padding_ = sym.get_opt_attr<double>("minimum-padding");
+    optional<double> min_padding_ = node.get_opt_attr<double>("minimum-padding");
     if (min_padding_) minimum_padding = *min_padding_;
-    optional<double> min_path_length_ = sym.get_opt_attr<double>("minimum-path-length");
+    optional<double> min_path_length_ = node.get_opt_attr<double>("minimum-path-length");
     if (min_path_length_) minimum_path_length = *min_path_length_;
-    optional<mapnik::boolean_type> avoid_edges_ = sym.get_opt_attr<mapnik::boolean_type>("avoid-edges");
+    optional<mapnik::boolean_type> avoid_edges_ = node.get_opt_attr<mapnik::boolean_type>("avoid-edges");
     if (avoid_edges_) avoid_edges = *avoid_edges_;
-    optional<mapnik::boolean_type> allow_overlap_ = sym.get_opt_attr<mapnik::boolean_type>("allow-overlap");
+    optional<mapnik::boolean_type> allow_overlap_ = node.get_opt_attr<mapnik::boolean_type>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
-    optional<mapnik::boolean_type> largest_bbox_only_ = sym.get_opt_attr<mapnik::boolean_type>("largest-bbox-only");
+    optional<mapnik::boolean_type> largest_bbox_only_ = node.get_opt_attr<mapnik::boolean_type>("largest-bbox-only");
     if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
-}
-
-void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
-{
-    placement_properties_from_xml(node);
-
     optional<double> max_char_angle_delta_ = node.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
     optional<text_upright_e> upright_ = node.get_opt_attr<text_upright_e>("upright");
     if (upright_) upright = *upright_;
+}
 
+void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
+{
+    text_properties_from_xml(node);
     layout_defaults.from_xml(node);
-
     optional<expression_ptr> name_ = node.get_opt_attr<expression_ptr>("name");
     if (name_)
     {
         MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
-
         set_old_style_expression(*name_);
     }
 
