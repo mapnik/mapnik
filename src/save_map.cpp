@@ -60,7 +60,7 @@ namespace mapnik
 using boost::property_tree::ptree;
 using boost::optional;
 
-void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool explicit_defaults = false)
+void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool explicit_defaults)
 {
     p->defaults.to_xml(node, explicit_defaults);
     // Known types:
@@ -92,7 +92,7 @@ void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool 
 
 void serialize_raster_colorizer(ptree & sym_node,
                                 raster_colorizer_ptr const& colorizer,
-                                bool explicit_defaults = false)
+                                bool explicit_defaults)
 {
     ptree & col_node = sym_node.push_back(
         ptree::value_type("RasterColorizer", ptree() ))->second;
@@ -126,16 +126,18 @@ void serialize_raster_colorizer(ptree & sym_node,
 
 void serialize_group_symbolizer_properties(ptree & sym_node,
                                            group_symbolizer_properties_ptr const& properties,
-                                           bool explicit_defaults = false);
+                                           bool explicit_defaults);
 
 template <typename Meta>
 class serialize_symbolizer_property : public boost::static_visitor<>
 {
 public:
     serialize_symbolizer_property(Meta const& meta,
-                                  boost::property_tree::ptree & node)
+                                  boost::property_tree::ptree & node,
+                                  bool explicit_defaults)
         : meta_(meta),
-          node_(node) {}
+          node_(node),
+          explicit_defaults_(explicit_defaults) {}
 
     void operator() ( mapnik::enumeration_wrapper const& e) const
     {
@@ -158,7 +160,7 @@ public:
     {
         if (expr)
         {
-            serialize_text_placements(node_, expr);
+            serialize_text_placements(node_, expr, explicit_defaults_);
         }
     }
 
@@ -166,7 +168,7 @@ public:
     {
         if (expr)
         {
-            serialize_raster_colorizer(node_, expr);
+            serialize_raster_colorizer(node_, expr, explicit_defaults_);
         }
     }
 
@@ -201,7 +203,7 @@ public:
     {
         if (properties)
         {
-            serialize_group_symbolizer_properties(node_, properties);
+            serialize_group_symbolizer_properties(node_, properties, explicit_defaults_);
         }
     }
 
@@ -214,6 +216,7 @@ public:
 private:
     Meta const& meta_;
     boost::property_tree::ptree & node_;
+    bool explicit_defaults_;
 };
 
 class serialize_symbolizer : public boost::static_visitor<>
@@ -237,7 +240,9 @@ private:
     {
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(serialize_symbolizer_property<property_meta_type>(get_meta(prop.first), sym_node), prop.second);
+            boost::apply_visitor(serialize_symbolizer_property<property_meta_type>(
+                                     get_meta(prop.first), sym_node, explicit_defaults_),
+                                     prop.second);
         }
     }
     ptree & rule_;
