@@ -88,7 +88,6 @@ public:
     map_parser(bool strict, std::string const& filename = "") :
         strict_(strict),
         filename_(filename),
-        relative_to_xml_(true),
         font_manager_(font_engine_),
         xml_base_path_()
     {}
@@ -131,7 +130,6 @@ private:
 
     bool strict_;
     std::string filename_;
-    bool relative_to_xml_;
     std::map<std::string,parameters> datasource_templates_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
@@ -175,14 +173,6 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
         xml_node const& map_node = node.get_child("Map");
         try
         {
-            // Check if relative paths should be interpreted as relative to/from XML location
-            // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<mapnik::boolean> paths_from_xml = map_node.get_opt_attr<mapnik::boolean>("paths-from-xml");
-            if (paths_from_xml)
-            {
-                relative_to_xml_ = *paths_from_xml;
-            }
-
             optional<std::string> base_path_from_xml = map_node.get_opt_attr<std::string>("base");
             if (!base_path.empty())
             {
@@ -1778,7 +1768,7 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;
 
-    if (!xml_base_path_.empty() && relative_to_xml_)
+    if (!xml_base_path_.empty())
     {
         std::string starting_path = *opt_path;
         if (mapnik::util::is_relative(starting_path))
