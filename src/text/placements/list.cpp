@@ -89,25 +89,19 @@ unsigned text_placements_list::size() const
 }
 
 
-text_placements_ptr text_placements_list::from_xml(xml_node const& xml, fontset_map const& fontsets)
+text_placements_ptr text_placements_list::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
-    using boost::property_tree::ptree;
-    text_placements_list *list = new text_placements_list;
-    text_placements_ptr ptr = text_placements_ptr(list);
-    list->defaults.from_xml(xml, fontsets);
-    xml_node::const_iterator itr = xml.begin();
-    xml_node::const_iterator end = xml.end();
-    for( ;itr != end; ++itr)
+    auto list = std::make_shared<text_placements_list>();
+    list->defaults.from_xml(node, fontsets);
+    for( auto const& child : node)
     {
-        if (itr->is_text() || !itr->is("Placement")) continue;
+        if (child.is_text() || !child.is("Placement")) continue;
         text_symbolizer_properties & p = list->add();
-        //p.format = std::make_shared<detail::evaluated_format_properties>(*(p.format)); //Make a deep copy -- FIXME
-        //TODO: This needs a real copy constructor for text_symbolizer_properties
-        p.from_xml(*itr, fontsets);
-       //TODO: if (strict_ && !p.format.fontset.size())
-       //         ensure_font_face(p.format.face_name);
+        p.from_xml(child, fontsets);
+        //if (strict_ && !p.format.fontset.size())
+        //    ensure_font_face(p.format.face_name);
     }
-    return ptr;
+    return list;
 }
 
 } //ns mapnik
