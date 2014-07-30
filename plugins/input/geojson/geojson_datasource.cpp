@@ -178,10 +178,10 @@ void geojson_datasource::parse_geojson(T & stream)
             extent_ = box;
             mapnik::feature_kv_iterator f_itr = f->begin();
             mapnik::feature_kv_iterator f_end = f->end();
-            for ( ;f_itr!=f_end; ++f_itr)
+            for ( auto const& kv : *f)
             {
-                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(*f_itr),
-                    boost::apply_visitor(attr_value_converter(),std::get<1>(*f_itr).base())));
+                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
+                    boost::apply_visitor(attr_value_converter(),std::get<1>(kv).base())));
             }
         }
         else
