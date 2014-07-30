@@ -138,6 +138,8 @@ files = {
     'formatting-2': {'bbox':default_text_box},
     'formatting-3': {'bbox':default_text_box},
     'formatting-4': {'bbox':default_text_box},
+    'formatting-5': {'bbox':default_text_box},
+    'formatting-6': {'bbox':default_text_box},
     'expressionformat': {'bbox':default_text_box},
     'shieldsymbolizer-1': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
     'shieldsymbolizer-2': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},

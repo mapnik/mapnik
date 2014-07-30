@@ -80,72 +80,29 @@ struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-
-        box2d<double> bbox(0,0, src_.width(),src_.height());
-        if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == geometry_type::types::Point)
+        box2d<double> bbox(0,0, src_.width(), src_.height());
+        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        markers_placement_finder<T, label_collision_detector4> placement_finder(
+            placement_method,
+            path,
+            bbox,
+            marker_trans_,
+            detector_,
+            spacing * scale_factor_,
+            max_error,
+            allow_overlap);
+        double x, y, angle = .0;
+        while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            double x = 0;
-            double y = 0;
-            if (path.type() == geometry_type::types::LineString)
-            {
-                if (!label::middle_point(path, x, y))
-                {
-                    return;
-                }
-            }
-            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
-            {
-                if (!label::interior_position(path, x, y))
-                {
-                    return;
-                }
-            }
-            else
-            {
-                if (!label::centroid(path, x, y))
-                {
-                    return;
-                }
-            }
             agg::trans_affine matrix = marker_trans_;
-            matrix.translate(x,y);
-            box2d<double> transformed_bbox = bbox * matrix;
-            if (allow_overlap ||
-                detector_.has_placement(transformed_bbox))
+            matrix.rotate(angle);
+            matrix.translate(x, y);
+            render_raster_marker(matrix);
+            if (!placed_)
             {
-                render_raster_marker(matrix);
-                if (!ignore_placement)
-                {
-                    detector_.insert(transformed_bbox);
-                }
-                if (!placed_)
-                {
-                    pixmap_.add_feature(feature_);
-                    placed_ = true;
-                }
-            }
-        }
-        else
-        {
-            double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-            double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-            markers_placement<T, label_collision_detector4> placement(path, bbox, marker_trans_, detector_,
-                                                                      spacing * scale_factor_,
-                                                                      max_error,
-                                                                      allow_overlap);
-            double x, y, angle;
-            while (placement.get_point(x, y, angle, ignore_placement))
-            {
-                agg::trans_affine matrix = marker_trans_;
-                matrix.rotate(angle);
-                matrix.translate(x, y);
-                render_raster_marker(matrix);
-                if (!placed_)
-                {
-                    pixmap_.add_feature(feature_);
-                    placed_ = true;
-                }
+                pixmap_.add_feature(feature_);
+                placed_ = true;
             }
         }
     }
@@ -239,69 +196,34 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-
         coord2d center = bbox_.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
-
-        if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == geometry_type::types::Point)
+        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        markers_placement_finder<T, Detector> placement_finder(
+            placement_method,
+            path,
+            bbox_,
+            marker_trans_,
+            detector_,
+            spacing * scale_factor_,
+            max_error,
+            allow_overlap);
+        double x, y, angle = .0;
+        while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            double x = 0;
-            double y = 0;
-            if (path.type() == geometry_type::types::LineString)
-            {
-                if (!label::middle_point(path, x, y)) return;
-            }
-            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
-            {
-                if (!label::interior_position(path, x, y)) return;
-            }
-            else
-            {
-                if (!label::centroid(path, x, y)) return;
-            }
-
             agg::trans_affine matrix = recenter * marker_trans_;
-            matrix.translate(x,y);
-            box2d<double> transformed_bbox = bbox_ * matrix;
-            if (allow_overlap ||
-                detector_.has_placement(transformed_bbox))
+            matrix.rotate(angle);
+            matrix.translate(x, y);
+            svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
+            if (!placed_)
             {
-                svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
-                if (!ignore_placement)
-                {
-                    detector_.insert(transformed_bbox);
-                }
-                if (!placed_)
-                {
-                    pixmap_.add_feature(feature_);
-                    placed_ = true;
-                }
-            }
-        }
-        else
-        {
-            double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-            double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-            markers_placement<T, Detector> placement(path, bbox_, marker_trans_, detector_,
-                                                     spacing * scale_factor_,
-                                                     max_error,
-                                                     allow_overlap);
-            double x, y, angle;
-            while (placement.get_point(x, y, angle, ignore_placement))
-            {
-                agg::trans_affine matrix = recenter * marker_trans_;
-                matrix.rotate(angle);
-                matrix.translate(x, y);
-                svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
-                if (!placed_)
-                {
-                    pixmap_.add_feature(feature_);
-                    placed_ = true;
-                }
+                pixmap_.add_feature(feature_);
+                placed_ = true;
             }
         }
     }
+
 private:
     BufferType & buf_;
     pixfmt_type pixf_;
