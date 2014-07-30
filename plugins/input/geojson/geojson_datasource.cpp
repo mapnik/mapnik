@@ -158,11 +158,13 @@ void geojson_datasource::parse_geojson(T & stream)
     // FIXME - for perf we need to declare grammar as 'static const'
     // but we cannot because then all features will interact only with the first context_ptr
     // created in the process which leads to very odd bugs
-    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+
     mapnik::transcoder tr("utf8");
-    mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(ctx, tr);
+    mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(tr);
     boost::spirit::standard_wide::space_type space;
-    bool result = boost::spirit::qi::phrase_parse(begin, end, fc_grammar, space, features_);
+
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+    bool result = boost::spirit::qi::phrase_parse(begin, end, (fc_grammar)(boost::phoenix::ref(ctx)), space, features_);
     if (!result)
     {
         if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
