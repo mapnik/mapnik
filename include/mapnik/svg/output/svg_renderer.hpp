@@ -24,7 +24,6 @@
 #define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
-#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
