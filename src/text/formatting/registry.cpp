@@ -48,12 +48,12 @@ void registry::register_name(std::string const& name, from_xml_function_ptr ptr,
     }
 }
 
-node_ptr registry::from_xml(xml_node const& xml)
+node_ptr registry::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
     std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(xml.name());
     if (itr == map_.end())  throw config_error("Unknown element '" + xml.name() + "'", xml);
     xml.set_processed(true);
-    return itr->second(xml);
+    return itr->second(xml, fontsets);
 }
 } //ns formatting
 } //ns mapnik

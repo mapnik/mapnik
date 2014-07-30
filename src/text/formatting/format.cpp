@@ -57,10 +57,10 @@ void format_node::to_xml(ptree & xml) const
 }
 
 
-node_ptr format_node::from_xml(xml_node const& xml)
+node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
     auto n = std::make_shared<format_node>();
-    node_ptr child = node::from_xml(xml);
+    node_ptr child = node::from_xml(xml,fontsets);
     n->set_child(child);
 
     //TODO: Fontset is problematic. We don't have the fontsets pointer here...

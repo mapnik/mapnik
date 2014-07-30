@@ -130,7 +130,7 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
     text_properties_from_xml(node);
-    layout_defaults.from_xml(node);
+    layout_defaults.from_xml(node,fontsets);
     optional<expression_ptr> name_ = node.get_opt_attr<expression_ptr>("name");
     if (name_)
     {
@@ -139,7 +139,7 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
     }
 
     format_defaults.from_xml(node, fontsets);
-    formatting::node_ptr n(formatting::node::from_xml(node));
+    formatting::node_ptr n(formatting::node::from_xml(node,fontsets));
     if (n) set_format_tree(n);
 }
 
@@ -227,7 +227,7 @@ text_layout_properties::text_layout_properties()
       jalign(enumeration_wrapper(J_AUTO)),
       valign(enumeration_wrapper(V_AUTO)) {}
 
-void text_layout_properties::from_xml(xml_node const &node)
+void text_layout_properties::from_xml(xml_node const &node, fontset_map const& fontsets)
 {
     set_property_from_xml<double>(dx, "dx", node);
     set_property_from_xml<double>(dy, "dy", node);

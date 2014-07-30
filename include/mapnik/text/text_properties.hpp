@@ -95,7 +95,7 @@ struct MAPNIK_DECL text_layout_properties
     text_layout_properties();
 
     // Load all values from XML ptree.
-    void from_xml(xml_node const &sym);
+    void from_xml(xml_node const &sym, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 text_layout_properties const& dfl = text_layout_properties()) const;

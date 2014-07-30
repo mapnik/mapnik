@@ -29,14 +29,14 @@
 
 namespace mapnik { namespace formatting {
 
-node_ptr node::from_xml(xml_node const& xml)
+node_ptr node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
     auto list = std::make_shared<list_node>();
     for (auto const& node : xml)
     {
         if (node.name() == "Placement")
             continue;
-        node_ptr n = registry::instance().from_xml(node);
+        node_ptr n = registry::instance().from_xml(node,fontsets);
         if (n) list->push_back(n);
     }
     if (list->get_children().size() == 1)
