@@ -40,6 +40,8 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/util/dasharray_parser.hpp>
+
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -365,6 +367,25 @@ struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
     }
 };
 
+template <>
+struct evaluate_expression_wrapper<mapnik::dash_array>
+{
+    template <typename T1, typename T2, typename T3>
+    mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    {
+        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        // FIXME - throw?
+        if (val.is_null()) return dash_array();
+        dash_array dash;
+        std::vector<double> buf;
+        std::string str = val.to_string();
+        if (util::parse_dasharray(str.begin(),str.end(),buf))
+        {
+            add_dashes(buf,dash);
+        }
+        return dash;
+    }
+};
 
 template <typename T>
 struct extract_value : public boost::static_visitor<T>

@@ -353,7 +353,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     double stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
     line_join_enum stroke_join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, common_.vars_, MITER_JOIN);
     line_cap_enum stroke_cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, common_.vars_, BUTT_CAP);
-    auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
+    auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray, feature, common_.vars_);
     double miterlimit = get<double>(sym, keys::stroke_miterlimit, feature, common_.vars_, 4.0);
     double width = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
 

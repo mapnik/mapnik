@@ -1227,44 +1227,7 @@ void map_parser::parse_stroke(symbolizer_base & sym, xml_node const & node)
     // stroke-miterlimit
     set_symbolizer_property<symbolizer_base,double>(sym, keys::stroke_miterlimit, node);
     // stroke-dasharray
-    optional<std::string> str = node.get_opt_attr<std::string>("stroke-dasharray");
-    if (str)
-    {
-        std::vector<double> buf;
-        if (util::parse_dasharray((*str).begin(),(*str).end(),buf))
-        {
-            if (!buf.empty())
-            {
-                size_t size = buf.size();
-                if (size % 2 == 1)
-                {
-                    buf.insert(buf.end(),buf.begin(),buf.end());
-                }
-
-                dash_array dash;
-                std::vector<double>::const_iterator pos = buf.begin();
-                while (pos != buf.end())
-                {
-                    if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
-                    {
-                        dash.emplace_back(*pos,*(pos + 1));
-                    }
-                    pos +=2;
-                }
-                if (dash.size() > 0)
-                {
-                    put(sym,keys::stroke_dasharray,dash);
-                }
-            }
-        }
-        else
-        {
-            throw config_error(std::string("Failed to parse dasharray ") +
-                               "'. Expected a " +
-                               "list of floats or 'none' but got '" + (*str) + "'");
-        }
-    }
-
+    set_symbolizer_property<symbolizer_base,dash_array>(sym, keys::stroke_dasharray, node);
 
 }
 

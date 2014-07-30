@@ -29,6 +29,9 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 
+#include <vector>
+#include <string>
+
 namespace mapnik { namespace util {
 
 template <typename Iterator>
@@ -55,6 +58,26 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
         return false;
     }
     return r;
+}
+
+inline bool add_dashes(std::vector<double> & buf, dash_array & dash)
+{
+    if (buf.empty()) return false;
+    size_t size = buf.size();
+    if (size % 2 == 1)
+    {
+        buf.insert(buf.end(),buf.begin(),buf.end());
+    }
+    std::vector<double>::const_iterator pos = buf.begin();
+    while (pos != buf.end())
+    {
+        if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
+        {
+            dash.emplace_back(*pos,*(pos + 1));
+        }
+        pos +=2;
+    }
+    return !buf.empty();
 }
 
 }}
