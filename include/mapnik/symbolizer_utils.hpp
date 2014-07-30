@@ -403,7 +403,7 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
         {
             std::vector<double> buf;
             dash_array dash;
-            if (util::parse_dasharray((*str).begin(),(*str).end(),buf) && add_dashes(buf,dash))
+            if (util::parse_dasharray((*str).begin(),(*str).end(),buf) && util::add_dashes(buf,dash))
             {
                 put(sym,key,dash);
             }

@@ -381,7 +381,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
         std::string str = val.to_string();
         if (util::parse_dasharray(str.begin(),str.end(),buf))
         {
-            add_dashes(buf,dash);
+            util::add_dashes(buf,dash);
         }
         return dash;
     }

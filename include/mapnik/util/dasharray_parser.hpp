@@ -60,7 +60,7 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
     return r;
 }
 
-inline bool add_dashes(std::vector<double> & buf, dash_array & dash)
+inline bool add_dashes(std::vector<double> & buf, std::vector<std::pair<double,double> > & dash)
 {
     if (buf.empty()) return false;
     size_t size = buf.size();
