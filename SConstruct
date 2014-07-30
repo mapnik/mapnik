@@ -493,6 +493,12 @@ elif HELP_REQUESTED:
     # to ensure config gets skipped when help is requested
     preconfigured = True
 
+# need no-op for clean on fresh checkout
+# https://github.com/mapnik/mapnik/issues/2112
+if ('-c' in command_line_args) or ('--clean' in command_line_args) and not os.path.exists(SCONS_CONFIGURE_CACHE):
+    print 'all good: nothing to clean'
+    Exit(0)
+
 # initially populate environment with defaults and any possible custom arguments
 opts.Update(env)
 
