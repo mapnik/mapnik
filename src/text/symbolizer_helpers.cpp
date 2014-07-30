@@ -77,9 +77,8 @@ struct largest_bbox_first
 
 void base_symbolizer_helper::initialize_geometries()
 {
-    // FIXME
-    bool largest_box_only = get<value_bool>(sym_, keys::largest_box_only, feature_, vars_, false);
-    double minimum_path_length = get<value_double>(sym_, keys::minimum_path_length, feature_, vars_, 0);
+    bool largest_box_only = placement_->properties.largest_bbox_only;
+    double minimum_path_length = placement_->properties.minimum_path_length;
     for ( auto const& geom :  feature_.paths())
     {
         // don't bother with empty geometries

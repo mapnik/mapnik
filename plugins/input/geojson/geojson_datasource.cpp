@@ -145,24 +145,24 @@ geojson_datasource::geojson_datasource(parameters const& params)
     }
 }
 
+namespace {
+using base_iterator_type = std::istreambuf_iterator<char>;
+const mapnik::transcoder tr("utf8");
+const mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(tr);
+}
+
 template <typename T>
 void geojson_datasource::parse_geojson(T & stream)
 {
-    using base_iterator_type = std::istreambuf_iterator<char>;
     boost::spirit::multi_pass<base_iterator_type> begin =
         boost::spirit::make_default_multi_pass(base_iterator_type(stream));
 
     boost::spirit::multi_pass<base_iterator_type> end =
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
-    // FIXME - for perf we need to declare grammar as 'static const'
-    // but we cannot because then all features will interact only with the first context_ptr
-    // created in the process which leads to very odd bugs
-    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    mapnik::transcoder tr("utf8");
-    mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(ctx, tr);
     boost::spirit::standard_wide::space_type space;
-    bool result = boost::spirit::qi::phrase_parse(begin, end, fc_grammar, space, features_);
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+    bool result = boost::spirit::qi::phrase_parse(begin, end, (fc_grammar)(boost::phoenix::ref(ctx)), space, features_);
     if (!result)
     {
         if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
@@ -176,12 +176,10 @@ void geojson_datasource::parse_geojson(T & stream)
         if (count == 0)
         {
             extent_ = box;
-            mapnik::feature_kv_iterator f_itr = f->begin();
-            mapnik::feature_kv_iterator f_end = f->end();
-            for ( ;f_itr!=f_end; ++f_itr)
+            for ( auto const& kv : *f)
             {
-                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(*f_itr),
-                    boost::apply_visitor(attr_value_converter(),std::get<1>(*f_itr).base())));
+                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
+                    boost::apply_visitor(attr_value_converter(),std::get<1>(kv).base())));
             }
         }
         else
