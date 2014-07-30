@@ -58,6 +58,7 @@ public:
         coord2d center = size.center();
         tr_ = agg::trans_affine_translation(-center.x, -center.y) * tr_;
     }
+    virtual ~markers_point_placement() {}
 
     /** Start again at first marker.
      * \note Returns the same list of markers only works when they were NOT added
