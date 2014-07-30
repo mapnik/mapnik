@@ -29,7 +29,7 @@
 #include <mapnik/xml_node.hpp>
 
 //boost
-
+#include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik { namespace formatting {
@@ -52,6 +52,7 @@ void format_node::to_xml(ptree & xml) const
     if (text_transform) serialize_property("text-transform", *text_transform, new_node);
 
     if (face_name) set_attr(new_node, "face-name", *face_name);
+    if (fontset) set_attr(new_node, "fontset-name", fontset->get_name());
 
     if (child_) child_->to_xml(new_node);
 }
@@ -63,8 +64,6 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     node_ptr child = node::from_xml(xml,fontsets);
     n->set_child(child);
 
-    //TODO: Fontset is problematic. We don't have the fontsets pointer here...
-    // exprs
     set_property_from_xml<double>(n->text_size, "size", xml);
     set_property_from_xml<double>(n->character_spacing, "character-spacing", xml);
     set_property_from_xml<double>(n->line_spacing, "line-spacing", xml);
@@ -72,12 +71,32 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     //set_property_from_xml<double>(n->halo_opacity, "halo-opacity", xml); FIXME
     set_property_from_xml<double>(n->halo_radius, "halo-radius", xml);
     set_property_from_xml<std::string>(n->wrap_char, "wrap-character", xml);
-    //
     set_property_from_xml<color>(n->fill, "fill", xml);
     set_property_from_xml<color>(n->halo_fill, "halo-fill", xml);
     set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
 
-    n->face_name = xml.get_opt_attr<std::string>("face-name");
+    boost::optional<std::string> face_name = xml.get_opt_attr<std::string>("face-name");
+    if (face_name)
+    {
+        n->face_name = *face_name;
+    }
+    boost::optional<std::string> fontset_name = xml.get_opt_attr<std::string>("fontset-name");
+    if (fontset_name)
+    {
+        std::map<std::string,font_set>::const_iterator itr = fontsets.find(*fontset_name);
+        if (itr != fontsets.end())
+        {
+            n->fontset = itr->second;
+        }
+        else
+        {
+            throw config_error("Unable to find any fontset named '" + *fontset_name + "' for <Format> node", xml);
+        }
+    }
+    if (face_name && !face_name->empty() && n->fontset)
+    {
+        throw config_error("Can't have both face-name and fontset-name", xml);
+    }
     return n;
 }
 
@@ -104,8 +123,18 @@ void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     if (halo_fill) new_properties->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
     if (text_transform) new_properties->text_transform = boost::apply_visitor(extract_value<text_transform_enum>(feature,attrs), *text_transform);
 
-    if (face_name) new_properties->face_name = *face_name;
-
+    if (fontset)
+    {
+        new_properties->fontset = *fontset;
+    }
+    else
+    {
+        if (face_name)
+        {
+            new_properties->face_name = *face_name;
+            new_properties->fontset.reset();
+        }
+    }
 
     if (child_) child_->apply(new_properties, feature, attrs, output);
     else MAPNIK_LOG_WARN(format) << "Useless format: No text to format";

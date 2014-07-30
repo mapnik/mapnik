@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-  <FontSet name="book"><Font face-name="DejaVu Sans Book"/></FontSet>
-  <FontSet name="oblique"><Font face-name="DejaVu Sans Oblique"/></FontSet>
+  <FontSet name="book">
+    <Font face-name="DejaVu Sans Book"/>
+  </FontSet>
+  <FontSet name="oblique">
+    <Font face-name="DejaVu Sans Oblique"/>
+  </FontSet>
 
   <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>My Style</StyleName>

@@ -44,6 +44,7 @@ public:
     node_ptr get_child() const;
 
     boost::optional<std::string> face_name;
+    boost::optional<font_set> fontset;
     boost::optional<symbolizer_base::value_type> text_size;
     boost::optional<symbolizer_base::value_type> character_spacing;
     boost::optional<symbolizer_base::value_type> line_spacing;
