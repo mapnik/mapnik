@@ -434,18 +434,20 @@ if __name__ == "__main__":
         os.makedirs(visual_output_dir)
 
     reporting = Reporting(quiet, overwrite_failures)
-    for filename in files:
-        config = dict(defaults)
-        config.update(files[filename])
-        for size in config['sizes']:
-            for scale_factor in config['scales']:
-                m = render(filename,
-                           config,
-                           size[0],
-                           size[1],
-                           config.get('bbox'),
-                           scale_factor,
-                           reporting)
-        mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
-
+    try:
+        for filename in files:
+            config = dict(defaults)
+            config.update(files[filename])
+            for size in config['sizes']:
+                for scale_factor in config['scales']:
+                    m = render(filename,
+                               config,
+                               size[0],
+                               size[1],
+                               config.get('bbox'),
+                               scale_factor,
+                               reporting)
+            #mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
+    except KeyboardInterrupt:
+        pass
     sys.exit(reporting.summary())
