@@ -176,8 +176,6 @@ void geojson_datasource::parse_geojson(T & stream)
         if (count == 0)
         {
             extent_ = box;
-            mapnik::feature_kv_iterator f_itr = f->begin();
-            mapnik::feature_kv_iterator f_end = f->end();
             for ( auto const& kv : *f)
             {
                 desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
