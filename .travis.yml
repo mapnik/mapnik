@@ -18,7 +18,9 @@ before_install:
  # more recent boost
  - sudo add-apt-repository -y ppa:boost-latest/ppa
  - sudo apt-get update -y
- - sudo apt-get install -y gcc-4.8 g++-4.8 make boost1.55 libgdal-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
+ # gdal is borked on travis again
+ #- sudo apt-get install -y gcc-4.8 g++-4.8 make boost1.55 libgdal-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
+ - sudo apt-get install -y gcc-4.8 g++-4.8 make boost1.55 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
  - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.32.tar.bz2
  - tar xf harfbuzz-0.9.32.tar.bz2
  - cd harfbuzz-0.9.32
@@ -29,7 +31,7 @@ before_install:
 install:
  - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
  - ./configure CXX="${CXX}" CC="${CC}" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True
- - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=3 make; else JOBS=8 make; fi;
+ - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=3 make; else JOBS=10 make; fi;
 
 before_script:
  - make test
