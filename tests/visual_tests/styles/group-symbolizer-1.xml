@@ -61,6 +61,7 @@ lat,long,nr
   <Style name="center">
     <Rule>
       <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/raster/white-alpha.png"/>
+      <DebugSymbolizer/>
     </Rule>
   </Style>
 
