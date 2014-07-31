@@ -113,15 +113,16 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
-        coord2d center = bbox_.center();
-        agg::trans_affine_translation recenter(-center.x, -center.y);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine tr = recenter * marker_trans_;
         markers_placement_finder<T, Detector> placement_finder(
             placement_method,
             path,
             bbox_,
-            marker_trans_,
+            tr,
             detector_,
             spacing * scale_factor_,
             max_error,
@@ -129,7 +130,7 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            agg::trans_affine matrix = recenter * marker_trans_;
+            agg::trans_affine matrix = tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
             if (snap_to_pixels_)

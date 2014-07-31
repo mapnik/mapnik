@@ -801,11 +801,14 @@ struct markers_dispatch : mapnik::noncopyable
         double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine tr = recenter * marker_trans_;
         markers_placement_finder<T, label_collision_detector4> placement_finder(
             placement_method,
             path,
             bbox_,
-            marker_trans_,
+            tr,
             detector_,
             spacing * scale_factor_,
             max_error,
@@ -813,8 +816,9 @@ struct markers_dispatch : mapnik::noncopyable
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            agg::trans_affine matrix = marker_trans_;
+            agg::trans_affine matrix = tr;
             matrix.rotate(angle);
+            matrix.translate(x, y);
             render_vector_marker(
                 ctx_,
                 pixel_position(x, y),
@@ -823,7 +827,7 @@ struct markers_dispatch : mapnik::noncopyable
                 attributes_,
                 matrix,
                 opacity,
-                true);
+                false);
         }
     }
 
