@@ -50,7 +50,7 @@
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/marker_helpers.hpp>
+#include <mapnik/marker_helpers.hpp> // todo - only need some of this expensive header
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -839,10 +839,10 @@ struct markers_dispatch : mapnik::noncopyable
     cairo_context & ctx_;
 };
 
-template <typename RendererContext, typename ImageMarker, typename Detector>
+template <typename RendererContext, typename Detector>
 struct raster_markers_dispatch : mapnik::noncopyable
 {
-    raster_markers_dispatch(ImageMarker & marker,
+    raster_markers_dispatch(mapnik::image_data_32 & src,
                        agg::trans_affine const& marker_trans,
                        markers_symbolizer const& sym,
                        Detector & detector,
@@ -850,10 +850,9 @@ struct raster_markers_dispatch : mapnik::noncopyable
                        feature_impl const& feature,
                        mapnik::attributes const& vars,
                        RendererContext const& renderer_context)
-        :marker_(marker),
+        : src_(src),
         detector_(detector),
         sym_(sym),
-        bbox_(std::get<1>(renderer_context)),
         marker_trans_(marker_trans),
         scale_factor_(scale_factor),
         feature_(feature),
@@ -869,6 +868,7 @@ struct raster_markers_dispatch : mapnik::noncopyable
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_,  0.2);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_,  false);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_,  false);
+        box2d<double> bbox_(0,0, src_.width(),src_.height());
         markers_placement_finder<T, label_collision_detector4> placement_finder(
             placement_method,
             path,
@@ -881,20 +881,16 @@ struct raster_markers_dispatch : mapnik::noncopyable
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            coord2d center = bbox_.center();
-            agg::trans_affine matrix = agg::trans_affine_translation(
-                -center.x, -center.y);
-            matrix *= marker_trans_;
-            matrix *= agg::trans_affine_rotation(angle);
-            matrix *= agg::trans_affine_translation(x, y);
-            ctx_.add_image(matrix, marker_, opacity);
+            agg::trans_affine matrix = marker_trans_;
+            matrix.rotate(angle);
+            matrix.translate(x, y);
+            ctx_.add_image(matrix, src_, opacity);
         }
     }
 
-    ImageMarker & marker_;
+    image_data_32 & src_;
     Detector & detector_;
     markers_symbolizer const& sym_;
-    box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
     double scale_factor_;
     feature_impl const& feature_;
@@ -914,14 +910,14 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
     context_.set_operator(comp_op);
     box2d<double> clip_box = common_.query_extent_;
 
-    auto renderer_context = std::tie(context_, clip_box);
+    auto renderer_context = std::tie(context_);
 
     using RendererContextType = decltype(renderer_context);
     using vector_dispatch_type = detail::markers_dispatch<RendererContextType,
                                                           svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> >,
                                                           svg_attribute_type,label_collision_detector4>;
 
-    using raster_dispatch_type = detail::raster_markers_dispatch<RendererContextType, mapnik::image_data_32,
+    using raster_dispatch_type = detail::raster_markers_dispatch<RendererContextType,
                                                                  label_collision_detector4>;
 
 
