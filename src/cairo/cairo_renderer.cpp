@@ -58,6 +58,8 @@
 #include <mapnik/group/group_layout_manager.hpp>
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_renderer.hpp>
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
@@ -80,7 +82,6 @@
 #include "agg_conv_smooth_poly1.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
-
 // markers
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
@@ -693,13 +694,23 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     context_.set_operator(comp_op);
 
     boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
-    if (!marker && !(*marker)->is_bitmap()) return;
+    if (!marker || !(*marker)) return;
 
-    cairo_pattern pattern(**((*marker)->get_bitmap_data()));
+    if ((*marker)->is_bitmap())
+    {
+        cairo_pattern pattern(**((*marker)->get_bitmap_data()));
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        context_.set_pattern(pattern);
+    }
+    else
+    {
+        mapnik::rasterizer ras;
+        image_ptr image = render_pattern(ras, **marker);
+        cairo_pattern pattern(*image);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        context_.set_pattern(pattern);
+    }
 
-    pattern.set_extend(CAIRO_EXTEND_REPEAT);
-
-    context_.set_pattern(pattern);
 
     //pattern_alignment_e align = sym.get_alignment();
     //unsigned offset_x=0;
