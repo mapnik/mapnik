@@ -241,11 +241,22 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
         {
             agg::rendering_buffer src_buffer((unsigned char *)src_.getBytes(),src_.width(),src_.height(),src_.width() * 4);
             pixfmt_pre pixf_mask(src_buffer);
-            renb_.blend_from(pixf_mask,
-                             0,
-                             std::floor(marker_tr.tx + .5),
-                             std::floor(marker_tr.ty + .5),
-                             unsigned(255*opacity));
+            if (snap_to_pixels_)
+            {
+                renb_.blend_from(pixf_mask,
+                                 0,
+                                 std::floor(marker_tr.tx + .5),
+                                 std::floor(marker_tr.ty + .5),
+                                 unsigned(255*opacity));
+            }
+            else
+            {
+                renb_.blend_from(pixf_mask,
+                                 0,
+                                 marker_tr.tx,
+                                 marker_tr.ty,
+                                 unsigned(255*opacity));
+            }
         }
         else
         {
