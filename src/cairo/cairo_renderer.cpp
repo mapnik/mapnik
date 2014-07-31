@@ -611,10 +611,6 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     {
         marker = marker_cache::instance().find(filename, true);
     }
-    else
-    {
-        marker.reset(std::make_shared<mapnik::marker>());
-    }
     if (!marker && !(*marker)->is_bitmap()) return;
 
     unsigned width((*marker)->width());
