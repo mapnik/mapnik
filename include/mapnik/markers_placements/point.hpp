@@ -54,9 +54,6 @@ public:
           done_(false)
     {
         rewind();
-
-        coord2d center = size.center();
-        tr_ = agg::trans_affine_translation(-center.x, -center.y) * tr_;
     }
     virtual ~markers_point_placement() {}
 
@@ -103,8 +100,9 @@ public:
         }
 
         angle = 0;
-
-        box2d<double> box = perform_transform(angle, x, y);
+        agg::trans_affine matrix = tr_;
+        matrix.translate(x,y);
+        box2d<double> box = size_ * matrix;
 
         if (!allow_overlap_ && !detector_.has_placement(box))
         {
