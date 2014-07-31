@@ -155,7 +155,7 @@ int main (int argc,char** argv)
                 std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
             }
             // 10 pixel buffer to avoid edge clipping of 100% svg's
-            mapnik::image_32 im(w+10,h+10);
+            mapnik::image_32 im(w+0,h+0);
             agg::rendering_buffer buf(im.raw_data(), im.width(), im.height(), im.width() * 4);
             pixfmt pixf(buf);
             renderer_base renb(pixf);

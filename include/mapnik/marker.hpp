@@ -64,21 +64,14 @@ public:
     }
 
     marker(boost::optional<mapnik::image_ptr> const& data)
-        : bitmap_data_(data)
-    {
-
-    }
+        : bitmap_data_(data) {}
 
     marker(boost::optional<mapnik::svg_path_ptr> const& data)
-        : vector_data_(data)
-    {
-
-    }
+        : vector_data_(data) {}
 
     marker(marker const& rhs)
         : bitmap_data_(rhs.bitmap_data_),
-          vector_data_(rhs.vector_data_)
-    {}
+          vector_data_(rhs.vector_data_) {}
 
     box2d<double> bounding_box() const
     {

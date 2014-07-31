@@ -36,6 +36,7 @@
 #include <mapnik/request.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/renderer_common.hpp>
+#include <mapnik/image_data.hpp>
 // boost
 
 #include <memory>
@@ -180,6 +181,9 @@ private:
     renderer_common common_;
     void setup(Map const& m);
 };
-}
+
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker);
+
+} // namespace mapnik
 
 #endif // MAPNIK_AGG_RENDERER_HPP

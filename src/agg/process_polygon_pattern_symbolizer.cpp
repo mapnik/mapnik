@@ -32,6 +32,9 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_renderer_agg.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -56,25 +59,27 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 {
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
-    if (!marker) return;
+    boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
+    if (!marker_ptr || !(*marker_ptr)) return;
 
     boost::optional<image_ptr> pat;
 
-    if (!(*marker)->is_bitmap())
+    if ((*marker_ptr)->is_bitmap())
     {
-        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
-        return;
+        pat = (*marker_ptr)->get_bitmap_data();
     }
-
-    pat = (*marker)->get_bitmap_data();
+    else
+    {
+        pat = render_pattern(*ras_ptr, **marker_ptr);
+    }
 
     if (!pat) return;
 
     using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
     using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(),
+                              current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
     double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
     gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);

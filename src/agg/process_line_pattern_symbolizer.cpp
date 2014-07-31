@@ -102,16 +102,18 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
-    if (!mark) return;
-
-    if (!(*mark)->is_bitmap())
+    boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
+    if (!marker_ptr || !(*marker_ptr)) return;
+    boost::optional<image_ptr> pat;
+    if ((*marker_ptr)->is_bitmap())
     {
-        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
-        return;
+        boost::optional<image_ptr> pat = (*marker_ptr)->get_bitmap_data();
+    }
+    else
+    {
+        pat = render_pattern(*ras_ptr, **marker_ptr);
     }
 
-    boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
     bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
@@ -139,7 +141,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     if (clip)
     {
         double padding = (double)(common_.query_extent_.width()/pixmap_.width());
-        double half_stroke = (*mark)->width()/2.0;
+        double half_stroke = (*marker_ptr)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         if (std::fabs(offset) > 0)
