@@ -59,13 +59,16 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
     if (!marker) return;
 
+    boost::optional<image_ptr> pat;
+
     if (!(*marker)->is_bitmap())
     {
         MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
         return;
     }
 
-    boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
+    pat = (*marker)->get_bitmap_data();
+
     if (!pat) return;
 
     using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
@@ -83,7 +86,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     }
 
     bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    double opacity = get<double>(sym,keys::stroke_opacity, feature, common_.vars_, 1.0);
+    double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
