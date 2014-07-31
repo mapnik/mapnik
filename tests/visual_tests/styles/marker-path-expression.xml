@@ -22,6 +22,7 @@ x,y,FILENAME,FILETYPE
     <Style name="frame">
         <Rule>
             <PointSymbolizer />
+            <DebugSymbolizer />
         </Rule>
     </Style>
 

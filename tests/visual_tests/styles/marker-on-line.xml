@@ -7,6 +7,7 @@
 <Style name="point-placement" filter-mode="first" >
   <Rule>
     <MarkersSymbolizer placement="point" marker-type="ellipse" fill="blue" />
+    <DebugSymbolizer />
   </Rule>
 </Style>
 <Layer name="carto_tests">
