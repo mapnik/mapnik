@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <FontSet name="book">
+    <Font face-name="DejaVu Sans Book"/>
+  </FontSet>
+
+  <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+<Parameter name="inline">
+lat,long,alignment
+0,0.25,left
+0,0.5,middle
+0,0.75,right
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+    <Style name="My Style">
+    <Rule>
+      <PointSymbolizer/>
+      <!-- Basic test -->
+      <TextSymbolizer fontset-name="book" size="16" placement="point" dx="0" dy="5" horizontal-alignment="[alignment]">[alignment]</TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>
