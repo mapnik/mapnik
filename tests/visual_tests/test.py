@@ -79,6 +79,7 @@ sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
     (499, 100), (500, 100), (501, 100), (502, 100), (505, 100), (510, 100)]
 
 default_text_box = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
+large_text_box = mapnik.Box2d(-0.5, -0.5, 0.5, 0.5)
 
 merc_z1_bboxes = {
   '0,0':mapnik.Box2d(-20037508.342,0,0,20037508.342), # upper left
@@ -142,6 +143,7 @@ files = {
     'formatting-6': {'bbox':default_text_box},
     'formatting-7': {'bbox':default_text_box},
     'formatting-8': {'bbox':default_text_box},
+    'formatting-expr-alignment': {'bbox':large_text_box, 'sizes': [(500, 500)]},
     'expressionformat': {'bbox':default_text_box},
     'shieldsymbolizer-1': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
     'shieldsymbolizer-2': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
