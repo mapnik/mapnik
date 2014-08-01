@@ -1019,7 +1019,8 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
         // offset value
         optional<double> offset = node.get_opt_attr<double>("offset");
         if (offset) put(symbol, keys::offset, *offset);
-
+        // image transform
+        set_symbolizer_property<line_pattern_symbolizer, transform_type>(symbol, keys::image_transform, node);
         rule.append(std::move(symbol));
     }
     catch (config_error const& ex)
