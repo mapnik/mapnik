@@ -612,18 +612,37 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     {
         marker = marker_cache::instance().find(filename, true);
     }
-    if (!marker && !(*marker)->is_bitmap()) return;
+    if (!marker || !(*marker)) return;
 
-    unsigned width((*marker)->width());
-    unsigned height((*marker)->height());
+    unsigned width = (*marker)->width();
+    unsigned height = (*marker)->height();
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
-    cairo_pattern pattern(**((*marker)->get_bitmap_data()));
 
-    pattern.set_extend(CAIRO_EXTEND_REPEAT);
-    pattern.set_filter(CAIRO_FILTER_BILINEAR);
-    context_.set_line_width(height * common_.scale_factor_);
+    std::shared_ptr<cairo_pattern> pattern;
+    image_ptr image = nullptr;
+    if ((*marker)->is_bitmap())
+    {
+        pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()));
+        context_.set_line_width(height* common_.scale_factor_); // FIXME: do we need to scale height here?
+    }
+    else
+    {
+        mapnik::rasterizer ras;
+        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
+        image = render_pattern(ras, **marker, image_tr);
+        pattern = std::make_unique<cairo_pattern>(*image);
+        width = image->width();
+        height = image->height();
+        context_.set_line_width(height);
+    }
+
+    pattern->set_extend(CAIRO_EXTEND_REPEAT);
+    pattern->set_filter(CAIRO_FILTER_BILINEAR);
+
 
     for (std::size_t i = 0; i < feature.num_geometries(); ++i)
     {
@@ -659,9 +678,9 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                     cairo_matrix_translate(&matrix,-offset,0.5*height);
                     cairo_matrix_invert(&matrix);
 
-                    pattern.set_matrix(matrix);
+                    pattern->set_matrix(matrix);
 
-                    context_.set_pattern(pattern);
+                    context_.set_pattern(*pattern);
 
                     context_.move_to(x0, y0);
                     context_.line_to(x, y);
