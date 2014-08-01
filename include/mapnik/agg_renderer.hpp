@@ -182,7 +182,7 @@ private:
     void setup(Map const& m);
 };
 
-std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker);
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker, agg::trans_affine const& tr);
 
 } // namespace mapnik
 

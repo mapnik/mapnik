@@ -70,7 +70,10 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     }
     else
     {
-        pat = render_pattern(*ras_ptr, **marker_ptr);
+        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
+        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr);
     }
 
     if (!pat) return;

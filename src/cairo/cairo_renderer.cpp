@@ -691,6 +691,10 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
 
+    agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+    auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+    if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
+
     context_.set_operator(comp_op);
 
     boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
@@ -705,7 +709,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     else
     {
         mapnik::rasterizer ras;
-        image_ptr image = render_pattern(ras, **marker);
+        image_ptr image = render_pattern(ras, **marker, image_tr);
         cairo_pattern pattern(*image);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
         context_.set_pattern(pattern);
