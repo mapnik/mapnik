@@ -232,6 +232,7 @@ template <> struct enum_traits<e> { \
     } \
 };\
 
+ENUM_FROM_STRING( pattern_alignment_enum )
 ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( line_cap_enum )
 ENUM_FROM_STRING( point_placement_enum )

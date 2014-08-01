@@ -867,7 +867,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
         // ignore-placement
         set_symbolizer_property<point_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
         // point placement
-        set_symbolizer_property<symbolizer_base,point_placement_enum>(sym, keys::point_placement_type, node);
+        set_symbolizer_property<point_symbolizer,point_placement_enum>(sym, keys::point_placement_type, node);
         if (file && !file->empty())
         {
             if(base)
@@ -1043,7 +1043,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
 
         optional<std::string> base = node.get_opt_attr<std::string>("base");
 
-        if(base)
+        if (base)
         {
             std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
             if (itr!=file_sources_.end())
@@ -1054,26 +1054,23 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
 
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
-        polygon_pattern_symbolizer symbol;
-        parse_symbolizer_base(symbol, node);
-        put(symbol, keys::file, parse_path(file));
+        polygon_pattern_symbolizer sym;
 
+        parse_symbolizer_base(sym, node);
+        put(sym, keys::file, parse_path(file));
+
+        // image transform
+        set_symbolizer_property<polygon_pattern_symbolizer, transform_type>(sym, keys::image_transform, node);
         // pattern alignment
-        optional<pattern_alignment_e> p_alignment = node.get_opt_attr<pattern_alignment_e>("alignment");
-        if (p_alignment) put(symbol, keys::alignment, pattern_alignment_enum(*p_alignment));
-
+        set_symbolizer_property<polygon_pattern_symbolizer, pattern_alignment_enum>(sym, keys::alignment, node);
         // opacity
-        set_symbolizer_property<polygon_pattern_symbolizer,double>(symbol, keys::opacity, node);
-
+        set_symbolizer_property<polygon_pattern_symbolizer, double>(sym, keys::opacity, node);
         // gamma
-        optional<double> gamma = node.get_opt_attr<double>("gamma");
-        if (gamma)  put(symbol, keys::gamma, *gamma);
-
+        set_symbolizer_property<polygon_pattern_symbolizer, double>(sym, keys::gamma, node);
         // gamma method
-        optional<gamma_method_e> gamma_method = node.get_opt_attr<gamma_method_e>("gamma-method");
-        if (gamma_method) put(symbol, keys::gamma_method, gamma_method_enum(*gamma_method));
+        set_symbolizer_property<polygon_pattern_symbolizer, gamma_method_enum>(sym, keys::gamma_method, node);
 
-        rule.append(std::move(symbol));
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
