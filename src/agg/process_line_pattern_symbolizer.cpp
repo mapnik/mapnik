@@ -107,7 +107,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat;
     if ((*marker_ptr)->is_bitmap())
     {
-        boost::optional<image_ptr> pat = (*marker_ptr)->get_bitmap_data();
+        pat = (*marker_ptr)->get_bitmap_data();
     }
     else
     {
