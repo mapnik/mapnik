@@ -17,7 +17,7 @@ wkt,name1,ref1,name2,ref2
   <Style name="alpha">
     <Rule>
       <LineSymbolizer stroke-width="0.2" stroke="#ff0000"/>
-      <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" minimum-distance="50" spacing="100" repeat-key="[name%]+'-'+[ref%]">
+      <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" repeat-distance="50" spacing="100" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
           <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="16" placement="point">
@@ -43,7 +43,7 @@ wkt,name1,ref1,name2,ref2
   <Style name="beta">
     <Rule>
       <LineSymbolizer stroke-width="0.2" stroke="#ff0000"/>
-      <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" minimum-distance="40" spacing="80" repeat-key="[name%]+'-'+[ref%]">
+      <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" repeat-distance="40" spacing="80" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
           <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="16" placement="point">
@@ -69,7 +69,7 @@ wkt,name1,ref1,name2,ref2
   <Style name="gamma">
     <Rule>
       <LineSymbolizer stroke-width="0.2" stroke="#ff0000"/>
-      <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" minimum-distance="30" spacing="60" repeat-key="[name%]+'-'+[ref%]">
+      <GroupSymbolizer start-column="1" num-columns="2" placement="line" avoid-edges="false" repeat-distance="30" spacing="60" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
           <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book" size="16" placement="point">

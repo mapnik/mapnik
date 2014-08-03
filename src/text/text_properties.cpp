@@ -44,6 +44,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       label_spacing(0.0),
       label_position_tolerance(0.0),
       avoid_edges(false),
+      repeat_distance(0.0),
       minimum_distance(0.0),
       minimum_padding(0.0),
       minimum_path_length(0.0),
@@ -62,6 +63,7 @@ void text_symbolizer_properties::evaluate_text_properties(feature_impl const& fe
     label_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
     label_position_tolerance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
     avoid_edges = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
+    repeat_distance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.repeat_distance);
     minimum_distance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
     minimum_padding = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
     minimum_path_length = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
@@ -117,6 +119,7 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
     set_property_from_xml<label_placement_e>(expressions.label_placement, "placement", node);
     set_property_from_xml<value_double>(expressions.label_spacing, "spacing", node);
     set_property_from_xml<value_double>(expressions.label_position_tolerance, "label-position-tolerance", node);
+    set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
     set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
     set_property_from_xml<value_double>(expressions.minimum_padding, "minimum-padding", node);
     set_property_from_xml<value_double>(expressions.minimum_path_length, "minimum-path-length", node);
@@ -158,6 +161,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (!(expressions.label_spacing == dfl.expressions.label_spacing) || explicit_defaults)
     {
         serialize_property("spacing", expressions.label_spacing, node);
+    }
+    if (!(expressions.repeat_distance == dfl.expressions.repeat_distance) || explicit_defaults)
+    {
+        serialize_property("repeat-distance", expressions.repeat_distance, node);
     }
     if (!(expressions.minimum_distance == dfl.expressions.minimum_distance) || explicit_defaults)
     {

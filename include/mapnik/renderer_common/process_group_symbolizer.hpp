@@ -297,38 +297,28 @@ void render_group_symbolizer(group_symbolizer const& sym,
                                    common.scale_factor_, common.t_,
                                    *common.detector_, clipping_extent);
 
-    // determine if we should be tracking repeat distance
-    bool check_repeat = (helper.get_properties().minimum_distance > 0);
-
     for (size_t i = 0; i < matches.size(); ++i)
     {
-        if (check_repeat)
+        group_rule_ptr match_rule = matches[i].first;
+        feature_ptr match_feature = matches[i].second;
+        value_unicode_string rpt_key_value = "";
+
+        // get repeat key from matched group rule
+        expression_ptr rpt_key_expr = match_rule->get_repeat_key();
+
+        // if no repeat key was defined, use default from group symbolizer
+        if (!rpt_key_expr)
         {
-            group_rule_ptr match_rule = matches[i].first;
-            feature_ptr match_feature = matches[i].second;
-            value_unicode_string rpt_key_value = "";
-
-            // get repeat key from matched group rule
-            expression_ptr rpt_key_expr = match_rule->get_repeat_key();
-
-            // if no repeat key was defined, use default from group symbolizer
-            if (!rpt_key_expr)
-            {
-                rpt_key_expr = get<expression_ptr>(sym, keys::repeat_key);
-            }
-
-            // evalute the repeat key with the matched sub feature if we have one
-            if (rpt_key_expr)
-            {
-                rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),
-                                                     *rpt_key_expr).to_unicode();
-            }
-            helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
+            rpt_key_expr = get<expression_ptr>(sym, keys::repeat_key);
         }
-        else
+
+        // evalute the repeat key with the matched sub feature if we have one
+        if (rpt_key_expr)
         {
-            helper.add_box_element(layout_manager.offset_box_at(i));
+            rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),
+                                                 *rpt_key_expr).to_unicode();
         }
+        helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
     }
 
     pixel_position_list positions = helper.get();
