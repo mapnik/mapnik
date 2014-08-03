@@ -3,8 +3,8 @@
 
 import sys
 import mapnik
-mapnik.logger.set_severity(mapnik.severity_type.None)
-#mapnik.logger.set_severity(mapnik.severity_type.Debug)
+#mapnik.logger.set_severity(mapnik.severity_type.None)
+mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
 import sys
 import os.path
@@ -159,6 +159,8 @@ files = {
     'rtl-point': {'sizes': [(200, 200)],'bbox':default_text_box},
     'jalign-auto': {'sizes': [(200, 200)],'bbox':default_text_box},
     'line-offset': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
+    'repeat-labels-1': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
+    'repeat-labels-2': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
     'text-bug1532': {'sizes': [(600, 165)]},
     'text-bug1533': {'sizes': [(600, 600)]},
     'text-bug1820-1': {'sizes': [(600, 300)], 'bbox': default_text_box},
