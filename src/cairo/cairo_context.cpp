@@ -179,6 +179,9 @@ void cairo_context::set_operator(composite_mode_e comp_op)
     case saturation:
     case _color:
     case _value:
+    case linear_dodge:
+    case linear_burn:
+    case divide:
         //case colorize_alpha:
         break;
     }
