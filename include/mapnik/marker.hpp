@@ -24,23 +24,20 @@
 #define MAPNIK_MARKER_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // agg
-#include "agg_path_storage.h"
+#include "agg_array.h"
 
 // boost
-#include <boost/unordered_map.hpp>
 #include <boost/optional.hpp>
 
 // stl
 #include <memory>
-#include <cstring>
 
 namespace mapnik
 {
