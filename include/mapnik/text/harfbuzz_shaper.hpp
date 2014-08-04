@@ -101,12 +101,16 @@ static void shape_text(text_line & line,
             {
                 glyph_info tmp;
                 tmp.glyph_index = glyphs[i].codepoint;
+
+                // cache will overwrite tmp if codepoint is found 
+                // in cache, so call this first
                 face->glyph_dimensions(tmp);
 
                 tmp.char_index = glyphs[i].cluster;
                 tmp.face = face;
                 tmp.format = text_item.format;
                 tmp.scale_multiplier = size / face->get_face()->units_per_EM;
+
                 //Overwrite default advance with better value provided by HarfBuzz
                 tmp.unscaled_advance = positions[i].x_advance;
 

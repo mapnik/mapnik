@@ -44,10 +44,14 @@ extern "C"
 namespace mapnik
 {
 
+typedef std::map<glyph_index_t, glyph_info> glyph_cache_type;
+typedef std::shared_ptr<glyph_cache_type> glyph_cache_ptr;
+
 class font_face : mapnik::noncopyable
 {
 public:
     font_face(FT_Face face);
+    font_face(FT_Face face, glyph_cache_ptr glyphs);
 
     std::string family_name() const
     {
@@ -75,11 +79,14 @@ public:
 
 private:
     FT_Face face_;
-    mutable std::map<glyph_index_t, glyph_info> dimension_cache_;
+    mutable glyph_cache_ptr glyphs_;
     mutable double char_height_;
 };
 using face_ptr = std::shared_ptr<font_face>;
 
+inline bool operator==(face_ptr const& lhs, face_ptr const& rhs) {
+    return lhs->get_face() == rhs->get_face();
+}
 
 class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {

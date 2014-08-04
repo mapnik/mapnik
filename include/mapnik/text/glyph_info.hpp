@@ -71,6 +71,10 @@ struct glyph_info
     double line_height() const { return unscaled_line_height * scale_multiplier; };
 };
 
+inline bool operator<(glyph_info const& lhs, glyph_info const& rhs) {
+    return lhs.glyph_index < rhs.glyph_index;
+}
+
 } //ns mapnik
 
 #endif // GLYPH_INFO_HPP

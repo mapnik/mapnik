@@ -32,7 +32,16 @@ namespace mapnik
 {
 
 font_face::font_face(FT_Face face)
-    : face_(face), dimension_cache_(), char_height_(0.0)
+    : face_(face),
+      glyphs_(std::make_shared<glyph_cache_type>()),
+      char_height_(0.0)
+{
+}
+
+font_face::font_face(FT_Face face, glyph_cache_ptr glyphs)
+    : face_(face),
+      glyphs_(glyphs),
+      char_height_(0.0)
 {
 }
 
@@ -61,14 +70,12 @@ bool font_face::set_unscaled_character_sizes()
 
 void font_face::glyph_dimensions(glyph_info & glyph) const
 {
-    //TODO
-    //Check if char is already in cache
-//    std::map<glyph_index_t, glyph_info>::const_iterator itr;
-//    itr = dimension_cache_.find(glyph.glyph_index);
-//    if (itr != dimension_cache_.end()) {
-//        glyph = itr->second;
-//        return;
-//    }
+    // Check if char is already in cache
+    auto const& itr = glyphs_->find(glyph.glyph_index);
+    if (itr != glyphs_.get()->cend()) {
+        glyph = itr->second;
+        return;
+    }
 
     FT_Vector pen;
     pen.x = 0;
@@ -97,7 +104,7 @@ void font_face::glyph_dimensions(glyph_info & glyph) const
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
 
-//TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
+    glyphs_.get()->emplace(glyph.glyph_index, glyph);
 }
 
 font_face::~font_face()
