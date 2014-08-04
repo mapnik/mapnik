@@ -19,9 +19,9 @@ before_install:
  - sudo add-apt-repository -y ppa:boost-latest/ppa
  - sudo apt-get update -y
  - sudo apt-get install -y gcc-4.8 g++-4.8 make boost1.55 libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
- - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.32.tar.bz2
- - tar xf harfbuzz-0.9.32.tar.bz2
- - cd harfbuzz-0.9.32
+ - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
+ - tar xf harfbuzz-0.9.34.tar.bz2
+ - cd harfbuzz-0.9.34
  - ./configure --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make && sudo make install
  - sudo ldconfig
  - cd ../
