@@ -19,6 +19,8 @@ before_install:
  - sudo add-apt-repository -y ppa:boost-latest/ppa
  - sudo apt-get update -y
  - sudo apt-get install -y gcc-4.8 g++-4.8 make boost1.55 libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
+ - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
+ - if [[ "${CXX}" == 'clang++' ]]; then echo `which clang`; echo `which clang++`; fi;
  - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
  - tar xf harfbuzz-0.9.34.tar.bz2
  - cd harfbuzz-0.9.34
@@ -27,7 +29,6 @@ before_install:
  - cd ../
 
 install:
- - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
  - ./configure CXX="${CXX}" CC="${CC}" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True
  - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=3 make; else JOBS=10 make; fi;
 
