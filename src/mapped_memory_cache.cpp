@@ -56,7 +56,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    using iterator_type = boost::unordered_map<std::string, mapped_region_ptr>::const_iterator;
+    using iterator_type = std::unordered_map<std::string, mapped_region_ptr>::const_iterator;
     boost::optional<mapped_region_ptr> result;
     iterator_type itr = cache_.find(uri);
     if (itr != cache_.end())
