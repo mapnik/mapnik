@@ -32,13 +32,13 @@ class span_image_resample_rgba_affine :
         public span_image_resample_affine<Source>
 {
 public:
-    typedef Source source_type;
-    typedef typename source_type::color_type color_type;
-    typedef typename source_type::order_type order_type;
-    typedef span_image_resample_affine<source_type> base_type;
-    typedef typename base_type::interpolator_type interpolator_type;
-    typedef typename color_type::value_type value_type;
-    typedef typename color_type::long_type long_type;
+    using source_type = Source;
+    using color_type = typename source_type::color_type;
+    using order_type = typename source_type::order_type;
+    using base_type = span_image_resample_affine<source_type>;
+    using interpolator_type = typename base_type::interpolator_type;
+    using value_type = typename color_type::value_type;
+    using long_type = typename color_type::long_type;
     enum base_scale_e
     {
         base_shift      = color_type::base_shift,

@@ -31,16 +31,16 @@ namespace mapnik
 //==================================================================gray16
 struct gray16
 {
-    typedef agg::int16u value_type;
-    typedef agg::int32u calc_type;
-    typedef agg::int64  long_type;
+    using value_type = agg::int16u;
+    using calc_type = agg::int32u;
+    using long_type = agg::int64 ;
     enum base_scale_e
     {
         base_shift = 16,
         base_scale = 1 << base_shift,
         base_mask  = base_scale - 1
     };
-    typedef gray16 self_type;
+    using self_type = gray16;
 
     value_type v;
     value_type a;
@@ -168,9 +168,9 @@ struct gray16
 //==================================================================gray32
 struct gray32
 {
-    typedef agg::int32 value_type;
-    typedef agg::int64u calc_type;
-    typedef agg::int64  long_type;
+    using value_type = agg::int32;
+    using calc_type = agg::int64u;
+    using long_type = agg::int64 ;
     // NOTE: don't touch this enum since enums cannot be
     // 64 bit and we need to ensure that alpha = base_mask
     // in grid_pixfmt.hpp#blend_hiline#l256
@@ -182,7 +182,7 @@ struct gray32
         base_scale = 1 << base_shift,
         base_mask  = base_scale - 1
     };
-    typedef gray32 self_type;
+    using self_type = gray32;
 
     value_type v;
     value_type a;
@@ -310,9 +310,9 @@ struct gray32
 //==================================================================gray64
 struct gray64
 {
-    typedef agg::int64 value_type;
-    typedef agg::int64u calc_type;
-    typedef agg::int64  long_type;
+    using value_type = agg::int64;
+    using calc_type = agg::int64u;
+    using long_type = agg::int64 ;
     // NOTE: don't touch this enum since enums cannot be
     // 64 bit and we need to ensure that alpha = base_mask
     // in grid_pixfmt.hpp#blend_hiline#l256
@@ -324,7 +324,7 @@ struct gray64
         base_scale = 1 << base_shift,
         base_mask  = base_scale - 1
     };
-    typedef gray64 self_type;
+    using self_type = gray64;
 
     value_type v;
     value_type a;

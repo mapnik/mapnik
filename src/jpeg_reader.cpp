@@ -46,8 +46,8 @@ template <typename T>
 class jpeg_reader : public image_reader
 {
 public:
-    typedef T source_type;
-    typedef boost::iostreams::stream<source_type> input_stream;
+    using source_type = T;
+    using input_stream = boost::iostreams::stream<source_type>;
     const static unsigned BUF_SIZE = 4096;
 private:
     struct jpeg_stream_wrapper

@@ -22,7 +22,6 @@
 
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/transform_expression_grammar.hpp>
-#include <mapnik/transform_processor.hpp>
 
 // stl
 #include <string>

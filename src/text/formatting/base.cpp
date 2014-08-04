@@ -27,46 +27,30 @@
 #include <mapnik/text/formatting/registry.hpp>
 #include <mapnik/xml_node.hpp>
 
-// boost
-#include <boost/property_tree/ptree.hpp>
+namespace mapnik { namespace formatting {
 
-// stl
-#include <stdexcept>
-
-namespace mapnik {
-namespace formatting {
-
-void node::to_xml(boost::property_tree::ptree & /*xml*/) const
+node_ptr node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
-    throw std::runtime_error("Trying to write unsupported node type to XML");
-}
-
-node_ptr node::from_xml(xml_node const& xml)
-{
-    list_node *list = new list_node();
-    node_ptr list_ptr(list);
-    xml_node::const_iterator itr = xml.begin();
-    xml_node::const_iterator end = xml.end();
-    for (; itr != end; ++itr) {
-        if (itr->name() == "Placement")
-        {
+    auto list = std::make_shared<list_node>();
+    for (auto const& node : xml)
+    {
+        if (node.name() == "Placement")
             continue;
-        }
-        node_ptr n = registry::instance().from_xml(*itr);
+        node_ptr n = registry::instance().from_xml(node,fontsets);
         if (n) list->push_back(n);
     }
-    if (list->get_children().size() == 1) {
+    if (list->get_children().size() == 1)
+    {
         return list->get_children()[0];
-    } else if (list->get_children().size() > 1) {
-        return list_ptr;
-    } else {
-        return node_ptr();
     }
-}
-
-void node::add_expressions(expression_set & /*output*/) const
-{
-    //Do nothing by default
+    else if (list->get_children().size() > 1)
+    {
+        return list;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 } //ns formatting

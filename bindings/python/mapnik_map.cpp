@@ -115,15 +115,15 @@ void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> >
 
 struct extract_style
 {
-    typedef boost::python::tuple result_type;
+    using result_type = boost::python::tuple;
     result_type operator() (std::map<std::string, mapnik::feature_type_style>::value_type const& val) const
     {
         return boost::python::make_tuple(val.first,val.second);
     }
 };
 
-typedef boost::transform_iterator<extract_style, Map::const_style_iterator> style_extract_iterator;
-typedef std::pair<style_extract_iterator,style_extract_iterator> style_range;
+using style_extract_iterator = boost::transform_iterator<extract_style, Map::const_style_iterator>;
+using style_range = std::pair<style_extract_iterator,style_extract_iterator>;
 
 style_range _styles_ (mapnik::Map const& m)
 {

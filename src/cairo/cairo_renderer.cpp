@@ -50,7 +50,7 @@
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/marker_helpers.hpp>
+#include <mapnik/marker_helpers.hpp> // todo - only need some of this expensive header
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -58,6 +58,8 @@
 #include <mapnik/group/group_layout_manager.hpp>
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_renderer.hpp>
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
@@ -80,7 +82,6 @@
 #include "agg_conv_smooth_poly1.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
-
 // markers
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
@@ -276,10 +277,10 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
-    typedef vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
-                             CoordTransform, proj_transform, agg::trans_affine,
-                             conv_types, feature_impl> vertex_converter_type;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type = vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
+                                                   CoordTransform, proj_transform, agg::trans_affine,
+                                                   conv_types, feature_impl>;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -299,7 +300,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    using path_type = coord_transform<CoordTransform,geometry_type>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     mapnik::color fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
@@ -337,14 +338,14 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               affine_transform_tag,
-                               simplify_tag, smooth_tag,
-                               offset_transform_tag,
-                               dash_tag, stroke_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag, smooth_tag,
+                                          offset_transform_tag,
+                                          dash_tag, stroke_tag>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
     double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
@@ -353,7 +354,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     double stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
     line_join_enum stroke_join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, common_.vars_, MITER_JOIN);
     line_cap_enum stroke_cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, common_.vars_, BUTT_CAP);
-    auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
+    auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray, feature, common_.vars_);
     double miterlimit = get<double>(sym, keys::stroke_miterlimit, feature, common_.vars_, 4.0);
     double width = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
 
@@ -560,7 +561,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
     render_point_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](pixel_position const& pos, marker const& marker,
+        [this](pixel_position const& pos, marker const& marker,
             agg::trans_affine const& tr, double opacity) {
             render_marker(pos, marker, tr, opacity);
         });
@@ -600,8 +601,8 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+    using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -611,22 +612,37 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     {
         marker = marker_cache::instance().find(filename, true);
     }
-    else
-    {
-        marker.reset(std::make_shared<mapnik::marker>());
-    }
-    if (!marker && !(*marker)->is_bitmap()) return;
+    if (!marker || !(*marker)) return;
 
-    unsigned width((*marker)->width());
-    unsigned height((*marker)->height());
+    unsigned width = (*marker)->width();
+    unsigned height = (*marker)->height();
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
-    cairo_pattern pattern(**((*marker)->get_bitmap_data()));
 
-    pattern.set_extend(CAIRO_EXTEND_REPEAT);
-    pattern.set_filter(CAIRO_FILTER_BILINEAR);
-    context_.set_line_width(height * common_.scale_factor_);
+    std::shared_ptr<cairo_pattern> pattern;
+    image_ptr image = nullptr;
+    if ((*marker)->is_bitmap())
+    {
+        pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()));
+        context_.set_line_width(height* common_.scale_factor_); // FIXME: do we need to scale height here?
+    }
+    else
+    {
+        mapnik::rasterizer ras;
+        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
+        image = render_pattern(ras, **marker, image_tr);
+        pattern = std::make_unique<cairo_pattern>(*image);
+        width = image->width();
+        height = image->height();
+        context_.set_line_width(height);
+    }
+
+    pattern->set_extend(CAIRO_EXTEND_REPEAT);
+    pattern->set_filter(CAIRO_FILTER_BILINEAR);
+
 
     for (std::size_t i = 0; i < feature.num_geometries(); ++i)
     {
@@ -662,9 +678,9 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                     cairo_matrix_translate(&matrix,-offset,0.5*height);
                     cairo_matrix_invert(&matrix);
 
-                    pattern.set_matrix(matrix);
+                    pattern->set_matrix(matrix);
 
-                    context_.set_pattern(pattern);
+                    context_.set_pattern(*pattern);
 
                     context_.move_to(x0, y0);
                     context_.line_to(x, y);
@@ -684,28 +700,42 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    //typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    //typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    //using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
+    //using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
+
+    agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+    auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+    if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
 
     context_.set_operator(comp_op);
 
     boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
-    if (!marker && !(*marker)->is_bitmap()) return;
+    if (!marker || !(*marker)) return;
 
-    cairo_pattern pattern(**((*marker)->get_bitmap_data()));
+    if ((*marker)->is_bitmap())
+    {
+        cairo_pattern pattern(**((*marker)->get_bitmap_data()));
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        context_.set_pattern(pattern);
+    }
+    else
+    {
+        mapnik::rasterizer ras;
+        image_ptr image = render_pattern(ras, **marker, image_tr);
+        cairo_pattern pattern(*image);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        context_.set_pattern(pattern);
+    }
 
-    pattern.set_extend(CAIRO_EXTEND_REPEAT);
 
-    context_.set_pattern(pattern);
-
-    //pattern_alignment_e align = sym.get_alignment();
+    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
     //unsigned offset_x=0;
     //unsigned offset_y=0;
 
@@ -728,7 +758,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
@@ -798,62 +828,40 @@ struct markers_dispatch : mapnik::noncopyable
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
+        marker_placement_enum placement_method = get<marker_placement_enum>(
+            sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-
-        if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == geometry_type::types::Point)
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine tr = recenter * marker_trans_;
+        markers_placement_finder<T, label_collision_detector4> placement_finder(
+            placement_method,
+            path,
+            bbox_,
+            tr,
+            detector_,
+            spacing * scale_factor_,
+            max_error,
+            allow_overlap);
+        double x, y, angle = .0;
+        while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            double x = 0;
-            double y = 0;
-            if (path.type() == geometry_type::types::LineString)
-            {
-                if (!label::middle_point(path, x, y)) return;
-            }
-            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
-            {
-                if (!label::interior_position(path, x, y)) return;
-            }
-            else
-            {
-                if (!label::centroid(path, x, y)) return;
-            }
-            coord2d center = bbox_.center();
-            agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
-            matrix *= marker_trans_;
-            matrix *=agg::trans_affine_translation(x, y);
-
-            box2d<double> transformed_bbox = bbox_ * matrix;
-
-            if (allow_overlap ||
-                detector_.has_placement(transformed_bbox))
-            {
-                render_vector_marker(ctx_, pixel_position(x,y), marker_, bbox_, attributes_, marker_trans_, opacity, true);
-
-                if (!ignore_placement)
-                {
-                    detector_.insert(transformed_bbox);
-                }
-            }
-        }
-        else
-        {
-            markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
-                                                                      spacing * scale_factor_,
-                                                                      max_error,
-                                                                      allow_overlap);
-            double x, y, angle;
-            while (placement.get_point(x, y, angle, ignore_placement))
-            {
-                agg::trans_affine matrix = marker_trans_;
-                matrix.rotate(angle);
-                render_vector_marker(ctx_, pixel_position(x,y), marker_, bbox_, attributes_, matrix, opacity, true);
-
-            }
+            agg::trans_affine matrix = tr;
+            matrix.rotate(angle);
+            matrix.translate(x, y);
+            render_vector_marker(
+                ctx_,
+                pixel_position(x, y),
+                marker_,
+                bbox_,
+                attributes_,
+                matrix,
+                opacity,
+                false);
         }
     }
 
@@ -869,10 +877,10 @@ struct markers_dispatch : mapnik::noncopyable
     cairo_context & ctx_;
 };
 
-template <typename RendererContext, typename ImageMarker, typename Detector>
+template <typename RendererContext, typename Detector>
 struct raster_markers_dispatch : mapnik::noncopyable
 {
-    raster_markers_dispatch(ImageMarker & marker,
+    raster_markers_dispatch(mapnik::image_data_32 & src,
                        agg::trans_affine const& marker_trans,
                        markers_symbolizer const& sym,
                        Detector & detector,
@@ -880,10 +888,9 @@ struct raster_markers_dispatch : mapnik::noncopyable
                        feature_impl const& feature,
                        mapnik::attributes const& vars,
                        RendererContext const& renderer_context)
-        :marker_(marker),
+        : src_(src),
         detector_(detector),
         sym_(sym),
-        bbox_(std::get<1>(renderer_context)),
         marker_trans_(marker_trans),
         scale_factor_(scale_factor),
         feature_(feature),
@@ -899,67 +906,29 @@ struct raster_markers_dispatch : mapnik::noncopyable
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_,  0.2);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_,  false);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_,  false);
-
-        if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == geometry_type::types::Point)
+        box2d<double> bbox_(0,0, src_.width(),src_.height());
+        markers_placement_finder<T, label_collision_detector4> placement_finder(
+            placement_method,
+            path,
+            bbox_,
+            marker_trans_,
+            detector_,
+            spacing * scale_factor_,
+            max_error,
+            allow_overlap);
+        double x, y, angle = .0;
+        while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            double x = 0;
-            double y = 0;
-            if (path.type() == geometry_type::types::LineString)
-            {
-                if (!label::middle_point(path, x, y))
-                    return;
-            }
-            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
-            {
-                if (!label::interior_position(path, x, y))
-                    return;
-            }
-            else
-            {
-                if (!label::centroid(path, x, y))
-                    return;
-            }
-            coord2d center = bbox_.center();
-            agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
-            matrix *= marker_trans_;
-            matrix *=agg::trans_affine_translation(x, y);
-
-            box2d<double> transformed_bbox = bbox_ * matrix;
-
-            if (allow_overlap ||
-                detector_.has_placement(transformed_bbox))
-            {
-                ctx_.add_image(matrix, marker_, opacity);
-                if (!ignore_placement)
-                {
-                    detector_.insert(transformed_bbox);
-                }
-            }
-        }
-        else
-        {
-            markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
-                                                                      spacing * scale_factor_,
-                                                                      max_error,
-                                                                      allow_overlap);
-            double x, y, angle;
-            while (placement.get_point(x, y, angle, ignore_placement))
-            {
-                coord2d center = bbox_.center();
-                agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
-                matrix *= marker_trans_;
-                matrix *= agg::trans_affine_rotation(angle);
-                matrix *= agg::trans_affine_translation(x, y);
-                ctx_.add_image(matrix, marker_, opacity);
-            }
+            agg::trans_affine matrix = marker_trans_;
+            matrix.rotate(angle);
+            matrix.translate(x, y);
+            ctx_.add_image(matrix, src_, opacity);
         }
     }
 
-    ImageMarker & marker_;
+    image_data_32 & src_;
     Detector & detector_;
     markers_symbolizer const& sym_;
-    box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
     double scale_factor_;
     feature_impl const& feature_;
@@ -972,20 +941,22 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::pod_bvector<svg::path_attributes> svg_attribute_type;
+    using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     context_.set_operator(comp_op);
     box2d<double> clip_box = common_.query_extent_;
 
-    auto renderer_context = std::tie(context_, clip_box);
+    auto renderer_context = std::tie(context_);
 
-    typedef decltype(renderer_context) RendererContextType;
-    typedef detail::markers_dispatch<RendererContextType, svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> > , svg_attribute_type,
-                                     label_collision_detector4> vector_dispatch_type;
-    typedef detail::raster_markers_dispatch<RendererContextType, mapnik::image_data_32,
-                                       label_collision_detector4> raster_dispatch_type;
+    using RendererContextType = decltype(renderer_context);
+    using vector_dispatch_type = detail::markers_dispatch<RendererContextType,
+                                                          svg::path_adapter<svg::vertex_stl_adapter<svg::svg_path_storage> >,
+                                                          svg_attribute_type,label_collision_detector4>;
+
+    using raster_dispatch_type = detail::raster_markers_dispatch<RendererContextType,
+                                                                 label_collision_detector4>;
 
 
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
@@ -1025,7 +996,7 @@ namespace {
  */
 struct thunk_renderer : public boost::static_visitor<>
 {
-    typedef cairo_renderer_base renderer_type;
+    using renderer_type = cairo_renderer_base;
 
     thunk_renderer(renderer_type &ren,
                    cairo_context &context,
@@ -1120,7 +1091,7 @@ void cairo_renderer_base::process(debug_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef label_collision_detector4 detector_type;
+    using detector_type = label_collision_detector4;
     cairo_save_restore guard(context_);
 
     debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);

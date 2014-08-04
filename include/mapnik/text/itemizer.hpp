@@ -24,7 +24,7 @@
 #define MAPNIK_TEXT_ITEMIZER_HPP
 
 //mapnik
-#include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/value_types.hpp>
 
 // stl
@@ -39,57 +39,50 @@
 namespace mapnik
 {
 
-
 struct text_item
 {
-    /** First char (UTF16 offset) */
-    unsigned start;
-    /** Char _after_ the last char (UTF16 offset) */
-    unsigned end;
-    UScriptCode script;
-    char_properties_ptr format;
-    UBiDiDirection rtl;
-    text_item() :
-        start(0), end(0), script(), format(), rtl(UBIDI_LTR)
-    {
-
-    }
+    // First char (UTF16 offset)
+    unsigned start = 0u;
+    // Char _after_ the last char (UTF16 offset)
+    unsigned end = 0u;
+    UScriptCode script = USCRIPT_INVALID_CODE;
+    UBiDiDirection rtl = UBIDI_LTR;
+    evaluated_format_properties_ptr format;
 };
 
-/** This class splits text into parts which all have the same
- * - direction (LTR, RTL)
- * - format
- * - script (http://en.wikipedia.org/wiki/Scripts_in_Unicode)
- **/
+// This class splits text into parts which all have the same
+// - direction (LTR, RTL)
+// - format
+// - script (http://en.wikipedia.org/wiki/Scripts_in_Unicode)
+
 class text_itemizer
 {
 public:
     text_itemizer();
-    void add_text(mapnik::value_unicode_string str, char_properties_ptr format);
+    void add_text(value_unicode_string const& str, evaluated_format_properties_ptr format);
     std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
     void clear();
-    mapnik::value_unicode_string const& text() const { return text_; }
-    /** Returns the start and end position of a certain line.
-     *
-     * Only forced line breaks with \n characters are handled here.
-     */
+    value_unicode_string const& text() const { return text_; }
+    // Returns the start and end position of a certain line.
+    // Only forced line breaks with \n characters are handled here.
     std::pair<unsigned, unsigned> line(unsigned i) const;
     unsigned num_lines() const;
 private:
     template<typename T> struct run
     {
-        run(T data, unsigned start, unsigned end) :  start(start), end(end), data(data){}
+        run(T const& data, unsigned start, unsigned end)
+            :  start(start), end(end), data(data){}
         unsigned start;
         unsigned end;
         T data;
     };
-    typedef run<char_properties_ptr> format_run_t;
-    typedef run<UBiDiDirection> direction_run_t;
-    typedef run<UScriptCode> script_run_t;
-    typedef std::list<format_run_t> format_run_list;
-    typedef std::list<script_run_t> script_run_list;
-    typedef std::list<direction_run_t> direction_run_list;
-    mapnik::value_unicode_string text_;
+    using format_run_t = run<evaluated_format_properties_ptr>;
+    using direction_run_t = run<UBiDiDirection>;
+    using script_run_t = run<UScriptCode>;
+    using format_run_list = std::list<format_run_t>;
+    using script_run_list = std::list<script_run_t>;
+    using direction_run_list = std::list<direction_run_t>;
+    value_unicode_string text_;
     /// Format runs are always sorted by char index
     format_run_list format_runs_;
     /// Directions runs are always in visual order! This is different from

@@ -137,21 +137,15 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt, double tol) 
 {
     filter_at_point filter(pt);
     // collect all attribute names
-    std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
-    std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
-    std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
     std::set<std::string> names;
-
-    while (itr != end)
+    for (auto const& elem : desc_.get_descriptors())
     {
-        names.insert(itr->get_name());
-        ++itr;
+        names.insert(elem.get_name());
     }
-
     return std::make_shared<osm_featureset<filter_at_point> >(filter,
-                                                                osm_data_,
-                                                                names,
-                                                                desc_.get_encoding());
+                                                              osm_data_,
+                                                              names,
+                                                              desc_.get_encoding());
 }
 
 box2d<double> osm_datasource::envelope() const

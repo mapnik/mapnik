@@ -311,13 +311,13 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
                                     double opacity,
                                     composite_mode_e comp_op)
 {
-    typedef agg::rgba8 color_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
-    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
-    typedef agg::pod_bvector<mapnik::svg::path_attributes> svg_attribute_type;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+    using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
+    using svg_attribute_type = agg::pod_bvector<mapnik::svg::path_attributes>;
 
     ras_ptr->reset();
     if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
@@ -350,10 +350,10 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_agg<svg_path_adapter,
-            svg_attribute_type,
-            renderer_type,
-            pixfmt_comp_type> svg_renderer(svg_path,
-                                                   (*marker.get_vector_data())->attributes());
+                         svg_attribute_type,
+                         renderer_type,
+                         pixfmt_comp_type> svg_renderer(svg_path,
+                                                        (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
     }
@@ -410,13 +410,13 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
                                              src.height(),
                                              src.width()*4);
             agg::pixfmt_rgba32_pre marker_pixf(marker_buf);
-            typedef agg::image_accessor_clone<agg::pixfmt_rgba32_pre> img_accessor_type;
-            typedef agg::span_interpolator_linear<agg::trans_affine> interpolator_type;
-            typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
-                                                    interpolator_type> span_gen_type;
-            typedef agg::renderer_scanline_aa_alpha<renderer_base,
-                        agg::span_allocator<agg::rgba8>,
-                        span_gen_type> renderer_type;
+            using img_accessor_type = agg::image_accessor_clone<agg::pixfmt_rgba32_pre>;
+            using interpolator_type = agg::span_interpolator_linear<agg::trans_affine>;
+            using span_gen_type = agg::span_image_filter_rgba_2x2<img_accessor_type,
+                                                                  interpolator_type>;
+            using renderer_type = agg::renderer_scanline_aa_alpha<renderer_base,
+                                                                  agg::span_allocator<agg::rgba8>,
+                                                                  span_gen_type>;
             img_accessor_type ia(marker_pixf);
             interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
             span_gen_type sg(ia, interpolator, filter);
@@ -447,9 +447,9 @@ template <typename T0, typename T1> template <typename R>
 void agg_renderer<T0,T1>::debug_draw_box(R& buf, box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    typedef agg::pixfmt_rgba32_pre pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+    using pixfmt = agg::pixfmt_rgba32_pre;
+    using renderer_base = agg::renderer_base<pixfmt>;
+    using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
 
     agg::scanline_p8 sl_line;
     pixfmt pixf(buf);
@@ -468,8 +468,8 @@ void agg_renderer<T0,T1>::debug_draw_box(R& buf, box2d<double> const& box,
     pbox.line_to(box.minx(), box.miny());
 
     // prepare stroke with applied transformation
-    typedef agg::conv_transform<agg::path_storage> conv_transform;
-    typedef agg::conv_stroke<conv_transform> conv_stroke;
+    using conv_transform = agg::conv_transform<agg::path_storage>;
+    using conv_stroke = agg::conv_stroke<conv_transform>;
     conv_transform tbox(pbox, tr);
     conv_stroke sbox(tbox);
     sbox.generator().width(1.0 * common_.scale_factor_);
@@ -500,6 +500,39 @@ void agg_renderer<T0,T1>::draw_geo_extent(box2d<double> const& extent, mapnik::c
         pixmap_.setPixel(x0, y, rgba);
         pixmap_.setPixel(x1, y, rgba);
     }
+}
+
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker, agg::trans_affine const& tr)
+{
+    using pixfmt = agg::pixfmt_rgba32_pre;
+    using renderer_base = agg::renderer_base<pixfmt>;
+    using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
+    agg::scanline_u8 sl;
+
+    //double width = marker.width();
+    //double height = marker.height();
+
+    mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box() * tr;
+    mapnik::coord<double,2> c = bbox.center();
+    agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+    mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
+    mtx = tr * mtx;
+
+    std::shared_ptr<mapnik::image_data_32> image = std::make_shared<mapnik::image_data_32>(bbox.width(), bbox.height());
+    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 4);
+    pixfmt pixf(buf);
+    renderer_base renb(pixf);
+
+    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
+    mapnik::svg::svg_path_adapter svg_path(stl_storage);
+    mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
+                                  agg::pod_bvector<mapnik::svg::path_attributes>,
+                                  renderer_solid,
+                                  agg::pixfmt_rgba32_pre > svg_renderer(svg_path,
+                                                                        (*marker.get_vector_data())->attributes());
+
+    svg_renderer.render(ras, sl, renb, mtx, 1.0, bbox);
+    return image;
 }
 
 template class agg_renderer<image_32>;

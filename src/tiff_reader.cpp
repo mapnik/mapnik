@@ -102,9 +102,9 @@ static int tiff_map_proc(thandle_t, tdata_t* , toff_t*)
 template <typename T>
 class tiff_reader : public image_reader
 {
-    typedef std::shared_ptr<TIFF> tiff_ptr;
-    typedef T source_type;
-    typedef boost::iostreams::stream<source_type> input_stream;
+    using tiff_ptr = std::shared_ptr<TIFF>;
+    using source_type = T;
+    using input_stream = boost::iostreams::stream<source_type>;
 
     struct tiff_closer
     {

@@ -19,6 +19,7 @@
 #include <mapnik/save_map.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <vector>
 #include <algorithm>
 #include <mapnik/make_unique.hpp>
@@ -66,10 +67,10 @@ int main(int argc, char** argv)
         mapnik::rule r;
         mapnik::text_symbolizer text_sym;
         mapnik::text_placements_ptr placement_finder = std::make_shared<mapnik::text_placements_dummy>();
-        placement_finder->defaults.format->face_name = "DejaVu Sans Book";
-        placement_finder->defaults.format->text_size = 10;
-        placement_finder->defaults.format->fill = mapnik::color(0,0,0);
-        placement_finder->defaults.format->fontset = fontset;
+        placement_finder->defaults.format_defaults.face_name = "DejaVu Sans Book";
+        placement_finder->defaults.format_defaults.text_size = 10.0;
+        placement_finder->defaults.format_defaults.fill = mapnik::color(0,0,0);
+        placement_finder->defaults.format_defaults.fontset = fontset;
         placement_finder->defaults.set_old_style_expression(mapnik::parse_expression("[name]"));
         mapnik::put<mapnik::text_placements_ptr>(text_sym, mapnik::keys::text_placements_, placement_finder);
         r.append(std::move(text_sym));

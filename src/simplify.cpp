@@ -8,7 +8,7 @@
 namespace mapnik
 {
 
-typedef boost::bimap<simplify_algorithm_e, std::string> simplify_algorithm_lookup_type;
+using simplify_algorithm_lookup_type = boost::bimap<simplify_algorithm_e, std::string>;
 static const simplify_algorithm_lookup_type simplify_lookup = boost::assign::list_of<simplify_algorithm_lookup_type::relation>
     (radial_distance,"radial-distance")
     (douglas_peucker,"douglas-peucker")

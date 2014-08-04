@@ -24,6 +24,7 @@
 # will want to be more selective.
 
 import sys
+from os import path
 
 try:
     import mapnik
@@ -41,6 +42,7 @@ except ImportError:
 # Instanciate a map, giving it a width and height. Remember: the word "map" is
 # reserved in Python! :)
 
+root = path.dirname(__file__)
 m = mapnik.Map(800,600,"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs")
 
 # Set its background colour. More on colours later ...
@@ -68,7 +70,7 @@ m.background = mapnik.Color('white')
 
 provpoly_lyr = mapnik.Layer('Provinces')
 provpoly_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-provpoly_lyr.datasource = mapnik.Shapefile(file='../data/boundaries', encoding='latin1')
+provpoly_lyr.datasource = mapnik.Shapefile(file=path.join(root,'../data/boundaries'), encoding='latin1')
 
 # We then define a style for the layer.  A layer can have one or many styles.
 # Styles are named, so they can be shared across different layers.
@@ -103,12 +105,16 @@ provpoly_rule_on.filter = mapnik.Expression("[NAME_EN] = 'Ontario'")
 #     - Color(<string>) where <string> will be something like '#00FF00'
 #       or '#0f0' or 'green'
 
-provpoly_rule_on.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color(250, 190, 183)))
+sym = mapnik.PolygonSymbolizer()
+sym.fill = mapnik.Color(250, 190, 183);
+provpoly_rule_on.symbols.append(sym)
 provpoly_style.rules.append(provpoly_rule_on)
 
 provpoly_rule_qc = mapnik.Rule()
 provpoly_rule_qc.filter = mapnik.Expression("[NOM_FR] = 'Québec'")
-provpoly_rule_qc.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color(217, 235, 203)))
+sym = mapnik.PolygonSymbolizer()
+sym.fill = mapnik.Color(217, 235, 203)
+provpoly_rule_qc.symbols.append(sym)
 provpoly_style.rules.append(provpoly_rule_qc)
 
 # Add the style to the map, giving it a name.  This is the name that will be
@@ -133,12 +139,13 @@ m.layers.append(provpoly_lyr)
 
 qcdrain_lyr = mapnik.Layer('Quebec Hydrography')
 qcdrain_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-qcdrain_lyr.datasource = mapnik.Shapefile(file='../data/qcdrainage')
+qcdrain_lyr.datasource = mapnik.Shapefile(file=path.join(root,'../data/qcdrainage'))
 
 qcdrain_style = mapnik.Style()
 qcdrain_rule = mapnik.Rule()
 qcdrain_rule.filter = mapnik.Expression('[HYC] = 8')
-sym = mapnik.PolygonSymbolizer(mapnik.Color(153, 204, 255))
+sym = mapnik.PolygonSymbolizer()
+sym.fill = mapnik.Color(153, 204, 255)
 sym.smooth = 1.0 # very smooth
 qcdrain_rule.symbols.append(sym)
 qcdrain_style.rules.append(qcdrain_rule)
@@ -153,7 +160,7 @@ m.layers.append(qcdrain_lyr)
 
 ondrain_lyr = mapnik.Layer('Ontario Hydrography')
 ondrain_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-ondrain_lyr.datasource = mapnik.Shapefile(file='../data/ontdrainage')
+ondrain_lyr.datasource = mapnik.Shapefile(file=path.join(root,'../data/ontdrainage'))
 
 ondrain_lyr.styles.append('drainage')
 m.layers.append(ondrain_lyr)
@@ -162,20 +169,18 @@ m.layers.append(ondrain_lyr)
 
 provlines_lyr = mapnik.Layer('Provincial borders')
 provlines_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-provlines_lyr.datasource = mapnik.Shapefile(file='../data/boundaries_l')
+provlines_lyr.datasource = mapnik.Shapefile(file=path.join(root,'../data/boundaries_l'))
 
 # Here we define a "dash dot dot dash" pattern for the provincial boundaries.
 
-provlines_stk = mapnik.Stroke()
-provlines_stk.add_dash(8, 4)
-provlines_stk.add_dash(2, 2)
-provlines_stk.add_dash(2, 2)
-provlines_stk.color = mapnik.Color('black')
-provlines_stk.width = 1.0
-
 provlines_style = mapnik.Style()
 provlines_rule = mapnik.Rule()
-provlines_rule.symbols.append(mapnik.LineSymbolizer(provlines_stk))
+sym = mapnik.LineSymbolizer()
+# FIXME - currently adding dash arrays is broken
+# https://github.com/mapnik/mapnik/issues/2324
+sym.stroke = mapnik.Color('black')
+sym.stroke_width = 1.0
+provlines_rule.symbols.append(sym)
 provlines_style.rules.append(provlines_rule)
 
 m.append_style('provlines', provlines_style)
@@ -188,7 +193,7 @@ roads34_lyr = mapnik.Layer('Roads')
 roads34_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
 # create roads datasource (we're going to re-use it later)
 
-roads34_lyr.datasource = mapnik.Shapefile(file='../data/roads')
+roads34_lyr.datasource = mapnik.Shapefile(file=path.join(root,'../data/roads'))
 
 roads34_style = mapnik.Style()
 roads34_rule = mapnik.Rule()
@@ -197,10 +202,6 @@ roads34_rule.filter = mapnik.Expression('([CLASS] = 3) or ([CLASS] = 4)')
 # With lines of a certain width, you can control how the ends
 # are closed off using line_cap as below.
 
-roads34_rule_stk = mapnik.Stroke()
-roads34_rule_stk.color = mapnik.Color(171,158,137)
-roads34_rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-
 # Available options are:
 # line_cap: BUTT_CAP, SQUARE_CAP, ROUND_CAP
 # line_join: MITER_JOIN, MITER_REVERT_JOIN, ROUND_JOIN, BEVEL_JOIN
@@ -208,8 +209,12 @@ roads34_rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
 # And one last Stroke() attribute not used here is "opacity", which
 # can be set to a numerical value.
 
-roads34_rule_stk.width = 2.0
-roads34_rule.symbols.append(mapnik.LineSymbolizer(roads34_rule_stk))
+sym = mapnik.LineSymbolizer()
+sym.stroke = mapnik.Color(171,158,137)
+sym.stroke_width = 2.0
+sym.stroke_linecap = mapnik.stroke_linecap.ROUND_CAP
+
+roads34_rule.symbols.append(sym)
 roads34_style.rules.append(roads34_rule)
 
 m.append_style('smallroads', roads34_style)
@@ -226,11 +231,12 @@ roads2_lyr.datasource = roads34_lyr.datasource
 roads2_style_1 = mapnik.Style()
 roads2_rule_1 = mapnik.Rule()
 roads2_rule_1.filter = mapnik.Expression('[CLASS] = 2')
-roads2_rule_stk_1 = mapnik.Stroke()
-roads2_rule_stk_1.color = mapnik.Color(171,158,137)
-roads2_rule_stk_1.line_cap = mapnik.line_cap.ROUND_CAP
-roads2_rule_stk_1.width = 4.0
-roads2_rule_1.symbols.append(mapnik.LineSymbolizer(roads2_rule_stk_1))
+
+sym = mapnik.LineSymbolizer()
+sym.stroke = mapnik.Color(171,158,137)
+sym.stroke_width = 4.0
+sym.stroke_linecap = mapnik.stroke_linecap.ROUND_CAP
+roads2_rule_1.symbols.append(sym)
 roads2_style_1.rules.append(roads2_rule_1)
 
 m.append_style('road-border', roads2_style_1)
@@ -238,11 +244,11 @@ m.append_style('road-border', roads2_style_1)
 roads2_style_2 = mapnik.Style()
 roads2_rule_2 = mapnik.Rule()
 roads2_rule_2.filter = mapnik.Expression('[CLASS] = 2')
-roads2_rule_stk_2 = mapnik.Stroke()
-roads2_rule_stk_2.color = mapnik.Color(255,250,115)
-roads2_rule_stk_2.line_cap = mapnik.line_cap.ROUND_CAP
-roads2_rule_stk_2.width = 2.0
-roads2_rule_2.symbols.append(mapnik.LineSymbolizer(roads2_rule_stk_2))
+sym = mapnik.LineSymbolizer()
+sym.stroke = mapnik.Color(255,250,115)
+sym.stroke_linecap = mapnik.stroke_linecap.ROUND_CAP
+sym.stroke_width = 2.0
+roads2_rule_2.symbols.append(sym)
 roads2_style_2.rules.append(roads2_rule_2)
 
 m.append_style('road-fill', roads2_style_2)
@@ -261,22 +267,21 @@ roads1_lyr.datasource = roads34_lyr.datasource
 roads1_style_1 = mapnik.Style()
 roads1_rule_1 = mapnik.Rule()
 roads1_rule_1.filter = mapnik.Expression('[CLASS] = 1')
-roads1_rule_stk_1 = mapnik.Stroke()
-roads1_rule_stk_1.color = mapnik.Color(188,149,28)
-roads1_rule_stk_1.line_cap = mapnik.line_cap.ROUND_CAP
-roads1_rule_stk_1.width = 7.0
-roads1_rule_1.symbols.append(mapnik.LineSymbolizer(roads1_rule_stk_1))
+sym = mapnik.LineSymbolizer()
+sym.stroke = mapnik.Color(188,149,28)
+sym.stroke_linecap = mapnik.stroke_linecap.ROUND_CAP
+sym.stroke_width = 7.0
+roads1_rule_1.symbols.append(sym)
 roads1_style_1.rules.append(roads1_rule_1)
 m.append_style('highway-border', roads1_style_1)
 
 roads1_style_2 = mapnik.Style()
 roads1_rule_2 = mapnik.Rule()
 roads1_rule_2.filter = mapnik.Expression('[CLASS] = 1')
-roads1_rule_stk_2 = mapnik.Stroke()
-roads1_rule_stk_2.color = mapnik.Color(242,191,36)
-roads1_rule_stk_2.line_cap = mapnik.line_cap.ROUND_CAP
-roads1_rule_stk_2.width = 5.0
-roads1_rule_2.symbols.append(mapnik.LineSymbolizer(roads1_rule_stk_2))
+sym.stroke = mapnik.Color(242,191,36)
+sym.stroke_linecap = mapnik.stroke_linecap.ROUND_CAP
+sym.stroke_width = 5.0
+roads1_rule_2.symbols.append(sym)
 roads1_style_2.rules.append(roads1_rule_2)
 
 m.append_style('highway-fill', roads1_style_2)
@@ -290,7 +295,7 @@ m.layers.append(roads1_lyr)
 
 popplaces_lyr = mapnik.Layer('Populated Places')
 popplaces_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-popplaces_lyr.datasource = mapnik.Shapefile(file='../data/popplaces',encoding='latin1')
+popplaces_lyr.datasource = mapnik.Shapefile(file=path.join(root,'../data/popplaces'),encoding='latin1')
 
 popplaces_style = mapnik.Style()
 popplaces_rule = mapnik.Rule()
@@ -299,19 +304,19 @@ popplaces_rule = mapnik.Rule()
 # The first parameter is the name of the attribute to use as the source of the
 # text to label with.  Then there is font size in points (I think?), and colour.
 
-popplaces_text_symbolizer = mapnik.TextSymbolizer(mapnik.Expression("[GEONAME]"),
-                                           'DejaVu Sans Book',
-                                           10, mapnik.Color('black'))
+# TODO - currently broken: https://github.com/mapnik/mapnik/issues/2324
+#popplaces_text_symbolizer = mapnik.TextSymbolizer(mapnik.Expression("[GEONAME]"),
+#                                           'DejaVu Sans Book',
+#                                           10, mapnik.Color('black'))
 
 # We set a "halo" around the text, which looks like an outline if thin enough,
 # or an outright background if large enough.
-popplaces_text_symbolizer.label_placement= mapnik.label_placement.POINT_PLACEMENT
-popplaces_text_symbolizer.halo_fill = mapnik.Color(255,255,200)
-popplaces_text_symbolizer.halo_radius = 1
-popplaces_text_symbolizer.avoid_edges = True
+#popplaces_text_symbolizer.label_placement= mapnik.label_placement.POINT_PLACEMENT
+#popplaces_text_symbolizer.halo_fill = mapnik.Color(255,255,200)
+#popplaces_text_symbolizer.halo_radius = 1
+#popplaces_text_symbolizer.avoid_edges = True
 #popplaces_text_symbolizer.minimum_padding = 30
-
-popplaces_rule.symbols.append(popplaces_text_symbolizer)
+#popplaces_rule.symbols.append(popplaces_text_symbolizer)
 
 popplaces_style.rules.append(popplaces_rule)
 

@@ -24,7 +24,6 @@
 #define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
-#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -72,7 +71,7 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
                                  private mapnik::noncopyable
 {
 public:
-    typedef svg_renderer<OutputIterator> processor_impl_type;
+    using processor_impl_type = svg_renderer<OutputIterator>;
     svg_renderer(Map const& m, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     svg_renderer(Map const& m, request const& req, attributes const& vars, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~svg_renderer();

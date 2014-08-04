@@ -1,5 +1,5 @@
 #ifndef __MAPNIK_BENCH_FRAMEWORK_HPP__
-#define __MAPNIK_BENCH_FRAMEWORK_HPP__ 
+#define __MAPNIK_BENCH_FRAMEWORK_HPP__
 
 // mapnik
 #include <mapnik/params.hpp>
@@ -97,8 +97,8 @@ int run(T const& test_runner, std::string const& name)
             << " i:" << test_runner.iterations();
         if (test_runner.threads() > 0)
         {
-            typedef std::vector<std::unique_ptr<std::thread> > thread_group;
-            typedef thread_group::value_type value_type;
+            using thread_group = std::vector<std::unique_ptr<std::thread> >;
+            using value_type = thread_group::value_type;
             thread_group tg;
             for (std::size_t i=0;i<test_runner.threads();++i)
             {

@@ -6,8 +6,9 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-//#include <mapnik/util/geometry_to_wkt.hpp>
+#include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/fs.hpp>
 
@@ -33,9 +34,9 @@ void render(mapnik::geometry_type & geom,
             mapnik::box2d<double> const& extent,
             std::string const& name)
 {
-    typedef mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+    using path_type = mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type>;
+    using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
+    using renderer = agg::renderer_scanline_aa_solid<ren_base>;
     mapnik::image_32 im(256,256);
     im.set_background(mapnik::color("white"));
     mapnik::box2d<double> padded_extent = extent;
@@ -63,7 +64,7 @@ class test1 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    typedef agg::conv_clip_polygon<mapnik::geometry_type> conv_clip;
+    using conv_clip = agg::conv_clip_polygon<mapnik::geometry_type>;
     test1(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -138,7 +139,7 @@ class test2 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    typedef agg::conv_clipper<mapnik::geometry_type, agg::path_storage> poly_clipper;
+    using poly_clipper = agg::conv_clipper<mapnik::geometry_type, agg::path_storage>;
     test2(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -225,7 +226,7 @@ class test3 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    typedef mapnik::polygon_clipper<mapnik::geometry_type> poly_clipper;
+    using poly_clipper = mapnik::polygon_clipper<mapnik::geometry_type>;
     test3(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -317,4 +318,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-

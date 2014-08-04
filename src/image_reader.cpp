@@ -30,7 +30,7 @@ namespace mapnik
 
 inline boost::optional<std::string> type_from_bytes(char const* data, size_t size)
 {
-    typedef boost::optional<std::string> result_type;
+    using result_type = boost::optional<std::string>;
     if (size >= 4)
     {
         unsigned int magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];

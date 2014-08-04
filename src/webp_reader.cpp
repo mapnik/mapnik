@@ -90,7 +90,7 @@ struct internal_buffer_policy
 template <typename T>
 class webp_reader : public image_reader
 {
-    typedef T buffer_policy_type;
+    using buffer_policy_type = T;
 private:
     struct config_guard
     {

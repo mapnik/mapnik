@@ -49,7 +49,7 @@ struct move_to
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit move_to(PathType & path)
@@ -70,7 +70,7 @@ struct hline_to
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit hline_to(PathType & path)
@@ -92,7 +92,7 @@ struct vline_to
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit vline_to(PathType & path)
@@ -113,7 +113,7 @@ struct line_to
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit line_to(PathType & path)
@@ -135,7 +135,7 @@ struct curve4
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit curve4(PathType & path)
@@ -160,7 +160,7 @@ struct curve4_smooth
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit curve4_smooth(PathType & path)
@@ -182,7 +182,7 @@ struct curve3
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit curve3(PathType & path)
@@ -205,7 +205,7 @@ struct curve3_smooth
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit curve3_smooth(PathType & path)
@@ -227,7 +227,7 @@ struct arc_to
     template <typename T0>
     struct result
     {
-        typedef void type;
+        using type = void;
     };
 
     explicit arc_to(PathType & path)
@@ -248,7 +248,7 @@ struct arc_to
 template <typename PathType>
 struct close
 {
-    typedef void result_type;
+    using result_type = void;
 
     explicit close(PathType & path)
         : path_(path) {}

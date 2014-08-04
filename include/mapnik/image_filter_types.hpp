@@ -158,19 +158,19 @@ struct colorize_alpha : std::vector<color_stop>
     colorize_alpha() {}
 };
 
-typedef boost::variant<filter::blur,
-                       filter::gray,
-                       filter::agg_stack_blur,
-                       filter::emboss,
-                       filter::sharpen,
-                       filter::edge_detect,
-                       filter::sobel,
-                       filter::x_gradient,
-                       filter::y_gradient,
-                       filter::invert,
-                       filter::scale_hsla,
-                       filter::colorize_alpha,
-                       filter::color_to_alpha> filter_type;
+using filter_type =  boost::variant<filter::blur,
+                                    filter::gray,
+                                    filter::agg_stack_blur,
+                                    filter::emboss,
+                                    filter::sharpen,
+                                    filter::edge_detect,
+                                    filter::sobel,
+                                    filter::x_gradient,
+                                    filter::y_gradient,
+                                    filter::invert,
+                                    filter::scale_hsla,
+                                    filter::colorize_alpha,
+                                    filter::color_to_alpha>;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {

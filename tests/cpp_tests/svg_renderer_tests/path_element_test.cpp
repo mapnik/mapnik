@@ -1,24 +1,22 @@
-#undef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 #define BOOST_TEST_MODULE path_element_tests
 
-// boost.test
+// boost
 #include <boost/test/included/unit_test.hpp>
-
-// boost.filesystem
 #include <boost/filesystem.hpp>
 
 // mapnik
 #include <mapnik/map.hpp>
+#include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
-
 
 // stl
 #include <fstream>
@@ -181,11 +179,11 @@ void prepare_map(Map & m)
         {
             text_symbolizer text_sym;
             text_placements_ptr placement_finder = std::make_shared<text_placements_dummy>();
-            placement_finder->defaults.format->face_name = "DejaVu Sans Book";
-            placement_finder->defaults.format->text_size = 10;
-            placement_finder->defaults.format->fill = color(0,0,0);
-            placement_finder->defaults.format->halo_fill = color(255,255,200);
-            placement_finder->defaults.format->halo_radius = 1;
+            placement_finder->defaults.format_defaults.face_name = "DejaVu Sans Book";
+            placement_finder->defaults.format_defaults.text_size = mapnik::value_integer(10);
+            placement_finder->defaults.format_defaults.fill = color(0,0,0);
+            placement_finder->defaults.format_defaults.halo_fill = color(255,255,200);
+            placement_finder->defaults.format_defaults.halo_radius = mapnik::value_integer(1);
             placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]"));
             put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
             r.append(std::move(text_sym));
@@ -281,7 +279,7 @@ void render_to_file(Map const& m, const std::string output_filename)
 
     if(output_stream)
     {
-        typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
+        using svg_ren = svg_renderer<std::ostream_iterator<char> >;
         std::ostream_iterator<char> output_stream_iterator(output_stream);
         svg_ren renderer(m, output_stream_iterator);
         renderer.apply();

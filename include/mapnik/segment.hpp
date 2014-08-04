@@ -23,12 +23,13 @@
 #ifndef MAPNIK_SEGMENT_HPP
 #define MAPNIK_SEGMENT_HPP
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
+#include <algorithm>
 
 namespace mapnik
 {
 
-typedef std::tuple<double,double,double,double> segment_t;
+using segment_t = std::tuple<double,double,double,double>;
 
 static bool y_order(segment_t const& first,segment_t const& second)
 {

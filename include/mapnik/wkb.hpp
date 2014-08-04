@@ -52,7 +52,7 @@ class MAPNIK_DECL geometry_utils : private mapnik::noncopyable
 {
 public:
 
-    static bool from_wkb (boost::ptr_vector<geometry_type>& paths,
+    static bool from_wkb(mapnik::geometry_container& paths,
                           const char* wkb,
                           unsigned size,
                           wkbFormat format = wkbGeneric);

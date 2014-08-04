@@ -49,10 +49,10 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
-    typedef vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
-                             CoordTransform, proj_transform, agg::trans_affine, 
-                             conv_types, feature_impl> vertex_converter_type;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type = vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
+                                                   CoordTransform, proj_transform, agg::trans_affine,
+                                                   conv_types, feature_impl>;
 
     ras_ptr->reset();
     double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
@@ -74,14 +74,14 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
             unsigned g=fill.green();
             unsigned b=fill.blue();
             unsigned a=fill.alpha();
-            typedef agg::rgba8 color_type;
-            typedef agg::order_rgba order_type;
-            typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-            typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
-            typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-            typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+            using color_type = agg::rgba8;
+            using order_type = agg::order_rgba;
+            using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+            using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+            using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+            using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
             pixfmt_comp_type pixf(buf);
-            pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
+            pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
             renderer_base renb(pixf);
             renderer_type ren(renb);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));

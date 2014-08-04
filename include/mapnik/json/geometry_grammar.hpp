@@ -39,7 +39,7 @@ using standard_wide::space_type;
 
 struct push_vertex
 {
-    typedef void result_type;
+    using result_type = void;
 
     template <typename T0,typename T1, typename T2, typename T3>
     result_type operator() (T0 c, T1 path, T2 x, T3 y) const
@@ -51,7 +51,7 @@ struct push_vertex
 
 struct close_path
 {
-    typedef void result_type;
+    using result_type = void;
 
     template <typename T>
     result_type operator() (T path) const
@@ -66,7 +66,7 @@ struct close_path
 
 struct cleanup
 {
-    typedef void result_type;
+    using result_type = void;
     template <typename T0>
     void operator() (T0 & path) const
     {
@@ -76,7 +76,7 @@ struct cleanup
 
 struct where_message
 {
-    typedef std::string result_type;
+    using result_type = std::string;
 
     template <typename Iterator>
     std::string operator() (Iterator first, Iterator last, std::size_t size) const
@@ -90,31 +90,31 @@ struct where_message
 
 template <typename Iterator>
 struct geometry_grammar :
-        qi::grammar<Iterator,qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& )
+        qi::grammar<Iterator,qi::locals<int>, void(mapnik::geometry_container& )
         , space_type>
 {
     geometry_grammar();
-    qi::rule<Iterator, qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry;
+    qi::rule<Iterator, qi::locals<int>, void(mapnik::geometry_container& ),space_type> geometry;
     qi::symbols<char, int> geometry_dispatch;
 
     qi::rule<Iterator,void(CommandType,geometry_type*),space_type> point;
     qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),space_type> points;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>&,int),space_type> coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container&,int),space_type> coordinates;
     //
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> point_coordinates;
+             void(mapnik::geometry_container& ),space_type> point_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> linestring_coordinates;
+             void(mapnik::geometry_container& ),space_type> linestring_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> polygon_coordinates;
+             void(mapnik::geometry_container& ),space_type> polygon_coordinates;
 
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipoint_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multilinestring_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipolygon_coordinates;
-    qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry_collection;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipoint_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multilinestring_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipolygon_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> geometry_collection;
 
     // Nabialek trick //////////////////////////////////////
-    //typedef typename qi::rule<Iterator,void(FeatureType &), space_type> dispatch_rule;
+    //using dispatch_rule = typename qi::rule<Iterator,void(FeatureType &), space_type>;
     //qi::rule<Iterator,qi::locals<dispatch_rule*>, void(FeatureType&),space_type> geometry;
     //qi::symbols<char, dispatch_rule*> geometry_dispatch;
     ////////////////////////////////////////////////////////

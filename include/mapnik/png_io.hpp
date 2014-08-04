@@ -681,7 +681,7 @@ void save_as_png8_hex(T1 & file,
     tree.create_palette(pal);
     std::vector<mapnik::rgb> palette;
     std::vector<unsigned> alphaTable;
-    for(unsigned i=0; i<pal.size(); i++)
+    for (unsigned i=0; i<pal.size(); ++i)
     {
         palette.push_back(rgb(pal[i].r, pal[i].g, pal[i].b));
         alphaTable.push_back(pal[i].a);

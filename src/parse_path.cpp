@@ -22,7 +22,7 @@
 
 #include <mapnik/parse_path.hpp>
 #include <mapnik/path_expression_grammar.hpp>
-
+#include <mapnik/path_expression_grammar_impl.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>

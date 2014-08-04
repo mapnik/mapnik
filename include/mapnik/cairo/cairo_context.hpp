@@ -26,20 +26,17 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
-#include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// boost
+// stl
 #include <memory>
 
 // cairo
@@ -47,7 +44,6 @@
 
 // stl
 #include <map>
-#include <vector>
 #include <stdexcept>
 
 // agg
@@ -56,8 +52,9 @@
 namespace mapnik {
 
 class text_path;
+template <typename T> class box2d;
 
-typedef cairo_status_t ErrorStatus;
+using ErrorStatus = cairo_status_t;
 
 /// Throws the appropriate exception, if exceptions are enabled.
 inline void throw_exception(ErrorStatus status)
@@ -107,7 +104,7 @@ private:
     cairo_font_face_t *c_face_;
 };
 
-typedef std::shared_ptr<cairo_face> cairo_face_ptr;
+using cairo_face_ptr = std::shared_ptr<cairo_face>;
 
 class cairo_face_manager : private mapnik::noncopyable
 {
@@ -116,7 +113,7 @@ public:
     cairo_face_ptr get_face(face_ptr face);
 
 private:
-    typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
+    using cairo_face_cache = std::map<face_ptr,cairo_face_ptr>;
     std::shared_ptr<freetype_engine> font_engine_;
     cairo_face_cache cache_;
 };
@@ -271,8 +268,8 @@ struct cairo_surface_closer
     }
 };
 
-typedef std::shared_ptr<cairo_t> cairo_ptr;
-typedef std::shared_ptr<cairo_surface_t> cairo_surface_ptr;
+using cairo_ptr = std::shared_ptr<cairo_t>;
+using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 inline cairo_ptr create_context(cairo_surface_ptr const& surface)
 {

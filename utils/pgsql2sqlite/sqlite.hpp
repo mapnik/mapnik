@@ -52,7 +52,7 @@ namespace mapnik {  namespace sqlite {
             }
         };
 
-        typedef std::shared_ptr<sqlite3> sqlite_db;
+        using sqlite_db = std::shared_ptr<sqlite3>;
         sqlite_db db_;
 
     public:
@@ -71,8 +71,8 @@ namespace mapnik {  namespace sqlite {
         unsigned size_;
     };
 
-    typedef boost::variant<int,double,std::string, blob,null_type> value_type;
-    typedef std::vector<value_type> record_type;
+    using value_type = boost::variant<int,double,std::string, blob,null_type>;
+    using record_type = std::vector<value_type>;
 
     class prepared_statement : mapnik::noncopyable
     {

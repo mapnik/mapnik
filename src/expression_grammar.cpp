@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,11 @@
  *
  *****************************************************************************/
 
-// mapnik
+// NOTE: we define this here in a cpp because def is needed twice:
+// once by src/expression.cpp and once by mapnik/transform_expression_grammar_impl.hpp
 #include <mapnik/expression_grammar_impl.hpp>
-// stl
+#include <mapnik/transform_expression_grammar_impl.hpp>
 #include <string>
 
-namespace mapnik {
-
 template struct mapnik::expression_grammar<std::string::const_iterator>;
-
-}
+template struct mapnik::transform_expression_grammar<std::string::const_iterator>;

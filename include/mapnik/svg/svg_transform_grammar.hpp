@@ -53,7 +53,7 @@ namespace mapnik { namespace svg {
         template <typename T0>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         explicit process_matrix( TransformType & tr)
@@ -73,7 +73,7 @@ namespace mapnik { namespace svg {
         template <typename T0>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         explicit process_rotate( TransformType & tr)
@@ -104,7 +104,7 @@ namespace mapnik { namespace svg {
         template <typename T0>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         explicit process_translate( TransformType & tr)
@@ -126,7 +126,7 @@ namespace mapnik { namespace svg {
         template <typename T0>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         explicit process_scale( TransformType & tr)
@@ -149,7 +149,7 @@ namespace mapnik { namespace svg {
         template <typename T0>
         struct result
         {
-            typedef void type;
+            using type = void;
         };
 
         explicit process_skew( TransformType & tr)

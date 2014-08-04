@@ -24,9 +24,12 @@
 
 // mapnik
 #include <mapnik/proj_transform.hpp>
-#include <boost/noncopyable.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/box2d.hpp>
 
 // boost
+#include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
 
 // stl

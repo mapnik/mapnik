@@ -42,9 +42,6 @@
 // cairo
 #include <cairo.h>
 
-// boost
-
-
 namespace agg {
 struct trans_affine;
 }
@@ -165,7 +162,7 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
                                    public cairo_renderer_base
 {
 public:
-    typedef cairo_renderer_base processor_impl_type;
+    using processor_impl_type = cairo_renderer_base;
     cairo_renderer(Map const& m,
                    T const& obj,
                    double scale_factor=1.0,

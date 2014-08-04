@@ -30,7 +30,8 @@ namespace mapnik {
 
 class text_placement_info_simple;
 
-typedef enum {
+enum directions_e
+{
     NORTH,
     EAST,
     SOUTH,
@@ -40,37 +41,34 @@ typedef enum {
     NORTHWEST,
     SOUTHWEST,
     EXACT_POSITION
-} directions_t;
+};
 
-
-/** Automatically generates placement options from a user selected list of directions and text sizes. */
+// Automatically generates placement options from a user selected list of directions and text sizes.
 class text_placements_simple: public text_placements
 {
 public:
     text_placements_simple();
-    text_placements_simple(std::string positions);
+    text_placements_simple(std::string const& positions);
     text_placement_info_ptr get_placement_info(double scale_factor) const;
-    void set_positions(std::string positions);
+    void set_positions(std::string const& positions);
     std::string get_positions();
     static text_placements_ptr from_xml(xml_node const &xml, fontset_map const & fontsets);
 private:
     std::string positions_;
-    std::vector<directions_t> direction_;
+    std::vector<directions_e> direction_;
     std::vector<int> text_sizes_;
     friend class text_placement_info_simple;
 };
 
-/** Simple placement strategy.
- * See parent class for documentation of each function. */
+// Simple placement strategy.
+// See parent class for documentation of each function.
 class text_placement_info_simple : public text_placement_info
 {
 public:
     text_placement_info_simple(text_placements_simple const* parent,
                                double scale_factor)
         : text_placement_info(parent, scale_factor),
-          state(0), position_state(0), parent_(parent)
-    {
-    }
+          state(0), position_state(0), parent_(parent) {}
     bool next();
 protected:
     bool next_position_only();

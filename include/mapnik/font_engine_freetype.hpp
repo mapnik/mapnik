@@ -25,27 +25,23 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
-#include <mapnik/pixel_position.hpp>
-
-// boost
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/optional.hpp>
 
 // stl
-#include <map>
 #include <memory>
-#ifdef MAPNIK_THREADSAFE
-#include <thread>
-#endif
+#include <map>
+#include <utility> // pair
 #include <vector>
+
+#ifdef MAPNIK_THREADSAFE
+#include <mutex>
+#endif
 
 struct FT_LibraryRec_;
 struct FT_MemoryRec_;
+namespace boost { template <class T> class optional; }
 
 namespace mapnik
 {
@@ -53,11 +49,11 @@ namespace mapnik
 typedef std::map<glyph_index_t, glyph_info> glyph_cache_type;
 typedef std::shared_ptr<glyph_cache_type> glyph_cache_ptr;
 class stroker;
-typedef std::shared_ptr<stroker> stroker_ptr;
+using stroker_ptr = std::shared_ptr<stroker>;
 class font_face_set;
-typedef std::shared_ptr<font_face_set> face_set_ptr;
+using face_set_ptr = std::shared_ptr<font_face_set>;
 class font_face;
-typedef std::shared_ptr<font_face> face_ptr;
+using face_ptr = std::shared_ptr<font_face>;
 
 
 class MAPNIK_DECL freetype_engine
@@ -76,7 +72,7 @@ public:
      */
     static bool register_fonts(std::string const& dir, bool recurse = false);
     static std::vector<std::string> face_names();
-    static std::map<std::string,std::pair<int,std::string> > const& get_mapping();
+    static std::map<std::string, std::pair<int,std::string> > const& get_mapping();
     face_ptr create_face(std::string const& family_name);
     stroker_ptr create_stroker();
     virtual ~freetype_engine();
@@ -97,8 +93,8 @@ private:
 template <typename T>
 class MAPNIK_DECL face_manager : private mapnik::noncopyable
 {
-    typedef T font_engine_type;
-    typedef std::map<std::string, face_ptr> face_ptr_cache_type;
+    using font_engine_type = T;
+    using face_ptr_cache_type = std::map<std::string, face_ptr>;
 
 public:
     face_manager(T & engine)
@@ -120,7 +116,7 @@ private:
     face_ptr_cache_type face_ptr_cache_;
 };
 
-typedef face_manager<freetype_engine> face_manager_freetype;
+using face_manager_freetype = face_manager<freetype_engine>;
 
 }
 

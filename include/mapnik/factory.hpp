@@ -42,8 +42,8 @@ class factory : public singleton<factory <product_type,
                                           Args...> >
 {
 private:
-    typedef  product_type* (*product_creator)(Args...);
-    typedef std::map<key_type,product_creator> product_map;
+    using product_creator = product_type* (*) (Args...);
+    using product_map = std::map<key_type,product_creator>;
     product_map map_;
 public:
 

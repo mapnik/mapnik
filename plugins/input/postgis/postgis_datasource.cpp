@@ -82,8 +82,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
       pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10)),
-      persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
-      extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
+      persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
+      extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
       max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1)),
       asynchronous_request_(false),
       // TODO - use for known tokens too: "(@\\w+|!\\w+!)"
@@ -121,10 +121,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
     }
 
     boost::optional<mapnik::value_integer> initial_size = params.get<mapnik::value_integer>("initial_size", 1);
-    boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
-    boost::optional<mapnik::boolean> estimate_extent = params.get<mapnik::boolean>("estimate_extent", false);
+    boost::optional<mapnik::boolean_type> autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    boost::optional<mapnik::boolean_type> estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
-    boost::optional<mapnik::boolean> simplify_opt = params.get<mapnik::boolean>("simplify_geometries", false);
+    boost::optional<mapnik::boolean_type> simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);

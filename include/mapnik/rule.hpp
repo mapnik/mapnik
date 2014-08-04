@@ -26,9 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/expression_string.hpp>
 
 // stl
 #include <string>
@@ -40,7 +38,7 @@ namespace mapnik
 class MAPNIK_DECL rule
 {
 public:
-    typedef std::vector<symbolizer> symbolizers;
+    using symbolizers = std::vector<symbolizer>;
 private:
 
     std::string name_;

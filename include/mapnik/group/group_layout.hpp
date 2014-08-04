@@ -26,6 +26,9 @@
 // boost
 #include <boost/variant.hpp>
 
+// std
+#include <memory>
+
 namespace mapnik
 {
 
@@ -64,7 +67,7 @@ public:
    {
       return item_margin_;
    }
-   
+
    void set_item_margin(double item_margin)
    {
       item_margin_ = item_margin;
@@ -85,10 +88,8 @@ private:
    double max_difference_;
 };
 
-typedef boost::variant<simple_row_layout,
-                       pair_layout> group_layout;
-
-typedef std::shared_ptr<group_layout> group_layout_ptr;
+using group_layout = boost::variant<simple_row_layout,pair_layout>;
+using group_layout_ptr = std::shared_ptr<group_layout>;
 }
 
 #endif // MAPNIK_GROUP_LAYOUT_HPP

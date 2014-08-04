@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/datasource.hpp>
 
 #ifdef MAPNIK_STATIC_PLUGINS
 #include <mapnik/params.hpp>
@@ -89,8 +90,8 @@ datasource_ptr ds_generator(parameters const& params)
     return std::make_shared<T>(params);
 }
 
-typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
-typedef boost::unordered_map<std::string, ds_generator_ptr> datasource_map;
+using params) = datasource_ptr (*ds_generator_ptr)(parameters const&;
+using datasource_map = boost::unordered_map<std::string, ds_generator_ptr>;
 
 static datasource_map ds_map = boost::assign::map_list_of
     #if defined(MAPNIK_STATIC_PLUGIN_CSV)

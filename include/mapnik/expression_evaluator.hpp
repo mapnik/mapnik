@@ -25,15 +25,16 @@
 
 // mapnik
 #include <mapnik/attribute.hpp>
-#include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/expression_node.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#else
+#include <boost/regex.hpp>
 #endif
 
 namespace mapnik
@@ -42,9 +43,9 @@ namespace mapnik
 template <typename T0, typename T1, typename T2>
 struct evaluate : boost::static_visitor<T1>
 {
-    typedef T0 feature_type;
-    typedef T1 value_type;
-    typedef T2 variable_type;
+    using feature_type = T0;
+    using value_type = T1;
+    using variable_type = T2;
 
     explicit evaluate(feature_type const& f, variable_type const& v)
         : feature_(f),

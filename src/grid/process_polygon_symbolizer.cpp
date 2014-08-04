@@ -50,13 +50,13 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
-    typedef vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
-                             CoordTransform, proj_transform, agg::trans_affine, 
-                             conv_types, feature_impl> vertex_converter_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
+    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type = vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
+                                                   CoordTransform, proj_transform, agg::trans_affine,
+                                                   conv_types, feature_impl>;
 
     ras_ptr->reset();
 
@@ -66,10 +66,10 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
       sym, feature, prj_trans, common_, common_.query_extent_, *ras_ptr,
       [&](color const &, double) {
         pixfmt_type pixf(buf);
-        
+
         grid_renderer_base_type renb(pixf);
         renderer_type ren(renb);
-        
+
         // render id
         ren.color(color_type(feature.id()));
         agg::scanline_bin sl;

@@ -25,6 +25,7 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -207,11 +208,11 @@ int main ( int argc , char** argv)
             {
                 text_symbolizer text_sym;
                 text_placements_ptr placement_finder = std::make_shared<text_placements_dummy>();
-                placement_finder->defaults.format->face_name = "DejaVu Sans Book";
-                placement_finder->defaults.format->text_size = 10;
-                placement_finder->defaults.format->fill = color(0,0,0);
-                placement_finder->defaults.format->halo_fill = color(255,255,200);
-                placement_finder->defaults.format->halo_radius = 1;
+                placement_finder->defaults.format_defaults.face_name = "DejaVu Sans Book";
+                placement_finder->defaults.format_defaults.text_size = 10.0;
+                placement_finder->defaults.format_defaults.fill = color(0,0,0);
+                placement_finder->defaults.format_defaults.halo_fill = color(255,255,200);
+                placement_finder->defaults.format_defaults.halo_radius = 1.0;
                 placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]"));
                 put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
                 r.append(std::move(text_sym));

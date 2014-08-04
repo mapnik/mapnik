@@ -23,7 +23,7 @@
 //mapnik
 #include <mapnik/text/placements/list.hpp>
 #include <mapnik/xml_node.hpp>
-
+#include <mapnik/make_unique.hpp>
 //boost
 #include <boost/property_tree/ptree.hpp>
 
@@ -32,22 +32,28 @@ namespace mapnik
 
 bool text_placement_info_list::next()
 {
-    if (state == 0) {
+    if (state == 0)
+    {
         properties = parent_->defaults;
-    } else {
-        if (state-1 >= parent_->list_.size()) return false;
+    }
+    else
+    {
+        if (state  > parent_->list_.size()) return false;
         properties = parent_->list_[state-1];
     }
-    state++;
+    ++state;
     return true;
 }
 
 text_symbolizer_properties & text_placements_list::add()
 {
-    if (list_.size()) {
-        text_symbolizer_properties &last = list_.back();
-        list_.push_back(last); //Preinitialize with old values
-    } else {
+    if (list_.size())
+    {
+        text_symbolizer_properties & last = list_.back();
+        list_.push_back(last); //Preinitialize with old values FIXME
+    }
+    else
+    {
         list_.push_back(defaults);
     }
     return list_.back();
@@ -58,26 +64,22 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
     return list_[i];
 }
 
-/***************************************************************************/
 
 text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor) const
 {
-    return std::make_shared<text_placement_info_list>(this, scale_factor);
+    return std::make_unique<text_placement_info_list>(this, scale_factor);
 }
 
-text_placements_list::text_placements_list() : text_placements(), list_(0)
-{
+text_placements_list::text_placements_list()
+    : text_placements(),
+      list_(0) {}
 
-}
-
-void text_placements_list::add_expressions(expression_set &output)
+void text_placements_list::add_expressions(expression_set & output) const
 {
     defaults.add_expressions(output);
-
-    std::vector<text_symbolizer_properties>::const_iterator it;
-    for (it=list_.begin(); it != list_.end(); it++)
+    for (auto & prop : list_)
     {
-        it->add_expressions(output);
+        prop.add_expressions(output);
     }
 }
 
@@ -86,27 +88,20 @@ unsigned text_placements_list::size() const
     return list_.size();
 }
 
-text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_map const & fontsets)
+
+text_placements_ptr text_placements_list::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
-    using boost::property_tree::ptree;
-    text_placements_list *list = new text_placements_list;
-    text_placements_ptr ptr = text_placements_ptr(list);
-    list->defaults.from_xml(xml, fontsets);
-    xml_node::const_iterator itr = xml.begin();
-    xml_node::const_iterator end = xml.end();
-    for( ;itr != end; ++itr)
+    auto list = std::make_shared<text_placements_list>();
+    list->defaults.from_xml(node, fontsets);
+    for( auto const& child : node)
     {
-        if (itr->is_text() || !itr->is("Placement")) continue;
-        text_symbolizer_properties &p = list->add();
-        p.format = std::make_shared<char_properties>(*(p.format)); //Make a deep copy
-        p.layout_defaults = std::make_shared<text_layout_properties>(*(p.layout_defaults));
-        //TODO: This needs a real copy constructor for text_symbolizer_properties
-        p.from_xml(*itr, fontsets);
-//TODO:        if (strict_ &&
-//                !p.format.fontset.size())
-//            ensure_font_face(p.format.face_name);
+        if (child.is_text() || !child.is("Placement")) continue;
+        text_symbolizer_properties & p = list->add();
+        p.from_xml(child, fontsets);
+        //if (strict_ && !p.format.fontset.size())
+        //    ensure_font_face(p.format.face_name);
     }
-    return ptr;
+    return list;
 }
 
 } //ns mapnik

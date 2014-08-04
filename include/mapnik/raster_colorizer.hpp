@@ -141,7 +141,7 @@ private:
 };
 
 
-typedef std::vector<colorizer_stop> colorizer_stops;
+using colorizer_stops = std::vector<colorizer_stop>;
 
 
 //! \brief Class representing the raster colorizer
@@ -226,7 +226,7 @@ private:
 };
 
 
-typedef std::shared_ptr<raster_colorizer> raster_colorizer_ptr;
+using raster_colorizer_ptr = std::shared_ptr<raster_colorizer>;
 
 
 } // mapnik namespace

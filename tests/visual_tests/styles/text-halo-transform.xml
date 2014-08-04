@@ -1,0 +1,240 @@
+<Map srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over" background-color="steelblue" minimum-version="0.7.2">
+
+    <Style name="labels">
+        <Rule>
+            <Filter>([id]=0.1)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius=".1"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast .1'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=0.3)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius=".3"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast .3'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=0.5)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius=".5"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast .5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=0.7)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius=".7"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast .7'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=1.0)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius="1"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast 1'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=1.5)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius="1.5"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast 1.5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=2.5)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius="2.5"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast 2.5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=4)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-rasterizer="fast"
+              halo-radius="4"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'fast 4'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=100.1)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius=".1"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full .1'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=100.3)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius=".3"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full .3'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=100.5)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius=".5"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full .5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=100.7)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius=".7"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full .7'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=101)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="1"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full 1'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=101.5)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="1.5"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full 1.5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=102.5)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="2.5"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full 2.5'
+            </TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>([id]=104)</Filter>
+            <TextSymbolizer
+              face-name="DejaVu Sans Book"
+              size="15"
+              halo-radius="4"
+              halo-transform="rotate(-3.14159*[x]*[y]) translate([x],[y])"
+            >
+                'full 4'
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>labels</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+id,x,y
+0.1,1.5,4.5
+0.3,1.5,4
+0.5,1.5,3.5
+0.7,1.5,3
+1,1.5,2.5
+1.5,1.5,2
+2.5,1.5,1.5
+4,1.5,1
+
+100.1,3.5,4.5
+100.3,3.5,4
+100.5,3.5,3.5
+100.7,3.5,3
+101,3.5,2.5
+101.5,3.5,2
+102.5,3.5,1.5
+104,3.5,1
+
+            </Parameter>
+        </Datasource>
+    </Layer>
+    
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+0,0
+5,0
+0,5
+5,5
+            </Parameter>
+        </Datasource>
+    </Layer>
+    
+</Map>

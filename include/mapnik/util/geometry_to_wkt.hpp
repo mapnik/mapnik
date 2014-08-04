@@ -24,16 +24,27 @@
 #define MAPNIK_GEOMETRY_TO_WKT_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/wkt/wkt_generator_grammar.hpp>
 
 namespace mapnik { namespace util {
 
-MAPNIK_DECL bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom);
+inline bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
+{
+    using sink_type = std::back_insert_iterator<std::string>;
+    sink_type sink(wkt);
+    static const mapnik::wkt::wkt_generator<sink_type, mapnik::geometry_type> generator(true);
+    return boost::spirit::karma::generate(sink, generator, geom);
+}
 
-MAPNIK_DECL bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom);
+inline bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
+{
+    using sink_type = std::back_insert_iterator<std::string>;
+    sink_type sink(wkt);
+    static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    return boost::spirit::karma::generate(sink, generator, geom);
+}
 
 }}
-
 
 #endif // MAPNIK_GEOMETRY_TO_WKT_HPP

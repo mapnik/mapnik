@@ -26,11 +26,22 @@
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+
 // mapnik
 #include <mapnik/css_color_grammar.hpp>
-#include <mapnik/image_filter.hpp>
+#include <mapnik/color.hpp>
+
 // stl
-#include <vector>
+#include <cmath>
+
+namespace mapnik {
+
+namespace filter {
+struct color_stop;
+struct colorize_alpha;
+}
+
+}
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::filter::color_stop,
@@ -47,7 +58,7 @@ struct percent_offset_impl
     template <typename T>
     struct result
     {
-        typedef double type;
+        using type = double;
     };
 
     double operator() (double val) const

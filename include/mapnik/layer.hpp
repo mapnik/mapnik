@@ -24,15 +24,19 @@
 #define MAPNIK_LAYER_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/well_known_srs.hpp>
+#include <mapnik/box2d.hpp>
 
 // stl
 #include <vector>
+#include <memory>
 
 namespace mapnik
 {
+
+class datasource;
+using datasource_ptr = std::shared_ptr<datasource>;
+
 /*!
  * @brief A Mapnik map layer.
  *

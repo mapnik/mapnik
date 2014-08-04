@@ -29,7 +29,6 @@
 
 // boost
 #include <boost/iterator/iterator_adaptor.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <memory>
 
 namespace mapnik {
@@ -59,9 +58,9 @@ class path_iterator
                                      boost::forward_traversal_tag>
 {
 public:
-    typedef Value value_type;
-    typedef Container container_type;
-    //typedef typename Container::value_type value_component_type;
+    using value_type = Value;
+    using container_type = Container;
+    //using value_component_type = typename Container::value_type;
 
     /*!
      * @brief Constructor that initializes the reference to the current element to null.
@@ -167,13 +166,12 @@ private:
     std::shared_ptr<Value> first_value_;
 };
 
-/*!
- * @brief Specialization of geometry_iterator, as needed by mapnik::svg::svg_path_data_grammar.
- * The Value type is a std::tuple that holds 5 elements, the command and the x and y coordinate.
- * Each coordinate is stored twice to match the needs of the grammar.
- */
-//typedef path_iterator<std::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
-//                      coord_transform<CoordTransform, geometry_type> > path_iterator_type;
+
+// Specialization of geometry_iterator, as needed by mapnik::svg::svg_path_data_grammar.
+// The Value type is a std::tuple that holds 5 elements, the command and the x and y coordinate.
+// Each coordinate is stored twice to match the needs of the grammar.
+//using path_iterator_type = path_iterator<std::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
+//                      coord_transform<CoordTransform, geometry_type> >;
 
 }}
 

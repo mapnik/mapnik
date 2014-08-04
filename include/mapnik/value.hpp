@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
-#include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
 
@@ -73,7 +72,7 @@ inline void to_utf8(mapnik::value_unicode_string const& input, std::string & tar
     }
 }
 
-typedef boost::variant<value_null,value_bool,value_integer,value_double,value_unicode_string> value_base;
+using value_base = boost::variant<value_null,value_bool,value_integer,value_double,value_unicode_string>;
 
 namespace impl {
 
@@ -341,7 +340,7 @@ struct less_or_equal
 template <typename V>
 struct add : public boost::static_visitor<V>
 {
-    typedef V value_type;
+    using value_type = V;
     value_type operator() (value_unicode_string const& lhs ,
                            value_unicode_string const& rhs ) const
     {
@@ -409,7 +408,7 @@ struct add : public boost::static_visitor<V>
 template <typename V>
 struct sub : public boost::static_visitor<V>
 {
-    typedef V value_type;
+    using value_type = V;
     template <typename T1, typename T2>
     value_type operator() (T1 const& lhs, T2 const&) const
     {
@@ -449,7 +448,7 @@ struct sub : public boost::static_visitor<V>
 template <typename V>
 struct mult : public boost::static_visitor<V>
 {
-    typedef V value_type;
+    using value_type = V;
     template <typename T1, typename T2>
     value_type operator() (T1 const& lhs , T2 const& ) const
     {
@@ -490,7 +489,7 @@ struct mult : public boost::static_visitor<V>
 template <typename V>
 struct div: public boost::static_visitor<V>
 {
-    typedef V value_type;
+    using value_type = V;
     template <typename T1, typename T2>
     value_type operator() (T1 const& lhs, T2 const&) const
     {
@@ -535,7 +534,7 @@ struct div: public boost::static_visitor<V>
 template <typename V>
 struct mod: public boost::static_visitor<V>
 {
-    typedef V value_type;
+    using value_type = V;
     template <typename T1, typename T2>
     value_type operator() (T1 const& lhs, T2 const&) const
     {
@@ -583,7 +582,7 @@ struct mod: public boost::static_visitor<V>
 template <typename V>
 struct negate : public boost::static_visitor<V>
 {
-    typedef V value_type;
+    using value_type = V;
 
     template <typename T>
     value_type operator() (T val) const

@@ -38,7 +38,7 @@ namespace mapnik
 
 class marker;
 
-typedef std::shared_ptr<marker> marker_ptr;
+using marker_ptr = std::shared_ptr<marker>;
 
 
 class MAPNIK_DECL marker_cache :
@@ -55,7 +55,10 @@ private:
     boost::unordered_map<std::string,std::string> svg_cache_;
 public:
     std::string known_svg_prefix_;
-    bool is_uri(std::string const& path);
+    std::string known_image_prefix_;
+    inline bool is_uri(std::string const& path) { return is_svg_uri(path) || is_image_uri(path); }
+    bool is_svg_uri(std::string const& path);
+    bool is_image_uri(std::string const& path);
     boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);
     void clear();
 };

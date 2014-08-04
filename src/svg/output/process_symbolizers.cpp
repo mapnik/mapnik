@@ -23,7 +23,12 @@
 #if defined(SVG_RENDERER)
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
+#include <mapnik/svg/geometry_svg_generator_impl.hpp>
+#include <mapnik/svg/output/svg_output_grammars.hpp>
+#include <boost/spirit/include/karma.hpp>
+#include <mapnik/svg/output/svg_output_attributes.hpp>
 
 namespace mapnik {
 
@@ -49,13 +54,27 @@ bool is_path_based(symbolizer const& sym)
     return boost::apply_visitor(symbol_type_dispatch(), sym);
 }
 
+template <typename OutputIterator, typename PathType>
+void generate_path(OutputIterator & output_iterator, PathType const& path, svg::path_output_attributes const& path_attributes)
+{
+    using path_dash_array_grammar = svg::svg_path_dash_array_grammar<OutputIterator>;
+    using path_attributes_grammar = svg::svg_path_attributes_grammar<OutputIterator>;
+    static const path_attributes_grammar attributes_grammar;
+    static const path_dash_array_grammar dash_array_grammar;
+    static const svg::svg_path_generator<OutputIterator,PathType> svg_path_grammer;
+    boost::spirit::karma::lit_type lit;
+    boost::spirit::karma::generate(output_iterator, lit("<path ") << svg_path_grammer, path);
+    boost::spirit::karma::generate(output_iterator, lit(" ") << dash_array_grammar, path_attributes.stroke_dasharray());
+    boost::spirit::karma::generate(output_iterator, lit(" ") << attributes_grammar << lit("/>\n"), path_attributes);
+}
+
 template <typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            mapnik::feature_impl & feature,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-    typedef coord_transform<CoordTransform, geometry_type> path_type;
+    using path_type = coord_transform<CoordTransform, geometry_type>;
 
     bool process_path = false;
     // process each symbolizer to collect its (path) information.
@@ -78,7 +97,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
             if(geom.size() > 0)
             {
                 path_type path(common_.t_, geom, prj_trans);
-                generator_.generate_path(path, path_attributes_);
+                generate_path(generator_.output_iterator_, path, path_attributes_);
             }
         }
         // set the previously collected values back to their defaults
@@ -95,4 +114,3 @@ template bool svg_renderer<std::ostream_iterator<char> >::process(rule::symboliz
 }
 
 #endif
-

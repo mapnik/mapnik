@@ -80,7 +80,7 @@ struct json_value_visitor : boost::static_visitor<>
 template <typename T>
 struct put_property_visitor : boost::static_visitor<>
 {
-    typedef T value_type;
+    using value_type = T;
 
     put_property_visitor(mapnik::keys key, value_type const& val)
         : key_(key), val_(val) {}
@@ -97,7 +97,7 @@ struct put_property_visitor : boost::static_visitor<>
 
 struct put_property
 {
-    typedef void result_type;
+    using result_type = void;
     template <typename T0,typename T1, typename T2>
     result_type operator() (T0 & sym, T1 const& name, T2 const& val) const
     {
@@ -115,10 +115,10 @@ struct put_property
 template <typename Iterator>
 struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 {
-    typedef boost::variant<value_null,value_bool,value_integer,value_double, std::string> json_value_type;
-    symbolizer_grammar(generic_json<Iterator> & json)
+    using json_value_type = boost::variant<value_null,value_bool,value_integer,value_double, std::string>;
+    symbolizer_grammar()
         : symbolizer_grammar::base_type(sym, "symbolizer"),
-          json_(json)
+          json_()
     {
         using qi::lit;
         using qi::double_;
@@ -201,7 +201,7 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
     }
 
     // generic JSON
-    generic_json<Iterator> & json_;
+    generic_json<Iterator> json_;
     // symbolizer
     qi::rule<Iterator, space_type, mapnik::symbolizer()> sym;
     qi::rule<Iterator,qi::locals<std::string>, void(mapnik::symbolizer&),space_type> property;
@@ -215,4 +215,4 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 
 }}
 
-#endif // MAPNIK_FEATURE_GRAMMAR_HPP
+#endif // MAPNIK_SYMBOLIZER_GRAMMAR_HPP

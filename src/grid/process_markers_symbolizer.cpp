@@ -83,34 +83,31 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef grid_rendering_buffer buf_type;
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
-    typedef label_collision_detector4 detector_type;
+    using buf_type = grid_rendering_buffer;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+    using detector_type = label_collision_detector4;
 
     using namespace mapnik::svg;
-    typedef agg::pod_bvector<path_attributes> svg_attribute_type;
-    typedef svg_renderer_agg<svg_path_adapter,
-                             svg_attribute_type,
-                             renderer_type,
-                             pixfmt_type > svg_renderer_type;
+    using svg_attribute_type = agg::pod_bvector<path_attributes>;
+    using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
+                                               svg_attribute_type,
+                                               renderer_type,
+                                               pixfmt_type>;
 
     buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     ras_ptr->reset();
     box2d<double> clip_box = common_.query_extent_;
 
     auto renderer_context = std::tie(render_buf,*ras_ptr,pixmap_);
-    typedef decltype(renderer_context) context_type;
-
-    typedef vector_markers_rasterizer_dispatch_grid<svg_renderer_type,
-                                                    detector_type,
-                                                    context_type> vector_dispatch_type;
-
-    typedef raster_markers_rasterizer_dispatch_grid<grid_renderer_base_type,
-                                                    renderer_type,
-                                                    detector_type,
-                                                    context_type> raster_dispatch_type;
-
+    using context_type = decltype(renderer_context);
+    using vector_dispatch_type = vector_markers_rasterizer_dispatch_grid<svg_renderer_type,
+                                                                         detector_type,
+                                                                         context_type>;
+    using raster_dispatch_type = raster_markers_rasterizer_dispatch_grid<grid_renderer_base_type,
+                                                                           renderer_type,
+                                                                           detector_type,
+                                                                           context_type>;
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
         sym, feature, prj_trans, common_, clip_box,renderer_context);
 }

@@ -24,7 +24,7 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text/layout.hpp>
+#include <mapnik/text/text_layout.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/debug.hpp>
@@ -33,7 +33,6 @@
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
-
 
 //agg
 #include "agg_conv_clip_polyline.h"
@@ -56,11 +55,12 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      clipped_(get<bool>(sym_, keys::clip, feature_, vars, true)),
+      clipped_(get<bool>(sym_, keys::clip, feature_, vars_, false)),
       placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
+    placement_->properties.evaluate_text_properties(feature_, vars_);
     initialize_geometries();
-    if (!geometries_to_process_.size()) return;
+    if (!geometries_to_process_.size()) return; // FIXME - bad practise
     initialize_points();
 }
 
@@ -77,9 +77,8 @@ struct largest_bbox_first
 
 void base_symbolizer_helper::initialize_geometries()
 {
-    // FIXME
-    bool largest_box_only = get<value_bool>(sym_, keys::largest_box_only, feature_, vars_, false);
-    double minimum_path_length = get<value_double>(sym_, keys::minimum_path_length, feature_, vars_, 0);
+    bool largest_box_only = placement_->properties.largest_bbox_only;
+    double minimum_path_length = placement_->properties.minimum_path_length;
     for ( auto const& geom :  feature_.paths())
     {
         // don't bother with empty geometries
@@ -126,15 +125,13 @@ void base_symbolizer_helper::initialize_points()
     double label_y=0.0;
     double z=0.0;
 
-    std::list<geometry_type*>::const_iterator itr = geometries_to_process_.begin();
-    std::list<geometry_type*>::const_iterator end = geometries_to_process_.end();
-    for (; itr != end; itr++)
+    for (auto * geom_ptr : geometries_to_process_)
     {
-        geometry_type const& geom = **itr;
+        geometry_type const& geom = *geom_ptr;
         if (how_placed == VERTEX_PLACEMENT)
         {
             geom.rewind(0);
-            for(unsigned i = 0; i < geom.size(); i++)
+            for(unsigned i = 0; i < geom.size(); ++i)
             {
                 geom.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);
@@ -182,9 +179,9 @@ text_symbolizer_helper::text_symbolizer_helper(
         proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
         CoordTransform const& t, FaceManagerT & font_manager,
-        DetectorT &detector, const box2d<double> &query_extent)
+        DetectorT &detector, box2d<double> const& query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, vars, detector, dims_, placement_, font_manager, scale_factor),
+      finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
       points_on_line_(false)
 {
     if (geometries_to_process_.size()) finder_.next_position();
@@ -218,8 +215,8 @@ bool text_symbolizer_helper::next_line_placement(bool clipped)
         bool success = false;
         if (clipped)
         {
-            typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-            typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+            using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+            using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
             clipped_geometry_type clipped(**geo_itr_);
             clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
@@ -229,7 +226,7 @@ bool text_symbolizer_helper::next_line_placement(bool clipped)
         }
         else
         {
-            typedef coord_transform<CoordTransform,geometry_type> path_type;
+            using path_type = coord_transform<CoordTransform,geometry_type>;
             path_type path(t_, **geo_itr_, prj_trans_);
             success = finder_.find_line_placements(path, points_on_line_);
         }
@@ -281,7 +278,7 @@ text_symbolizer_helper::text_symbolizer_helper(
         CoordTransform const& t, FaceManagerT & font_manager,
         DetectorT &detector, const box2d<double> &query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, vars, detector, dims_, placement_, font_manager, scale_factor),
+      finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
       points_on_line_(true)
 {
     if (geometries_to_process_.size())

@@ -21,7 +21,8 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/image_filter_types.hpp>
-#include <mapnik/image_filter_grammar.hpp> // image_filter_grammar
+#include <mapnik/image_filter_grammar.hpp>
+#include <mapnik/image_filter_grammar_impl.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>

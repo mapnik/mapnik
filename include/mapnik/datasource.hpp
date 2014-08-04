@@ -28,6 +28,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
+#include <mapnik/featureset.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
@@ -41,14 +42,6 @@
 #include <string>
 
 namespace mapnik {
-
-struct MAPNIK_DECL Featureset : private mapnik::noncopyable
-{
-    virtual feature_ptr next() = 0;
-    virtual ~Featureset() {}
-};
-
-typedef std::shared_ptr<Featureset> featureset_ptr;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
@@ -132,9 +125,9 @@ protected:
     parameters params_;
 };
 
-typedef const char * datasource_name();
-typedef datasource* create_ds(parameters const& params);
-typedef void destroy_ds(datasource *ds);
+using datasource_name = const char* (*)();
+using create_ds = datasource* (*) (parameters const&);
+using destroy_ds = void (*) (datasource *);
 
 class datasource_deleter
 {
@@ -145,7 +138,7 @@ public:
     }
 };
 
-typedef std::shared_ptr<datasource> datasource_ptr;
+using datasource_ptr = std::shared_ptr<datasource>;
 
 #ifdef MAPNIK_STATIC_PLUGINS
     #define DATASOURCE_PLUGIN(classname)

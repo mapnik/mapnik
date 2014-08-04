@@ -24,32 +24,28 @@
 #define MAPNIK_MARKER_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // agg
-#include "agg_path_storage.h"
+#include "agg_array.h"
 
 // boost
-#include <boost/unordered_map.hpp>
-#include <memory>
 #include <boost/optional.hpp>
 
 // stl
-#include <cassert>
-#include <cstring>
+#include <memory>
 
 namespace mapnik
 {
 
-typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;
-typedef mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage> svg_storage_type;
-typedef std::shared_ptr<svg_storage_type> svg_path_ptr;
-typedef std::shared_ptr<image_data_32> image_ptr;
+using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
+using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;
+using svg_path_ptr = std::shared_ptr<svg_storage_type>;
+using image_ptr = std::shared_ptr<image_data_32>;
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
@@ -65,21 +61,14 @@ public:
     }
 
     marker(boost::optional<mapnik::image_ptr> const& data)
-        : bitmap_data_(data)
-    {
-
-    }
+        : bitmap_data_(data) {}
 
     marker(boost::optional<mapnik::svg_path_ptr> const& data)
-        : vector_data_(data)
-    {
-
-    }
+        : vector_data_(data) {}
 
     marker(marker const& rhs)
         : bitmap_data_(rhs.bitmap_data_),
-          vector_data_(rhs.vector_data_)
-    {}
+          vector_data_(rhs.vector_data_) {}
 
     box2d<double> bounding_box() const
     {

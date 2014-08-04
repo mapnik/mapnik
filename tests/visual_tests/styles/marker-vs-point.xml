@@ -53,6 +53,7 @@ x,y
   <Style name="frame">
     <Rule>
       <PointSymbolizer />
+      <DebugSymbolizer />
     </Rule>
   </Style>
   

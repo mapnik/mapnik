@@ -26,7 +26,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/text/layout.hpp>
+#include <mapnik/text/text_layout.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -38,19 +38,18 @@ namespace formatting
 
 using boost::property_tree::ptree;
 
-void text_node::to_xml(ptree &xml) const
+void text_node::to_xml(ptree & xml) const
 {
-    ptree &new_node = xml.push_back(ptree::value_type(
-                                        "<xmltext>", ptree()))->second;
+    ptree & new_node = xml.push_back(ptree::value_type("<xmltext>", ptree()))->second;
     new_node.put_value(to_expression_string(*text_));
 }
 
-node_ptr text_node::from_xml(xml_node const& xml)
+node_ptr text_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
     return std::make_shared<text_node>(xml.get_value<expression_ptr>());
 }
 
-void text_node::apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+void text_node::apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
 {
     mapnik::value_unicode_string text_str = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *text_).to_unicode();
     if (p->text_transform == UPPERCASE)

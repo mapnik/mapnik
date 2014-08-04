@@ -24,29 +24,27 @@
 #define MAPNIK_POOL_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
+#include <mapnik/unique_lock.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // boost
 #include <memory>
 #ifdef MAPNIK_THREADSAFE
-#include <thread>
+#include <mutex>
 #endif
 
 // stl
-#include <map>
+#include <algorithm> // std::max
 #include <deque>
-#include <ctime>
-#include <cassert>
 
 namespace mapnik
 {
 template <typename T,template <typename> class Creator>
 class Pool : private mapnik::noncopyable
 {
-    typedef std::shared_ptr<T> HolderType;
-    typedef std::deque<HolderType> ContType;
+    using HolderType = std::shared_ptr<T>;
+    using ContType = std::deque<HolderType>;
 
     Creator<T> creator_;
     unsigned initialSize_;
@@ -85,13 +83,10 @@ public:
             }
             else if ((*itr)->isOK())
             {
-                MAPNIK_LOG_DEBUG(pool) << "pool: Borrow instance=" << (*itr).get();
                 return *itr;
             }
             else
             {
-                MAPNIK_LOG_DEBUG(pool) << "pool: Bad connection (erase) instance=" << (*itr).get();
-
                 itr=pool_.erase(itr);
             }
         }
@@ -102,9 +97,6 @@ public:
             if (conn->isOK())
             {
                 pool_.push_back(conn);
-
-                MAPNIK_LOG_DEBUG(pool) << "pool: Create connection=" << conn.get();
-
                 return conn;
             }
         }

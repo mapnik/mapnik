@@ -49,7 +49,7 @@ struct unicode_impl
     template <typename T>
     struct result
     {
-        typedef mapnik::value_unicode_string type;
+        using type = mapnik::value_unicode_string;
     };
 
     explicit unicode_impl(mapnik::transcoder const& tr)
@@ -68,7 +68,7 @@ struct regex_match_impl
     template <typename T>
     struct result
     {
-        typedef expr_node type;
+        using type = expr_node;
     };
 
     explicit regex_match_impl(mapnik::transcoder const& tr)
@@ -86,7 +86,7 @@ struct regex_replace_impl
     template <typename T>
     struct result
     {
-        typedef expr_node type;
+        using type = expr_node;
     };
 
     explicit regex_replace_impl(mapnik::transcoder const& tr)
@@ -114,7 +114,7 @@ struct geometry_types : qi::symbols<char,mapnik::value_integer>
 template <typename T>
 struct integer_parser
 {
-    typedef qi::int_parser<T,10,1,-1> type;
+    using type = qi::int_parser<T,10,1,-1>;
 };
 
 #ifdef __GNUC__
@@ -125,7 +125,7 @@ template <typename Iterator>
 struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 #endif
 {
-    typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
+    using rule_type = qi::rule<Iterator, expr_node(), space_type>;
 
     explicit expression_grammar(std::string const& encoding = "utf-8");
 

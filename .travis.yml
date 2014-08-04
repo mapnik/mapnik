@@ -1,18 +1,15 @@
 language: cpp
 
 compiler:
- - gcc
  - clang
+ - gcc
 
 addons:
   postgresql: "9.3"
 
-env:
-  - TESTS_TO_RUN=python BINDINGS=python CPP_TESTS=false BENCHMARK=false DEMO=False
-  - TESTS_TO_RUN=visual BINDINGS=python CPP_TESTS=false BENCHMARK=false DEMO=False
-  - TESTS_TO_RUN=cpp BINDINGS=none CPP_TESTS=true BENCHMARK=true DEMO=True
-
 before_install:
+ - nproc
+ - free
  # we need at least g++-4.7 for c++11 features
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  # grab more recent gdal/proj
@@ -21,30 +18,28 @@ before_install:
  # more recent boost
  - sudo add-apt-repository -y ppa:boost-latest/ppa
  - sudo apt-get update -y
- # upgrade compilers
- - sudo apt-get install -y gcc-4.8 g++-4.8
- - sudo apt-get install -y make boost1.55 libgdal-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
- - wget http://mapnik.s3.amazonaws.com/deps/harfbuzz-0.9.29.tar.bz2
- - tar xf harfbuzz-0.9.29.tar.bz2
- - cd harfbuzz-0.9.29
- - ./configure && make && sudo make install
+ - sudo apt-get install -y gcc-4.8 g++-4.8 make boost1.55 libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
+ - if [[ "${CXX}" == 'g++' ]]; then export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
+ - if [[ "${CXX}" == 'clang++' ]]; then export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
+ - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
+ - tar xf harfbuzz-0.9.34.tar.bz2
+ - cd harfbuzz-0.9.34
+ - ./configure --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make && sudo make install
  - sudo ldconfig
  - cd ../
 
 install:
- - if [[ "${CXX}" == 'g++' ]]; then export CXX="g++-4.8" && export CC="gcc-4.8"; fi;
- - ./configure CXX="nice ${CXX}" CC="nice ${CC}" DEMO=${DEMO} BINDINGS=${BINDINGS} BENCHMARK=${BENCHMARK} CPP_TESTS=${CPP_TESTS} CAIRO=True FAST=True
- - JOBS=3 make
+ - ./configure CXX="${CXX}" CC="${CC}" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True
+ - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=2 make; else JOBS=6 make; fi;
 
 before_script:
- - make test-$TESTS_TO_RUN
+ - make test
 
 script:
- - if [[ "${BENCHMARK}" == true ]]; then make bench; fi;
+ - make bench
 
 notifications:
   irc:
     channels:
       - "irc.freenode.org#mapnik"
-
     use_notice: true

@@ -24,7 +24,7 @@
 #define MAPNIK_FEATURESET_BUFFER_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
+#include <mapnik/featureset.hpp>
 
 #include <vector>
 

@@ -1,10 +1,10 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
-//#include <mapnik/value_types.hpp>
+#include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
-//#include <mapnik/params.hpp>
-//#include <mapnik/boolean.hpp>
 
 #include <vector>
 #include <algorithm>
@@ -68,7 +68,6 @@ int main(int argc, char** argv)
     m2 = std::move(m1);
     BOOST_TEST(m2 == m0);
     BOOST_TEST(m1 != m0);
-
 
     BOOST_TEST(m0 == m2);
 

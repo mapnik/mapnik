@@ -38,7 +38,7 @@ namespace mapnik
 {
 
 class vertex_cache;
-typedef std::shared_ptr<vertex_cache> vertex_cache_ptr;
+using vertex_cache_ptr = std::shared_ptr<vertex_cache>;
 
 /** Caches all path points and their lengths. Allows easy moving in both directions. */
 class vertex_cache
@@ -59,7 +59,7 @@ class vertex_cache
             vector.push_back(segment(x, y, len));
             length += len;
         }
-        typedef std::vector<segment>::iterator iterator;
+        using iterator = std::vector<segment>::iterator;
         std::vector<segment> vector;
         double length;
     };
@@ -161,7 +161,7 @@ private:
     /** Is the value in angle_ valid?
      * Used to avoid unnecessary calculations. */
     mutable bool angle_valid_;
-    typedef std::map<double, vertex_cache_ptr> offseted_lines_map;
+    using offseted_lines_map = std::map<double, vertex_cache_ptr>;
     /** Cache of all offseted lines already computed. */
     offseted_lines_map offseted_lines_;
     /** Linear position, i.e distance from start of line. */

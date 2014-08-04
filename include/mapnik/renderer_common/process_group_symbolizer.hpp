@@ -38,6 +38,7 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 #include <mapnik/text/placements_list.hpp>
+#include <mapnik/util/conversions.hpp>
 
 #include <agg_trans_affine.h>
 
@@ -45,27 +46,25 @@ namespace mapnik {
 
 class proj_transform;
 
-/* General:
- *
- * The approach here is to run the normal symbolizers, but in
- * a 'virtual' blank environment where the changes that they
- * make are recorded (the detector, the render_* calls).
- *
- * The recorded boxes are then used to lay out the items and
- * the offsets from old to new positions can be used to perform
- * the actual rendering calls.
- *
- * This should allow us to re-use as much as possible of the
- * existing symbolizer layout and rendering code while still
- * being able to interpose our own decisions about whether
- * a collision has occured or not.
- */
+// General:
 
-/**
- * Thunk for rendering a particular instance of a point - this
- * stores all the arguments necessary to re-render this point
- * symbolizer at a later time.
- */
+// The approach here is to run the normal symbolizers, but in
+// a 'virtual' blank environment where the changes that they
+// make are recorded (the detector, the render_* calls).
+//
+// The recorded boxes are then used to lay out the items and
+// the offsets from old to new positions can be used to perform
+// the actual rendering calls.
+
+// This should allow us to re-use as much as possible of the
+// existing symbolizer layout and rendering code while still
+// being able to interpose our own decisions about whether
+// a collision has occured or not.
+
+// Thunk for rendering a particular instance of a point - this
+// stores all the arguments necessary to re-render this point
+// symbolizer at a later time.
+
 struct point_render_thunk
 {
     pixel_position pos_;
@@ -74,8 +73,8 @@ struct point_render_thunk
     double opacity_;
     composite_mode_e comp_op_;
 
-    point_render_thunk(pixel_position const &pos, marker const &m,
-                       agg::trans_affine const &tr, double opacity,
+    point_render_thunk(pixel_position const& pos, marker const& m,
+                       agg::trans_affine const& tr, double opacity,
                        composite_mode_e comp_op);
 };
 
@@ -90,65 +89,63 @@ struct text_render_thunk
     composite_mode_e comp_op_;
     halo_rasterizer_enum halo_rasterizer_;
 
-    text_render_thunk(placements_list const &placements,
+    text_render_thunk(placements_list const&    placements,
                       double opacity, composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer);
 };
 
-/**
- * Variant type for render thunks to allow us to re-render them
- * via a static visitor later.
- */
-typedef boost::variant<point_render_thunk,
-                       text_render_thunk> render_thunk;
-typedef std::shared_ptr<render_thunk> render_thunk_ptr;
-typedef std::list<render_thunk_ptr> render_thunk_list;
+// Variant type for render thunks to allow us to re-render them
+// via a static visitor later.
 
-/**
- * Base class for extracting the bounding boxes associated with placing
- * a symbolizer at a fake, virtual point - not real geometry.
- *
- * The bounding boxes can be used for layout, and the thunks are
- * used to re-render at locations according to the group layout.
- */
+using render_thunk = boost::variant<point_render_thunk,
+                                    text_render_thunk>;
+using render_thunk_ptr = std::shared_ptr<render_thunk>;
+using render_thunk_list = std::list<render_thunk_ptr>;
+
+// Base class for extracting the bounding boxes associated with placing
+// a symbolizer at a fake, virtual point - not real geometry.
+//
+// The bounding boxes can be used for layout, and the thunks are
+// used to re-render at locations according to the group layout.
+
 struct render_thunk_extractor : public boost::static_visitor<>
 {
-    render_thunk_extractor(box2d<double> &box,
-                           render_thunk_list &thunks,
-                           feature_impl &feature,
+    render_thunk_extractor(box2d<double> & box,
+                           render_thunk_list & thunks,
+                           feature_impl & feature,
                            attributes const& vars,
-                           proj_transform const &prj_trans,
-                           renderer_common &common,
-                           box2d<double> const &clipping_extent);
+                           proj_transform const& prj_trans,
+                           renderer_common & common,
+                           box2d<double> const& clipping_extent);
 
-    void operator()(point_symbolizer const &sym) const;
+    void operator()(point_symbolizer const& sym) const;
 
-    void operator()(text_symbolizer const &sym) const;
+    void operator()(text_symbolizer const& sym) const;
 
-    void operator()(shield_symbolizer const &sym) const;
+    void operator()(shield_symbolizer const& sym) const;
 
     template <typename T>
-    void operator()(T const &) const
+    void operator()(T const& ) const
     {
         // TODO: warning if unimplemented?
     }
 
 private:
-    void extract_text_thunk(text_symbolizer_helper &helper, text_symbolizer const &sym) const;
+    void extract_text_thunk(text_symbolizer_helper & helper, text_symbolizer const& sym) const;
 
-    box2d<double> &box_;
-    render_thunk_list &thunks_;
+    box2d<double> & box_;
+    render_thunk_list & thunks_;
     feature_impl & feature_;
     attributes const& vars_;
-    proj_transform const &prj_trans_;
-    renderer_common &common_;
+    proj_transform const& prj_trans_;
+    renderer_common & common_;
     box2d<double> clipping_extent_;
 
     void update_box() const;
 };
 
-geometry_type *origin_point(proj_transform const &prj_trans,
-                            renderer_common const &common);
+geometry_type *origin_point(proj_transform const& prj_trans,
+                            renderer_common const& common);
 
 template <typename F>
 void render_offset_placements(placements_list const& placements,
@@ -182,12 +179,12 @@ void render_offset_placements(placements_list const& placements,
 }
 
 template <typename F>
-void render_group_symbolizer(group_symbolizer const &sym,
+void render_group_symbolizer(group_symbolizer const& sym,
                              feature_impl & feature,
                              attributes const& vars,
-                             proj_transform const & prj_trans,
-                             box2d<double> const & clipping_extent,
-                             renderer_common &common,
+                             proj_transform const& prj_trans,
+                             box2d<double> const& clipping_extent,
+                             renderer_common & common,
                              F render_thunks)
 {
     // find all column names referenced in the group rules and symbolizers
@@ -245,9 +242,13 @@ void render_group_symbolizer(group_symbolizer const &sym,
                 else
                 {
                     // indexed column
-                    std::string col_idx_name = col_name;
-                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-                    sub_feature->put(col_name, feature.get(col_idx_name));
+                    std::string col_idx_str;
+                    if (mapnik::util::to_string(col_idx_str,col_idx))
+                    {
+                        std::string col_idx_name = col_name;
+                        boost::replace_all(col_idx_name, "%", col_idx_str);
+                        sub_feature->put(col_name, feature.get(col_idx_name));
+                    }
                 }
             }
             else
@@ -319,7 +320,8 @@ void render_group_symbolizer(group_symbolizer const &sym,
             // evalute the repeat key with the matched sub feature if we have one
             if (rpt_key_expr)
             {
-                rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_), *rpt_key_expr).to_unicode();
+                rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),
+                                                     *rpt_key_expr).to_unicode();
             }
             helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
         }
@@ -334,9 +336,8 @@ void render_group_symbolizer(group_symbolizer const &sym,
     {
         for (size_t layout_i = 0; layout_i < num_layout_thunks; ++layout_i)
         {
-            const pixel_position &offset = layout_manager.offset_at(layout_i);
+            pixel_position const& offset = layout_manager.offset_at(layout_i);
             pixel_position render_offset = pos + offset;
-
             render_thunks(layout_thunks[layout_i], render_offset);
         }
     }

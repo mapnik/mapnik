@@ -37,7 +37,6 @@ namespace mapnik { namespace svg {
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/karma_omit.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/repository/include/karma_confix.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/fusion/include/std_pair.hpp>
@@ -103,17 +102,16 @@ struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
         karma::lit_type lit;
         karma::double_type double_;
         karma::string_type kstring;
-        repository::confix_type confix;
 
         svg_path_attributes =
-            lit("fill=") << confix('"', '"')[kstring]
-                         << lit(" fill-opacity=") << confix('"', '"')[double_]
-                         << lit(" stroke=") << confix('"', '"')[kstring]
-                         << lit(" stroke-opacity=") << confix('"', '"')[double_]
-                         << lit(" stroke-width=") << confix('"', '"')[double_ << lit("px")]
-                         << lit(" stroke-linecap=") << confix('"', '"')[kstring]
-                         << lit(" stroke-linejoin=") << confix('"', '"')[kstring]
-                         << lit(" stroke-dashoffset=") << confix('"', '"')[double_ << lit("px")];
+            lit("fill=") << lit('"') << kstring << lit('"')
+                         << lit(" fill-opacity=\"") << double_ << lit('"')
+                         << lit(" stroke=") << kstring << lit('"')
+                         << lit(" stroke-opacity=") << double_ << lit('"')
+                         << lit(" stroke-width=") << double_ << lit("px") << lit('"')
+                         << lit(" stroke-linecap=") << kstring << lit('"')
+                         << lit(" stroke-linejoin=") << kstring << lit('"')
+                         << lit(" stroke-dashoffset=") << double_ << lit("px") << lit('"');
     }
 
     karma::rule<OutputIterator, mapnik::svg::path_output_attributes()> svg_path_attributes;
@@ -127,12 +125,9 @@ struct svg_path_dash_array_grammar : karma::grammar<OutputIterator, mapnik::dash
     {
         karma::double_type double_;
         karma::lit_type lit;
-        repository::confix_type confix;
 
-        svg_path_dash_array =
-            lit("stroke-dasharray=")
-            << confix('"', '"')[
-                -((double_ << lit(',') << double_) % lit(','))];
+        svg_path_dash_array = lit("stroke-dasharray=") <<
+                -((double_ << lit(',') << double_) % lit(',')) << lit('"');
     }
 
     karma::rule<OutputIterator, mapnik::dash_array()> svg_path_dash_array;
@@ -147,14 +142,13 @@ struct svg_rect_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
         karma::lit_type lit;
         karma::int_type int_;
         karma::string_type kstring;
-        repository::confix_type confix;
 
         svg_rect_attributes =
-            lit("x=") << confix('"', '"')[int_]
-                      << lit(" y=") << confix('"', '"')[int_]
-                      << lit(" width=") << confix('"', '"')[int_ << lit("px")]
-                      << lit(" height=") << confix('"', '"')[int_ << lit("px")]
-                      << lit(" fill=") << confix('"', '"')[kstring];
+            lit("x=") << lit('"') << int_ << lit('"')
+                      << lit(" y=") << int_ << lit('"')
+                      << lit(" width=") << int_ << lit("px") << lit('"')
+                      << lit(" height=") << int_ << lit("px") << lit('"')
+                      << lit(" fill=") << kstring << lit('"');
     }
 
     karma::rule<OutputIterator, mapnik::svg::rect_output_attributes()> svg_rect_attributes;
@@ -170,13 +164,12 @@ struct svg_root_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
         karma::int_type int_;
         karma::string_type kstring;
         karma::double_type double_;
-        repository::confix_type confix;
 
         svg_root_attributes =
-            lit("width=") << confix('"', '"')[int_ << lit("px")]
-                          << lit(" height=") << confix('"', '"')[int_ << lit("px")]
-                          << " version=" << confix('"', '"')[double_]
-                          << " xmlns=" << confix('"', '"')[kstring]
+            lit("width=") << lit('"') << int_ << lit("px") << lit('"')
+                          << lit(" height=") << int_ << lit("px") << lit('"')
+                          << " version=" << double_ << lit('"')
+                          << " xmlns=" << kstring << lit('"')
                           << lit(" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"");
     }
 

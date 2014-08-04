@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/rule.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -35,6 +34,7 @@
 
 // stl
 #include <vector>
+#include <cstddef>
 
 namespace mapnik
 {
@@ -49,7 +49,7 @@ enum filter_mode_enum {
 
 DEFINE_ENUM( filter_mode_e, filter_mode_enum );
 
-typedef std::vector<rule> rules;
+using rules = std::vector<rule>;
 
 class MAPNIK_DECL feature_type_style
 {

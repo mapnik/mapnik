@@ -42,7 +42,7 @@ namespace mapnik
 class string_info : private mapnik::noncopyable
 {
 protected:
-    typedef std::vector<char_info> characters_t;
+    using characters_t = std::vector<char_info>;
     characters_t characters_;
     mapnik::value_unicode_string text_;
     bool is_rtl;
@@ -118,7 +118,7 @@ public:
     }
 };
 
-typedef char_info const * char_info_ptr;
+using char_info_ptr = char_info const *;
 
 
 // List of all characters and their positions and formats for a placement.
@@ -151,7 +151,7 @@ class text_path : mapnik::noncopyable
 
     mutable int itr_;
 public:
-    typedef std::vector<character_node> character_nodes_t;
+    using character_nodes_t = std::vector<character_node>;
     pixel_position center;
     character_nodes_t nodes_;
 
@@ -196,8 +196,8 @@ public:
     }
 };
 
-typedef std::shared_ptr<text_path> text_path_ptr;
-typedef boost::ptr_vector<text_path> placements_type;
+using text_path_ptr = std::shared_ptr<text_path>;
+using placements_type = boost::ptr_vector<text_path>;
 }
 
 #endif // MAPNIK_TEXT_PATH_HPP

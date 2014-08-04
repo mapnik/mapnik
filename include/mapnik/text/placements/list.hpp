@@ -28,24 +28,24 @@ namespace mapnik {
 class text_placement_info_list;
 
 
-/** Tries a list of placements. */
+// Tries a list of placements.
 class text_placements_list: public text_placements
 {
 public:
     text_placements_list();
     text_placement_info_ptr get_placement_info(double scale_factor) const;
-    virtual void add_expressions(expression_set &output);
+    virtual void add_expressions(expression_set & output) const;
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);
     unsigned size() const;
-    static text_placements_ptr from_xml(xml_node const &xml, fontset_map const & fontsets);
+    static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
 private:
     std::vector<text_symbolizer_properties> list_;
     friend class text_placement_info_list;
 };
 
-/** List placement strategy.
- * See parent class for documentation of each function. */
+// List placement strategy.
+// See parent class for documentation of each function.
 class text_placement_info_list : public text_placement_info
 {
 public:

@@ -141,9 +141,9 @@ int main (int argc,char** argv)
                 continue;
             }
 
-            typedef agg::pixfmt_rgba32_pre pixfmt;
-            typedef agg::renderer_base<pixfmt> renderer_base;
-            typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
+            using pixfmt = agg::pixfmt_rgba32_pre;
+            using renderer_base = agg::renderer_base<pixfmt>;
+            using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
             agg::rasterizer_scanline_aa<> ras_ptr;
             agg::scanline_u8 sl;
 
@@ -155,7 +155,7 @@ int main (int argc,char** argv)
                 std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
             }
             // 10 pixel buffer to avoid edge clipping of 100% svg's
-            mapnik::image_32 im(w+10,h+10);
+            mapnik::image_32 im(w+0,h+0);
             agg::rendering_buffer buf(im.raw_data(), im.width(), im.height(), im.width() * 4);
             pixfmt pixf(buf);
             renderer_base renb(pixf);

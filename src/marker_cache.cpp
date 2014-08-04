@@ -45,7 +45,8 @@ namespace mapnik
 {
 
 marker_cache::marker_cache()
-    : known_svg_prefix_("shape://")
+    : known_svg_prefix_("shape://"),
+      known_image_prefix_("image://")
 {
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"
@@ -57,6 +58,10 @@ marker_cache::marker_cache()
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
                "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
+    boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_32>(4,4));
+    (*bitmap_data)->set(0xff000000);
+    marker_ptr mark = std::make_shared<mapnik::marker>(bitmap_data);
+    marker_cache_.insert(std::make_pair("image://square",mark));
 }
 
 marker_cache::~marker_cache() {}
@@ -66,7 +71,7 @@ void marker_cache::clear()
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
+    using iterator_type = boost::unordered_map<std::string, marker_ptr>::const_iterator;
     iterator_type itr = marker_cache_.begin();
     while(itr != marker_cache_.end())
     {
@@ -81,15 +86,20 @@ void marker_cache::clear()
     }
 }
 
-bool marker_cache::is_uri(std::string const& path)
+bool marker_cache::is_svg_uri(std::string const& path)
 {
     return boost::algorithm::starts_with(path,known_svg_prefix_);
+}
+
+bool marker_cache::is_image_uri(std::string const& path)
+{
+    return boost::algorithm::starts_with(path,known_image_prefix_);
 }
 
 bool marker_cache::insert_svg(std::string const& name, std::string const& svg_string)
 {
     std::string key = known_svg_prefix_ + name;
-    typedef boost::unordered_map<std::string, std::string>::const_iterator iterator_type;
+    using iterator_type = boost::unordered_map<std::string, std::string>::const_iterator;
     iterator_type itr = svg_cache_.find(key);
     if (itr == svg_cache_.end())
     {
@@ -119,7 +129,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
+    using iterator_type = boost::unordered_map<std::string, marker_ptr>::const_iterator;
     iterator_type itr = marker_cache_.find(uri);
     if (itr != marker_cache_.end())
     {
@@ -130,7 +140,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
     try
     {
         // if uri references a built-in marker
-        if (is_uri(uri))
+        if (is_svg_uri(uri))
         {
             boost::unordered_map<std::string, std::string>::const_iterator mark_itr = svg_cache_.find(uri);
             if (mark_itr == svg_cache_.end())

@@ -41,10 +41,10 @@ class quad_tree : mapnik::noncopyable
 {
     struct node
     {
-        typedef T value_t;
-        typedef std::vector<T> cont_t;
-        typedef typename cont_t::iterator iterator;
-        typedef typename cont_t::const_iterator const_iterator;
+        using value_t = T;
+        using cont_t = std::vector<T>;
+        using iterator = typename cont_t::iterator;
+        using const_iterator = typename cont_t::const_iterator;
         box2d<double> extent_;
         cont_t cont_;
         node * children_[4];
@@ -82,15 +82,15 @@ class quad_tree : mapnik::noncopyable
         ~node () {}
     };
 
-    typedef boost::ptr_vector<node> nodes_t;
-    typedef typename node::cont_t cont_t;
-    typedef typename cont_t::iterator node_data_iterator;
+    using nodes_t = boost::ptr_vector<node>;
+    using cont_t = typename node::cont_t;
+    using node_data_iterator = typename cont_t::iterator;
 
 public:
-    typedef typename nodes_t::iterator iterator;
-    typedef typename nodes_t::const_iterator const_iterator;
-    typedef typename boost::ptr_vector<T,boost::view_clone_allocator> result_t;
-    typedef typename result_t::iterator query_iterator;
+    using iterator = typename nodes_t::iterator;
+    using const_iterator = typename nodes_t::const_iterator;
+    using result_t = typename boost::ptr_vector<T,boost::view_clone_allocator>;
+    using query_iterator = typename result_t::iterator;
 
 
     explicit quad_tree(box2d<double> const& ext,

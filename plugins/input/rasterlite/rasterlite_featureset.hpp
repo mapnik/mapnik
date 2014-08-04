@@ -33,7 +33,7 @@
 
 #include "rasterlite_include.hpp"
 
-typedef boost::variant<mapnik::query,mapnik::coord2d> rasterlite_query;
+using rasterlite_query = boost::variant<mapnik::query,mapnik::coord2d>;
 
 class rasterlite_featureset : public mapnik::Featureset
 {

@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
 #include <mapnik/noncopyable.hpp>       // for noncopyable
 #include <mapnik/rule.hpp>              // for rule, symbolizers
 #include <mapnik/box2d.hpp>     // for box2d
@@ -35,10 +34,11 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
-#include <mapnik/gamma_method.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
-// boost
+#include <mapnik/image_data.hpp>
 
+// stl
 #include <memory>
 
 // fwd declaration to avoid dependence on agg headers
@@ -64,9 +64,9 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
 {
 
 public:
-    typedef T0 buffer_type;
-    typedef agg_renderer<T0> processor_impl_type;
-    typedef T1 detector_type;
+    using buffer_type = T0;
+    using processor_impl_type = agg_renderer<T0>;
+    using detector_type = T1;
     // create with default, empty placement detector
     agg_renderer(Map const& m, buffer_type & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
@@ -181,6 +181,9 @@ private:
     renderer_common common_;
     void setup(Map const& m);
 };
-}
+
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker, agg::trans_affine const& tr);
+
+} // namespace mapnik
 
 #endif // MAPNIK_AGG_RENDERER_HPP

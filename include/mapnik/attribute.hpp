@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/value.hpp>
 
 // stl
@@ -80,7 +79,7 @@ struct global_attribute
     }
 };
 
-typedef std::unordered_map<std::string, value> attributes;
+using attributes = std::unordered_map<std::string, value>;
 
 }
 

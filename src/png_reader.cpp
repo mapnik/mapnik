@@ -44,8 +44,8 @@ namespace mapnik
 template <typename T>
 class png_reader : public image_reader
 {
-    typedef T source_type;
-    typedef boost::iostreams::stream<source_type> input_stream;
+    using source_type = T;
+    using input_stream = boost::iostreams::stream<source_type>;
 
     struct png_struct_guard
     {

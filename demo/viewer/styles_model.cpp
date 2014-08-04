@@ -325,7 +325,7 @@ StyleModel::StyleModel(std::shared_ptr<mapnik::Map> map, QObject * parent)
     : QAbstractItemModel(parent),
       root_(new node(map_node(map)))
 {
-    typedef std::map<std::string,mapnik::feature_type_style> style_type;
+    using style_type = std::map<std::string,mapnik::feature_type_style>;
     style_type const & styles = map->styles();
     style_type::const_iterator itr = styles.begin();
     style_type::const_iterator end = styles.end();

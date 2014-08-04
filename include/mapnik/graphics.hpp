@@ -24,6 +24,7 @@
 #define MAPNIK_GRAPHICS_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
@@ -31,21 +32,20 @@
 #include <mapnik/global.hpp>
 
 // stl
-#include <cmath>
 #include <string>
-#include <cassert>
-#include <cstring>
-
-// cairo
-#ifdef HAVE_CAIRO
-#include <mapnik/cairo/cairo_context.hpp>
-#endif
+#include <cstring> // memset
+#include <memory>
 
 // boost
 #include <boost/optional/optional.hpp>
 
+struct _cairo_surface;
+typedef struct _cairo_surface cairo_surface_t;
+
 namespace mapnik
 {
+
+using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 class MAPNIK_DECL image_32
 {
@@ -166,14 +166,10 @@ public:
 
                 for (int x = box.minx(); x < box.maxx(); ++x)
                 {
-#ifdef MAPNIK_BIG_ENDIAN
-                    row_to[x] = row_from[x-x0];
-#else
                     if (row_from[x-x0] & 0xff000000)
                     {
                         row_to[x] = row_from[x-x0];
                     }
-#endif
                 }
             }
         }
@@ -195,32 +191,6 @@ public:
                 {
                     unsigned rgba0 = row_to[x];
                     unsigned rgba1 = row_from[x-x0];
-
-#ifdef MAPNIK_BIG_ENDIAN
-                    unsigned a1 = rgba1 & 0xff;
-                    if (a1 == 0) continue;
-                    if (a1 == 0xff)
-                    {
-                        row_to[x] = rgba1;
-                        continue;
-                    }
-                    unsigned r1 = (rgba1 >> 24) & 0xff;
-                    unsigned g1 = (rgba1 >> 16 ) & 0xff;
-                    unsigned b1 = (rgba1 >> 8) & 0xff;
-
-                    unsigned a0 = rgba0 & 0xff;
-                    unsigned r0 = ((rgba0 >> 24) & 0xff) * a0;
-                    unsigned g0 = ((rgba0 >> 16 ) & 0xff) * a0;
-                    unsigned b0 = ((rgba0 >> 8) & 0xff) * a0;
-
-                    a0 = ((a1 + a0) << 8) - a0*a1;
-
-                    r0 = ((((r1 << 8) - r0) * a1 + (r0 << 8)) / a0);
-                    g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
-                    b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
-                    a0 = a0 >> 8;
-                    row_to[x] = (a0) | (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
-#else
                     unsigned a1 = (rgba1 >> 24) & 0xff;
                     if (a1 == 0) continue;
                     if (a1 == 0xff)
@@ -244,7 +214,6 @@ public:
                     b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
                     a0 = a0 >> 8;
                     row_to[x] = (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
-#endif
                 }
             }
         }
@@ -266,34 +235,6 @@ public:
                 {
                     unsigned rgba0 = row_to[x];
                     unsigned rgba1 = row_from[x-x0];
-#ifdef MAPNIK_BIG_ENDIAN
-                    unsigned a1 = int( (rgba1 & 0xff) * opacity );
-                    if (a1 == 0) continue;
-                    if (a1 == 0xff)
-                    {
-                        row_to[x] = rgba1;
-                        continue;
-                    }
-                    unsigned r1 = (rgba1 >> 24) & 0xff;
-                    unsigned g1 = (rgba1 >> 16 ) & 0xff;
-                    unsigned b1 = (rgba1 >> 8) & 0xff;
-
-                    unsigned a0 = rgba0 & 0xff;
-                    unsigned r0 = (rgba0 >> 24) & 0xff ;
-                    unsigned g0 = (rgba0 >> 16 ) & 0xff;
-                    unsigned b0 = (rgba0 >> 8) & 0xff;
-
-                    unsigned atmp = a1 + a0 - ((a1 * a0 + 255) >> 8);
-                    if (atmp)
-                    {
-                        r0 = byte((r1 * a1 + (r0 * a0) - ((r0 * a0 * a1 + 255) >> 8)) / atmp);
-                        g0 = byte((g1 * a1 + (g0 * a0) - ((g0 * a0 * a1 + 255) >> 8)) / atmp);
-                        b0 = byte((b1 * a1 + (b0 * a0) - ((b0 * a0 * a1 + 255) >> 8)) / atmp);
-                    }
-                    a0 = byte(atmp);
-
-                    row_to[x] = (a0)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
-#else
                     unsigned a1 = int( ((rgba1 >> 24) & 0xff) * opacity );
                     if (a1 == 0) continue;
                     if (a1 == 0xff)
@@ -320,7 +261,6 @@ public:
                     a0 = byte(atmp);
 
                     row_to[x] = (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
-#endif
                 }
             }
         }
@@ -343,28 +283,6 @@ public:
                 {
                     unsigned rgba0 = row_to[x];
                     unsigned rgba1 = row_from[x-x0];
-#ifdef MAPNIK_BIG_ENDIAN
-                    unsigned a1 = int( (rgba1 & 0xff) * opacity );
-                    if (a1 == 0) continue;
-                    unsigned r1 = (rgba1 >> 24)& 0xff;
-                    unsigned g1 = (rgba1 >> 16 ) & 0xff;
-                    unsigned b1 = (rgba1 >> 8) & 0xff;
-
-                    unsigned a0 = rgba0 & 0xff;
-                    unsigned r0 = (rgba0 >> 24) & 0xff ;
-                    unsigned g0 = (rgba0 >> 16 ) & 0xff;
-                    unsigned b0 = (rgba0 >> 8) & 0xff;
-
-                    unsigned a = (a1 * 255 + (255 - a1) * a0 + 127)/255;
-
-                    MergeMethod::mergeRGB(r0,g0,b0,r1,g1,b1);
-
-                    r0 = (r1*a1 + (((255 - a1) * a0 + 127)/255) * r0 + 127)/a;
-                    g0 = (g1*a1 + (((255 - a1) * a0 + 127)/255) * g0 + 127)/a;
-                    b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
-
-                    row_to[x] = (a)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
-#else
                     unsigned a1 = int( ((rgba1 >> 24) & 0xff) * opacity );
                     if (a1 == 0) continue;
                     unsigned r1 = rgba1 & 0xff;
@@ -385,7 +303,6 @@ public:
                     b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
 
                     row_to[x] = (a << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
-#endif
                 }
             }
         }

@@ -3,14 +3,14 @@
     <Style name="1">
         <Rule>
             <Filter>([label]='center')</Filter>
-            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" wrap-character="," wrap-width="1" halo-radius="1">'one
+            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" wrap-width="1" halo-radius="1">'one
 two
 three'</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>
         <Rule>
             <ElseFilter/>
-            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" wrap-character="," wrap-width="1" halo-radius="1">[label]</TextSymbolizer>
+            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" wrap-width="1" halo-radius="1">[label]</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>        
     </Style>

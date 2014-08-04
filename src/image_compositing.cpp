@@ -39,7 +39,7 @@
 namespace mapnik
 {
 
-typedef boost::bimap<composite_mode_e, std::string> comp_op_lookup_type;
+using comp_op_lookup_type = boost::bimap<composite_mode_e, std::string>;
 static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lookup_type::relation>
     (clear,"clear")
     (src,"src")
@@ -75,6 +75,9 @@ static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lo
     (saturation,"saturation")
     (_color,"color")
     (_value,"value")
+    (linear_dodge,"linear-dodge")
+    (linear_burn,"linear-burn")
+    (divide,"divide")
     ;
 
 boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
@@ -106,8 +109,8 @@ From http://www.antigrain.com/news/release_notes/v22.agdoc.html:
 
 Format agg::pixfmt_rgba32 is the main and the fastest pixel format and it's supposed to be used in most cases. But it always uses plain colors as input and produces pre-multiplied result on the canvas. It has even less number of calculations than agg::pixfmt_rgba32_pre. Format agg::pixfmt_rgba32_plain is slow because of division operations. APIs allowing for alpha-blending require premultiplied colors. Besides, if you display RGBA with RGB API (that is, without alpha, like WinAPI BitBlt), the colors still must be premultiplied. Note that the formulas in agg::pixfmt_rgba32 and agg::pixfmt_rgb24 are exactly the same! So, premultiplied colors are more natural and agg::pixfmt_rgba32_plain is rather useless.
 
-Format agg::pixfmt_rgba32_pre is a bit slower than agg::pixfmt_rgba32 because of additional "cover" values, i.e. secondary alphas, that are to be mixed with the source premultiplied color. That spoils the beauty of the premultiplied colors idea. But the "cover" values are important because there can be other color spaces and color types that don't have any "alpha" at all, or the alpha is incompatible with integral types. So, the "cover" is a secondary, uniform alpha in range of 0…255, used specifically for anti-aliasing purposes. 
-One needs to consider this issue when transforming images. Actually, all RGBA images are supposed to be in the premultiplied color space and the result of filtering is also premultiplied. Since the resulting colors of the filtered images are the source for the renderers, one should use the premultiplied renderers, that is, agg::pixfmt_rgba32_pre, or the new one, agg::pixfmt_rgb24_pre. But it's important only if images are translucent, that is, have actual alpha channel. 
+Format agg::pixfmt_rgba32_pre is a bit slower than agg::pixfmt_rgba32 because of additional "cover" values, i.e. secondary alphas, that are to be mixed with the source premultiplied color. That spoils the beauty of the premultiplied colors idea. But the "cover" values are important because there can be other color spaces and color types that don't have any "alpha" at all, or the alpha is incompatible with integral types. So, the "cover" is a secondary, uniform alpha in range of 0…255, used specifically for anti-aliasing purposes.
+One needs to consider this issue when transforming images. Actually, all RGBA images are supposed to be in the premultiplied color space and the result of filtering is also premultiplied. Since the resulting colors of the filtered images are the source for the renderers, one should use the premultiplied renderers, that is, agg::pixfmt_rgba32_pre, or the new one, agg::pixfmt_rgb24_pre. But it's important only if images are translucent, that is, have actual alpha channel.
 
 For example, if you generate some pattern with AGG (premultiplied) and would like to use it for filling, you'll need to use agg::pixfmt_rgba32_pre. If you use agg::span_image_filter_rgb24_gamma_bilinear (that is, RGB for input) and draw it on the RGBA canvas, you still need to use agg::pixfmt_rgba32_pre as the destination canvas. The only thing you need is to premultiply the background color used out of bounds.
 
@@ -121,18 +124,18 @@ void composite(T1 & dst, T2 & src, composite_mode_e mode,
                int dy,
                bool premultiply_src)
 {
-    typedef agg::rgba8 color;
-    typedef agg::order_rgba order;
-    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
-    typedef agg::renderer_base<pixfmt_type> renderer_type;
+    using color = agg::rgba8;
+    using order = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+    using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+    using renderer_type = agg::renderer_base<pixfmt_type>;
 
     agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width() * 4);
     agg::rendering_buffer src_buffer(src.getBytes(),src.width(),src.height(),src.width() * 4);
 
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
-    
+
     agg::pixfmt_rgba32 pixf_mask(src_buffer);
     if (premultiply_src)  pixf_mask.premultiply();
     renderer_type ren(pixf);

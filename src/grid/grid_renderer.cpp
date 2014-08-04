@@ -134,8 +134,8 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, unsign
 {
     if (marker.is_vector())
     {
-        typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-        typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
+        using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+        using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
         agg::scanline_bin sl;
 
         grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);

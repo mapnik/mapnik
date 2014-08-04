@@ -27,13 +27,11 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/color_factory.hpp>
-#include <mapnik/gamma_method.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
-
 #include <mapnik/expression.hpp>
 
 // stl
@@ -42,7 +40,7 @@
 namespace mapnik
 {
 
-class boolean;
+class boolean_type;
 template <typename T>
 struct name_trait
 {
@@ -68,7 +66,7 @@ struct name_trait
 DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
-DEFINE_NAME_TRAIT( boolean, "boolean")
+DEFINE_NAME_TRAIT( boolean_type, "boolean_type")
 #ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
 #else
@@ -81,7 +79,7 @@ DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
 {
-    typedef enumeration<ENUM, MAX> Enum;
+    using Enum = enumeration<ENUM, MAX>;
 
     static std::string name()
     {
@@ -265,7 +263,7 @@ xml_node & xml_node::get_child(std::string const& name)
 {
     std::list<xml_node>::iterator itr = children_.begin();
     std::list<xml_node>::iterator end = children_.end();
-    for (; itr != end; itr++)
+    for (; itr != end; ++itr)
     {
         if (!(itr->is_text_) && itr->name_ == name)
         {
@@ -301,6 +299,11 @@ xml_node const* xml_node::get_opt_child(std::string const& name) const
 bool xml_node::has_child(std::string const& name) const
 {
     return get_opt_child(name) != 0;
+}
+
+bool xml_node::has_attribute(std::string const& name) const
+{
+    return attributes_.count(name) == 1 ? true : false;
 }
 
 template <typename T>
@@ -389,7 +392,7 @@ std::string xml_node::line_to_string() const
 #define compile_get_attr(T) template T xml_node::get_attr<T>(std::string const&) const; template T xml_node::get_attr<T>(std::string const&, T const&) const
 #define compile_get_value(T) template T xml_node::get_value<T>() const
 
-compile_get_opt_attr(boolean);
+compile_get_opt_attr(boolean_type);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(unsigned);
 compile_get_opt_attr(mapnik::value_integer);

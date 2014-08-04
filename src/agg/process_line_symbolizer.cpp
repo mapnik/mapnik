@@ -23,8 +23,8 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
+#include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
@@ -52,6 +52,40 @@
 
 namespace mapnik {
 
+template <typename Symbolizer, typename Rasterizer, typename Feature>
+void set_join_caps_aa(Symbolizer const& sym, Rasterizer & ras, Feature & feature, attributes const& vars)
+{
+    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
+    switch (join)
+    {
+    case MITER_JOIN:
+        ras.line_join(agg::outline_miter_accurate_join);
+        break;
+    case MITER_REVERT_JOIN:
+        ras.line_join(agg::outline_no_join);
+        break;
+    case ROUND_JOIN:
+        ras.line_join(agg::outline_round_join);
+        break;
+    default:
+        ras.line_join(agg::outline_no_join);
+    }
+
+    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
+
+    switch (cap)
+    {
+    case BUTT_CAP:
+        ras.round_cap(false);
+        break;
+    case SQUARE_CAP:
+        ras.round_cap(false);
+        break;
+    default:
+        ras.round_cap(true);
+    }
+}
+
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                               mapnik::feature_impl & feature,
@@ -77,19 +111,19 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
 
-    typedef agg::rgba8 color_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
-    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               affine_transform_tag,
-                               simplify_tag, smooth_tag,
-                               offset_transform_tag,
-                               dash_tag, stroke_tag> conv_types;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag, smooth_tag,
+                                          offset_transform_tag,
+                                          dash_tag, stroke_tag>;
 
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(get<agg::comp_op_e>(sym, keys::comp_op, feature, common_.vars_, agg::comp_op_src_over));
+    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
     renderer_base renb(pixf);
 
     agg::trans_affine tr;
@@ -98,7 +132,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent();
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
     double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
     double opacity = get<value_double>(sym,keys::stroke_opacity,feature, common_.vars_, 1.0);
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
@@ -128,8 +162,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     if (rasterizer_e == RASTERIZER_FAST)
     {
-        typedef agg::renderer_outline_aa<renderer_base> renderer_type;
-        typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
+        using renderer_type = agg::renderer_outline_aa<renderer_base>;
+        using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
         agg::line_profile_aa profile(width * common_.scale_factor_, agg::gamma_power(gamma));
         renderer_type ren(renb, profile);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
@@ -158,7 +192,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     {
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_); 
+            converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
@@ -178,7 +212,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
             }
         }
 
-        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+        using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
         agg::scanline_u8 sl;

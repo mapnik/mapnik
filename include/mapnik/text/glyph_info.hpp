@@ -23,7 +23,7 @@
 #define MAPNIK_GLYPH_INFO_HPP
 
 //mapnik
-#include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/pixel_position.hpp>
 
 #include <memory>
@@ -33,9 +33,9 @@ namespace mapnik
 {
 
 class font_face;
-typedef std::shared_ptr<font_face> face_ptr;
+using face_ptr = std::shared_ptr<font_face>;
 
-typedef unsigned glyph_index_t;
+using glyph_index_t = unsigned;
 
 struct glyph_info
 {
@@ -62,7 +62,7 @@ struct glyph_info
     double unscaled_line_height;
     double scale_multiplier;
     pixel_position offset;
-    char_properties_ptr format;
+    evaluated_format_properties_ptr format;
 
     double ymin() const { return unscaled_ymin * 64.0 * scale_multiplier; }
     double ymax() const { return unscaled_ymax * 64.0 * scale_multiplier; }

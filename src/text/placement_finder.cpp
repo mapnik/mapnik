@@ -25,7 +25,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text/placement_finder.hpp>
-#include <mapnik/text/layout.hpp>
+#include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/vertex_cache.hpp>
@@ -44,7 +44,7 @@ placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
                                    DetectorType &detector,
                                    box2d<double> const& extent,
-                                   text_placement_info_ptr placement_info,
+                                   text_placement_info & placement_info,
                                    face_manager_freetype & font_manager,
                                    double scale_factor)
     : feature_(feature),
@@ -52,38 +52,29 @@ placement_finder::placement_finder(feature_impl const& feature,
       detector_(detector),
       extent_(extent),
       info_(placement_info),
-      valid_(true),
       scale_factor_(scale_factor),
       font_manager_(font_manager),
       placements_(),
       has_marker_(false),
       marker_(),
-      marker_box_()
-{
-}
+      marker_box_() {}
 
 bool placement_finder::next_position()
 {
-    if (!valid_)
+    if (info_.next())
     {
-        MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
-        return false;
+        text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
+        layout->evaluate_properties(feature_, attr_);
+        move_dx_ = layout->displacement().x;
+        info_.properties.process(*layout, feature_, attr_);
+        layouts_.clear(); // FIXME !!!!
+        layouts_.add(layout);
+        layouts_.layout();
+        horizontal_alignment_ = layout->horizontal_alignment();
+        return true;
     }
-    if (!info_->next())
-    {
-        valid_ = false;
-        return false;
-    }
-
-    text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_->properties.layout_defaults);
-    layout->init_orientation(feature_, attr_);
-    info_->properties.process(*layout, feature_, attr_);
-
-    layouts_.clear();
-    layouts_.add(layout);
-    layouts_.layout();
-
-    return true;
+    MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
+    return false;
 }
 
 text_upright_e placement_finder::simplify_upright(text_upright_e upright, double angle) const
@@ -117,7 +108,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         text_layout const& layout = *layout_ptr;
         rotation const& orientation = layout.orientation();
 
-        /* Find text origin. */
+        // Find text origin.
         pixel_position layout_center = pos + layout.displacement();
 
         if (!base_point_set)
@@ -129,7 +120,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         box2d<double> bbox = layout.bounds();
         bbox.re_center(layout_center.x, layout_center.y);
 
-        /* For point placements it is faster to just check the bounding box. */
+        // For point placements it is faster to just check the bounding box.
         if (collision(bbox)) return false;
 
         if (layout.num_lines()) bboxes.push_back(std::move(bbox));
@@ -137,12 +128,12 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         pixel_position layout_offset = layout_center - glyphs->get_base_point();
         layout_offset.y = -layout_offset.y;
 
-        /* IMPORTANT NOTE:
-           x and y are relative to the center of the text
-           coordinate system:
-           x: grows from left to right
-           y: grows from bottom to top (opposite of normal computer graphics)
-        */
+        // IMPORTANT NOTE:
+        //   x and y are relative to the center of the text
+        //   coordinate system:
+        //   x: grows from left to right
+        //   y: grows from bottom to top (opposite of normal computer graphics)
+
         double x, y;
 
         // set for upper left corner of text envelope for the first line, top left of first character
@@ -166,7 +157,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         }
     }
 
-    /* add_marker first checks for collision and then updates the detector.*/
+    // add_marker first checks for collision and then updates the detector.
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
 
     for (box2d<double> const& bbox : bboxes)
@@ -197,9 +188,9 @@ bool placement_finder::find_line_placements(T & path, bool points)
         }
         else
         {
-            if ((pp.length() < info_->properties.minimum_path_length * scale_factor_)
+            if ((pp.length() < info_.properties.minimum_path_length * scale_factor_)
                 ||
-                (pp.length() <= 0.001) /* Clipping removed whole geometry */
+                (pp.length() <= 0.001) // Clipping removed whole geometry
                 ||
                 (pp.length() < layouts_.width()))
                 {
@@ -209,30 +200,30 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
 
-        horizontal_alignment_e halign = info_->properties.layout_defaults->halign;
-        if (halign == H_LEFT)
-        {
-            // Don't move
-        }
-        else if (halign == H_MIDDLE || halign == H_AUTO)
+        //horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
+
+        // halign == H_LEFT -> don't move
+        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO)
         {
             pp.forward(spacing/2.0);
         }
-        else if (halign == H_RIGHT)
+        else if (horizontal_alignment_ == H_RIGHT)
         {
             pp.forward(pp.length());
         }
-        path_move_dx(pp);
+
+        if (move_dx_ != 0.0) path_move_dx(pp, move_dx_);
+
         do
         {
-            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
+            tolerance_iterator tolerance_offset(info_.properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
                 if (pp.move(tolerance_offset.get())
                     && (
                     (points && find_point_placement(pp.current_position()))
-                    || (!points && single_line_placement(pp, info_->properties.upright))))
+                    || (!points && single_line_placement(pp, info_.properties.upright))))
                 {
                     success = true;
                     break;
@@ -245,9 +236,10 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
 bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
-    /********************************************************************************
-     * IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! *
-     ********************************************************************************/
+    //
+    // IMPORTANT NOTE: See note about coordinate systems in find_point_placement()!
+    //
+
     vertex_cache::scoped_state begin(pp);
     text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
 
@@ -262,9 +254,9 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     {
         text_layout const& layout = *layout_ptr;
         pixel_position align_offset = layout.alignment_offset();
-        pixel_position const& layout_displacement = layout.get_layout_properties()->displacement;
+        pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-        double offset = align_offset.y + layout_displacement.y * scale_factor_ + sign * layout.height()/2.;
+        double offset = layout_displacement.y + 0.5 * sign * layout.height();
 
         for (auto const& line : layout)
         {
@@ -296,8 +288,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     // Only calculate new angle at the start of each cluster!
                     angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
-                    if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
-                            std::fabs(normalize_angle(angle-last_cluster_angle)) > info_->properties.max_char_angle_delta)
+                    if ((info_.properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
+                            std::fabs(normalize_angle(angle-last_cluster_angle)) > info_.properties.max_char_angle_delta)
                     {
                         return false;
                     }
@@ -350,14 +342,10 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     return true;
 }
 
-void placement_finder::path_move_dx(vertex_cache &pp)
+void placement_finder::path_move_dx(vertex_cache & pp, double dx)
 {
-    double dx = info_->properties.layout_defaults->displacement.x * scale_factor_;
-    if (dx != 0.0)
-    {
-        vertex_cache::state state = pp.save_state();
-        if (!pp.move(dx)) pp.restore_state(state);
-    }
+    vertex_cache::state state = pp.save_state();
+    if (!pp.move(dx)) pp.restore_state(state);
 }
 
 double placement_finder::normalize_angle(double angle)
@@ -376,15 +364,10 @@ double placement_finder::normalize_angle(double angle)
 double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
-    if (info_->properties.label_spacing > 0)
+    if (info_.properties.label_spacing > 0)
     {
         num_labels = static_cast<int>(floor(
-            path_length / (info_->properties.label_spacing * scale_factor_ + layout_width)));
-    }
-
-    if (info_->properties.force_odd_labels && num_labels % 2 == 0)
-    {
-        --num_labels;
+            path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
     }
     if (num_labels <= 0)
     {
@@ -397,13 +380,13 @@ bool placement_finder::collision(const box2d<double> &box) const
 {
     if (!detector_.extent().intersects(box)
             ||
-        (info_->properties.avoid_edges && !extent_.contains(box))
+        (info_.properties.avoid_edges && !extent_.contains(box))
             ||
-        (info_->properties.minimum_padding > 0 &&
-         !extent_.contains(box + (scale_factor_ * info_->properties.minimum_padding)))
+        (info_.properties.minimum_padding > 0 &&
+         !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
             ||
-        (!info_->properties.allow_overlap &&
-         !detector_.has_point_placement(box, info_->properties.minimum_distance * scale_factor_))
+        (!info_.properties.allow_overlap &&
+         !detector_.has_point_placement(box, info_.properties.minimum_distance * scale_factor_))
         )
     {
         return true;
@@ -466,18 +449,12 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
 }
 
 
-/*********************************************************************************************/
-
-
 glyph_positions::glyph_positions()
     : data_(),
       base_point_(),
       marker_(),
       marker_pos_(),
-      bbox_()
-{
-
-}
+      bbox_() {}
 
 glyph_positions::const_iterator glyph_positions::begin() const
 {
@@ -526,10 +503,9 @@ pixel_position const& glyph_positions::marker_pos() const
 }
 
 
-/*************************************************************************************/
-typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
-typedef coord_transform<CoordTransform,geometry_type> PathType;
+using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
+using ClippedPathType = coord_transform<CoordTransform,clipped_geometry_type>;
+using PathType = coord_transform<CoordTransform,geometry_type>;
 template bool placement_finder::find_line_placements<ClippedPathType>(ClippedPathType &, bool);
 template bool placement_finder::find_line_placements<PathType>(PathType &, bool);
 

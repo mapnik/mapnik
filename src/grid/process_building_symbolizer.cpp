@@ -54,10 +54,10 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+    using path_type = coord_transform<CoordTransform,geometry_type>;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);

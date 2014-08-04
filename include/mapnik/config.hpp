@@ -52,12 +52,4 @@
 
 #define PROJ_ENVELOPE_POINTS 20
 
-#include <boost/thread/locks.hpp>
-#include <mutex>
-
-namespace mapnik
-{
-typedef boost::unique_lock<std::mutex> scoped_lock;
-}
-
 #endif // MAPNIK_CONFIG_HPP

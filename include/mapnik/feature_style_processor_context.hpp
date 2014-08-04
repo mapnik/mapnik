@@ -36,8 +36,8 @@ public:
     virtual ~IProcessorContext() {}
 };
 
-typedef std::shared_ptr<IProcessorContext> processor_context_ptr;
-typedef std::map<std::string, processor_context_ptr > feature_style_context_map;
+using processor_context_ptr = std::shared_ptr<IProcessorContext>;
+using feature_style_context_map = std::map<std::string, processor_context_ptr >;
 
 }
 

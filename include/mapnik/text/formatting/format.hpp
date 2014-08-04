@@ -30,29 +30,30 @@
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
 
-namespace mapnik {
-namespace formatting {
-class MAPNIK_DECL format_node: public node {
+namespace mapnik { namespace formatting {
+
+class MAPNIK_DECL format_node: public node
+{
 public:
-    void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
-    virtual void add_expressions(expression_set &output) const;
+    void to_xml(boost::property_tree::ptree & xml) const;
+    static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const;
+    virtual void add_expressions(expression_set & output) const;
 
     void set_child(node_ptr child);
     node_ptr get_child() const;
 
     boost::optional<std::string> face_name;
-    boost::optional<unsigned> text_size;
-    boost::optional<unsigned> character_spacing;
-    boost::optional<unsigned> line_spacing;
-    boost::optional<double> text_opacity;
-    boost::optional<bool> wrap_before;
-    boost::optional<unsigned> wrap_char;
-    boost::optional<text_transform_e> text_transform;
-    boost::optional<color> fill;
-    boost::optional<color> halo_fill;
-    boost::optional<double> halo_radius;
+    boost::optional<font_set> fontset;
+    boost::optional<symbolizer_base::value_type> text_size;
+    boost::optional<symbolizer_base::value_type> character_spacing;
+    boost::optional<symbolizer_base::value_type> line_spacing;
+    boost::optional<symbolizer_base::value_type> text_opacity;
+    boost::optional<symbolizer_base::value_type> wrap_before;
+    boost::optional<symbolizer_base::value_type> text_transform;
+    boost::optional<symbolizer_base::value_type> fill;
+    boost::optional<symbolizer_base::value_type> halo_fill;
+    boost::optional<symbolizer_base::value_type> halo_radius;
 
 private:
     node_ptr child_;

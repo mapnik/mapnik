@@ -35,9 +35,9 @@
 namespace mapnik {
 
 class label_collision_detector4;
-typedef label_collision_detector4 DetectorType;
+using DetectorType = label_collision_detector4;
 
-typedef std::list<pixel_position> pixel_position_list;
+using pixel_position_list = std::list<pixel_position>;
 
 /** Helper object that does some of the GroupSymbolizer placement finding work. */
 class group_symbolizer_helper : public base_symbolizer_helper

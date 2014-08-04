@@ -24,20 +24,20 @@
 #define MAPNIK_EVALUATE_GLOBAL_ATTRIBUTES_HPP
 
 #include <mapnik/map.hpp>
+#include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/symbolizer_hash.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#else
+#include <boost/regex.hpp>
 #endif
 
 namespace mapnik {
@@ -47,7 +47,7 @@ namespace {
 template <typename T, typename Attributes>
 struct evaluate_expression : boost::static_visitor<T>
 {
-    typedef T value_type;
+    using value_type = T;
 
     explicit evaluate_expression(Attributes const& attributes)
         : attributes_(attributes) {}
@@ -136,6 +136,90 @@ struct evaluate_expression : boost::static_visitor<T>
     Attributes const& attributes_;
 };
 
+template <typename T>
+struct evaluate_expression<T, boost::none_t> : boost::static_visitor<T>
+{
+    using value_type = T;
+
+    evaluate_expression(boost::none_t) {}
+
+    value_type operator() (attribute const& attr) const
+    {
+        throw std::runtime_error("can't evaluate feature attributes in this context");
+    }
+
+    value_type operator() (global_attribute const& attr) const
+    {
+        throw std::runtime_error("can't evaluate feature attributes in this context");
+    }
+
+    value_type operator() (geometry_type_attribute const& geom) const
+    {
+        throw std::runtime_error("can't evaluate geometry_type attributes in this context");
+    }
+
+    value_type operator() (binary_node<tags::logical_and> const & x) const
+    {
+        return (boost::apply_visitor(*this, x.left).to_bool())
+            && (boost::apply_visitor(*this, x.right).to_bool());
+    }
+
+    value_type operator() (binary_node<tags::logical_or> const & x) const
+    {
+        return (boost::apply_visitor(*this,x.left).to_bool())
+            || (boost::apply_visitor(*this,x.right).to_bool());
+    }
+
+    template <typename Tag>
+    value_type operator() (binary_node<Tag> const& x) const
+    {
+        typename make_op<Tag>::type operation;
+        return operation(boost::apply_visitor(*this, x.left),
+                         boost::apply_visitor(*this, x.right));
+    }
+
+    template <typename Tag>
+    value_type operator() (unary_node<Tag> const& x) const
+    {
+        typename make_op<Tag>::type func;
+        return func(boost::apply_visitor(*this, x.expr));
+    }
+
+    value_type operator() (unary_node<tags::logical_not> const& x) const
+    {
+        return ! (boost::apply_visitor(*this,x.expr).to_bool());
+    }
+
+    value_type operator() (regex_match_node const& x) const
+    {
+        value_type v = boost::apply_visitor(*this, x.expr);
+#if defined(BOOST_REGEX_HAS_ICU)
+        return boost::u32regex_match(v.to_unicode(),x.pattern);
+#else
+        return boost::regex_match(v.to_string(),x.pattern);
+#endif
+
+    }
+
+    value_type operator() (regex_replace_node const& x) const
+    {
+        value_type v = boost::apply_visitor(*this, x.expr);
+#if defined(BOOST_REGEX_HAS_ICU)
+        return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
+#else
+        std::string repl = boost::regex_replace(v.to_string(),x.pattern,x.format);
+        mapnik::transcoder tr_("utf8");
+        return tr_.transcode(repl.c_str());
+#endif
+    }
+
+    template <typename ValueType>
+    value_type operator() (ValueType const& val) const
+    {
+        return value_type(val);
+    }
+};
+
 template <typename T, typename Attributes>
 struct assign_value : boost::static_visitor<> {};
 
@@ -182,6 +266,20 @@ struct assign_value<expression_ptr,Attributes> : boost::static_visitor<>
 };
 
 }
+
+template <typename T>
+std::tuple<T,bool> pre_evaluate_expression (expression_ptr const& expr)
+{
+    try
+    {
+        return std::make_tuple(boost::apply_visitor(mapnik::evaluate_expression<T, boost::none_t>(boost::none),*expr), true);
+    }
+    catch (...)
+    {
+        return std::make_tuple(T(),false);
+    }
+}
+
 struct evaluate_global_attributes : mapnik::noncopyable
 {
     template <typename Attributes>

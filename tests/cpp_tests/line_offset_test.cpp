@@ -1,4 +1,3 @@
-
 // mapnik
 #include <mapnik/coord.hpp>
 #include <mapnik/text/vertex_cache.hpp>
@@ -12,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <tuple>
 #include <algorithm>
 
 // test
@@ -19,12 +19,12 @@
 
 struct fake_path
 {
-    typedef boost::tuple<double, double, unsigned> coord_type;
-    typedef std::vector<coord_type> cont_type;
+    using coord_type = std::tuple<double, double, unsigned>;
+    using cont_type = std::vector<coord_type>;
     cont_type vertices_;
     cont_type::iterator itr_;
 
-    fake_path(std::initializer_list<double> l) 
+    fake_path(std::initializer_list<double> l)
         : fake_path(l.begin(), l.size()) {
     }
 
@@ -41,7 +41,7 @@ struct fake_path
             double x = *itr++;
             double y = *itr++;
             unsigned cmd = (i == 0) ? agg::path_cmd_move_to : agg::path_cmd_line_to;
-            vertices_.push_back(boost::make_tuple(x, y, cmd));
+            vertices_.push_back(std::make_tuple(x, y, cmd));
         }
         itr_ = vertices_.begin();
     }
@@ -50,9 +50,9 @@ struct fake_path
         if (itr_ == vertices_.end()) {
             return agg::path_cmd_stop;
         }
-        *x = itr_->get<0>();
-        *y = itr_->get<1>();
-        unsigned cmd = itr_->get<2>();
+        *x = std::get<0>(*itr_);
+        *y = std::get<1>(*itr_);
+        unsigned cmd = std::get<2>(*itr_);
         ++itr_;
         return cmd;
     }
@@ -73,7 +73,7 @@ namespace boost { namespace detail {
 
 template<class T, class U>
 inline void test_leq_impl(char const * expr1, char const * expr2,
-                          char const * file, int line, char const * function, 
+                          char const * file, int line, char const * function,
                           T const & t, U const & u)
 {
     if( t > u )
@@ -108,7 +108,7 @@ void test_simple_segment(double const &offset)
 
 void test_straight_line(double const &offset) {
     const double dx = 0.01;
-    fake_path path = {0, 0, 0.1, 0, 0.9, 0, 1, 0}, 
+    fake_path path = {0, 0, 0.1, 0, 0.9, 0, 1, 0},
         off_path = {0, offset, 0.4, offset, 0.6, offset, 1, offset};
     mapnik::vertex_cache vc(path), off_vc(off_path);
 

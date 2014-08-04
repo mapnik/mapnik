@@ -25,12 +25,10 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
-#include <mapnik/value.hpp>
-#include <mapnik/attribute.hpp>
 
 // boost
 #include <boost/mpl/vector/vector30.hpp>
-#include <boost/variant.hpp>
+#include <boost/variant/recursive_variant.hpp>
 
 namespace mapnik
 {
@@ -93,7 +91,7 @@ struct less
     }
 };
 
-struct  less_equal
+struct less_equal
 {
     static const char* str()
     {
@@ -164,10 +162,11 @@ template <typename Tag> struct binary_node;
 template <typename Tag> struct unary_node;
 struct regex_match_node;
 struct regex_replace_node;
+struct attribute;
+struct global_attribute;
+struct geometry_type_attribute;
 
-typedef mapnik::value value_type;
-
-typedef boost::mpl::vector25<
+using expr_types  = boost::mpl::vector25<
 value_null,
 value_bool,
 value_integer,
@@ -193,9 +192,9 @@ boost::recursive_wrapper<binary_node<tags::logical_and> >,
 boost::recursive_wrapper<binary_node<tags::logical_or> >,
 boost::recursive_wrapper<regex_match_node>,
 boost::recursive_wrapper<regex_replace_node>
->::type expr_types;
+>::type;
 
-typedef boost::make_recursive_variant_over<expr_types>::type expr_node;
+using expr_node = boost::make_recursive_variant_over<expr_types>::type;
 
 }
 

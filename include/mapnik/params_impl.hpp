@@ -55,14 +55,14 @@ struct extract_value
 };
 
 template <>
-struct extract_value<mapnik::boolean>
+struct extract_value<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean> do_extract_from_string(std::string const& source)
+    static inline boost::optional<mapnik::boolean_type> do_extract_from_string(std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean>(result);
-        return boost::optional<mapnik::boolean>();
+            return boost::optional<mapnik::boolean_type>(result);
+        return boost::optional<mapnik::boolean_type>();
     }
 };
 
@@ -156,8 +156,8 @@ namespace params_detail {
 template <typename T>
 struct converter
 {
-    typedef T value_type;
-    typedef boost::optional<value_type> return_type;
+    using value_type = T;
+    using return_type = boost::optional<value_type>;
     static return_type extract(parameters const& params,
                                std::string const& name,
                                boost::optional<T> const& default_opt_value)

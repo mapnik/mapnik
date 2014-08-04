@@ -29,6 +29,8 @@
 
 // stl
 #include <string>
+#include <algorithm>
+#include <locale>
 
 namespace mapnik { namespace util {
 

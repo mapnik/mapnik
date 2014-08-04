@@ -25,18 +25,14 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#ifdef MAPNIK_LOG
-#include <mapnik/debug.hpp>
-#endif
 #include <mapnik/value.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 
 // boost
-
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/range/adaptor/reversed.hpp>
+
 // agg
 #include <agg_trans_affine.h>
 
@@ -49,9 +45,9 @@ template <typename Container> struct expression_attributes;
 template <typename T, typename T1>
 struct transform_processor
 {
-    typedef T feature_type;
-    typedef T1 variable_type;
-    typedef agg::trans_affine transform_type;
+    using feature_type = T;
+    using variable_type = T1;
+    using transform_type = agg::trans_affine;
 
     template <typename Container>
     struct attribute_collector : boost::static_visitor<void>
@@ -213,22 +209,11 @@ struct transform_processor
     {
         node_evaluator eval(tr, feat, vars, scale_factor);
 
-        #ifdef MAPNIK_LOG
-        MAPNIK_LOG_DEBUG(transform) << "transform: begin with " << to_string(matrix_node(tr));
-        #endif
-
-        for (transform_node const& node : boost::adaptors::reverse(list))
+        transform_list::const_reverse_iterator rit;
+        for (rit = list.rbegin(); rit!= list.rend(); ++rit)
         {
-            boost::apply_visitor(eval, *node);
-            #ifdef MAPNIK_LOG
-            MAPNIK_LOG_DEBUG(transform) << "transform: apply " << to_string(*node);
-            MAPNIK_LOG_DEBUG(transform) << "transform: result " << to_string(matrix_node(tr));
-            #endif
+            boost::apply_visitor(eval, *(*rit));
         }
-
-        #ifdef MAPNIK_LOG
-        MAPNIK_LOG_DEBUG(transform) << "transform: end";
-        #endif
     }
 
     static std::string to_string(transform_node const& node)
@@ -242,7 +227,7 @@ struct transform_processor
     }
 };
 
-typedef mapnik::transform_processor<feature_impl,attributes> transform_processor_type;
+using transform_processor_type = mapnik::transform_processor<feature_impl,attributes>;
 
 } // namespace mapnik
 

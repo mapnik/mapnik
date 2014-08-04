@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/text/formatting/base.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // stl
@@ -36,7 +37,7 @@ namespace mapnik
 namespace formatting
 {
 
-typedef node_ptr (*from_xml_function_ptr)(xml_node const& xml);
+using from_xml_function_ptr = node_ptr (*) (xml_node const&, fontset_map const&) ;
 
 class registry : public singleton<registry, CreateStatic>,
                  private mapnik::noncopyable
@@ -45,7 +46,7 @@ public:
     registry();
     ~registry() {}
     void register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite=false);
-    node_ptr from_xml(xml_node const& xml);
+    node_ptr from_xml(xml_node const& xml, fontset_map const & fontsets);
 private:
     std::map<std::string, from_xml_function_ptr> map_;
 };

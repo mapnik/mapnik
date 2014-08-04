@@ -96,22 +96,6 @@
 #     # https://github.com/mapnik/mapnik/issues/1420
 #     eq_(s.text_transform, mapnik.text_transform.NONE)
 
-#     # https://github.com/mapnik/mapnik/issues/1427
-#     eq_(s.wrap_char,ord(' '))
-#     eq_(s.wrap_character,ord(' '))
-#     s.wrap_char = ord('\n')
-#     eq_(s.wrap_char,ord('\n'))
-#     eq_(s.wrap_character,ord('\n'))
-#     eq_(s.format.wrap_character,ord('\n'))
-#     s.wrap_character = ord('\r')
-#     eq_(s.wrap_char,ord('\r'))
-#     eq_(s.wrap_character,ord('\r'))
-#     eq_(s.format.wrap_character,ord('\r'))
-#     s.format.wrap_character = ord(' ')
-#     eq_(s.wrap_char,ord(' '))
-#     eq_(s.wrap_character,ord(' '))
-#     eq_(s.format.wrap_character,ord(' '))
-
 #     # old args required method
 #     ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
 # #    eq_(str(ts.name), str(mapnik2.Expression('[Field_Name]'))) name field is no longer supported
@@ -133,7 +117,6 @@
 #     eq_(s.face_name, 'DejaVu Sans Bold')
 #     eq_(s.allow_overlap, False)
 #     eq_(s.fill, mapnik.Color('#000000'))
-#     eq_(s.force_odd_labels, False)
 #     eq_(s.halo_fill, mapnik.Color('rgb(255,255,255)'))
 #     eq_(s.halo_radius, 0)
 #     eq_(s.label_placement, mapnik.label_placement.POINT_PLACEMENT)
@@ -147,7 +130,6 @@
 #     # 22.5 * M_PI/180.0 initialized by default
 #     assert_almost_equal(s.max_char_angle_delta, 0.39269908169872414)
 
-#     eq_(s.wrap_character, ' ')
 #     eq_(s.text_transform, mapnik.text_transform.NONE)
 #     eq_(s.line_spacing, 0)
 #     eq_(s.character_spacing, 0)

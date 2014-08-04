@@ -38,7 +38,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) evaluate_transform(tr, feature, common.vars_, *transform, common.scale_factor_);
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
     double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, 0.0);
     double opacity = get<value_double>(sym,keys::fill_opacity,feature,common.vars_, 1.0);

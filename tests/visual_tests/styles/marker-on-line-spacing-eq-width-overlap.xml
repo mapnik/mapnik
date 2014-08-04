@@ -48,6 +48,7 @@
         <Rule>
             <MarkersSymbolizer file="shape://ellipse" allow-overlap="true" width="20" height="20" placement="line" spacing="15"/>
             <LineSymbolizer stroke-width="0.2" stroke="#ff0000" />
+            <DebugSymbolizer />
         </Rule>
     </Style>
 </Map>

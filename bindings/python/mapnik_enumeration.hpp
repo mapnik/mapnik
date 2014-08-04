@@ -34,8 +34,8 @@ class enumeration_ :
         public boost::python::enum_<typename EnumWrapper::native_type>
 {
     // some short cuts
-    typedef boost::python::enum_<typename EnumWrapper::native_type> base_type;
-    typedef typename EnumWrapper::native_type native_type;
+    using base_type = boost::python::enum_<typename EnumWrapper::native_type>;
+    using native_type = typename EnumWrapper::native_type;
 public:
     enumeration_() :
         base_type( EnumWrapper::get_name().c_str() )

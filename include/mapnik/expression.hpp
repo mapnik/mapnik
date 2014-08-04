@@ -38,8 +38,8 @@ namespace mapnik
 {
 
 // fwd declare to reduce compile time
-typedef std::shared_ptr<expr_node> expression_ptr;
-typedef std::set<expression_ptr> expression_set;
+using expression_ptr = std::shared_ptr<expr_node>;
+using expression_set = std::set<expression_ptr>;
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding = "UTF8");
 }

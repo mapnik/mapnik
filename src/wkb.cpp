@@ -36,7 +36,7 @@
 namespace mapnik
 {
 
-typedef coord_array<coord2d> CoordinateArray;
+using CoordinateArray = coord_array<coord2d>;
 
 struct wkb_reader : mapnik::noncopyable
 {
@@ -125,11 +125,7 @@ public:
             break;
         }
 
-#ifndef MAPNIK_BIG_ENDIAN
         needSwap_ = byteOrder_ ? wkbXDR : wkbNDR;
-#else
-        needSwap_ = byteOrder_ ? wkbNDR : wkbXDR;
-#endif
     }
 
     void read(boost::ptr_vector<geometry_type> & paths)
@@ -249,19 +245,19 @@ private:
     {
         if (! needSwap_)
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_ndr(wkb_ + pos_, ar[i].x);
-                read_double_ndr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_ndr(wkb_ + pos_, coord.x);
+                read_double_ndr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 16; // skip XY
             }
         }
         else
         {
-            for (unsigned i=0;i<ar.size();++i)
+            for (auto & coord : ar)
             {
-                read_double_xdr(wkb_ + pos_, ar[i].x);
-                read_double_xdr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_xdr(wkb_ + pos_, coord.x);
+                read_double_xdr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 16; // skip XY
             }
         }
@@ -271,19 +267,19 @@ private:
     {
         if (! needSwap_)
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_ndr(wkb_ + pos_, ar[i].x);
-                read_double_ndr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_ndr(wkb_ + pos_, coord.x);
+                read_double_ndr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 24; // skip XYZ
             }
         }
         else
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_xdr(wkb_ + pos_, ar[i].x);
-                read_double_xdr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_xdr(wkb_ + pos_, coord.x);
+                read_double_xdr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 24; // skip XYZ
             }
         }
@@ -293,19 +289,19 @@ private:
     {
         if (! needSwap_)
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_ndr(wkb_ + pos_, ar[i].x);
-                read_double_ndr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_ndr(wkb_ + pos_, coord.x);
+                read_double_ndr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 32; // skip XYZM
             }
         }
         else
         {
-            for (unsigned i = 0; i < ar.size(); ++i)
+            for (auto & coord : ar)
             {
-                read_double_xdr(wkb_ + pos_, ar[i].x);
-                read_double_xdr(wkb_ + pos_ + 8, ar[i].y);
+                read_double_xdr(wkb_ + pos_, coord.x);
+                read_double_xdr(wkb_ + pos_ + 8, coord.y);
                 pos_ += 32; // skip XYZM
             }
         }
@@ -344,10 +340,10 @@ private:
     {
         double x = read_double();
         double y = read_double();
-        std::auto_ptr<geometry_type> pt(new geometry_type(geometry_type::types::Point));
+        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
         pos_ += 16;
         pt->move_to(x, y);
-        paths.push_back(pt);
+        paths.push_back(pt.release());
     }
 
     void read_multipoint_xyz(boost::ptr_vector<geometry_type> & paths)
@@ -421,13 +417,13 @@ private:
         {
             CoordinateArray ar(num_points);
             read_coords_xyzm(ar);
-            std::auto_ptr<geometry_type> line(new geometry_type(geometry_type::types::LineString));
+            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
             line->move_to(ar[0].x, ar[0].y);
             for (int i = 1; i < num_points; ++i)
             {
                 line->line_to(ar[i].x, ar[i].y);
             }
-            paths.push_back(line);
+            paths.push_back(line.release());
         }
     }
 
@@ -518,7 +514,7 @@ private:
         int num_rings = read_integer();
         if (num_rings > 0)
         {
-            std::auto_ptr<geometry_type> poly(new geometry_type(geometry_type::types::Polygon));
+            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
             for (int i = 0; i < num_rings; ++i)
             {
                 int num_points = read_integer();
@@ -535,7 +531,7 @@ private:
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices
-                paths.push_back(poly);
+                paths.push_back(poly.release());
         }
     }
 

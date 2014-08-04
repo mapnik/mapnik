@@ -23,8 +23,7 @@
 #ifndef MAPNIK_SYMBOLIZER_KEYS_HPP
 #define MAPNIK_SYMBOLIZER_KEYS_HPP
 
-#include <string>
-#include <tuple>
+#include <cstdint>
 
 namespace mapnik {
 
@@ -73,6 +72,7 @@ enum class keys : std::uint8_t
     simplify_tolerance,
     halo_rasterizer,
     text_placements_,
+    label_placement,
     markers_placement_type,
     markers_multipolicy,
     point_placement_type,
@@ -85,6 +85,11 @@ enum class keys : std::uint8_t
     largest_box_only,
     minimum_path_length,
     halo_comp_op,
+    text_transform,
+    horizontal_alignment,
+    justify_alignment,
+    vertical_alignment,
+    upright,
     MAX_SYMBOLIZER_KEY
 };
 

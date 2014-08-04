@@ -230,7 +230,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             expected_file = './images/support/marker-text-line-scale-factor-%s.png' % size
             actual_file = '/tmp/' + os.path.basename(expected_file)
             im.save(actual_file,'png32')
-            im.save(expected_file,'png32')
+            #im.save(expected_file,'png32')
             # we save and re-open here so both png8 images are ready as full color png
             actual = mapnik.Image.open(actual_file)
             expected = mapnik.Image.open(expected_file)
@@ -238,4 +238,4 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
 
 if __name__ == "__main__":
     setup()
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

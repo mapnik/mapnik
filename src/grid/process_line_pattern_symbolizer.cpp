@@ -23,6 +23,7 @@
 #if defined(GRID_RENDERER)
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
@@ -64,17 +65,17 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
-    typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               offset_transform_tag, affine_transform_tag,
-                               simplify_tag, smooth_tag, stroke_tag> conv_types;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          offset_transform_tag, affine_transform_tag,
+                                          simplify_tag, smooth_tag, stroke_tag>;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
@@ -106,7 +107,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
         padding *= common_.scale_factor_;
         clipping_extent.pad(padding);
     }
-    
+
     // to avoid the complexity of using an agg pattern filter instead
     // we create a line_symbolizer in order to fake the pattern
     line_symbolizer line;
@@ -154,4 +155,3 @@ template void grid_renderer<grid>::process(line_pattern_symbolizer const&,
 }
 
 #endif
-

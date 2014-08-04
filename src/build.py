@@ -144,6 +144,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    expression_grammar.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp
@@ -151,39 +152,32 @@ source = Split(
     image_filter_types.cpp
     miniz_png.cpp
     color.cpp
-    css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
-    image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
     expression_node.cpp
-    expression_grammar.cpp
     expression_string.cpp
     expression.cpp
-    transform_expression_grammar.cpp
     transform_expression.cpp
     feature_kv_iterator.cpp
     feature_style_processor.cpp
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
-    gamma_method.cpp
     gradient.cpp
     graphics.cpp
+    parse_path.cpp
     image_reader.cpp
     image_util.cpp
     layer.cpp
     map.cpp
     load_map.cpp
     memory.cpp
-    parse_path.cpp
-    parse_transform.cpp
     palette.cpp
-    path_expression_grammar.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
@@ -192,13 +186,13 @@ source = Split(
     proj_transform.cpp
     scale_denominator.cpp
     simplify.cpp
+    parse_transform.cpp
     memory_datasource.cpp
     symbolizer.cpp
     symbolizer_keys.cpp
+    symbolizer_enumerations.cpp
     unicode.cpp
     raster_colorizer.cpp
-    wkt/wkt_factory.cpp
-    wkt/wkt_generator.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
     svg/svg_parser.cpp
@@ -206,24 +200,19 @@ source = Split(
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
     warp.cpp
-    json/geometry_grammar.cpp
-    json/geometry_parser.cpp
-    json/feature_grammar.cpp
-    json/feature_parser.cpp
-    json/feature_collection_parser.cpp
-    json/geojson_generator.cpp
+    css_color_grammar.cpp
     text/vertex_cache.cpp
-    text/layout.cpp
+    text/text_layout.cpp
     text/text_line.cpp
     text/itemizer.cpp
     text/scrptrun.cpp
     text/face.cpp
     text/placement_finder.cpp
+    text/properties_util.cpp
     text/renderer.cpp
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
     text/formatting/base.cpp
-    text/formatting/expression.cpp
     text/formatting/list.cpp
     text/formatting/text.cpp
     text/formatting/format.cpp
@@ -282,8 +271,8 @@ if env['HAS_CAIRO']:
     lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     libmapnik_defines.append('-DHAVE_CAIRO')
     lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
-    source.insert(0,'cairo/cairo_renderer.cpp')
-    source.insert(0,'cairo/cairo_context.cpp')
+    source.append('cairo/cairo_renderer.cpp')
+    source.append('cairo/cairo_context.cpp')
 
 for cpp in enabled_imaging_libraries:
     source.append(cpp)
@@ -381,7 +370,6 @@ lib_env_final.Prepend(LINKFLAGS=mapnik_lib_link_flag)
 # cache library values for other builds to use
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
 env['LIBMAPNIK_LINKFLAGS'] = copy(lib_env['LINKFLAGS'])
-env.Append(LIBMAPNIK_LINKFLAGS=env['CUSTOM_LDFLAGS'])
 env['LIBMAPNIK_CXXFLAGS'] = libmapnik_cxxflags
 env['LIBMAPNIK_DEFINES'] = libmapnik_defines
 

@@ -101,14 +101,14 @@ template <typename VertexSource, typename AttributeSource, typename ScanlineRend
 class svg_renderer_agg : mapnik::noncopyable
 {
 public:
-    typedef agg::conv_curve<VertexSource>            curved_type;
-    typedef agg::conv_stroke<curved_type>            curved_stroked_type;
-    typedef agg::conv_transform<curved_stroked_type> curved_stroked_trans_type;
-    typedef agg::conv_transform<curved_type>         curved_trans_type;
-    typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
-    typedef agg::renderer_base<PixelFormat>          renderer_base;
-    typedef VertexSource                             vertex_source_type;
-    typedef AttributeSource                          attribute_source_type;
+    using curved_type = agg::conv_curve<VertexSource>           ;
+    using curved_stroked_type = agg::conv_stroke<curved_type>           ;
+    using curved_stroked_trans_type = agg::conv_transform<curved_stroked_type>;
+    using curved_trans_type = agg::conv_transform<curved_type>        ;
+    using curved_trans_contour_type = agg::conv_contour<curved_trans_type>    ;
+    using renderer_base = agg::renderer_base<PixelFormat>         ;
+    using vertex_source_type = VertexSource                            ;
+    using attribute_source_type = AttributeSource                         ;
 
     svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
@@ -127,10 +127,10 @@ public:
                          curved_trans_type & curved_trans,
                          unsigned path_id)
     {
-        typedef agg::gamma_lut<agg::int8u, agg::int8u> gamma_lut_type;
-        typedef agg::gradient_lut<agg::color_interpolator<agg::rgba8>, 1024> color_func_type;
-        typedef agg::span_interpolator_linear<> interpolator_type;
-        typedef agg::span_allocator<agg::rgba8> span_allocator_type;
+        using gamma_lut_type = agg::gamma_lut<agg::int8u, agg::int8u>;
+        using color_func_type = agg::gradient_lut<agg::color_interpolator<agg::rgba8>, 1024>;
+        using interpolator_type = agg::span_interpolator_linear<>;
+        using span_allocator_type = agg::span_allocator<agg::rgba8>;
 
         span_allocator_type             m_alloc;
         color_func_type                 m_gradient_lut;
@@ -176,11 +176,11 @@ public:
 
             if (grad.get_gradient_type() == RADIAL)
             {
-                typedef agg::gradient_radial_focus gradient_adaptor_type;
-                typedef agg::span_gradient<agg::rgba8,
-                    interpolator_type,
-                    gradient_adaptor_type,
-                    color_func_type> span_gradient_type;
+                using gradient_adaptor_type = agg::gradient_radial_focus;
+                using span_gradient_type = agg::span_gradient<agg::rgba8,
+                                                              interpolator_type,
+                                                              gradient_adaptor_type,
+                                                              color_func_type>;
 
                 // the agg radial gradient assumes it is centred on 0
                 transform.translate(-x2,-y2);
@@ -206,12 +206,11 @@ public:
             }
             else
             {
-                typedef linear_gradient_from_segment gradient_adaptor_type;
-                typedef agg::span_gradient<agg::rgba8,
-                    interpolator_type,
-                    gradient_adaptor_type,
-                    color_func_type> span_gradient_type;
-
+                using gradient_adaptor_type = linear_gradient_from_segment;
+                using span_gradient_type = agg::span_gradient<agg::rgba8,
+                                                              interpolator_type,
+                                                              gradient_adaptor_type,
+                                                              color_func_type>;
                 // scale everything up since agg turns things into integers a bit too soon
                 int scaleup=255;
                 x1*=scaleup;

@@ -102,13 +102,13 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 {
 
 public:
-    typedef Pool<Connection,ConnectionCreator> PoolType;
+    using PoolType = Pool<Connection,ConnectionCreator>;
 
 private:
     friend class CreateStatic<ConnectionManager>;
 
-    typedef std::map<std::string,std::shared_ptr<PoolType> > ContType;
-    typedef std::shared_ptr<Connection> HolderType;
+    using ContType = std::map<std::string,std::shared_ptr<PoolType> >;
+    using HolderType = std::shared_ptr<Connection>;
     ContType pools_;
 
 public:

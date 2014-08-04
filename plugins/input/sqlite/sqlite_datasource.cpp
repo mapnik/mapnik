@@ -93,10 +93,10 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }
 
-    use_spatial_index_ = *params.get<mapnik::boolean>("use_spatial_index", true);
+    use_spatial_index_ = *params.get<mapnik::boolean_type>("use_spatial_index", true);
 
     // TODO - remove this option once all datasources have an indexing api
-    bool auto_index = *params.get<mapnik::boolean>("auto_index", true);
+    bool auto_index = *params.get<mapnik::boolean_type>("auto_index", true);
 
     boost::optional<std::string> ext  = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
@@ -444,7 +444,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             const char* data = (const char*) rs->column_blob(0, size);
             if (data)
             {
-                boost::ptr_vector<mapnik::geometry_type> paths;
+                mapnik::geometry_container paths;
                 if (mapnik::geometry_utils::from_wkb(paths, data, size, format_))
                 {
                     mapnik::util::to_ds_type(paths,result);

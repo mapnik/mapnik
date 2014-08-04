@@ -45,16 +45,17 @@ namespace mapnik
 struct glyph_t
 {
     FT_Glyph image;
-    char_properties_ptr properties;
+    detail::evaluated_format_properties const* properties;
 
-    glyph_t(FT_Glyph image_, char_properties_ptr properties_)
+    glyph_t(FT_Glyph image_, detail::evaluated_format_properties const* properties_)
         : image(image_), properties(properties_) {}
 
     glyph_t( glyph_t && other) noexcept
     : image(other.image),
-        properties(std::move(other.properties))
+        properties(other.properties)
     {
         other.image = nullptr;
+        other.properties = nullptr;
     }
 
     glyph_t(glyph_t const& ) = delete;
@@ -75,7 +76,7 @@ public:
     void set_transform(agg::trans_affine const& transform);
     void set_halo_transform(agg::trans_affine const& halo_transform);
 protected:
-    typedef std::vector<glyph_t> glyph_vector;
+    using glyph_vector = std::vector<glyph_t>;
     void prepare_glyphs(glyph_positions const& positions);
     halo_rasterizer_e rasterizer_;
     composite_mode_e comp_op_;
@@ -91,7 +92,7 @@ template <typename T>
 class agg_text_renderer : public text_renderer
 {
 public:
-    typedef T pixmap_type;
+    using pixmap_type = T;
     agg_text_renderer (pixmap_type & pixmap, halo_rasterizer_e rasterizer,
                        composite_mode_e comp_op = src_over,
                        composite_mode_e halo_comp_op = src_over,
@@ -109,7 +110,7 @@ template <typename T>
 class grid_text_renderer : public text_renderer
 {
 public:
-    typedef T pixmap_type;
+    using pixmap_type = T;
     grid_text_renderer (pixmap_type & pixmap,
                         composite_mode_e comp_op = src_over,
                         double scale_factor = 1.0);

@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/graphics.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 
@@ -64,18 +65,18 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     using namespace mapnik::svg;
-    typedef agg::rgba8 color_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-    typedef agg::rendering_buffer buf_type;
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, buf_type> pixfmt_comp_type;
-    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
-    typedef agg::pod_bvector<path_attributes> svg_attribute_type;
-    typedef svg_renderer_agg<svg_path_adapter,
-                             svg_attribute_type,
-                             renderer_type,
-                             pixfmt_comp_type > svg_renderer_type;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using buf_type = agg::rendering_buffer;
+    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
+    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+    using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
+    using svg_attribute_type = agg::pod_bvector<path_attributes>;
+    using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
+                                               svg_attribute_type,
+                                               renderer_type,
+                                               pixfmt_comp_type>;
 
     ras_ptr->reset();
 
@@ -92,9 +93,9 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
     box2d<double> clip_box = clipping_extent();
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
-    typedef decltype(renderer_context) context_type;
-    typedef vector_markers_rasterizer_dispatch<svg_renderer_type, detector_type, context_type> vector_dispatch_type;
-    typedef raster_markers_rasterizer_dispatch<detector_type, context_type> raster_dispatch_type;
+    using context_type = decltype(renderer_context);
+    using vector_dispatch_type = vector_markers_rasterizer_dispatch<svg_renderer_type, detector_type, context_type>;
+    using raster_dispatch_type = raster_markers_rasterizer_dispatch<detector_type, context_type>;
 
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
         sym, feature, prj_trans, common_, clip_box, renderer_context);

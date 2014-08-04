@@ -24,11 +24,14 @@
 #define MAPNIK_TRANSFORM_EXPRESSION_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
 
 // boost
 #include <boost/optional.hpp>
-#include <memory>
 #include <boost/variant/variant.hpp>
 
 // fusion
@@ -37,6 +40,7 @@
 
 // stl
 #include <vector>
+#include <memory>
 
 namespace mapnik {
 
@@ -87,7 +91,7 @@ struct scale_node
 
 struct rotate_node
 {
-    typedef boost::fusion::vector2<expr_node, expr_node> coords_type;
+    using coords_type = boost::fusion::vector2<expr_node, expr_node>;
 
     expr_node angle_;
     expr_node cx_;
@@ -143,14 +147,13 @@ namespace detail {
 // default-constructible, but also makes little sense with our variant of
 // transform nodes...
 
-typedef boost::variant< identity_node
-                        , matrix_node
-                        , translate_node
-                        , scale_node
-                        , rotate_node
-                        , skewX_node
-                        , skewY_node
-                        > transform_variant;
+using transform_variant =  boost::variant< identity_node
+                                           ,matrix_node
+                                           ,translate_node
+                                           ,scale_node
+                                           ,rotate_node
+                                           ,skewX_node
+                                           ,skewY_node >;
 
 // ... thus we wrap the variant-type in a distinct type and provide
 // a custom clear overload, which resets the value to identity_node
@@ -191,9 +194,9 @@ inline void clear(transform_node& val)
 
 } // namespace detail
 
-typedef detail::transform_node              transform_node;
-typedef std::vector<transform_node>         transform_list;
-typedef std::shared_ptr<transform_list>   transform_list_ptr;
+using transform_node = detail::transform_node             ;
+using transform_list = std::vector<transform_node>        ;
+using transform_list_ptr = std::shared_ptr<transform_list>  ;
 
 MAPNIK_DECL std::string to_expression_string(transform_node const& node);
 MAPNIK_DECL std::string to_expression_string(transform_list const& list);

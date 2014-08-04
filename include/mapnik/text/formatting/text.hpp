@@ -35,8 +35,8 @@ public:
     text_node(expression_ptr text): node(), text_(text) {}
     text_node(std::string text): node(), text_(parse_expression(text)) {}
     void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
+    static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
+    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
     virtual void add_expressions(expression_set &output) const;
 
     void set_text(expression_ptr text);

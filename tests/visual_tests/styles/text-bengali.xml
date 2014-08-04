@@ -18,15 +18,15 @@
     <Style name="My Style">
       <Rule>
 	    <Filter>[nr] = 3</Filter>
-	    <TextSymbolizer face-name="Lohit Bengali Regular" size="30" placement="point" dy="0">"গোপালগঞ্জ"</TextSymbolizer>
+	    <TextSymbolizer face-name="Lohit Bengali Regular" size="8" placement="point">"গোপালগঞ্জ"</TextSymbolizer>
 	</Rule>
 	<Rule>
 	    <Filter>[nr] = 5</Filter>
-	    <TextSymbolizer face-name="Lohit Bengali Regular" size="30" placement="point" dy="0">"ঝিনাইদহ"</TextSymbolizer>
+	    <TextSymbolizer face-name="Lohit Bengali Regular" size="8" placement="point">"ঝিনাইদহ"</TextSymbolizer>
 	</Rule>
 	<Rule>
 	    <Filter>[nr] = 7</Filter>
-	    <TextSymbolizer face-name="Lohit Bengali Regular" size="30" placement="point" dy="0">"কুষ্টিয়া"</TextSymbolizer>
+	    <TextSymbolizer face-name="Lohit Bengali Regular" size="8" placement="point">"কুষ্টিয়া"</TextSymbolizer>
 	</Rule>
     </Style>
 </Map>

@@ -51,9 +51,9 @@
 class topojson_datasource : public mapnik::datasource
 {
 public:
-    typedef boost::geometry::model::d2::point_xy<double> point_type;
-    typedef boost::geometry::model::box<point_type> box_type;
-    typedef boost::geometry::index::rtree<box_type,std::size_t> spatial_index_type;
+    using point_type = boost::geometry::model::d2::point_xy<double>;
+    using box_type = boost::geometry::model::box<point_type>;
+    using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
 
     // constructor
     topojson_datasource(mapnik::parameters const& params);
@@ -65,11 +65,14 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    template <typename T>
+    void parse_topojson(T & stream);
 private:
     mapnik::datasource::datasource_t type_;
     std::map<std::string, mapnik::parameters> statistics_;
     mapnik::layer_descriptor desc_;
-    std::string file_;
+    std::string filename_;
+    std::string inline_string_;
     mapnik::box2d<double> extent_;
     std::shared_ptr<mapnik::transcoder> tr_;
     mapnik::topojson::topology topo_;

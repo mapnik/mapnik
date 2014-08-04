@@ -23,10 +23,6 @@
 #ifndef MAPNIK_XML_NODE_H
 #define MAPNIK_XML_NODE_H
 
-//mapnik
-#include <mapnik/boolean.hpp>
-
-
 //boost
 #include <boost/optional.hpp>
 
@@ -82,8 +78,8 @@ private:
 class xml_node
 {
 public:
-    typedef std::list<xml_node>::const_iterator const_iterator;
-    typedef std::map<std::string, xml_attribute> attribute_map;
+    using const_iterator = std::list<xml_node>::const_iterator;
+    using attribute_map = std::map<std::string, xml_attribute>;
     xml_node(xml_tree &tree, std::string && name, unsigned line=0, bool is_text = false);
 
     std::string const& name() const;
@@ -110,6 +106,7 @@ public:
     xml_node const& get_child(std::string const& name) const;
     xml_node const* get_opt_child(std::string const& name) const;
     bool has_child(std::string const& name) const;
+    bool has_attribute(std::string const& name) const;
 
     template <typename T>
     boost::optional<T> get_opt_attr(std::string const& name) const;
@@ -121,15 +118,12 @@ public:
 
     std::string const& get_text() const;
 
-    xml_tree const& get_tree() const
-    {
-        return tree_;
-    }
+    inline xml_tree const& get_tree() const { return tree_; }
 
     template <typename T>
     T get_value() const;
 private:
-    xml_tree &tree_;
+    xml_tree & tree_;
     std::string name_;
     std::list<xml_node> children_;
     attribute_map attributes_;

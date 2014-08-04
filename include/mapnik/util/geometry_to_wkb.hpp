@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
+#include <cassert>
 
 namespace mapnik { namespace util {
 
@@ -96,11 +97,7 @@ struct wkb_stream
 template <typename S, typename T>
 inline void write (S & stream, T val, std::size_t size, wkbByteOrder byte_order)
 {
-#ifdef MAPNIK_BIG_ENDIAN
-    bool need_swap =  byte_order ? wkbNDR : wkbXDR;
-#else
     bool need_swap =  byte_order ? wkbXDR : wkbNDR;
-#endif
     char* buf = reinterpret_cast<char*>(&val);
     if (need_swap)
     {
@@ -135,7 +132,7 @@ struct wkb_buffer
     char * data_;
 };
 
-typedef std::unique_ptr<wkb_buffer> wkb_buffer_ptr;
+using wkb_buffer_ptr = std::unique_ptr<wkb_buffer>;
 
 template<typename GeometryType>
 wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
@@ -186,8 +183,8 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
     unsigned num_points = g.size();
     assert(num_points > 1);
 
-    typedef std::pair<double,double> point_type;
-    typedef std::vector<point_type> linear_ring;
+    using point_type = std::pair<double,double>;
+    using linear_ring = std::vector<point_type>;
     boost::ptr_vector<linear_ring> rings;
 
     double x = 0;
@@ -269,14 +266,13 @@ wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
         bool collection = false;
         int multi_type = 0;
         size_t multi_size = 1 + 4 + 4;
-        geometry_container::const_iterator itr = paths.begin();
-        geometry_container::const_iterator end = paths.end();
-        for ( ; itr!=end; ++itr)
+
+        for (auto const& geom : paths)
         {
-            wkb_buffer_ptr wkb = to_wkb(*itr,byte_order);
+            wkb_buffer_ptr wkb = to_wkb(geom,byte_order);
             multi_size += wkb->size();
-            int type = static_cast<int>(itr->type());
-            if (multi_type > 0 && multi_type != itr->type())
+            int type = static_cast<int>(geom.type());
+            if (multi_type > 0 && multi_type != geom.type())
                 collection = true;
             multi_type = type;
             wkb_cont.push_back(std::move(wkb));

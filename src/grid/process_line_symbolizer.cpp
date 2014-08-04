@@ -47,12 +47,12 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
-    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
-    typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                               offset_transform_tag, affine_transform_tag,
-                               simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
+    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          offset_transform_tag, affine_transform_tag,
+                                          simplify_tag, smooth_tag, dash_tag, stroke_tag>;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
@@ -72,7 +72,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     box2d<double> clipping_extent = common_.query_extent_;
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, true);
+    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
     double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_,1.0);
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_,0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_,0.0);

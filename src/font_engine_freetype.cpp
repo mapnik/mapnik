@@ -29,8 +29,9 @@
 #include <mapnik/utils.hpp>
 
 // boost
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
 // stl
 #include <algorithm>

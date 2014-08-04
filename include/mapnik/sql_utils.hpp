@@ -27,7 +27,7 @@
 #include <mapnik/util/trim.hpp> // for trim
 
 // boost
-#include "boost/algorithm/string/replace.hpp"  // for ireplace_all, etc
+#include <boost/algorithm/string/replace.hpp>  // for ireplace_all, etc
 
 // stl
 #include <sstream>

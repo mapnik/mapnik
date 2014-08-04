@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
@@ -31,7 +32,8 @@
 
 // boost
 #include <boost/filesystem/operations.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 // stl
 #include <algorithm>
@@ -78,24 +80,27 @@ datasource_ptr datasource_cache::create(parameters const& params)
     }
 #endif
 
-#ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
-#endif
-
-    std::map<std::string,std::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
-    if (itr == plugins_.end())
+    std::map<std::string,std::shared_ptr<PluginInfo> >::iterator itr;
+    // add scope to ensure lock is released asap
     {
-        std::string s("Could not create datasource for type: '");
-        s += *type + "'";
-        if (plugin_directories_.empty())
+#ifdef MAPNIK_THREADSAFE
+        mapnik::scoped_lock lock(mutex_);
+#endif
+        itr=plugins_.find(*type);
+        if (itr == plugins_.end())
         {
-            s += " (no datasource plugin directories have been successfully registered)";
+            std::string s("Could not create datasource for type: '");
+            s += *type + "'";
+            if (plugin_directories_.empty())
+            {
+                s += " (no datasource plugin directories have been successfully registered)";
+            }
+            else
+            {
+                s += " (searched for datasource plugins in '" + plugin_directories() + "')";
+            }
+            throw config_error(s);
         }
-        else
-        {
-            s += " (searched for datasource plugins in '" + plugin_directories() + "')";
-        }
-        throw config_error(s);
     }
 
     if (! itr->second->valid())
@@ -108,7 +113,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-        create_ds* create_datasource = reinterpret_cast<create_ds*>(itr->second->get_symbol("create"));
+        create_ds create_datasource = reinterpret_cast<create_ds>(itr->second->get_symbol("create"));
 
     if (! create_datasource)
     {

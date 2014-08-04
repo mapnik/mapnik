@@ -61,7 +61,7 @@ raster_datasource::raster_datasource(parameters const& params)
     else
         filename_ = *file;
 
-    multi_tiles_ = *params.get<mapnik::boolean>("multi", false);
+    multi_tiles_ = *params.get<mapnik::boolean_type>("multi", false);
     tile_size_ = *params.get<mapnik::value_integer>("tile_size", 256);
     tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
