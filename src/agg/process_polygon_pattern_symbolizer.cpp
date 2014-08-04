@@ -128,7 +128,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
-    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, LOCAL_ALIGNMENT);
+    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
     unsigned offset_x=0;
     unsigned offset_y=0;
 

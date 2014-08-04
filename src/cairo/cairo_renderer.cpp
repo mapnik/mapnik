@@ -735,7 +735,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     }
 
 
-    //pattern_alignment_e align = sym.get_alignment();
+    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
     //unsigned offset_x=0;
     //unsigned offset_y=0;
 
