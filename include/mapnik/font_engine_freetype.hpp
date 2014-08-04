@@ -87,7 +87,7 @@ private:
 #endif
     static std::map<std::string, std::pair<int,std::string> > name2file_;
     static std::map<std::string, std::pair<std::unique_ptr<char[]>, std::size_t> > memory_fonts_;
-    static std::map<const std::string, glyph_cache_ptr> glyph_cache_map_;
+    static std::map<std::string, glyph_cache_ptr> glyph_cache_map_;
 };
 
 template <typename T>
