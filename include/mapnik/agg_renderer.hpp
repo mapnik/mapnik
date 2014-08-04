@@ -37,8 +37,8 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/image_data.hpp>
-// boost
 
+// stl
 #include <memory>
 
 // fwd declaration to avoid dependence on agg headers

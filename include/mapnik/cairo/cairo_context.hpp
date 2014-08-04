@@ -36,7 +36,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// boost
+// stl
 #include <memory>
 
 // cairo

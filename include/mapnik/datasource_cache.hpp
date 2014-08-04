@@ -28,9 +28,6 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <memory>
-
 // stl
 #include <map>
 #include <set>

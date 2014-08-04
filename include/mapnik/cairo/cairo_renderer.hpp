@@ -42,9 +42,6 @@
 // cairo
 #include <cairo.h>
 
-// boost
-
-
 namespace agg {
 struct trans_affine;
 }

@@ -37,10 +37,6 @@
 #include <stdexcept>
 #include <string>
 
-// boost
-
-
-
 namespace mapnik {
 
 template <typename T>
