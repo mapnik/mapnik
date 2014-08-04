@@ -52,7 +52,6 @@ struct evaluated_format_properties
     double line_spacing;
     double text_opacity;
     double halo_opacity;
-    unsigned wrap_char;
     text_transform_e text_transform; //Per expression
     color fill;
     color halo_fill;
@@ -80,7 +79,6 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     symbolizer_base::value_type text_opacity;
     symbolizer_base::value_type halo_opacity;
-    symbolizer_base::value_type wrap_char;
     symbolizer_base::value_type fill;
     symbolizer_base::value_type halo_fill;
     symbolizer_base::value_type halo_radius;
