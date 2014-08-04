@@ -27,13 +27,11 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/color_factory.hpp>
-#include <mapnik/gamma_method.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
-
 #include <mapnik/expression.hpp>
 
 // stl

@@ -34,7 +34,7 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
-#include <mapnik/gamma_method.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/image_data.hpp>
 // boost

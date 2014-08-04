@@ -184,6 +184,17 @@ enum text_upright_enum
 
 DEFINE_ENUM(text_upright_e, text_upright_enum);
 
+enum gamma_method_enum {
+    GAMMA_POWER, //agg::gamma_power
+    GAMMA_LINEAR, //agg::gamma_linear
+    GAMMA_NONE, //agg::gamma_none
+    GAMMA_THRESHOLD, //agg::gamma_threshold
+    GAMMA_MULTIPLY, //agg::gamma_multiply
+    gamma_method_enum_MAX
+};
+
+DEFINE_ENUM (gamma_method_e, gamma_method_enum );
+
 
 }
 

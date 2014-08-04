@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/expression.hpp>
@@ -38,7 +39,6 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/gamma_method.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 
@@ -185,14 +185,7 @@ struct evaluate_path_wrapper<std::string>
 namespace detail {
 
 template <typename T>
-struct enum_traits
-{
-    using result_type = boost::optional<T>;
-    static result_type from_string(std::string const& str)
-    {
-        return result_type();
-    }
-};
+struct enum_traits {};
 
 template <>
 struct enum_traits<composite_mode_e>
@@ -201,6 +194,16 @@ struct enum_traits<composite_mode_e>
     static result_type from_string(std::string const& str)
     {
         return comp_op_from_string(str);
+    }
+};
+
+template <>
+struct enum_traits<scaling_method_e>
+{
+    using result_type = boost::optional<scaling_method_e>;
+    static result_type from_string(std::string const& str)
+    {
+        return scaling_method_from_string(str);
     }
 };
 
@@ -232,16 +235,22 @@ template <> struct enum_traits<e> { \
     } \
 };\
 
-ENUM_FROM_STRING( pattern_alignment_enum )
-ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( line_cap_enum )
+ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( point_placement_enum )
-ENUM_FROM_STRING( marker_placement_enum )
-ENUM_FROM_STRING( gamma_method_enum )
 ENUM_FROM_STRING( line_rasterizer_enum )
+ENUM_FROM_STRING( marker_placement_enum )
 ENUM_FROM_STRING( marker_multi_policy_enum )
+ENUM_FROM_STRING( debug_symbolizer_mode_enum )
+ENUM_FROM_STRING( pattern_alignment_enum )
 ENUM_FROM_STRING( halo_rasterizer_enum )
+ENUM_FROM_STRING( label_placement_enum )
+ENUM_FROM_STRING( vertical_alignment_enum )
+ENUM_FROM_STRING( horizontal_alignment_enum )
+ENUM_FROM_STRING( justify_alignment_enum )
 ENUM_FROM_STRING( text_transform_enum )
+ENUM_FROM_STRING( text_upright_enum )
+ENUM_FROM_STRING( gamma_method_enum )
 
 // enum
 template <typename T, bool is_enum = true>

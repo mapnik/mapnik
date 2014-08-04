@@ -22,7 +22,7 @@
 
 
 #include <boost/python.hpp>
-#include <mapnik/gamma_method.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 #include "mapnik_enumeration.hpp"
 
 void export_gamma_method()
