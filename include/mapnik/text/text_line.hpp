@@ -43,8 +43,6 @@ public:
 
     text_line(unsigned first_char, unsigned last_char);
 
-    // Get glyph vector.
-    glyph_vector const& glyphs() const { return glyphs_; }
     // Append glyph.
     void add_glyph(glyph_info && glyph, double scale_factor_);
 
@@ -80,8 +78,8 @@ public:
     unsigned size() const;
 private:
     glyph_vector glyphs_;
-    double line_height_; //Includes line spacing (returned by freetype)
-    double max_char_height_; //Height of 'X' character of the largest font in this run. //TODO: Initialize this!
+    double line_height_; // Includes line spacing (returned by freetype)
+    double max_char_height_; // Height of 'X' character of the largest font in this run. //TODO: Initialize this!
     double width_;
     unsigned first_char_;
     unsigned last_char_;
