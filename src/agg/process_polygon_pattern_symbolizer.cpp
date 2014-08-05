@@ -143,8 +143,8 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
             path_type path(common_.t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
-        offset_x = unsigned(current_buffer_->width() - x0);
-        offset_y = unsigned(current_buffer_->height() - y0);
+        offset_x = std::abs(current_buffer_->width() - x0);
+        offset_y = std::abs(current_buffer_->height() - y0);
     }
 
     span_gen_type sg(img_src, offset_x, offset_y);
