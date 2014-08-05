@@ -35,7 +35,10 @@
 
 namespace mapnik {
 
-std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker, agg::trans_affine const& tr)
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras,
+                                              marker const& marker,
+                                              agg::trans_affine const& tr,
+                                              double opacity)
 {
     using pixfmt = agg::pixfmt_rgba32_pre;
     using renderer_base = agg::renderer_base<pixfmt>;
@@ -61,7 +64,7 @@ std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& ma
                                   agg::pixfmt_rgba32_pre > svg_renderer(svg_path,
                                                                         (*marker.get_vector_data())->attributes());
 
-    svg_renderer.render(ras, sl, renb, mtx, 1.0, bbox);
+    svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
     return image;
 }
 

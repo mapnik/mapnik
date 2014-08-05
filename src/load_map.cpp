@@ -1014,6 +1014,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
         line_pattern_symbolizer symbol;
         parse_symbolizer_base(symbol, node);
         put(symbol, keys::file, parse_path(file));
+        set_symbolizer_property<line_pattern_symbolizer,double>(symbol, keys::opacity, node);
 
         // offset value
         optional<double> offset = node.get_opt_attr<double>("offset");

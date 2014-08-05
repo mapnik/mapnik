@@ -37,7 +37,10 @@ namespace mapnik {
 struct rasterizer;
 class marker;
 
-std::shared_ptr<image_data_32> render_pattern(rasterizer & ras, marker const& marker, agg::trans_affine const& tr);
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras,
+                                              marker const& marker,
+                                              agg::trans_affine const& tr,
+                                              double opacity);
 
 } // namespace mapnik
 

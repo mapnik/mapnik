@@ -631,6 +631,8 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     context_.set_operator(comp_op);
     std::shared_ptr<cairo_pattern> pattern;
     image_ptr image = nullptr;
+    // TODO - re-implement at renderer level like polygon_pattern symbolizer
+    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
     if ((*marker)->is_bitmap())
     {
         pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()));
@@ -642,7 +644,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        image = render_pattern(ras, **marker, image_tr);
+        image = render_pattern(ras, **marker, image_tr, opacity);
         pattern = std::make_unique<cairo_pattern>(*image);
         width = image->width();
         height = image->height();
@@ -745,7 +747,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     else
     {
         mapnik::rasterizer ras;
-        image_ptr image = render_pattern(ras, **marker, image_tr);
+        double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
+        image_ptr image = render_pattern(ras, **marker, image_tr, opacity);
         cairo_pattern pattern(*image);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
         pattern.set_origin(offset_x, offset_y);

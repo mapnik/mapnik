@@ -257,6 +257,7 @@ files = {
     'text-halo-opacity':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
     'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'line-pattern-smooth-and-offset':{'sizes':[(512,512)]},
     'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
     'marker-whole-multi-polygon':{'sizes':[(512,512)]}
     }

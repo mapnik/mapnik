@@ -106,6 +106,8 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
     if (!marker_ptr || !(*marker_ptr)) return;
     boost::optional<image_ptr> pat;
+    // TODO - re-implement at renderer level like polygon_pattern symbolizer
+    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
     if ((*marker_ptr)->is_bitmap())
     {
         pat = (*marker_ptr)->get_bitmap_data();
@@ -115,13 +117,12 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr);
+        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, opacity);
     }
 
     if (!pat) return;
 
     bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    //double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0); TODO
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
