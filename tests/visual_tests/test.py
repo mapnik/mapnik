@@ -3,7 +3,7 @@
 
 import sys
 import mapnik
-mapnik.logger.set_severity(mapnik.severity_type.None)
+#mapnik.logger.set_severity(mapnik.severity_type.None)
 #mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
 import sys
