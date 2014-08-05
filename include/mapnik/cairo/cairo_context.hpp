@@ -440,7 +440,7 @@ struct line_pattern_rasterizer
                 double dx = x - x0;
                 double dy = y - y0;
                 double angle = std::atan2(dy, dx);
-                double offset = std::fmod(length, width_);
+                double offset = std::fmod(length, static_cast<double>(width_));
 
                 cairo_matrix_t matrix;
                 cairo_matrix_init_identity(&matrix);
@@ -453,7 +453,7 @@ struct line_pattern_rasterizer
                 context_.move_to(x0, y0);
                 context_.line_to(x, y);
                 context_.stroke();
-                length = length + hypot(x - x0, y - y0);
+                length = length + std::hypot(x - x0, y - y0);
             }
 
             x0 = x;
