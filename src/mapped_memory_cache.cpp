@@ -48,7 +48,7 @@ bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    return cache_.insert(std::make_pair(uri,mem)).second;
+    return cache_.emplace(uri,mem).second;
 }
 
 boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& uri, bool update_cache)
@@ -71,12 +71,10 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         {
             boost::interprocess::file_mapping mapping(uri.c_str(),boost::interprocess::read_only);
             mapped_region_ptr region(std::make_shared<boost::interprocess::mapped_region>(mapping,boost::interprocess::read_only));
-
             result.reset(region);
-
             if (update_cache)
             {
-                cache_.insert(std::make_pair(uri,*result));
+                cache_.emplace(uri,*result);
             }
             return result;
         }

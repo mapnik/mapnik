@@ -525,9 +525,8 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     else
     {
         entry = std::make_shared<cairo_face>(font_engine_, face);
-        cache_.insert(std::make_pair(face, entry));
+        cache_.emplace(face, entry);
     }
-
     return entry;
 }
 

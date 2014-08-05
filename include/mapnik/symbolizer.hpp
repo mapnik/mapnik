@@ -311,10 +311,7 @@ struct put_impl
         }
         else
         {
-            // NOTE: we use insert here instead of emplace
-            // because of lacking std::map emplace support in libstdc++
-            // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44436
-            sym.properties.insert(std::make_pair(key, enumeration_wrapper(val)));
+            sym.properties.emplace(key, enumeration_wrapper(val));
         }
     }
 };
@@ -331,7 +328,7 @@ struct put_impl<T, false>
         }
         else
         {
-            sym.properties.insert(std::make_pair(key, val));
+            sym.properties.emplace(key, val);
         }
     }
 };
