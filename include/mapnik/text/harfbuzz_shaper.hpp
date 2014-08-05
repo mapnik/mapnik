@@ -48,7 +48,6 @@ static void shape_text(text_line & line,
 {
     unsigned start = line.first_char();
     unsigned end = line.last_char();
-    mapnik::value_unicode_string const& text = itemizer.text();
     size_t length = end - start;
     if (!length) return;
     line.reserve(length);
@@ -58,20 +57,22 @@ static void shape_text(text_line & line,
     const std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> buffer(hb_buffer_create(),hb_buffer_deleter);
     hb_buffer_set_unicode_funcs(buffer.get(), hb_icu_get_unicode_funcs());
     hb_buffer_pre_allocate(buffer.get(), length);
+    mapnik::value_unicode_string const& text = itemizer.text();
 
     for (auto const& text_item : list)
     {
         face_set_ptr face_set = font_manager.get_face_set(text_item.format->face_name, text_item.format->fontset);
         double size = text_item.format->text_size * scale_factor;
         face_set->set_unscaled_character_sizes();
-        font_face_set::iterator face_itr = face_set->begin(), face_end = face_set->end();
-        for (; face_itr != face_end; ++face_itr)
+        std::size_t num_faces = face_set->size();
+        std::size_t pos = 0;
+        for (auto const& face : *face_set)
         {
+            ++pos;
             hb_buffer_clear_contents(buffer.get());
             hb_buffer_add_utf16(buffer.get(), text.getBuffer(), text.length(), text_item.start, text_item.end - text_item.start);
             hb_buffer_set_direction(buffer.get(), (text_item.rtl == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), hb_icu_script_to_script(text_item.script));
-            face_ptr const& face = *face_itr;
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
             hb_shape(font, buffer.get(), nullptr, 0);
             hb_font_destroy(font);
@@ -91,7 +92,7 @@ static void shape_text(text_line & line,
                     break;
                 }
             }
-            if (!font_has_all_glyphs && face_itr+1 != face_end)
+            if (!font_has_all_glyphs && (pos < num_faces))
             {
                 //Try next font in fontset
                 continue;
