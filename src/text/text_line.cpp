@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include <mapnik/text/text_line.hpp>
+#include <mapnik/text/glyph_info.hpp>
+#include <mapnik/text/text_properties.hpp>
 
 namespace mapnik {
 

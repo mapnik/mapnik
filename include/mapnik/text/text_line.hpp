@@ -22,14 +22,13 @@
 #ifndef MAPNIK_TEXT_LINE_HPP
 #define MAPNIK_TEXT_LINE_HPP
 
-//mapnik
-#include <mapnik/text/glyph_info.hpp>
-#include <mapnik/text/text_properties.hpp>
 //stl
 #include <vector>
 
 namespace mapnik
 {
+
+struct glyph_info;
 
 // This class stores all glyphs of a line in left to right order.
 // It can be used for rendering but no text processing (like line breaking)

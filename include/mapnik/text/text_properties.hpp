@@ -45,6 +45,17 @@ namespace mapnik { namespace detail {
 
 struct evaluated_format_properties
 {
+    evaluated_format_properties() :
+      face_name(),
+      text_size(0.0),
+      character_spacing(0.0),
+      line_spacing(0.0),
+      text_opacity(1.0),
+      halo_opacity(1.0),
+      text_transform(NONE),
+      fill(0,0,0),
+      halo_fill(0,0,0),
+      halo_radius(0.0) {}
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
@@ -52,7 +63,7 @@ struct evaluated_format_properties
     double line_spacing;
     double text_opacity;
     double halo_opacity;
-    text_transform_e text_transform; //Per expression
+    text_transform_e text_transform;
     color fill;
     color halo_fill;
     double halo_radius;
@@ -147,7 +158,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 text_symbolizer_properties const& dfl = text_symbolizer_properties()) const;
 
-    // Takes a feature and produces formated text as output.
+    // Takes a feature and produces formatted text as output.
     // The output object has to be created by the caller and passed in for thread safety.
     void process(text_layout &output, feature_impl const& feature, attributes const& vars);
     void evaluate_text_properties(feature_impl const& feature, attributes const& attrs);
