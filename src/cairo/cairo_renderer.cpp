@@ -59,7 +59,8 @@
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/agg_renderer.hpp>
+#include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/render_pattern.hpp>
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>

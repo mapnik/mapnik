@@ -38,6 +38,7 @@
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/render_pattern.hpp>
 // stl
 #include <memory>
 
