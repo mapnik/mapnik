@@ -39,7 +39,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_renderer_base.h"

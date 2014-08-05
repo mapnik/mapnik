@@ -32,7 +32,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"

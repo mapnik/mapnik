@@ -31,7 +31,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
 // agg
 #include "agg_trans_affine.h"
 
