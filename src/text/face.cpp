@@ -32,18 +32,20 @@ namespace mapnik
 {
 
 font_face::font_face(FT_Face face)
-    : face_(face), dimension_cache_(), char_height_(0.0)
-{
-}
+    : face_(face),
+      glyph_info_cache_(),
+      char_height_(0.0) {}
 
 double font_face::get_char_height(double size) const
 {
     if (char_height_ != 0.0) return char_height_;
     glyph_info tmp;
     tmp.glyph_index = FT_Get_Char_Index(face_, 'X');
-    glyph_dimensions(tmp);
-    tmp.scale_multiplier = size / face_->units_per_EM;
-    char_height_ = tmp.height();
+    if (glyph_dimensions(tmp))
+    {
+        tmp.scale_multiplier = size / face_->units_per_EM;
+        char_height_ = tmp.height();
+    }
     return char_height_;
 }
 
@@ -59,45 +61,41 @@ bool font_face::set_unscaled_character_sizes()
     return !FT_Set_Char_Size(face_,0,face_->units_per_EM,0,0);
 }
 
-void font_face::glyph_dimensions(glyph_info & glyph) const
+bool font_face::glyph_dimensions(glyph_info & glyph) const
 {
-    //TODO
-    //Check if char is already in cache
-//    std::map<glyph_index_t, glyph_info>::const_iterator itr;
-//    itr = dimension_cache_.find(glyph.glyph_index);
-//    if (itr != dimension_cache_.end()) {
-//        glyph = itr->second;
-//        return;
-//    }
+    // Check if glyph is already in cache
+    std::map<glyph_index_t, glyph_info>::const_iterator itr;
+    itr = glyph_info_cache_.find(glyph.glyph_index);
+    if (itr != glyph_info_cache_.end()) {
+        glyph = itr->second;
+        return true;
+    }
 
     FT_Vector pen;
     pen.x = 0;
     pen.y = 0;
-    /*
-    FT_Matrix matrix;
-    matrix.xx = (FT_Fixed)( 1 * 0x10000L );
-    matrix.xy = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yx = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yy = (FT_Fixed)( 1 * 0x10000L );
-    FT_Set_Transform(face_, &matrix, &pen);
-    */
-    // TODO - any benefit to using a matrix here?
     FT_Set_Transform(face_, 0, &pen);
 
-    if (FT_Load_Glyph (face_, glyph.glyph_index, FT_LOAD_NO_HINTING)) return;
-
+    if (FT_Load_Glyph(face_, glyph.glyph_index, FT_LOAD_NO_HINTING))
+    {
+        MAPNIK_LOG_ERROR(font_face) << "FT_Load_Glyph failed";
+        return false;
+    }
     FT_Glyph image;
-    if (FT_Get_Glyph(face_->glyph, &image)) return;
+    if (FT_Get_Glyph(face_->glyph, &image))
+    {
+        MAPNIK_LOG_ERROR(font_face) << "FT_Get_Glyph failed";
+        return false;
+    }
     FT_BBox glyph_bbox;
     FT_Glyph_Get_CBox(image, FT_GLYPH_BBOX_TRUNCATE, &glyph_bbox);
     FT_Done_Glyph(image);
-
     glyph.unscaled_ymin = glyph_bbox.yMin;
     glyph.unscaled_ymax = glyph_bbox.yMax;
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
-
-//TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
+    glyph_info_cache_.insert(std::make_pair(glyph.glyph_index, glyph));
+    return true;
 }
 
 font_face::~font_face()
