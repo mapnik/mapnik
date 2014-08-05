@@ -343,7 +343,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                           simplify_tag, smooth_tag,
                                           offset_transform_tag,
                                           dash_tag, stroke_tag>;
-    cairo_save_restore guard(context_);
+
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
     double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
@@ -358,6 +358,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     double miterlimit = get<double>(sym, keys::stroke_miterlimit, feature, common_.vars_, 4.0);
     double width = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
 
+    cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
     context_.set_color(stroke, stroke_opacity);
     context_.set_line_join(stroke_join);
@@ -601,11 +602,19 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
-    using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
+
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag, smooth_tag,
+                                          offset_transform_tag,
+                                          dash_tag, stroke_tag>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
+    double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
+    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
 
     boost::optional<marker_ptr> marker;
     if ( !filename.empty() )
@@ -619,13 +628,12 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
-
     std::shared_ptr<cairo_pattern> pattern;
     image_ptr image = nullptr;
     if ((*marker)->is_bitmap())
     {
         pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()));
-        context_.set_line_width(height* common_.scale_factor_); // FIXME: do we need to scale height here?
+        context_.set_line_width(height);
     }
     else
     {
@@ -643,55 +651,42 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     pattern->set_extend(CAIRO_EXTEND_REPEAT);
     pattern->set_filter(CAIRO_FILTER_BILINEAR);
 
+    agg::trans_affine tr;
+    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
 
-    for (std::size_t i = 0; i < feature.num_geometries(); ++i)
+    box2d<double> clipping_extent = common_.query_extent_;
+    if (clip)
     {
-        geometry_type & geom = feature.get_geometry(i);
+        double padding = (double)(common_.query_extent_.width()/common_.width_);
+        double half_stroke = width/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (std::fabs(offset) > 0)
+            padding *= std::fabs(offset) * 1.2;
+        padding *= common_.scale_factor_;
+        clipping_extent.pad(padding);
+    }
 
+    using rasterizer_type = line_pattern_rasterizer<cairo_context>;
+    rasterizer_type ras(context_, *pattern, width, height);
+    vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        converter(clipping_extent, ras, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
+
+    if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
+    converter.set<transform_tag>(); // always transform
+    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    converter.set<affine_transform_tag>(); // optional affine transform
+    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+
+    for (auto & geom : feature.paths())
+    {
         if (geom.size() > 1)
         {
-            clipped_geometry_type clipped(geom);
-            clipped.clip_box(common_.query_extent_.minx(),common_.query_extent_.miny(),common_.query_extent_.maxx(),common_.query_extent_.maxy());
-            path_type path(common_.t_,clipped,prj_trans);
-
-            double length(0);
-            double x0(0), y0(0);
-            double x, y;
-
-            for (unsigned cm = path.vertex(&x, &y); cm != SEG_END; cm = path.vertex(&x, &y))
-            {
-                if (cm == SEG_MOVETO)
-                {
-                    length = 0.0;
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    double dx = x - x0;
-                    double dy = y - y0;
-                    double angle = std::atan2(dy, dx);
-                    double offset = std::fmod(length, width);
-
-                    cairo_matrix_t matrix;
-                    cairo_matrix_init_identity(&matrix);
-                    cairo_matrix_translate(&matrix,x0,y0);
-                    cairo_matrix_rotate(&matrix,angle);
-                    cairo_matrix_translate(&matrix,-offset,0.5*height);
-                    cairo_matrix_invert(&matrix);
-
-                    pattern->set_matrix(matrix);
-
-                    context_.set_pattern(*pattern);
-
-                    context_.move_to(x0, y0);
-                    context_.line_to(x, y);
-                    context_.stroke();
-
-                    length = length + hypot(x - x0, y - y0);
-                }
-
-                x0 = x;
-                y0 = y;
-            }
+            converter.apply(geom);
         }
     }
 }
@@ -700,10 +695,6 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    //using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
-    //using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
-
-    cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
@@ -714,15 +705,40 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
     if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
 
+    cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
 
     boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
     if (!marker || !(*marker)) return;
 
+    unsigned offset_x=0;
+    unsigned offset_y=0;
+    box2d<double> const& clip_box = common_.query_extent_;//clipping_extent();
+    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
+    if (alignment == LOCAL_ALIGNMENT)
+    {
+        double x0 = 0.0;
+        double y0 = 0.0;
+
+        if (feature.num_geometries() > 0)
+        {
+            using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
+            using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
+            clipped_geometry_type clipped(feature.get_geometry(0));
+            clipped.clip_box(clip_box.minx(), clip_box.miny(),
+                             clip_box.maxx(), clip_box.maxy());
+            path_type path(common_.t_, clipped, prj_trans);
+            path.vertex(&x0, &y0);
+        }
+        offset_x = std::abs(clip_box.width() - x0);
+        offset_y = std::abs(clip_box.height() - y0);
+    }
+
     if ((*marker)->is_bitmap())
     {
         cairo_pattern pattern(**((*marker)->get_bitmap_data()));
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(offset_x, offset_y);
         context_.set_pattern(pattern);
     }
     else
@@ -731,28 +747,9 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
         image_ptr image = render_pattern(ras, **marker, image_tr);
         cairo_pattern pattern(*image);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(offset_x, offset_y);
         context_.set_pattern(pattern);
     }
-
-
-    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
-    //unsigned offset_x=0;
-    //unsigned offset_y=0;
-
-    //if (align == LOCAL_ALIGNMENT)
-    //{
-    //    double x0 = 0;
-    //    double y0 = 0;
-    //    if (feature.num_geometries() > 0)
-    //    {
-    //        clipped_geometry_type clipped(feature.get_geometry(0));
-    //        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-    //        path_type path(t_,clipped,prj_trans);
-    //        path.vertex(&x0,&y0);
-    //    }
-    //    offset_x = unsigned(width_ - x0);
-    //    offset_y = unsigned(height_ - y0);
-    //}
 
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
@@ -761,7 +758,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-        converter(common_.query_extent_,context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+        converter(clip_box, context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
