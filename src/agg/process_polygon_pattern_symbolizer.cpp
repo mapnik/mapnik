@@ -98,7 +98,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
 
     using color = agg::rgba8;
     using order = agg::order_rgba;

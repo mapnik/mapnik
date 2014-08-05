@@ -140,7 +140,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
     if (clip)
     {
         double padding = (double)(common_.query_extent_.width()/pixmap_.width());

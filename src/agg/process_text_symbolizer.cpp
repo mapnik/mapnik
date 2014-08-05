@@ -36,7 +36,7 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
     text_symbolizer_helper helper(
             sym, feature, common_.vars_, prj_trans,
             common_.width_, common_.height_,

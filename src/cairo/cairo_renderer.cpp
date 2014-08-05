@@ -713,7 +713,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     unsigned offset_x=0;
     unsigned offset_y=0;
-    box2d<double> const& clip_box = common_.query_extent_;//clipping_extent();
+    box2d<double> const& clip_box = clipping_extent(common_);
     pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
     if (alignment == LOCAL_ALIGNMENT)
     {
