@@ -25,8 +25,7 @@
 
 #if defined(HAVE_JPEG)
 
-#include <mapnik/global.hpp>
-
+#include <new>
 #include <ostream>
 
 extern "C"
