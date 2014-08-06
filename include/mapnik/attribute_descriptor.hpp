@@ -107,18 +107,6 @@ private:
     int precision_;
 };
 
-template <typename charT,typename traits>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             attribute_descriptor const& ad)
-{
-    out << "name=" << ad.get_name() << "\n";
-    out << "type=" << ad.get_type() << "\n";
-    out << "size=" << ad.get_size() << "\n";
-    return out;
-}
-
-
 }
 
 #endif // MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP
