@@ -40,7 +40,7 @@ namespace mapnik
 class vertex_cache;
 using vertex_cache_ptr = std::shared_ptr<vertex_cache>;
 
-/** Caches all path points and their lengths. Allows easy moving in both directions. */
+// Caches all path points and their lengths. Allows easy moving in both directions.
 class vertex_cache
 {
     struct segment
@@ -50,7 +50,7 @@ class vertex_cache
         double length;
     };
 
-    /* The first segment always has the length 0 and just defines the starting point. */
+    // The first segment always has the length 0 and just defines the starting point.
     struct segment_vector
     {
         segment_vector() : vector(), length(0.) {}
@@ -65,8 +65,8 @@ class vertex_cache
     };
 
 public:
-    /** This class has no public members to avoid acciedential modification.
-     * It should only be used with save_state/restore_state. */
+    // This class has no public members to avoid acciedential modification.
+    // It should only be used with save_state/restore_state.
     class state
     {
         segment_vector::iterator current_segment;
@@ -92,7 +92,7 @@ public:
         bool restored_;
     };
 
-    /********************************************************************************************/
+    ///////////////////////////////////////////////////////////////////////
 
     template <typename T> vertex_cache(T &path);
 
@@ -104,73 +104,72 @@ public:
     double linear_position() const { return position_; }
 
 
-    /** Returns a parallel line in the specified distance. */
-    vertex_cache &get_offseted(double offset, double region_width);
+    // Returns a parallel line in the specified distance.
+    vertex_cache & get_offseted(double offset, double region_width);
 
 
-    /** Skip a certain amount of space.
-     *
-     * This function automatically calculates new points if the position is not exactly
-     * on a point on the path.
-     */
+    // Skip a certain amount of space.
+    // This function automatically calculates new points if the position is not exactly
+    // on a point on the path.
+
     bool forward(double length);
-    /** Go backwards. */
+    // Go backwards.
     bool backward(double length);
-    /** Move in any direction (based on sign of length). Returns false if it reaches either end of the path. */
+    // Move in any direction (based on sign of length). Returns false if it reaches either end of the path.
     bool move(double length);
-    /** Work on next subpath. Returns false if the is no next subpath. */
+    // Work on next subpath. Returns false if the is no next subpath.
     bool next_subpath();
 
     // Compatibility with standard path interface
-    void rewind(unsigned);
-    unsigned vertex(double *x, double *y);
+    void rewind(unsigned) const;
+    unsigned vertex(double *x, double *y) const;
 
-    //State
+    // State
     state save_state() const;
     void restore_state(state const& s);
-    /** Go back to initial state. */
+    // Go back to initial state.
     void reset();
 
-    /** position on this line closest to the target position */
+    // position on this line closest to the target position
     double position_closest_to(pixel_position const &target_pos);
 
 private:
     void rewind_subpath();
     bool next_segment();
     bool previous_segment();
-    /** Position as calculated by last move/forward/next call. */
+    // Position as calculated by last move/forward/next call.
     pixel_position current_position_;
-    /** First pixel of current segment. */
+    // First pixel of current segment.
     pixel_position segment_starting_point_;
-    /** List of all subpaths. */
+    // List of all subpaths.
     std::vector<segment_vector> subpaths_;
-    /** Currently active subpath. */
+    // Currently active subpath.
     std::vector<segment_vector>::iterator current_subpath_;
-    /** Current segment for normal operation (move()). */
+    // Current segment for normal operation (move()).
     segment_vector::iterator current_segment_;
-    /** Current segment in compatibility mode (vertex(), rewind()). */
+    // Current segment in compatibility mode (vertex(), rewind()).
     segment_vector::iterator vertex_segment_;
-    /** Currently active subpath in compatibility mode. */
+    // Currently active subpath in compatibility mode.
     std::vector<segment_vector>::iterator vertex_subpath_;
-    /** State is initialized (after first call to next_subpath()). */
+    // State is initialized (after first call to next_subpath()).
     bool initialized_;
-    /** Position from start of segment. */
+    // Position from start of segment.
     double position_in_segment_;
-    /** Angle for current segment. */
+    // Angle for current segment.
     mutable double angle_;
-    /** Is the value in angle_ valid?
-     * Used to avoid unnecessary calculations. */
+    // Is the value in angle_ valid?
+    // Used to avoid unnecessary calculations.
     mutable bool angle_valid_;
     using offseted_lines_map = std::map<double, vertex_cache_ptr>;
-    /** Cache of all offseted lines already computed. */
+    // Cache of all offseted lines already computed.
     offseted_lines_map offseted_lines_;
-    /** Linear position, i.e distance from start of line. */
+    // Linear position, i.e distance from start of line.
     double position_;
 };
 
 
 template <typename T>
-vertex_cache::vertex_cache(T &path)
+vertex_cache::vertex_cache(T & path)
         : current_position_(),
           segment_starting_point_(),
           subpaths_(),
