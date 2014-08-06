@@ -113,7 +113,7 @@ static void shape_text(text_line & line,
 
                     tmp.offset.set(positions[i].x_offset * tmp.scale_multiplier, positions[i].y_offset * tmp.scale_multiplier);
                     width_map[glyphs[i].cluster] += tmp.advance();
-                    line.add_glyph(std::move(tmp), scale_factor);
+                    line.add_glyph(tmp, scale_factor);
                 }
             }
             line.update_max_char_height(face->get_char_height(size));

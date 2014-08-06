@@ -43,7 +43,7 @@ public:
     text_line(unsigned first_char, unsigned last_char);
 
     // Append glyph.
-    void add_glyph(glyph_info && glyph, double scale_factor_);
+    void add_glyph(glyph_info const& glyph, double scale_factor_);
 
     // Preallocate memory.
     void reserve(glyph_vector::size_type length);
