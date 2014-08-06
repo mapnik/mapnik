@@ -27,11 +27,11 @@ namespace mapnik {
 
 template <typename vertex_converter_type, typename rasterizer_type, typename F>
 void render_polygon_symbolizer(polygon_symbolizer const &sym,
-                               mapnik::feature_impl &feature,
-                               proj_transform const &prj_trans,
-                               renderer_common &common,
-                               box2d<double> const &clip_box,
-                               rasterizer_type &ras,
+                               mapnik::feature_impl & feature,
+                               proj_transform const& prj_trans,
+                               renderer_common & common,
+                               box2d<double> const& clip_box,
+                               rasterizer_type & ras,
                                F fill_func)
 {
     agg::trans_affine tr;

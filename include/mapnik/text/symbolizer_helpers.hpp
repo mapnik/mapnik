@@ -30,8 +30,36 @@
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 namespace mapnik {
+
+template <typename T>
+struct placement_finder_adapter
+{
+    using placement_finder_type = T;
+    placement_finder_adapter(T & finder, bool points_on_line)
+        : finder_(finder),
+          points_on_line_(points_on_line) {}
+
+    template <typename PathT>
+    void add_path(PathT & path)
+    {
+        status_ = finder_.find_line_placements(path, points_on_line_);
+    }
+
+    bool status() const { return status_;}
+    // Place text at points on a line instead of following the line (used for ShieldSymbolizer)
+    placement_finder_type & finder_;
+    bool points_on_line_;
+    mutable bool status_ = false;
+
+};
+
+using conv_types = boost::mpl::vector<clip_line_tag , transform_tag, simplify_tag, smooth_tag>;
+using vertex_converter_type = vertex_converter<box2d<double>, placement_finder_adapter<placement_finder> , symbolizer_base,
+                                               CoordTransform, proj_transform, agg::trans_affine,
+                                               conv_types, feature_impl>;
 
 class base_symbolizer_helper
 {
@@ -116,10 +144,8 @@ protected:
     bool next_line_placement(bool clipped);
 
     placement_finder finder_;
-
-    // Place text at points on a line instead of following the line (used for ShieldSymbolizer)
-    bool points_on_line_;
-
+    placement_finder_adapter<placement_finder> adapter_;
+    vertex_converter_type converter_;
     //ShieldSymbolizer only
     void init_marker();
 };

@@ -121,8 +121,8 @@ public:
     bool next_subpath();
 
     // Compatibility with standard path interface
-    void rewind(unsigned) const;
-    unsigned vertex(double *x, double *y) const;
+    void rewind(unsigned);
+    unsigned vertex(double *x, double *y);
 
     // State
     state save_state() const;
