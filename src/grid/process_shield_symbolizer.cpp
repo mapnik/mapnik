@@ -1,4 +1,3 @@
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -43,12 +42,16 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                 mapnik::feature_impl & feature,
                                 proj_transform const& prj_trans)
 {
+    agg::trans_affine tr;
+    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
+
     text_symbolizer_helper helper(
             sym, feature, common_.vars_, prj_trans,
             common_.width_, common_.height_,
             common_.scale_factor_,
             common_.t_, common_.font_manager_, *common_.detector_,
-            common_.query_extent_);
+            common_.query_extent_, tr);
     bool placement_found = false;
 
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -60,12 +63,12 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
     placements_list const& placements = helper.get();
     value_integer feature_id = feature.id();
-    
+
     for (glyph_positions_ptr glyphs : placements)
     {
         if (glyphs->marker())
         {
-            render_marker(feature, 
+            render_marker(feature,
                           pixmap_.get_resolution(),
                           glyphs->marker_pos(),
                           *(glyphs->marker()->marker),

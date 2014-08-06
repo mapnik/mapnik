@@ -178,11 +178,12 @@ text_symbolizer_helper::text_symbolizer_helper(
         proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
         CoordTransform const& t, FaceManagerT & font_manager,
-        DetectorT &detector, box2d<double> const& query_extent)
+        DetectorT &detector, box2d<double> const& query_extent,
+        agg::trans_affine const& affine_trans)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
     adapter_(finder_,false),
-    converter_(query_extent_, adapter_, sym_, t, prj_trans, agg::trans_affine(), feature, vars, scale_factor)
+    converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
 
     // setup vertex converter
@@ -270,13 +271,13 @@ text_symbolizer_helper::text_symbolizer_helper(
         proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
         CoordTransform const& t, FaceManagerT & font_manager,
-        DetectorT & detector, box2d<double> const& query_extent)
+        DetectorT & detector, box2d<double> const& query_extent, agg::trans_affine const& affine_trans)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
       adapter_(finder_,true),
-      converter_(query_extent_, adapter_, sym_, t, prj_trans, agg::trans_affine(), feature, vars, scale_factor)
+      converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
-    // setup vertex converter
+   // setup vertex converter
     bool clip = mapnik::get<bool>(sym_, keys::clip, feature_, vars_, false);
     double simplify_tolerance = mapnik::get<double>(sym_, keys::simplify_tolerance, feature_, vars_, 0.0);
     double smooth = mapnik::get<double>(sym_, keys::smooth, feature_, vars_, 0.0);
@@ -342,7 +343,8 @@ template text_symbolizer_helper::text_symbolizer_helper(
     CoordTransform const& t,
     face_manager<freetype_engine> &font_manager,
     label_collision_detector4 &detector,
-    box2d<double> const& query_extent);
+    box2d<double> const& query_extent,
+    agg::trans_affine const&);
 
 template text_symbolizer_helper::text_symbolizer_helper(
     shield_symbolizer const& sym,
@@ -355,5 +357,6 @@ template text_symbolizer_helper::text_symbolizer_helper(
     CoordTransform const& t,
     face_manager<freetype_engine> &font_manager,
     label_collision_detector4 &detector,
-    box2d<double> const& query_extent);
+    box2d<double> const& query_extent,
+    agg::trans_affine const&);
 } //namespace

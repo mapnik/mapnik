@@ -56,7 +56,7 @@ struct placement_finder_adapter
 
 };
 
-using conv_types = boost::mpl::vector<clip_line_tag , transform_tag, simplify_tag, smooth_tag>;
+using conv_types = boost::mpl::vector<clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 using vertex_converter_type = vertex_converter<box2d<double>, placement_finder_adapter<placement_finder> , symbolizer_base,
                                                CoordTransform, proj_transform, agg::trans_affine,
                                                conv_types, feature_impl>;
@@ -122,7 +122,8 @@ public:
                            CoordTransform const& t,
                            FaceManagerT & font_manager,
                            DetectorT & detector,
-                           box2d<double> const& query_extent);
+                           box2d<double> const& query_extent,
+                           agg::trans_affine const&);
 
     template <typename FaceManagerT, typename DetectorT>
     text_symbolizer_helper(shield_symbolizer const& sym,
@@ -135,7 +136,8 @@ public:
                            CoordTransform const& t,
                            FaceManagerT & font_manager,
                            DetectorT & detector,
-                           box2d<double> const& query_extent);
+                           box2d<double> const& query_extent,
+                           agg::trans_affine const&);
 
     // Return all placements.
     placements_list const& get();
@@ -144,6 +146,7 @@ protected:
     bool next_line_placement(bool clipped);
 
     placement_finder finder_;
+
     placement_finder_adapter<placement_finder> adapter_;
     vertex_converter_type converter_;
     //ShieldSymbolizer only
@@ -151,4 +154,5 @@ protected:
 };
 
 } //namespace
+
 #endif // SYMBOLIZER_HELPERS_HPP

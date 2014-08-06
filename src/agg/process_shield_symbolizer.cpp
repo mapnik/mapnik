@@ -34,16 +34,19 @@ namespace mapnik {
 
 template <typename T0, typename T1>
 void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
-                               proj_transform const& prj_trans)
+                                   mapnik::feature_impl & feature,
+                                   proj_transform const& prj_trans)
 {
     box2d<double> clip_box = clipping_extent(common_);
+    agg::trans_affine tr;
+    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
     text_symbolizer_helper helper(
-            sym, feature, common_.vars_, prj_trans,
-            common_.width_, common_.height_,
-            common_.scale_factor_,
-            common_.t_, common_.font_manager_, *common_.detector_,
-            clip_box);
+        sym, feature, common_.vars_, prj_trans,
+        common_.width_, common_.height_,
+        common_.scale_factor_,
+        common_.t_, common_.font_manager_, *common_.detector_,
+        clip_box, tr);
 
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature, common_.vars_, HALO_RASTERIZER_FULL);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
