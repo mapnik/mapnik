@@ -30,8 +30,9 @@ if 'shape' in plugins and 'ogr' in plugins:
         import itertools
         for feat1,feat2 in itertools.izip(fs1, fs2):
             count += 1
-            eq_(str(feat1),str(feat2))
+            eq_(feat1.attributes,feat2.attributes)
             # TODO - revisit this: https://github.com/mapnik/mapnik/issues/1093
+            # eq_(feat1.to_geojson(),feat2.to_geojson())
             #eq_(feat1.geometries().to_wkt(),feat2.geometries().to_wkt())
             #eq_(feat1.geometries().to_wkb(mapnik.wkbByteOrder.NDR),feat2.geometries().to_wkb(mapnik.wkbByteOrder.NDR))
             #eq_(feat1.geometries().to_wkb(mapnik.wkbByteOrder.XDR),feat2.geometries().to_wkb(mapnik.wkbByteOrder.XDR))

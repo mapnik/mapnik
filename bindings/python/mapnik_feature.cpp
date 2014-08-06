@@ -226,7 +226,6 @@ void export_feature()
     class_<mapnik::feature_impl,std::shared_ptr<mapnik::feature_impl>,
         boost::noncopyable>("Feature",init<context_ptr,mapnik::value_integer>("Default ctor."))
         .def("id",&mapnik::feature_impl::id)
-        .def("__str__",&mapnik::feature_impl::to_string)
         .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
         .def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
         .def("add_geometry", &mapnik::feature_impl::add_geometry)
