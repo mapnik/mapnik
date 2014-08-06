@@ -26,10 +26,6 @@
 // boost
 #include <boost/operators.hpp>
 
-// stl
-#include <iomanip>
-#include <sstream>
-
 namespace mapnik {
 template <typename T,int dim>
 struct coord {
@@ -185,39 +181,6 @@ private:
 using coord2d = coord<double,2>;
 using coord2i = coord<int,2>;
 
-
-template <typename charT,typename traits,typename T ,int dim>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             const coord<T,dim>& c);
-
-template <typename charT,typename traits,typename T>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             const coord<T,2>& c)
-{
-    std::basic_ostringstream<charT,traits> s;
-    s.copyfmt(out);
-    s.width(0);
-    s << "coord2(" << std::setprecision(16)
-      << c.x << "," << c.y<< ")";
-    out << s.str();
-    return out;
-}
-
-template <typename charT,typename traits,typename T>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             const coord<T,3>& c)
-{
-    std::basic_ostringstream<charT,traits> s;
-    s.copyfmt(out);
-    s.width(0);
-    s << "coord3(" << std::setprecision(16)
-      << c.x << "," << c.y<< "," << c.z<<")";
-    out << s.str();
-    return out;
-}
 }
 
 #endif // MAPNIK_COORD_HPP

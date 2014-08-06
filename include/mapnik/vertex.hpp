@@ -23,7 +23,7 @@
 #ifndef MAPNIK_VERTEX_HPP
 #define MAPNIK_VERTEX_HPP
 
-#include <sstream>
+#include <utility>
 
 namespace mapnik
 {
@@ -102,43 +102,6 @@ private:
 
 using vertex2d = vertex<double,2>;
 using vertex2i = vertex<int,2>;
-
-template <class charT,class traits,class T,int dim>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             const vertex<T,dim>& c);
-
-template <class charT,class traits,class T>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             const vertex<T,2>& v)
-{
-    std::basic_ostringstream<charT,traits> s;
-    s.copyfmt(out);
-    s.width(0);
-    switch (v.cmd)
-    {
-        case SEG_END: s << "End "; break;
-        case SEG_MOVETO: s << "MoveTo "; break;
-        case SEG_LINETO: s << "LineTo "; break;
-        case SEG_CLOSE: s << "Close "; break;
-    }
-    s << "(" << v.x << ", " << v.y << ")";
-    return out << s.str();
-}
-
-template <class charT,class traits,class T>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             const vertex<T,3>& v)
-{
-    std::basic_ostringstream<charT,traits> s;
-    s.copyfmt(out);
-    s.width(0);
-    s<<"vertex3("<<v.x<<","<<v.y<<","<<v.z<<",cmd="<<v.cmd<<")";
-    out << s.str();
-    return out;
-}
 
 }
 

@@ -27,9 +27,8 @@
 #include <mapnik/attribute_descriptor.hpp>
 
 // stl
-#include <string>
+#include <iosfwd>
 #include <vector>
-#include <iostream>
 
 namespace mapnik
 {
@@ -88,21 +87,6 @@ private:
     std::vector<attribute_descriptor> desc_ar_;
 };
 
-template <typename charT,typename traits>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             layer_descriptor const& ld)
-{
-    out << "name: " << ld.get_name() << "\n";
-    out << "encoding: " << ld.get_encoding() << "\n";
-    std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
-    std::vector<attribute_descriptor>::const_iterator pos = desc_ar.begin();
-    while (pos != desc_ar.end())
-    {
-        out << *pos++ << "\n";
-    }
-    return out;
-}
 }
 
 #endif // MAPNIK_FEATURE_LAYER_DESC_HPP
