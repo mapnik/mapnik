@@ -33,7 +33,7 @@
 #include <iostream>
 #include <sstream>
 #include <ostream>
-#include <fstream>
+#include <iosfwd>
 #include <string>
 #include <unordered_map>
 #ifdef MAPNIK_THREADSAFE
