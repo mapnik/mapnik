@@ -32,9 +32,7 @@ before_install:
  - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
  - tar xf harfbuzz-0.9.34.tar.bz2
  - cd harfbuzz-0.9.34
- - ./configure --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make && sudo make install
- - export LD_LIBRARY_PATH=/usr/local/lib
- - sudo ldconfig
+ - ./configure --prefix=/usr --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make && sudo make install
  - cd ../
 
 install:
