@@ -36,7 +36,8 @@ before_install:
  - cd ../
 
 install:
- - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="-flto" CUSTOM_LDFLAGS="-flto" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True || cat config.log
+ - export RANLIB=/bin/true
+ - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="-flto" BINDINGS="" CUSTOM_LDFLAGS="-flto" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=2 make; else JOBS=6 make; fi;
 
 before_script:
