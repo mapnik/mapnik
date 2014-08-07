@@ -29,9 +29,6 @@
 #include <mapnik/util/conversions.hpp>
 
 // boost
-#include <boost/variant/recursive_wrapper.hpp>
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/variant.hpp>
 
 #include <boost/concept_check.hpp>
@@ -980,7 +977,8 @@ operator << (std::basic_ostream<charT,traits>& out,
     return out;
 }
 
-inline std::size_t hash_value(const value& val) {
+inline std::size_t hash_value(value const& val)
+{
     return hash_value(val.base());
 }
 
