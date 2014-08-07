@@ -21,11 +21,8 @@ before_install:
  - sudo apt-get install -y libstdc++6 libstdc++-4.8-dev make boost1.55 libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
  - sudo apt-get install binutils-gold
  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key|sudo apt-key add -
- - ls /usr/lib
- - ls /usr/local/clang-3.4/lib/
- - echo `which clang`
- - echo `which clang++`
  - sudo apt-get install clang-3.4
+ - export PATH=/usr/bin:${PATH}
  - echo `which clang`
  - echo `which clang++`
  - sudo ln -s /usr/lib/llvm-3.4/lib/LLVMgold.so /usr/lib/LLVMgold.so
