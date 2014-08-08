@@ -25,8 +25,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/text/placements/base.hpp>
-// boost
-#include <boost/concept_check.hpp>
 
 namespace mapnik
 {

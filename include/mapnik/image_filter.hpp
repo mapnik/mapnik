@@ -31,8 +31,6 @@
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/gil/gil_all.hpp>
-#include <boost/concept_check.hpp>
-
 
 // agg
 #include "agg_basics.h"
@@ -176,11 +174,8 @@ void process_channel_impl (Src const& src, Dst & dst, Conv const& k)
 }
 
 template <typename Src, typename Dst, typename Conv>
-void process_channel (Src const& src, Dst & dst, Conv const& k)
+void process_channel (Src const&, Dst &, Conv const&)
 {
-    boost::ignore_unused_variable_warning(src);
-    boost::ignore_unused_variable_warning(dst);
-    boost::ignore_unused_variable_warning(k);
 }
 
 template <typename Src, typename Dst>

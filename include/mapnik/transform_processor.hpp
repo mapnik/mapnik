@@ -57,9 +57,8 @@ struct transform_processor
         attribute_collector(Container& names)
             : collect_(names) {}
 
-        void operator() (identity_node const& node) const
+        void operator() (identity_node const&) const
         {
-            boost::ignore_unused_variable_warning(node);
         }
 
         void operator() (matrix_node const& node) const
@@ -113,9 +112,8 @@ struct transform_processor
               vars_(v),
               scale_factor_(scale_factor) {}
 
-        void operator() (identity_node const& node)
+        void operator() (identity_node const&)
         {
-            boost::ignore_unused_variable_warning(node);
         }
 
         void operator() (matrix_node const& node)

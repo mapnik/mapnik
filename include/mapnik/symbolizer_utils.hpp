@@ -127,9 +127,8 @@ struct symbolizer_name_impl : public boost::static_visitor<std::string>
 {
 public:
     template <typename Symbolizer>
-    std::string operator () (Symbolizer const& sym) const
+    std::string operator () (Symbolizer const&) const
     {
-        boost::ignore_unused_variable_warning(sym);
         return symbolizer_traits<Symbolizer>::name();
     }
 };
