@@ -55,27 +55,16 @@ public:
     {
         rewind();
     }
-    virtual ~markers_point_placement() {}
 
-    /** Start again at first marker.
-     * \note Returns the same list of markers only works when they were NOT added
-     *       to the detector.
-     */
-    virtual void rewind()
+    // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
+    void rewind()
     {
         locator_.rewind(0);
         done_ = false;
     }
 
-    /** Get a point where the marker should be placed.
-     * Each time this function is called a new point is returned.
-     * \param x     Return value for x position
-     * \param y     Return value for x position
-     * \param angle Return value for rotation angle
-     * \param ignore_placement Whether to add selected position to detector
-     * \return True if a place is found, false if none is found.
-     */
-    virtual bool get_point(double &x, double &y, double &angle, bool ignore_placement)
+    // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
+    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
         if (done_)
         {
@@ -129,7 +118,7 @@ protected:
     double marker_width_;
     bool done_;
 
-    /** Rotates the size_ box and translates the position. */
+    // Rotates the size_ box and translates the position.
     box2d<double> perform_transform(double angle, double dx, double dy)
     {
         double x1 = size_.minx();
@@ -156,4 +145,3 @@ protected:
 }
 
 #endif // MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
-

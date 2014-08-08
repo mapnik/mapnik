@@ -65,6 +65,8 @@ static const char * marker_placement_strings[] = {
     "point",
     "interior",
     "line",
+    "vertex-first",
+    "vertex-last",
     ""
 };
 
