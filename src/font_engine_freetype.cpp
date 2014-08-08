@@ -177,7 +177,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
             // skip fonts with leading . in the name
             if (!boost::algorithm::starts_with(name,"."))
             {
-                name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+                name2file_.emplace(name,std::make_pair(i,file_name));
                 success = true;
             }
         }
@@ -332,7 +332,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 std::fseek(file.get(), 0, SEEK_SET);
                 std::unique_ptr<char[]> buffer(new char[file_size]);
                 std::fread(buffer.get(), file_size, 1, file.get());
-                auto result = memory_fonts_.insert(std::make_pair(itr->second.second, std::make_pair(std::move(buffer),file_size)));
+                auto result = memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(buffer),file_size));
                 FT_Error error = FT_New_Memory_Face (library_,
                                                      reinterpret_cast<FT_Byte const*>(result.first->second.first.get()),
                                                      static_cast<FT_Long>(result.first->second.second),
@@ -377,7 +377,7 @@ face_ptr face_manager<T>::get_face(std::string const& name)
         face_ptr face = engine_.create_face(name);
         if (face)
         {
-            face_ptr_cache_.insert(make_pair(name,face));
+            face_ptr_cache_.emplace(name,face);
         }
         return face;
     }

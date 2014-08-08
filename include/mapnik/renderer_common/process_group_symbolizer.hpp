@@ -268,7 +268,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
                                                *(rule->get_filter())).to_bool())
              {
                 // add matched rule and feature to the list of things to draw
-                matches.push_back(std::make_pair(rule, sub_feature));
+                matches.emplace_back(rule, sub_feature);
 
                 // construct a bounding box around all symbolizers for the matched rule
                 bound_box bounds;

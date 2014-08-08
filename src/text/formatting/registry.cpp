@@ -44,7 +44,7 @@ void registry::register_name(std::string const& name, from_xml_function_ptr ptr,
     if (overwrite) {
         map_[name] = ptr;
     } else {
-        map_.insert(make_pair(name, ptr));
+        map_.emplace(name, ptr);
     }
 }
 
