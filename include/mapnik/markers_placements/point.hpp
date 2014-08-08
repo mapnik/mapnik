@@ -55,13 +55,12 @@ public:
     {
         rewind();
     }
-    virtual ~markers_point_placement() {}
 
     /** Start again at first marker.
      * \note Returns the same list of markers only works when they were NOT added
      *       to the detector.
      */
-    virtual void rewind()
+    void rewind()
     {
         locator_.rewind(0);
         done_ = false;
@@ -75,7 +74,7 @@ public:
      * \param ignore_placement Whether to add selected position to detector
      * \return True if a place is found, false if none is found.
      */
-    virtual bool get_point(double &x, double &y, double &angle, bool ignore_placement)
+    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
         if (done_)
         {
