@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map>
+    <Style name="lines">
+        <Rule>
+            <LineSymbolizer stroke="#000000" />
+        </Rule>
+    </Style>
+    <Style name="markers">
+        <Rule>
+            <MarkersSymbolizer marker-type="ellipse" placement="[placement]" />
+            <DebugSymbolizer />
+        </Rule>
+    </Style>
+    <Layer name="layer">
+        <StyleName>lines</StyleName>
+        <StyleName>markers</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+            wkt, placement
+            "LINESTRING(0 0)", "vertex-first"
+            "LINESTRING(0 1, 10 1)", "vertex-first"
+            "LINESTRING(0 2, 2 3, 4 2, 6 3, 8 2, 10 3)", "vertex-first"
+            </Parameter>
+        </Datasource>
+    </Layer>
+</Map>

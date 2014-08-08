@@ -26,6 +26,8 @@
 #include <mapnik/markers_placements/line.hpp>
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/markers_placements/interior.hpp>
+#include <mapnik/markers_placements/vertext_first.hpp>
+#include <mapnik/markers_placements/vertext_last.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 
 #include <boost/variant.hpp>
@@ -41,7 +43,9 @@ class markers_placement_finder : mapnik::noncopyable
 public:
     using markers_placement = boost::variant<markers_point_placement<Locator, Detector>,
                                              markers_line_placement<Locator, Detector>,
-                                             markers_interior_placement<Locator, Detector>>;
+                                             markers_interior_placement<Locator, Detector>,
+                                             markers_vertex_first_placement<Locator, Detector>,
+                                             markers_vertex_last_placement<Locator, Detector>>;
 
     class get_point_visitor : public boost::static_visitor<bool>
     {
@@ -74,22 +78,14 @@ public:
     {
     }
 
-    /** Get a point where the marker should be placed.
-     * Each time this function is called a new point is returned.
-     * \param x     Return value for x position
-     * \param y     Return value for x position
-     * \param angle Return value for rotation angle
-     * \param ignore_placement Whether to add selected position to detector
-     * \return True if a place is found, false if none is found.
-     */
+    // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
         return boost::apply_visitor(get_point_visitor(x, y, angle, ignore_placement), placement_);
     }
 
 private:
-    /** Factory function for particular placement implementations.
-     */
+    // Factory function for particular placement implementations.
     static markers_placement create(marker_placement_e placement_type,
                              Locator &locator,
                              box2d<double> const& size,
@@ -110,7 +106,9 @@ private:
             {
                 { MARKER_POINT_PLACEMENT, boost::value_factory<markers_point_placement<Locator, Detector>>() },
                 { MARKER_INTERIOR_PLACEMENT, boost::value_factory<markers_interior_placement<Locator, Detector>>() },
-                { MARKER_LINE_PLACEMENT, boost::value_factory<markers_line_placement<Locator, Detector>>() }
+                { MARKER_LINE_PLACEMENT, boost::value_factory<markers_line_placement<Locator, Detector>>() },
+                { MARKER_VERTEX_FIRST_PLACEMENT, boost::value_factory<markers_vertex_first_placement<Locator, Detector>>() },
+                { MARKER_VERTEX_LAST_PLACEMENT, boost::value_factory<markers_vertex_last_placement<Locator, Detector>>() }
             };
         return factories.at(placement_type)(locator, size, tr, detector, spacing, max_error, allow_overlap);
     }
