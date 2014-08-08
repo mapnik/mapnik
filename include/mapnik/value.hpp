@@ -31,12 +31,10 @@
 // boost
 #include <boost/concept_check.hpp>
 #include <boost/functional/hash.hpp>
-
 // stl
 #include <string>
 #include <cmath>
 #include <memory>
-#include <iostream>
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
@@ -66,7 +64,7 @@ inline void to_utf8(mapnik::value_unicode_string const& input, std::string & tar
     }
 }
 
-using value_base = util::variant<value_null,value_bool,value_integer,value_double,value_unicode_string>;
+using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
 
 namespace impl {
 
@@ -814,6 +812,88 @@ struct to_expression_string : public util::static_visitor<std::string>
 
 namespace value_adl_barrier {
 
+namespace detail {
+
+template <typename T>
+struct is_value_bool
+{
+    bool value = std::is_same<T, bool>::value;
+};
+
+template <typename T>
+struct is_value_integer
+{
+    bool value = std::is_integral<T>::value && !std::is_same<T, bool>::value;
+};
+
+template <typename T>
+struct is_value_double
+{
+    bool value = std::is_floating_point<T>::value;
+};
+
+template <typename T>
+struct is_value_unicode_string
+{
+    bool value = std::is_same<T,mapnik::value_unicode_string>::value;
+};
+
+template <typename T>
+struct is_value_string
+{
+    bool value = std::is_same<T,std::string>::value;
+};
+
+template <typename T>
+struct is_value_null
+{
+    bool value = std::is_same<T, value_null>::value;
+};
+
+} // namespace detail
+
+
+template <typename T, class Enable = void>
+struct mapnik_value_type
+{
+    using type = T;
+};
+
+// value_null
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_null<T>::value>::type>
+{
+    using type = mapnik::value_null;
+};
+
+// value_bool
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_bool<T>::value>::type>
+{
+    using type = mapnik::value_bool;
+};
+
+// value_integer
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_integer<T>::value>::type>
+{
+    using type = mapnik::value_integer;
+};
+
+// value_double
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_double<T>::value>::type>
+{
+    using type = mapnik::value_double;
+};
+
+// value_unicode_string
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_unicode_string<T>::value>::type>
+{
+    using type = mapnik::value_unicode_string;
+};
+
 class value
 {
     value_base base_;
@@ -827,20 +907,9 @@ public:
     value () noexcept //-- comment out for VC++11
         : base_(value_null()) {}
 
-    value(value_integer val)
-        : base_(val) {}
-
-    value(value_double val)
-        : base_(val) {}
-
-    value(value_bool val)
-        : base_(val) {}
-
-    value(value_null val)
-        : base_(val) {}
-
-    value(value_unicode_string const& val)
-        : base_(val) {}
+    template <typename T>
+    value ( T const& val)
+        : base_(typename mapnik_value_type<T>::type(val)) {}
 
     value (value const& other)
         : base_(other.base_) {}
@@ -974,20 +1043,14 @@ operator << (std::basic_ostream<charT,traits>& out,
     return out;
 }
 
-inline std::size_t hash_value(value const& val)
-{
-    std::cerr << "hash_value" << std::endl;
-    return 123; // FIXME hash_value(val.base());
-}
-
 } // namespace value_adl_barrier
 
 using value_adl_barrier::value;
 using value_adl_barrier::operator<<;
 
-namespace impl {
+namespace detail {
 
-struct is_null : public util::static_visitor<bool>
+struct is_null_visitor : public util::static_visitor<bool>
 {
     bool operator() (value const& val) const
     {
@@ -1004,25 +1067,15 @@ struct is_null : public util::static_visitor<bool>
     bool operator() (T const& val) const
     {
         boost::ignore_unused_variable_warning(val);
-        std::cerr << "is_null" << std::endl;
         return false;
     }
-
-    //template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
-    //bool operator() (boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& val) const
-    //{
-    //    return util::apply_visitor(*this, val);
-    //}
 };
 
-} // namespace impl
-
-// constant visitor instance substitutes overloaded function
-impl::is_null const is_null = impl::is_null();
+} // namespace detail
 
 inline bool value::is_null() const
 {
-    return util::apply_visitor(impl::is_null(), base_);
+    return util::apply_visitor(mapnik::detail::is_null_visitor(), base_);
 }
 
 } // namespace mapnik
