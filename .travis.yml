@@ -4,6 +4,11 @@ compiler:
  - clang
 # - gcc
 
+env:
+  matrix:
+   - DEBUG=True ENABLE_LOG=True DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
+   - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none XMLPARSER="ptree" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="-flto" CUSTOM_LDFLAGS="-flto"
+
 addons:
   postgresql: "9.3"
 
@@ -37,7 +42,7 @@ before_install:
 
 install:
  - export RANLIB=/bin/true
- - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="-flto" CUSTOM_LDFLAGS="-flto" DEMO=True BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True || cat config.log
+ - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER=${XML_PARSER} ENABLE_LOG=${ENABLE_LOG} DEBUG=${DEBUG} DEMO=${DEMO} BENCHMARK=${BENCHMARK} CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  # workaround ar bug: https://sourceware.org/bugzilla/show_bug.cgi?id=13256
  - echo 'ar "$@" --plugin /usr/lib/LLVMgold.so' > ar-lto && chmod +x ./ar-lto && export AR=$(pwd)/ar-lto
  - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=2 make; else JOBS=6 make; fi;
