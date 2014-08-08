@@ -24,14 +24,14 @@
 
 // mapnik
 #include <mapnik/value.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/python.hpp>
 #include <boost/implicit_cast.hpp>
 
 namespace boost { namespace python {
 
-    struct value_converter : public boost::static_visitor<PyObject*>
+    struct value_converter : public mapnik::util::static_visitor<PyObject*>
     {
         PyObject * operator() (mapnik::value_integer val) const
         {
@@ -71,7 +71,7 @@ namespace boost { namespace python {
     {
         static PyObject* convert(mapnik::value const& v)
         {
-            return boost::apply_visitor(value_converter(),v.base());
+            return mapnik::util::apply_visitor(value_converter(),v.base());
         }
 
     };

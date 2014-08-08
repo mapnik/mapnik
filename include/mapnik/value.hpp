@@ -27,19 +27,16 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
-#include <boost/variant/variant.hpp>
-
 #include <boost/concept_check.hpp>
 #include <boost/functional/hash.hpp>
-#include "hash_variant.hpp"
 
 // stl
 #include <string>
 #include <cmath>
 #include <memory>
-
+#include <iostream>
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
@@ -69,12 +66,12 @@ inline void to_utf8(mapnik::value_unicode_string const& input, std::string & tar
     }
 }
 
-using value_base = boost::variant<value_null,value_bool,value_integer,value_double,value_unicode_string>;
+using value_base = util::variant<value_null,value_bool,value_integer,value_double,value_unicode_string>;
 
 namespace impl {
 
 struct equals
-    : public boost::static_visitor<bool>
+    : public util::static_visitor<bool>
 {
     bool operator() (value_integer lhs, value_double rhs) const
     {
@@ -126,7 +123,7 @@ struct equals
 };
 
 struct not_equals
-    : public boost::static_visitor<bool>
+    : public util::static_visitor<bool>
 {
     template <typename T, typename U>
     bool operator() (const T &, const U &) const
@@ -189,7 +186,7 @@ struct not_equals
 };
 
 struct greater_than
-    : public boost::static_visitor<bool>
+    : public util::static_visitor<bool>
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -225,7 +222,7 @@ struct greater_than
 };
 
 struct greater_or_equal
-    : public boost::static_visitor<bool>
+    : public util::static_visitor<bool>
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -261,7 +258,7 @@ struct greater_or_equal
 };
 
 struct less_than
-    : public boost::static_visitor<bool>
+    : public util::static_visitor<bool>
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -298,7 +295,7 @@ struct less_than
 };
 
 struct less_or_equal
-    : public boost::static_visitor<bool>
+    : public util::static_visitor<bool>
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -335,7 +332,7 @@ struct less_or_equal
 };
 
 template <typename V>
-struct add : public boost::static_visitor<V>
+struct add : public util::static_visitor<V>
 {
     using value_type = V;
     value_type operator() (value_unicode_string const& lhs ,
@@ -403,7 +400,7 @@ struct add : public boost::static_visitor<V>
 };
 
 template <typename V>
-struct sub : public boost::static_visitor<V>
+struct sub : public util::static_visitor<V>
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -443,7 +440,7 @@ struct sub : public boost::static_visitor<V>
 };
 
 template <typename V>
-struct mult : public boost::static_visitor<V>
+struct mult : public util::static_visitor<V>
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -484,7 +481,7 @@ struct mult : public boost::static_visitor<V>
 };
 
 template <typename V>
-struct div: public boost::static_visitor<V>
+struct div: public util::static_visitor<V>
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -529,7 +526,7 @@ struct div: public boost::static_visitor<V>
 };
 
 template <typename V>
-struct mod: public boost::static_visitor<V>
+struct mod: public util::static_visitor<V>
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -577,7 +574,7 @@ struct mod: public boost::static_visitor<V>
 };
 
 template <typename V>
-struct negate : public boost::static_visitor<V>
+struct negate : public util::static_visitor<V>
 {
     using value_type = V;
 
@@ -609,7 +606,7 @@ template <typename T>
 struct convert {};
 
 template <>
-struct convert<value_bool> : public boost::static_visitor<value_bool>
+struct convert<value_bool> : public util::static_visitor<value_bool>
 {
     value_bool operator() (value_bool val) const
     {
@@ -635,7 +632,7 @@ struct convert<value_bool> : public boost::static_visitor<value_bool>
 };
 
 template <>
-struct convert<value_double> : public boost::static_visitor<value_double>
+struct convert<value_double> : public util::static_visitor<value_double>
 {
     value_double operator() (value_double val) const
     {
@@ -675,7 +672,7 @@ struct convert<value_double> : public boost::static_visitor<value_double>
 };
 
 template <>
-struct convert<value_integer> : public boost::static_visitor<value_integer>
+struct convert<value_integer> : public util::static_visitor<value_integer>
 {
     value_integer operator() (value_integer val) const
     {
@@ -715,7 +712,7 @@ struct convert<value_integer> : public boost::static_visitor<value_integer>
 };
 
 template <>
-struct convert<std::string> : public boost::static_visitor<std::string>
+struct convert<std::string> : public util::static_visitor<std::string>
 {
     template <typename T>
     std::string operator() (T val) const
@@ -747,7 +744,7 @@ struct convert<std::string> : public boost::static_visitor<std::string>
     }
 };
 
-struct to_unicode : public boost::static_visitor<value_unicode_string>
+struct to_unicode : public util::static_visitor<value_unicode_string>
 {
 
     template <typename T>
@@ -778,7 +775,7 @@ struct to_unicode : public boost::static_visitor<value_unicode_string>
     }
 };
 
-struct to_expression_string : public boost::static_visitor<std::string>
+struct to_expression_string : public util::static_visitor<std::string>
 {
     std::string operator() (value_unicode_string const& val) const
     {
@@ -861,37 +858,37 @@ public:
 
     bool operator==(value const& other) const
     {
-        return boost::apply_visitor(impl::equals(),base_,other.base_);
+        return util::apply_visitor(impl::equals(),base_,other.base_);
     }
 
     bool operator!=(value const& other) const
     {
-        return boost::apply_visitor(impl::not_equals(),base_,other.base_);
+        return util::apply_visitor(impl::not_equals(),base_,other.base_);
     }
 
     bool operator>(value const& other) const
     {
-        return boost::apply_visitor(impl::greater_than(),base_,other.base_);
+        return util::apply_visitor(impl::greater_than(),base_,other.base_);
     }
 
     bool operator>=(value const& other) const
     {
-        return boost::apply_visitor(impl::greater_or_equal(),base_,other.base_);
+        return util::apply_visitor(impl::greater_or_equal(),base_,other.base_);
     }
 
     bool operator<(value const& other) const
     {
-        return boost::apply_visitor(impl::less_than(),base_,other.base_);
+        return util::apply_visitor(impl::less_than(),base_,other.base_);
     }
 
     bool operator<=(value const& other) const
     {
-        return boost::apply_visitor(impl::less_or_equal(),base_,other.base_);
+        return util::apply_visitor(impl::less_or_equal(),base_,other.base_);
     }
 
     value operator- () const
     {
-        return boost::apply_visitor(impl::negate<value>(), base_);
+        return util::apply_visitor(impl::negate<value>(), base_);
     }
 
     value_base const& base() const
@@ -904,68 +901,68 @@ public:
     template <typename T>
     T convert() const
     {
-        return boost::apply_visitor(impl::convert<T>(),base_);
+        return util::apply_visitor(impl::convert<T>(),base_);
     }
 
     value_bool to_bool() const
     {
-        return boost::apply_visitor(impl::convert<value_bool>(),base_);
+        return util::apply_visitor(impl::convert<value_bool>(),base_);
     }
 
     std::string to_expression_string() const
     {
-        return boost::apply_visitor(impl::to_expression_string(),base_);
+        return util::apply_visitor(impl::to_expression_string(),base_);
     }
 
     std::string to_string() const
     {
-        return boost::apply_visitor(impl::convert<std::string>(),base_);
+        return util::apply_visitor(impl::convert<std::string>(),base_);
     }
 
     value_unicode_string to_unicode() const
     {
-        return boost::apply_visitor(impl::to_unicode(),base_);
+        return util::apply_visitor(impl::to_unicode(),base_);
     }
 
     value_double to_double() const
     {
-        return boost::apply_visitor(impl::convert<value_double>(),base_);
+        return util::apply_visitor(impl::convert<value_double>(),base_);
     }
 
     value_integer to_int() const
     {
-        return boost::apply_visitor(impl::convert<value_integer>(),base_);
+        return util::apply_visitor(impl::convert<value_integer>(),base_);
     }
 };
 
 inline const value operator+(value const& p1,value const& p2)
 {
 
-    return value(boost::apply_visitor(impl::add<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::add<value>(),p1.base_, p2.base_));
 }
 
 inline const value operator-(value const& p1,value const& p2)
 {
 
-    return value(boost::apply_visitor(impl::sub<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::sub<value>(),p1.base_, p2.base_));
 }
 
 inline const value operator*(value const& p1,value const& p2)
 {
 
-    return value(boost::apply_visitor(impl::mult<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::mult<value>(),p1.base_, p2.base_));
 }
 
 inline const value operator/(value const& p1,value const& p2)
 {
 
-    return value(boost::apply_visitor(impl::div<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::div<value>(),p1.base_, p2.base_));
 }
 
 inline const value operator%(value const& p1,value const& p2)
 {
 
-    return value(boost::apply_visitor(impl::mod<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::mod<value>(),p1.base_, p2.base_));
 }
 
 template <typename charT, typename traits>
@@ -979,7 +976,8 @@ operator << (std::basic_ostream<charT,traits>& out,
 
 inline std::size_t hash_value(value const& val)
 {
-    return hash_value(val.base());
+    std::cerr << "hash_value" << std::endl;
+    return 123; // FIXME hash_value(val.base());
 }
 
 } // namespace value_adl_barrier
@@ -989,7 +987,7 @@ using value_adl_barrier::operator<<;
 
 namespace impl {
 
-struct is_null : public boost::static_visitor<bool>
+struct is_null : public util::static_visitor<bool>
 {
     bool operator() (value const& val) const
     {
@@ -1006,15 +1004,15 @@ struct is_null : public boost::static_visitor<bool>
     bool operator() (T const& val) const
     {
         boost::ignore_unused_variable_warning(val);
+        std::cerr << "is_null" << std::endl;
         return false;
     }
 
-    template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
-    bool operator() (boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& val)
-        const
-    {
-        return boost::apply_visitor(*this, val);
-    }
+    //template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
+    //bool operator() (boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& val) const
+    //{
+    //    return util::apply_visitor(*this, val);
+    //}
 };
 
 } // namespace impl
@@ -1024,7 +1022,7 @@ impl::is_null const is_null = impl::is_null();
 
 inline bool value::is_null() const
 {
-    return boost::apply_visitor(impl::is_null(), base_);
+    return util::apply_visitor(impl::is_null(), base_);
 }
 
 } // namespace mapnik

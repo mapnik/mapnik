@@ -32,11 +32,8 @@
 #include <mapnik/json/generic_json.hpp>
 
 // spirit::qi
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/variant/variant_fwd.hpp>
 
 namespace mapnik { namespace json {
 
@@ -47,7 +44,7 @@ namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
 class attribute_value_visitor
-    : public boost::static_visitor<mapnik::value>
+    : public mapnik::util::static_visitor<mapnik::value>
 {
 public:
     attribute_value_visitor(mapnik::transcoder const& tr)
@@ -75,7 +72,7 @@ struct put_property
     template <typename T0,typename T1, typename T2>
     result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
     {
-        feature.put_new(key, boost::apply_visitor(attribute_value_visitor(tr_),val));
+        feature.put_new(key, mapnik::util::apply_visitor(attribute_value_visitor(tr_),val));
     }
     mapnik::transcoder const& tr_;
 };
@@ -107,7 +104,7 @@ struct feature_grammar :
 
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator,boost::variant<value_null,bool,value_integer,value_double,std::string>(), space_type> attribute_value;
+    qi::rule<Iterator, mapnik::util::variant<value_null,bool,value_integer,value_double,std::string>(), space_type> attribute_value;
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
