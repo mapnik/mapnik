@@ -180,7 +180,7 @@ struct transform_processor
 
         double eval(expr_node const& x, double def) const
         {
-            return is_null(x) ? def : eval(x);
+            return detail::is_null_node(x) ? def : eval(x);
         }
 
         transform_type& transform_;

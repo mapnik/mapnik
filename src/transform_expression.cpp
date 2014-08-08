@@ -29,7 +29,6 @@
 
 namespace mapnik {
 
-
 struct transform_node_to_expression_string
     : public boost::static_visitor<void>
 {
@@ -56,7 +55,7 @@ struct transform_node_to_expression_string
 
     void operator() (translate_node const& node)
     {
-        if (is_null(node.ty_))
+        if (detail::is_null_node(node.ty_))
         {
             os_ << "translate("
                 << to_expression_string(node.tx_) << ")";
@@ -71,7 +70,7 @@ struct transform_node_to_expression_string
 
     void operator() (scale_node const& node)
     {
-        if (is_null(node.sy_))
+        if (detail::is_null_node(node.sy_))
         {
             os_ << "scale("
                 << to_expression_string(node.sx_) << ")";
@@ -86,7 +85,7 @@ struct transform_node_to_expression_string
 
     void operator() (rotate_node const& node)
     {
-        if (is_null(node.cy_) || is_null(node.cy_))
+        if (detail::is_null_node(node.cy_) || detail::is_null_node(node.cy_))
         {
             os_ << "rotate("
                 << to_expression_string(node.angle_) << ")";

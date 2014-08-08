@@ -192,6 +192,42 @@ inline void clear(transform_node& val)
     val.base_ = identity_node();
 }
 
+namespace  {
+
+struct is_null_transform_node : public mapnik::util::static_visitor<bool>
+{
+    bool operator() (value const& val) const
+    {
+        return val.is_null();
+    }
+
+    bool operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return true;
+    }
+
+    template <typename T>
+    bool operator() (T const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return false;
+    }
+
+    bool operator() (detail::transform_variant const& var) const
+    {
+        return boost::apply_visitor(*this, var);
+    }
+};
+
+}
+
+template <typename T>
+bool is_null_node (T const& node)
+{
+    return boost::apply_visitor(is_null_transform_node(), node);
+}
+
 } // namespace detail
 
 using transform_node = detail::transform_node             ;
