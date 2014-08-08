@@ -51,10 +51,4 @@ before_script:
  - make test
 
 script:
- - make bench
-
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.org#mapnik"
-    use_notice: true
+ - if [[ ${BENCHMARK} ]]; then make bench; fi;
