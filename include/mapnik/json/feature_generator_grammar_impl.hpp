@@ -99,6 +99,8 @@ feature_generator_grammar<OutputIterator>::feature_generator_grammar()
 
     ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]
         ;
+// FIXME http://boost-spirit.com/home/articles/karma-examples/creating-your-own-generator-component-for-spirit-karma/
+
 }
 
 }}
