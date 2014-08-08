@@ -42,6 +42,8 @@
 
 namespace mapnik {
 
+template class singleton<datasource_cache, CreateStatic>;
+
 extern datasource_ptr create_static_datasource(parameters const& params);
 extern std::vector<std::string> get_static_datasource_names();
 

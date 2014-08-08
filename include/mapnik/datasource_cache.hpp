@@ -58,6 +58,9 @@ private:
     bool registered_;
     std::set<std::string> plugin_directories_;
 };
+
+extern template class singleton<datasource_cache, CreateStatic>;
+
 }
 
 #endif // MAPNIK_DATASOURCE_CACHE_HPP
