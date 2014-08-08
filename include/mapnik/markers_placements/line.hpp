@@ -206,13 +206,13 @@ private:
     double last_y;
     double next_x;
     double next_y;
-    /** If a marker could not be placed at the exact point where it should
-     * go the next marker's distance will be a bit lower. */
+    // If a marker could not be placed at the exact point where it should
+    // go the next marker's distance will be a bit lower.
     double error_;
     double spacing_left_;
     unsigned marker_nr_;
 
-    /** Set spacing_left_, adjusts error_ and performs sanity checks. */
+    // Set spacing_left_, adjusts error_ and performs sanity checks.
     void set_spacing_left(double sl, bool allow_negative=false)
     {
         double delta_error = sl - spacing_left_;

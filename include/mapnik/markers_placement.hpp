@@ -78,22 +78,14 @@ public:
     {
     }
 
-    /** Get a point where the marker should be placed.
-     * Each time this function is called a new point is returned.
-     * \param x     Return value for x position
-     * \param y     Return value for x position
-     * \param angle Return value for rotation angle
-     * \param ignore_placement Whether to add selected position to detector
-     * \return True if a place is found, false if none is found.
-     */
+    // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
         return boost::apply_visitor(get_point_visitor(x, y, angle, ignore_placement), placement_);
     }
 
 private:
-    /** Factory function for particular placement implementations.
-     */
+    // Factory function for particular placement implementations.
     static markers_placement create(marker_placement_e placement_type,
                              Locator &locator,
                              box2d<double> const& size,
