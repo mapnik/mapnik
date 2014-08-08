@@ -36,10 +36,6 @@ void evaluate_transform(agg::trans_affine& tr,
 {
     if (trans_expr)
     {
-#ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(transform) << "transform: evaluate "
-                                << transform_processor_type::to_string(*trans_expr);
-#endif
         transform_processor_type::evaluate(tr, feature, vars, *trans_expr, scale_factor);
     }
 }
