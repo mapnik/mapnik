@@ -126,14 +126,13 @@ struct utf8
     }
 };
 
-struct value_base
+struct extract_string
 {
     template <typename T>
-    struct result { using type =  mapnik::value_base const&; };
-
-    mapnik::value_base const& operator() (mapnik::value const& val) const
+    struct result { using type = std::string; };
+    std::string operator() (mapnik::value const& val) const
     {
-        return val.base();
+        return val.to_expression_string();
     }
 };
 
@@ -159,12 +158,12 @@ struct feature_generator_grammar:
     escaped_string<OutputIterator> escaped_string_;
     karma::rule<OutputIterator, mapnik::feature_impl const&()> properties;
     karma::rule<OutputIterator, pair_type()> pair;
-    karma::rule<OutputIterator, void(mapnik::value const&)> value;
+    karma::rule<OutputIterator, mapnik::value_base const&(mapnik::value const&)> value;
     karma::rule<OutputIterator, mapnik::value_null()> value_null_;
     karma::rule<OutputIterator, mapnik::value_unicode_string()> ustring;
     typename karma::int_generator<mapnik::value_integer,10, false> int__;
     boost::phoenix::function<get_id> id_;
-    boost::phoenix::function<value_base> value_base_;
+    boost::phoenix::function<extract_string> extract_string_;
     boost::phoenix::function<utf8> utf8_;
     std::string quote_;
 };

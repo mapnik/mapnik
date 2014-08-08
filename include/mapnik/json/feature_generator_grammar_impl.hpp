@@ -92,9 +92,8 @@ feature_generator_grammar<OutputIterator>::feature_generator_grammar()
         << value(boost::phoenix::at_c<1>(_val))
         ;
 
-    value = kstring[_1 = "\"FIXME\""] // FIXME (value_null_| bool_ | int__ | double_ | ustring)[_1 = value_base_(_r1)]
+    value = kstring[_1 = extract_string_(_r1)]
         ;
-
     value_null_ = kstring[_1 = "null"]
         ;
 
