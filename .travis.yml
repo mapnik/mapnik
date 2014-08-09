@@ -51,4 +51,4 @@ before_script:
  - make test
 
 script:
- - if [[ ${BENCHMARK} ]]; then make bench; fi;
+ - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
