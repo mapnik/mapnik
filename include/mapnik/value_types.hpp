@@ -23,6 +23,9 @@
 #ifndef MAPNIK_VALUE_TYPES_HPP
 #define MAPNIK_VALUE_TYPES_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+
 // icu
 #include <unicode/unistr.h>  // for UnicodeString
 
@@ -42,7 +45,7 @@ using value_double = double;
 using value_unicode_string = U_NAMESPACE_QUALIFIER UnicodeString;
 using value_bool = bool;
 
-struct value_null
+struct MAPNIK_DECL value_null
 {
     bool operator==(value_null const&) const
     {
