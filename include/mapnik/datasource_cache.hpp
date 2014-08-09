@@ -59,7 +59,7 @@ private:
     std::set<std::string> plugin_directories_;
 };
 
-extern template class singleton<datasource_cache, CreateStatic>;
+extern template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;
 
 }
 

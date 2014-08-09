@@ -53,6 +53,7 @@ namespace mapnik {
   class marker;
   class proj_transform;
   struct rasterizer;
+  class image_32;
 }
 
 namespace mapnik {
@@ -164,6 +165,8 @@ private:
     renderer_common common_;
     void setup(Map const& m);
 };
+
+extern template class MAPNIK_DECL agg_renderer<image_32>;
 
 } // namespace mapnik
 
