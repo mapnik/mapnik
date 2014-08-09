@@ -38,6 +38,9 @@
 #include <string>
 #include <cmath>
 #include <memory>
+#include <iosfwd>
+#include <cstddef>
+#include <new>
 
 // icu
 #include <unicode/unistr.h>
@@ -118,7 +121,7 @@ struct equals
     }
 
     template <typename T, typename U>
-    bool operator() (T const& /*lhs*/, U const& /*rhs*/) const
+    bool operator() (T const&, U const&) const
     {
         return false;
     }

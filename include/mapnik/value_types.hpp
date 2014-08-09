@@ -27,10 +27,15 @@
 #include <mapnik/config.hpp>
 
 // icu
-#include <unicode/unistr.h>  // for UnicodeString
+#include <unicode/uversion.h> // for U_NAMESPACE_QUALIFIER
 
 // stl
 #include <iosfwd>
+#include <cstddef>
+
+namespace U_ICU_NAMESPACE {
+    class UnicodeString;
+}
 
 namespace mapnik  {
 
