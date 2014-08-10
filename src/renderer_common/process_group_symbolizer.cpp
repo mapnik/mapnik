@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
+#include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
 namespace mapnik {
 
