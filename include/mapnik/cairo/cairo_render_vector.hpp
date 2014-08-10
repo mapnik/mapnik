@@ -20,41 +20,30 @@
  *
  *****************************************************************************/
 
+#if defined(HAVE_CAIRO)
+
+#ifndef MAPNIK_CAIRO_RENDER_VECTOR_HPP
+#define MAPNIK_CAIRO_RENDER_VECTOR_HPP
+
 // mapnik
+#include <mapnik/svg/svg_path_adapter.hpp>
 
-#include <mapnik/feature_style_processor_impl.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
+namespace agg { struct trans_affine; }
 
-#if defined(GRID_RENDERER)
-#include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid.hpp>
-#endif
+namespace mapnik {
 
-#if defined(HAVE_CAIRO)
-#include <cairo.h>
-#include <mapnik/cairo/cairo_renderer.hpp>
-#endif
+class cairo_context;
+struct pixel_position;
+template <typename T> class box2d;
+namespace svg { struct path_attributes; }
 
-#if defined(SVG_RENDERER)
-#include <mapnik/svg/output/svg_renderer.hpp>
-#endif
-
-namespace mapnik
-{
-
-#if defined(HAVE_CAIRO)
-template class feature_style_processor<cairo_renderer<cairo_ptr> >;
-#endif
-
-#if defined(SVG_RENDERER)
-template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
-#endif
-
-#if defined(GRID_RENDERER)
-template class feature_style_processor<grid_renderer<grid> >;
-#endif
-
-template class feature_style_processor<agg_renderer<image_32> >;
+void render_vector_marker(cairo_context & context, pixel_position const& pos,
+                          svg::svg_path_adapter & svg_path, box2d<double> const& bbox,
+                          agg::pod_bvector<svg::path_attributes> const & attributes,
+                          agg::trans_affine const& tr, double opacity, bool recenter);
 
 }
+
+#endif // MAPNIK_CAIRO_RENDER_VECTOR_HPP
+
+#endif
