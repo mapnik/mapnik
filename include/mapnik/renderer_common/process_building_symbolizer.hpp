@@ -23,6 +23,12 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_BUILDING_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_BUILDING_SYMBOLIZER_HPP
 
+#include <mapnik/segment.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/geometry.hpp>
+
+#include <algorithm>
+
 namespace mapnik {
 
 template <typename F1, typename F2, typename F3>
@@ -106,4 +112,4 @@ void render_building_symbolizer(mapnik::feature_impl &feature,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_BUILDING_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_BUILDING_SYMBOLIZER_HPP

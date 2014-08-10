@@ -23,28 +23,29 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP
 
+// mapnik
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/renderer_common.hpp>
-#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/attribute_collector.hpp>
-#include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_layout_manager.hpp>
-#include <mapnik/group/group_rule.hpp>
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
-#include <mapnik/renderer_common/process_point_symbolizer.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
+// agg
 #include <agg_trans_affine.h>
 
 namespace mapnik {
 
 class proj_transform;
+struct glyph_info;
+class text_symbolizer_helper;
 
 // General:
 
@@ -345,4 +346,4 @@ void render_group_symbolizer(group_symbolizer const& sym,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP

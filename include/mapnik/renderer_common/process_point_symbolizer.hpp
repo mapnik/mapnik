@@ -26,6 +26,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
 namespace mapnik {
 

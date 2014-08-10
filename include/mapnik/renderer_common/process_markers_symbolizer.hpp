@@ -27,6 +27,9 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/marker_helpers.hpp>
+
+// boost
 #include <boost/mpl/vector.hpp>
 
 namespace mapnik {
