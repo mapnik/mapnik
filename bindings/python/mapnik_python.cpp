@@ -241,7 +241,7 @@ void render3(mapnik::Map const& map,
 {
     python_unblock_auto_block b;
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map,surface,scale_factor,offset_x,offset_y);
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,mapnik::create_context(surface),scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
@@ -249,7 +249,7 @@ void render4(mapnik::Map const& map, PycairoSurface* py_surface)
 {
     python_unblock_auto_block b;
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map,surface);
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,mapnik::create_context(surface));
     ren.apply();
 }
 
@@ -304,7 +304,7 @@ void render_with_detector4(
 {
     python_unblock_auto_block b;
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map, surface, detector);
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map, mapnik::create_context(surface), detector);
     ren.apply();
 }
 
@@ -318,7 +318,7 @@ void render_with_detector5(
 {
     python_unblock_auto_block b;
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map, surface, detector, scale_factor, offset_x, offset_y);
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map, mapnik::create_context(surface), detector, scale_factor, offset_x, offset_y);
     ren.apply();
 }
 
