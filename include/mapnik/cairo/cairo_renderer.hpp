@@ -176,6 +176,7 @@ protected:
 };
 
 extern template class MAPNIK_DECL cairo_renderer<cairo_ptr>;
+extern template class MAPNIK_DECL cairo_renderer<cairo_surface_ptr>;
 
 }
 
