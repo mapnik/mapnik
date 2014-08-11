@@ -53,5 +53,6 @@ before_script:
 script:
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
  # install some exotic fonts to ensure we don't crash registering them
- - sudo apt-get install ttf-*
+ - sudo apt-get install ttf-wqy-microhei
+ - source localize.sh
  - python -c "import mapnik;mapnik.logger.set_severity(mapnik.severity_type.Debug);mapnik.register_fonts('/usr/share/fonts/');mapnik.register_fonts('/usr/share/fonts/');print '\n'.join(list(mapnik.FontEngine.instance().face_names()))"
