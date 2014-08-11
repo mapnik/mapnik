@@ -25,8 +25,7 @@
 
 // mapnik
 #include <mapnik/symbolizer.hpp>
-// boost
-#include <boost/variant/static_visitor.hpp>
+#include <mapnik/util/variant.hpp>
 // stl
 #include <typeinfo>
 #include <typeindex>
@@ -34,7 +33,7 @@
 
 namespace mapnik {
 
-struct property_value_hash_visitor : boost::static_visitor<std::size_t>
+struct property_value_hash_visitor : util::static_visitor<std::size_t>
 {
     std::size_t operator() (color val) const
     {
@@ -72,13 +71,13 @@ struct symbolizer_hash
         for (auto const& prop : sym.properties)
         {
             seed ^= std::hash<std::size_t>()(static_cast<std::size_t>(prop.first));
-            seed ^= boost::apply_visitor(property_value_hash_visitor(), prop.second);
+            seed ^= util::apply_visitor(property_value_hash_visitor(), prop.second);
         }
         return seed;
     }
 };
 
-struct hash_visitor : boost::static_visitor<std::size_t>
+struct symbolizer_hash_visitor : boost::static_visitor<std::size_t>
 {
     template <typename Symbolizer>
     std::size_t operator() (Symbolizer const& sym) const

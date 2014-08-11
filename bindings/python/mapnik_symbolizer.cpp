@@ -49,6 +49,7 @@
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
+#include <mapnik/util/variant.hpp>
 
 // stl
 #include <sstream>
@@ -103,7 +104,7 @@ std::shared_ptr<mapnik::symbolizer_base::value_type> numeric_wrapper(const objec
     return result;
 }
 
-struct extract_python_object : public boost::static_visitor<boost::python::object>
+struct extract_python_object : public mapnik::util::static_visitor<boost::python::object>
 {
     using result_type = boost::python::object;
 
@@ -121,7 +122,7 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_python_object(), itr->second);
+        return mapnik::util::apply_visitor(extract_python_object(), itr->second);
     }
     //mapnik::property_meta_type const& meta = mapnik::get_meta(key);
     //return boost::apply_visitor(extract_python_object(), std::get<1>(meta));
@@ -138,18 +139,9 @@ std::string get_symbolizer_type(symbolizer const& sym)
     return mapnik::symbolizer_name(sym); // FIXME - do we need this ?
 }
 
-struct symbolizer_hash_visitor : public boost::static_visitor<std::size_t>
-{
-    template <typename T>
-    std::size_t operator() (T const& sym) const
-    {
-        return mapnik::symbolizer_hash::value(sym);
-    }
-};
-
 std::size_t hash_impl(symbolizer const& sym)
 {
-    return boost::apply_visitor(symbolizer_hash_visitor(), sym);
+    return boost::apply_visitor(mapnik::symbolizer_hash_visitor(), sym);
 }
 
 template <typename T>

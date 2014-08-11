@@ -41,7 +41,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
-
+#include <mapnik/util/variant.hpp>
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -49,8 +49,6 @@
 #include <vector>
 #include <string>
 #include <functional>
-// boost
-#include <boost/variant/variant_fwd.hpp>
 
 namespace agg { struct trans_affine; }
 
@@ -92,19 +90,19 @@ using text_placements_ptr = std::shared_ptr<text_placements>;
 
 struct MAPNIK_DECL symbolizer_base
 {
-    using value_type =  boost::variant<value_bool,
-                                       value_integer,
-                                       enumeration_wrapper,
-                                       value_double,
-                                       std::string,
-                                       color,
-                                       expression_ptr,
-                                       path_expression_ptr,
-                                       transform_type,
-                                       text_placements_ptr,
-                                       dash_array,
-                                       raster_colorizer_ptr,
-                                       group_symbolizer_properties_ptr>;
+    using value_type =  util::variant<value_bool,
+                                      value_integer,
+                                      enumeration_wrapper,
+                                      value_double,
+                                      std::string,
+                                      color,
+                                      expression_ptr,
+                                      path_expression_ptr,
+                                      transform_type,
+                                      text_placements_ptr,
+                                      dash_array,
+                                      raster_colorizer_ptr,
+                                      group_symbolizer_properties_ptr>;
     using key_type =  mapnik::keys;
     using cont_type = std::map<key_type, value_type>;
     cont_type properties;
@@ -112,7 +110,7 @@ struct MAPNIK_DECL symbolizer_base
 
 inline bool is_expression(symbolizer_base::value_type const& val)
 {
-    return (val.which() == 6);
+    return (val.get_type_index() == 6);
 }
 
 // symbolizer properties target types
@@ -391,7 +389,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
 };
 
 template <typename T>
-struct extract_value : public boost::static_visitor<T>
+struct extract_value : public util::static_visitor<T>
 {
     using result_type = T;
 
@@ -431,7 +429,7 @@ struct extract_value : public boost::static_visitor<T>
 };
 
 template <typename T1>
-struct extract_raw_value : public boost::static_visitor<T1>
+struct extract_raw_value : public util::static_visitor<T1>
 {
     using result_type = T1;
 
@@ -472,7 +470,7 @@ MAPNIK_DECL T get(symbolizer_base const& sym, keys key, mapnik::feature_impl con
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
     return _default_value;
 }
@@ -484,7 +482,7 @@ MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
     return boost::optional<T>();
 }
@@ -496,7 +494,7 @@ MAPNIK_DECL T get(symbolizer_base const& sym, keys key, T const& _default_value 
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_raw_value<T>(), itr->second);
+        return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
     return _default_value;
 }
@@ -508,7 +506,7 @@ MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_raw_value<T>(), itr->second);
+        return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
     return boost::optional<T>();
 }

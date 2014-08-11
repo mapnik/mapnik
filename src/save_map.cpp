@@ -45,7 +45,7 @@
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -240,9 +240,9 @@ private:
     {
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(serialize_symbolizer_property<property_meta_type>(
-                                     get_meta(prop.first), sym_node, explicit_defaults_),
-                                     prop.second);
+            util::apply_visitor(serialize_symbolizer_property<property_meta_type>(
+                                    get_meta(prop.first), sym_node, explicit_defaults_),
+                                prop.second);
         }
     }
     ptree & rule_;

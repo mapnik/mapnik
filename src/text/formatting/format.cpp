@@ -103,14 +103,14 @@ void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
 {
     evaluated_format_properties_ptr new_properties = std::make_shared<detail::evaluated_format_properties>(*p);
 
-    if (text_size) new_properties->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), *text_size);
-    if (character_spacing) new_properties->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), *character_spacing);
-    if (line_spacing) new_properties->line_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), *line_spacing);
-    if (text_opacity) new_properties->text_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), *text_opacity);
-    if (halo_radius) new_properties->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), *halo_radius);
-    if (fill) new_properties->fill = boost::apply_visitor(extract_value<color>(feature,attrs), *fill);
-    if (halo_fill) new_properties->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
-    if (text_transform) new_properties->text_transform = boost::apply_visitor(extract_value<text_transform_enum>(feature,attrs), *text_transform);
+    if (text_size) new_properties->text_size = util::apply_visitor(extract_value<value_double>(feature,attrs), *text_size);
+    if (character_spacing) new_properties->character_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), *character_spacing);
+    if (line_spacing) new_properties->line_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), *line_spacing);
+    if (text_opacity) new_properties->text_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), *text_opacity);
+    if (halo_radius) new_properties->halo_radius = util::apply_visitor(extract_value<value_double>(feature,attrs), *halo_radius);
+    if (fill) new_properties->fill = util::apply_visitor(extract_value<color>(feature,attrs), *fill);
+    if (halo_fill) new_properties->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
+    if (text_transform) new_properties->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), *text_transform);
 
     if (fontset)
     {
@@ -143,16 +143,16 @@ node_ptr format_node::get_child() const
 
 void format_node::add_expressions(expression_set & output) const
 {
-    if (text_size && is_expression(*text_size)) output.insert(boost::get<expression_ptr>(*text_size));
-    if (character_spacing && is_expression(*character_spacing)) output.insert(boost::get<expression_ptr>(*character_spacing));
-    if (line_spacing && is_expression(*line_spacing)) output.insert(boost::get<expression_ptr>(*line_spacing));
-    if (halo_radius && is_expression(*halo_radius)) output.insert(boost::get<expression_ptr>(*halo_radius));
-    if (text_opacity && is_expression(*text_opacity)) output.insert(boost::get<expression_ptr>(*text_opacity));
-    //if (halo_opacity && is_expression(*halo_opacity)) output.insert(boost::get<expression_ptr>(*halo_opacity));
-    if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
-    if (fill && is_expression(*fill)) output.insert(boost::get<expression_ptr>(*fill));
-    if (halo_fill && is_expression(*halo_fill)) output.insert(boost::get<expression_ptr>(*halo_fill));
-    if (text_transform && is_expression(*text_transform)) output.insert(boost::get<expression_ptr>(*text_transform));
+    if (text_size && is_expression(*text_size)) output.insert(util::get<expression_ptr>(*text_size));
+    if (character_spacing && is_expression(*character_spacing)) output.insert(util::get<expression_ptr>(*character_spacing));
+    if (line_spacing && is_expression(*line_spacing)) output.insert(util::get<expression_ptr>(*line_spacing));
+    if (halo_radius && is_expression(*halo_radius)) output.insert(util::get<expression_ptr>(*halo_radius));
+    if (text_opacity && is_expression(*text_opacity)) output.insert(util::get<expression_ptr>(*text_opacity));
+    //if (halo_opacity && is_expression(*halo_opacity)) output.insert(util::get<expression_ptr>(*halo_opacity));
+    if (wrap_before && is_expression(*wrap_before)) output.insert(util::get<expression_ptr>(*wrap_before));
+    if (fill && is_expression(*fill)) output.insert(util::get<expression_ptr>(*fill));
+    if (halo_fill && is_expression(*halo_fill)) output.insert(util::get<expression_ptr>(*halo_fill));
+    if (text_transform && is_expression(*text_transform)) output.insert(util::get<expression_ptr>(*text_transform));
     if (child_) child_->add_expressions(output);
 }
 

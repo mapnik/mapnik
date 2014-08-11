@@ -201,16 +201,14 @@ struct is_null_transform_node : public mapnik::util::static_visitor<bool>
         return val.is_null();
     }
 
-    bool operator() (value_null const& val) const
+    bool operator() (value_null const&) const
     {
-        boost::ignore_unused_variable_warning(val);
         return true;
     }
 
     template <typename T>
-    bool operator() (T const& val) const
+    bool operator() (T const&) const
     {
-        boost::ignore_unused_variable_warning(val);
         return false;
     }
 

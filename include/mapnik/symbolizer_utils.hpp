@@ -37,6 +37,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/parse_transform.hpp>
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/variant/apply_visitor.hpp>
 
@@ -142,7 +143,7 @@ inline std::string symbolizer_name(symbolizer const& sym)
 
 
 template <typename Meta>
-class symbolizer_property_value_string : public boost::static_visitor<std::string>
+class symbolizer_property_value_string : public util::static_visitor<std::string>
 {
 public:
     symbolizer_property_value_string (Meta const& meta)
@@ -246,7 +247,7 @@ struct symbolizer_to_json : public boost::static_visitor<std::string>
             if (first) first = false;
             else ss << ",";
             ss << "\"" <<  std::get<0>(meta) << "\":";
-            ss << boost::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta),prop.second);
+            ss << util::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta),prop.second);
         }
         ss << "}}";
         return ss.str();

@@ -37,6 +37,7 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/variant.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
@@ -169,7 +170,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
     {
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(f_attrs_, prop.second);
+            util::apply_visitor(f_attrs_, prop.second);
         }
     }
 
@@ -190,7 +191,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(f_attrs_, prop.second);
+            util::apply_visitor(f_attrs_, prop.second);
         }
     }
 
