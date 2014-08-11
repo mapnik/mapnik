@@ -50,39 +50,6 @@
 #include "agg_renderer_outline_image.h"
 #include "agg_conv_clip_polyline.h"
 
-// boost
-
-
-namespace {
-
-class pattern_source : private mapnik::noncopyable
-{
-public:
-    pattern_source(mapnik::image_data_32 const& pattern)
-        : pattern_(pattern) {}
-
-    inline unsigned int width() const
-    {
-        return pattern_.width();
-    }
-    inline unsigned int height() const
-    {
-        return pattern_.height();
-    }
-    inline agg::rgba8 pixel(int x, int y) const
-    {
-        unsigned c = pattern_(x,y);
-        return agg::rgba8_pre(c & 0xff,
-                          (c >> 8) & 0xff,
-                          (c >> 16) & 0xff,
-                          (c >> 24) & 0xff);
-    }
-private:
-    mapnik::image_data_32 const& pattern_;
-};
-
-}
-
 namespace mapnik {
 
 template <typename T0, typename T1>
@@ -117,7 +84,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, opacity);
+        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, 1.0);
     }
 
     if (!pat) return;
@@ -133,7 +100,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 
-    pattern_source source(*(*pat));
+    pattern_source source(*(*pat), opacity);
     pattern_type pattern (filter,source);
     renderer_type ren(ren_base, pattern);
     rasterizer_type ras(ren);
