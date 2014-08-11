@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <FontSet name="book">
+    <Font face-name="DejaVu Sans Book"/>
+  </FontSet>
+
+  <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+<Parameter name="inline">
+lat,long,test,text
+ 0.25,-0.35,noexpr-true,ABC
+ 0.25,-0.35,noexpr-true,XYZ
+ 0.25,-0.12,noexpr-false,ABC
+ 0.25,-0.12,noexpr-false,XYZ
+ 0.25, 0.11,noexpr-true,ABC
+ 0.25, 0.11,noexpr-false,XYZ
+ 0.25, 0.35,noexpr-false,ABC
+ 0.25, 0.35,noexpr-true,XYZ
+ 0   ,-0.35,true,ABC
+ 0   ,-0.35,true,XYZ
+ 0   ,-0.12,false,ABC
+ 0   ,-0.12,false,XYZ
+ 0   , 0.11,true,ABC
+ 0   , 0.11,false,XYZ
+ 0   , 0.35,false,ABC
+ 0   , 0.35,true,XYZ
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+    <Style name="My Style" filter-mode="first">
+    <Rule>
+      <Filter>[test] = "noexpr-true"</Filter>
+      <TextSymbolizer fontset-name="book" size="16" placement="point" dx="0" dy="0" allow-overlap="true">[text]</TextSymbolizer>
+    </Rule>
+    <Rule>
+      <Filter>[test] = "noexpr-false"</Filter>
+      <TextSymbolizer fontset-name="book" size="16" placement="point" dx="0" dy="0" allow-overlap="false">[text]</TextSymbolizer>
+    </Rule>
+    <Rule>
+      <TextSymbolizer fontset-name="book" size="16" placement="point" dx="0" dy="0" allow-overlap="[test]">[text]</TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>
