@@ -501,7 +501,7 @@ void map_parser::parse_fontset(Map & map, xml_node const& node)
 
         // XXX Hack because map object isn't accessible by text_symbolizer
         // when it's parsed
-        fontsets_.insert(std::make_pair(name, fontset));
+        fontsets_.emplace(name, fontset);
         map.insert_fontset(name, std::move(fontset));
     }
     catch (config_error const& ex)

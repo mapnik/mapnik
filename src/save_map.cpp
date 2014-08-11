@@ -51,7 +51,7 @@
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/concept_check.hpp>
+
 // stl
 #include <iostream>
 
@@ -488,27 +488,23 @@ public:
     serialize_type( boost::property_tree::ptree & node):
         node_(node) {}
 
-    void operator () ( mapnik::value_integer val ) const
+    void operator () ( mapnik::value_integer ) const
     {
-        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "int" );
     }
 
-    void operator () ( mapnik::value_double val ) const
+    void operator () ( mapnik::value_double ) const
     {
-        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "float" );
     }
 
-    void operator () ( std::string const& val ) const
+    void operator () ( std::string const& ) const
     {
-        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "string" );
     }
 
-    void operator () ( mapnik::value_null val ) const
+    void operator () ( mapnik::value_null ) const
     {
-        boost::ignore_unused_variable_warning(val);
         node_.put("<xmlattr>.type", "string" );
     }
 

@@ -684,7 +684,7 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     }
     else
     {
-        return ctx.insert(std::make_pair(ds_name,std::make_shared<postgis_processor_context>())).first->second;
+        return ctx.emplace(ds_name,std::make_shared<postgis_processor_context>()).first->second;
     }
 }
 

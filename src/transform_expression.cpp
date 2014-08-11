@@ -37,9 +37,8 @@ struct transform_node_to_expression_string
     transform_node_to_expression_string(std::ostringstream& os)
         : os_(os) {}
 
-    void operator() (identity_node const& node) const
+    void operator() (identity_node const&) const
     {
-        boost::ignore_unused_variable_warning(node);
     }
 
     void operator() (matrix_node const& node)

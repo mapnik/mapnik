@@ -28,19 +28,13 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/map.hpp>
-#include <mapnik/request.hpp>
-#include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/cairo/cairo_context.hpp>
-#include <mapnik/pixel_position.hpp>
-#include <mapnik/ctrans.hpp>    // for CoordTransform
 #include <mapnik/renderer_common.hpp>
 
-// cairo
-#include <cairo.h>
+// stl
+#include <memory>
 
 namespace agg {
 struct trans_affine;
@@ -48,34 +42,57 @@ struct trans_affine;
 
 namespace mapnik {
 
+class Map;
+class feature_impl;
+class feature_type_style;
+class label_collision_detector4;
+class layer;
 class marker;
-
-class MAPNIK_DECL cairo_renderer_base : private mapnik::noncopyable
+class proj_transform;
+class request;
+struct pixel_position;
+struct cairo_save_restore
 {
-protected:
-    cairo_renderer_base(Map const& m,
-                        cairo_ptr const& cairo,
-                        attributes const& vars,
-                        double scale_factor=1.0,
-                        unsigned offset_x=0,
-                        unsigned offset_y=0);
-    cairo_renderer_base(Map const& m,
-                        request const& req,
-                        cairo_ptr const& cairo,
-                        attributes const& vars,
-                        double scale_factor=1.0,
-                        unsigned offset_x=0,
-                        unsigned offset_y=0);
-    cairo_renderer_base(Map const& m,
-                        cairo_ptr const& cairo,
-                        attributes const& vars,
-                        std::shared_ptr<label_collision_detector4> detector,
-                        double scale_factor=1.0,
-                        unsigned offset_x=0,
-                        unsigned offset_y=0);
+    cairo_save_restore(cairo_context & context)
+        : context_(context)
+    {
+        context_.save();
+    }
+    ~cairo_save_restore()
+    {
+        context_.restore();
+    }
+    cairo_context & context_;
+};
+
+template <typename T>
+class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
+                                   private mapnik::noncopyable
+{
 public:
-    ~cairo_renderer_base();
+    using processor_impl_type = cairo_renderer<T>;
+    cairo_renderer(Map const& m,
+                   T const& obj,
+                   double scale_factor=1.0,
+                   unsigned offset_x=0,
+                   unsigned offset_y=0);
+    cairo_renderer(Map const& m,
+                   request const& req,
+                   attributes const& vars,
+                   T const& obj,
+                   double scale_factor=1.0,
+                   unsigned offset_x=0,
+                   unsigned offset_y=0);
+    cairo_renderer(Map const& m,
+                   T const& obj,
+                   std::shared_ptr<label_collision_detector4> detector,
+                   double scale_factor=1.0,
+                   unsigned offset_x=0,
+                   unsigned offset_y=0);
+
+    ~cairo_renderer();
     void start_map_processing(Map const& map);
+    void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
     void start_style_processing(feature_type_style const& st);
@@ -155,34 +172,11 @@ protected:
     renderer_common common_;
     cairo_face_manager face_manager_;
     void setup(Map const& m);
+
 };
 
-template <typename T>
-class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
-                                   public cairo_renderer_base
-{
-public:
-    using processor_impl_type = cairo_renderer_base;
-    cairo_renderer(Map const& m,
-                   T const& obj,
-                   double scale_factor=1.0,
-                   unsigned offset_x=0,
-                   unsigned offset_y=0);
-    cairo_renderer(Map const& m,
-                   request const& req,
-                   attributes const& vars,
-                   T const& obj,
-                   double scale_factor=1.0,
-                   unsigned offset_x=0,
-                   unsigned offset_y=0);
-    cairo_renderer(Map const& m,
-                   T const& obj,
-                   std::shared_ptr<label_collision_detector4> detector,
-                   double scale_factor=1.0,
-                   unsigned offset_x=0,
-                   unsigned offset_y=0);
-    void end_map_processing(Map const& map);
-};
+extern template class MAPNIK_DECL cairo_renderer<cairo_ptr>;
+
 }
 
 #endif // MAPNIK_CAIRO_RENDERER_HPP

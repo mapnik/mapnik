@@ -56,7 +56,7 @@ struct expression_attributes : boost::static_visitor<void>
 
     void operator() (attribute const& attr) const
     {
-        names_.insert(attr.name());
+        names_.emplace(attr.name());
     }
 
     template <typename Tag>
@@ -289,7 +289,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
                     {
                         std::string col_idx_name = col_name;
                         boost::replace_all(col_idx_name, "%", col_idx_str);
-                        names_.insert(col_idx_name);
+                        names_.emplace(col_idx_name);
                     }
                 }
             }
@@ -298,7 +298,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
         {
             // This is not an indexed column, or we are ignoring indexes.
             // Insert the name as is.
-            names_.insert(col_name);
+            names_.emplace(col_name);
         }
     }
 }

@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/config.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -41,7 +42,7 @@ class vertex_cache;
 using vertex_cache_ptr = std::shared_ptr<vertex_cache>;
 
 // Caches all path points and their lengths. Allows easy moving in both directions.
-class vertex_cache
+class MAPNIK_DECL vertex_cache
 {
     struct segment
     {

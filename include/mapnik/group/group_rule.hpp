@@ -36,7 +36,7 @@ namespace mapnik
  * be rendered atomically when the filter attached to
  * this rule is matched.
  */
-struct group_rule
+struct MAPNIK_DECL group_rule
 {
    using symbolizers = std::vector<symbolizer>;
 

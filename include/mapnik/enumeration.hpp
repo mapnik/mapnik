@@ -333,8 +333,8 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
  */
 
 #define IMPLEMENT_ENUM( name, strings )                                 \
-    template <> const char ** name ::our_strings_ = strings;            \
-    template <> std::string name ::our_name_ = #name;                   \
-    template <> bool name ::our_verified_flag_( name ::verify_mapnik_enum(__FILE__, __LINE__));
+    template <> MAPNIK_DECL const char ** name ::our_strings_ = strings;            \
+    template <> MAPNIK_DECL std::string name ::our_name_ = #name;                   \
+    template <> MAPNIK_DECL bool name ::our_verified_flag_( name ::verify_mapnik_enum(__FILE__, __LINE__));
 
 #endif // MAPNIK_ENUMERATION_HPP

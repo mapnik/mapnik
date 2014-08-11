@@ -51,7 +51,6 @@
 #include <functional>
 // boost
 #include <boost/variant/variant_fwd.hpp>
-#include <boost/concept_check.hpp>
 
 namespace agg { struct trans_affine; }
 
@@ -91,7 +90,7 @@ using dash_array = std::vector<std::pair<double,double> >;
 class text_placements;
 using text_placements_ptr = std::shared_ptr<text_placements>;
 
-struct  MAPNIK_DECL symbolizer_base
+struct MAPNIK_DECL symbolizer_base
 {
     using value_type =  boost::variant<value_bool,
                                        value_integer,
@@ -163,10 +162,8 @@ struct evaluate_path_wrapper
 {
     using result_type = T;
     template <typename T1, typename T2>
-    result_type operator() (T1 const& expr, T2 const& feature) const
+    result_type operator() (T1 const&, T2 const&) const
     {
-        boost::ignore_unused_variable_warning(expr);
-        boost::ignore_unused_variable_warning(feature);
         return result_type();
     }
 
@@ -291,9 +288,8 @@ template <typename T>
 struct enumeration_result<T,false>
 {
     using result_type = T;
-    static result_type convert(enumeration_wrapper const& e)
+    static result_type convert(enumeration_wrapper const&)
     {
-        boost::ignore_unused_variable_warning(e);
         return result_type();// FAIL
     }
 };
@@ -311,10 +307,7 @@ struct put_impl
         }
         else
         {
-            // NOTE: we use insert here instead of emplace
-            // because of lacking std::map emplace support in libstdc++
-            // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44436
-            sym.properties.insert(std::make_pair(key, enumeration_wrapper(val)));
+            sym.properties.emplace(key, enumeration_wrapper(val));
         }
     }
 };
@@ -331,7 +324,7 @@ struct put_impl<T, false>
         }
         else
         {
-            sym.properties.insert(std::make_pair(key, val));
+            sym.properties.emplace(key, val);
         }
     }
 };
@@ -428,9 +421,8 @@ struct extract_value : public boost::static_visitor<T>
     }
 
     template <typename T1>
-    auto operator() (T1 const& val) const -> result_type
+    auto operator() (T1 const&) const -> result_type
     {
-        boost::ignore_unused_variable_warning(val);
         return result_type();
     }
 
@@ -461,20 +453,20 @@ struct extract_raw_value : public boost::static_visitor<T1>
 };
 
 template <typename T>
-void put(symbolizer_base & sym, keys key, T const& val)
+MAPNIK_DECL void put(symbolizer_base & sym, keys key, T const& val)
 {
     constexpr bool enum_ = std::is_enum<T>::value;
     detail::put_impl<T, enum_ >::apply(sym, key, val);
 }
 
 template <typename T>
-bool has_key(symbolizer_base const& sym, keys key)
+MAPNIK_DECL bool has_key(symbolizer_base const& sym, keys key)
 {
     return (sym.properties.count(key) == 1);
 }
 
 template <typename T>
-T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
+MAPNIK_DECL T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -486,7 +478,7 @@ T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature,
 }
 
 template <typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
+MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -498,7 +490,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::fe
 }
 
 template <typename T>
-T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
+MAPNIK_DECL T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -510,7 +502,7 @@ T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 }
 
 template <typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
+MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -528,8 +520,8 @@ constexpr auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
 }
 
 using property_meta_type = std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types>;
-property_meta_type const& get_meta(mapnik::keys key);
-mapnik::keys get_key(std::string const& name);
+MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
+MAPNIK_DECL mapnik::keys get_key(std::string const& name);
 
 // concrete symbolizer types
 struct MAPNIK_DECL point_symbolizer : public symbolizer_base {};

@@ -102,9 +102,8 @@ namespace path_processor_detail {
         collect_ (std::set<std::string> & cont)
             : cont_(cont) {}
 
-        void operator() (std::string const& token) const
+        void operator() (std::string const&) const
         {
-            boost::ignore_unused_variable_warning(token);
         }
 
         void operator() (attribute const& attr) const

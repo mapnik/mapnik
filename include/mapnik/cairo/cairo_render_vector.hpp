@@ -20,27 +20,30 @@
  *
  *****************************************************************************/
 
-//mapnik
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/attribute.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/transform_processor.hpp>
+#if defined(HAVE_CAIRO)
+
+#ifndef MAPNIK_CAIRO_RENDER_VECTOR_HPP
+#define MAPNIK_CAIRO_RENDER_VECTOR_HPP
+
+// mapnik
+#include <mapnik/svg/svg_path_adapter.hpp>
+
+namespace agg { struct trans_affine; }
 
 namespace mapnik {
 
-// START FIXME - move to its own compilation unit
-void evaluate_transform(agg::trans_affine& tr,
-                        feature_impl const& feature,
-                        attributes const& vars,
-                        transform_list_ptr const& trans_expr, double scale_factor)
-{
-    if (trans_expr)
-    {
-        transform_processor_type::evaluate(tr, feature, vars, *trans_expr, scale_factor);
-    }
+class cairo_context;
+struct pixel_position;
+template <typename T> class box2d;
+namespace svg { struct path_attributes; }
+
+void render_vector_marker(cairo_context & context, pixel_position const& pos,
+                          svg::svg_path_adapter & svg_path, box2d<double> const& bbox,
+                          agg::pod_bvector<svg::path_attributes> const & attributes,
+                          agg::trans_affine const& tr, double opacity, bool recenter);
+
 }
-// END FIXME
 
+#endif // MAPNIK_CAIRO_RENDER_VECTOR_HPP
 
-
-} // end of namespace mapnik
+#endif

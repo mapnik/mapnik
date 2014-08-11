@@ -27,6 +27,7 @@
 
 // mapnik
 #include <mapnik/value.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/attribute.hpp>
 
 

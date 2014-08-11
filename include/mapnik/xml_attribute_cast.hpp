@@ -194,7 +194,7 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
         else
         {
             mapnik::expression_ptr expr = parse_expression(source);
-            tree.expr_cache_.insert(std::make_pair(source,expr));
+            tree.expr_cache_.emplace(source,expr);
             return expr;
         }
     }

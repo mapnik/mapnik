@@ -61,7 +61,7 @@ marker_cache::marker_cache()
     boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_32>(4,4));
     (*bitmap_data)->set(0xff000000);
     marker_ptr mark = std::make_shared<mapnik::marker>(bitmap_data);
-    marker_cache_.insert(std::make_pair("image://square",mark));
+    marker_cache_.emplace("image://square",mark);
 }
 
 marker_cache::~marker_cache() {}
@@ -103,7 +103,7 @@ bool marker_cache::insert_svg(std::string const& name, std::string const& svg_st
     iterator_type itr = svg_cache_.find(key);
     if (itr == svg_cache_.end())
     {
-        return svg_cache_.insert(std::make_pair(key,svg_string)).second;
+        return svg_cache_.emplace(key,svg_string).second;
     }
     return false;
 }
@@ -113,7 +113,7 @@ bool marker_cache::insert_marker(std::string const& uri, marker_ptr path)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    return marker_cache_.insert(std::make_pair(uri,path)).second;
+    return marker_cache_.emplace(uri,path).second;
 }
 
 boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
@@ -165,7 +165,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             result.reset(mark);
             if (update_cache)
             {
-                marker_cache_.insert(std::make_pair(uri,*result));
+                marker_cache_.emplace(uri,*result);
             }
         }
         // otherwise assume file-based
@@ -194,7 +194,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                 result.reset(mark);
                 if (update_cache)
                 {
-                    marker_cache_.insert(std::make_pair(uri,*result));
+                    marker_cache_.emplace(uri,*result);
                 }
             }
             else
@@ -218,7 +218,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                     result.reset(mark);
                     if (update_cache)
                     {
-                        marker_cache_.insert(std::make_pair(uri,*result));
+                        marker_cache_.emplace(uri,*result);
                     }
                 }
                 else

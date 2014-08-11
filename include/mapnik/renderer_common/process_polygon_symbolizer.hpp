@@ -23,6 +23,8 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP
 
+#include <mapnik/vertex_converters.hpp>
+
 namespace mapnik {
 
 template <typename vertex_converter_type, typename rasterizer_type, typename F>
