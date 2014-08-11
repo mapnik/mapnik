@@ -132,6 +132,7 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
+    MAPNIK_LOG_DEBUG(font_engine_freetype) << "registering: " << file_name;
 #ifdef _WINDOWS
     FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(), L"rb");
 #else
