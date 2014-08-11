@@ -34,7 +34,7 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
-
+#include <boost/variant.hpp>
 // mapnik
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
@@ -87,7 +87,7 @@ struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttri
     }
 };
 
-struct geometry_type_visitor : public mapnik::util::static_visitor<int>
+struct geometry_type_visitor : public boost::static_visitor<int>
 {
     int operator() (mapnik::topojson::point const&) const
     {
@@ -211,14 +211,14 @@ void topojson_datasource::parse_topojson(T & stream)
     std::size_t count = 0;
     for (auto const& geom : topo_.geometries)
     {
-        mapnik::box2d<double> bbox = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
+        mapnik::box2d<double> bbox = boost::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
         if (bbox.valid())
         {
             if (count == 0)
             {
                 extent_ = bbox;
                 collect_attributes_visitor assessor(desc_);
-                mapnik::util::apply_visitor(assessor,geom);
+                boost::apply_visitor(assessor,geom);
             }
             else
             {
@@ -245,7 +245,7 @@ boost::optional<mapnik::datasource::geometry_t> topojson_datasource::get_geometr
     for (std::size_t i = 0; i < num_features && i < 5; ++i)
     {
         mapnik::topojson::geometry const& geom = topo_.geometries[i];
-        int type = mapnik::util::apply_visitor(geometry_type_visitor(),geom);
+        int type = boost::apply_visitor(geometry_type_visitor(),geom);
         if (type > 0)
         {
             if (multi_type > 0 && multi_type != type)

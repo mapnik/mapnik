@@ -26,8 +26,8 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/topology.hpp>
-// boost
-#include <boost/variant/static_visitor.hpp>
+#include <mapnik/util/variant.hpp>
+#include <boost/variant.hpp>
 
 namespace mapnik { namespace topojson {
 

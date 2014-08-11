@@ -371,7 +371,7 @@ mapnik::feature_ptr topojson_featureset::next()
         if ( index < topo_.geometries.size())
         {
             mapnik::topojson::geometry const& geom = topo_.geometries[index];
-            mapnik::feature_ptr feature = mapnik::util::apply_visitor(
+            mapnik::feature_ptr feature = boost::apply_visitor(
                 mapnik::topojson::feature_generator<mapnik::context_ptr>(ctx_, tr_, topo_, feature_id_++),
                 geom);
             return feature;
