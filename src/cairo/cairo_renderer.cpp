@@ -226,6 +226,7 @@ void cairo_renderer<T>::render_marker(pixel_position const& pos,
 }
 
 template class cairo_renderer<cairo_ptr>;
+
 }
 
 #endif // HAVE_CAIRO
