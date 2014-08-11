@@ -745,6 +745,18 @@ auto VARIANT_INLINE static apply_visitor(F f, V & v0, V & v1) -> decltype(V::bin
     return V::binary_visit(v0, v1, f);
 }
 
+// getter interface
+template<typename ResultType, typename T>
+ResultType &  get(T & var)
+{
+    return var.template get<ResultType>();
+}
+
+template<typename ResultType, typename T>
+ResultType const&  get(T const& var)
+{
+    return var.template get<ResultType>();
+}
 
 // operator<<
 template <typename charT, typename traits, typename Variant>
