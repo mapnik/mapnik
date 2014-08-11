@@ -23,19 +23,29 @@
 #define MAPNIK_TEXT_LAYOUT_HPP
 
 //mapnik
+#include <mapnik/value_types.hpp>
+#include <mapnik/pixel_position.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/text_line.hpp>
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
-#include <mapnik/text/harfbuzz_shaper.hpp>
 #include <mapnik/text/rotation.hpp>
 
 //stl
 #include <vector>
+#include <memory>
 #include <map>
+#include <utility>
 
 namespace mapnik
 {
+
+class feature_impl;
+class text_layout;
 
 using text_layout_ptr = std::shared_ptr<text_layout>;
 using text_layout_vector = std::vector<text_layout_ptr>;
@@ -46,7 +56,6 @@ public:
     using line_vector = std::vector<text_line>;
     using const_iterator = line_vector::const_iterator;
     using child_iterator = text_layout_vector::const_iterator;
-    using shaper_type = harfbuzz_shaper;
 
     text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties);
 

@@ -26,9 +26,6 @@
 // mapnik
 #include <mapnik/grid/grid.hpp>
 
-// boost
-#include <boost/concept_check.hpp>
-
 namespace mapnik {
 
 /*
@@ -60,8 +57,6 @@ static inline void scale_grid(mapnik::grid::data_type & target,
     unsigned yprt1 = 0;
     unsigned xprt = 0;
     unsigned xprt1 = 0;
-    boost::ignore_unused_variable_warning(yprt1);
-    boost::ignore_unused_variable_warning(xprt1);
 
     //no scaling or subpixel offset
     if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){

@@ -127,7 +127,7 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
     {
         // TODO - consider shortcutting f_keys if feature_id == lookup_value
         // create a mapping between the pixel id and the feature key
-        f_keys_.insert(std::make_pair(feature_id,lookup_value));
+        f_keys_.emplace(feature_id,lookup_value);
         // if extra fields have been supplied, push them into grid memory
         if (!names_.empty())
         {
@@ -136,7 +136,7 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
             // https://github.com/mapnik/mapnik/issues/1198
             mapnik::feature_ptr feature2(mapnik::feature_factory::create(ctx_,feature_id));
             feature2->set_data(feature.get_data());
-            features_.insert(std::make_pair(lookup_value,feature2));
+            features_.emplace(lookup_value,feature2);
         }
     }
     else

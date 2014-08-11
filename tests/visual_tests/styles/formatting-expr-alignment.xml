@@ -20,7 +20,6 @@ lat,long,horizontal_alignment,vertical_alignment,dy,text
 -0.25,-0.35,left,bottom,0
 -0.25,-0.12,middle,bottom,0
 -0.25, 0.11,right,bottom,0
-# right column: auto vertical alignment
  0.25, 0.35,right,auto,-0.0001
  0   , 0.35,middle,auto,0
 -0.25, 0.35,left,auto,0.0001

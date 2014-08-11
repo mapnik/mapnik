@@ -31,7 +31,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
 // agg
 #include "agg_trans_affine.h"
 
@@ -106,7 +106,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     render_group_symbolizer(
-        sym, feature, common_.vars_, prj_trans, clipping_extent(), common_,
+        sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_,
         [&](render_thunk_list const& thunks, pixel_position const& render_offset)
         {
             thunk_renderer ren(*this, current_buffer_, common_, render_offset);

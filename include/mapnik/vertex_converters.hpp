@@ -43,6 +43,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/offset_converter.hpp>
+#include <mapnik/simplify.hpp>
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>

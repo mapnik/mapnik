@@ -33,7 +33,8 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/parse_path.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/render_pattern.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
@@ -105,6 +106,8 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
     if (!marker_ptr || !(*marker_ptr)) return;
     boost::optional<image_ptr> pat;
+    // TODO - re-implement at renderer level like polygon_pattern symbolizer
+    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
     if ((*marker_ptr)->is_bitmap())
     {
         pat = (*marker_ptr)->get_bitmap_data();
@@ -114,13 +117,12 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr);
+        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, opacity);
     }
 
     if (!pat) return;
 
     bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    //double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0); TODO
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
@@ -140,7 +142,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
     if (clip)
     {
         double padding = (double)(common_.query_extent_.width()/pixmap_.width());
@@ -153,7 +155,10 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         clip_box.pad(padding);
     }
 
-    using conv_types = boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag,smooth_tag,
+                                          offset_transform_tag>;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);

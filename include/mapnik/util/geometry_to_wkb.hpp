@@ -196,13 +196,13 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
         if (command == SEG_MOVETO)
         {
             rings.push_back(new linear_ring); // start new loop
-            rings.back().push_back(std::make_pair(x,y));
+            rings.back().emplace_back(x,y);
             size += 4; // num_points
             size += 2 * 8; // point
         }
         else if (command == SEG_LINETO)
         {
-            rings.back().push_back(std::make_pair(x,y));
+            rings.back().emplace_back(x,y);
             size += 2 * 8; // point
         }
     }

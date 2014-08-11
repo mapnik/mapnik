@@ -3,10 +3,9 @@
 
 import sys
 import mapnik
-mapnik.logger.set_severity(mapnik.severity_type.None)
+#mapnik.logger.set_severity(mapnik.severity_type.None)
 #mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
-import sys
 import os.path
 from compare import compare, compare_grids
 
@@ -109,6 +108,7 @@ files = {
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'geometry-transform-translate': {'sizes':[(200,200)]},
     'geometry-transform-translate-patterns': {'sizes':[(200,200)]},
+    'geometry-transform-translate-patterns-svg': {'sizes':[(200,200)]},
     'marker-svg-opacity':{},
     'marker-svg-opacity2':{},
     'marker-svg-empty-g-element':{},
@@ -120,6 +120,11 @@ files = {
     'marker-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'marker-on-line-spacing-eq-width-overlap': {'sizes':[(600,400)]},
     'marker_line_placement_on_points':{},
+    'marker-on-line-and-vertex-first-placement':{'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
+    'marker-on-line-and-vertex-last-placement':{'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
+    'marker-with-background-image-linear-comp-op': {},
     'marker-with-background-image': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-with-background-image-and-hsla-transform': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-on-hex-grid': {'sizes':[(600,400),(400,600),(257,256)]},
@@ -258,6 +263,7 @@ files = {
     'text-halo-opacity':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
     'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'line-pattern-smooth-and-offset':{'sizes':[(512,512)]},
     'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
     'marker-whole-multi-polygon':{'sizes':[(512,512)]}
     }

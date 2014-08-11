@@ -387,10 +387,6 @@ private:
 
     void push_vertex(vertex2d const& v)
     {
-        #ifdef MAPNIK_LOG
-        MAPNIK_LOG_DEBUG(ctrans) << "offset_converter: " << v;
-        #endif
-
         vertices_.push_back(v);
     }
 

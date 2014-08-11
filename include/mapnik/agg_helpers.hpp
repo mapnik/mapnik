@@ -24,7 +24,7 @@
 #define MAPNIK_AGG_HELPERS_HPP
 
 // mapnik
-#include <mapnik/gamma_method.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 
 // agg
 #include "agg_gamma_functions.h"

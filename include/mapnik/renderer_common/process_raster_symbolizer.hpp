@@ -25,6 +25,10 @@
 
 // mapnik
 #include <mapnik/warp.hpp>
+#include <mapnik/raster.hpp>
+#include <mapnik/raster_colorizer.hpp>
+#include <mapnik/proj_transform.hpp>
+#include <mapnik/feature.hpp>
 
 // agg
 #include "agg_rendering_buffer.h"
@@ -136,4 +140,4 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP

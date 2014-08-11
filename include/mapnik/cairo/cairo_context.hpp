@@ -36,7 +36,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// boost
+// stl
 #include <memory>
 
 // cairo
@@ -412,6 +412,60 @@ private:
     cairo_ptr cairo_;
 };
 
+template <typename Context>
+struct line_pattern_rasterizer
+{
+    line_pattern_rasterizer(Context & context, cairo_pattern & pattern, unsigned width, unsigned height)
+        : context_(context),
+          pattern_(pattern),
+          width_(width),
+          height_(height) {}
+
+    template <typename T>
+    void add_path(T & path, unsigned start_index = 0)
+    {
+        double length = 0.0;
+        double x0 = 0.0;
+        double y0 = 0.0;
+        double x, y;
+        path.rewind(start_index);
+        for (unsigned cm = path.vertex(&x, &y); cm != SEG_END; cm = path.vertex(&x, &y))
+        {
+            if (cm == SEG_MOVETO)
+            {
+                length = 0.0;
+            }
+            else if (cm == SEG_LINETO)
+            {
+                double dx = x - x0;
+                double dy = y - y0;
+                double angle = std::atan2(dy, dx);
+                double offset = std::fmod(length, static_cast<double>(width_));
+
+                cairo_matrix_t matrix;
+                cairo_matrix_init_identity(&matrix);
+                cairo_matrix_translate(&matrix, x0, y0);
+                cairo_matrix_rotate(&matrix, angle);
+                cairo_matrix_translate(&matrix, -offset, 0.5 * height_);
+                cairo_matrix_invert(&matrix);
+                pattern_.set_matrix(matrix);
+                context_.set_pattern(pattern_);
+                context_.move_to(x0, y0);
+                context_.line_to(x, y);
+                context_.stroke();
+                length = length + std::hypot(x - x0, y - y0);
+            }
+
+            x0 = x;
+            y0 = y;
+        }
+    }
+
+    Context & context_;
+    cairo_pattern & pattern_;
+    unsigned width_;
+    unsigned height_;
+};
 
 }
 

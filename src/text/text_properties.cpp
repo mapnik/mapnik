@@ -89,10 +89,6 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
         format->text_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
         format->halo_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
         format->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
-
-        std::string const& wrap_char = boost::apply_visitor(extract_value<std::string>(feature,attrs), format_defaults.wrap_char);
-        if (!wrap_char.empty()) format->wrap_char = wrap_char[0];
-
         format->fill = boost::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
         format->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
         format->text_transform = boost::apply_visitor(extract_value<text_transform_enum>(feature,attrs), format_defaults.text_transform);
@@ -288,7 +284,6 @@ format_properties::format_properties()
       line_spacing(0.0),
       text_opacity(1.0),
       halo_opacity(1.0),
-      wrap_char(" "),
       fill(color(0,0,0)),
       halo_fill(color(255,255,255)),
       halo_radius(0.0),
@@ -302,7 +297,6 @@ void format_properties::from_xml(xml_node const& node, fontset_map const& fontse
     set_property_from_xml<double>(halo_radius, "halo-radius", node);
     set_property_from_xml<double>(text_opacity, "opacity", node);
     set_property_from_xml<double>(halo_opacity, "halo-opacity", node);
-    set_property_from_xml<std::string>(wrap_char, "wrap-character", node);
     set_property_from_xml<color>(fill, "fill", node);
     set_property_from_xml<color>(halo_fill, "halo-fill", node);
     set_property_from_xml<text_transform_e>(text_transform,"text-transform", node);
@@ -348,8 +342,6 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
     if (!(character_spacing == dfl.character_spacing) || explicit_defaults) serialize_property("character-spacing", character_spacing, node);
     if (!(line_spacing == dfl.line_spacing) || explicit_defaults) serialize_property("line-spacing", line_spacing, node);
     if (!(halo_radius == dfl.halo_radius) || explicit_defaults) serialize_property("halo-radius", halo_radius, node);
-    if (!(wrap_char == dfl.wrap_char) || explicit_defaults) serialize_property("wrap-character", wrap_char, node);
-
     // for shield_symbolizer this is later overridden -- FIXME
     if (!(text_opacity == dfl.text_opacity) || explicit_defaults) serialize_property("opacity", text_opacity, node);
     if (!(halo_opacity == dfl.halo_opacity) || explicit_defaults) serialize_property("halo-opacity", halo_opacity, node);
@@ -367,7 +359,6 @@ void format_properties::add_expressions(expression_set & output) const
     if (is_expression(halo_radius)) output.insert(boost::get<expression_ptr>(halo_radius));
     if (is_expression(text_opacity)) output.insert(boost::get<expression_ptr>(text_opacity));
     if (is_expression(halo_opacity)) output.insert(boost::get<expression_ptr>(halo_opacity));
-    if (is_expression(wrap_char)) output.insert(boost::get<expression_ptr>(wrap_char));
     if (is_expression(fill)) output.insert(boost::get<expression_ptr>(fill));
     if (is_expression(halo_fill)) output.insert(boost::get<expression_ptr>(halo_fill));
     if (is_expression(text_transform)) output.insert(boost::get<expression_ptr>(text_transform));

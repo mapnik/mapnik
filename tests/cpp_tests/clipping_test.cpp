@@ -10,6 +10,7 @@
 // stl
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <vector>
 #include <algorithm>

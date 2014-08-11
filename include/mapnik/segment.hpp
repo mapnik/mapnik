@@ -31,7 +31,7 @@ namespace mapnik
 
 using segment_t = std::tuple<double,double,double,double>;
 
-static bool y_order(segment_t const& first,segment_t const& second)
+static inline bool y_order(segment_t const& first,segment_t const& second)
 {
     double miny0 = std::min(std::get<1>(first), std::get<3>(first));
     double miny1 = std::min(std::get<1>(second), std::get<3>(second));

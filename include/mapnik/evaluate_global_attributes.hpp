@@ -30,6 +30,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>

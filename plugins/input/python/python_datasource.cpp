@@ -29,7 +29,7 @@ python_datasource::python_datasource(parameters const& params)
     {
         if((kv.first != "type") && (kv.first != "factory"))
         {
-            kwargs_.insert(std::make_pair(kv.first, *params.get<std::string>(kv.first)));
+            kwargs_.emplace(kv.first, *params.get<std::string>(kv.first));
         }
     }
 

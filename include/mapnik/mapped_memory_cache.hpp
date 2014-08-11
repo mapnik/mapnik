@@ -29,10 +29,11 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/unordered_map.hpp>
 #include <memory>
+#include <unordered_map>
 #include <boost/optional.hpp>
-#include <boost/interprocess/interprocess_fwd.hpp>
+
+namespace boost { namespace interprocess { class mapped_region; } }
 
 namespace mapnik
 {
@@ -44,7 +45,7 @@ class MAPNIK_DECL mapped_memory_cache :
         private mapnik::noncopyable
 {
     friend class CreateStatic<mapped_memory_cache>;
-    boost::unordered_map<std::string,mapped_region_ptr> cache_;
+    std::unordered_map<std::string,mapped_region_ptr> cache_;
 public:
     bool insert(std::string const& key, mapped_region_ptr);
     boost::optional<mapped_region_ptr> find(std::string const& key, bool update_cache = false);

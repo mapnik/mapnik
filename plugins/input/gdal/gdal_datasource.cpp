@@ -29,6 +29,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/boolean.hpp>
 
 #include <gdal_version.h>
 

@@ -168,7 +168,6 @@ source = Split(
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
-    gamma_method.cpp
     gradient.cpp
     graphics.cpp
     parse_path.cpp
@@ -231,6 +230,7 @@ source = Split(
     config_error.cpp
     color_factory.cpp
     renderer_common.cpp
+    renderer_common/render_pattern.cpp
     renderer_common/process_group_symbolizer.cpp
     """
     )
@@ -272,8 +272,20 @@ if env['HAS_CAIRO']:
     lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     libmapnik_defines.append('-DHAVE_CAIRO')
     lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
-    source.insert(0,'cairo/cairo_renderer.cpp')
-    source.insert(0,'cairo/cairo_context.cpp')
+    source.append('cairo/cairo_context.cpp')
+    source.append('cairo/cairo_renderer.cpp')
+    source.append('cairo/cairo_render_vector.cpp')
+    source.append('cairo/process_markers_symbolizer.cpp')
+    source.append('cairo/process_text_symbolizer.cpp')
+    source.append('cairo/process_group_symbolizer.cpp')
+    source.append('cairo/process_line_symbolizer.cpp')
+    source.append('cairo/process_line_pattern_symbolizer.cpp')
+    source.append('cairo/process_polygon_symbolizer.cpp')
+    source.append('cairo/process_polygon_pattern_symbolizer.cpp')
+    source.append('cairo/process_debug_symbolizer.cpp')
+    source.append('cairo/process_point_symbolizer.cpp')
+    source.append('cairo/process_raster_symbolizer.cpp')
+    source.append('cairo/process_building_symbolizer.cpp')
 
 for cpp in enabled_imaging_libraries:
     source.append(cpp)

@@ -35,7 +35,8 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/render_pattern.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -73,7 +74,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr);
+        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, 1.0);
     }
 
     if (!pat) return;
@@ -98,7 +99,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
 
     using color = agg::rgba8;
     using order = agg::order_rgba;
@@ -128,7 +129,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
-    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, LOCAL_ALIGNMENT);
+    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
     unsigned offset_x=0;
     unsigned offset_y=0;
 

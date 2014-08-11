@@ -45,7 +45,6 @@ void format_node::to_xml(ptree & xml) const
     if (line_spacing) serialize_property("line-spacing", *line_spacing, new_node);
     if (text_opacity) serialize_property("opacity", *text_opacity, new_node);
     if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
-    if (wrap_char) serialize_property("wrap_char", *wrap_char, new_node);
     if (fill) serialize_property("fill", *fill, new_node);
     if (halo_fill) serialize_property("halo-fill", *halo_fill, new_node);
     if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
@@ -70,7 +69,6 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     set_property_from_xml<double>(n->text_opacity, "opacity", xml);
     //set_property_from_xml<double>(n->halo_opacity, "halo-opacity", xml); FIXME
     set_property_from_xml<double>(n->halo_radius, "halo-radius", xml);
-    set_property_from_xml<std::string>(n->wrap_char, "wrap-character", xml);
     set_property_from_xml<color>(n->fill, "fill", xml);
     set_property_from_xml<color>(n->halo_fill, "halo-fill", xml);
     set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
@@ -109,15 +107,6 @@ void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     if (character_spacing) new_properties->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), *character_spacing);
     if (line_spacing) new_properties->line_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), *line_spacing);
     if (text_opacity) new_properties->text_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), *text_opacity);
-
-    if (wrap_char)
-    {
-        std::string str = boost::apply_visitor(extract_value<std::string>(feature,attrs), *wrap_char);
-        if (!str.empty())
-        {
-            new_properties->wrap_char = str[0];
-        }
-    }
     if (halo_radius) new_properties->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), *halo_radius);
     if (fill) new_properties->fill = boost::apply_visitor(extract_value<color>(feature,attrs), *fill);
     if (halo_fill) new_properties->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
@@ -160,7 +149,6 @@ void format_node::add_expressions(expression_set & output) const
     if (halo_radius && is_expression(*halo_radius)) output.insert(boost::get<expression_ptr>(*halo_radius));
     if (text_opacity && is_expression(*text_opacity)) output.insert(boost::get<expression_ptr>(*text_opacity));
     //if (halo_opacity && is_expression(*halo_opacity)) output.insert(boost::get<expression_ptr>(*halo_opacity));
-    if (wrap_char && is_expression(*wrap_char)) output.insert(boost::get<expression_ptr>(*wrap_char));
     if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
     if (fill && is_expression(*fill)) output.insert(boost::get<expression_ptr>(*fill));
     if (halo_fill && is_expression(*halo_fill)) output.insert(boost::get<expression_ptr>(*halo_fill));

@@ -30,7 +30,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/value_types.hpp>
-#include <mapnik/text/placement_finder.hpp>
+#include <mapnik/text/placement_finder_impl.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 
@@ -72,7 +72,6 @@ struct largest_bbox_first
         box2d<double> b1 = g1->envelope();
         return b0.width()*b0.height() > b1.width()*b1.height();
     }
-
 };
 
 void base_symbolizer_helper::initialize_geometries()
@@ -179,11 +178,25 @@ text_symbolizer_helper::text_symbolizer_helper(
         proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
         CoordTransform const& t, FaceManagerT & font_manager,
-        DetectorT &detector, box2d<double> const& query_extent)
+        DetectorT &detector, box2d<double> const& query_extent,
+        agg::trans_affine const& affine_trans)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
-      points_on_line_(false)
+    adapter_(finder_,false),
+    converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
+
+    // setup vertex converter
+    bool clip = mapnik::get<bool>(sym_, keys::clip, feature_, vars_, false);
+    double simplify_tolerance = mapnik::get<double>(sym_, keys::simplify_tolerance, feature_, vars_, 0.0);
+    double smooth = mapnik::get<double>(sym_, keys::smooth, feature_, vars_, 0.0);
+
+    if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
+    converter_.template set<transform_tag>(); //always transform
+    converter_.template set<affine_transform_tag>();
+    if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter_.template set<smooth_tag>(); // optional smooth converter
+
     if (geometries_to_process_.size()) finder_.next_position();
 }
 
@@ -212,31 +225,15 @@ bool text_symbolizer_helper::next_line_placement(bool clipped)
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
         }
-        bool success = false;
-        if (clipped)
-        {
-            using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
-            using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
 
-            clipped_geometry_type clipped(**geo_itr_);
-            clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
-                             query_extent_.maxx(), query_extent_.maxy());
-            path_type path(t_, clipped, prj_trans_);
-            success = finder_.find_line_placements(path, points_on_line_);
-        }
-        else
-        {
-            using path_type = coord_transform<CoordTransform,geometry_type>;
-            path_type path(t_, **geo_itr_, prj_trans_);
-            success = finder_.find_line_placements(path, points_on_line_);
-        }
-        if (success)
+        converter_.apply(**geo_itr_);
+        if (adapter_.status())
         {
             //Found a placement
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             return true;
         }
-        //No placement for this geometry. Keep it in geometries_to_process_ for next try.
+        // No placement for this geometry. Keep it in geometries_to_process_ for next try.
         ++geo_itr_;
     }
     return false;
@@ -266,8 +263,6 @@ bool text_symbolizer_helper::next_point_placement()
     return false;
 }
 
-/*****************************************************************************/
-
 template <typename FaceManagerT, typename DetectorT>
 text_symbolizer_helper::text_symbolizer_helper(
         shield_symbolizer const& sym,
@@ -276,11 +271,22 @@ text_symbolizer_helper::text_symbolizer_helper(
         proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
         CoordTransform const& t, FaceManagerT & font_manager,
-        DetectorT &detector, const box2d<double> &query_extent)
+        DetectorT & detector, box2d<double> const& query_extent, agg::trans_affine const& affine_trans)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
-      points_on_line_(true)
+      adapter_(finder_,true),
+      converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
+   // setup vertex converter
+    bool clip = mapnik::get<bool>(sym_, keys::clip, feature_, vars_, false);
+    double simplify_tolerance = mapnik::get<double>(sym_, keys::simplify_tolerance, feature_, vars_, 0.0);
+    double smooth = mapnik::get<double>(sym_, keys::smooth, feature_, vars_, 0.0);
+
+    if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
+    converter_.template set<transform_tag>(); //always transform
+    converter_.template set<affine_transform_tag>();
+    if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0) converter_.template set<smooth_tag>(); // optional smooth converter
     if (geometries_to_process_.size())
     {
         init_marker();
@@ -325,7 +331,6 @@ void text_symbolizer_helper::init_marker()
     finder_.set_marker(std::make_shared<marker_info>(*marker, trans), bbox, unlock_image, marker_displacement);
 }
 
-/*****************************************************************************/
 
 template text_symbolizer_helper::text_symbolizer_helper(
     text_symbolizer const& sym,
@@ -338,7 +343,8 @@ template text_symbolizer_helper::text_symbolizer_helper(
     CoordTransform const& t,
     face_manager<freetype_engine> &font_manager,
     label_collision_detector4 &detector,
-    box2d<double> const& query_extent);
+    box2d<double> const& query_extent,
+    agg::trans_affine const&);
 
 template text_symbolizer_helper::text_symbolizer_helper(
     shield_symbolizer const& sym,
@@ -351,5 +357,6 @@ template text_symbolizer_helper::text_symbolizer_helper(
     CoordTransform const& t,
     face_manager<freetype_engine> &font_manager,
     label_collision_detector4 &detector,
-    box2d<double> const& query_extent);
+    box2d<double> const& query_extent,
+    agg::trans_affine const&);
 } //namespace

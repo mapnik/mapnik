@@ -26,22 +26,17 @@
 #include <mapnik/config.hpp>
 #include <mapnik/unique_lock.hpp>
 
-// boost
-#ifdef MAPNIK_THREADSAFE
-#include <mutex>
-#endif
-
 // stl
 #include <stdexcept> // std::runtime_error
 #include <cstdlib> // std::atexit
 #include <new> // operator new
 
+#ifdef MAPNIK_THREADSAFE
+#include <mutex>
+#endif
+
 namespace mapnik
 {
-
-#ifdef MAPNIK_THREADSAFE
-using std::mutex;
-#endif
 
 template <typename T>
 class CreateUsingNew
@@ -119,7 +114,7 @@ template <typename T,
 protected:
 
 #ifdef MAPNIK_THREADSAFE
-        static mutex mutex_;
+        static std::mutex mutex_;
 #endif
         singleton() {}
     public:
@@ -152,7 +147,7 @@ protected:
 
 #ifdef MAPNIK_THREADSAFE
     template <typename T,
-              template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
+              template <typename U> class CreatePolicy> std::mutex singleton<T,CreatePolicy>::mutex_;
 #endif
 
     template <typename T,

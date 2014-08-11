@@ -29,19 +29,16 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <unordered_map>
-#ifdef MAPNIK_THREADSAFE
-#include <mutex>
-#endif
-
 // std
 #include <iostream>
 #include <sstream>
 #include <ostream>
-#include <fstream>
+#include <iosfwd>
 #include <string>
-
+#include <unordered_map>
+#ifdef MAPNIK_THREADSAFE
+#include <mutex>
+#endif
 
 namespace mapnik {
 

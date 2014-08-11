@@ -30,16 +30,15 @@
 // webp
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
+extern "C"
+{
 #include <webp/encode.h>
+}
 #pragma clang diagnostic pop
 
 // stl
 #include <stdexcept>
 #include <string>
-
-// boost
-
-
 
 namespace mapnik {
 

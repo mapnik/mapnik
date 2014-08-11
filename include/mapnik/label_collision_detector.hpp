@@ -28,6 +28,9 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
+// icu
+#include <unicode/unistr.h>
+
 // stl
 #include <vector>
 

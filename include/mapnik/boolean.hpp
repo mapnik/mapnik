@@ -22,17 +22,22 @@
 #ifndef MAPNIK_BOOLEAN_HPP
 #define MAPNIK_BOOLEAN_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/util/conversions.hpp>
+
 // std
-#include <istream>
+#include <iosfwd>
 #include <algorithm>
 #include <string>
-#include <iostream>
+//#include <istream>
+//#include <ostream>
 
 namespace mapnik
 {
 
-// Helper for class bool
-class boolean_type {
+class MAPNIK_DECL boolean_type
+{
 public:
     boolean_type()
         : b_(false)  {}
@@ -63,25 +68,12 @@ template <typename charT, typename traits>
 std::basic_istream<charT, traits> &
 operator >> ( std::basic_istream<charT, traits> & s, boolean_type & b )
 {
-    std::string word;
-    s >> word;
-    std::transform(word.begin(), word.end(), word.begin(), ::tolower);
     if ( s )
     {
-        if ( word == "true" || word == "yes" || word == "on" ||
-             word == "1")
-        {
-            b = true;
-        }
-        else if ( word == "false" || word == "no" || word == "off" ||
-                  word == "0")
-        {
-            b = false;
-        }
-        else
-        {
-            s.setstate( std::ios::failbit );
-        }
+        std::string word;
+        s >> word;
+        bool result;
+        if (util::string2bool(word,result)) b = result;
     }
     return s;
 }

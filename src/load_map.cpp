@@ -31,7 +31,6 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_utils.hpp>
-#include <mapnik/gamma_method.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
@@ -502,7 +501,7 @@ void map_parser::parse_fontset(Map & map, xml_node const& node)
 
         // XXX Hack because map object isn't accessible by text_symbolizer
         // when it's parsed
-        fontsets_.insert(std::make_pair(name, fontset));
+        fontsets_.emplace(name, fontset);
         map.insert_fontset(name, std::move(fontset));
     }
     catch (config_error const& ex)
@@ -1015,6 +1014,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
         line_pattern_symbolizer symbol;
         parse_symbolizer_base(symbol, node);
         put(symbol, keys::file, parse_path(file));
+        set_symbolizer_property<line_pattern_symbolizer,double>(symbol, keys::opacity, node);
 
         // offset value
         optional<double> offset = node.get_opt_attr<double>("offset");
