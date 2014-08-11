@@ -73,7 +73,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
     if ((*marker)->is_bitmap())
     {
-        pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()));
+        pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()), opacity);
         context_.set_line_width(height);
     }
     else
@@ -82,8 +82,8 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        image = render_pattern(ras, **marker, image_tr, opacity);
-        pattern = std::make_unique<cairo_pattern>(*image);
+        image = render_pattern(ras, **marker, image_tr, 1.0);
+        pattern = std::make_unique<cairo_pattern>(*image, opacity);
         width = image->width();
         height = image->height();
         context_.set_line_width(height);

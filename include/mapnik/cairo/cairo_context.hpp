@@ -121,7 +121,7 @@ private:
 class cairo_pattern : private mapnik::noncopyable
 {
 public:
-    cairo_pattern(image_data_32 const& data)
+    explicit cairo_pattern(image_data_32 const& data, double opacity = 1.0)
     {
         int pixels = data.width() * data.height();
         const unsigned int *in_ptr = data.getData();
@@ -135,10 +135,10 @@ public:
         while (in_ptr < in_end)
         {
             unsigned int in = *in_ptr++;
-            unsigned int r = (in >> 0) & 0xff;
-            unsigned int g = (in >> 8) & 0xff;
-            unsigned int b = (in >> 16) & 0xff;
-            unsigned int a = (in >> 24) & 0xff;
+            unsigned int r = static_cast<unsigned>(((in >> 0) & 0xff) * opacity);
+            unsigned int g = static_cast<unsigned>(((in >> 8) & 0xff) * opacity);
+            unsigned int b = static_cast<unsigned>(((in >> 16) & 0xff) * opacity);
+            unsigned int a = static_cast<unsigned>(((in >> 24) & 0xff) * opacity);
 
             //r = r * a / 255;
             //g = g * a / 255;
