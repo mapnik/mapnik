@@ -54,7 +54,7 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         query.add_property_name('bogus')
         fs = ds.features(query)
 
-	# OGR plugin extent parameter
+    # OGR plugin extent parameter
     def test_ogr_extent_parameter():
         ds = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0,extent='-1,-1,1,1')
         e = ds.envelope()
