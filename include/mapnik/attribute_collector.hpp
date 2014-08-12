@@ -262,7 +262,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
         {
             // note that this recurses down on to the symbolizer
             // internals too, so we get all free variables.
-// FIXME            column_collector(*rule);
+            column_collector(*rule);
             // still need to collect repeat key columns
             if (rule->get_repeat_key())
             {
