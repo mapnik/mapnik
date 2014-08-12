@@ -111,26 +111,16 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                 else
                 {
                     raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
-                    if (scaling_method == SCALING_BILINEAR8)
-                    {
-                        scale_image_bilinear8<image_data_32>(target.data_,
-                                                             source->data_,
-                                                             0.0,
-                                                             0.0);
-                    }
-                    else
-                    {
-                        double image_ratio_x = ext.width() / source->data_.width();
-                        double image_ratio_y = ext.height() / source->data_.height();
-                        scale_image_agg<image_data_32>(target.data_,
-                                                       source->data_,
-                                                       scaling_method,
-                                                       image_ratio_x,
-                                                       image_ratio_y,
-                                                       0.0,
-                                                       0.0,
-                                                       source->get_filter_factor());
-                    }
+                    double image_ratio_x = ext.width() / source->data_.width();
+                    double image_ratio_y = ext.height() / source->data_.height();
+                    scale_image_agg<image_data_32>(target.data_,
+                                                   source->data_,
+                                                   scaling_method,
+                                                   image_ratio_x,
+                                                   image_ratio_y,
+                                                   0.0,
+                                                   0.0,
+                                                   source->get_filter_factor());
                     composite(target.data_, comp_op, opacity, start_x, start_y);
                 }
             }
