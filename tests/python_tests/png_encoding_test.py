@@ -18,8 +18,8 @@ if mapnik.has_png():
        os.makedirs(tmp_dir)
 
     opts = [
-    'png',
-    'png:t=0',
+    'png32',
+    'png32:t=0',
     'png8:m=o',
     'png8:m=o:c=1',
     'png8:m=o:t=0',
@@ -32,7 +32,7 @@ if mapnik.has_png():
     'png8:m=h:c=1:t=0',
     'png8:m=h:t=1',
     'png8:m=h:t=2',
-    'png:e=miniz',
+    'png32:e=miniz',
     'png8:e=miniz'
     ]
 
