@@ -10,8 +10,9 @@ env:
 
 before_install:
  - sudo add-apt-repository -y ppa:boost-latest/ppa
+ - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
  - sudo apt-get update -qq
- - sudo apt-get install -y make valgrind libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 boost1.55 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
+ - sudo apt-get install -y postgis postgresql-9.1-postgis-2.0-scripts make valgrind libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 boost1.55 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
  # multi-face ttc font: https://github.com/mapnik/mapnik/issues/2274
  - sudo apt-get install ttf-wqy-microhei
 
