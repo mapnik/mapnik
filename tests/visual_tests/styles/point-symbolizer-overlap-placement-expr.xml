@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <FontSet name="book">
+    <Font face-name="DejaVu Sans Book"/>
+  </FontSet>
+
+  <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+<Parameter name="inline">
+lat,long,overlap,placement
+ 0.33,-0.36,noexpr-true,noexpr-false
+ 0.33,-0.34,noexpr-true,noexpr-false
+ 0.33,-0.13,noexpr-false,noexpr-false
+ 0.33,-0.11,noexpr-false,noexpr-false
+ 0.33, 0.10,noexpr-true,noexpr-false
+ 0.33, 0.12,noexpr-false,noexpr-false
+ 0.33, 0.34,noexpr-false,noexpr-false
+ 0.33, 0.36,noexpr-true,noexpr-false
+
+ 0.11,-0.36,true,false
+ 0.11,-0.34,true,false
+ 0.11,-0.13,false,false
+ 0.11,-0.11,false,false
+ 0.11, 0.10,true,false
+ 0.11, 0.12,false,false
+ 0.11, 0.34,false,false
+ 0.11, 0.36,true,false
+
+-0.11,-0.36,noexpr-false,noexpr-true
+-0.11,-0.34,noexpr-false,noexpr-true
+-0.11,-0.13,noexpr-false,noexpr-false
+-0.11,-0.11,noexpr-false,noexpr-false
+-0.11, 0.10,noexpr-false,noexpr-true
+-0.11, 0.12,noexpr-false,noexpr-false
+-0.11, 0.34,noexpr-false,noexpr-false
+-0.11, 0.36,noexpr-false,noexpr-true
+
+-0.33,-0.36,false,true
+-0.33,-0.34,false,true
+-0.33,-0.13,false,false
+-0.33,-0.11,false,false
+-0.33, 0.10,false,true
+-0.33, 0.12,false,false
+-0.33, 0.34,false,false
+-0.33, 0.36,false,true
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+    <Style name="My Style" filter-mode="first">
+    <Rule>
+      <Filter>[overlap] = "noexpr-true" and [placement] = "noexpr-true"</Filter>
+      <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/svg/point_sm.svg" />
+    </Rule>
+    <Rule>
+      <Filter>[overlap] = "noexpr-true" and [placement] = "noexpr-false"</Filter>
+      <PointSymbolizer allow-overlap="true" ignore-placement="false" file="../../data/svg/point_sm.svg" />
+    </Rule>
+    <Rule>
+      <Filter>[overlap] = "noexpr-false" and [placement] = "noexpr-false"</Filter>
+      <PointSymbolizer allow-overlap="false" ignore-placement="false" file="../../data/svg/point_sm.svg" />
+    </Rule>
+    <Rule>
+      <Filter>[overlap] = "noexpr-false" and [placement] = "noexpr-true"</Filter>
+      <PointSymbolizer allow-overlap="false" ignore-placement="true" file="../../data/svg/point_sm.svg" />
+    </Rule>
+    <Rule>
+      <PointSymbolizer allow-overlap="[overlap]" ignore-placement="[placement]" file="../../data/svg/point_sm.svg" />
+    </Rule>
+  </Style>
+
+</Map>

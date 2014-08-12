@@ -111,11 +111,6 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
     return std::fread ((char*)buffer, 1, count, file);
 }
 
-void ft_close_cb(FT_Stream stream)
-{
-    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
-}
-
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
@@ -138,7 +133,6 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
 #else
     FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
-
     if (file == nullptr) return false;
 
     FT_Face face = 0;
@@ -154,7 +148,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
     streamRec.size = file_size;
     streamRec.descriptor.pointer = file;
     streamRec.read  = ft_read_cb;
-    streamRec.close = ft_close_cb;
+    streamRec.close = NULL;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
     int num_faces = 0;
@@ -192,11 +186,11 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
                 s << "which reports a family name of '" << std::string(face->family_name) << "' and lacks a style name";
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
-
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
         if (face) FT_Done_Face(face);
     }
+    std::fclose(file);
     return success;
 }
 
