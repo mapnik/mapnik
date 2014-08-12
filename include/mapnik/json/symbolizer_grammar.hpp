@@ -28,6 +28,7 @@
 #include <boost/spirit/include/phoenix.hpp>
 
 // mapnik
+#include <mapnik/util/variant.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_utils.hpp>
 #include <mapnik/json/generic_json.hpp>
@@ -41,7 +42,7 @@ namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
 template <typename Symbolizer>
-struct json_value_visitor : boost::static_visitor<>
+struct json_value_visitor : mapnik::util::static_visitor<>
 {
     json_value_visitor(Symbolizer & sym, mapnik::keys key)
         : sym_(sym), key_(key) {}
@@ -78,7 +79,7 @@ struct json_value_visitor : boost::static_visitor<>
 };
 
 template <typename T>
-struct put_property_visitor : boost::static_visitor<>
+struct put_property_visitor : mapnik::util::static_visitor<>
 {
     using value_type = T;
 
@@ -88,7 +89,7 @@ struct put_property_visitor : boost::static_visitor<>
     template <typename Symbolizer>
     void operator() (Symbolizer & sym) const
     {
-        boost::apply_visitor(json_value_visitor<Symbolizer>(sym, key_), val_);
+        mapnik::util::apply_visitor(json_value_visitor<Symbolizer>(sym, key_), val_);
     }
 
     keys key_;
@@ -103,7 +104,7 @@ struct put_property
     {
         try
         {
-            boost::apply_visitor(put_property_visitor<T2>(get_key(name),val), sym);
+            mapnik::util::apply_visitor(put_property_visitor<T2>(get_key(name),val), sym);
         }
         catch (std::runtime_error const& err)
         {
@@ -115,7 +116,7 @@ struct put_property
 template <typename Iterator>
 struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 {
-    using json_value_type = boost::variant<value_null,value_bool,value_integer,value_double, std::string>;
+    using json_value_type = util::variant<value_null,value_bool,value_integer,value_double, std::string>;
     symbolizer_grammar()
         : symbolizer_grammar::base_type(sym, "symbolizer"),
           json_()

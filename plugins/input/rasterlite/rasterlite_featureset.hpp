@@ -27,17 +27,15 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
-
-// boost
-#include <boost/variant.hpp>
+#include <mapnik/util/variant.hpp>
 
 #include "rasterlite_include.hpp"
 
-using rasterlite_query = boost::variant<mapnik::query,mapnik::coord2d>;
+using rasterlite_query = mapnik::util::variant<mapnik::query,mapnik::coord2d>;
 
 class rasterlite_featureset : public mapnik::Featureset
 {
-    struct query_dispatch : public boost::static_visitor<mapnik::feature_ptr>
+    struct query_dispatch : public mapnik::util::static_visitor<mapnik::feature_ptr>
     {
         query_dispatch( rasterlite_featureset & featureset)
             : featureset_(featureset) {}

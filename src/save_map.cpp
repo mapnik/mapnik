@@ -129,7 +129,7 @@ void serialize_group_symbolizer_properties(ptree & sym_node,
                                            bool explicit_defaults);
 
 template <typename Meta>
-class serialize_symbolizer_property : public boost::static_visitor<>
+class serialize_symbolizer_property : public util::static_visitor<>
 {
 public:
     serialize_symbolizer_property(Meta const& meta,
@@ -219,7 +219,7 @@ private:
     bool explicit_defaults_;
 };
 
-class serialize_symbolizer : public boost::static_visitor<>
+class serialize_symbolizer : public util::static_visitor<>
 {
 public:
     serialize_symbolizer( ptree & r , bool explicit_defaults)
@@ -249,7 +249,7 @@ private:
     bool explicit_defaults_;
 };
 
-class serialize_group_layout : public boost::static_visitor<>
+class serialize_group_layout : public util::static_visitor<>
 {
 public:
     serialize_group_layout(ptree & parent_node, bool explicit_defaults)
@@ -317,14 +317,14 @@ void serialize_group_rule( ptree & parent_node, const group_rule & r, bool expli
     rule::symbolizers::const_iterator begin = r.get_symbolizers().begin();
     rule::symbolizers::const_iterator end = r.get_symbolizers().end();
     serialize_symbolizer serializer( rule_node, explicit_defaults);
-    std::for_each( begin, end , boost::apply_visitor( serializer ));
+    std::for_each( begin, end , [&serializer](symbolizer const& sym) { util::apply_visitor( std::ref(serializer), sym);} );
 }
 
 void serialize_group_symbolizer_properties(ptree & sym_node,
                                            group_symbolizer_properties_ptr const& properties,
                                            bool explicit_defaults)
 {
-    boost::apply_visitor(serialize_group_layout(sym_node, explicit_defaults), properties->get_layout());
+    util::apply_visitor(serialize_group_layout(sym_node, explicit_defaults), properties->get_layout());
 
     for (auto const& rule : properties->get_rules())
     {
@@ -384,7 +384,7 @@ void serialize_rule( ptree & style_node, rule const& r, bool explicit_defaults)
     rule::symbolizers::const_iterator begin = r.get_symbolizers().begin();
     rule::symbolizers::const_iterator end = r.get_symbolizers().end();
     serialize_symbolizer serializer( rule_node, explicit_defaults);
-    std::for_each( begin, end , boost::apply_visitor( serializer ));
+    std::for_each( begin, end , [&serializer](symbolizer const& sym) { util::apply_visitor( std::ref(serializer), sym);});
 }
 
 void serialize_style( ptree & map_node, std::string const& name, feature_type_style const& style, bool explicit_defaults )
@@ -482,7 +482,7 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
     }
 }
 
-class serialize_type : public boost::static_visitor<>
+class serialize_type : public util::static_visitor<>
 {
 public:
     serialize_type( boost::property_tree::ptree & node):
@@ -525,7 +525,7 @@ void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
                                                         boost::property_tree::ptree()))->second;
             param_node.put("<xmlattr>.name", p.first );
             param_node.put_value( p.second );
-            boost::apply_visitor(serialize_type(param_node),p.second);
+            util::apply_visitor(serialize_type(param_node),p.second);
         }
     }
 }

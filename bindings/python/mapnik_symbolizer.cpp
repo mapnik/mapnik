@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
+
 #include "boost_std_shared_shim.hpp" // FIXME - do we need it?
 // The functions in this file produce deprecation warnings.
 // But as shield symbolizer doesn't fully support more than one
@@ -28,9 +30,9 @@
 
 #define NO_DEPRECATION_WARNINGS
 
+
 // boost
 #include <boost/python.hpp>
-#include <boost/variant.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 // mapnik
 #include <mapnik/symbolizer.hpp>
@@ -125,7 +127,7 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
         return mapnik::util::apply_visitor(extract_python_object(), itr->second);
     }
     //mapnik::property_meta_type const& meta = mapnik::get_meta(key);
-    //return boost::apply_visitor(extract_python_object(), std::get<1>(meta));
+    //return mapnik::util::apply_visitor(extract_python_object(), std::get<1>(meta));
     return boost::python::object();
 }
 

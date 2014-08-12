@@ -23,6 +23,8 @@
 #ifndef MAPNIK_UTIL_VARIANT_HPP
 #define MAPNIK_UTIL_VARIANT_HPP
 
+#include <mapnik/config.hpp>
+
 #include <utility>
 #include <typeinfo>
 #include <type_traits>

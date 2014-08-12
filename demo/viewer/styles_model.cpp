@@ -19,6 +19,8 @@
 
 
 #include "styles_model.hpp"
+#include <mapnik/config.hpp>
+#include <mapnik/util/variant.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/rule.hpp>
@@ -120,7 +122,7 @@ private:
 };
 
 
-struct symbolizer_info : public boost::static_visitor<QString>
+struct symbolizer_info : public mapnik::util::static_visitor<QString>
 {
     QString operator() (mapnik::point_symbolizer const& sym) const
     {
@@ -183,7 +185,7 @@ struct symbolizer_info : public boost::static_visitor<QString>
     }
 };
 
-struct symbolizer_icon : public boost::static_visitor<QIcon>
+struct symbolizer_icon : public mapnik::util::static_visitor<QIcon>
 {
     QIcon operator() (mapnik::polygon_symbolizer const& sym) const
     {
@@ -243,12 +245,12 @@ public:
     QString name() const
     {
         //return QString("Symbolizer:fixme");
-        return boost::apply_visitor(symbolizer_info(),sym_);
+        return mapnik::util::apply_visitor(symbolizer_info(),sym_);
     }
 
     QIcon icon() const
     {
-        return boost::apply_visitor(symbolizer_icon(),sym_);//QIcon(":/images/filter.png");
+        return mapnik::util::apply_visitor(symbolizer_icon(),sym_);//QIcon(":/images/filter.png");
     }
     mapnik::symbolizer const& sym_;
 };

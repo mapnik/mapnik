@@ -29,11 +29,9 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/optional.hpp>
-#include <boost/variant/variant.hpp>
-
 // fusion
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/vector.hpp>
@@ -147,13 +145,13 @@ namespace detail {
 // default-constructible, but also makes little sense with our variant of
 // transform nodes...
 
-using transform_variant =  boost::variant< identity_node
-                                           ,matrix_node
-                                           ,translate_node
-                                           ,scale_node
-                                           ,rotate_node
-                                           ,skewX_node
-                                           ,skewY_node >;
+using transform_variant =  mapnik::util::variant< identity_node,
+                                                  matrix_node,
+                                                  translate_node,
+                                                  scale_node,
+                                                  rotate_node,
+                                                  skewX_node,
+                                                  skewY_node >;
 
 // ... thus we wrap the variant-type in a distinct type and provide
 // a custom clear overload, which resets the value to identity_node
@@ -214,7 +212,7 @@ struct is_null_transform_node : public mapnik::util::static_visitor<bool>
 
     bool operator() (detail::transform_variant const& var) const
     {
-        return boost::apply_visitor(*this, var);
+        return util::apply_visitor(*this, var);
     }
 };
 
@@ -223,7 +221,7 @@ struct is_null_transform_node : public mapnik::util::static_visitor<bool>
 template <typename T>
 bool is_null_node (T const& node)
 {
-    return boost::apply_visitor(is_null_transform_node(), node);
+    return util::apply_visitor(is_null_transform_node(), node);
 }
 
 } // namespace detail

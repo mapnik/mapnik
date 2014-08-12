@@ -72,9 +72,9 @@ boost::python::dict grid_encode( T const& grid, std::string const& format, bool 
  * whether features are dumped is determined by argument not 'fields'
  */
 void render_layer_for_grid(const mapnik::Map& map,
-                                  mapnik::grid& grid,
-                                  unsigned layer_idx, // TODO - layer by name or index
-                                  boost::python::list const& fields);
+                           mapnik::grid& grid,
+                           unsigned layer_idx, // TODO - layer by name or index
+                           boost::python::list const& fields);
 
 }
 

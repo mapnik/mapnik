@@ -32,7 +32,7 @@
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/group/group_layout_manager.hpp>
 #include <mapnik/group/group_symbolizer_helper.hpp>
-
+#include <mapnik/util/variant.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/label_collision_detector.hpp>
@@ -53,7 +53,7 @@ namespace mapnik {
  * in the detector from the placement_finder.
  */
 template <typename T0>
-struct thunk_renderer : public boost::static_visitor<>
+struct thunk_renderer : public util::static_visitor<>
 {
     using renderer_type = grid_renderer<T0>;
     using buffer_type = typename renderer_type::buffer_type;
@@ -122,7 +122,7 @@ void  grid_renderer<T>::process(group_symbolizer const& sym,
             thunk_renderer<T> ren(*this, pixmap_, common_, feature, render_offset);
             for (render_thunk_ptr const& thunk : thunks)
             {
-                boost::apply_visitor(ren, *thunk);
+                util::apply_visitor(ren, *thunk);
             }
         });
 }

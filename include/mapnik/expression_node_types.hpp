@@ -24,11 +24,11 @@
 #define MAPNIK_EXPRESSION_NODE_TYPES_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
-#include <boost/mpl/vector/vector30.hpp>
-#include <boost/variant/recursive_variant.hpp>
+#include <boost/mpl/vector.hpp>
 
 namespace mapnik
 {
@@ -166,7 +166,7 @@ struct attribute;
 struct global_attribute;
 struct geometry_type_attribute;
 
-using expr_types  = boost::mpl::vector25<
+using expr_node  = util::variant<
 value_null,
 value_bool,
 value_integer,
@@ -175,26 +175,24 @@ value_unicode_string,
 attribute,
 global_attribute,
 geometry_type_attribute,
-boost::recursive_wrapper<unary_node<tags::negate> >,
-boost::recursive_wrapper<binary_node<tags::plus> >,
-boost::recursive_wrapper<binary_node<tags::minus> >,
-boost::recursive_wrapper<binary_node<tags::mult> >,
-boost::recursive_wrapper<binary_node<tags::div> >,
-boost::recursive_wrapper<binary_node<tags::mod> >,
-boost::recursive_wrapper<binary_node<tags::less> >,
-boost::recursive_wrapper<binary_node<tags::less_equal> >,
-boost::recursive_wrapper<binary_node<tags::greater> >,
-boost::recursive_wrapper<binary_node<tags::greater_equal> >,
-boost::recursive_wrapper<binary_node<tags::equal_to> >,
-boost::recursive_wrapper<binary_node<tags::not_equal_to> >,
-boost::recursive_wrapper<unary_node<tags::logical_not> >,
-boost::recursive_wrapper<binary_node<tags::logical_and> >,
-boost::recursive_wrapper<binary_node<tags::logical_or> >,
-boost::recursive_wrapper<regex_match_node>,
-boost::recursive_wrapper<regex_replace_node>
->::type;
-
-using expr_node = boost::make_recursive_variant_over<expr_types>::type;
+util::recursive_wrapper<unary_node<tags::negate> >,
+util::recursive_wrapper<binary_node<tags::plus> >,
+util::recursive_wrapper<binary_node<tags::minus> >,
+util::recursive_wrapper<binary_node<tags::mult> >,
+util::recursive_wrapper<binary_node<tags::div> >,
+util::recursive_wrapper<binary_node<tags::mod> >,
+util::recursive_wrapper<binary_node<tags::less> >,
+util::recursive_wrapper<binary_node<tags::less_equal> >,
+util::recursive_wrapper<binary_node<tags::greater> >,
+util::recursive_wrapper<binary_node<tags::greater_equal> >,
+util::recursive_wrapper<binary_node<tags::equal_to> >,
+util::recursive_wrapper<binary_node<tags::not_equal_to> >,
+util::recursive_wrapper<unary_node<tags::logical_not> >,
+util::recursive_wrapper<binary_node<tags::logical_and> >,
+util::recursive_wrapper<binary_node<tags::logical_or> >,
+util::recursive_wrapper<regex_match_node>,
+util::recursive_wrapper<regex_replace_node>
+>;
 
 }
 

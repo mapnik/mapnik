@@ -5,7 +5,6 @@
 #include <mapnik/boolean.hpp>
 #include <vector>
 #include <algorithm>
-#include <boost/variant.hpp>
 
 int main(int argc, char** argv)
 {

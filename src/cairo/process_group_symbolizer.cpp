@@ -43,7 +43,7 @@ namespace {
 // to render it, and the boxes themselves should already be
 // in the detector from the placement_finder.
 template <typename T>
-struct thunk_renderer : public boost::static_visitor<>
+struct thunk_renderer : public util::static_visitor<>
 {
     using renderer_type = cairo_renderer<T>;
 
@@ -112,7 +112,7 @@ void cairo_renderer<T>::process(group_symbolizer const& sym,
             thunk_renderer<T> ren(*this, context_, face_manager_, common_, render_offset);
             for (render_thunk_ptr const& thunk : thunks)
             {
-                boost::apply_visitor(ren, *thunk);
+                util::apply_visitor(ren, *thunk);
             }
         });
 }

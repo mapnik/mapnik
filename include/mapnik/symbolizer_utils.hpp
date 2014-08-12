@@ -38,8 +38,6 @@
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
-//#include <boost/variant/apply_visitor.hpp>
 
 namespace mapnik {
 

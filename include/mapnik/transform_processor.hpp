@@ -28,11 +28,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
-
-// boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
-
+#include <mapnik/util/variant.hpp>
 // agg
 #include <agg_trans_affine.h>
 
@@ -50,7 +46,7 @@ struct transform_processor
     using transform_type = agg::trans_affine;
 
     template <typename Container>
-    struct attribute_collector : boost::static_visitor<void>
+    struct attribute_collector : util::static_visitor<void>
     {
         expression_attributes<Container> collect_;
 
@@ -63,45 +59,45 @@ struct transform_processor
 
         void operator() (matrix_node const& node) const
         {
-            boost::apply_visitor(collect_, node.a_);
-            boost::apply_visitor(collect_, node.b_);
-            boost::apply_visitor(collect_, node.c_);
-            boost::apply_visitor(collect_, node.d_);
-            boost::apply_visitor(collect_, node.e_);
-            boost::apply_visitor(collect_, node.f_);
+            util::apply_visitor(collect_, node.a_);
+            util::apply_visitor(collect_, node.b_);
+            util::apply_visitor(collect_, node.c_);
+            util::apply_visitor(collect_, node.d_);
+            util::apply_visitor(collect_, node.e_);
+            util::apply_visitor(collect_, node.f_);
         }
 
         void operator() (translate_node const& node) const
         {
-            boost::apply_visitor(collect_, node.tx_);
-            boost::apply_visitor(collect_, node.ty_);
+            util::apply_visitor(collect_, node.tx_);
+            util::apply_visitor(collect_, node.ty_);
         }
 
         void operator() (scale_node const& node) const
         {
-            boost::apply_visitor(collect_, node.sx_);
-            boost::apply_visitor(collect_, node.sy_);
+            util::apply_visitor(collect_, node.sx_);
+            util::apply_visitor(collect_, node.sy_);
         }
 
         void operator() (rotate_node const& node) const
         {
-            boost::apply_visitor(collect_, node.angle_);
-            boost::apply_visitor(collect_, node.cx_);
-            boost::apply_visitor(collect_, node.cy_);
+            util::apply_visitor(collect_, node.angle_);
+            util::apply_visitor(collect_, node.cx_);
+            util::apply_visitor(collect_, node.cy_);
         }
 
         void operator() (skewX_node const& node) const
         {
-            boost::apply_visitor(collect_, node.angle_);
+            util::apply_visitor(collect_, node.angle_);
         }
 
         void operator() (skewY_node const& node) const
         {
-            boost::apply_visitor(collect_, node.angle_);
+            util::apply_visitor(collect_, node.angle_);
         }
     };
 
-    struct node_evaluator : boost::static_visitor<void>
+    struct node_evaluator : util::static_visitor<void>
     {
         node_evaluator(transform_type& tr,
                        feature_type const& feat,
@@ -173,7 +169,7 @@ struct transform_processor
         double eval(expr_node const& x) const
         {
             mapnik::evaluate<feature_type, value_type, variable_type> e(feature_,vars_);
-            return boost::apply_visitor(e, x).to_double();
+            return util::apply_visitor(e, x).to_double();
         }
 
         double eval(expr_node const& x, double def) const
@@ -195,7 +191,7 @@ struct transform_processor
 
         for (transform_node const& node : list)
         {
-            boost::apply_visitor(collect, *node);
+            util::apply_visitor(collect, *node);
         }
     }
 
@@ -210,7 +206,7 @@ struct transform_processor
         transform_list::const_reverse_iterator rit;
         for (rit = list.rbegin(); rit!= list.rend(); ++rit)
         {
-            boost::apply_visitor(eval, *(*rit));
+            util::apply_visitor(eval, *(*rit));
         }
     }
 

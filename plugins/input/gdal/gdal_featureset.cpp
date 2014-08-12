@@ -29,10 +29,9 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/format.hpp>
-#include <boost/variant/apply_visitor.hpp>
 // stl
 #include <cmath>
 #include <memory>
@@ -94,7 +93,7 @@ feature_ptr gdal_featureset::next()
     {
         first_ = false;
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Next feature in Dataset=" << &dataset_;
-        return boost::apply_visitor(query_dispatch(*this), gquery_);
+        return mapnik::util::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
 }

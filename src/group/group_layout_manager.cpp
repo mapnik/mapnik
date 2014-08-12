@@ -22,9 +22,7 @@
 
 // mapnik
 #include <mapnik/group/group_layout_manager.hpp>
-
-// boost
-#include <boost/variant.hpp>
+#include <mapnik/util/variant.hpp>
 
 // std
 #include <cmath>
@@ -33,23 +31,23 @@ namespace mapnik
 {
 
 // This visitor will process offsets for the given layout
-struct process_layout : public boost::static_visitor<>
+struct process_layout : public util::static_visitor<>
 {
     // The vector containing the existing, centered item bounding boxes
-    const vector<bound_box> &member_boxes_;
-    
+    vector<bound_box> const& member_boxes_;
+
     // The vector to populate with item offsets
-    vector<pixel_position> &member_offsets_;
-    
+    vector<pixel_position> & member_offsets_;
+
     // The origin point of the member boxes
     // i.e. The member boxes are positioned around input_origin,
     //      and the offset values should position them around (0,0)
-    const pixel_position &input_origin_;
+    pixel_position const& input_origin_;
 
-    process_layout(const vector<bound_box> &member_bboxes, 
+    process_layout(const vector<bound_box> &member_bboxes,
                    vector<pixel_position> &member_offsets,
                    const pixel_position &input_origin)
-       : member_boxes_(member_bboxes), 
+       : member_boxes_(member_bboxes),
          member_offsets_(member_offsets),
          input_origin_(input_origin)
     {
@@ -63,7 +61,7 @@ struct process_layout : public boost::static_visitor<>
         {
             total_width += box.width();
         }
-        
+
         double x_offset = -(total_width / 2.0);
         for (auto const& box : member_boxes_)
         {
@@ -111,7 +109,7 @@ struct process_layout : public boost::static_visitor<>
         }
 
     }
-  
+
 private:
 
     // Place member bound boxes at [ifirst] and [ifirst + 1] in a horizontal pairi, vertically
@@ -132,7 +130,7 @@ private:
             pair_box.expand_to_include(box_offset_align(ifirst + 1, x_center + x_margin, pair_y, 1, y_dir));
             return pair_box;
         }
-        
+
         // only one box available for this "pair", so keep x-centered and handle y-offset
         return box_offset_align(ifirst, 0, pair_y, 0, y_dir);
     }
@@ -165,9 +163,9 @@ void group_layout_manager::handle_update()
     if (update_layout_)
     {
        member_offsets_.clear();
-       boost::apply_visitor(process_layout(member_boxes_, member_offsets_, input_origin_), layout_);
+       util::apply_visitor(process_layout(member_boxes_, member_offsets_, input_origin_), layout_);
        update_layout_ = false;
-    }     
+    }
 }
 
 }

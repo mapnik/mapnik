@@ -40,8 +40,6 @@
 #include <mapnik/util/variant.hpp>
 
 // boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 // stl
@@ -50,7 +48,7 @@
 namespace mapnik {
 
 template <typename Container>
-struct expression_attributes : boost::static_visitor<void>
+struct expression_attributes : util::static_visitor<void>
 {
     explicit expression_attributes(Container& names)
         : names_(names) {}
@@ -63,24 +61,24 @@ struct expression_attributes : boost::static_visitor<void>
     template <typename Tag>
     void operator() (binary_node<Tag> const& x) const
     {
-        boost::apply_visitor(*this, x.left);
-        boost::apply_visitor(*this, x.right);
+        util::apply_visitor(*this, x.left);
+        util::apply_visitor(*this, x.right);
     }
 
     template <typename Tag>
     void operator() (unary_node<Tag> const& x) const
     {
-        boost::apply_visitor(*this, x.expr);
+        util::apply_visitor(*this, x.expr);
     }
 
     void operator() (regex_match_node const& x) const
     {
-        boost::apply_visitor(*this, x.expr);
+        util::apply_visitor(*this, x.expr);
     }
 
     void operator() (regex_replace_node const& x) const
     {
-        boost::apply_visitor(*this, x.expr);
+        util::apply_visitor(*this, x.expr);
     }
 
     template <typename T>
@@ -105,7 +103,7 @@ public:
 };
 
 template <typename Container>
-struct extract_attribute_names : boost::static_visitor<void>
+struct extract_attribute_names : util::static_visitor<void>
 {
     explicit extract_attribute_names(Container& names)
         : names_(names),
@@ -115,7 +113,7 @@ struct extract_attribute_names : boost::static_visitor<void>
     {
         if (expr)
         {
-            boost::apply_visitor(f_attr_, *expr);
+            util::apply_visitor(f_attr_, *expr);
         }
     }
     void operator() (mapnik::transform_type const& expr) const
@@ -136,7 +134,7 @@ struct extract_attribute_names : boost::static_visitor<void>
             expr->add_expressions(expressions);
             for (it=expressions.begin(); it != expressions.end(); ++it)
             {
-                if (*it) boost::apply_visitor(f_attr_, **it);
+                if (*it) util::apply_visitor(f_attr_, **it);
             }
         }
     }
@@ -230,7 +228,7 @@ public:
         }
 
         expression_ptr const& expr = r.get_filter();
-        boost::apply_visitor(f_attr,*expr);
+        util::apply_visitor(f_attr,*expr);
     }
 
     double get_filter_factor() const
@@ -251,7 +249,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
     expression_ptr repeat_key = get<mapnik::expression_ptr>(sym, keys::repeat_key);
     if (repeat_key)
     {
-        boost::apply_visitor(rk_attr, *repeat_key);
+        util::apply_visitor(rk_attr, *repeat_key);
     }
 
     // get columns from child rules and symbolizers
@@ -266,7 +264,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
             // still need to collect repeat key columns
             if (rule->get_repeat_key())
             {
-                boost::apply_visitor(rk_attr, *(rule->get_repeat_key()));
+                util::apply_visitor(rk_attr, *(rule->get_repeat_key()));
             }
         }
     }

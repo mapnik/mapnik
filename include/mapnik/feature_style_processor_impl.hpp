@@ -45,10 +45,6 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/featureset_buffer.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
-#include <boost/variant/apply_visitor.hpp>
-//#include <boost/variant/static_visitor.hpp>
-
 // stl
 #include <vector>
 #include <stdexcept>
@@ -654,7 +650,7 @@ void feature_style_processor<Processor>::render_style(
         for (rule const* r : rc.get_if_rules() )
         {
             expression_ptr const& expr = r->get_filter();
-            value_type result = boost::apply_visitor(evaluate<feature_impl,value_type,attributes>(*feature,vars),*expr);
+            value_type result = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(*feature,vars),*expr);
             if (result.to_bool())
             {
                 was_painted = true;

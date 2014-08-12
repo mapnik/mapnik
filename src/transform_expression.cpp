@@ -30,7 +30,7 @@
 namespace mapnik {
 
 struct transform_node_to_expression_string
-    : public boost::static_visitor<void>
+    : public util::static_visitor<void>
 {
     std::ostringstream& os_;
 
@@ -116,7 +116,7 @@ std::string to_expression_string(transform_node const& node)
 {
     std::ostringstream os; // FIXME set precision?
     transform_node_to_expression_string to_string(os);
-    boost::apply_visitor(to_string, *node);
+    util::apply_visitor(to_string, *node);
     return os.str();
 }
 
@@ -130,7 +130,7 @@ std::string to_expression_string(transform_list const& list)
     for (transform_node const& node : list)
     {
         os.write(" ", first ? (first = 0) : 1);
-        boost::apply_visitor(to_string, *node);
+        util::apply_visitor(to_string, *node);
     }
     return os.str();
 }

@@ -337,7 +337,7 @@ struct evaluate_expression_wrapper
     template <typename T1, typename T2, typename T3>
     result_type operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type result = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type result = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         return detail::expression_result<result_type, std::is_enum<result_type>::value>::convert(result);
     }
 };
@@ -349,7 +349,7 @@ struct evaluate_expression_wrapper<mapnik::color>
     template <typename T1, typename T2, typename T3>
     mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         // FIXME - throw instead?
         if (val.is_null()) return mapnik::color(255,192,203); // pink
         return mapnik::color(val.to_string());
@@ -363,7 +363,7 @@ struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
     template <typename T1, typename T2, typename T3>
     mapnik::enumeration_wrapper operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         return mapnik::enumeration_wrapper(val.to_int());
     }
 };
@@ -374,7 +374,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
     template <typename T1, typename T2, typename T3>
     mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         // FIXME - throw?
         if (val.is_null()) return dash_array();
         dash_array dash;
