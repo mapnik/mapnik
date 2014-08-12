@@ -18,10 +18,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *****************************************************************************
- *
- * Initially developed by Sandro Santilli <strk@keybit.net> 
- *
  *****************************************************************************/
 
 #ifndef PGRASTER_WKB_READER_HPP
@@ -29,9 +25,6 @@
 
 // mapnik
 #include <mapnik/feature.hpp> // for raster_ptr
-
-// boost
-#include <boost/cstdint.hpp> // for boost::uint8_t
 
 enum pgraster_color_interp {
   // Automatic color interpretation:

@@ -1,3 +1,5 @@
+Initially developed by Sandro Santilli <strk@keybit.net>
+
 This plugin shares directives with the "postgis" one,
 with the following differences:
 

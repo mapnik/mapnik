@@ -18,17 +18,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *****************************************************************************
- *
- * Initially developed by Sandro Santilli <strk@keybit.net> 
- *
  *****************************************************************************/
 
 #include "connection_manager.hpp"
 #include "pgraster_datasource.hpp"
 #include "pgraster_featureset.hpp"
 #include "asyncresultset.hpp"
-
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -58,14 +53,11 @@ const std::string pgraster_datasource::RASTER_COLUMNS = "raster_columns";
 const std::string pgraster_datasource::RASTER_OVERVIEWS = "raster_overviews";
 const std::string pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
-using boost::shared_ptr;
+using std::shared_ptr;
 using mapnik::attribute_descriptor;
+using mapnik::value_integer;
 
 namespace {
-  // TODO: move to sql_utils
-  std::string quote_literal(std::string& s) {
-    return "'" + s + "'"; // TODO: escape internal quotes
-  }
 
   // TODO: move to sql_utils
   std::string quote_ident(std::string& s) {
@@ -82,14 +74,14 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       raster_field_(*params.get<std::string>("raster_field", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
-      row_limit_(*params.get<int>("row_limit", 0)),
+      row_limit_(*params.get<value_integer>("row_limit", 0)),
       type_(datasource::Raster),
-      srid_(*params.get<int>("srid", 0)),
-      band_(*params.get<int>("band", 0)),
+      srid_(*params.get<value_integer>("srid", 0)),
+      band_(*params.get<value_integer>("band", 0)),
       extent_initialized_(false),
-      prescale_rasters_(*params.get<mapnik::boolean>("prescale_rasters", false)),
-      use_overviews_(*params.get<mapnik::boolean>("use_overviews", false)),
-      clip_rasters_(*params.get<mapnik::boolean>("clip_rasters", false)),
+      prescale_rasters_(*params.get<mapnik::boolean_type>("prescale_rasters", false)),
+      use_overviews_(*params.get<mapnik::boolean_type>("use_overviews", false)),
+      clip_rasters_(*params.get<mapnik::boolean_type>("clip_rasters", false)),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -101,15 +93,15 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       scale_denom_token_("!scale_denominator!"),
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
-      pool_max_size_(*params_.get<int>("max_size", 10)),
-      persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
-      extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
-      estimate_extent_(*params.get<mapnik::boolean>("estimate_extent", false)),
-      max_async_connections_(*params_.get<int>("max_async_connection", 1)),
+      pool_max_size_(*params_.get<value_integer>("max_size", 10)),
+      persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
+      extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
+      estimate_extent_(*params.get<mapnik::boolean_type>("estimate_extent", false)),
+      max_async_connections_(*params_.get<value_integer>("max_async_connection", 1)),
       asynchronous_request_(false),
       // params below are for testing purposes only and may be removed at any time
-      intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
-      intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
+      intersect_min_scale_(*params.get<value_integer>("intersect_min_scale", 0)),
+      intersect_max_scale_(*params.get<value_integer>("intersect_max_scale", 0))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "pgraster_datasource::init");
@@ -139,8 +131,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    boost::optional<int> initial_size = params.get<int>("initial_size", 1);
-    boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
+    boost::optional<value_integer> initial_size = params.get<value_integer>("initial_size", 1);
+    boost::optional<mapnik::boolean_type> autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -358,7 +350,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 {
                   overviews_.resize(overviews_.size()+1);
                   pgraster_overview& ov = overviews_.back();
-                  ov.schema = rs->getValue("sch"); 
+                  ov.schema = rs->getValue("sch");
                   ov.table = rs->getValue("tab");
                   ov.column = rs->getValue("col");
                   ov.scale = atof(rs->getValue("scl"));
@@ -721,7 +713,7 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql, double 
 }
 
 
-boost::shared_ptr<IResultSet> pgraster_datasource::get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
+std::shared_ptr<IResultSet> pgraster_datasource::get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
 {
 
     if (!ctx)
@@ -741,7 +733,7 @@ boost::shared_ptr<IResultSet> pgraster_datasource::get_resultset(boost::shared_p
                 throw mapnik::datasource_exception("Pgraster Plugin: error creating cursor for data select." );
             }
 
-            return boost::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
+            return std::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
 
         }
         else
@@ -753,17 +745,17 @@ boost::shared_ptr<IResultSet> pgraster_datasource::get_resultset(boost::shared_p
     else
     {   // asynchronous requests
 
-        boost::shared_ptr<postgis_processor_context> pgis_ctxt = boost::static_pointer_cast<postgis_processor_context>(ctx);
+        std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(ctx);
         if (conn)
         {
             // lauch async req & create asyncresult with conn
             conn->executeAsyncQuery(sql, 1);
-            return boost::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
+            return std::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
         }
         else
         {
             // create asyncresult  with  null connection
-            boost::shared_ptr<AsyncResultSet> res = boost::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
+            std::shared_ptr<AsyncResultSet> res = std::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
             pgis_ctxt->add_request(res);
             return res;
         }
@@ -785,7 +777,7 @@ processor_context_ptr pgraster_datasource::get_context(feature_style_context_map
     }
     else
     {
-        return ctx.insert(std::make_pair(ds_name,boost::make_shared<postgis_processor_context>())).first->second;
+        return ctx.insert(std::make_pair(ds_name,std::make_shared<postgis_processor_context>())).first->second;
     }
 }
 
@@ -794,7 +786,7 @@ featureset_ptr pgraster_datasource::features(query const& q) const
     // if the driver is in asynchronous mode, return the appropriate fetaures
     if (asynchronous_request_ )
     {
-        return features_with_context(q,boost::make_shared<postgis_processor_context>());
+        return features_with_context(q,std::make_shared<postgis_processor_context>());
     }
     else
     {
@@ -822,7 +814,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         if ( asynchronous_request_ )
         {
             // limit use to num_async_request_ => if reached don't borrow the last connexion object
-            boost::shared_ptr<postgis_processor_context> pgis_ctxt = boost::static_pointer_cast<postgis_processor_context>(proc_ctx);
+            std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(proc_ctx);
             if ( pgis_ctxt->num_async_requests_ < max_async_connections_ )
             {
                 conn = pool->borrowObject();
@@ -862,8 +854,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
             throw mapnik::datasource_exception(s_error.str());
         }
 
-        const double px_gw = 1.0 / boost::get<0>(q.resolution());
-        const double px_gh = 1.0 / boost::get<1>(q.resolution());
+        const double px_gw = 1.0 / std::get<0>(q.resolution());
+        const double px_gh = 1.0 / std::get<1>(q.resolution());
 
         MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: px_gw=" << px_gw
                                    << " px_gh=" << px_gh;
@@ -901,7 +893,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
               mapnik::sql_utils::unquote_double(raster_table_), tab);
           boost::algorithm::replace_all(table_with_bbox,
               mapnik::sql_utils::unquote_double(schema_), sch);
-          boost::algorithm::replace_all(table_with_bbox, 
+          boost::algorithm::replace_all(table_with_bbox,
               mapnik::sql_utils::unquote_double(geometryColumn_), col);
           table_with_bbox = populate_tokens(table_with_bbox,
               scale_denom, box, px_gw, px_gh);
@@ -925,7 +917,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
           s << ", ST_Expand(" << sql_bbox(box)
             << ", greatest(abs(ST_ScaleX(\""
             << col << "\")), abs(ST_ScaleY(\""
-            << col << "\")))))"; 
+            << col << "\")))))";
         }
 
         if (prescale_rasters_) {
@@ -942,7 +934,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         s << ") AS geom";
 
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
@@ -980,10 +972,10 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: "
           "features query: " << s.str();
 
-        boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return boost::make_shared<pgraster_featureset>(rs, ctx,
+        std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
+        return std::make_shared<pgraster_featureset>(rs, ctx,
                   desc_.get_encoding(), !key_field_.empty(),
-                  band_ ? 1 : 0 // whatever band number is given we'd have 
+                  band_ ? 1 : 0 // whatever band number is given we'd have
                                 // extracted with ST_Band above so it becomes
                                 // band number 1
                );
@@ -1032,7 +1024,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
@@ -1068,8 +1060,8 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
                 s << " LIMIT " << row_limit_;
             }
 
-            boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return boost::make_shared<pgraster_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
+            return std::make_shared<pgraster_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
     }
 
@@ -1196,5 +1188,3 @@ boost::optional<mapnik::datasource::geometry_t> pgraster_datasource::get_geometr
 {
     return boost::optional<mapnik::datasource::geometry_t>();
 }
-
-

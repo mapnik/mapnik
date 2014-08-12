@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,10 +18,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *****************************************************************************
- *
- * Initially developed by Sandro Santilli <strk@keybit.net> 
- *
  *****************************************************************************/
 
 #ifndef PGRASTER_FEATURESET_HPP
@@ -33,8 +29,8 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
 
-// boost
-#include <boost/scoped_ptr.hpp>
+// stl
+#include <memory>
 
 using mapnik::Featureset;
 using mapnik::box2d;
@@ -51,7 +47,7 @@ public:
     /// @param bandno band number (1-based). 0 (default) reads all bands.
     ///               Anything else forces interpretation of colors off
     ///               (values copied verbatim)
-    pgraster_featureset(boost::shared_ptr<IResultSet> const& rs,
+    pgraster_featureset(std::shared_ptr<IResultSet> const& rs,
                        context_ptr const& ctx,
                        std::string const& encoding,
                        bool key_field = false,
@@ -60,9 +56,9 @@ public:
     ~pgraster_featureset();
 
 private:
-    boost::shared_ptr<IResultSet> rs_;
+    std::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::value_integer feature_id_;
     bool key_field_;
     int band_;

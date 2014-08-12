@@ -18,10 +18,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *****************************************************************************
- *
- * Initially developed by Sandro Santilli <strk@keybit.net> 
- *
  *****************************************************************************/
 
 #include "pgraster_featureset.hpp"
@@ -43,10 +39,6 @@
 #include <mapnik/global.hpp> // for int2net
 #include <boost/scoped_array.hpp>
 
-
-// boost
-#include <boost/cstdint.hpp> // for boost::int16_t
-
 // stl
 #include <sstream>
 #include <string>
@@ -56,7 +48,7 @@ using mapnik::byte;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 
-pgraster_featureset::pgraster_featureset(boost::shared_ptr<IResultSet> const& rs,
+pgraster_featureset::pgraster_featureset(std::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
                                        bool key_field, int bandno)

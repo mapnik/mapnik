@@ -18,10 +18,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *****************************************************************************
- *
- * Initially developed by Sandro Santilli <strk@keybit.net> 
- *
  *****************************************************************************/
 
 #include "pgraster_wkb_reader.hpp"
@@ -38,8 +34,6 @@
 #include <mapnik/box2d.hpp> // for box2d
 
 // boost
-#include <boost/cstdint.hpp> // for boost::int8_t
-#include <boost/make_shared.hpp>
 #include <boost/bind.hpp>
 
 namespace {
@@ -456,10 +450,10 @@ pgraster_wkb_reader::get_raster() {
       return mapnik::raster_ptr();
     }
 
-    box2d<double> ext(ipX,ipY,ipX+(width_*scaleX),ipY+(height_*scaleY)); 
+    box2d<double> ext(ipX,ipY,ipX+(width_*scaleX),ipY+(height_*scaleY));
     MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: Raster extent=" << ext;
 
-    mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(ext, width_, height_);
+    mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(ext, width_, height_, 1.0);
 
     if ( bandno_ ) {
       if ( bandno_ != 1 ) {
@@ -493,5 +487,3 @@ pgraster_wkb_reader::get_raster() {
     return raster;
 
 }
-
-
