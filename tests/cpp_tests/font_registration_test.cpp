@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     try
     {
         mapnik::logger logger;
-        logger.set_severity(mapnik::logger::none);
+        mapnik::logger::severity_type original_severity = logger.get_severity();
 
         BOOST_TEST(set_working_dir(args));
 
@@ -45,6 +45,8 @@ int main(int argc, char** argv)
         BOOST_TEST( face_names.size() == 0 );
 
         // directories without fonts
+        // silence warnings here by altering the logging severity
+        logger.set_severity(mapnik::logger::none);
         std::string src("src");
         // an empty directory will not return true
         // we need to register at least one font and not fail on any
@@ -61,6 +63,9 @@ int main(int argc, char** argv)
         BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/intentionally-broken.ttf") == false );
         BOOST_TEST( mapnik::freetype_engine::register_fonts("tests/data/fonts/intentionally-broken.ttf") == false );
         BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
+
+        // now restore the original severity
+        logger.set_severity(original_severity);
 
         // register unifont, since we know it sits in the root fonts/ dir
         BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir) );
