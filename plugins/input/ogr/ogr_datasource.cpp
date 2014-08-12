@@ -263,7 +263,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     {
         OGREnvelope envelope;
         layer->GetExtent(&envelope);
-		extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
+        extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
     }
 
     // scan for index file
