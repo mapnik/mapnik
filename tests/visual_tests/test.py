@@ -248,6 +248,7 @@ files = {
     'point-symbolizer-expressions':{'sizes':[(256,256)]},
     'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'point-symbolizer-overlap-placement-expr': {'bbox':large_text_box, 'sizes': [(500, 500)]},
+    'text-allow-overlap-expr': {'bbox':large_text_box, 'sizes': [(500, 500)]},
     'marker-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
