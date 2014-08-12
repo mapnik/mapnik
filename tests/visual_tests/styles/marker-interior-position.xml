@@ -5,8 +5,9 @@
     <Style name="poly">
         <Rule>
             <PolygonSymbolizer />
-            <MarkersSymbolizer stroke-width="0" placement="interior" fill="green"/>
-            <MarkersSymbolizer stroke-width="0" placement="point" fill="red"/>
+            <MarkersSymbolizer stroke-width="0" width="7" placement="interior" fill="blue" allow-overlap="true"/>
+            <MarkersSymbolizer stroke-width="0" width="7" placement="point" fill="red" allow-overlap="true"/>
+            <DebugSymbolizer />
         </Rule>
     </Style>
     
