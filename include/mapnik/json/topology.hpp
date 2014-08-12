@@ -32,7 +32,6 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/optional.hpp>
-#include <boost/variant.hpp>
 
 namespace mapnik { namespace topojson {
 
@@ -86,13 +85,13 @@ struct multi_polygon
 
 struct invalid {};
 
-using geometry =  boost::variant<invalid,
-                                 point,
-                                 linestring,
-                                 polygon,
-                                 multi_point,
-                                 multi_linestring,
-                                 multi_polygon>;
+using geometry =  util::variant<invalid,
+                                point,
+                                linestring,
+                                polygon,
+                                multi_point,
+                                multi_linestring,
+                                multi_polygon>;
 
 using pair_type = std::tuple<double,double>;
 

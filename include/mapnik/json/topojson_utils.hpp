@@ -27,11 +27,10 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/util/variant.hpp>
-#include <boost/variant.hpp>
 
 namespace mapnik { namespace topojson {
 
-struct bounding_box_visitor : public boost::static_visitor<box2d<double> >
+struct bounding_box_visitor : public mapnik::util::static_visitor<box2d<double> >
 {
     bounding_box_visitor(topology const& topo)
         : topo_(topo) {}

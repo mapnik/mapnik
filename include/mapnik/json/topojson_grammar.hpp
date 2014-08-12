@@ -92,7 +92,7 @@ private:
     qi::rule<Iterator, space_type, mapnik::topojson::multi_linestring()> multi_linestring;
     qi::rule<Iterator, space_type, mapnik::topojson::polygon()> polygon;
     qi::rule<Iterator, space_type, mapnik::topojson::multi_polygon()> multi_polygon;
-    qi::rule<Iterator, space_type, std::vector<mapnik::topojson::geometry>()> geometry_collection;
+    qi::rule<Iterator, space_type, void(std::vector<mapnik::topojson::geometry>&)> geometry_collection;
 
     qi::rule<Iterator, space_type, std::vector<index_type>()> ring;
 
@@ -105,7 +105,6 @@ private:
 
     // error
     boost::phoenix::function<where_message> where_message_;
-
 };
 
 }}
