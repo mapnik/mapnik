@@ -39,7 +39,7 @@
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
-#include <boost/variant/apply_visitor.hpp>
+//#include <boost/variant/apply_visitor.hpp>
 
 namespace mapnik {
 
@@ -124,7 +124,7 @@ struct symbolizer_traits<debug_symbolizer>
 // symbolizer name impl
 namespace detail {
 
-struct symbolizer_name_impl : public boost::static_visitor<std::string>
+struct symbolizer_name_impl : public util::static_visitor<std::string>
 {
 public:
     template <typename Symbolizer>
@@ -137,7 +137,7 @@ public:
 
 inline std::string symbolizer_name(symbolizer const& sym)
 {
-    std::string type = boost::apply_visitor( detail::symbolizer_name_impl(), sym);
+    std::string type = util::apply_visitor( detail::symbolizer_name_impl(), sym);
     return type;
 }
 
@@ -230,7 +230,7 @@ private:
     Meta const& meta_;
 };
 
-struct symbolizer_to_json : public boost::static_visitor<std::string>
+struct symbolizer_to_json : public util::static_visitor<std::string>
 {
     using result_type = std::string;
 

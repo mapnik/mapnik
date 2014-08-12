@@ -157,7 +157,7 @@ private:
     expression_attributes<std::set<std::string> > f_attr_;
 };
 
-struct symbolizer_attributes : public boost::static_visitor<>
+struct symbolizer_attributes : public util::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
@@ -210,7 +210,7 @@ private:
 class attribute_collector : public mapnik::noncopyable
 {
 private:
-    std::set<std::string>& names_;
+    std::set<std::string> & names_;
     double filter_factor_;
     expression_attributes<std::set<std::string> > f_attr;
 public:
@@ -224,9 +224,9 @@ public:
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
         symbolizer_attributes s_attr(names_,filter_factor_);
-        for (auto symbol : symbols)
+        for (auto const& sym : symbols)
         {
-            boost::apply_visitor(s_attr,symbol);
+            util::apply_visitor(std::ref(s_attr), sym);
         }
 
         expression_ptr const& expr = r.get_filter();
@@ -256,12 +256,13 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
 
     // get columns from child rules and symbolizers
     group_symbolizer_properties_ptr props = get<group_symbolizer_properties_ptr>(sym, keys::group_properties);
-    if (props) {
+    if (props)
+    {
         for (auto const& rule : props->get_rules())
         {
             // note that this recurses down on to the symbolizer
             // internals too, so we get all free variables.
-            column_collector(*rule);
+// FIXME            column_collector(*rule);
             // still need to collect repeat key columns
             if (rule->get_repeat_key())
             {

@@ -44,10 +44,10 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/featureset_buffer.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
+//#include <boost/variant/static_visitor.hpp>
 
 // stl
 #include <vector>
@@ -87,7 +87,7 @@ struct process_impl<false>
  * \param sym        Symbolizer object
  */
 template <typename Processor>
-struct feature_style_processor<Processor>::symbol_dispatch : public boost::static_visitor<>
+struct feature_style_processor<Processor>::symbol_dispatch : public util::static_visitor<>
 {
     symbol_dispatch (Processor & output,
                      mapnik::feature_impl & f,
@@ -665,7 +665,7 @@ void feature_style_processor<Processor>::render_style(
                 {
                     for (symbolizer const& sym : symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                        util::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
                 }
                 if (style->get_filter_mode() == FILTER_FIRST)
@@ -686,7 +686,7 @@ void feature_style_processor<Processor>::render_style(
                 {
                     for (symbolizer const& sym : symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                        util::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
                 }
             }
@@ -701,7 +701,7 @@ void feature_style_processor<Processor>::render_style(
                 {
                     for (symbolizer const& sym : symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                        util::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
                 }
             }

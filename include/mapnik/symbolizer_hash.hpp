@@ -77,7 +77,7 @@ struct symbolizer_hash
     }
 };
 
-struct symbolizer_hash_visitor : boost::static_visitor<std::size_t>
+struct symbolizer_hash_visitor : util::static_visitor<std::size_t>
 {
     template <typename Symbolizer>
     std::size_t operator() (Symbolizer const& sym) const

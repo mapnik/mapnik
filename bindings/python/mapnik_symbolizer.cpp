@@ -131,7 +131,7 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
 
 std::string __str__(mapnik::symbolizer const& sym)
 {
-    return boost::apply_visitor(mapnik::symbolizer_to_json(), sym);
+    return mapnik::util::apply_visitor(mapnik::symbolizer_to_json(), sym);
 }
 
 std::string get_symbolizer_type(symbolizer const& sym)
@@ -141,7 +141,7 @@ std::string get_symbolizer_type(symbolizer const& sym)
 
 std::size_t hash_impl(symbolizer const& sym)
 {
-    return boost::apply_visitor(mapnik::symbolizer_hash_visitor(), sym);
+    return mapnik::util::apply_visitor(mapnik::symbolizer_hash_visitor(), sym);
 }
 
 template <typename T>
@@ -150,7 +150,7 @@ std::size_t hash_impl_2(T const& sym)
     return mapnik::symbolizer_hash::value<T>(sym);
 }
 
-struct extract_underlying_type_visitor : boost::static_visitor<boost::python::object>
+struct extract_underlying_type_visitor : mapnik::util::static_visitor<boost::python::object>
 {
     template <typename T>
     boost::python::object operator() (T const& sym) const
@@ -161,7 +161,7 @@ struct extract_underlying_type_visitor : boost::static_visitor<boost::python::ob
 
 boost::python::object extract_underlying_type(symbolizer const& sym)
 {
-    return boost::apply_visitor(extract_underlying_type_visitor(), sym);
+    return mapnik::util::apply_visitor(extract_underlying_type_visitor(), sym);
 }
 
 }

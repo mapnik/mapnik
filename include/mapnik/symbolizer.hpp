@@ -536,18 +536,18 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL debug_symbolizer : public symbolizer_base {};
 
 // symbolizer
-using symbolizer = boost::variant<point_symbolizer,
-                                  line_symbolizer,
-                                  line_pattern_symbolizer,
-                                  polygon_symbolizer,
-                                  polygon_pattern_symbolizer,
-                                  raster_symbolizer,
-                                  shield_symbolizer,
-                                  text_symbolizer,
-                                  building_symbolizer,
-                                  markers_symbolizer,
-                                  group_symbolizer,
-                                  debug_symbolizer>;
+using symbolizer = util::variant<point_symbolizer,
+                                 line_symbolizer,
+                                 line_pattern_symbolizer,
+                                 polygon_symbolizer,
+                                 polygon_pattern_symbolizer,
+                                 raster_symbolizer,
+                                 shield_symbolizer,
+                                 text_symbolizer,
+                                 building_symbolizer,
+                                 markers_symbolizer,
+                                 group_symbolizer,
+                                 debug_symbolizer>;
 
 using dash_array = std::vector<std::pair<double,double> >;
 
