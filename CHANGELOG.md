@@ -6,6 +6,11 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.x / Future
+
+- Default PNG encoding method when `png` is supplied is now `png8:m=h`, so paletted png using hextree color quantization (#2028)
+  Use `png32` now for full color png. More details at https://github.com/mapnik/mapnik/wiki/Image-IO.
+
 ## 2.3.0
 
 Released ...
