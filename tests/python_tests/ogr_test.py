@@ -60,6 +60,15 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
     #    fs = ds.all_features()
     #    eq_(len(fs),1)
 
+    # OGR plugin extent parameter
+    def test_ogr_extent_parameter():
+        ds = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0,extent='-1,-1,1,1')
+        e = ds.envelope()
+        eq_(e.minx,-1)
+        eq_(e.miny,-1)
+        eq_(e.maxx,1)
+        eq_(e.maxy,1)
+
 if __name__ == "__main__":
     setup()
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))
