@@ -22,6 +22,8 @@ before_install:
 script:
  - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=False DEMO=True BENCHMARK=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
  - JOBS=6 make
+ - createdb -EUTF8 template_postgis
+ - psql -c 'create extension postgis' template_postgis
  - make test-local
  - sudo make install
  - make grind
