@@ -87,6 +87,19 @@ int main(int argc, char** argv)
         face_names = mapnik::freetype_engine::face_names();
         //std::clog << "number of registered fonts: " << face_names.size() << std::endl;
         BOOST_TEST( face_names.size() == 22 );
+
+        // now blindly register as many system fonts as possible
+        // the goal here to make sure we don't crash
+        // linux
+        mapnik::freetype_engine::register_fonts("/usr/share/fonts/", true);
+        mapnik::freetype_engine::register_fonts("/usr/local/share/fonts/", true);
+        // osx
+        mapnik::freetype_engine::register_fonts("/Library/Fonts/", true);
+        mapnik::freetype_engine::register_fonts("/System/Library/Fonts/", true);
+        // windows
+        mapnik::freetype_engine::register_fonts("C:\\Windows\\Fonts", true);
+        face_names = mapnik::freetype_engine::face_names();
+        BOOST_TEST( face_names.size() > 22 );
     }
     catch (std::exception const & ex)
     {
