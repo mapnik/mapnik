@@ -97,7 +97,11 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
 }
 
 void ft_close_cb(FT_Stream stream) {
-    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
+    std::FILE *f = static_cast<std::FILE *>(stream->descriptor.pointer);
+    if ( f ) {
+      std::fclose(f);
+      stream->descriptor.pointer = 0;
+    }
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -136,21 +140,14 @@ bool freetype_engine::register_font(std::string const& file_name)
     streamRec.close = ft_close_cb;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
-    int num_faces = 0;
     bool success = false;
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
+    for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
         // if face is null then this is the first face
         error = FT_Open_Face(library, &args, i, &face);
-        if (error)
-        {
-            break;
-        }
-        // store num_faces locally, after FT_Done_Face it can not be accessed any more
-        if (!num_faces)
-            num_faces = face->num_faces;
+        if (error) break;
         // some fonts can lack names, skip them
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
         if (face->family_name && face->style_name)
@@ -176,7 +173,6 @@ bool freetype_engine::register_font(std::string const& file_name)
 
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
-        if (face) FT_Done_Face(face);
     }
     if (library)
         FT_Done_FreeType(library);
