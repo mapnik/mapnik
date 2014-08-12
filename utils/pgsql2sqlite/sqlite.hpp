@@ -29,9 +29,10 @@
 
 //stl
 #ifdef MAPNIK_DEBUG
-#include <iostream>
 #include <cassert>
 #endif
+
+#include <iostream>
 #include <string>
 #include <vector>
 
