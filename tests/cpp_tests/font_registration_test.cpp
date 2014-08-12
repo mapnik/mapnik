@@ -70,28 +70,31 @@ int main(int argc, char** argv)
         // register unifont, since we know it sits in the root fonts/ dir
         BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir) );
         face_names = mapnik::freetype_engine::face_names();
-        //std::clog << "number of registered fonts: " << face_names.size() << std::endl;
         BOOST_TEST( face_names.size() > 0 );
         BOOST_TEST( face_names.size() == 1 );
 
         // re-register unifont, should not have any affect
         BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir, false) );
         face_names = mapnik::freetype_engine::face_names();
-        //std::clog << "number of registered fonts: " << face_names.size() << std::endl;
         BOOST_TEST( face_names.size() == 1 );
 
         // register a single dejavu font
         std::string dejavu_bold_oblique("tests/data/fonts/DejaVuSansMono-BoldOblique.ttf");
         BOOST_TEST( mapnik::freetype_engine::register_font(dejavu_bold_oblique) );
         face_names = mapnik::freetype_engine::face_names();
-        //std::clog << "number of registered fonts: " << face_names.size() << std::endl;
         BOOST_TEST( face_names.size() == 2 );
 
         // recurse to find all dejavu fonts
         BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir, true) );
         face_names = mapnik::freetype_engine::face_names();
-        //std::clog << "number of registered fonts: " << face_names.size() << std::endl;
         BOOST_TEST( face_names.size() == 22 );
+
+        // check that we can correctly read a .tcc containing
+        // multiple valid faces
+        // https://github.com/mapnik/mapnik/issues/2274
+        BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/NotoSans-Regular.ttc") );
+        face_names = mapnik::freetype_engine::face_names();
+        BOOST_TEST( face_names.size() == 24 );
 
         // now blindly register as many system fonts as possible
         // the goal here to make sure we don't crash
