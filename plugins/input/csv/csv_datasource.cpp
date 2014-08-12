@@ -733,10 +733,24 @@ void csv_datasource::parse_csv(T & stream,
                 }
                 if (!matched)
                 {
+                    // NOTE: we don't use mapnik::util::string2bool
+                    // here because we don't want to treat 'on' and 'off'
+                    // as booleans, only 'true' and 'false'
                     bool bool_val = false;
-                    if (mapnik::util::string2bool(value,bool_val))
+                    std::string lower_val = value;
+                    std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
+                    if (lower_val == "true")
                     {
                         matched = true;
+                        bool_val = true;
+                    }
+                    else if (lower_val == "false")
+                    {
+                        matched = true;
+                        bool_val = false;
+                    }
+                    if (matched)
+                    {
                         feature->put(fld_name,bool_val);
                         if (feature_count == 1)
                         {
