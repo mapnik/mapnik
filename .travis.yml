@@ -1,8 +1,5 @@
 language: cpp
 
-addons:
-  postgresql: "9.3"
-
 compiler:
  - clang
 
@@ -19,17 +16,13 @@ before_install:
  # multi-face ttc font: https://github.com/mapnik/mapnik/issues/2274
  - sudo apt-get install ttf-wqy-microhei
 
+before_script:
+ - createdb -EUTF8 template_postgis
+ - psql -c 'create extension postgis' template_postgis
+
 script:
  - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=False DEMO=True BENCHMARK=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
  - JOBS=6 make
- - createdb -EUTF8 template_postgis
- - psql -c 'create extension postgis' template_postgis
  - make test-local
  - sudo make install
  - make grind
-
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.org#mapnik"
-    use_notice: true
