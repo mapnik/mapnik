@@ -36,7 +36,7 @@ class MAPNIK_DECL format_node: public node
 {
 public:
     void to_xml(boost::property_tree::ptree & xml) const;
-    static node_ptr from_xml(xml_node const& xml);
+    static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
     virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const;
     virtual void add_expressions(expression_set & output) const;
 
@@ -44,12 +44,12 @@ public:
     node_ptr get_child() const;
 
     boost::optional<std::string> face_name;
+    boost::optional<font_set> fontset;
     boost::optional<symbolizer_base::value_type> text_size;
     boost::optional<symbolizer_base::value_type> character_spacing;
     boost::optional<symbolizer_base::value_type> line_spacing;
     boost::optional<symbolizer_base::value_type> text_opacity;
     boost::optional<symbolizer_base::value_type> wrap_before;
-    boost::optional<symbolizer_base::value_type> wrap_char;
     boost::optional<symbolizer_base::value_type> text_transform;
     boost::optional<symbolizer_base::value_type> fill;
     boost::optional<symbolizer_base::value_type> halo_fill;

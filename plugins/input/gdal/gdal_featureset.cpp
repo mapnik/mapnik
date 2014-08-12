@@ -404,7 +404,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     }
                     else
                     {
-                        MAPNIK_LOG_ERROR(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of alpha band";
+                        MAPNIK_LOG_WARN(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of alpha band";
                     }
                 }
             }

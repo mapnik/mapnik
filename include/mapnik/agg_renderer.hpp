@@ -34,10 +34,10 @@
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
-#include <mapnik/gamma_method.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
-// boost
-
+#include <mapnik/image_data.hpp>
+// stl
 #include <memory>
 
 // fwd declaration to avoid dependence on agg headers
@@ -53,6 +53,7 @@ namespace mapnik {
   class marker;
   class proj_transform;
   struct rasterizer;
+  class image_32;
 }
 
 namespace mapnik {
@@ -145,22 +146,6 @@ public:
     {
         return common_.vars_;
     }
-
-    inline box2d<double> clipping_extent() const
-    {
-        if (common_.t_.offset() > 0)
-        {
-            box2d<double> box = common_.query_extent_;
-            double scale = static_cast<double>(common_.query_extent_.width())/static_cast<double>(common_.width_);
-            // 3 is used here because at least 3 was needed for the 'style-level-compositing-tiled-0,1' visual test to pass
-            // TODO - add more tests to hone in on a more robust #
-            scale *= common_.t_.offset()*3;
-            box.pad(scale);
-            return box;
-        }
-        return common_.query_extent_;
-    }
-
 protected:
     template <typename R>
     void debug_draw_box(R& buf, box2d<double> const& extent,
@@ -183,6 +168,9 @@ private:
     renderer_common common_;
     void setup(Map const& m);
 };
-}
+
+extern template class MAPNIK_DECL agg_renderer<image_32>;
+
+} // namespace mapnik
 
 #endif // MAPNIK_AGG_RENDERER_HPP

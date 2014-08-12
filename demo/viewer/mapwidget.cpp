@@ -533,9 +533,11 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 #ifdef HAVE_CAIRO
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
-    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
+    mapnik::cairo_ptr cairo = mapnik::create_context(image_surface);
+    if (cairo)
     {
         mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
+        mapnik::cairo_renderer<mapnik::cairo_ptr> renderer(map, cairo, scaling_factor);
         renderer.apply();
     }
     image_32 buf(image_surface);

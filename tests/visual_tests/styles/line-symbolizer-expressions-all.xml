@@ -21,7 +21,7 @@
         </Rule>
         <Rule>
             <Filter>[id] = 'stroke-dasharray'</Filter>
-            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-dasharray="3,3" />
+            <LineSymbolizer stroke-width='5' stroke='#ff0000' stroke-dasharray="[value]" />
         </Rule>
         <Rule>
             <Filter>[id] = 'stroke-linejoin'</Filter>

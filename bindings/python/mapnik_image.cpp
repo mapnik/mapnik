@@ -253,6 +253,9 @@ void export_image()
         .value("saturation", mapnik::saturation)
         .value("color", mapnik::_color)
         .value("value", mapnik::_value)
+        .value("linear_dodge", mapnik::linear_dodge)
+        .value("linear_burn", mapnik::linear_burn)
+        .value("divide", mapnik::divide)
         ;
 
     class_<image_32,std::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())

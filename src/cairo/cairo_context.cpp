@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -179,6 +179,9 @@ void cairo_context::set_operator(composite_mode_e comp_op)
     case saturation:
     case _color:
     case _value:
+    case linear_dodge:
+    case linear_burn:
+    case divide:
         //case colorize_alpha:
         break;
     }
@@ -522,9 +525,8 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     else
     {
         entry = std::make_shared<cairo_face>(font_engine_, face);
-        cache_.insert(std::make_pair(face, entry));
+        cache_.emplace(face, entry);
     }
-
     return entry;
 }
 

@@ -65,6 +65,8 @@ static const char * marker_placement_strings[] = {
     "point",
     "interior",
     "line",
+    "vertex-first",
+    "vertex-last",
     ""
 };
 
@@ -171,5 +173,16 @@ static const char * text_upright_strings[] = {
     ""
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
+
+static const char * gamma_method_strings[] = {
+    "power", //agg::gamma_power
+    "linear", //agg::gamma_linear
+    "none", //agg::gamma_none
+    "threshold", //agg::gamma_threshold
+    "multiply", //agg::gamma_multiply",
+    ""
+};
+
+IMPLEMENT_ENUM( gamma_method_e, gamma_method_strings )
 
 } // namespace mapnik

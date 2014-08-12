@@ -23,271 +23,97 @@
 #ifndef MAPNIK_MARKERS_PLACEMENT_HPP
 #define MAPNIK_MARKERS_PLACEMENT_HPP
 
-// mapnik
-#include <mapnik/ctrans.hpp>
-#include <mapnik/debug.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/global.hpp> //round
-#include <mapnik/box2d.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/markers_placements/line.hpp>
+#include <mapnik/markers_placements/point.hpp>
+#include <mapnik/markers_placements/interior.hpp>
+#include <mapnik/markers_placements/vertext_first.hpp>
+#include <mapnik/markers_placements/vertext_last.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 
-// agg
-#include "agg_basics.h"
-#include "agg_trans_affine.h"
+#include <boost/variant.hpp>
+#include <boost/functional/value_factory.hpp>
+#include <boost/function.hpp>
 
-// stl
-#include <cmath>
-
-namespace mapnik {
+namespace mapnik
+{
 
 template <typename Locator, typename Detector>
-class markers_placement : mapnik::noncopyable
+class markers_placement_finder : mapnik::noncopyable
 {
 public:
-    /** Constructor for markers_placement object.
-     * \param locator  Path along which markers are placed (type: vertex source)
-     * \param size     Size of the marker
-     * \param tr       Affine transform
-     * \param detector Collision detection
-     * \param spacing  Distance between markers. If the value is negative it is
-     *                 converted to a positive value with similar magnitude, but
-     *                 choosen to optimize marker placement. 0 = no markers
-     */
-    markers_placement(Locator &locator,
-                      box2d<double> const& size,
-                      agg::trans_affine const& tr,
-                      Detector &detector,
-                      double spacing,
-                      double max_error,
-                      bool allow_overlap)
-      : locator_(locator),
-        size_(size),
-        tr_(tr),
-        detector_(detector),
-        max_error_(max_error),
-        allow_overlap_(allow_overlap),
-        marker_width_((size_ * tr_).width()),
-        done_(false),
-        last_x(0.0),
-        last_y(0.0),
-        next_x(0.0),
-        next_y(0.0),
-        error_(0.0),
-        spacing_left_(0.0),
-        marker_nr_(0)
+    using markers_placement = boost::variant<markers_point_placement<Locator, Detector>,
+                                             markers_line_placement<Locator, Detector>,
+                                             markers_interior_placement<Locator, Detector>,
+                                             markers_vertex_first_placement<Locator, Detector>,
+                                             markers_vertex_last_placement<Locator, Detector>>;
+
+    class get_point_visitor : public boost::static_visitor<bool>
     {
-      if (spacing >= 1)
-      {
-          spacing_ = spacing;
-      }
-      else
-      {
-          spacing_ = 100;
-      }
-      rewind();
+    public:
+        get_point_visitor(double &x, double &y, double &angle, bool ignore_placement)
+            : x_(x), y_(y), angle_(angle), ignore_placement_(ignore_placement)
+        {
+        }
+
+        template <typename T>
+        bool operator()(T &placement) const
+        {
+            return placement.get_point(x_, y_, angle_, ignore_placement_);
+        }
+
+    private:
+        double &x_, &y_, &angle_;
+        bool ignore_placement_;
+    };
+
+    markers_placement_finder(marker_placement_e placement_type,
+                             Locator &locator,
+                             box2d<double> const& size,
+                             agg::trans_affine const& tr,
+                             Detector &detector,
+                             double spacing,
+                             double max_error,
+                             bool allow_overlap)
+        : placement_(create(placement_type, locator, size, tr, detector, spacing, max_error, allow_overlap))
+    {
     }
 
-    /** Start again at first marker.
-     * \note Returns the same list of markers only works when they were NOT added
-     *       to the detector.
-     */
-    void rewind()
+    // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
+    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
-        locator_.rewind(0);
-        //Get first point
-        done_ = agg::is_stop(locator_.vertex(&next_x, &next_y));
-        last_x = next_x;
-        last_y = next_y; // Force request of new segment
-        error_ = 0.0;
-        marker_nr_ = 0;
-    }
-
-    /** Get a point where the marker should be placed.
-     * Each time this function is called a new point is returned.
-     * \param x     Return value for x position
-     * \param y     Return value for x position
-     * \param angle Return value for rotation angle
-     * \param ignore_placement Whether to add selected position to detector
-     * \return True if a place is found, false if none is found.
-     */
-    bool get_point(double & x, double  & y, double & angle,  bool ignore_placement)
-    {
-        if (done_)
-        {
-            return false;
-        }
-        unsigned cmd;
-        /* This functions starts at the position of the previous marker,
-           walks along the path, counting how far it has to go in spacing_left.
-           If one marker can't be placed at the position it should go to it is
-           moved a bit. The error is compensated for in the next call to this
-           function.
-
-           error > 0: Marker too near to the end of the path.
-           error = 0: Perfect position.
-           error < 0: Marker too near to the beginning of the path.
-        */
-        if (marker_nr_ == 0)
-        {
-            //First marker
-            marker_nr_++;
-            spacing_left_ = spacing_ / 2;
-        }
-        else
-        {
-            spacing_left_ = spacing_;
-        }
-        spacing_left_ -= error_;
-        error_ = 0.0;
-        double max_err_allowed = max_error_ * spacing_;
-        // Loop exits when a position is found or when no more segments are available
-        while (true)
-        {
-            // Do not place markers too close to the beginning of a segment
-            if (spacing_left_ < marker_width_/2)
-            {
-                set_spacing_left(marker_width_/2); //Only moves forward
-            }
-            // Error for this marker is too large. Skip to the next position.
-            if (std::fabs(error_) > max_err_allowed)
-            {
-                if (error_ > spacing_)
-                {
-                    error_ = spacing_; // Avoid moving backwards
-                }
-                spacing_left_ += spacing_ - error_;
-                error_ = 0.0;
-            }
-            double dx = next_x - last_x;
-            double dy = next_y - last_y;
-            double segment_length = std::sqrt(dx * dx + dy * dy);
-            if (segment_length <= spacing_left_)
-            {
-                //Segment is too short to place marker. Find next segment
-                spacing_left_ -= segment_length;
-                last_x = next_x;
-                last_y = next_y;
-                while (agg::is_move_to(cmd = locator_.vertex(&next_x, &next_y)))
-                {
-                    //Skip over "move" commands
-                    last_x = next_x;
-                    last_y = next_y;
-                }
-                if (agg::is_stop(cmd) || cmd == SEG_CLOSE)
-                {
-                    done_ = true;
-                    return false;
-                }
-                continue; //Try again
-            }
-            /* At this point we know the following things:
-               - segment_length > spacing_left
-               - error is small enough
-               - at least half a marker fits into this segment
-            */
-            //Check if marker really fits in this segment
-            if (segment_length < marker_width_)
-            {
-                //Segment to short => Skip this segment
-                set_spacing_left(segment_length + marker_width_/2); //Only moves forward
-                continue;
-            }
-            else if (segment_length - spacing_left_ < marker_width_/2)
-            {
-                //Segment is long enough, but we are to close to the end
-                //Note: This function moves backwards. This could lead to an infinite
-                // loop when another function adds a positive offset. Therefore we
-                // only move backwards when there is no offset
-                if (error_ == 0)
-                {
-                    set_spacing_left(segment_length - marker_width_/2, true);
-                }
-                else
-                {
-                    //Skip this segment
-                    set_spacing_left(segment_length + marker_width_/2); //Only moves forward
-                }
-                continue; //Force checking of max_error constraint
-            }
-            angle = std::atan2(dy, dx);
-            x = last_x + dx * (spacing_left_ / segment_length);
-            y = last_y + dy * (spacing_left_ / segment_length);
-            box2d<double> box = perform_transform(angle, x, y);
-            if (!allow_overlap_ && !detector_.has_placement(box))
-            {
-                //10.0 is the approximate number of positions tried and choosen arbitrarily
-                set_spacing_left(spacing_left_ + spacing_ * max_error_ / 10.0); //Only moves forward
-                continue;
-            }
-            if (!ignore_placement)
-            {
-                detector_.insert(box);
-            }
-            last_x = x;
-            last_y = y;
-            return true;
-        }
+        return boost::apply_visitor(get_point_visitor(x, y, angle, ignore_placement), placement_);
     }
 
 private:
-    Locator &locator_;
-    box2d<double> size_;
-    agg::trans_affine tr_;
-    Detector &detector_;
-    double spacing_;
-    double max_error_;
-    bool allow_overlap_;
-    double marker_width_;
-
-    bool done_;
-    double last_x;
-    double last_y;
-    double next_x;
-    double next_y;
-    /** If a marker could not be placed at the exact point where it should
-     * go the next marker's distance will be a bit lower. */
-    double error_;
-    double spacing_left_;
-    unsigned marker_nr_;
-
-    /** Rotates the size_ box and translates the position. */
-    box2d<double> perform_transform(double angle, double dx, double dy)
+    // Factory function for particular placement implementations.
+    static markers_placement create(marker_placement_e placement_type,
+                             Locator &locator,
+                             box2d<double> const& size,
+                             agg::trans_affine const& tr,
+                             Detector &detector,
+                             double spacing,
+                             double max_error,
+                             bool allow_overlap)
     {
-        double x1 = size_.minx();
-        double x2 = size_.maxx();
-        double y1 = size_.miny();
-        double y2 = size_.maxy();
-        agg::trans_affine tr = tr_ * agg::trans_affine_rotation(angle).translate(dx, dy);
-        double xA = x1, yA = y1, xB = x2, yB = y1, xC = x2, yC = y2, xD = x1, yD = y2;
-        tr.transform(&xA, &yA);
-        tr.transform(&xB, &yB);
-        tr.transform(&xC, &yC);
-        tr.transform(&xD, &yD);
-        box2d<double> result(xA, yA, xC, yC);
-        result.expand_to_include(xB, yB);
-        result.expand_to_include(xD, yD);
-        return result;
+        static const std::map<marker_placement_e, boost::function<markers_placement(
+            Locator &locator,
+            box2d<double> const& size,
+            agg::trans_affine const& tr,
+            Detector &detector,
+            double spacing,
+            double max_error,
+            bool allow_overlap)>> factories =
+            {
+                { MARKER_POINT_PLACEMENT, boost::value_factory<markers_point_placement<Locator, Detector>>() },
+                { MARKER_INTERIOR_PLACEMENT, boost::value_factory<markers_interior_placement<Locator, Detector>>() },
+                { MARKER_LINE_PLACEMENT, boost::value_factory<markers_line_placement<Locator, Detector>>() },
+                { MARKER_VERTEX_FIRST_PLACEMENT, boost::value_factory<markers_vertex_first_placement<Locator, Detector>>() },
+                { MARKER_VERTEX_LAST_PLACEMENT, boost::value_factory<markers_vertex_last_placement<Locator, Detector>>() }
+            };
+        return factories.at(placement_type)(locator, size, tr, detector, spacing, max_error, allow_overlap);
     }
 
-    /** Set spacing_left_, adjusts error_ and performs sanity checks. */
-    void set_spacing_left(double sl, bool allow_negative=false)
-    {
-        double delta_error = sl - spacing_left_;
-        if (!allow_negative && delta_error < 0)
-        {
-            MAPNIK_LOG_WARN(markers_placement) << "Unexpected negative error in markers_placement. Please file a bug report.";
-            return;
-        }
-    #ifdef MAPNIK_DEBUG
-        if (delta_error == 0.0)
-        {
-            MAPNIK_LOG_WARN(markers_placement) << "Not moving at all in set_spacing_left()! Please file a bug report.";
-        }
-    #endif
-        error_ += delta_error;
-        spacing_left_ = sl;
-    }
-
+    markers_placement placement_;
 };
 
 }

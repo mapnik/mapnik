@@ -30,23 +30,29 @@
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
 
+// stl
+#include <memory>
+#include <map>
+
 namespace mapnik {
 
 class text_layout;
 class feature_impl;
 class xml_node;
+class font_set;
 
 namespace formatting {
 
 class node;
 using node_ptr = std::shared_ptr<node>;
+using fontset_map = std::map<std::string, font_set>;
 
 class MAPNIK_DECL node
 {
 public:
     virtual ~node() {}
     virtual void to_xml(boost::property_tree::ptree & xml) const = 0;
-    static node_ptr from_xml(xml_node const& xml);
+    static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
     virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const = 0;
     virtual void add_expressions(expression_set & output) const = 0;
 };

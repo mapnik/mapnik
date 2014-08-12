@@ -499,6 +499,12 @@ elif HELP_REQUESTED:
     # to ensure config gets skipped when help is requested
     preconfigured = True
 
+# need no-op for clean on fresh checkout
+# https://github.com/mapnik/mapnik/issues/2112
+if ('-c' in command_line_args) or ('--clean' in command_line_args) and not os.path.exists(SCONS_CONFIGURE_CACHE):
+    print 'all good: nothing to clean'
+    Exit(0)
+
 # initially populate environment with defaults and any possible custom arguments
 opts.Update(env)
 
@@ -1525,7 +1531,7 @@ if not preconfigured:
                 env["CAIRO_ALL_LIBS"] = ['cairo']
                 if env['RUNTIME_LINK'] == 'static':
                     env["CAIRO_ALL_LIBS"].extend(
-                        ['pixman-1','expat','fontconfig']
+                        ['pixman-1','expat']
                     )
                 # todo - run actual checkLib?
                 env['HAS_CAIRO'] = True
@@ -1779,7 +1785,7 @@ if not preconfigured:
         else:
             # TODO - add back -fvisibility-inlines-hidden
             # https://github.com/mapnik/mapnik/issues/1863
-            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 

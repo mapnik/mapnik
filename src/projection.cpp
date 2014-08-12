@@ -49,6 +49,7 @@ namespace mapnik {
 projection::projection(std::string const& params, bool defer_proj_init)
     : params_(params),
       defer_proj_init_(defer_proj_init),
+      is_geographic_(false),
       proj_(nullptr),
       proj_ctx_(nullptr)
 {

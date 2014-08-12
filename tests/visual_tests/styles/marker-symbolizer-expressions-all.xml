@@ -1,0 +1,81 @@
+<Map
+    background-color="#eee"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="bug">
+        <Rule>
+            <Filter>[id] = 'file'</Filter>
+            <MarkersSymbolizer file="[value]" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'allow-overlap'</Filter>
+            <MarkersSymbolizer allow-overlap="[value]" file="../../data/images/crosshair16x16.png" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'opacity'</Filter>
+            <MarkersSymbolizer opacity="[value]" file="../../data/images/crosshair16x16.png" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'transform'</Filter>
+            <MarkersSymbolizer transform="scale([value],[value])" file="../../data/images/crosshair16x16.png" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'ignore-placement'</Filter>
+            <MarkersSymbolizer ignore-placement="[value]" file="../../data/images/crosshair16x16.png" />
+        </Rule>
+        <Rule>
+            <Filter>[id] = 'comp-op'</Filter>
+            <MarkersSymbolizer comp-op="[value]" file="../../data/images/crosshair16x16.png" />
+        </Rule>
+        <Rule>
+            <TextSymbolizer dy='-20' face-name='DejaVu Sans Book' halo-fill='#ffffff' halo-radius='1'>[id]</TextSymbolizer>
+            <DebugSymbolizer />
+        </Rule>
+    </Style>
+
+    <Style name="frame">
+        <Rule>
+            <PolygonSymbolizer />
+        </Rule>
+    </Style>
+
+    <!-- 
+      frame is a layer with a single polygon that is used to ensure that m.zoom_all() will zoom the
+      map to a reasonable bounding extent to make the test easy to view with tools like nik2img.py
+      (which calls m.zoom_all() by default). Another approach in >= Mapnik 2.3.x is to just sent a
+      manual `extent` for the CSV datasource.
+    -->
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt|name
+Polygon((-180.0 -125.0, -180.0 125.0, 180.0 125.0, 180.0 -125.0, -180.0 -125.0))|bounds
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- 
+      "bug" is a layer that should provide sample data that triggers the bug in question. It is
+      listed after the "frame" layer so that it renders on top and is visible.
+    -->
+
+    <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>bug</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+id|value|wkt
+file|../../data/images/crosshair16x16.png|Point(-130 -70)
+allow-overlap|true|Point(0 -70)
+opacity|.5|Point(130 -70)
+transform|1.2|Point(-130 30)
+ignore-placement|true|Point(0 30)
+comp-op|src-over|Point(130 30)
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>

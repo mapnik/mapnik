@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
+#include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
 namespace mapnik {
 
@@ -104,7 +105,7 @@ void render_thunk_extractor::operator()(text_symbolizer const& sym) const
         common_.width_, common_.height_,
         common_.scale_factor_,
         common_.t_, common_.font_manager_, *common_.detector_,
-        clip_box);
+        clip_box, agg::trans_affine());
 
     extract_text_thunk(helper, sym);
 }
@@ -117,7 +118,7 @@ void render_thunk_extractor::operator()(shield_symbolizer const& sym) const
         common_.width_, common_.height_,
         common_.scale_factor_,
         common_.t_, common_.font_manager_, *common_.detector_,
-        clip_box);
+        clip_box, agg::trans_affine());
 
     extract_text_thunk(helper, sym);
 }

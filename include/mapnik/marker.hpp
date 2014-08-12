@@ -24,23 +24,20 @@
 #define MAPNIK_MARKER_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // agg
-#include "agg_path_storage.h"
+#include "agg_array.h"
 
 // boost
-#include <boost/unordered_map.hpp>
 #include <boost/optional.hpp>
 
 // stl
 #include <memory>
-#include <cstring>
 
 namespace mapnik
 {
@@ -64,21 +61,14 @@ public:
     }
 
     marker(boost::optional<mapnik::image_ptr> const& data)
-        : bitmap_data_(data)
-    {
-
-    }
+        : bitmap_data_(data) {}
 
     marker(boost::optional<mapnik::svg_path_ptr> const& data)
-        : vector_data_(data)
-    {
-
-    }
+        : vector_data_(data) {}
 
     marker(marker const& rhs)
         : bitmap_data_(rhs.bitmap_data_),
-          vector_data_(rhs.vector_data_)
-    {}
+          vector_data_(rhs.vector_data_) {}
 
     box2d<double> bounding_box() const
     {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,24 +20,30 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GAMMA_METHOD_HPP
-#define MAPNIK_GAMMA_METHOD_HPP
+#if defined(HAVE_CAIRO)
 
-#include <mapnik/enumeration.hpp>
+#ifndef MAPNIK_CAIRO_RENDER_VECTOR_HPP
+#define MAPNIK_CAIRO_RENDER_VECTOR_HPP
+
+// mapnik
+#include <mapnik/svg/svg_path_adapter.hpp>
+
+namespace agg { struct trans_affine; }
 
 namespace mapnik {
 
-enum gamma_method_enum {
-    GAMMA_POWER, //agg::gamma_power
-    GAMMA_LINEAR, //agg::gamma_linear
-    GAMMA_NONE, //agg::gamma_none
-    GAMMA_THRESHOLD, //agg::gamma_threshold
-    GAMMA_MULTIPLY, //agg::gamma_multiply
-    gamma_method_enum_MAX
-};
+class cairo_context;
+struct pixel_position;
+template <typename T> class box2d;
+namespace svg { struct path_attributes; }
 
-DEFINE_ENUM (gamma_method_e, gamma_method_enum );
+void render_vector_marker(cairo_context & context, pixel_position const& pos,
+                          svg::svg_path_adapter & svg_path, box2d<double> const& bbox,
+                          agg::pod_bvector<svg::path_attributes> const & attributes,
+                          agg::trans_affine const& tr, double opacity, bool recenter);
 
 }
 
-#endif // MAPNIK_GAMMA_METHOD_HPP
+#endif // MAPNIK_CAIRO_RENDER_VECTOR_HPP
+
+#endif

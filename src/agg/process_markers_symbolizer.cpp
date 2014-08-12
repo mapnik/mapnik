@@ -39,7 +39,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_renderer_base.h"
@@ -90,7 +90,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
     }
 
     buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
     using context_type = decltype(renderer_context);

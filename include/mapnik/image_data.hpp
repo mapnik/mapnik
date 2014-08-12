@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/config.hpp>
 
 // stl
 #include <cassert>
@@ -34,7 +35,7 @@
 namespace mapnik
 {
 template <typename T>
-class ImageData
+class MAPNIK_DECL ImageData
 {
 public:
     using pixel_type = T;

@@ -58,17 +58,16 @@ extern "C"
 #include <cairo.h>
 #ifdef CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>
-#endif // CAIRO_HAS_PDF_SURFACE
+#endif
 #ifdef CAIRO_HAS_PS_SURFACE
 #include <cairo-ps.h>
-#endif // CAIRO_HAS_PS_SURFACE
+#endif
 #ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
-#endif // CAIRO_HAS_SVG_SURFACE
+#endif
 #endif
 
 // boost
-
 #include <boost/tokenizer.hpp>
 
 // stl

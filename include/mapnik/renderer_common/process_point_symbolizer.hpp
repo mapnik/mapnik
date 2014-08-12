@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,11 @@
 #define MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP
 
 #include <mapnik/geom_util.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
 namespace mapnik {
 

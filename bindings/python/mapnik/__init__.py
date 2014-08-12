@@ -795,24 +795,6 @@ class _TextSymbolizer(TextSymbolizer,_injector):
 
 
     @property
-    def wrap_char(self):
-        return self.format.wrap_char
-
-    @wrap_char.setter
-    def wrap_char(self, wrap_char):
-        self.format.wrap_char = wrap_char
-
-
-    @property
-    def wrap_character(self):
-        return self.format.wrap_character
-
-    @wrap_char.setter
-    def wrap_character(self, wrap_character):
-        self.format.wrap_character = wrap_character
-
-
-    @property
     def wrap_before(self):
         return self.format.wrap_before
 

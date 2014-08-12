@@ -28,9 +28,6 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <memory>
-
 // stl
 #include <map>
 #include <set>
@@ -61,6 +58,9 @@ private:
     bool registered_;
     std::set<std::string> plugin_directories_;
 };
+
+extern template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;
+
 }
 
 #endif // MAPNIK_DATASOURCE_CACHE_HPP

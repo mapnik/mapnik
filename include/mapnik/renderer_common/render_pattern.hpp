@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,22 +20,29 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/gamma_method.hpp>
-#include <mapnik/enumeration.hpp>
+#ifndef MAPNIK_RENDER_PATTERN_HPP
+#define MAPNIK_RENDER_PATTERN_HPP
 
-namespace mapnik
-{
+#include <mapnik/image_data.hpp>
+#include <memory>
 
-static const char * gamma_method_strings[] = {
-    "power", //agg::gamma_power
-    "linear", //agg::gamma_linear
-    "none", //agg::gamma_none
-    "threshold", //agg::gamma_threshold
-    "multiply", //agg::gamma_multiply",
-    ""
-};
-
-IMPLEMENT_ENUM( gamma_method_e, gamma_method_strings )
-
+// fwd decl
+namespace agg {
+struct trans_affine;
 }
+
+namespace mapnik {
+
+// fwd decl
+struct rasterizer;
+class marker;
+
+std::shared_ptr<image_data_32> render_pattern(rasterizer & ras,
+                                              marker const& marker,
+                                              agg::trans_affine const& tr,
+                                              double opacity);
+
+} // namespace mapnik
+
+
+#endif // MAPNIK_RENDER_PATTERN_HPP

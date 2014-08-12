@@ -36,7 +36,7 @@ extern "C"
 }
 
 //stl
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -47,6 +47,7 @@ namespace mapnik
 class font_face : mapnik::noncopyable
 {
 public:
+    using glyph_info_cache_type = std::unordered_map<glyph_index_t, glyph_info>;
     font_face(FT_Face face);
 
     std::string family_name() const
@@ -69,13 +70,13 @@ public:
     bool set_character_sizes(double size);
     bool set_unscaled_character_sizes();
 
-    void glyph_dimensions(glyph_info &glyph) const;
+    bool glyph_dimensions(glyph_info &glyph) const;
 
     ~font_face();
 
 private:
     FT_Face face_;
-    mutable std::map<glyph_index_t, glyph_info> dimension_cache_;
+    mutable glyph_info_cache_type glyph_info_cache_;
     mutable double char_height_;
 };
 using face_ptr = std::shared_ptr<font_face>;

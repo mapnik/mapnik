@@ -30,7 +30,6 @@
 // stl
 #include <string>
 #include <algorithm>
-#include <locale>
 
 namespace mapnik { namespace util {
 
@@ -42,7 +41,9 @@ by many other headers inside mapnik.
 
 MAPNIK_DECL inline bool string2bool(std::string const& value, bool & result)
 {
-    if (value == "true") {
+    if (value.empty() || value.size() > 5) {
+        return false;
+    } else if (value == "true") {
         return result = true;
     } else if (value == "false") {
         result = false;
@@ -52,9 +53,11 @@ MAPNIK_DECL inline bool string2bool(std::string const& value, bool & result)
     std::transform(val.begin(), val.end(), val.begin(), ::tolower);
     if (val == "true" || val == "yes" || val == "1" || val == "on") {
         return result = true;
+    } else if (val == "false" || val == "no" || val == "0" || val == "off") {
+        result = false;
+        return true;
     }
-    result = false;
-    return true;
+    return false;
 }
 
 MAPNIK_DECL inline bool string2bool(const char * iter, const char * end, bool & result)

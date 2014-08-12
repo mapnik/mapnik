@@ -67,13 +67,13 @@ public:
     inline size_type push(key_type const& name)
     {
         size_type index = mapping_.size();
-        mapping_.insert(std::make_pair(name, index));
+        mapping_.emplace(name, index);
         return index;
     }
 
     inline void add(key_type const& name, size_type index)
     {
-        mapping_.insert(std::make_pair(name, index));
+        mapping_.emplace(name, index);
     }
 
     inline size_type size() const { return mapping_.size(); }

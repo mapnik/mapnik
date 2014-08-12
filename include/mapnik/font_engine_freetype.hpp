@@ -28,17 +28,15 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
+// stl
 #include <memory>
 #include <map>
 #include <utility> // pair
+#include <vector>
 
 #ifdef MAPNIK_THREADSAFE
 #include <mutex>
 #endif
-
-// stl
-#include <vector>
 
 struct FT_LibraryRec_;
 struct FT_MemoryRec_;

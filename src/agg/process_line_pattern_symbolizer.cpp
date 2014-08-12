@@ -33,7 +33,8 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/parse_path.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/render_pattern.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
@@ -48,39 +49,6 @@
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
 #include "agg_conv_clip_polyline.h"
-
-// boost
-
-
-namespace {
-
-class pattern_source : private mapnik::noncopyable
-{
-public:
-    pattern_source(mapnik::image_data_32 const& pattern)
-        : pattern_(pattern) {}
-
-    inline unsigned int width() const
-    {
-        return pattern_.width();
-    }
-    inline unsigned int height() const
-    {
-        return pattern_.height();
-    }
-    inline agg::rgba8 pixel(int x, int y) const
-    {
-        unsigned c = pattern_(x,y);
-        return agg::rgba8_pre(c & 0xff,
-                          (c >> 8) & 0xff,
-                          (c >> 16) & 0xff,
-                          (c >> 24) & 0xff);
-    }
-private:
-    mapnik::image_data_32 const& pattern_;
-};
-
-}
 
 namespace mapnik {
 
@@ -102,20 +70,26 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
-    if (!mark) return;
-
-    if (!(*mark)->is_bitmap())
+    boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
+    if (!marker_ptr || !(*marker_ptr)) return;
+    boost::optional<image_ptr> pat;
+    // TODO - re-implement at renderer level like polygon_pattern symbolizer
+    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
+    if ((*marker_ptr)->is_bitmap())
     {
-        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
-        return;
+        pat = (*marker_ptr)->get_bitmap_data();
+    }
+    else
+    {
+        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
+        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, 1.0);
     }
 
-    boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
     bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    //double opacity = get<value_double>(sym,keys::stroke_opacity,feature, 1.0); TODO
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
@@ -126,7 +100,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 
-    pattern_source source(*(*pat));
+    pattern_source source(*(*pat), opacity);
     pattern_type pattern (filter,source);
     renderer_type ren(ren_base, pattern);
     rasterizer_type ras(ren);
@@ -135,11 +109,11 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
     if (clip)
     {
         double padding = (double)(common_.query_extent_.width()/pixmap_.width());
-        double half_stroke = (*mark)->width()/2.0;
+        double half_stroke = (*marker_ptr)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         if (std::fabs(offset) > 0)
@@ -148,7 +122,10 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         clip_box.pad(padding);
     }
 
-    using conv_types = boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag,smooth_tag,
+                                          offset_transform_tag>;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);

@@ -127,9 +127,8 @@ struct symbolizer_name_impl : public boost::static_visitor<std::string>
 {
 public:
     template <typename Symbolizer>
-    std::string operator () (Symbolizer const& sym) const
+    std::string operator () (Symbolizer const&) const
     {
-        boost::ignore_unused_variable_warning(sym);
         return symbolizer_traits<Symbolizer>::name();
     }
 };
@@ -389,6 +388,49 @@ struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
         std::string const& name = std::get<0>(get_meta(key));
         boost::optional<std::string> transform = node.get_opt_attr<std::string>(name);
         if (transform) put(sym, key, mapnik::parse_transform(*transform));
+    }
+};
+
+template <typename Symbolizer>
+struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
+{
+    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    {
+        std::string const& name = std::get<0>(get_meta(key));
+        boost::optional<std::string> str = node.get_opt_attr<std::string>(name);
+        if (str)
+        {
+            std::vector<double> buf;
+            dash_array dash;
+            if (util::parse_dasharray((*str).begin(),(*str).end(),buf) && util::add_dashes(buf,dash))
+            {
+                put(sym,key,dash);
+            }
+            else
+            {
+                boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+                if (val)
+                {
+                    // first try pre-evaluate expressions which don't have dynamic properties
+                    auto result = pre_evaluate_expression<mapnik::value>(*val);
+                    if (std::get<1>(result))
+                    {
+                        set_property_from_value(sym, key,std::get<0>(result));
+                    }
+                    else
+                    {
+                        // expression_ptr
+                        put(sym, key, *val);
+                    }
+                }
+                else
+                {
+                    throw config_error(std::string("Failed to parse dasharray ") +
+                                       "'. Expected a " +
+                                       "list of floats or 'none' but got '" + (*str) + "'");
+                }
+            }
+        }
     }
 };
 

@@ -87,18 +87,7 @@ struct hash_visitor : boost::static_visitor<std::size_t>
     }
 };
 
-}
+} // namespace mapnik
 
-namespace std {
-
-template<>
-struct hash<mapnik::symbolizer>
-{
-    std::size_t operator()(mapnik::symbolizer const& sym) const
-    {
-        return boost::apply_visitor(mapnik::hash_visitor(),sym);
-    }
-};
-}
 
 #endif // MAPNIK_SYMBOLIZER_HASH_HPP

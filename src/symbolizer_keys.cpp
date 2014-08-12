@@ -22,7 +22,6 @@
 
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/gamma_method.hpp>
 #include <mapnik/simplify.hpp>
 
 // boost

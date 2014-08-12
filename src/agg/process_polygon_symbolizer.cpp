@@ -32,7 +32,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
-
+#include <mapnik/renderer_common/clipping_extent.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -64,7 +64,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    box2d<double> clip_box = clipping_extent();
+    box2d<double> clip_box = clipping_extent(common_);
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
 
     render_polygon_symbolizer<vertex_converter_type>(

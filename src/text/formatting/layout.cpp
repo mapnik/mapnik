@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/text_layout.hpp>
+#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/ptree_helpers.hpp>
@@ -59,10 +60,10 @@ void layout_node::to_xml(ptree &xml) const
     if (child_) child_->to_xml(new_node);
 }
 
-node_ptr layout_node::from_xml(xml_node const& xml)
+node_ptr layout_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
     auto n = std::make_shared<layout_node>();
-    node_ptr child = node::from_xml(xml);
+    node_ptr child = node::from_xml(xml, fontsets);
     n->set_child(child);
 
     if (xml.has_attribute("dx")) set_property_from_xml<double>(n->dx, "dx", xml);

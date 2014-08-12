@@ -26,6 +26,9 @@
 // boost
 #include <boost/variant.hpp>
 
+// std
+#include <memory>
+
 namespace mapnik
 {
 

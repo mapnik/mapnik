@@ -113,9 +113,9 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(len(ds.fields()),10)
         eq_(len(ds.field_types()),10)
         eq_(ds.fields(),['x', 'y', 'text', 'date', 'integer', 'boolean', 'float', 'time', 'datetime', 'empty_column'])
-        eq_(ds.field_types(),['int', 'int', 'str', 'str', 'int', 'str', 'float', 'str', 'str', 'str'])
+        eq_(ds.field_types(),['int', 'int', 'str', 'str', 'int', 'bool', 'float', 'str', 'str', 'str'])
         fs = ds.featureset()
-        attr = {'x': 0, 'empty_column': u'', 'text': u'a b', 'float': 1.0, 'datetime': u'1971-01-01T04:14:00', 'y': 0, 'boolean': u'True', 'time': u'04:14:00', 'date': u'1971-01-01', 'integer': 40}
+        attr = {'x': 0, 'empty_column': u'', 'text': u'a b', 'float': 1.0, 'datetime': u'1971-01-01T04:14:00', 'y': 0, 'boolean': True, 'time': u'04:14:00', 'date': u'1971-01-01', 'integer': 40}
         first = True
         for feat in fs:
             if first:
@@ -331,18 +331,18 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         ds = get_csv_ds('nulls_and_booleans_as_strings.csv')
         eq_(len(ds.fields()),4)
         eq_(ds.fields(),['x','y','null','boolean'])
-        eq_(ds.field_types(),['int','int','str','str'])
+        eq_(ds.field_types(),['int', 'int', 'str', 'bool'])
         fs = ds.featureset()
         feat = fs.next()
         eq_(feat['x'],0)
         eq_(feat['y'],0)
         eq_(feat['null'],'null')
-        eq_(feat['boolean'],'true')
+        eq_(feat['boolean'],True)
         feat = fs.next()
         eq_(feat['x'],0)
         eq_(feat['y'],0)
         eq_(feat['null'],'')
-        eq_(feat['boolean'],'false')
+        eq_(feat['boolean'],False)
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 

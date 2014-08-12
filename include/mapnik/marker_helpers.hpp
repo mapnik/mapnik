@@ -36,6 +36,8 @@
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/vertex_converters.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
 // agg
 #include "agg_ellipse.h"
@@ -111,69 +113,36 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
-
+        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
         coord2d center = bbox_.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
-
-        if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == mapnik::geometry_type::types::Point)
+        agg::trans_affine tr = recenter * marker_trans_;
+        markers_placement_finder<T, Detector> placement_finder(
+            placement_method,
+            path,
+            bbox_,
+            tr,
+            detector_,
+            spacing * scale_factor_,
+            max_error,
+            allow_overlap);
+        double x, y, angle = .0;
+        while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            double x = 0;
-            double y = 0;
-            if (path.type() == mapnik::geometry_type::types::LineString)
-            {
-                if (!label::middle_point(path, x, y)) return;
-            }
-            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
-            {
-                if (!label::interior_position(path, x, y)) return;
-            }
-            else
-            {
-                if (!label::centroid(path, x, y)) return;
-            }
-            agg::trans_affine matrix = recenter * marker_trans_;
-            matrix.translate(x,y);
+            agg::trans_affine matrix = tr;
+            matrix.rotate(angle);
+            matrix.translate(x, y);
             if (snap_to_pixels_)
             {
                 // https://github.com/mapnik/mapnik/issues/1316
-                matrix.tx = std::floor(matrix.tx+.5);
-                matrix.ty = std::floor(matrix.ty+.5);
+                matrix.tx = std::floor(matrix.tx + .5);
+                matrix.ty = std::floor(matrix.ty + .5);
             }
-            // TODO https://github.com/mapnik/mapnik/issues/1754
-            box2d<double> transformed_bbox = bbox_ * matrix;
-
-            if (allow_overlap ||
-                detector_.has_placement(transformed_bbox))
-            {
-                svg_renderer_.render(ras_, sl_, renb_, matrix, opacity, bbox_);
-                if (!ignore_placement)
-                {
-                    detector_.insert(transformed_bbox);
-                }
-            }
-        }
-        else
-        {
-            double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-            double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-            markers_placement<T, Detector> placement(path, bbox_, marker_trans_, detector_,
-                                                     spacing * scale_factor_,
-                                                     max_error,
-                                                     allow_overlap);
-            double x = 0;
-            double y = 0;
-            double angle = 0;
-            while (placement.get_point(x, y, angle, ignore_placement))
-            {
-
-                agg::trans_affine matrix = recenter * marker_trans_;
-                matrix.rotate(angle);
-                matrix.translate(x, y);
-                svg_renderer_.render(ras_, sl_, renb_, matrix, opacity, bbox_);
-            }
+            svg_renderer_.render(ras_, sl_, renb_, matrix, opacity, bbox_);
         }
     }
+
 private:
     BufferType & buf_;
     pixfmt_type pixf_;
@@ -236,54 +205,24 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
         box2d<double> bbox_(0,0, src_.width(),src_.height());
         double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
-
-        if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == mapnik::geometry_type::types::Point)
+        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
+        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        markers_placement_finder<T, label_collision_detector4> placement_finder(
+            placement_method,
+            path,
+            bbox_,
+            marker_trans_,
+            detector_,
+            spacing * scale_factor_,
+            max_error,
+            allow_overlap);
+        double x, y, angle = .0;
+        while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            double x = 0;
-            double y = 0;
-            if (path.type() == mapnik::geometry_type::types::LineString)
-            {
-                if (!label::middle_point(path, x, y)) return;
-            }
-            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
-            {
-                if (!label::interior_position(path, x, y)) return;
-            }
-            else
-            {
-                if (!label::centroid(path, x, y)) return;
-            }
             agg::trans_affine matrix = marker_trans_;
-            matrix.translate(x,y);
-            box2d<double> transformed_bbox = bbox_ * matrix;
-
-            if (allow_overlap ||
-                detector_.has_placement(transformed_bbox))
-            {
-                render_raster_marker(matrix, opacity);
-                if (!ignore_placement)
-                {
-                    detector_.insert(transformed_bbox);
-                }
-            }
-        }
-        else
-        {
-            double spacing  = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-            double max_error  = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-            markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
-                                                                      spacing * scale_factor_,
-                                                                      max_error,
-                                                                      allow_overlap);
-            double x, y, angle;
-            while (placement.get_point(x, y, angle, ignore_placement))
-            {
-                agg::trans_affine matrix = marker_trans_;
-                matrix.rotate(angle);
-                matrix.translate(x, y);
-                render_raster_marker(matrix, opacity);
-            }
+            matrix.rotate(angle);
+            matrix.translate(x, y);
+            render_raster_marker(matrix, opacity);
         }
     }
 
@@ -302,11 +241,22 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
         {
             agg::rendering_buffer src_buffer((unsigned char *)src_.getBytes(),src_.width(),src_.height(),src_.width() * 4);
             pixfmt_pre pixf_mask(src_buffer);
-            renb_.blend_from(pixf_mask,
-                             0,
-                             std::floor(marker_tr.tx + .5),
-                             std::floor(marker_tr.ty + .5),
-                             unsigned(255*opacity));
+            if (snap_to_pixels_)
+            {
+                renb_.blend_from(pixf_mask,
+                                 0,
+                                 std::floor(marker_tr.tx + .5),
+                                 std::floor(marker_tr.ty + .5),
+                                 unsigned(255*opacity));
+            }
+            else
+            {
+                renb_.blend_from(pixf_mask,
+                                 0,
+                                 marker_tr.tx,
+                                 marker_tr.ty,
+                                 unsigned(255*opacity));
+            }
         }
         else
         {

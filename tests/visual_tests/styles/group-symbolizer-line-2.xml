@@ -99,6 +99,7 @@ wkt,nr
   <Style name="frame">
     <Rule>
       <PointSymbolizer/>
+      <DebugSymbolizer/>
     </Rule>
   </Style>
 

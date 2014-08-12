@@ -43,7 +43,7 @@ namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
 
-namespace {
+namespace detail {
 
 struct get_type
 {
@@ -143,9 +143,9 @@ struct geometry_generator_grammar :
     karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
     karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
     karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
-    boost::phoenix::function<get_type > _type;
-    boost::phoenix::function<get_first> _first;
-    karma::real_generator<double, json_coordinate_policy<double> > coord_type;
+    boost::phoenix::function<detail::get_type > _type;
+    boost::phoenix::function<detail::get_first> _first;
+    karma::real_generator<double, detail::json_coordinate_policy<double> > coord_type;
 };
 
 
@@ -165,9 +165,9 @@ struct multi_geometry_generator_grammar :
                 geometry_type const&()> geometry2;
     karma::rule<OutputIterator, geometry_container const&()> coordinates;
     geometry_generator_grammar<OutputIterator>  path;
-    boost::phoenix::function<multi_geometry_type> multi_type_;
-    boost::phoenix::function<get_type > type_;
-    boost::phoenix::function<not_empty> not_empty_;
+    boost::phoenix::function<detail::multi_geometry_type> multi_type_;
+    boost::phoenix::function<detail::get_type > type_;
+    boost::phoenix::function<detail::not_empty> not_empty_;
     karma::symbols<unsigned, char const*> geometry_types;
 };
 

@@ -3,7 +3,7 @@
     <Style name="1">
         <Rule>
             <Filter>([name]='CHILE')</Filter>
-            <TextSymbolizer size="10" dy="5" face-name="DejaVu Sans Book" text-transform="lowercase" wrap-width="10" wrap-character=" " halo-radius="1">[name] + ' (default OGC pixel)'</TextSymbolizer>
+            <TextSymbolizer size="10" dy="5" face-name="DejaVu Sans Book" text-transform="lowercase" wrap-width="10" halo-radius="1">[name] + ' (default OGC pixel)'</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>
         <Rule>

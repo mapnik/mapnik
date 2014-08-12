@@ -37,8 +37,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/renderer_common.hpp>
 
-// boost
-
+// stl
 #include <memory>
 
 // fwd declaration to avoid depedence on agg headers

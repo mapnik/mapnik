@@ -384,10 +384,10 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_agg<svg_path_adapter,
-            svg_attribute_type,
-            renderer_type,
-            pixfmt_comp_type> svg_renderer(svg_path,
-                                                   (*marker.get_vector_data())->attributes());
+                         svg_attribute_type,
+                         renderer_type,
+                         pixfmt_comp_type> svg_renderer(svg_path,
+                                                        (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
     }

@@ -11,6 +11,7 @@
                 placement="line"
                 spacing="50"
             />
+            <DebugSymbolizer />
         </Rule>
     </Style>
     <Layer name="point" srs="+init=epsg:4326">

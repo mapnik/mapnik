@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/expression.hpp>
@@ -38,8 +39,9 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/gamma_method.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/util/dasharray_parser.hpp>
+
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -49,7 +51,6 @@
 #include <functional>
 // boost
 #include <boost/variant/variant_fwd.hpp>
-#include <boost/concept_check.hpp>
 
 namespace agg { struct trans_affine; }
 
@@ -89,7 +90,7 @@ using dash_array = std::vector<std::pair<double,double> >;
 class text_placements;
 using text_placements_ptr = std::shared_ptr<text_placements>;
 
-struct  MAPNIK_DECL symbolizer_base
+struct MAPNIK_DECL symbolizer_base
 {
     using value_type =  boost::variant<value_bool,
                                        value_integer,
@@ -161,10 +162,8 @@ struct evaluate_path_wrapper
 {
     using result_type = T;
     template <typename T1, typename T2>
-    result_type operator() (T1 const& expr, T2 const& feature) const
+    result_type operator() (T1 const&, T2 const&) const
     {
-        boost::ignore_unused_variable_warning(expr);
-        boost::ignore_unused_variable_warning(feature);
         return result_type();
     }
 
@@ -183,14 +182,7 @@ struct evaluate_path_wrapper<std::string>
 namespace detail {
 
 template <typename T>
-struct enum_traits
-{
-    using result_type = boost::optional<T>;
-    static result_type from_string(std::string const& str)
-    {
-        return result_type();
-    }
-};
+struct enum_traits {};
 
 template <>
 struct enum_traits<composite_mode_e>
@@ -199,6 +191,16 @@ struct enum_traits<composite_mode_e>
     static result_type from_string(std::string const& str)
     {
         return comp_op_from_string(str);
+    }
+};
+
+template <>
+struct enum_traits<scaling_method_e>
+{
+    using result_type = boost::optional<scaling_method_e>;
+    static result_type from_string(std::string const& str)
+    {
+        return scaling_method_from_string(str);
     }
 };
 
@@ -230,15 +232,22 @@ template <> struct enum_traits<e> { \
     } \
 };\
 
-ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( line_cap_enum )
+ENUM_FROM_STRING( line_join_enum )
 ENUM_FROM_STRING( point_placement_enum )
-ENUM_FROM_STRING( marker_placement_enum )
-ENUM_FROM_STRING( gamma_method_enum )
 ENUM_FROM_STRING( line_rasterizer_enum )
+ENUM_FROM_STRING( marker_placement_enum )
 ENUM_FROM_STRING( marker_multi_policy_enum )
+ENUM_FROM_STRING( debug_symbolizer_mode_enum )
+ENUM_FROM_STRING( pattern_alignment_enum )
 ENUM_FROM_STRING( halo_rasterizer_enum )
+ENUM_FROM_STRING( label_placement_enum )
+ENUM_FROM_STRING( vertical_alignment_enum )
+ENUM_FROM_STRING( horizontal_alignment_enum )
+ENUM_FROM_STRING( justify_alignment_enum )
 ENUM_FROM_STRING( text_transform_enum )
+ENUM_FROM_STRING( text_upright_enum )
+ENUM_FROM_STRING( gamma_method_enum )
 
 // enum
 template <typename T, bool is_enum = true>
@@ -279,9 +288,8 @@ template <typename T>
 struct enumeration_result<T,false>
 {
     using result_type = T;
-    static result_type convert(enumeration_wrapper const& e)
+    static result_type convert(enumeration_wrapper const&)
     {
-        boost::ignore_unused_variable_warning(e);
         return result_type();// FAIL
     }
 };
@@ -299,10 +307,7 @@ struct put_impl
         }
         else
         {
-            // NOTE: we use insert here instead of emplace
-            // because of lacking std::map emplace support in libstdc++
-            // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44436
-            sym.properties.insert(std::make_pair(key, enumeration_wrapper(val)));
+            sym.properties.emplace(key, enumeration_wrapper(val));
         }
     }
 };
@@ -319,7 +324,7 @@ struct put_impl<T, false>
         }
         else
         {
-            sym.properties.insert(std::make_pair(key, val));
+            sym.properties.emplace(key, val);
         }
     }
 };
@@ -365,6 +370,25 @@ struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
     }
 };
 
+template <>
+struct evaluate_expression_wrapper<mapnik::dash_array>
+{
+    template <typename T1, typename T2, typename T3>
+    mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    {
+        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        // FIXME - throw?
+        if (val.is_null()) return dash_array();
+        dash_array dash;
+        std::vector<double> buf;
+        std::string str = val.to_string();
+        if (util::parse_dasharray(str.begin(),str.end(),buf))
+        {
+            util::add_dashes(buf,dash);
+        }
+        return dash;
+    }
+};
 
 template <typename T>
 struct extract_value : public boost::static_visitor<T>
@@ -397,9 +421,8 @@ struct extract_value : public boost::static_visitor<T>
     }
 
     template <typename T1>
-    auto operator() (T1 const& val) const -> result_type
+    auto operator() (T1 const&) const -> result_type
     {
-        boost::ignore_unused_variable_warning(val);
         return result_type();
     }
 
@@ -430,20 +453,20 @@ struct extract_raw_value : public boost::static_visitor<T1>
 };
 
 template <typename T>
-void put(symbolizer_base & sym, keys key, T const& val)
+MAPNIK_DECL void put(symbolizer_base & sym, keys key, T const& val)
 {
     constexpr bool enum_ = std::is_enum<T>::value;
     detail::put_impl<T, enum_ >::apply(sym, key, val);
 }
 
 template <typename T>
-bool has_key(symbolizer_base const& sym, keys key)
+MAPNIK_DECL bool has_key(symbolizer_base const& sym, keys key)
 {
     return (sym.properties.count(key) == 1);
 }
 
 template <typename T>
-T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
+MAPNIK_DECL T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -455,7 +478,7 @@ T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature,
 }
 
 template <typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
+MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -467,7 +490,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::fe
 }
 
 template <typename T>
-T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
+MAPNIK_DECL T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -479,7 +502,7 @@ T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 }
 
 template <typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
+MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -497,8 +520,8 @@ constexpr auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
 }
 
 using property_meta_type = std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types>;
-property_meta_type const& get_meta(mapnik::keys key);
-mapnik::keys get_key(std::string const& name);
+MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
+MAPNIK_DECL mapnik::keys get_key(std::string const& name);
 
 // concrete symbolizer types
 struct MAPNIK_DECL point_symbolizer : public symbolizer_base {};
@@ -527,8 +550,6 @@ using symbolizer = boost::variant<point_symbolizer,
                                   markers_symbolizer,
                                   group_symbolizer,
                                   debug_symbolizer>;
-
-using dash_array = std::vector<std::pair<double,double> >;
 
 }
 

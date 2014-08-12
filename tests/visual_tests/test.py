@@ -3,10 +3,9 @@
 
 import sys
 import mapnik
-mapnik.logger.set_severity(mapnik.severity_type.None)
+#mapnik.logger.set_severity(mapnik.severity_type.None)
 #mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
-import sys
 import os.path
 from compare import compare, compare_grids
 
@@ -79,6 +78,7 @@ sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
     (499, 100), (500, 100), (501, 100), (502, 100), (505, 100), (510, 100)]
 
 default_text_box = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
+large_text_box = mapnik.Box2d(-0.5, -0.5, 0.5, 0.5)
 
 merc_z1_bboxes = {
   '0,0':mapnik.Box2d(-20037508.342,0,0,20037508.342), # upper left
@@ -108,6 +108,7 @@ files = {
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'geometry-transform-translate': {'sizes':[(200,200)]},
     'geometry-transform-translate-patterns': {'sizes':[(200,200)]},
+    'geometry-transform-translate-patterns-svg': {'sizes':[(200,200)]},
     'marker-svg-opacity':{},
     'marker-svg-opacity2':{},
     'marker-svg-empty-g-element':{},
@@ -119,6 +120,11 @@ files = {
     'marker-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'marker-on-line-spacing-eq-width-overlap': {'sizes':[(600,400)]},
     'marker_line_placement_on_points':{},
+    'marker-on-line-and-vertex-first-placement':{'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
+    'marker-on-line-and-vertex-last-placement':{'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
+    'marker-with-background-image-linear-comp-op': {},
     'marker-with-background-image': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-with-background-image-and-hsla-transform': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-on-hex-grid': {'sizes':[(600,400),(400,600),(257,256)]},
@@ -126,6 +132,7 @@ files = {
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     'text-halo-rasterizer': {'sizes':[(600,400)]},
     'text-halo-transform': {'sizes':[(600,400)]},
+    'text-ttc-font': {'sizes':[(600,400)]},
     'simple-E': {'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
     'simple-NE': {'bbox':default_text_box},
     'simple-NW': {'bbox':default_text_box},
@@ -138,6 +145,11 @@ files = {
     'formatting-2': {'bbox':default_text_box},
     'formatting-3': {'bbox':default_text_box},
     'formatting-4': {'bbox':default_text_box},
+    'formatting-5': {'bbox':default_text_box},
+    'formatting-6': {'bbox':default_text_box},
+    'formatting-7': {'bbox':default_text_box},
+    'formatting-8': {'bbox':default_text_box},
+    'formatting-expr-alignment': {'bbox':large_text_box, 'sizes': [(500, 500)]},
     'expressionformat': {'bbox':default_text_box},
     'shieldsymbolizer-1': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
     'shieldsymbolizer-2': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
@@ -153,6 +165,8 @@ files = {
     'rtl-point': {'sizes': [(200, 200)],'bbox':default_text_box},
     'jalign-auto': {'sizes': [(200, 200)],'bbox':default_text_box},
     'line-offset': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
+    'repeat-labels-1': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
+    'repeat-labels-2': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
     'text-bug1532': {'sizes': [(600, 165)]},
     'text-bug1533': {'sizes': [(600, 600)]},
     'text-bug1820-1': {'sizes': [(600, 300)], 'bbox': default_text_box},
@@ -234,6 +248,9 @@ files = {
     'line-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'point-symbolizer-expressions':{'sizes':[(256,256)]},
     'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'point-symbolizer-overlap-placement-expr': {'bbox':large_text_box, 'sizes': [(500, 500)]},
+    'text-allow-overlap-expr': {'bbox':large_text_box, 'sizes': [(500, 500)]},
+    'marker-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'group-symbolizer-1':{'sizes':[(512,512)]},
@@ -247,6 +264,7 @@ files = {
     'text-halo-opacity':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
     'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'line-pattern-smooth-and-offset':{'sizes':[(512,512)]},
     'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
     'marker-whole-multi-polygon':{'sizes':[(512,512)]}
     }
@@ -432,18 +450,20 @@ if __name__ == "__main__":
         os.makedirs(visual_output_dir)
 
     reporting = Reporting(quiet, overwrite_failures)
-    for filename in files:
-        config = dict(defaults)
-        config.update(files[filename])
-        for size in config['sizes']:
-            for scale_factor in config['scales']:
-                m = render(filename,
-                           config,
-                           size[0],
-                           size[1],
-                           config.get('bbox'),
-                           scale_factor,
-                           reporting)
-        mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
-
+    try:
+        for filename in files:
+            config = dict(defaults)
+            config.update(files[filename])
+            for size in config['sizes']:
+                for scale_factor in config['scales']:
+                    m = render(filename,
+                               config,
+                               size[0],
+                               size[1],
+                               config.get('bbox'),
+                               scale_factor,
+                               reporting)
+            #mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
+    except KeyboardInterrupt:
+        pass
     sys.exit(reporting.summary())

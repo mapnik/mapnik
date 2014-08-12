@@ -23,14 +23,19 @@
 #ifndef MAPNIK_VALUE_TYPES_HPP
 #define MAPNIK_VALUE_TYPES_HPP
 
-// icu
-#include <unicode/unistr.h>  // for UnicodeString
+// mapnik
+#include <mapnik/config.hpp>
 
-// boost
-#include <boost/concept_check.hpp>
+// icu
+#include <unicode/uversion.h> // for U_NAMESPACE_QUALIFIER
 
 // stl
-#include <iosfwd> // for ostream
+#include <iosfwd>
+#include <cstddef>
+
+namespace U_ICU_NAMESPACE {
+    class UnicodeString;
+}
 
 namespace mapnik  {
 
@@ -45,84 +50,73 @@ using value_double = double;
 using value_unicode_string = U_NAMESPACE_QUALIFIER UnicodeString;
 using value_bool = bool;
 
-struct value_null
+struct MAPNIK_DECL value_null
 {
-    bool operator==(value_null const& other) const
+    bool operator==(value_null const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return true;
     }
 
     template <typename T>
-    bool operator==(T const& other) const
+    bool operator==(T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return false;
     }
 
-    bool operator!=(value_null const& other) const
+    bool operator!=(value_null const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return false;
     }
 
     template <typename T>
-    bool operator!=(T const& other) const
+    bool operator!=(T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return true;
     }
 
     template <typename T>
-    value_null operator+ (T const& other) const
+    value_null operator+ (T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator- (T const& other) const
+    value_null operator- (T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator* (T const& other) const
+    value_null operator* (T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator/ (T const& other) const
+    value_null operator/ (T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator% (T const& other) const
+    value_null operator% (T const&) const
     {
-        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 };
 
-inline std::size_t hash_value(const value_null& val)
+inline std::size_t hash_value(value_null const&)
 {
-    boost::ignore_unused_variable_warning(val);
     return 0;
 }
 
-inline std::ostream& operator<< (std::ostream & out,value_null const& v)
-{
-    boost::ignore_unused_variable_warning(v);
+template <typename TChar, typename TTraits>
+inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, value_null const& v) {
     return out;
 }
-inline std::istream& operator>> ( std::istream & s, value_null & null )
+
+inline std::istream& operator>> ( std::istream & s, value_null & )
 {
-    boost::ignore_unused_variable_warning(null);
     return s;
 }
 

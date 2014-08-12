@@ -43,6 +43,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/offset_converter.hpp>
+#include <mapnik/simplify.hpp>
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
@@ -149,8 +150,10 @@ struct converter_traits<T, mapnik::dash_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        auto const& feat = boost::fusion::at_c<6>(args);
+        auto const& vars = boost::fusion::at_c<7>(args);
         double scale_factor = boost::fusion::at_c<8>(args);
-        auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray);
+        auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray, feat, vars);
         if (dash)
         {
             for (auto const& d : *dash)

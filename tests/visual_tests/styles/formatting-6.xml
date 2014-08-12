@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <FontSet name="book">
+    <Font face-name="DejaVu Sans Book"/>
+  </FontSet>
+  <FontSet name="oblique">
+    <Font face-name="DejaVu Sans Oblique"/>
+  </FontSet>
+
+  <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="file">../data/points.csv</Parameter>
+    </Datasource>
+  </Layer>
+
+    <Style name="My Style">
+    <Rule>
+      <PointSymbolizer/>
+      <!-- Basic test -->
+      <TextSymbolizer fontset-name="book" size="16" placement="point" dx="0" dy="5">
+      [name]+'&#10;'<Format fontset-name="oblique" size="9" opacity="1">'('+[name]+')'</Format></TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>

@@ -22,6 +22,7 @@ int main(int argc, char** argv)
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
     using mapnik::util::to_string;
+    using mapnik::util::string2bool;
 
     try
     {
@@ -275,6 +276,12 @@ int main(int argc, char** argv)
         to_string(out, false);
         BOOST_TEST_EQ( out, "false" );
         out.clear();
+
+        bool val = false;
+        BOOST_TEST( !string2bool("this is invalid",val) );
+        BOOST_TEST_EQ( val, false );
+        BOOST_TEST( string2bool("true",val) );
+        BOOST_TEST_EQ( val, true );
     }
     catch (std::exception const & ex)
     {
