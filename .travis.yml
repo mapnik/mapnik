@@ -5,7 +5,6 @@ addons:
 
 compiler:
  - clang
- - gcc
 
 env:
   matrix:
@@ -20,7 +19,7 @@ before_install:
 
 script:
  - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=False DEMO=True BENCHMARK=True BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
- - JOBS=3 make
+ - JOBS=6 make
  - make test-local
  - sudo make install
  - make grind
