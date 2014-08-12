@@ -132,6 +132,7 @@ files = {
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     'text-halo-rasterizer': {'sizes':[(600,400)]},
     'text-halo-transform': {'sizes':[(600,400)]},
+    'text-ttc-font': {'sizes':[(600,400)]},
     'simple-E': {'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
     'simple-NE': {'bbox':default_text_box},
     'simple-NW': {'bbox':default_text_box},
