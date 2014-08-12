@@ -254,9 +254,17 @@ void ogr_datasource::init(mapnik::parameters const& params)
     OGRLayer* layer = layer_.layer();
 
     // initialize envelope
-    OGREnvelope envelope;
-    layer->GetExtent(&envelope);
-    extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
+    boost::optional<std::string> ext = params.get<std::string>("extent");
+    if (ext && !ext->empty())
+    {
+        extent_.from_string(*ext);
+    }
+	else
+    {
+        OGREnvelope envelope;
+        layer->GetExtent(&envelope);
+        extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
+    }
 
     // scan for index file
     // TODO - layer names don't match dataset name, so this will break for

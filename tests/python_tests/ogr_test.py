@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
@@ -53,6 +53,16 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
         fs = ds.features(query)
+
+    # OGR plugin extent parameter
+    def test_ogr_extent_parameter():
+        ds = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0,extent='-1,-1,1,1')
+        e = ds.envelope()
+        eq_(e.minx,-1)
+        eq_(e.miny,-1)
+        eq_(e.maxx,1)
+        eq_(e.maxy,1)
+
 
     # disabled because OGR prints an annoying error: ERROR 1: Invalid Point object. Missing 'coordinates' member.
     #def test_handling_of_null_features():
