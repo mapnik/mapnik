@@ -28,9 +28,10 @@
 #include <sqlite3.h>
 
 //stl
-//#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
 #include <iostream>
-//#endif
+#include <cassert>
+#endif
 #include <string>
 #include <vector>
 
