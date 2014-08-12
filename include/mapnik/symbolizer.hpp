@@ -549,8 +549,6 @@ using symbolizer = util::variant<point_symbolizer,
                                  group_symbolizer,
                                  debug_symbolizer>;
 
-using dash_array = std::vector<std::pair<double,double> >;
-
 }
 
 #endif // MAPNIK_SYMBOLIZER_HPP

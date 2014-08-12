@@ -670,12 +670,14 @@ void csv_datasource::parse_csv(T & stream,
                 // now, add attributes, skipping any WKT or JSON fields
                 if ((has_wkt_field) && (i == wkt_idx)) continue;
                 if ((has_json_field) && (i == json_idx)) continue;
-                /* First we detect likely strings, then try parsing likely numbers,
-                   finally falling back to string type
-                   * We intentionally do not try to detect boolean or null types
-                   since they are not common in csv
-                   * Likely strings are either empty values, very long values
-                   or value with leading zeros like 001 (which are not safe
+                /* First we detect likely strings,
+                   then try parsing likely numbers,
+                   then try converting to bool,
+                   finally falling back to string type.
+                   An empty string or a string of "null" will be parsed
+                   as a string rather than a true null value.
+                   Likely strings are either empty values, very long values
+                   or values with leading zeros like 001 (which are not safe
                    to assume are numbers)
                 */
 
@@ -731,13 +733,42 @@ void csv_datasource::parse_csv(T & stream,
                 }
                 if (!matched)
                 {
-                    // fallback to normal string
-                    feature->put(fld_name,std::move(tr.transcode(value.c_str())));
-                    if (feature_count == 1)
+                    // NOTE: we don't use mapnik::util::string2bool
+                    // here because we don't want to treat 'on' and 'off'
+                    // as booleans, only 'true' and 'false'
+                    bool bool_val = false;
+                    std::string lower_val = value;
+                    std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
+                    if (lower_val == "true")
                     {
-                        desc_.add_descriptor(
-                            mapnik::attribute_descriptor(
-                                fld_name,mapnik::String));
+                        matched = true;
+                        bool_val = true;
+                    }
+                    else if (lower_val == "false")
+                    {
+                        matched = true;
+                        bool_val = false;
+                    }
+                    if (matched)
+                    {
+                        feature->put(fld_name,bool_val);
+                        if (feature_count == 1)
+                        {
+                            desc_.add_descriptor(
+                                mapnik::attribute_descriptor(
+                                    fld_name,mapnik::Boolean));
+                        }
+                    }
+                    else
+                    {
+                        // fallback to normal string
+                        feature->put(fld_name,std::move(tr.transcode(value.c_str())));
+                        if (feature_count == 1)
+                        {
+                            desc_.add_descriptor(
+                                mapnik::attribute_descriptor(
+                                    fld_name,mapnik::String));
+                        }
                     }
                 }
             }
