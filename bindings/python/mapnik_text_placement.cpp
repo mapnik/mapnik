@@ -20,8 +20,9 @@
  *
  *****************************************************************************/
 
-#include "boost_std_shared_shim.hpp"
 #include <mapnik/config.hpp>
+#include "boost_std_shared_shim.hpp"
+
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/noncopyable.hpp>
