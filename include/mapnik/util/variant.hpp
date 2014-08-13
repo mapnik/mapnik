@@ -25,10 +25,9 @@
 
 #include <mapnik/config.hpp>
 
-#include <utility>
+#include <utility> // swap
 #include <typeinfo>
 #include <type_traits>
-#include <algorithm> // std::move/swap
 #include <stdexcept> // runtime_error
 #include <new> // operator new
 #include <cstddef> // size_t

@@ -29,8 +29,9 @@
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/simplify.hpp>
+#include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/attribute.hpp>
+#include <mapnik/expression_node.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/parse_path.hpp>
@@ -42,6 +43,7 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/variant.hpp>
+
 // stl
 #include <type_traits>
 #include <algorithm>

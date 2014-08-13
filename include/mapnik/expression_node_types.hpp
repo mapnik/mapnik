@@ -27,8 +27,6 @@
 #include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
-#include <boost/mpl/vector.hpp>
 
 namespace mapnik
 {
@@ -197,4 +195,4 @@ util::recursive_wrapper<regex_replace_node>
 }
 
 
-#endif //MAPNIK_EXPRESSION_NODE_HPP
+#endif // MAPNIK_EXPRESSION_NODE_HPP
