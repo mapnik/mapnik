@@ -46,6 +46,5 @@ void export_scaling_method()
         .value("SINC", mapnik::SCALING_SINC)
         .value("LANCZOS", mapnik::SCALING_LANCZOS)
         .value("BLACKMAN", mapnik::SCALING_BLACKMAN)
-        .value("BILINEAR8", mapnik::SCALING_BILINEAR8)
         ;
 }

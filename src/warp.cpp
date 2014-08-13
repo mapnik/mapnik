@@ -108,7 +108,6 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     switch(scaling_method)
     {
     case SCALING_NEAR: break;
-    case SCALING_BILINEAR8: // TODO - impl this or remove?
     case SCALING_BILINEAR:
         filter.calculate(agg::image_filter_bilinear(), true); break;
     case SCALING_BICUBIC:
