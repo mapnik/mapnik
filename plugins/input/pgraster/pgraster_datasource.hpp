@@ -42,9 +42,9 @@
 #include <string>
 #include <memory>
 
-#include "connection_manager.hpp"
-#include "resultset.hpp"
-#include "cursorresultset.hpp"
+#include "../postgis/connection_manager.hpp"
+#include "../postgis/resultset.hpp"
+#include "../postgis/cursorresultset.hpp"
 
 using mapnik::transcoder;
 using mapnik::datasource;

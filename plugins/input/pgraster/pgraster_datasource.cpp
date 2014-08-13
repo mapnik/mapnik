@@ -20,10 +20,10 @@
  *
  *****************************************************************************/
 
-#include "connection_manager.hpp"
+#include "../postgis/connection_manager.hpp"
+#include "../postgis/asyncresultset.hpp"
 #include "pgraster_datasource.hpp"
 #include "pgraster_featureset.hpp"
-#include "asyncresultset.hpp"
 
 // mapnik
 #include <mapnik/debug.hpp>
