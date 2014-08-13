@@ -23,15 +23,17 @@
 #ifndef MAPNIK_IMAGE_SCALING_HPP
 #define MAPNIK_IMAGE_SCALING_HPP
 
-// stl
-#include <string>
-
-#include <boost/optional.hpp>
+// mapnik
 #include <mapnik/config.hpp>
-
 #ifdef _MSC_VER
 #include <mapnik/image_data.hpp>
 #endif
+
+// stl
+#include <iosfwd>
+
+// boost
+#include <boost/optional.hpp>
 
 namespace mapnik
 {

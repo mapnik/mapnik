@@ -1,8 +1,8 @@
-// boost
-#include <boost/python.hpp>
-
 #include "python_featureset.hpp"
 #include "python_utils.hpp"
+
+// boost
+#include <boost/python.hpp>
 
 python_featureset::python_featureset(boost::python::object iterator)
 {
