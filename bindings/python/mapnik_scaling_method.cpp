@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 
-#include <boost/python.hpp>
 #include <mapnik/image_scaling.hpp>
+#include <boost/python.hpp>
 
 void export_scaling_method()
 {

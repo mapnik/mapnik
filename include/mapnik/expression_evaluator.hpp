@@ -27,10 +27,8 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/expression_node.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #else
@@ -41,7 +39,7 @@ namespace mapnik
 {
 
 template <typename T0, typename T1, typename T2>
-struct evaluate : boost::static_visitor<T1>
+struct evaluate : util::static_visitor<T1>
 {
     using feature_type = T0;
     using value_type = T1;
@@ -98,39 +96,39 @@ struct evaluate : boost::static_visitor<T1>
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {
-        return (boost::apply_visitor(*this, x.left).to_bool())
-            && (boost::apply_visitor(*this, x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool())
+            && (util::apply_visitor(*this, x.right).to_bool());
     }
 
     value_type operator() (binary_node<tags::logical_or> const & x) const
     {
-        return (boost::apply_visitor(*this,x.left).to_bool())
-            || (boost::apply_visitor(*this,x.right).to_bool());
+        return (util::apply_visitor(*this,x.left).to_bool())
+            || (util::apply_visitor(*this,x.right).to_bool());
     }
 
     template <typename Tag>
     value_type operator() (binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
-        return operation(boost::apply_visitor(*this, x.left),
-                         boost::apply_visitor(*this, x.right));
+        return operation(util::apply_visitor(*this, x.left),
+                         util::apply_visitor(*this, x.right));
     }
 
     template <typename Tag>
     value_type operator() (unary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type func;
-        return func(boost::apply_visitor(*this, x.expr));
+        return func(util::apply_visitor(*this, x.expr));
     }
 
     value_type operator() (unary_node<tags::logical_not> const& x) const
     {
-        return ! (boost::apply_visitor(*this,x.expr).to_bool());
+        return ! (util::apply_visitor(*this,x.expr).to_bool());
     }
 
     value_type operator() (regex_match_node const& x) const
     {
-        value_type v = boost::apply_visitor(*this, x.expr);
+        value_type v = util::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_match(v.to_unicode(),x.pattern);
 #else
@@ -141,7 +139,7 @@ struct evaluate : boost::static_visitor<T1>
 
     value_type operator() (regex_replace_node const& x) const
     {
-        value_type v = boost::apply_visitor(*this, x.expr);
+        value_type v = util::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
 #else

@@ -65,7 +65,7 @@ feature_ptr rasterlite_featureset::next()
     {
         first_ = false;
         MAPNIK_LOG_DEBUG(gdal) << "rasterlite_featureset: Next feature in Dataset=" << &dataset_;
-        return boost::apply_visitor(query_dispatch(*this), gquery_);
+        return mapnik::util::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
 }

@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/json/topology.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
@@ -69,8 +69,9 @@ private:
     qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,space_type, boost::variant<value_null,bool,
-                                     value_integer,value_double>()> number;
+    qi::rule<Iterator,space_type, util::variant<value_null,bool,
+                                                value_integer,value_double,
+                                                std::string>()> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;
@@ -84,14 +85,14 @@ private:
     qi::rule<Iterator, space_type, mapnik::topojson::coordinate()> coordinate;
     qi::rule<Iterator, space_type, mapnik::topojson::transform()> transform;
     qi::rule<Iterator, space_type, mapnik::topojson::bounding_box()> bbox;
-    qi::rule<Iterator, space_type, mapnik::topojson::geometry()> geometry;
+    qi::rule<Iterator, space_type, mapnik::topojson::geometry() > geometry;
     qi::rule<Iterator, space_type, mapnik::topojson::point()> point;
     qi::rule<Iterator, space_type, mapnik::topojson::multi_point()> multi_point;
     qi::rule<Iterator, space_type, mapnik::topojson::linestring()> linestring;
     qi::rule<Iterator, space_type, mapnik::topojson::multi_linestring()> multi_linestring;
     qi::rule<Iterator, space_type, mapnik::topojson::polygon()> polygon;
     qi::rule<Iterator, space_type, mapnik::topojson::multi_polygon()> multi_polygon;
-    qi::rule<Iterator, space_type, std::vector<mapnik::topojson::geometry>()> geometry_collection;
+    qi::rule<Iterator, space_type, void(std::vector<mapnik::topojson::geometry>&)> geometry_collection;
 
     qi::rule<Iterator, space_type, std::vector<index_type>()> ring;
 
@@ -104,7 +105,6 @@ private:
 
     // error
     boost::phoenix::function<where_message> where_message_;
-
 };
 
 }}

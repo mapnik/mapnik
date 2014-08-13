@@ -58,17 +58,17 @@ text_symbolizer_properties::text_symbolizer_properties()
 
 void text_symbolizer_properties::evaluate_text_properties(feature_impl const& feature, attributes const& attrs)
 {
-    label_placement = boost::apply_visitor(extract_value<label_placement_enum>(feature,attrs), expressions.label_placement);
-    label_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
-    label_position_tolerance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
-    avoid_edges = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
-    minimum_distance = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
-    minimum_padding = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
-    minimum_path_length = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
-    max_char_angle_delta = boost::apply_visitor(extract_value<value_double>(feature,attrs), expressions.max_char_angle_delta) * M_PI/180;
-    allow_overlap = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.allow_overlap);
-    largest_bbox_only = boost::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.largest_bbox_only);
-    upright = boost::apply_visitor(extract_value<text_upright_enum>(feature,attrs), expressions.upright);
+    label_placement = util::apply_visitor(extract_value<label_placement_enum>(feature,attrs), expressions.label_placement);
+    label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
+    label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
+    avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
+    minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
+    minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
+    minimum_path_length = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
+    max_char_angle_delta = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.max_char_angle_delta) * M_PI/180;
+    allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.allow_overlap);
+    largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.largest_bbox_only);
+    upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), expressions.upright);
 }
 
 void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) //const
@@ -81,15 +81,15 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
         //evaluate format properties
         evaluated_format_properties_ptr format = std::make_shared<detail::evaluated_format_properties>();
 
-        format->text_size = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
-        format->character_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);
-        format->line_spacing = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.line_spacing);
-        format->text_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
-        format->halo_opacity = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
-        format->halo_radius = boost::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
-        format->fill = boost::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
-        format->halo_fill = boost::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
-        format->text_transform = boost::apply_visitor(extract_value<text_transform_enum>(feature,attrs), format_defaults.text_transform);
+        format->text_size = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
+        format->character_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);
+        format->line_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.line_spacing);
+        format->text_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
+        format->halo_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
+        format->halo_radius = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
+        format->fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
+        format->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
+        format->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), format_defaults.text_transform);
         format->face_name = format_defaults.face_name;
         format->fontset = format_defaults.fontset;
 
@@ -196,17 +196,17 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
 
 void text_symbolizer_properties::add_expressions(expression_set & output) const
 {
-    if (is_expression(expressions.label_placement)) output.insert(boost::get<expression_ptr>(expressions.label_placement));
-    if (is_expression(expressions.label_spacing)) output.insert(boost::get<expression_ptr>(expressions.label_spacing));
-    if (is_expression(expressions.label_position_tolerance)) output.insert(boost::get<expression_ptr>(expressions.label_position_tolerance));
-    if (is_expression(expressions.avoid_edges)) output.insert(boost::get<expression_ptr>(expressions.avoid_edges));
-    if (is_expression(expressions.minimum_distance)) output.insert(boost::get<expression_ptr>(expressions.minimum_distance));
-    if (is_expression(expressions.minimum_padding)) output.insert(boost::get<expression_ptr>(expressions.minimum_padding));
-    if (is_expression(expressions.minimum_path_length)) output.insert(boost::get<expression_ptr>(expressions.minimum_path_length));
-    if (is_expression(expressions.max_char_angle_delta)) output.insert(boost::get<expression_ptr>(expressions.max_char_angle_delta));
-    if (is_expression(expressions.allow_overlap)) output.insert(boost::get<expression_ptr>(expressions.allow_overlap));
-    if (is_expression(expressions.largest_bbox_only)) output.insert(boost::get<expression_ptr>(expressions.largest_bbox_only));
-    if (is_expression(expressions.upright)) output.insert(boost::get<expression_ptr>(expressions.upright));
+    if (is_expression(expressions.label_placement)) output.insert(util::get<expression_ptr>(expressions.label_placement));
+    if (is_expression(expressions.label_spacing)) output.insert(util::get<expression_ptr>(expressions.label_spacing));
+    if (is_expression(expressions.label_position_tolerance)) output.insert(util::get<expression_ptr>(expressions.label_position_tolerance));
+    if (is_expression(expressions.avoid_edges)) output.insert(util::get<expression_ptr>(expressions.avoid_edges));
+    if (is_expression(expressions.minimum_distance)) output.insert(util::get<expression_ptr>(expressions.minimum_distance));
+    if (is_expression(expressions.minimum_padding)) output.insert(util::get<expression_ptr>(expressions.minimum_padding));
+    if (is_expression(expressions.minimum_path_length)) output.insert(util::get<expression_ptr>(expressions.minimum_path_length));
+    if (is_expression(expressions.max_char_angle_delta)) output.insert(util::get<expression_ptr>(expressions.max_char_angle_delta));
+    if (is_expression(expressions.allow_overlap)) output.insert(util::get<expression_ptr>(expressions.allow_overlap));
+    if (is_expression(expressions.largest_bbox_only)) output.insert(util::get<expression_ptr>(expressions.largest_bbox_only));
+    if (is_expression(expressions.upright)) output.insert(util::get<expression_ptr>(expressions.upright));
 
     layout_defaults.add_expressions(output);
     format_defaults.add_expressions(output);
@@ -256,16 +256,16 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
 
 void text_layout_properties::add_expressions(expression_set & output) const
 {
-    if (is_expression(dx)) output.insert(boost::get<expression_ptr>(dx));
-    if (is_expression(dy)) output.insert(boost::get<expression_ptr>(dy));
-    if (is_expression(orientation)) output.insert(boost::get<expression_ptr>(orientation));
-    if (is_expression(wrap_width)) output.insert(boost::get<expression_ptr>(wrap_width));
-    if (is_expression(wrap_before)) output.insert(boost::get<expression_ptr>(wrap_before));
-    if (is_expression(rotate_displacement)) output.insert(boost::get<expression_ptr>(rotate_displacement));
-    if (is_expression(text_ratio)) output.insert(boost::get<expression_ptr>(text_ratio));
-    if (is_expression(halign)) output.insert(boost::get<expression_ptr>(halign));
-    if (is_expression(valign)) output.insert(boost::get<expression_ptr>(valign));
-    if (is_expression(jalign)) output.insert(boost::get<expression_ptr>(jalign));
+    if (is_expression(dx)) output.insert(util::get<expression_ptr>(dx));
+    if (is_expression(dy)) output.insert(util::get<expression_ptr>(dy));
+    if (is_expression(orientation)) output.insert(util::get<expression_ptr>(orientation));
+    if (is_expression(wrap_width)) output.insert(util::get<expression_ptr>(wrap_width));
+    if (is_expression(wrap_before)) output.insert(util::get<expression_ptr>(wrap_before));
+    if (is_expression(rotate_displacement)) output.insert(util::get<expression_ptr>(rotate_displacement));
+    if (is_expression(text_ratio)) output.insert(util::get<expression_ptr>(text_ratio));
+    if (is_expression(halign)) output.insert(util::get<expression_ptr>(halign));
+    if (is_expression(valign)) output.insert(util::get<expression_ptr>(valign));
+    if (is_expression(jalign)) output.insert(util::get<expression_ptr>(jalign));
 }
 
 // text format properties
@@ -346,15 +346,15 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
 
 void format_properties::add_expressions(expression_set & output) const
 {
-    if (is_expression(text_size)) output.insert(boost::get<expression_ptr>(text_size));
-    if (is_expression(character_spacing)) output.insert(boost::get<expression_ptr>(character_spacing));
-    if (is_expression(line_spacing)) output.insert(boost::get<expression_ptr>(line_spacing));
-    if (is_expression(halo_radius)) output.insert(boost::get<expression_ptr>(halo_radius));
-    if (is_expression(text_opacity)) output.insert(boost::get<expression_ptr>(text_opacity));
-    if (is_expression(halo_opacity)) output.insert(boost::get<expression_ptr>(halo_opacity));
-    if (is_expression(fill)) output.insert(boost::get<expression_ptr>(fill));
-    if (is_expression(halo_fill)) output.insert(boost::get<expression_ptr>(halo_fill));
-    if (is_expression(text_transform)) output.insert(boost::get<expression_ptr>(text_transform));
+    if (is_expression(text_size)) output.insert(util::get<expression_ptr>(text_size));
+    if (is_expression(character_spacing)) output.insert(util::get<expression_ptr>(character_spacing));
+    if (is_expression(line_spacing)) output.insert(util::get<expression_ptr>(line_spacing));
+    if (is_expression(halo_radius)) output.insert(util::get<expression_ptr>(halo_radius));
+    if (is_expression(text_opacity)) output.insert(util::get<expression_ptr>(text_opacity));
+    if (is_expression(halo_opacity)) output.insert(util::get<expression_ptr>(halo_opacity));
+    if (is_expression(fill)) output.insert(util::get<expression_ptr>(fill));
+    if (is_expression(halo_fill)) output.insert(util::get<expression_ptr>(halo_fill));
+    if (is_expression(text_transform)) output.insert(util::get<expression_ptr>(text_transform));
 }
 
 

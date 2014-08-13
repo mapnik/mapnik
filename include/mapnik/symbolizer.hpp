@@ -41,7 +41,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
-
+#include <mapnik/util/variant.hpp>
 // stl
 #include <type_traits>
 #include <algorithm>
@@ -49,8 +49,6 @@
 #include <vector>
 #include <string>
 #include <functional>
-// boost
-#include <boost/variant/variant_fwd.hpp>
 
 namespace agg { struct trans_affine; }
 
@@ -90,21 +88,46 @@ using dash_array = std::vector<std::pair<double,double> >;
 class text_placements;
 using text_placements_ptr = std::shared_ptr<text_placements>;
 
+namespace detail {
+
+using value_base_type = util::variant<value_bool,
+                                      value_integer,
+                                      enumeration_wrapper,
+                                      value_double,
+                                      std::string,
+                                      color,
+                                      expression_ptr,
+                                      path_expression_ptr,
+                                      transform_type,
+                                      text_placements_ptr,
+                                      dash_array,
+                                      raster_colorizer_ptr,
+                                      group_symbolizer_properties_ptr>;
+
+struct strict_value : value_base_type
+{
+    // default ctor
+    strict_value()
+        : value_base_type() {}
+    // copy ctor
+    strict_value(const char* val)
+        : value_base_type(val) {}
+
+    template <typename T>
+    strict_value(T const& obj)
+        : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
+    {}
+    // move ctor
+    template <typename T>
+    strict_value(T && obj) noexcept
+        : value_base_type(std::move(obj)) {}
+
+};
+}
+
 struct MAPNIK_DECL symbolizer_base
 {
-    using value_type =  boost::variant<value_bool,
-                                       value_integer,
-                                       enumeration_wrapper,
-                                       value_double,
-                                       std::string,
-                                       color,
-                                       expression_ptr,
-                                       path_expression_ptr,
-                                       transform_type,
-                                       text_placements_ptr,
-                                       dash_array,
-                                       raster_colorizer_ptr,
-                                       group_symbolizer_properties_ptr>;
+    using value_type = detail::strict_value;
     using key_type =  mapnik::keys;
     using cont_type = std::map<key_type, value_type>;
     cont_type properties;
@@ -112,7 +135,7 @@ struct MAPNIK_DECL symbolizer_base
 
 inline bool is_expression(symbolizer_base::value_type const& val)
 {
-    return (val.which() == 6);
+    return (val.get_type_index() == 6);
 }
 
 // symbolizer properties target types
@@ -339,7 +362,7 @@ struct evaluate_expression_wrapper
     template <typename T1, typename T2, typename T3>
     result_type operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type result = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type result = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         return detail::expression_result<result_type, std::is_enum<result_type>::value>::convert(result);
     }
 };
@@ -351,7 +374,7 @@ struct evaluate_expression_wrapper<mapnik::color>
     template <typename T1, typename T2, typename T3>
     mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         // FIXME - throw instead?
         if (val.is_null()) return mapnik::color(255,192,203); // pink
         return mapnik::color(val.to_string());
@@ -365,7 +388,7 @@ struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
     template <typename T1, typename T2, typename T3>
     mapnik::enumeration_wrapper operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         return mapnik::enumeration_wrapper(val.to_int());
     }
 };
@@ -376,7 +399,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
     template <typename T1, typename T2, typename T3>
     mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = boost::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         // FIXME - throw?
         if (val.is_null()) return dash_array();
         dash_array dash;
@@ -391,7 +414,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
 };
 
 template <typename T>
-struct extract_value : public boost::static_visitor<T>
+struct extract_value : public util::static_visitor<T>
 {
     using result_type = T;
 
@@ -431,7 +454,7 @@ struct extract_value : public boost::static_visitor<T>
 };
 
 template <typename T1>
-struct extract_raw_value : public boost::static_visitor<T1>
+struct extract_raw_value : public util::static_visitor<T1>
 {
     using result_type = T1;
 
@@ -472,7 +495,7 @@ MAPNIK_DECL T get(symbolizer_base const& sym, keys key, mapnik::feature_impl con
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
     return _default_value;
 }
@@ -484,7 +507,7 @@ MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
     return boost::optional<T>();
 }
@@ -496,7 +519,7 @@ MAPNIK_DECL T get(symbolizer_base const& sym, keys key, T const& _default_value 
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_raw_value<T>(), itr->second);
+        return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
     return _default_value;
 }
@@ -508,7 +531,7 @@ MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_raw_value<T>(), itr->second);
+        return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
     return boost::optional<T>();
 }
@@ -538,18 +561,18 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL debug_symbolizer : public symbolizer_base {};
 
 // symbolizer
-using symbolizer = boost::variant<point_symbolizer,
-                                  line_symbolizer,
-                                  line_pattern_symbolizer,
-                                  polygon_symbolizer,
-                                  polygon_pattern_symbolizer,
-                                  raster_symbolizer,
-                                  shield_symbolizer,
-                                  text_symbolizer,
-                                  building_symbolizer,
-                                  markers_symbolizer,
-                                  group_symbolizer,
-                                  debug_symbolizer>;
+using symbolizer = util::variant<point_symbolizer,
+                                 line_symbolizer,
+                                 line_pattern_symbolizer,
+                                 polygon_symbolizer,
+                                 polygon_pattern_symbolizer,
+                                 raster_symbolizer,
+                                 shield_symbolizer,
+                                 text_symbolizer,
+                                 building_symbolizer,
+                                 markers_symbolizer,
+                                 group_symbolizer,
+                                 debug_symbolizer>;
 
 }
 

@@ -25,7 +25,7 @@
 
 namespace mapnik { namespace detail {
 
-struct property_serializer : public boost::static_visitor<>
+struct property_serializer : public util::static_visitor<>
 {
     property_serializer(std::string const& name, boost::property_tree::ptree & node)
         : name_(name),
@@ -80,7 +80,7 @@ struct property_serializer : public boost::static_visitor<>
 
 void serialize_property(std::string const& name, symbolizer_base::value_type const& val, boost::property_tree::ptree & node)
 {
-    boost::apply_visitor(detail::property_serializer(name,node), val);
+    util::apply_visitor(detail::property_serializer(name,node), val);
 }
 
 }

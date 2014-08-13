@@ -25,7 +25,7 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
-
+#include <mapnik/util/variant.hpp>
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -35,9 +35,6 @@
 // agg
 #include "agg_trans_affine.h"
 
-// boost
-#include <boost/variant/apply_visitor.hpp>
-
 namespace mapnik {
 
 /**
@@ -46,7 +43,7 @@ namespace mapnik {
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.
  */
-struct thunk_renderer : public boost::static_visitor<>
+struct thunk_renderer : public util::static_visitor<>
 {
     using renderer_type = agg_renderer<image_32>;
     using buffer_type = typename renderer_type::buffer_type;
@@ -112,7 +109,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
             thunk_renderer ren(*this, current_buffer_, common_, render_offset);
             for (render_thunk_ptr const& thunk : thunks)
             {
-                boost::apply_visitor(ren, *thunk);
+                util::apply_visitor(ren, *thunk);
             }
         });
 }

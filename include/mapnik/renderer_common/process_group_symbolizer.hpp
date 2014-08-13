@@ -36,6 +36,7 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/variant.hpp>
 #include <mapnik/label_collision_detector.hpp>
 
 // agg
@@ -98,8 +99,8 @@ struct text_render_thunk
 // Variant type for render thunks to allow us to re-render them
 // via a static visitor later.
 
-using render_thunk = boost::variant<point_render_thunk,
-                                    text_render_thunk>;
+using render_thunk = util::variant<point_render_thunk,
+                                   text_render_thunk>;
 using render_thunk_ptr = std::shared_ptr<render_thunk>;
 using render_thunk_list = std::list<render_thunk_ptr>;
 
@@ -109,7 +110,7 @@ using render_thunk_list = std::list<render_thunk_ptr>;
 // The bounding boxes can be used for layout, and the thunks are
 // used to re-render at locations according to the group layout.
 
-struct render_thunk_extractor : public boost::static_visitor<>
+struct render_thunk_extractor : public util::static_visitor<>
 {
     render_thunk_extractor(box2d<double> & box,
                            render_thunk_list & thunks,
@@ -265,7 +266,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())
         {
-             if (boost::apply_visitor(evaluate<Feature,value_type,attributes>(*sub_feature,common.vars_),
+             if (util::apply_visitor(evaluate<Feature,value_type,attributes>(*sub_feature,common.vars_),
                                                *(rule->get_filter())).to_bool())
              {
                 // add matched rule and feature to the list of things to draw
@@ -280,7 +281,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 for (auto const& sym : *rule)
                 {
                     // TODO: construct layout and obtain bounding box
-                    boost::apply_visitor(extractor, sym);
+                    util::apply_visitor(extractor, sym);
                 }
 
                 // add the bounding box to the layout manager
@@ -321,8 +322,8 @@ void render_group_symbolizer(group_symbolizer const& sym,
             // evalute the repeat key with the matched sub feature if we have one
             if (rpt_key_expr)
             {
-                rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),
-                                                     *rpt_key_expr).to_unicode();
+                rpt_key_value = util::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),
+                                                    *rpt_key_expr).to_unicode();
             }
             helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
         }

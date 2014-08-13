@@ -29,8 +29,7 @@
 #include <mapnik/markers_placements/vertext_first.hpp>
 #include <mapnik/markers_placements/vertext_last.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
-
-#include <boost/variant.hpp>
+#include <mapnik/util/variant.hpp>
 #include <boost/functional/value_factory.hpp>
 #include <boost/function.hpp>
 
@@ -41,13 +40,13 @@ template <typename Locator, typename Detector>
 class markers_placement_finder : mapnik::noncopyable
 {
 public:
-    using markers_placement = boost::variant<markers_point_placement<Locator, Detector>,
-                                             markers_line_placement<Locator, Detector>,
-                                             markers_interior_placement<Locator, Detector>,
-                                             markers_vertex_first_placement<Locator, Detector>,
-                                             markers_vertex_last_placement<Locator, Detector>>;
+    using markers_placement = util::variant<markers_point_placement<Locator, Detector>,
+                                            markers_line_placement<Locator, Detector>,
+                                            markers_interior_placement<Locator, Detector>,
+                                            markers_vertex_first_placement<Locator, Detector>,
+                                            markers_vertex_last_placement<Locator, Detector>>;
 
-    class get_point_visitor : public boost::static_visitor<bool>
+    class get_point_visitor : public util::static_visitor<bool>
     {
     public:
         get_point_visitor(double &x, double &y, double &angle, bool ignore_placement)
@@ -81,19 +80,19 @@ public:
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
-        return boost::apply_visitor(get_point_visitor(x, y, angle, ignore_placement), placement_);
+        return util::apply_visitor(get_point_visitor(x, y, angle, ignore_placement), placement_);
     }
 
 private:
     // Factory function for particular placement implementations.
     static markers_placement create(marker_placement_e placement_type,
-                             Locator &locator,
-                             box2d<double> const& size,
-                             agg::trans_affine const& tr,
-                             Detector &detector,
-                             double spacing,
-                             double max_error,
-                             bool allow_overlap)
+                                    Locator &locator,
+                                    box2d<double> const& size,
+                                    agg::trans_affine const& tr,
+                                    Detector &detector,
+                                    double spacing,
+                                    double max_error,
+                                    bool allow_overlap)
     {
         static const std::map<marker_placement_e, boost::function<markers_placement(
             Locator &locator,

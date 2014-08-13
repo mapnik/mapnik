@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
 // boost
 #include <boost/python.hpp>
 

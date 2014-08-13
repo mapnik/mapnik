@@ -221,7 +221,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             mapnik::filter::filter_radius_visitor visitor(radius);
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
-                boost::apply_visitor(visitor, filter_tag);
+                util::apply_visitor(visitor, filter_tag);
             }
             if (radius > common_.t_.offset())
             {
@@ -277,7 +277,7 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
             mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
-                boost::apply_visitor(visitor, filter_tag);
+                util::apply_visitor(visitor, filter_tag);
             }
         }
         if (st.comp_op())
@@ -299,7 +299,7 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
     mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
     for (mapnik::filter::filter_type const& filter_tag : st.direct_image_filters())
     {
-        boost::apply_visitor(visitor, filter_tag);
+        util::apply_visitor(visitor, filter_tag);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }

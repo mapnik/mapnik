@@ -26,7 +26,6 @@
 
 // boost
 #include <boost/spirit/include/karma.hpp>
-#include <boost/variant.hpp>
 
 // stl
 #include <vector>
@@ -35,7 +34,7 @@ namespace mapnik {
 
 namespace filter {
 
-bool generate_image_filters(std::back_insert_iterator<std::string>& sink, std::vector<filter_type> const& filters)
+bool generate_image_filters(std::back_insert_iterator<std::string> & sink, std::vector<filter_type> const& filters)
 {
     boost::spirit::karma::stream_type stream;
     using boost::spirit::karma::generate;

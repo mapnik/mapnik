@@ -38,10 +38,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
 #include <mapnik/renderer_common.hpp>
-
-// boost
-#include <boost/variant/static_visitor.hpp>
-
+#include <mapnik/util/variant.hpp>
 #include <memory>
 
 // stl
@@ -123,15 +120,13 @@ public:
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    /*!
-     * @brief Overload that process the whole set of symbolizers of a rule.
-     * @return true, meaning that this renderer can process multiple symbolizers.
-     */
+    // Overload that process the whole set of symbolizers of a rule.
+    // return true, meaning that this renderer can process multiple symbolizers.
     bool process(rule::symbolizers const& syms,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    void painted(bool /*painted*/)
+    void painted(bool)
     {
         // nothing to do
     }
@@ -168,13 +163,12 @@ private:
     bool painted_;
     renderer_common common_;
 
-    /*!
-     * @brief Visitor that makes the calls to process each symbolizer when stored in a boost::variant.
-     * This object follows the model of that found in feature_style_processor. It appears here, because
-     * the logic that iterates over the set of symbolizer has been moved to an SVG renderer's internal
-     * method.
-     */
-    struct symbol_dispatch : public boost::static_visitor<>
+
+    // Visitor that makes the calls to process each symbolizer when stored in a variant.
+    // This object follows the model of that found in feature_style_processor. It appears here, because
+    // the logic that iterates over the set of symbolizer has been moved to an SVG renderer's internal
+    // method.
+    struct symbol_dispatch : public util::static_visitor<>
     {
         symbol_dispatch(svg_renderer<OutputIterator>& processor,
                         mapnik::feature_impl & feature,

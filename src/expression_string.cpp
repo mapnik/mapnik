@@ -31,7 +31,6 @@
 #include <mapnik/value.hpp>
 
 // boost
-#include <boost/variant.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>          // for u32regex
 #endif
@@ -39,7 +38,7 @@
 namespace mapnik
 {
 
-struct expression_string : boost::static_visitor<void>
+struct expression_string : util::static_visitor<void>
 {
     explicit expression_string(std::string & str)
         : str_(str) {}
@@ -75,9 +74,9 @@ struct expression_string : boost::static_visitor<void>
             str_ += "(";
         }
 
-        boost::apply_visitor(expression_string(str_),x.left);
+        util::apply_visitor(expression_string(str_),x.left);
         str_ += x.type();
-        boost::apply_visitor(expression_string(str_),x.right);
+        util::apply_visitor(expression_string(str_),x.right);
         if (x.type() != tags::mult::str() && x.type() != tags::div::str())
         {
             str_ += ")";
@@ -89,13 +88,13 @@ struct expression_string : boost::static_visitor<void>
     {
         str_ += Tag::str();
         str_ += "(";
-        boost::apply_visitor(expression_string(str_),x.expr);
+        util::apply_visitor(expression_string(str_),x.expr);
         str_ += ")";
     }
 
     void operator() (regex_match_node const & x) const
     {
-        boost::apply_visitor(expression_string(str_),x.expr);
+        util::apply_visitor(expression_string(str_),x.expr);
         str_ +=".match('";
 #if defined(BOOST_REGEX_HAS_ICU)
         std::string utf8;
@@ -110,7 +109,7 @@ struct expression_string : boost::static_visitor<void>
 
     void operator() (regex_replace_node const & x) const
     {
-        boost::apply_visitor(expression_string(str_),x.expr);
+        util::apply_visitor(expression_string(str_),x.expr);
         str_ +=".replace(";
         str_ += "'";
 #if defined(BOOST_REGEX_HAS_ICU)
@@ -137,7 +136,7 @@ std::string to_expression_string(expr_node const& node)
 {
     std::string str;
     expression_string functor(str);
-    boost::apply_visitor(functor,node);
+    util::apply_visitor(std::ref(functor),node);
     return str;
 }
 

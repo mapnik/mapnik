@@ -20,17 +20,21 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
+
 #include "boost_std_shared_shim.hpp"
 
 // boost
+#include <boost/python.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/to_python_converter.hpp>
-#include <boost/python.hpp>
+
 #include <boost/noncopyable.hpp>
 
 // mapnik
+
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>

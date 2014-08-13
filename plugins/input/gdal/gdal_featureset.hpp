@@ -25,9 +25,8 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-
+#include <mapnik/util/variant.hpp>
 // boost
-#include <boost/variant.hpp>
 #include <boost/optional.hpp>
 
 #include "gdal_datasource.hpp"
@@ -35,11 +34,11 @@
 class GDALDataset;
 class GDALRasterBand;
 
-using gdal_query = boost::variant<mapnik::query, mapnik::coord2d>;
+using gdal_query = mapnik::util::variant<mapnik::query, mapnik::coord2d>;
 
 class gdal_featureset : public mapnik::Featureset
 {
-    struct query_dispatch : public boost::static_visitor<mapnik::feature_ptr>
+    struct query_dispatch : public mapnik::util::static_visitor<mapnik::feature_ptr>
     {
         query_dispatch( gdal_featureset & featureset)
             : featureset_(featureset) {}

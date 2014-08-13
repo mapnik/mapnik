@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GENERIC_JSON_HPP
 #define MAPNIK_GENERIC_JSON_HPP
 
-#include <boost/variant.hpp>
+#include <mapnik/util/variant.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 namespace mapnik { namespace json {
@@ -41,8 +41,9 @@ struct generic_json
     qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,boost::variant<value_null,bool,
-                                     value_integer,value_double>(),space_type> number;
+    qi::rule<Iterator,mapnik::util::variant<value_null,bool,
+                                            value_integer,value_double,
+                                            std::string>(),space_type> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;

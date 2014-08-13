@@ -23,6 +23,20 @@
 #ifndef MAPNIK_VERTEX_CONVERTERS_HPP
 #define MAPNIK_VERTEX_CONVERTERS_HPP
 
+
+// mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/ctrans.hpp>
+#include <mapnik/offset_converter.hpp>
+#include <mapnik/simplify.hpp>
+#include <mapnik/simplify_converter.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/symbolizer_keys.hpp>
+#include <mapnik/symbolizer.hpp>
+
 // boost
 #include <boost/type_traits/is_same.hpp>
 
@@ -39,17 +53,7 @@
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/container/vector.hpp>
 
-// mapnik
-#include <mapnik/attribute.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/offset_converter.hpp>
-#include <mapnik/simplify.hpp>
-#include <mapnik/simplify_converter.hpp>
-#include <mapnik/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
-#include <mapnik/symbolizer_enumerations.hpp>
-#include <mapnik/symbolizer_keys.hpp>
-#include <mapnik/symbolizer.hpp>
+
 
 // agg
 #include "agg_math_stroke.h"

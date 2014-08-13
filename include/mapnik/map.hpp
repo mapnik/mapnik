@@ -24,8 +24,8 @@
 #define MAPNIK_MAP_HPP
 
 // mapnik
-#include <mapnik/color.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/box2d.hpp>

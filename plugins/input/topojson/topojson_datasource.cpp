@@ -27,10 +27,9 @@
 #include <algorithm>
 
 // boost
-#include <boost/variant.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
-
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
@@ -43,13 +42,14 @@
 #include <mapnik/json/topojson_grammar.hpp>
 #include <mapnik/json/topojson_grammar_impl.hpp>
 #include <mapnik/json/topojson_utils.hpp>
+#include <mapnik/util/variant.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
 
 DATASOURCE_PLUGIN(topojson_datasource)
 
-struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeType>
+struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttributeType>
 {
     mapnik::eAttributeType operator() (mapnik::value_integer /*val*/) const
     {
@@ -87,7 +87,7 @@ struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeTyp
     }
 };
 
-struct geometry_type_visitor : public boost::static_visitor<int>
+struct geometry_type_visitor : public mapnik::util::static_visitor<int>
 {
     int operator() (mapnik::topojson::point const&) const
     {
@@ -119,7 +119,7 @@ struct geometry_type_visitor : public boost::static_visitor<int>
     }
 };
 
-struct collect_attributes_visitor : public boost::static_visitor<void>
+struct collect_attributes_visitor : public mapnik::util::static_visitor<void>
 {
     mapnik::layer_descriptor & desc_;
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
@@ -135,7 +135,8 @@ struct collect_attributes_visitor : public boost::static_visitor<void>
             for (auto const& p : *g.props)
             {
                 desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(p),
-                    boost::apply_visitor(attr_value_converter(),std::get<1>(p))));
+                                                                  mapnik::util::apply_visitor(attr_value_converter(),
+                                                                                              std::get<1>(p))));
             }
         }
     }
@@ -210,14 +211,14 @@ void topojson_datasource::parse_topojson(T & stream)
     std::size_t count = 0;
     for (auto const& geom : topo_.geometries)
     {
-        mapnik::box2d<double> bbox = boost::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
+        mapnik::box2d<double> bbox = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
         if (bbox.valid())
         {
             if (count == 0)
             {
                 extent_ = bbox;
                 collect_attributes_visitor assessor(desc_);
-                boost::apply_visitor(assessor,geom);
+                mapnik::util::apply_visitor( std::ref(assessor), geom);
             }
             else
             {
@@ -244,7 +245,7 @@ boost::optional<mapnik::datasource::geometry_t> topojson_datasource::get_geometr
     for (std::size_t i = 0; i < num_features && i < 5; ++i)
     {
         mapnik::topojson::geometry const& geom = topo_.geometries[i];
-        int type = boost::apply_visitor(geometry_type_visitor(),geom);
+        int type = mapnik::util::apply_visitor(geometry_type_visitor(),geom);
         if (type > 0)
         {
             if (multi_type > 0 && multi_type != type)

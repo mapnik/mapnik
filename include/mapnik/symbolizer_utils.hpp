@@ -37,8 +37,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/parse_transform.hpp>
-// boost
-#include <boost/variant/apply_visitor.hpp>
+#include <mapnik/util/variant.hpp>
 
 namespace mapnik {
 
@@ -123,7 +122,7 @@ struct symbolizer_traits<debug_symbolizer>
 // symbolizer name impl
 namespace detail {
 
-struct symbolizer_name_impl : public boost::static_visitor<std::string>
+struct symbolizer_name_impl : public util::static_visitor<std::string>
 {
 public:
     template <typename Symbolizer>
@@ -136,13 +135,13 @@ public:
 
 inline std::string symbolizer_name(symbolizer const& sym)
 {
-    std::string type = boost::apply_visitor( detail::symbolizer_name_impl(), sym);
+    std::string type = util::apply_visitor( detail::symbolizer_name_impl(), sym);
     return type;
 }
 
 
 template <typename Meta>
-class symbolizer_property_value_string : public boost::static_visitor<std::string>
+class symbolizer_property_value_string : public util::static_visitor<std::string>
 {
 public:
     symbolizer_property_value_string (Meta const& meta)
@@ -229,7 +228,7 @@ private:
     Meta const& meta_;
 };
 
-struct symbolizer_to_json : public boost::static_visitor<std::string>
+struct symbolizer_to_json : public util::static_visitor<std::string>
 {
     using result_type = std::string;
 
@@ -246,7 +245,7 @@ struct symbolizer_to_json : public boost::static_visitor<std::string>
             if (first) first = false;
             else ss << ",";
             ss << "\"" <<  std::get<0>(meta) << "\":";
-            ss << boost::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta),prop.second);
+            ss << util::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta),prop.second);
         }
         ss << "}}";
         return ss.str();
