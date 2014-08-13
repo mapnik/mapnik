@@ -16,6 +16,11 @@ from binascii import hexlify, unhexlify
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-pgraster-test-db'
 POSTGIS_TEMPLATE_DBNAME = 'template_postgis'
+DEBUG_OUTPUT=False
+
+def log(msg):
+    if DEBUG_OUTPUT:
+      print msg
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -23,11 +28,10 @@ def setup():
     os.chdir(execution_path('.'))
 
 def call(cmd,silent=False):
-    proc = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = proc.communicate()
-    if stderr and not silent:
-        print stderr.strip()
-    if proc.returncode:
+    stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    if not stderr:
+        return stdin.strip()
+    elif not silent and 'ERROR' in stderr:
         raise RuntimeError(stderr.strip())
 
 def psql_can_connect():
@@ -48,7 +52,7 @@ def psql_can_connect():
 def psql_run(cmd):
   cmd = 'psql --set ON_ERROR_STOP=1 %s -c "%s"' % \
     (MAPNIK_TEST_DBNAME, cmd.replace('"', '\\"'))
-  print 'DEBUG: running ' + cmd
+  log('DEBUG: running ' + cmd)
   call(cmd)
 
 def raster2pgsql_on_path():
@@ -86,8 +90,8 @@ def postgis_takedown():
     #call('dropdb %s' % MAPNIK_TEST_DBNAME)
 
 def import_raster(filename, tabname, tilesize, constraint, overview):
-  print 'tile: ' + tilesize + ' constraints: ' + str(constraint) \
-      + ' overviews: ' + overview
+  log('tile: ' + tilesize + ' constraints: ' + str(constraint) \
+      + ' overviews: ' + overview)
   cmd = 'raster2pgsql -Y -I -q'
   if constraint:
     cmd += ' -C'
@@ -95,8 +99,8 @@ def import_raster(filename, tabname, tilesize, constraint, overview):
     cmd += ' -t ' + tilesize
   if overview:
     cmd += ' -l ' + overview
-  cmd += ' %s %s | psql --set ON_ERROR_STOP=1 -q %s' % (filename,tabname,MAPNIK_TEST_DBNAME)
-  print 'Import call: ' + cmd
+  cmd += ' %s %s | psql --set ON_ERROR_STOP=1 -q %s' % (os.path.abspath(os.path.normpath(filename)),tabname,MAPNIK_TEST_DBNAME)
+  log('Import call: ' + cmd)
   call(cmd)
 
 def drop_imported(tabname, overview):
@@ -162,7 +166,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       # no data
       eq_(im.view(1,1,1,1).tostring(), '\x00\x00\x00\x00') 
       eq_(im.view(255,255,1,1).tostring(), '\x00\x00\x00\x00') 
@@ -183,7 +187,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
       # nodata
       eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
       eq_(hexlify(im.view(200,254,1,1).tostring()), '00000000')
@@ -197,8 +201,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       eq_(hexlify(im.view(255, 0,1,1).tostring()), '404040ff')
 
     def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
-      rf = os.path.join(execution_path('.'),'../data/raster/dataraster.tif')
-      import_raster(rf, 'dataRaster', tilesize, constraint, overview)
+      import_raster('../data/raster/dataraster.tif', 'dataRaster', tilesize, constraint, overview)
       if constraint:
         lbl += ' C'
       if tilesize:
@@ -259,7 +262,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       # no data
       eq_(hexlify(im.view(3,3,1,1).tostring()), '00000000')
@@ -281,7 +284,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
       #im.save('/tmp/xtenth.png') # for debugging
       # no data
       eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
@@ -298,8 +301,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         'unexpected full transparent/opaque pixel: ' + alpha
 
     def _test_rgba_8bui(lbl, tilesize, constraint, overview):
-      rf = os.path.join(execution_path('.'),'../data/raster/river.tiff')
-      import_raster(rf, 'River', tilesize, constraint, overview)
+      import_raster('../data/raster/river.tiff', 'River', tilesize, constraint, overview)
       if constraint:
         lbl += ' C'
       if tilesize:
@@ -361,7 +363,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       # no data
       eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
@@ -381,7 +383,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:1/10'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
       #im.save('/tmp/xtenth.png') # for debugging
       # no data
       eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
@@ -397,9 +399,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       eq_(hexlify(im.view(195,223,1,1).tostring()), 'f2cdbaff')
 
     def _test_rgb_8bui(lbl, tilesize, constraint, overview):
-      rf = os.path.join(execution_path('.'),'../data/raster/nodata-edge.tif')
       tnam = 'nodataedge'
-      import_raster(rf, tnam, tilesize, constraint, overview)
+      import_raster('../data/raster/nodata-edge.tif', tnam, tilesize, constraint, overview)
       if constraint:
         lbl += ' C'
       if tilesize:
@@ -476,7 +477,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
       hex_v = h+h+h+'ff'
@@ -590,7 +591,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
       hex_v = '0000ffff'
@@ -709,7 +710,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       t0 = time.time() # we want wall time to include IO waits
       mapnik.render(mm, im)
       lap = time.time() - t0
-      print 'T ' + str(lap) + ' -- ' + lbl + ' E:full'
+      log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       im.save('/tmp/xfull.png') # for debugging
       hex_v = format(r << 24 | g  << 16 | b  << 8 | a, '08x')
       hex_a = format(r << 24 | g1 << 16 | b  << 8 | a, '08x')
