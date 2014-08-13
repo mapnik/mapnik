@@ -793,88 +793,6 @@ struct to_expression_string : public util::static_visitor<std::string>
 
 namespace value_adl_barrier {
 
-namespace detail {
-
-template <typename T>
-struct is_value_bool
-{
-    bool value = std::is_same<T, bool>::value;
-};
-
-template <typename T>
-struct is_value_integer
-{
-    bool value = std::is_integral<T>::value && !std::is_same<T, bool>::value;
-};
-
-template <typename T>
-struct is_value_double
-{
-    bool value = std::is_floating_point<T>::value;
-};
-
-template <typename T>
-struct is_value_unicode_string
-{
-    bool value = std::is_same<T,mapnik::value_unicode_string>::value;
-};
-
-template <typename T>
-struct is_value_string
-{
-    bool value = std::is_same<T,std::string>::value;
-};
-
-template <typename T>
-struct is_value_null
-{
-    bool value = std::is_same<T, value_null>::value;
-};
-
-} // namespace detail
-
-
-template <typename T, class Enable = void>
-struct mapnik_value_type
-{
-    using type = T;
-};
-
-// value_null
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_null<T>::value>::type>
-{
-    using type = mapnik::value_null;
-};
-
-// value_bool
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_bool<T>::value>::type>
-{
-    using type = mapnik::value_bool;
-};
-
-// value_integer
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_integer<T>::value>::type>
-{
-    using type = mapnik::value_integer;
-};
-
-// value_double
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_double<T>::value>::type>
-{
-    using type = mapnik::value_double;
-};
-
-// value_unicode_string
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_unicode_string<T>::value>::type>
-{
-    using type = mapnik::value_unicode_string;
-};
-
 class value
 {
     value_base base_;
@@ -890,7 +808,7 @@ public:
 
     template <typename T>
     value ( T const& val)
-        : base_(typename mapnik_value_type<T>::type(val)) {}
+        : base_(typename detail::mapnik_value_type<T>::type(val)) {}
 
     value (value const& other)
         : base_(other.base_) {}

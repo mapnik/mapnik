@@ -30,6 +30,7 @@
 #include <unicode/uversion.h> // for U_NAMESPACE_QUALIFIER
 
 // stl
+#include <type_traits>
 #include <iosfwd>
 #include <cstddef>
 
@@ -120,6 +121,87 @@ inline std::istream& operator>> ( std::istream & s, value_null & )
     return s;
 }
 
+
+namespace detail {
+// to mapnik::value_type conversions traits
+template <typename T>
+struct is_value_bool
+{
+    bool value = std::is_same<T, bool>::value;
+};
+
+template <typename T>
+struct is_value_integer
+{
+    bool value = std::is_integral<T>::value && !std::is_same<T, bool>::value;
+};
+
+template <typename T>
+struct is_value_double
+{
+    bool value = std::is_floating_point<T>::value;
+};
+
+template <typename T>
+struct is_value_unicode_string
+{
+    bool value = std::is_same<T,mapnik::value_unicode_string>::value;
+};
+
+template <typename T>
+struct is_value_string
+{
+    bool value = std::is_same<T,std::string>::value;
+};
+
+template <typename T>
+struct is_value_null
+{
+    bool value = std::is_same<T, value_null>::value;
+};
+
+template <typename T, class Enable = void>
+struct mapnik_value_type
+{
+    using type = T;
+};
+
+// value_null
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_null<T>::value>::type>
+{
+    using type = mapnik::value_null;
+};
+
+// value_bool
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_bool<T>::value>::type>
+{
+    using type = mapnik::value_bool;
+};
+
+// value_integer
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_integer<T>::value>::type>
+{
+    using type = mapnik::value_integer;
+};
+
+// value_double
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_double<T>::value>::type>
+{
+    using type = mapnik::value_double;
+};
+
+// value_unicode_string
+template <typename T>
+struct mapnik_value_type<T, typename std::enable_if<detail::is_value_unicode_string<T>::value>::type>
+{
+    using type = mapnik::value_unicode_string;
+};
+
+} // namespace detail
 
 } // namespace mapnik
 

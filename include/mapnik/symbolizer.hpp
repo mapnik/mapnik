@@ -88,9 +88,9 @@ using dash_array = std::vector<std::pair<double,double> >;
 class text_placements;
 using text_placements_ptr = std::shared_ptr<text_placements>;
 
-struct MAPNIK_DECL symbolizer_base
-{
-    using value_type =  util::variant<value_bool,
+namespace detail {
+
+using value_base_type = util::variant<value_bool,
                                       value_integer,
                                       enumeration_wrapper,
                                       value_double,
@@ -103,6 +103,31 @@ struct MAPNIK_DECL symbolizer_base
                                       dash_array,
                                       raster_colorizer_ptr,
                                       group_symbolizer_properties_ptr>;
+
+struct strict_value : value_base_type
+{
+    // default ctor
+    strict_value()
+        : value_base_type() {}
+    // copy ctor
+    strict_value(const char* val)
+        : value_base_type(val) {}
+
+    template <typename T>
+    strict_value(T const& obj)
+        : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
+    {}
+    // move ctor
+    template <typename T>
+    strict_value(T && obj) noexcept
+        : value_base_type(std::move(obj)) {}
+
+};
+}
+
+struct MAPNIK_DECL symbolizer_base
+{
+    using value_type = detail::strict_value;
     using key_type =  mapnik::keys;
     using cont_type = std::map<key_type, value_type>;
     cont_type properties;

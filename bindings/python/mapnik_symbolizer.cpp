@@ -172,7 +172,7 @@ void export_symbolizer()
 {
     using namespace boost::python;
 
-    //implicitly_convertible<mapnik::value_bool, mapnik::symbolizer_base::value_type>();
+    implicitly_convertible<mapnik::value_bool, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::value_integer, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<mapnik::value_double, mapnik::symbolizer_base::value_type>();
     implicitly_convertible<std::string, mapnik::symbolizer_base::value_type>();

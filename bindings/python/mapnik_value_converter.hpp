@@ -85,7 +85,6 @@ namespace boost { namespace python {
     };
 
 
-    }
-}
+}}
 
 #endif // MAPNIK_PYTHON_BINDING_VALUE_CONVERTER_INCLUDED
