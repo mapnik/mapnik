@@ -62,10 +62,6 @@ using boost::shared_ptr;
 using mapnik::attribute_descriptor;
 
 namespace {
-  // TODO: move to sql_utils
-  std::string quote_literal(std::string& s) {
-    return "'" + s + "'"; // TODO: escape internal quotes
-  }
 
   // TODO: move to sql_utils
   std::string quote_ident(std::string& s) {
