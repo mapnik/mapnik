@@ -757,11 +757,14 @@ struct to_unicode : public util::static_visitor<value_unicode_string>
 
 struct to_expression_string : public util::static_visitor<std::string>
 {
+    explicit to_expression_string(char quote = '\'')
+        : quote_(quote) {}
+
     std::string operator() (value_unicode_string const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
-        return "'" + utf8 + "'";
+        return quote_ + utf8 + quote_;
     }
 
     std::string operator() (value_integer val) const
@@ -787,6 +790,8 @@ struct to_expression_string : public util::static_visitor<std::string>
     {
         return "null";
     }
+
+    const char quote_;
 };
 
 } // namespace impl
@@ -877,9 +882,9 @@ public:
         return util::apply_visitor(impl::convert<value_bool>(),base_);
     }
 
-    std::string to_expression_string() const
+    std::string to_expression_string(char quote = '\'') const
     {
-        return util::apply_visitor(impl::to_expression_string(),base_);
+        return util::apply_visitor(impl::to_expression_string(quote),base_);
     }
 
     std::string to_string() const
