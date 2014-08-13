@@ -38,9 +38,6 @@ plugin_sources = Split(
 cxxflags = []
 plugin_env['LIBS'] = []
 
-# TODO: use variable for top-level dir
-plugin_env['CXXFLAGS'].append('-Iplugins/input/postgis')
-
 if env['RUNTIME_LINK'] == 'static':
     # pkg-config is more reliable than pg_config across platforms
     cmd = 'pkg-config libpq --libs --static'
