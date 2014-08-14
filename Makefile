@@ -1,4 +1,4 @@
-UNAME := $(shell uname)
+
 OS := $(shell uname -s)
 
 ifeq ($(JOBS),)
