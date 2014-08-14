@@ -39,9 +39,9 @@ public:
     void operator()() const
     {
         for (std::size_t i=0;i<iterations_;++i) {
-            for (int i=-180;i<180;++i)
+            for (int i=-180;i<180;i=i+5)
             {
-                for (int j=-85;j<85;++j)
+                for (int j=-85;j<85;j=j+5)
                 {
                     mapnik::projection src(src_,defer_proj4_init_);
                     mapnik::projection dest(dest_,defer_proj4_init_);
