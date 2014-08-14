@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/value_types.hpp>
+#include <mapnik/value_hash.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
@@ -978,6 +979,12 @@ struct is_null_visitor : public util::static_visitor<bool>
 inline bool value::is_null() const
 {
     return util::apply_visitor(mapnik::detail::is_null_visitor(), base_);
+}
+
+// hash function
+inline std::size_t hash_value(value const& val)
+{
+    return hash_value(val.base());
 }
 
 } // namespace mapnik
