@@ -760,9 +760,9 @@ ResultType const&  get(T const& var)
 }
 
 // operator<<
-template <typename charT, typename traits, typename Variant>
+template <typename charT, typename traits, typename... Types>
 VARIANT_INLINE std::basic_ostream<charT, traits>&
-operator<< (std::basic_ostream<charT, traits>& out, Variant const& rhs)
+operator<< (std::basic_ostream<charT, traits>& out, variant<Types...> const& rhs)
 {
     detail::printer<std::basic_ostream<charT, traits>> visitor(out);
     apply_visitor(visitor, rhs);
