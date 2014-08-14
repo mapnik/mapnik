@@ -24,6 +24,7 @@
 #define SVG_OUTPUT_GRAMMARS_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
 
 // fwd declare
