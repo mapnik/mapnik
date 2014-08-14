@@ -33,7 +33,7 @@
 #include <vector>
 #include <ostream>
 #include <iterator>  // for std::back_insert_iterator
-
+#include <functional> // std::ref
 
 namespace mapnik { namespace filter {
 

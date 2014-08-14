@@ -44,6 +44,7 @@
 
 // stl
 #include <set>
+#include <functional> // std::ref
 
 namespace mapnik {
 
