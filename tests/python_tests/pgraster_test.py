@@ -46,7 +46,7 @@ def psql_can_connect():
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
     except RuntimeError, e:
-        print 'Notice: skipping postgis tests (connection)'
+        print 'Notice: skipping pgraster tests (connection)'
         return False
 
 def psql_run(cmd):
@@ -64,7 +64,7 @@ def raster2pgsql_on_path():
         call('raster2pgsql')
         return True
     except RuntimeError, e:
-        print 'Notice: skipping postgis tests (raster2pgsql)'
+        print 'Notice: skipping pgraster tests (raster2pgsql)'
         return False
 
 def createdb_and_dropdb_on_path():
@@ -77,7 +77,7 @@ def createdb_and_dropdb_on_path():
         call('dropdb --help')
         return True
     except RuntimeError, e:
-        print 'Notice: skipping postgis tests (createdb/dropdb)'
+        print 'Notice: skipping pgraster tests (createdb/dropdb)'
         return False
 
 def postgis_setup():
