@@ -63,9 +63,10 @@ public:
         ADJUST_BBOX_HEIGHT,
         // adjust the width of the map, leave height and geo bbox unchanged
         ADJUST_CANVAS_WIDTH,
-        //adjust the height of the map, leave width and geo bbox unchanged
+        // adjust the height of the map, leave width and geo bbox unchanged
         ADJUST_CANVAS_HEIGHT,
-        //
+        // do nothing
+        RESPECT,
         aspect_fix_mode_MAX
     };
 
