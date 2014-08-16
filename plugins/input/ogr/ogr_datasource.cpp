@@ -265,9 +265,16 @@ void ogr_datasource::init(mapnik::parameters const& params)
         OGRErr e = layer->GetExtent(&envelope);
         if (e == OGRERR_FAILURE)
         {
-            std::ostringstream s;
-            s << "OGR Plugin: Extent missing for layer '" << layer->GetName() << "'. Use <extent> paramater to define a custom extent value.";
-            throw datasource_exception(s.str());
+            if (layer->GetFeatureCount() == 0)
+            {
+                MAPNIK_LOG_ERROR(ogr) << "could not determine extent, layer '" << layer->GetName() << "' appears to have no features";
+            }
+            else
+            {
+                std::ostringstream s;
+                s << "OGR Plugin: Cannot determine extent for layer '" << layer->GetName() << "'. Please provide a manual extent string (minx,miny,maxx,maxy).";
+                throw datasource_exception(s.str());
+            }
         }
         extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
     }

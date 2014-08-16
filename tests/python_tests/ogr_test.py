@@ -63,6 +63,26 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         eq_(e.maxx,1)
         eq_(e.maxy,1)
 
+    def test_ogr_reading_gpx_waypoint():
+        ds = mapnik.Ogr(file='../data/gpx/empty.gpx',layer='waypoints')
+        e = ds.envelope()
+        eq_(e.minx,-122)
+        eq_(e.miny,48)
+        eq_(e.maxx,-122)
+        eq_(e.maxy,48)
+
+    def test_ogr_empty_data_should_not_throw():
+        default_logging_severity = mapnik.logger.get_severity()
+        mapnik.logger.set_severity(mapnik.severity_type.None)
+        # use logger to silence expected warnings
+        for layer in ['routes', 'tracks', 'route_points', 'track_points']:
+            ds = mapnik.Ogr(file='../data/gpx/empty.gpx',layer=layer)
+            e = ds.envelope()
+            eq_(e.minx,0)
+            eq_(e.miny,0)
+            eq_(e.maxx,0)
+            eq_(e.maxy,0)
+        mapnik.logger.set_severity(default_logging_severity)
 
     # disabled because OGR prints an annoying error: ERROR 1: Invalid Point object. Missing 'coordinates' member.
     #def test_handling_of_null_features():
