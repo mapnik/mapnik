@@ -168,6 +168,8 @@ files = {
     'line-offset': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     'repeat-labels-1': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
     'repeat-labels-2': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
+    'repeat-labels-3': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
+    'repeat-labels-4': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
     'text-bug1532': {'sizes': [(600, 165)]},
     'text-bug1533': {'sizes': [(600, 600)]},
     'text-bug1820-1': {'sizes': [(600, 300)], 'bbox': default_text_box},

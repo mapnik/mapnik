@@ -120,8 +120,8 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         box2d<double> bbox = layout.bounds();
         bbox.re_center(layout_center.x, layout_center.y);
 
-        // For point placements it is faster to just check the bounding box.
-        if (collision(bbox)) return false;
+        /* For point placements it is faster to just check the bounding box. */
+        if (collision(bbox, layouts_.text())) return false;
 
         if (layout.num_lines()) bboxes.push_back(std::move(bbox));
 
@@ -244,7 +244,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 cluster_offset.y -= rot.sin * glyph.advance();
 
                 box2d<double> bbox = get_bbox(layout, glyph, pos, rot);
-                if (collision(bbox)) return false;
+                if (collision(bbox, layouts_.text())) return false;
                 bboxes.push_back(std::move(bbox));
                 glyphs->push_back(glyph, pos, rot);
             }
@@ -311,7 +311,7 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
     return path_length / num_labels;
 }
 
-bool placement_finder::collision(const box2d<double> &box) const
+bool placement_finder::collision(const box2d<double> &box, const value_unicode_string &repeat_key) const
 {
     if (!detector_.extent().intersects(box)
             ||
@@ -321,7 +321,10 @@ bool placement_finder::collision(const box2d<double> &box) const
          !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
             ||
         (!info_.properties.allow_overlap &&
-         !detector_.has_point_placement(box, info_.properties.minimum_distance * scale_factor_))
+            ((repeat_key.length() == 0 && !detector_.has_placement(box, info_.properties.minimum_distance * scale_factor_))
+                ||
+             (repeat_key.length() > 0  && !detector_.has_placement(box, info_.properties.minimum_distance * scale_factor_,
+                                                                   repeat_key, info_.properties.repeat_distance * scale_factor_))))
         )
     {
         return true;
@@ -345,7 +348,7 @@ bool placement_finder::add_marker(glyph_positions_ptr glyphs, pixel_position con
     box2d<double> bbox = marker_box_;
     bbox.move(real_pos.x, real_pos.y);
     glyphs->set_marker(marker_, real_pos);
-    if (collision(bbox)) return false;
+    if (collision(bbox, layouts_.text())) return false;
     detector_.insert(bbox);
     return true;
 }
