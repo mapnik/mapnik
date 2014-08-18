@@ -128,37 +128,37 @@ namespace detail {
 template <typename T>
 struct is_value_bool
 {
-    bool value = std::is_same<T, bool>::value;
+    constexpr static bool value = std::is_same<T, bool>::value;
 };
 
 template <typename T>
 struct is_value_integer
 {
-    bool value = std::is_integral<T>::value && !std::is_same<T, bool>::value;
+    constexpr static bool value = std::is_integral<T>::value && !std::is_same<T, bool>::value;
 };
 
 template <typename T>
 struct is_value_double
 {
-    bool value = std::is_floating_point<T>::value;
+    constexpr static bool value = std::is_floating_point<T>::value;
 };
 
 template <typename T>
 struct is_value_unicode_string
 {
-    bool value = std::is_same<T,mapnik::value_unicode_string>::value;
+    constexpr static bool value = std::is_same<T, typename mapnik::value_unicode_string>::value;
 };
 
 template <typename T>
 struct is_value_string
 {
-    bool value = std::is_same<T,std::string>::value;
+    constexpr static bool value = std::is_same<T, typename std::string>::value;
 };
 
 template <typename T>
 struct is_value_null
 {
-    bool value = std::is_same<T, value_null>::value;
+    constexpr static bool value = std::is_same<T, typename mapnik::value_null>::value;
 };
 
 template <typename T, class Enable = void>
