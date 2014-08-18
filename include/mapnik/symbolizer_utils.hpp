@@ -343,10 +343,9 @@ namespace detail {
 template <typename Symbolizer, typename T, bool is_enum = false>
 struct set_symbolizer_property_impl
 {
-    static void apply(Symbolizer & sym, keys key, xml_node const& node)
+    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const& node)
     {
         using value_type = T;
-        std::string const& name = std::get<0>(get_meta(key));
         try
         {
             boost::optional<value_type> val = node.get_opt_attr<value_type>(name);
@@ -382,9 +381,8 @@ struct set_symbolizer_property_impl
 template <typename Symbolizer>
 struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
 {
-    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
     {
-        std::string const& name = std::get<0>(get_meta(key));
         boost::optional<std::string> transform = node.get_opt_attr<std::string>(name);
         if (transform) put(sym, key, mapnik::parse_transform(*transform));
     }
@@ -393,9 +391,8 @@ struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
 template <typename Symbolizer>
 struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
 {
-    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
     {
-        std::string const& name = std::get<0>(get_meta(key));
         boost::optional<std::string> str = node.get_opt_attr<std::string>(name);
         if (str)
         {
@@ -436,10 +433,9 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
 template <typename Symbolizer, typename T>
 struct set_symbolizer_property_impl<Symbolizer, T, true>
 {
-    static void apply(Symbolizer & sym, keys key, xml_node const & node)
+    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
     {
         using value_type = T;
-        std::string const& name = std::get<0>(get_meta(key));
         try
         {
             boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
@@ -494,9 +490,12 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
 } // namespace detail
 
 template <typename Symbolizer, typename T>
-void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
+bool set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
 {
-    detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,node);
+    std::string const& name = std::get<0>(get_meta(key));
+    if (node.has_attribute(name)) {
+        detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,name,node);
+    }
 }
 
 
