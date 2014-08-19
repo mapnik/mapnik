@@ -254,9 +254,30 @@ void ogr_datasource::init(mapnik::parameters const& params)
     OGRLayer* layer = layer_.layer();
 
     // initialize envelope
-    OGREnvelope envelope;
-    layer->GetExtent(&envelope);
-    extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
+    boost::optional<std::string> ext = params.get<std::string>("extent");
+    if (ext && !ext->empty())
+    {
+        extent_.from_string(*ext);
+    }
+    else
+    {
+        OGREnvelope envelope;
+        OGRErr e = layer->GetExtent(&envelope);
+        if (e == OGRERR_FAILURE)
+        {
+            if (layer->GetFeatureCount() == 0)
+            {
+                MAPNIK_LOG_ERROR(ogr) << "could not determine extent, layer '" << layer->GetLayerDefn()->GetName() << "' appears to have no features";
+            }
+            else
+            {
+                std::ostringstream s;
+                s << "OGR Plugin: Cannot determine extent for layer '" << layer->GetLayerDefn()->GetName() << "'. Please provide a manual extent string (minx,miny,maxx,maxy).";
+                throw datasource_exception(s.str());
+            }
+        }
+        extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
+    }
 
     // scan for index file
     // TODO - layer names don't match dataset name, so this will break for

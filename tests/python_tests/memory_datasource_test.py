@@ -31,4 +31,4 @@ def test_add_feature():
     eq_(len(retrieved), 0)
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

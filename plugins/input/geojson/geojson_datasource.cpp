@@ -32,10 +32,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/foreach.hpp>
-#include <boost/geometry/geometries/box.hpp>
-#include <boost/geometry/geometries/geometries.hpp>
-#include <boost/geometry.hpp>
-#include <boost/geometry/extensions/index/rtree/rtree.hpp>
 
 // mapnik
 #include <mapnik/unicode.hpp>
@@ -103,7 +99,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
     extent_(),
     tr_(new mapnik::transcoder(*params.get<std::string>("encoding","utf-8"))),
     features_(),
+#if BOOST_VERSION >= 105600
+    tree_()
+#else
     tree_(16,1)
+#endif
 {
     if (file_.empty()) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
@@ -141,7 +141,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
     }
 
     bool first = true;
-    std::size_t count=0;
+    std::size_t count = 0;
     BOOST_FOREACH (mapnik::feature_ptr const& f, features_)
     {
         mapnik::box2d<double> box = f->envelope();
@@ -161,7 +161,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
         {
             extent_.expand_to_include(box);
         }
-        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), count++);
+#if BOOST_VERSION >= 105600
+        tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),count++));
+#else
+        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),count++);
+#endif
     }
 }
 
@@ -216,7 +220,11 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     if (extent_.intersects(b))
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
+#if BOOST_VERSION >= 105600
+        tree_.query(boost::geometry::index::intersects(box),std::back_inserter(index_array_));
+#else
         index_array_ = tree_.find(box);
+#endif
         return boost::make_shared<geojson_featureset>(features_, index_array_.begin(), index_array_.end());
     }
     // otherwise return an empty featureset pointer
