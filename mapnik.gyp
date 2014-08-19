@@ -23,35 +23,66 @@
           '-fvisibility-inlines-hidden'
         ]
       },
-      'libraries':[
-        '-lboost_filesystem',
-        '-lboost_regex',
-        '-lboost_thread',
-        '-lcairo',
-        '-lpixman-1',
-        '-lexpat',
-        '-lfontconfig',
-        '-lpng',
-        '-lproj',
-        '-ltiff',
-        '-lwebp',
-        '-lxml2',
-        '-licui18n',
-        '-lboost_system',
-        '-ljpeg',
-        '-licuuc',
-        '-lfreetype',
-        '-licudata',
-        '-lz',
-        '-Wl,-search_paths_first',
-        '-stdlib=libstdc++'
+      "conditions": [
+        ["OS=='win'", {
+           'libraries':[
+              'libboost_filesystem-vc120-mt-1_55.lib',
+              'libboost_regex-vc120-mt-1_55.lib',
+              'libboost_thread-vc120-mt-1_55.lib',
+              'libboost_system-vc120-mt-1_55.lib',
+              'libpng.lib',
+              'proj.lib',
+              'libtiff.lib',
+              'libwebp.lib',
+              'libxml2.lib',
+              'libjpeg.lib',
+              'icuuc.lib',
+              'freetype.lib',
+              'zlib.lib'
+          ]
+        },{
+            'libraries':[
+              '-lboost_filesystem',
+              '-lboost_regex',
+              '-lboost_thread',
+              '-lcairo',
+              '-lpixman-1',
+              '-lexpat',
+              '-lfontconfig',
+              '-lpng',
+              '-lproj',
+              '-ltiff',
+              '-lwebp',
+              '-lxml2',
+              '-licui18n',
+              '-lboost_system',
+              '-ljpeg',
+              '-licuuc',
+              '-lfreetype',
+              '-licudata',
+              '-lz',
+              '-Wl,-search_paths_first',
+              '-stdlib=libstdc++'
+            ]
+          }
+        ]
       ],
       'include_dirs':[
           './include', # mapnik
           './deps/', # mapnik/sparsehash
           './deps/agg/include/', # agg
           './deps/clipper/include/', # clipper
-          './' # boost
+          'C:/dev2/mapnik-dependencies/boost-55-vc120/include/boost-1_55/', # boost main
+          '.', #boost within mapnik
+          'C:/dev2/mapnik-dependencies/icu/include/', #icu
+          'C:/dev2/mapnik-dependencies/freetype/include/', #freetype
+          'C:/dev2/mapnik-dependencies/jpeg/', #jpg
+          'C:/dev2/mapnik-dependencies/zlib/', #zlib
+          'C:/dev2/mapnik-dependencies/postgresql/src/include/port/win32/', #dlfcn.h
+          'C:/dev2/mapnik-dependencies/libpng/', #libpng png.h
+          'C:/dev2/mapnik-dependencies/tiff/libtiff/', #libtiff tiffio.h
+          'C:/dev2/mapnik-dependencies/webp/include/', #webp types.h
+          'C:/dev2/mapnik-dependencies/libxml2/include/', #libxml xmlreader.h
       ],
       'direct_dependent_settings': {
         'include_dirs': [
@@ -59,7 +90,17 @@
           './deps/', # mapnik/sparsehash
           './deps/agg/include/', # agg
           './deps/clipper/include/', # clipper
-          './' # boost
+          'C:/dev2/mapnik-dependencies/boost-55-vc120/include/boost-1_55/', # boost main
+          '.', #boost within mapnik
+          'C:/dev2/mapnik-dependencies/icu/include/', #icu
+          'C:/dev2/mapnik-dependencies/freetype/include/', #freetype
+          'C:/dev2/mapnik-dependencies/jpeg/', #jpg
+          'C:/dev2/mapnik-dependencies/zlib', #zlib
+          'C:/dev2/mapnik-dependencies/postgresql/src/include/port/win32/', #dlfcn.h
+          'C:/dev2/mapnik-dependencies/libpng/', #libpng png.h
+          'C:/dev2/mapnik-dependencies/tiff/libtiff/', #libtiff tiffio.h
+          'C:/dev2/mapnik-dependencies/webp/include/', #webp types.h
+          'C:/dev2/mapnik-dependencies/libxml2/include/', #libxml xmlreader.h
         ],
         'libraries': ['-stdlib=libstdc++']
       },
@@ -86,7 +127,13 @@
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/ogr/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
-        'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [ 'C:/dev2/mapnik-dependencies/gdal/gdal/gdal111.dll', 'C:/Expat2.1.0/Bin/libexpat.dll']
+          } , {
+            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+          }]
+        ]
     },
     {
         "target_name": "gdal",
@@ -94,7 +141,13 @@
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/gdal/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
-        'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [ 'C:/dev2/mapnik-dependencies/gdal/gdal/gdal111.dll', 'C:/Expat2.1.0/Bin/libexpat.dll']
+          } , {
+            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+          }]
+        ]
     },
     {
         "target_name": "postgis",
@@ -102,7 +155,13 @@
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/postgis/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
-        'libraries': [ '<!@(pkg-config libpq --libs --static)']
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [ 'C:/dev2/mapnik-dependencies/postgresql/src/interfaces/libpq/Release/libpq.dll']
+          } , {
+            'libraries': [ '<!@(pkg-config libpq --libs --static)']
+          }]
+        ]
     },
     {
         "target_name": "sqlite",
@@ -110,7 +169,13 @@
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/sqlite/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
-        'libraries': [ '<!@(pkg-config sqlite3 --libs)']
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [ 'C:/dev2/mapnik-dependencies/sqlite/sqlite3.dll']
+          } , {
+            'libraries': [ '<!@(pkg-config sqlite3 --libs)']
+          }]
+        ]
     },
     {
         "target_name": "geojson",

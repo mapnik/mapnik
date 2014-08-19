@@ -17,7 +17,10 @@
         '-Wno-unsequenced',
         '-Wno-sign-compare',
         '-Wno-unused-function',
-        '-Wno-redeclared-class-member'
+        '-Wno-redeclared-class-member',
+        '-Wno-c99-extensions',
+        '-Wno-c++11-extra-semi',
+        '-Wno-variadic-macros'
       ]
     },
     'msvs_settings': {

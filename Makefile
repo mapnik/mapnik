@@ -21,10 +21,9 @@ all: mapnik
 
 ./deps/gyp:
 	git clone --depth 1 https://chromium.googlesource.com/external/gyp.git ./deps/gyp
-	patch -N deps/gyp/pylib/gyp/input.py gyp.diff
 
 g: config.gypi mapnik.gyp ./deps/gyp
-	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. --generator-output=./build/ -f make
+	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. --generator-output=./build/ -f make --no-duplicate-basename-check
 	#export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64/bin/:$$PATH && make -C build V=$(V) mapnik -j2
 	export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64-macosx/bin/:$$PATH && make -C build V=1 -j2
 	make test
