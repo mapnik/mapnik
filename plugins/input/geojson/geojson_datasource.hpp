@@ -36,11 +36,16 @@
 // boost
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/algorithms/area.hpp>
+#include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
+#include <boost/geometry.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 105600
+#include <boost/geometry/index/rtree.hpp>
+#else
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
+#endif
 
 // stl
 #include <vector>
@@ -53,7 +58,14 @@ class geojson_datasource : public mapnik::datasource
 public:
     typedef boost::geometry::model::d2::point_xy<double> point_type;
     typedef boost::geometry::model::box<point_type> box_type;
+#if BOOST_VERSION >= 105600
+    typedef std::pair<box_type,std::size_t> item_type;
+    typedef boost::geometry::index::linear<16,1> linear_type;
+    typedef boost::geometry::index::rtree<item_type,linear_type> spatial_index_type;
+#else
+    typedef std::size_t item_type;
     typedef boost::geometry::index::rtree<box_type,std::size_t> spatial_index_type;
+#endif
     
     // constructor
     geojson_datasource(mapnik::parameters const& params);
@@ -74,7 +86,7 @@ private:
     boost::shared_ptr<mapnik::transcoder> tr_;
     std::vector<mapnik::feature_ptr> features_;
     spatial_index_type tree_;
-    mutable std::deque<std::size_t> index_array_;
+    mutable std::deque<item_type> index_array_;
 };
 
 

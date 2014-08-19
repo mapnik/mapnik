@@ -11,17 +11,18 @@
 class geojson_featureset : public mapnik::Featureset
 {
 public:
+    typedef std::deque<geojson_datasource::item_type> array_type;
     geojson_featureset(std::vector<mapnik::feature_ptr> const& features,
-                       std::deque<std::size_t>::const_iterator index_itr,
-                       std::deque<std::size_t>::const_iterator index_end);
+                       array_type::const_iterator index_itr,
+                       array_type::const_iterator index_end);
     virtual ~geojson_featureset();
     mapnik::feature_ptr next();
 
 private:
     mapnik::box2d<double> box_;
     std::vector<mapnik::feature_ptr> const& features_;
-    std::deque<std::size_t>::const_iterator index_itr_;
-    std::deque<std::size_t>::const_iterator index_end_;
+    array_type::const_iterator index_itr_;
+    array_type::const_iterator index_end_;
 };
 
 #endif // GEOJSON_FEATURESET_HPP
