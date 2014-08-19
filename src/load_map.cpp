@@ -855,7 +855,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
     {
         optional<std::string> file = node.get_opt_attr<std::string>("file");
         optional<std::string> base = node.get_opt_attr<std::string>("base");
-        optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
 
         point_symbolizer sym;
         parse_symbolizer_base(sym, node);
