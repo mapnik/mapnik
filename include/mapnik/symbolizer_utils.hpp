@@ -490,7 +490,7 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
 } // namespace detail
 
 template <typename Symbolizer, typename T>
-bool set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
+void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
 {
     std::string const& name = std::get<0>(get_meta(key));
     if (node.has_attribute(name)) {
