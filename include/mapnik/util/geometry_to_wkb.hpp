@@ -24,11 +24,13 @@
 #define MAPNIK_GEOMETRY_TO_WKB_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/make_unique.hpp>
-#include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/vertex.hpp>
 
 // stl
+#include <sstream>
 #include <vector>
 #include <cstdio>
 #include <cstring>

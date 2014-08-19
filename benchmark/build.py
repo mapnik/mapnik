@@ -22,7 +22,26 @@ if env['PLATFORM'] == 'Darwin':
 
 test_env_local = test_env.Clone()
 
-for cpp_test in glob.glob('*cpp'):
+#benchmarks = glob.glob('test*cpp')
+benchmarks = [
+    #"test_array_allocation.cpp",
+    #"test_png_encoding1.cpp",
+    #"test_png_encoding2.cpp",
+    #"test_to_string1.cpp",
+    #"test_to_string2.cpp",
+    #"test_to_bool.cpp",
+    #"test_to_double.cpp",
+    #"test_to_int.cpp",
+    #"test_utf_encoding.cpp"
+    #"test_polygon_clipping.cpp",
+    #"test_polygon_clipping_rendering.cpp",
+    "test_proj_transform1.cpp",
+    "test_expression_parse.cpp",
+    "test_face_ptr_creation.cpp",
+    "test_font_registration.cpp",
+    "test_rendering.cpp",
+]
+for cpp_test in benchmarks:
     test_program = test_env_local.Program('out/'+cpp_test.replace('.cpp',''), source=[cpp_test])
     if 'install' in COMMAND_LINE_TARGETS:
         env.Alias('install',test_program)

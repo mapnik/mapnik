@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
+
 #include "boost_std_shared_shim.hpp"
 #include "python_to_value.hpp"
 

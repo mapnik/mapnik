@@ -32,7 +32,7 @@
 
 namespace mapnik {
 
-struct symbol_type_dispatch : public boost::static_visitor<bool>
+struct symbol_type_dispatch : public util::static_visitor<bool>
 {
     template <typename Symbolizer>
     bool operator()(Symbolizer const& sym) const
@@ -51,7 +51,7 @@ struct symbol_type_dispatch : public boost::static_visitor<bool>
 
 bool is_path_based(symbolizer const& sym)
 {
-    return boost::apply_visitor(symbol_type_dispatch(), sym);
+    return util::apply_visitor(symbol_type_dispatch(), sym);
 }
 
 template <typename OutputIterator, typename PathType>
@@ -86,7 +86,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
         {
             process_path = true;
         }
-        boost::apply_visitor(symbol_dispatch(*this, feature, prj_trans), sym);
+        util::apply_visitor(symbol_dispatch(*this, feature, prj_trans), sym);
     }
 
     if (process_path)

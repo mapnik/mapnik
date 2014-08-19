@@ -23,9 +23,8 @@
 #ifndef MAPNIK_GROUP_LAYOUT_HPP
 #define MAPNIK_GROUP_LAYOUT_HPP
 
-// boost
-#include <boost/variant.hpp>
-
+// mapnik
+#include <mapnik/util/variant.hpp>
 // std
 #include <memory>
 
@@ -88,7 +87,7 @@ private:
    double max_difference_;
 };
 
-using group_layout = boost::variant<simple_row_layout,pair_layout>;
+using group_layout = util::variant<simple_row_layout,pair_layout>;
 using group_layout_ptr = std::shared_ptr<group_layout>;
 }
 

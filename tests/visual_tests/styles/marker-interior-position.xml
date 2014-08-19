@@ -1,0 +1,25 @@
+<Map
+    background-color="#eee"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    
+    <Style name="poly">
+        <Rule>
+            <PolygonSymbolizer />
+            <MarkersSymbolizer stroke-width="0" width="7" placement="interior" fill="blue" allow-overlap="true"/>
+            <MarkersSymbolizer stroke-width="0" width="7" placement="point" fill="red" allow-overlap="true"/>
+            <DebugSymbolizer />
+        </Rule>
+    </Style>
+    
+    <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>poly</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-1 -1 11 11</Parameter>
+            <Parameter name="inline">
+                id|name|wkt
+                1|Example|Polygon((0 10, 0 0, 1 0, 1 7, 6 7, 6 0, 10 0, 10 10, 0 10))
+            </Parameter>
+        </Datasource>
+    </Layer>
+</Map>

@@ -24,6 +24,7 @@
 #define SVG_OUTPUT_GRAMMARS_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
 
 // fwd declare
@@ -104,14 +105,15 @@ struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
         karma::string_type kstring;
 
         svg_path_attributes =
-            lit("fill=") << lit('"') << kstring << lit('"')
-                         << lit(" fill-opacity=\"") << double_ << lit('"')
-                         << lit(" stroke=") << kstring << lit('"')
-                         << lit(" stroke-opacity=") << double_ << lit('"')
-                         << lit(" stroke-width=") << double_ << lit("px") << lit('"')
-                         << lit(" stroke-linecap=") << kstring << lit('"')
-                         << lit(" stroke-linejoin=") << kstring << lit('"')
-                         << lit(" stroke-dashoffset=") << double_ << lit("px") << lit('"');
+            lit("fill=\"")
+            << kstring
+            << lit("\" fill-opacity=\"") << double_
+            << lit("\" stroke=\"") << kstring
+            << lit("\" stroke-opacity=\"") << double_
+            << lit("\" stroke-width=\"") << double_ << lit("px")
+            << lit("\" stroke-linecap=\"") << kstring
+            << lit("\" stroke-linejoin=\"") << kstring
+            << lit("\" stroke-dashoffset=\"") << double_ << lit("px") << lit('"');
     }
 
     karma::rule<OutputIterator, mapnik::svg::path_output_attributes()> svg_path_attributes;
@@ -126,7 +128,7 @@ struct svg_path_dash_array_grammar : karma::grammar<OutputIterator, mapnik::dash
         karma::double_type double_;
         karma::lit_type lit;
 
-        svg_path_dash_array = lit("stroke-dasharray=") <<
+        svg_path_dash_array = lit("stroke-dasharray=\"") <<
                 -((double_ << lit(',') << double_) % lit(',')) << lit('"');
     }
 
@@ -144,11 +146,12 @@ struct svg_rect_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
         karma::string_type kstring;
 
         svg_rect_attributes =
-            lit("x=") << lit('"') << int_ << lit('"')
-                      << lit(" y=") << int_ << lit('"')
-                      << lit(" width=") << int_ << lit("px") << lit('"')
-                      << lit(" height=") << int_ << lit("px") << lit('"')
-                      << lit(" fill=") << kstring << lit('"');
+            lit("x=\"")
+            << int_
+            << lit("\" y=\"") << int_
+            << lit("\" width=\"") << int_ << lit("px")
+            << lit("\" height=\"") << int_ << lit("px")
+            << lit("\" fill=\"") << kstring << lit('"');
     }
 
     karma::rule<OutputIterator, mapnik::svg::rect_output_attributes()> svg_rect_attributes;
@@ -166,11 +169,13 @@ struct svg_root_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
         karma::double_type double_;
 
         svg_root_attributes =
-            lit("width=") << lit('"') << int_ << lit("px") << lit('"')
-                          << lit(" height=") << int_ << lit("px") << lit('"')
-                          << " version=" << double_ << lit('"')
-                          << " xmlns=" << kstring << lit('"')
-                          << lit(" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"");
+            lit("width=\"")
+            << int_
+            << lit("px")
+            << lit("\" height=\"") << int_ << lit("px")
+            << lit("\" version=\"") << double_
+            << lit("\" xmlns=\"") << kstring
+            << lit("\" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"");
     }
 
     karma::rule<OutputIterator, mapnik::svg::root_output_attributes()> svg_root_attributes;

@@ -40,13 +40,15 @@ topojson_grammar<Iterator>::topojson_grammar()
     qi::no_skip_type no_skip;
     qi::omit_type omit;
     qi::_val_type _val;
+    qi::_1_type _1;
     qi::_2_type _2;
     qi::_3_type _3;
     qi::_4_type _4;
+    qi::_r1_type _r1;
     standard_wide::char_type char_;
     using qi::fail;
     using qi::on_error;
-    using phoenix::construct;
+    using phoenix::push_back;
 
     // generic json types
     value = object | array | string_ | number
@@ -114,7 +116,7 @@ topojson_grammar<Iterator>::topojson_grammar()
         >> lit('{')
         >> -((omit[string_]
               >> lit(':')
-              >>  (geometry_collection | geometry)) % lit(','))
+              >>  (geometry_collection(_val) | geometry)) % lit(','))
         >> lit('}')
         ;
 
@@ -130,7 +132,7 @@ topojson_grammar<Iterator>::topojson_grammar()
 
     geometry_collection =  lit('{')
                >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"") >> lit(',')
-               >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry % lit(','))
+               >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
                >> lit(']')
                >> lit('}')
         ;

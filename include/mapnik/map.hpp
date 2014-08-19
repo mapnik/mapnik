@@ -24,8 +24,8 @@
 #define MAPNIK_MAP_HPP
 
 // mapnik
-#include <mapnik/color.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/box2d.hpp>
@@ -71,9 +71,10 @@ public:
         ADJUST_BBOX_HEIGHT,
         // adjust the width of the map, leave height and geo bbox unchanged
         ADJUST_CANVAS_WIDTH,
-        //adjust the height of the map, leave width and geo bbox unchanged
+        // adjust the height of the map, leave width and geo bbox unchanged
         ADJUST_CANVAS_HEIGHT,
-        //
+        // do nothing
+        RESPECT,
         aspect_fix_mode_MAX
     };
 

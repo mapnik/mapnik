@@ -40,7 +40,6 @@ escaped_string<OutputIterator>::escaped_string()
     karma::hex_type hex;
     karma::right_align_type right_align;
     karma::print_type kprint;
-
     esc_char.add
         ('"', "\\\"")
         ('\\', "\\\\")
@@ -70,9 +69,10 @@ feature_generator_grammar<OutputIterator>::feature_generator_grammar()
     boost::spirit::karma::double_type double_;
     boost::spirit::karma::_val_type _val;
     boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::_r1_type _r1;
     boost::spirit::karma::string_type kstring;
     boost::spirit::karma::eps_type eps;
+
+    using boost::phoenix::at_c;
 
     feature = lit("{\"type\":\"Feature\",\"id\":")
         << uint_[_1 = id_(_val)]
@@ -89,17 +89,21 @@ feature_generator_grammar<OutputIterator>::feature_generator_grammar()
     pair = lit('"')
         << kstring[_1 = boost::phoenix::at_c<0>(_val)] << lit('"')
         << lit(':')
-        << value(boost::phoenix::at_c<1>(_val))
+        << value[_1 = extract_string_(value_base_(at_c<1>(_val)))]
         ;
 
-    value = (value_null_| bool_ | int__ | double_ | ustring)[_1 = value_base_(_r1)]
+    value = eps(at_c<1>(_val)) << escaped_string_(quote_.c_str())[_1 = at_c<0>(_val)]
+        |
+        kstring[_1 = at_c<0>(_val)]
         ;
 
-    value_null_ = kstring[_1 = "null"]
-        ;
-
-    ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]
-        ;
+    // FIXME http://boost-spirit.com/home/articles/karma-examples/creating-your-own-generator-component-for-spirit-karma/
+    //value = (value_null_| bool_ | int__ | double_ | ustring)//[_1 = value_base_(_r1)]
+    //   ;
+    //value_null_ = kstring[_1 = "null"]
+    //    ;
+    //ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]
+    //    ;
 }
 
 }}

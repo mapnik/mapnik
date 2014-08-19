@@ -121,16 +121,16 @@ node_ptr layout_node::get_child() const
 
 void layout_node::add_expressions(expression_set & output) const
 {
-    if (dx && is_expression(*dx)) output.insert(boost::get<expression_ptr>(*dx));
-    if (dy && is_expression(*dy)) output.insert(boost::get<expression_ptr>(*dy));
-    if (orientation && is_expression(*orientation)) output.insert(boost::get<expression_ptr>(*orientation));
-    if (wrap_width && is_expression(*wrap_width)) output.insert(boost::get<expression_ptr>(*wrap_width));
-    if (wrap_before && is_expression(*wrap_before)) output.insert(boost::get<expression_ptr>(*wrap_before));
-    if (rotate_displacement && is_expression(*rotate_displacement)) output.insert(boost::get<expression_ptr>(*rotate_displacement));
-    if (text_ratio && is_expression(*text_ratio)) output.insert(boost::get<expression_ptr>(*text_ratio));
-    if (halign && is_expression(*halign)) output.insert(boost::get<expression_ptr>(*halign));
-    if (valign && is_expression(*valign)) output.insert(boost::get<expression_ptr>(*valign));
-    if (jalign && is_expression(*jalign)) output.insert(boost::get<expression_ptr>(*jalign));
+    if (dx && is_expression(*dx)) output.insert(util::get<expression_ptr>(*dx));
+    if (dy && is_expression(*dy)) output.insert(util::get<expression_ptr>(*dy));
+    if (orientation && is_expression(*orientation)) output.insert(util::get<expression_ptr>(*orientation));
+    if (wrap_width && is_expression(*wrap_width)) output.insert(util::get<expression_ptr>(*wrap_width));
+    if (wrap_before && is_expression(*wrap_before)) output.insert(util::get<expression_ptr>(*wrap_before));
+    if (rotate_displacement && is_expression(*rotate_displacement)) output.insert(util::get<expression_ptr>(*rotate_displacement));
+    if (text_ratio && is_expression(*text_ratio)) output.insert(util::get<expression_ptr>(*text_ratio));
+    if (halign && is_expression(*halign)) output.insert(util::get<expression_ptr>(*halign));
+    if (valign && is_expression(*valign)) output.insert(util::get<expression_ptr>(*valign));
+    if (jalign && is_expression(*jalign)) output.insert(util::get<expression_ptr>(*jalign));
 
     if (child_) child_->add_expressions(output);
 }

@@ -27,17 +27,13 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/config_error.hpp>
-
-// boost
-#include <boost/variant/variant.hpp>
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
+#include <mapnik/util/variant.hpp>
 
 // stl
 #include <vector>
 #include <ostream>
 #include <iterator>  // for std::back_insert_iterator
-
+#include <functional> // std::ref
 
 namespace mapnik { namespace filter {
 
@@ -158,19 +154,19 @@ struct colorize_alpha : std::vector<color_stop>
     colorize_alpha() {}
 };
 
-using filter_type =  boost::variant<filter::blur,
-                                    filter::gray,
-                                    filter::agg_stack_blur,
-                                    filter::emboss,
-                                    filter::sharpen,
-                                    filter::edge_detect,
-                                    filter::sobel,
-                                    filter::x_gradient,
-                                    filter::y_gradient,
-                                    filter::invert,
-                                    filter::scale_hsla,
-                                    filter::colorize_alpha,
-                                    filter::color_to_alpha>;
+using filter_type =  util::variant<filter::blur,
+                                   filter::gray,
+                                   filter::agg_stack_blur,
+                                   filter::emboss,
+                                   filter::sharpen,
+                                   filter::edge_detect,
+                                   filter::sobel,
+                                   filter::x_gradient,
+                                   filter::y_gradient,
+                                   filter::invert,
+                                   filter::scale_hsla,
+                                   filter::colorize_alpha,
+                                   filter::color_to_alpha>;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {
@@ -268,7 +264,7 @@ inline std::ostream& operator<< (std::ostream& os, colorize_alpha const& filter)
 
 
 template <typename Out>
-struct to_string_visitor : boost::static_visitor<void>
+struct to_string_visitor : util::static_visitor<void>
 {
     to_string_visitor(Out & out)
     : out_(out) {}
@@ -285,7 +281,7 @@ struct to_string_visitor : boost::static_visitor<void>
 inline std::ostream& operator<< (std::ostream& os, filter_type const& filter)
 {
     to_string_visitor<std::ostream> visitor(os);
-    boost::apply_visitor(visitor, filter);
+    util::apply_visitor(std::ref(visitor), filter);
     return os;
 }
 

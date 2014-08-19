@@ -164,9 +164,10 @@ bool group_symbolizer_helper::collision(const box2d<double> &box, const value_un
          !query_extent_.contains(box + (scale_factor_ * placement_->properties.minimum_padding)))
             ||
         (!placement_->properties.allow_overlap &&
-            ((repeat_key.length() == 0 && !detector_.has_point_placement(box, placement_->properties.minimum_distance * scale_factor_))
+            ((repeat_key.length() == 0 && !detector_.has_placement(box, placement_->properties.minimum_distance * scale_factor_))
                 ||
-             (repeat_key.length() > 0  && !detector_.has_placement(box, repeat_key, placement_->properties.minimum_distance * scale_factor_))))
+             (repeat_key.length() > 0  && !detector_.has_placement(box, placement_->properties.minimum_distance * scale_factor_,
+                                                                   repeat_key, placement_->properties.repeat_distance * scale_factor_))))
         )
     {
         return true;

@@ -2,6 +2,7 @@
 #define PYTHON_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/feature.hpp>
 
 // boost

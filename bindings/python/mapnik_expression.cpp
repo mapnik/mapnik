@@ -20,14 +20,14 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
 #include "boost_std_shared_shim.hpp"
 #include "python_to_value.hpp"
 
 // boost
 #include <boost/python.hpp>
-#include <boost/variant.hpp>
+#include <mapnik/util/variant.hpp>
 #include <boost/noncopyable.hpp>
-
 
 // mapnik
 #include <mapnik/feature.hpp>
@@ -57,12 +57,12 @@ std::string expression_to_string_(mapnik::expr_node const& expr)
 mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::feature_impl const& f, boost::python::dict const& d)
 {
     // will be auto-converted to proper python type by `mapnik_value_to_python`
-    return boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value,mapnik::attributes>(f,mapnik::dict2attr(d)),expr);
+    return mapnik::util::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value,mapnik::attributes>(f,mapnik::dict2attr(d)),expr);
 }
 
 bool expression_evaluate_to_bool_(mapnik::expr_node const& expr, mapnik::feature_impl const& f, boost::python::dict const& d)
 {
-    return boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value,mapnik::attributes>(f,mapnik::dict2attr(d)),expr).to_bool();
+    return mapnik::util::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value,mapnik::attributes>(f,mapnik::dict2attr(d)),expr).to_bool();
 }
 
 // path expression

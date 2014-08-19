@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
 
 #include <boost/python.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>

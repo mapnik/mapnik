@@ -128,9 +128,7 @@ struct utf8
 
 struct value_base
 {
-    template <typename T>
-    struct result { using type =  mapnik::value_base const&; };
-
+    using result_type = mapnik::value_base const&;
     mapnik::value_base const& operator() (mapnik::value const& val) const
     {
         return val.base();
@@ -146,6 +144,17 @@ struct escaped_string
     karma::symbols<char, char const*> esc_char;
 };
 
+struct extract_string
+{
+    using result_type = std::tuple<std::string,bool>;
+
+    result_type operator() (mapnik::value const& val) const
+    {
+        bool need_quotes = val.base().is<value_unicode_string>();
+        return std::make_tuple(val.to_string(), need_quotes);
+    }
+};
+
 template <typename OutputIterator>
 struct feature_generator_grammar:
         karma::grammar<OutputIterator, mapnik::feature_impl const&()>
@@ -159,12 +168,13 @@ struct feature_generator_grammar:
     escaped_string<OutputIterator> escaped_string_;
     karma::rule<OutputIterator, mapnik::feature_impl const&()> properties;
     karma::rule<OutputIterator, pair_type()> pair;
-    karma::rule<OutputIterator, void(mapnik::value const&)> value;
+    karma::rule<OutputIterator, std::tuple<std::string,bool>()> value;
     karma::rule<OutputIterator, mapnik::value_null()> value_null_;
     karma::rule<OutputIterator, mapnik::value_unicode_string()> ustring;
     typename karma::int_generator<mapnik::value_integer,10, false> int__;
     boost::phoenix::function<get_id> id_;
     boost::phoenix::function<value_base> value_base_;
+    boost::phoenix::function<extract_string> extract_string_;
     boost::phoenix::function<utf8> utf8_;
     std::string quote_;
 };

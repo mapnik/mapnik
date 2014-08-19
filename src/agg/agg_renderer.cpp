@@ -255,7 +255,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             mapnik::filter::filter_radius_visitor visitor(radius);
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
-                boost::apply_visitor(visitor, filter_tag);
+                util::apply_visitor(visitor, filter_tag);
             }
             if (radius > common_.t_.offset())
             {
@@ -311,7 +311,7 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
             mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
-                boost::apply_visitor(visitor, filter_tag);
+                util::apply_visitor(visitor, filter_tag);
             }
         }
         if (st.comp_op())
@@ -333,7 +333,7 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
     mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
     for (mapnik::filter::filter_type const& filter_tag : st.direct_image_filters())
     {
-        boost::apply_visitor(visitor, filter_tag);
+        util::apply_visitor(visitor, filter_tag);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
@@ -389,20 +389,28 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
                          pixfmt_comp_type> svg_renderer(svg_path,
                                                         (*marker.get_vector_data())->attributes());
 
+        // https://github.com/mapnik/mapnik/issues/1316
+        // https://github.com/mapnik/mapnik/issues/1866
+        mtx.tx = std::floor(mtx.tx+.5);
+        mtx.ty = std::floor(mtx.ty+.5);
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
     }
     else
     {
         double width = (*marker.get_bitmap_data())->width();
         double height = (*marker.get_bitmap_data())->height();
-        if (std::fabs(1.0 - common_.scale_factor_) < 0.001 && tr.is_identity())
+        if (std::fabs(1.0 - common_.scale_factor_) < 0.001
+            && (std::fabs(1.0 - tr.sx) < agg::affine_epsilon)
+            && (std::fabs(0.0 - tr.shy) < agg::affine_epsilon)
+            && (std::fabs(0.0 - tr.shx) < agg::affine_epsilon)
+            && (std::fabs(1.0 - tr.sy) < agg::affine_epsilon))
         {
             double cx = 0.5 * width;
             double cy = 0.5 * height;
             composite(current_buffer_->data(), **marker.get_bitmap_data(),
                       comp_op, opacity,
-                      boost::math::iround(pos.x - cx),
-                      boost::math::iround(pos.y - cy),
+                      std::floor(pos.x - cx + .5),
+                      std::floor(pos.y - cy + .5),
                       false);
         }
         else
@@ -452,7 +460,10 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
                                                                   agg::span_allocator<agg::rgba8>,
                                                                   span_gen_type>;
             img_accessor_type ia(marker_pixf);
-            interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
+            agg::trans_affine final_tr(p, 0, 0, width, height);
+            final_tr.tx = std::floor(final_tr.tx+.5);
+            final_tr.ty = std::floor(final_tr.ty+.5);
+            interpolator_type interpolator(final_tr);
             span_gen_type sg(ia, interpolator, filter);
             renderer_type rp(renb,sa, sg, unsigned(opacity*255));
             agg::render_scanlines(*ras_ptr, sl, rp);

@@ -23,10 +23,12 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_MARKERS_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_MARKERS_SYMBOLIZER_HPP
 
+#include <mapnik/renderer_common.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
 
 // boost

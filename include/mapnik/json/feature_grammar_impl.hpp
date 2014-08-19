@@ -52,7 +52,6 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
     using qi::fail;
     using qi::on_error;
     using phoenix::new_;
-    using phoenix::push_back;
     using phoenix::construct;
 
     // generic json types

@@ -1,9 +1,5 @@
 #define BOOST_TEST_MODULE path_element_tests
 
-// boost
-#include <boost/test/included/unit_test.hpp>
-#include <boost/filesystem.hpp>
-
 // mapnik
 #include <mapnik/map.hpp>
 #include <mapnik/layer.hpp>
@@ -17,6 +13,10 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
+
+// boost
+#include <boost/test/included/unit_test.hpp>
+#include <boost/filesystem.hpp>
 
 // stl
 #include <fstream>

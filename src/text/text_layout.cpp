@@ -235,21 +235,21 @@ void text_layout::shape_text(text_line & line)
 void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attrs)
 {
     // dx,dy
-    double dx = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dx);
-    double dy = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dy);
+    double dx = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dx);
+    double dy = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dy);
     displacement_ = properties_.displacement_evaluator_(dx,dy);
 
-    wrap_width_ = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);
+    wrap_width_ = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);
 
-    double angle = boost::apply_visitor(extract_value<value_double>(feature,attrs), properties_.orientation);
+    double angle = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.orientation);
     orientation_.init(angle * M_PI/ 180.0);
 
-    wrap_before_ = boost::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.wrap_before);
-    rotate_displacement_ = boost::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.rotate_displacement);
+    wrap_before_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.wrap_before);
+    rotate_displacement_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.rotate_displacement);
 
-    valign_ = boost::apply_visitor(extract_value<vertical_alignment_enum>(feature,attrs),properties_.valign);
-    halign_ = boost::apply_visitor(extract_value<horizontal_alignment_enum>(feature,attrs),properties_.halign);
-    jalign_ = boost::apply_visitor(extract_value<justify_alignment_enum>(feature,attrs),properties_.jalign);
+    valign_ = util::apply_visitor(extract_value<vertical_alignment_enum>(feature,attrs),properties_.valign);
+    halign_ = util::apply_visitor(extract_value<horizontal_alignment_enum>(feature,attrs),properties_.halign);
+    jalign_ = util::apply_visitor(extract_value<justify_alignment_enum>(feature,attrs),properties_.jalign);
 
 }
 

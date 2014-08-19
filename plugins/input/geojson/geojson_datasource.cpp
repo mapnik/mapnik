@@ -27,7 +27,7 @@
 #include <algorithm>
 
 // boost
-#include <boost/variant.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
@@ -47,10 +47,12 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
+#include <mapnik/util/variant.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/feature_collection_grammar_impl.hpp>
 #include <mapnik/json/feature_grammar_impl.hpp>
 #include <mapnik/json/geometry_grammar_impl.hpp>
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
@@ -59,39 +61,39 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(geojson_datasource)
 
-struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeType>
+struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttributeType>
 {
-    mapnik::eAttributeType operator() (mapnik::value_integer /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_integer) const
     {
         return mapnik::Integer;
     }
 
-    mapnik::eAttributeType operator() (double /*val*/) const
+    mapnik::eAttributeType operator() (double) const
     {
         return mapnik::Double;
     }
 
-    mapnik::eAttributeType operator() (float /*val*/) const
+    mapnik::eAttributeType operator() (float) const
     {
         return mapnik::Double;
     }
 
-    mapnik::eAttributeType operator() (bool /*val*/) const
+    mapnik::eAttributeType operator() (bool) const
     {
         return mapnik::Boolean;
     }
 
-    mapnik::eAttributeType operator() (std::string const& /*val*/) const
+    mapnik::eAttributeType operator() (std::string const& ) const
     {
         return mapnik::String;
     }
 
-    mapnik::eAttributeType operator() (mapnik::value_unicode_string const& /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_unicode_string const&) const
     {
         return mapnik::String;
     }
 
-    mapnik::eAttributeType operator() (mapnik::value_null const& /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_null const& ) const
     {
         return mapnik::String;
     }
@@ -179,7 +181,8 @@ void geojson_datasource::parse_geojson(T & stream)
             for ( auto const& kv : *f)
             {
                 desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
-                    boost::apply_visitor(attr_value_converter(),std::get<1>(kv).base())));
+                                                                  mapnik::util::apply_visitor(attr_value_converter(),
+                                                                                              std::get<1>(kv).base())));
             }
         }
         else

@@ -29,9 +29,6 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/conversions.hpp>
 // boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp> // keep gcc happy
-#include <boost/variant/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -120,7 +117,7 @@ boost::optional<T> param_cast(std::string const& source)
 } // end namespace detail
 
 template <typename T>
-struct value_extractor_visitor : public boost::static_visitor<>
+struct value_extractor_visitor : public util::static_visitor<>
 {
 
     value_extractor_visitor(boost::optional<T> & var)
@@ -166,7 +163,7 @@ struct converter
         parameters::const_iterator itr = params.find(name);
         if (itr != params.end())
         {
-            boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
+            util::apply_visitor(value_extractor_visitor<T>(result),itr->second);
         }
         return result;
     }

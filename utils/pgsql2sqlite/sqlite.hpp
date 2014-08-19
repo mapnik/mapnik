@@ -21,17 +21,18 @@
  *****************************************************************************/
 
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/util/variant.hpp>
 // boost
 #include <memory>
-#include <boost/variant.hpp>
-
 //sqlite3
 #include <sqlite3.h>
 
 //stl
-//#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
+#include <cassert>
+#endif
+
 #include <iostream>
-//#endif
 #include <string>
 #include <vector>
 
@@ -71,12 +72,12 @@ namespace mapnik {  namespace sqlite {
         unsigned size_;
     };
 
-    using value_type = boost::variant<int,double,std::string, blob,null_type>;
+    using value_type = mapnik::util::variant<int,double,std::string, blob,null_type>;
     using record_type = std::vector<value_type>;
 
     class prepared_statement : mapnik::noncopyable
     {
-        struct binder : public boost::static_visitor<bool>
+        struct binder : public mapnik::util::static_visitor<bool>
         {
             binder(sqlite3_stmt * stmt, unsigned index)
                 : stmt_(stmt), index_(index) {}
@@ -168,7 +169,7 @@ namespace mapnik {  namespace sqlite {
             for (; itr!=end;++itr)
             {
                 binder op(stmt_,count++);
-                if (!boost::apply_visitor(op,*itr))
+                if (!util::apply_visitor(op,*itr))
                 {
                     return false;
                 }

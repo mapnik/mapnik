@@ -563,18 +563,17 @@ bool interior_position(PathType & path, double & x, double & y)
     // no intersections we just return the default
     if (intersections.empty())
         return true;
-    x0=intersections[0];
+    std::sort(intersections.begin(), intersections.end());
     double max_width = 0;
-    for (unsigned ii = 1; ii < intersections.size(); ++ii)
+    for (unsigned ii = 1; ii < intersections.size(); ii += 2)
     {
-        double xi=intersections[ii];
-        double xc=(x0+xi)/2.0;
-        double width = std::fabs(xi-x0);
-        if (width > max_width && hit_test(path,xc,y,0))
+        double xlow = intersections[ii-1];
+        double xhigh = intersections[ii];
+        double width = xhigh - xlow;
+        if (width > max_width)
         {
-            x=xc;
+            x = (xlow + xhigh) / 2.0;
             max_width = width;
-            break;
         }
     }
     return true;

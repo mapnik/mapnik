@@ -37,19 +37,19 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/variant.hpp>
 
 // boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 // stl
 #include <set>
+#include <functional> // std::ref
 
 namespace mapnik {
 
 template <typename Container>
-struct expression_attributes : boost::static_visitor<void>
+struct expression_attributes : util::static_visitor<void>
 {
     explicit expression_attributes(Container& names)
         : names_(names) {}
@@ -62,24 +62,24 @@ struct expression_attributes : boost::static_visitor<void>
     template <typename Tag>
     void operator() (binary_node<Tag> const& x) const
     {
-        boost::apply_visitor(*this, x.left);
-        boost::apply_visitor(*this, x.right);
+        util::apply_visitor(*this, x.left);
+        util::apply_visitor(*this, x.right);
     }
 
     template <typename Tag>
     void operator() (unary_node<Tag> const& x) const
     {
-        boost::apply_visitor(*this, x.expr);
+        util::apply_visitor(*this, x.expr);
     }
 
     void operator() (regex_match_node const& x) const
     {
-        boost::apply_visitor(*this, x.expr);
+        util::apply_visitor(*this, x.expr);
     }
 
     void operator() (regex_replace_node const& x) const
     {
-        boost::apply_visitor(*this, x.expr);
+        util::apply_visitor(*this, x.expr);
     }
 
     template <typename T>
@@ -104,7 +104,7 @@ public:
 };
 
 template <typename Container>
-struct extract_attribute_names : boost::static_visitor<void>
+struct extract_attribute_names : util::static_visitor<void>
 {
     explicit extract_attribute_names(Container& names)
         : names_(names),
@@ -114,7 +114,7 @@ struct extract_attribute_names : boost::static_visitor<void>
     {
         if (expr)
         {
-            boost::apply_visitor(f_attr_, *expr);
+            util::apply_visitor(f_attr_, *expr);
         }
     }
     void operator() (mapnik::transform_type const& expr) const
@@ -135,7 +135,7 @@ struct extract_attribute_names : boost::static_visitor<void>
             expr->add_expressions(expressions);
             for (it=expressions.begin(); it != expressions.end(); ++it)
             {
-                if (*it) boost::apply_visitor(f_attr_, **it);
+                if (*it) util::apply_visitor(f_attr_, **it);
             }
         }
     }
@@ -156,7 +156,7 @@ private:
     expression_attributes<std::set<std::string> > f_attr_;
 };
 
-struct symbolizer_attributes : public boost::static_visitor<>
+struct symbolizer_attributes : public util::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
@@ -169,7 +169,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
     {
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(f_attrs_, prop.second);
+            util::apply_visitor(f_attrs_, prop.second);
         }
     }
 
@@ -190,7 +190,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         for (auto const& prop : sym.properties)
         {
-            boost::apply_visitor(f_attrs_, prop.second);
+            util::apply_visitor(f_attrs_, prop.second);
         }
     }
 
@@ -209,7 +209,7 @@ private:
 class attribute_collector : public mapnik::noncopyable
 {
 private:
-    std::set<std::string>& names_;
+    std::set<std::string> & names_;
     double filter_factor_;
     expression_attributes<std::set<std::string> > f_attr;
 public:
@@ -223,13 +223,13 @@ public:
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
         symbolizer_attributes s_attr(names_,filter_factor_);
-        for (auto symbol : symbols)
+        for (auto const& sym : symbols)
         {
-            boost::apply_visitor(s_attr,symbol);
+            util::apply_visitor(std::ref(s_attr), sym);
         }
 
         expression_ptr const& expr = r.get_filter();
-        boost::apply_visitor(f_attr,*expr);
+        util::apply_visitor(f_attr,*expr);
     }
 
     double get_filter_factor() const
@@ -250,12 +250,13 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
     expression_ptr repeat_key = get<mapnik::expression_ptr>(sym, keys::repeat_key);
     if (repeat_key)
     {
-        boost::apply_visitor(rk_attr, *repeat_key);
+        util::apply_visitor(rk_attr, *repeat_key);
     }
 
     // get columns from child rules and symbolizers
     group_symbolizer_properties_ptr props = get<group_symbolizer_properties_ptr>(sym, keys::group_properties);
-    if (props) {
+    if (props)
+    {
         for (auto const& rule : props->get_rules())
         {
             // note that this recurses down on to the symbolizer
@@ -264,7 +265,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
             // still need to collect repeat key columns
             if (rule->get_repeat_key())
             {
-                boost::apply_visitor(rk_attr, *(rule->get_repeat_key()));
+                util::apply_visitor(rk_attr, *(rule->get_repeat_key()));
             }
         }
     }

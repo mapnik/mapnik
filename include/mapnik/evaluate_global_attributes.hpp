@@ -31,10 +31,8 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/util/variant.hpp>
 
-// boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #else
@@ -46,7 +44,7 @@ namespace mapnik {
 namespace {
 
 template <typename T, typename Attributes>
-struct evaluate_expression : boost::static_visitor<T>
+struct evaluate_expression : util::static_visitor<T>
 {
     using value_type = T;
 
@@ -75,39 +73,39 @@ struct evaluate_expression : boost::static_visitor<T>
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {
-        return (boost::apply_visitor(*this, x.left).to_bool())
-            && (boost::apply_visitor(*this, x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool())
+            && (util::apply_visitor(*this, x.right).to_bool());
     }
 
     value_type operator() (binary_node<tags::logical_or> const & x) const
     {
-        return (boost::apply_visitor(*this,x.left).to_bool())
-            || (boost::apply_visitor(*this,x.right).to_bool());
+        return (util::apply_visitor(*this,x.left).to_bool())
+            || (util::apply_visitor(*this,x.right).to_bool());
     }
 
     template <typename Tag>
     value_type operator() (binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
-        return operation(boost::apply_visitor(*this, x.left),
-                         boost::apply_visitor(*this, x.right));
+        return operation(util::apply_visitor(*this, x.left),
+                         util::apply_visitor(*this, x.right));
     }
 
     template <typename Tag>
     value_type operator() (unary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type func;
-        return func(boost::apply_visitor(*this, x.expr));
+        return func(util::apply_visitor(*this, x.expr));
     }
 
     value_type operator() (unary_node<tags::logical_not> const& x) const
     {
-        return ! (boost::apply_visitor(*this,x.expr).to_bool());
+        return ! (util::apply_visitor(*this,x.expr).to_bool());
     }
 
     value_type operator() (regex_match_node const& x) const
     {
-        value_type v = boost::apply_visitor(*this, x.expr);
+        value_type v = util::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_match(v.to_unicode(),x.pattern);
 #else
@@ -118,7 +116,7 @@ struct evaluate_expression : boost::static_visitor<T>
 
     value_type operator() (regex_replace_node const& x) const
     {
-        value_type v = boost::apply_visitor(*this, x.expr);
+        value_type v = util::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
 #else
@@ -138,7 +136,7 @@ struct evaluate_expression : boost::static_visitor<T>
 };
 
 template <typename T>
-struct evaluate_expression<T, boost::none_t> : boost::static_visitor<T>
+struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
 {
     using value_type = T;
 
@@ -161,39 +159,39 @@ struct evaluate_expression<T, boost::none_t> : boost::static_visitor<T>
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {
-        return (boost::apply_visitor(*this, x.left).to_bool())
-            && (boost::apply_visitor(*this, x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool())
+            && (util::apply_visitor(*this, x.right).to_bool());
     }
 
     value_type operator() (binary_node<tags::logical_or> const & x) const
     {
-        return (boost::apply_visitor(*this,x.left).to_bool())
-            || (boost::apply_visitor(*this,x.right).to_bool());
+        return (util::apply_visitor(*this,x.left).to_bool())
+            || (util::apply_visitor(*this,x.right).to_bool());
     }
 
     template <typename Tag>
     value_type operator() (binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
-        return operation(boost::apply_visitor(*this, x.left),
-                         boost::apply_visitor(*this, x.right));
+        return operation(util::apply_visitor(*this, x.left),
+                         util::apply_visitor(*this, x.right));
     }
 
     template <typename Tag>
     value_type operator() (unary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type func;
-        return func(boost::apply_visitor(*this, x.expr));
+        return func(util::apply_visitor(*this, x.expr));
     }
 
     value_type operator() (unary_node<tags::logical_not> const& x) const
     {
-        return ! (boost::apply_visitor(*this,x.expr).to_bool());
+        return ! (util::apply_visitor(*this,x.expr).to_bool());
     }
 
     value_type operator() (regex_match_node const& x) const
     {
-        value_type v = boost::apply_visitor(*this, x.expr);
+        value_type v = util::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_match(v.to_unicode(),x.pattern);
 #else
@@ -204,7 +202,7 @@ struct evaluate_expression<T, boost::none_t> : boost::static_visitor<T>
 
     value_type operator() (regex_replace_node const& x) const
     {
-        value_type v = boost::apply_visitor(*this, x.expr);
+        value_type v = util::apply_visitor(*this, x.expr);
 #if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
 #else
@@ -222,10 +220,10 @@ struct evaluate_expression<T, boost::none_t> : boost::static_visitor<T>
 };
 
 template <typename T, typename Attributes>
-struct assign_value : boost::static_visitor<> {};
+struct assign_value : util::static_visitor<> {};
 
 template <typename Attributes>
-struct assign_value<expression_ptr,Attributes> : boost::static_visitor<>
+struct assign_value<expression_ptr,Attributes> : util::static_visitor<>
 {
     assign_value(symbolizer_base::value_type & val, expression_ptr const& expr, Attributes const& attributes)
         : val_(val),
@@ -235,7 +233,7 @@ struct assign_value<expression_ptr,Attributes> : boost::static_visitor<>
     void operator() (color const& default_val) const
     {
         // evaluate expression as a string then parse as css color
-        std::string str = boost::apply_visitor(mapnik::evaluate_expression<mapnik::value,
+        std::string str = util::apply_visitor(mapnik::evaluate_expression<mapnik::value,
                                                Attributes>(attributes_),*expr_).to_string();
         try { val_ = parse_color(str); }
         catch (...) { val_ = default_val;}
@@ -243,17 +241,17 @@ struct assign_value<expression_ptr,Attributes> : boost::static_visitor<>
 
     void operator() (value_double default_val) const
     {
-        val_ = boost::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_double();
+        val_ = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_double();
     }
 
     void operator() (value_integer default_val) const
     {
-        val_ = boost::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_int();
+        val_ = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_int();
     }
 
     void operator() (value_bool default_val) const
     {
-        val_ = boost::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_bool();
+        val_ = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_bool();
     }
 
     template <typename T>
@@ -273,7 +271,7 @@ std::tuple<T,bool> pre_evaluate_expression (expression_ptr const& expr)
 {
     try
     {
-        return std::make_tuple(boost::apply_visitor(mapnik::evaluate_expression<T, boost::none_t>(boost::none),*expr), true);
+        return std::make_tuple(util::apply_visitor(mapnik::evaluate_expression<T, boost::none_t>(boost::none),*expr), true);
     }
     catch (...)
     {
@@ -284,7 +282,7 @@ std::tuple<T,bool> pre_evaluate_expression (expression_ptr const& expr)
 struct evaluate_global_attributes : mapnik::noncopyable
 {
     template <typename Attributes>
-    struct evaluator : boost::static_visitor<>
+    struct evaluator : util::static_visitor<>
     {
         evaluator(symbolizer_base::cont_type::value_type & prop, Attributes const& attributes)
             : prop_(prop),
@@ -294,7 +292,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
         {
             auto const& meta = get_meta(prop_.first);
             try {
-                boost::apply_visitor(assign_value<expression_ptr,Attributes>(prop_.second, expr, attributes_), std::get<1>(meta));
+                util::apply_visitor(assign_value<expression_ptr,Attributes>(prop_.second, expr, attributes_), std::get<1>(meta));
             } catch (std::exception const& ex) {
                 // no-op
             }
@@ -310,7 +308,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
     };
 
     template <typename Attributes>
-    struct extract_symbolizer : boost::static_visitor<>
+    struct extract_symbolizer : util::static_visitor<>
     {
         extract_symbolizer(Attributes const& attributes)
             : attributes_(attributes) {}
@@ -320,7 +318,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
         {
             for (auto & prop : sym.properties)
             {
-                boost::apply_visitor(evaluator<Attributes>(prop, attributes_), prop.second);
+                util::apply_visitor(evaluator<Attributes>(prop, attributes_), prop.second);
             }
         }
         Attributes const& attributes_;
@@ -335,7 +333,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
             {
                 for (auto & sym : rule)
                 {
-                    boost::apply_visitor(extract_symbolizer<Attributes>(attributes), sym);
+                    util::apply_visitor(extract_symbolizer<Attributes>(attributes), sym);
                 }
             }
         }

@@ -23,15 +23,17 @@
 #ifndef MAPNIK_IMAGE_SCALING_HPP
 #define MAPNIK_IMAGE_SCALING_HPP
 
-// stl
-#include <string>
-
-#include <boost/optional.hpp>
+// mapnik
 #include <mapnik/config.hpp>
-
 #ifdef _MSC_VER
 #include <mapnik/image_data.hpp>
 #endif
+
+// stl
+#include <iosfwd>
+
+// boost
+#include <boost/optional.hpp>
 
 namespace mapnik
 {
@@ -54,8 +56,7 @@ enum scaling_method_e
     SCALING_MITCHELL,
     SCALING_SINC,
     SCALING_LANCZOS,
-    SCALING_BLACKMAN,
-    SCALING_BILINEAR8
+    SCALING_BLACKMAN
 };
 
 MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
@@ -82,18 +83,6 @@ template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
                       double y_off_f,
                       double filter_radius);
 #endif
-
-template <typename Image>
-void scale_image_bilinear_old(Image & target,
-                              Image const& source,
-                              double x_off_f=0,
-                              double y_off_f=0);
-
-template <typename Image>
-void scale_image_bilinear8(Image & target,
-                           Image const& source,
-                           double x_off_f=0,
-                           double y_off_f=0);
 
 }
 #endif // MAPNIK_IMAGE_SCALING_HPP

@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
+
 #include "boost_std_shared_shim.hpp" // FIXME - do we need it?
 // The functions in this file produce deprecation warnings.
 // But as shield symbolizer doesn't fully support more than one
@@ -28,9 +30,9 @@
 
 #define NO_DEPRECATION_WARNINGS
 
+
 // boost
 #include <boost/python.hpp>
-#include <boost/variant.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 // mapnik
 #include <mapnik/symbolizer.hpp>
@@ -49,6 +51,7 @@
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
+#include <mapnik/util/variant.hpp>
 
 // stl
 #include <sstream>
@@ -103,7 +106,7 @@ std::shared_ptr<mapnik::symbolizer_base::value_type> numeric_wrapper(const objec
     return result;
 }
 
-struct extract_python_object : public boost::static_visitor<boost::python::object>
+struct extract_python_object : public mapnik::util::static_visitor<boost::python::object>
 {
     using result_type = boost::python::object;
 
@@ -121,16 +124,16 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return boost::apply_visitor(extract_python_object(), itr->second);
+        return mapnik::util::apply_visitor(extract_python_object(), itr->second);
     }
     //mapnik::property_meta_type const& meta = mapnik::get_meta(key);
-    //return boost::apply_visitor(extract_python_object(), std::get<1>(meta));
+    //return mapnik::util::apply_visitor(extract_python_object(), std::get<1>(meta));
     return boost::python::object();
 }
 
 std::string __str__(mapnik::symbolizer const& sym)
 {
-    return boost::apply_visitor(mapnik::symbolizer_to_json(), sym);
+    return mapnik::util::apply_visitor(mapnik::symbolizer_to_json(), sym);
 }
 
 std::string get_symbolizer_type(symbolizer const& sym)
@@ -138,18 +141,9 @@ std::string get_symbolizer_type(symbolizer const& sym)
     return mapnik::symbolizer_name(sym); // FIXME - do we need this ?
 }
 
-struct symbolizer_hash_visitor : public boost::static_visitor<std::size_t>
-{
-    template <typename T>
-    std::size_t operator() (T const& sym) const
-    {
-        return mapnik::symbolizer_hash::value(sym);
-    }
-};
-
 std::size_t hash_impl(symbolizer const& sym)
 {
-    return boost::apply_visitor(symbolizer_hash_visitor(), sym);
+    return mapnik::util::apply_visitor(mapnik::symbolizer_hash_visitor(), sym);
 }
 
 template <typename T>
@@ -158,7 +152,7 @@ std::size_t hash_impl_2(T const& sym)
     return mapnik::symbolizer_hash::value<T>(sym);
 }
 
-struct extract_underlying_type_visitor : boost::static_visitor<boost::python::object>
+struct extract_underlying_type_visitor : mapnik::util::static_visitor<boost::python::object>
 {
     template <typename T>
     boost::python::object operator() (T const& sym) const
@@ -169,7 +163,7 @@ struct extract_underlying_type_visitor : boost::static_visitor<boost::python::ob
 
 boost::python::object extract_underlying_type(symbolizer const& sym)
 {
-    return boost::apply_visitor(extract_underlying_type_visitor(), sym);
+    return mapnik::util::apply_visitor(extract_underlying_type_visitor(), sym);
 }
 
 }

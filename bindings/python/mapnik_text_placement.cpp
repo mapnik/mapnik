@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
+
 #include "boost_std_shared_shim.hpp"
 
 #include <boost/python.hpp>
@@ -424,6 +426,7 @@ void export_text_placement()
         .def_readwrite("label_position_tolerance", &text_symbolizer_properties::label_position_tolerance)
         .def_readwrite("avoid_edges", &text_symbolizer_properties::avoid_edges)
         .def_readwrite("minimum_distance", &text_symbolizer_properties::minimum_distance)
+        .def_readwrite("repeat_distance", &text_symbolizer_properties::repeat_distance)
         .def_readwrite("minimum_padding", &text_symbolizer_properties::minimum_padding)
         .def_readwrite("minimum_path_length", &text_symbolizer_properties::minimum_path_length)
         .def_readwrite("maximum_angle_char_delta", &text_symbolizer_properties::max_char_angle_delta)

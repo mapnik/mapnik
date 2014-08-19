@@ -25,10 +25,10 @@
 #endif
 
 // mapnik
+#include <mapnik/config_error.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/noncopyable.hpp>
 

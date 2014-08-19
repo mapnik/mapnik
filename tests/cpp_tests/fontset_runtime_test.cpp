@@ -24,6 +24,9 @@
 #include <algorithm>
 #include <mapnik/make_unique.hpp>
 
+// icu - for memory cleanup (to make valgrind happy)
+#include "unicode/uclean.h"
+
 #include "utils.hpp"
 
 int main(int argc, char** argv)
@@ -84,6 +87,7 @@ int main(int argc, char** argv)
     } catch (std::exception const& ex) {
         BOOST_TEST_EQ(std::string(ex.what()),std::string("Unable to find specified font face 'DejaVu Sans Book' in font set: 'fontset'"));
     }
+    u_cleanup();
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
         else std::clog << "C++ fontset runtime: \x1b[1;32m✓ \x1b[0m\n";
