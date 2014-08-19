@@ -15,8 +15,8 @@ before_install:
  # we need at least g++-4.7 for c++11 features
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  # clear out travis postgis
- - sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
- - sudo apt-get -qq remove postgis
+ #- sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
+ #- sudo apt-get -qq remove postgis
  # grab more recent gdal/proj
  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
  # more recent boost
