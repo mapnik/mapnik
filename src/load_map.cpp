@@ -866,6 +866,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
         set_symbolizer_property<point_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
         // point placement
         set_symbolizer_property<point_symbolizer,point_placement_enum>(sym, keys::point_placement_type, node);
+        set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         if (file && !file->empty())
         {
             if(base)
@@ -881,7 +882,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
             std::string filename = *file;
             ensure_exists(filename);
             put(sym, keys::file, parse_path(filename));
-            set_symbolizer_property<symbolizer_base, transform_type>(sym, keys::image_transform, node);
         }
 
         rule.append(std::move(sym));
