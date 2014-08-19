@@ -7,7 +7,7 @@ compiler:
 env:
   matrix:
    - DEBUG=True ENABLE_LOG=True DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
-   - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none XMLPARSER="ptree" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="-flto" CUSTOM_LDFLAGS="-flto"
+   - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none XMLPARSER="ptree" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
 
 addons:
   postgresql: "9.3"
@@ -23,15 +23,7 @@ before_install:
  # more recent boost
  - sudo add-apt-repository -y ppa:boost-latest/ppa
  - sudo apt-get update -y
- - sudo apt-get install -y libstdc++6 libstdc++-4.8-dev make boost1.55 libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
- - sudo apt-get install -y binutils-gold
- - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key|sudo apt-key add -
- - sudo apt-get install clang-3.4
- - export PATH=/usr/bin:${PATH}
- - echo `which clang`
- - echo `which clang++`
- - sudo ln -s /usr/lib/llvm-3.4/lib/LLVMgold.so /usr/lib/LLVMgold.so
- - sudo ln -s /usr/lib/llvm-3.4/lib/libLTO.so /usr/lib/libLTO.so
+ - sudo apt-get install -y ttf-wqy-microhei libstdc++6 libstdc++-4.8-dev make boost1.55 libgdal-dev libgdal1-dev libgdal1h=1.10.0-1~precise1 python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev
  - if [[ "${CXX}" == 'g++' ]]; then sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
  - if [[ "${CXX}" == 'clang++' ]]; then export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
  - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
@@ -41,10 +33,7 @@ before_install:
  - cd ../
 
 install:
- - export RANLIB=/bin/true
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER=${XML_PARSER} ENABLE_LOG=${ENABLE_LOG} DEBUG=${DEBUG} DEMO=${DEMO} BENCHMARK=${BENCHMARK} CPP_TESTS=True CAIRO=True FAST=True || cat config.log
- # workaround ar bug: https://sourceware.org/bugzilla/show_bug.cgi?id=13256
- - echo 'ar "$@" --plugin /usr/lib/LLVMgold.so' > ar-lto && chmod +x ./ar-lto && export AR=$(pwd)/ar-lto
  - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=2 make; else JOBS=4 make; fi;
 
 before_script:
@@ -52,7 +41,3 @@ before_script:
 
 script:
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
- # install some exotic fonts to ensure we don't crash registering them
- #- sudo apt-get install ttf-wqy-microhei
- #- source localize.sh
- #- python -c "import mapnik;mapnik.logger.set_severity(mapnik.severity_type.Debug);mapnik.register_fonts('/usr/share/fonts/');mapnik.register_fonts('/usr/share/fonts/');print '\n'.join(list(mapnik.FontEngine.instance().face_names()))"
