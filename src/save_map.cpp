@@ -42,6 +42,7 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
+#include <boost/version.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -869,7 +870,11 @@ void save_map(Map const & map, std::string const& filename, bool explicit_defaul
 {
     ptree pt;
     serialize_map(pt,map,explicit_defaults);
+#if BOOST_VERSION >= 105600
+    write_xml(filename,pt,std::locale(),boost::property_tree::xml_writer_make_settings<ptree::key_type>(' ',4));
+#else
     write_xml(filename,pt,std::locale(),boost::property_tree::xml_writer_make_settings(' ',4));
+#endif
 }
 
 std::string save_map_to_string(Map const & map, bool explicit_defaults)
@@ -877,7 +882,11 @@ std::string save_map_to_string(Map const & map, bool explicit_defaults)
     ptree pt;
     serialize_map(pt,map,explicit_defaults);
     std::ostringstream ss;
+#if BOOST_VERSION >= 105600
+    write_xml(ss,pt,boost::property_tree::xml_writer_make_settings<ptree::key_type>(' ',4));
+#else
     write_xml(ss,pt,boost::property_tree::xml_writer_make_settings(' ',4));
+#endif
     return ss.str();
 }
 
