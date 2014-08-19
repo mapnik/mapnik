@@ -23,7 +23,7 @@ def call(cmd,silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
         return stdin.strip()
-    elif not silent and not 'NOTICE' in stderr:
+    elif not silent and 'ERROR' in stderr or 'could not connect to server' in stderr:
         raise RuntimeError(stderr.strip())
 
 def psql_can_connect():
