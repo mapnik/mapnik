@@ -352,7 +352,7 @@ struct feature_generator : public mapnik::util::static_visitor<mapnik::feature_p
 
 topojson_featureset::topojson_featureset(mapnik::topojson::topology const& topo,
                                          mapnik::transcoder const& tr,
-                                         std::deque<std::size_t> && index_array)
+                                         array_type && index_array)
     : ctx_(std::make_shared<mapnik::context_type>()),
       topo_(topo),
       tr_(tr),
@@ -367,7 +367,12 @@ mapnik::feature_ptr topojson_featureset::next()
 {
     if (index_itr_ != index_end_)
     {
+#if BOOST_VERSION >= 105600
+        topojson_datasource::item_type const& item = *index_itr_++;
+        std::size_t index = item.second;
+#else
         std::size_t index = *index_itr_++;
+#endif
         if ( index < topo_.geometries.size())
         {
             mapnik::topojson::geometry const& geom = topo_.geometries[index];

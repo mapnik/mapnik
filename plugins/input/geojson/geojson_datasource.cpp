@@ -31,11 +31,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
-#include <boost/geometry/geometries/box.hpp>
-#include <boost/geometry/geometries/geometries.hpp>
-#include <boost/geometry.hpp>
-#include <boost/geometry/extensions/index/rtree/rtree.hpp>
-
 // mapnik
 #include <mapnik/unicode.hpp>
 #include <mapnik/utils.hpp>
@@ -108,7 +103,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
     inline_string_(),
     extent_(),
     features_(),
+#if BOOST_VERSION >= 105600
+    tree_()
+#else
     tree_(16,1)
+#endif
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (inline_string)
@@ -189,7 +188,11 @@ void geojson_datasource::parse_geojson(T & stream)
         {
             extent_.expand_to_include(box);
         }
-        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), count++);
+#if BOOST_VERSION >= 105600
+        tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),count++));
+#else
+        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),count++);
+#endif
     }
 }
 
@@ -244,7 +247,14 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     if (extent_.intersects(b))
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
+#if BOOST_VERSION >= 105600
+        geojson_featureset::array_type index_array;
+        tree_.query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+        return std::make_shared<geojson_featureset>(features_, std::move(index_array));
+#else
+        index_array_ = tree_.find(box);
         return std::make_shared<geojson_featureset>(features_, tree_.find(box));
+#endif
     }
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();
