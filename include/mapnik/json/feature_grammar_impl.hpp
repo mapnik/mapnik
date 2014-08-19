@@ -24,9 +24,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 
-// boost
-#include <boost/spirit/include/support_multi_pass.hpp>
-
 namespace mapnik { namespace json {
 
 template <typename Iterator, typename FeatureType>
