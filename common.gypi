@@ -20,7 +20,9 @@
         '-Wno-redeclared-class-member',
         '-Wno-c99-extensions',
         '-Wno-c++11-extra-semi',
-        '-Wno-variadic-macros'
+        '-Wno-variadic-macros',
+        '-Wno-c++11-extensions',
+        '-Wno-unused-const-variable'
       ]
     },
     'msvs_settings': {
@@ -30,7 +32,13 @@
             'RuntimeLibrary': '2' # /MD
         }
     },
+    'defines': [ 'BOOST_SPIRIT_USE_PHOENIX_V3=1' ],
     'cflags_cc': ['-std=c++03'],
+    'conditions': [
+      ['OS=="win"', {
+        'defines': ['_WINDOWS']
+      }]
+    ],
     'configurations': {
       'Debug': {
         'defines!': [
