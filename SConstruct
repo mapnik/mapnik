@@ -1685,9 +1685,8 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
-        # c++11 support / https://github.com/mapnik/mapnik/issues/1683
-        #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
-        if 'c++11' in env['CUSTOM_CXXFLAGS']:
+        boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+        if boost_version_from_header > 53 or 'c++11' in env['CUSTOM_CXXFLAGS']:
             env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
             #  - workaround boost gil channel_algorithm.hpp narrowing error
             # TODO - remove when building against >= 1.55
