@@ -293,7 +293,6 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
         tree_.query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
         return std::make_shared<topojson_featureset>(topo_, *tr_, std::move(index_array));
 #else
-        index_array_ = tree_.find(box);
         return std::make_shared<topojson_featureset>(topo_, *tr_, tree_.find(box));
 #endif
     }

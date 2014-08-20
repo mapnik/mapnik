@@ -252,7 +252,6 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
         tree_.query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
         return std::make_shared<geojson_featureset>(features_, std::move(index_array));
 #else
-        index_array_ = tree_.find(box);
         return std::make_shared<geojson_featureset>(features_, tree_.find(box));
 #endif
     }
