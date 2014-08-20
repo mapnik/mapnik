@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,10 @@
 // mapnik
 #include <mapnik/geometry.hpp>  // for geometry_type
 #include <mapnik/vertex.hpp>  // for CommandType
-
+#include <mapnik/make_unique.hpp>
+#include <mapnik/json/positions_grammar.hpp>
+#include <mapnik/json/geometry_util.hpp>
+#include <mapnik/json/error_handler.hpp>
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -37,92 +40,19 @@ namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
-struct push_vertex
-{
-    using result_type = void;
-
-    template <typename T0,typename T1, typename T2, typename T3>
-    result_type operator() (T0 c, T1 path, T2 x, T3 y) const
-    {
-        BOOST_ASSERT( path!=0 );
-        path->push_vertex(x,y,c);
-    }
-};
-
-struct close_path
-{
-    using result_type = void;
-
-    template <typename T>
-    result_type operator() (T path) const
-    {
-        BOOST_ASSERT( path!=0 );
-        if (path->size() > 2u) // to form a polygon ring we need at least 3 vertices
-        {
-            path->close_path();
-        }
-    }
-};
-
-struct cleanup
-{
-    using result_type = void;
-    template <typename T0>
-    void operator() (T0 & path) const
-    {
-        if (path) delete path, path=0;
-    }
-};
-
-struct where_message
-{
-    using result_type = std::string;
-
-    template <typename Iterator>
-    std::string operator() (Iterator first, Iterator last, std::size_t size) const
-    {
-        std::string str(first, last);
-        if (str.length() > size)
-            return str.substr(0, size) + "..." ;
-        return str;
-    }
-};
-
 template <typename Iterator>
 struct geometry_grammar :
-        qi::grammar<Iterator,qi::locals<int>, void(mapnik::geometry_container& )
+        qi::grammar<Iterator,void(mapnik::geometry_container& )
         , space_type>
 {
     geometry_grammar();
-    qi::rule<Iterator, qi::locals<int>, void(mapnik::geometry_container& ),space_type> geometry;
-    qi::symbols<char, int> geometry_dispatch;
-
-    qi::rule<Iterator,void(CommandType,geometry_type*),space_type> point;
-    qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),space_type> points;
-    qi::rule<Iterator,void(mapnik::geometry_container&,int),space_type> coordinates;
-    //
-    qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(mapnik::geometry_container& ),space_type> point_coordinates;
-    qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(mapnik::geometry_container& ),space_type> linestring_coordinates;
-    qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(mapnik::geometry_container& ),space_type> polygon_coordinates;
-
-    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipoint_coordinates;
-    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multilinestring_coordinates;
-    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> multipolygon_coordinates;
+    qi::rule<Iterator,void(mapnik::geometry_container& ), space_type> start;
+    qi::rule<Iterator, qi::locals<int, mapnik::json::coordinates>, void(mapnik::geometry_container& ), space_type> geometry;
+    qi::symbols<char, int> geometry_type_dispatch;
     qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> geometry_collection;
-
-    // Nabialek trick //////////////////////////////////////
-    //using dispatch_rule = typename qi::rule<Iterator,void(FeatureType &), space_type>;
-    //qi::rule<Iterator,qi::locals<dispatch_rule*>, void(FeatureType&),space_type> geometry;
-    //qi::symbols<char, dispatch_rule*> geometry_dispatch;
-    ////////////////////////////////////////////////////////
-
-    boost::phoenix::function<push_vertex> push_vertex_;
-    boost::phoenix::function<close_path> close_path_;
-    boost::phoenix::function<cleanup> cleanup_;
+    positions_grammar<Iterator> coordinates;
     boost::phoenix::function<where_message> where_message_;
+    boost::phoenix::function<create_geometry_impl> create_geometry;
 };
 
 }}
