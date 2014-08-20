@@ -8,7 +8,6 @@
     'cairo%':'false',
     'common_defines': [
       'U_CHARSET_IS_UTF8=1',
-      'SHAPE_MEMORY_MAPPED_FILE',
       'BIGINT',
       'BOOST_REGEX_HAS_ICU',
       'HAVE_JPEG',
@@ -27,7 +26,7 @@
       './deps/agg/include/', # agg
       './deps/clipper/include/', # clipper
       './', # boost shim
-      '<@(includes)',
+      '<@(includes)/',
       '<@(includes)/freetype2',
       '<@(includes)/libxml2',
       '<@(includes)/cairo'
@@ -64,6 +63,7 @@
       ],
       "conditions": [
         ["OS=='win'", {
+           'msvs_disabled_warnings': [ 4244,4005,4506,4345,4804,4805,4661 ],
            'libraries':[
               'libboost_filesystem-vc120-mt-1_55.lib',
               'libboost_regex-vc120-mt-1_55.lib',
@@ -103,7 +103,8 @@
               '-Wl,-search_paths_first',
               '-stdlib=libstdc++',
               '-L<@(libs)'
-            ]
+            ],
+            'defines':['SHAPE_MEMORY_MAPPED_FILE']
           }
         ]
       ],
