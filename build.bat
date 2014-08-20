@@ -41,6 +41,16 @@ xcopy /i /d /s /q ..\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q ..\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
 
 :: libs
+xcopy /i /d /s /q ..\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\icu\lib\icuuc.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\icu\lib\icuin.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2_a.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2_a_dll.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libtiff\libtiff\libtiff.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libtiff\libtiff\libtiff.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\libtiff\libtiff\libtiff_i.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\proj\src\proj.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\webp\lib\libwebp.lib ..\mapnik-sdk\libs\ /Y
@@ -54,5 +64,5 @@ xcopy /i /d /s /q ..\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\proj\nad ..\mapnik-sdk\share\proj /Y
 
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
-msbuild .\build\mapnik.sln /p:Configuration=Release
+msbuild /m:2 /p:BuildInParallel=true .\build\mapnik.sln /p:Configuration=Release
 :: /v:diag > build.log

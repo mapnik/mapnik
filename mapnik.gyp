@@ -54,7 +54,7 @@
       'msvs_settings': {
         'VCLinkerTool': {
           'AdditionalLibraryDirectories': [
-              '<@(libs)'
+              '<@(libs)/'
           ]
         }
       },
@@ -76,6 +76,7 @@
               'libxml2.lib',
               'libjpeg.lib',
               'icuuc.lib',
+              'icuin.lib',
               'freetype.lib',
               'zlib.lib'
           ],
