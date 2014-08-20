@@ -208,13 +208,13 @@ void topojson_datasource::parse_topojson(T & stream)
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
-    std::size_t index = 0;
+    std::size_t geometry_index = 0;
     for (auto const& geom : topo_.geometries)
     {
         mapnik::box2d<double> box = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
         if (box.valid())
         {
-            if (count == 0)
+            if (geometry_index == 0)
             {
                 extent_ = box;
                 collect_attributes_visitor assessor(desc_);
@@ -225,12 +225,12 @@ void topojson_datasource::parse_topojson(T & stream)
                 extent_.expand_to_include(box);
             }
 #if BOOST_VERSION >= 105600
-            tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),index));
+            tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index));
 #else
-            tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),index);
+            tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
 #endif
         }
-        ++index;
+        ++geometry_index;
     }
 }
 
