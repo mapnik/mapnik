@@ -313,23 +313,18 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
 
 bool placement_finder::collision(const box2d<double> &box, const value_unicode_string &repeat_key) const
 {
-    if (!detector_.extent().intersects(box)
-            ||
-        (info_.properties.avoid_edges && !extent_.contains(box))
-            ||
-        (info_.properties.minimum_padding > 0 &&
-         !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
-            ||
-        (!info_.properties.allow_overlap &&
-            ((repeat_key.length() == 0 && !detector_.has_placement(box, info_.properties.minimum_distance * scale_factor_))
-                ||
-             (repeat_key.length() > 0  && !detector_.has_placement(box, info_.properties.minimum_distance * scale_factor_,
-                                                                   repeat_key, info_.properties.repeat_distance * scale_factor_))))
-        )
-    {
-        return true;
-    }
-    return false;
+    return !detector_.extent().intersects(box)
+               ||
+           (info_.properties.avoid_edges && !extent_.contains(box))
+               ||
+           (info_.properties.minimum_padding > 0 &&
+            !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
+               ||
+           (!info_.properties.allow_overlap &&
+               ((repeat_key.length() == 0 && !detector_.has_placement(box, info_.properties.text_margin * scale_factor_))
+                   ||
+               (repeat_key.length() > 0  && !detector_.has_placement(box, info_.properties.text_margin * scale_factor_,
+                                                                   repeat_key, info_.properties.repeat_distance * scale_factor_))));
 }
 
 void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement)
