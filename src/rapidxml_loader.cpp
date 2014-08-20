@@ -97,8 +97,9 @@ public:
         }
     }
 
-    void load_string(std::string const& buffer, xml_node &node, std::string const & base_path )
+    void load_string(std::string const& buffer, xml_node &node, std::string const & )
     {
+        // Note: base_path ignored because its not relevant - only needed for xml2 to load entities (see libxml2_loader.cpp)
         load_array(std::string(buffer), node);
     }
 private:

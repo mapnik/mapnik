@@ -107,7 +107,7 @@ public:
                                    base_path + "': file or directory does not exist");
             }
         }
-
+        // NOTE: base_path here helps libxml2 resolve entities correctly: https://github.com/mapnik/mapnik/issues/440
         xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), base_path.c_str(), encoding_, options_);
 
         load(doc, node);
