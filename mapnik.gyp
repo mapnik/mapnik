@@ -1,8 +1,38 @@
 {
   'includes': [
-    './common.gypi',
-    './config.gypi',
+    './common.gypi'
   ],
+  'variables': {
+    'includes%':'',
+    'libs%':'',
+    'cairo%':'false',
+    'common_defines': [
+      'U_CHARSET_IS_UTF8=1',
+      'SHAPE_MEMORY_MAPPED_FILE',
+      'BIGINT',
+      'BOOST_REGEX_HAS_ICU',
+      'HAVE_JPEG',
+      'MAPNIK_USE_PROJ4',
+      'HAVE_PNG',
+      'HAVE_TIFF',
+      'HAVE_WEBP',
+      'MAPNIK_THREADSAFE',
+      'HAVE_CAIRO',
+      'GRID_RENDERER',
+      'SVG_RENDERER'
+    ],
+    'common_includes': [
+      './include', # mapnik
+      './deps/', # mapnik/sparsehash
+      './deps/agg/include/', # agg
+      './deps/clipper/include/', # clipper
+      './', # boost shim
+      '<@(includes)',
+      '<@(includes)/freetype2',
+      '<@(includes)/libxml2',
+      '<@(includes)/cairo'
+    ]
+  },
   'targets': [
     {
       'target_name': 'mapnik',
@@ -19,10 +49,19 @@
         'SUPPORTED_PLATFORMS':['macosx'],
         'PUBLIC_HEADERS_FOLDER_PATH': 'include',
         'OTHER_CPLUSPLUSFLAGS':[
-          '-ftemplate-depth-300',
-          '-fvisibility-inlines-hidden'
+          '-ftemplate-depth-300'
         ]
       },
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalLibraryDirectories': [
+              '<@(libs)'
+          ]
+        }
+      },
+      'defines': [
+        '<@(common_defines)'
+      ],
       "conditions": [
         ["OS=='win'", {
            'libraries':[
@@ -62,27 +101,23 @@
               '-licudata',
               '-lz',
               '-Wl,-search_paths_first',
-              '-stdlib=libstdc++'
+              '-stdlib=libstdc++',
+              '-L<@(libs)'
             ]
           }
         ]
       ],
       'include_dirs':[
-          './include', # mapnik
-          './deps/', # mapnik/sparsehash
-          './deps/agg/include/', # agg
-          './deps/clipper/include/', # clipper
-          './', # boost shim
+          '<@(common_includes)'
       ],
       'direct_dependent_settings': {
         'include_dirs': [
-          './include', # mapnik
-          './deps/', # mapnik/sparsehash
-          './deps/agg/include/', # agg
-          './deps/clipper/include/', # clipper
-          './', # boost shim
+          '<@(common_includes)'
         ],
-        'libraries': ['-stdlib=libstdc++']
+        'libraries': ['-stdlib=libstdc++'],
+        'defines': [
+          '<@(common_defines)'
+        ],
       }
     },
     {
@@ -254,6 +289,25 @@
         "type": "executable",
         "sources": [ "./tests/cpp_tests/wkb_formats_test.cpp"],
         "dependencies": [ "mapnik" ]
+    },
+    {
+        "target_name": "test_rendering",
+        "type": "executable",
+        "sources": [ "./benchmark/test_rendering.cpp" ],
+        "dependencies": [ "mapnik" ],
+        "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_thread-vc120-mt-1_55.lib'
+            ],
+            'defines': ['MAPNIK_EXPORTS']
+          },{
+              'libraries':[
+                '-lboost_thread'
+              ]
+            }
+          ]
+        ],
     },
   ]
 }

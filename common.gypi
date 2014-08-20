@@ -5,6 +5,7 @@
       'CLANG_CXX_LIBRARY': 'libstdc++',
       'CLANG_CXX_LANGUAGE_STANDARD':'c++03',
       'GCC_VERSION': 'com.apple.compilers.llvm.clang.1_0',
+      'MACOSX_DEPLOYMENT_TARGET':'10.9',
       'WARNING_CFLAGS': [
         '-Wall',
         '-Wextra',
