@@ -152,6 +152,32 @@ def test_geojson_parsing_reversed():
         eq_(path.to_geojson(),path2.to_geojson())
     eq_(count,len(path))
 
+
+# http://geojson.org/geojson-spec.html#positions
+def test_geojson_point_positions():
+    input_json = '{"type":"Point","coordinates":[30,10]}'
+
+    path = mapnik.Path()
+    path.add_geojson(input_json)
+    eq_(path.to_geojson(),input_json)
+
+    path = mapnik.Path()
+    # should ignore all but the first two
+    path.add_geojson('{"type":"Point","coordinates":[30,10,50,50,50,50]}')
+    eq_(path.to_geojson(),input_json)
+
+def test_geojson_point_positions():
+    input_json = '{"type":"LineString","coordinates":[[30,10],[10,30],[40,40]]}'
+
+    path = mapnik.Path()
+    path.add_geojson(input_json)
+    eq_(path.to_geojson(),input_json)
+
+    path = mapnik.Path()
+    # should ignore all but the first two
+    path.add_geojson('{"type":"LineString","coordinates":[[30.0,10.0,0,0,0],[10.0,30.0,0,0,0],[40.0,40.0,0,0,0]]}')
+    eq_(path.to_geojson(),input_json)
+
 def compare_wkb_from_wkt(wkt,num=None):
 
     paths = mapnik.Path.from_wkt(wkt)
