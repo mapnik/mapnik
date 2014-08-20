@@ -22,6 +22,9 @@
 #ifndef MAPNIK_PIXEL_POSITION_HPP
 #define MAPNIK_PIXEL_POSITION_HPP
 
+// stl
+#include <cmath>
+
 namespace mapnik
 {
 
@@ -67,6 +70,11 @@ struct pixel_position
     pixel_position operator~() const
     {
         return pixel_position(x, -y);
+    }
+
+    double length()
+    {
+        return std::sqrt(x * x + y * y);
     }
 };
 
