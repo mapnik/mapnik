@@ -38,6 +38,7 @@ xcopy /i /d /s /q ..\cairo\src\cairo-svg.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q ..\cairo\src\cairo-svg-surface-private.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q ..\cairo\src\cairo-pdf.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q ..\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q ..\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
 
 :: libs
 xcopy /i /d /s /q ..\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
@@ -49,13 +50,9 @@ xcopy /i /d /s /q ..\cairo\src\release\cairo-static.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
 
-cairo-deprecated.h
-cairo-svg.h
-cairo-pdf.h
-cairo-svg-surface-private.h
 :: data
 xcopy /i /d /s /q ..\proj\nad ..\mapnik-sdk\share\proj /Y
 
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
-msbuild /m .\build\mapnik.sln /t:Rebuild /p:Configuration=Release
+msbuild .\build\mapnik.sln /p:Configuration=Release
 :: /v:diag > build.log
