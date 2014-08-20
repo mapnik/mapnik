@@ -1,8 +1,8 @@
 {
   'target_defaults': {
     'default_configuration': 'Release',
-    "msbuild_toolset":"CTP_Nov2013",
-    "msvs_configuration_platform": "Win32",
+    'msbuild_toolset':'CTP_Nov2013',
+    'msvs_configuration_platform': 'Win32',
     'xcode_settings': {
       'CLANG_CXX_LIBRARY': 'libstdc++',
       'CLANG_CXX_LANGUAGE_STANDARD':'c++03',
@@ -60,6 +60,15 @@
           'GCC_GENERATE_DEBUGGING_SYMBOLS': 'YES',
           'DEAD_CODE_STRIPPING': 'NO',
           'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO'
+        },
+        'msvs_settings': {
+          'VCCLCompilerTool': {
+            'RuntimeLibrary': '1', # static debug /MTd
+            'Optimization': 0, # /Od, no optimization
+            'MinimalRebuild': 'false',
+            'OmitFramePointers': 'false',
+            'BasicRuntimeChecks': 3 # /RTC1
+          }
         }
       },
       'Release': {
@@ -70,6 +79,34 @@
           'GCC_GENERATE_DEBUGGING_SYMBOLS': 'NO',
           'DEAD_CODE_STRIPPING': 'YES',
           'GCC_INLINES_ARE_PRIVATE_EXTERN': 'YES'
+        },
+        'msvs_settings': {
+          'VCCLCompilerTool': {
+            'RuntimeLibrary': 0, # static release
+            'Optimization': 3, # /Ox, full optimization
+            'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
+            'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
+            'WholeProgramOptimization': 'true', # /GL, whole program optimization, needed for LTCG
+            'OmitFramePointers': 'true',
+            'EnableFunctionLevelLinking': 'true',
+            'EnableIntrinsicFunctions': 'true',
+            'AdditionalOptions': [
+              '/MP', # compile across multiple CPUs
+            ],
+            'DebugInformationFormat': '0'
+          },
+          'VCLibrarianTool': {
+            'AdditionalOptions': [
+              '/LTCG' # link time code generation
+            ],
+          },
+          'VCLinkerTool': {
+            'LinkTimeCodeGeneration': 1, # link-time code generation
+            'OptimizeReferences': 2, # /OPT:REF
+            'EnableCOMDATFolding': 2, # /OPT:ICF
+            'LinkIncremental': 1, # disable incremental linking
+            'GenerateDebugInformation': 'false'
+          }
         }
       }
     }
