@@ -39,6 +39,7 @@
 
 // stl
 #include <stdexcept>
+#include <fstream>
 
 void export_color();
 void export_coord();
@@ -109,6 +110,10 @@ void export_logger();
 #include <mapnik/marker_cache.hpp>
 #if defined(SHAPE_MEMORY_MAPPED_FILE)
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
+
+#if defined(SVG_RENDERER)
+#include <mapnik/svg/output/svg_renderer.hpp>
 #endif
 
 namespace mapnik {
@@ -342,7 +347,23 @@ void render_to_file1(mapnik::Map const& map,
                      std::string const& filename,
                      std::string const& format)
 {
-    if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
+    if (format == "svg-ng")
+    {
+#if defined(SVG_RENDERER)
+        std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
+        if (!file)
+        {
+            throw mapnik::ImageWriterException("could not open file for writing: " + filename);
+        }
+        using iter_type = std::ostream_iterator<char>;
+        iter_type output_stream_iterator(file);
+        mapnik::svg_renderer<iter_type> ren(map,output_stream_iterator);
+        ren.apply();
+#else
+        throw mapnik::ImageWriterException("SVG backend not available, cannot write to format: " + format);
+#endif
+    }
+    else if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
         mapnik::save_to_cairo_file(map,filename,format,1.0);
@@ -383,7 +404,23 @@ void render_to_file3(mapnik::Map const& map,
                      double scale_factor = 1.0
     )
 {
-    if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
+    if (format == "svg-ng")
+    {
+#if defined(SVG_RENDERER)
+        std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
+        if (!file)
+        {
+            throw mapnik::ImageWriterException("could not open file for writing: " + filename);
+        }
+        using iter_type = std::ostream_iterator<char>;
+        iter_type output_stream_iterator(file);
+        mapnik::svg_renderer<iter_type> ren(map,output_stream_iterator,scale_factor);
+        ren.apply();
+#else
+        throw mapnik::ImageWriterException("SVG backend not available, cannot write to format: " + format);
+#endif
+    }
+    else if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
         mapnik::save_to_cairo_file(map,filename,format,scale_factor);
@@ -863,6 +900,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_png", &has_png, "Get png read/write support status");
     def("has_tiff", &has_tiff, "Get tiff read/write support status");
     def("has_webp", &has_webp, "Get webp read/write support status");
+    def("has_svg_renderer", &has_svg_renderer, "Get svg_renderer status");
     def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
