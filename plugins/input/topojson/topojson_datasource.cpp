@@ -308,7 +308,7 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
 #else
         if (tree_)
         {
-            return std::make_shared<topojson_featureset>(topo_, *tr_, tree_.find(box));
+            return std::make_shared<topojson_featureset>(topo_, *tr_, tree_->find(box));
         }
 #endif
     }
