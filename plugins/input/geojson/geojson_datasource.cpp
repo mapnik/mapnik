@@ -137,15 +137,13 @@ geojson_datasource::geojson_datasource(parameters const& params)
         throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + file_ + "'");
     }
 
-    bool first = true;
-    std::size_t count=0;
+    std::size_t geometry_index = 0;
     BOOST_FOREACH (mapnik::feature_ptr const& f, features_)
     {
         mapnik::box2d<double> box = f->envelope();
-        if (first)
+        if (geometry_index == 0)
         {
             extent_ = box;
-            first = false;
             mapnik::feature_kv_iterator f_itr = f->begin();
             mapnik::feature_kv_iterator f_end = f->end();
             for ( ;f_itr!=f_end; ++f_itr)
@@ -159,10 +157,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
             extent_.expand_to_include(box);
         }
 #if BOOST_VERSION >= 105600
-        tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),count++));
+        tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index));
 #else
-        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),count++);
+        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
 #endif
+        ++geometry_index;
     }
 }
 
