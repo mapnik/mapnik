@@ -236,6 +236,8 @@ bool vertex_cache::backward(double length)
 
 bool vertex_cache::move(double length)
 {
+    if (current_segment_ == current_subpath_->vector.end()) return false;
+
     position_ += length;
     length += position_in_segment_;
     while (length >= current_segment_->length)
@@ -251,6 +253,67 @@ bool vertex_cache::move(double length)
     double factor = length / current_segment_->length;
     position_in_segment_ = length;
     current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
+    return true;
+}
+
+bool vertex_cache::move_to_distance(double distance)
+{
+    if (current_segment_ == current_subpath_->vector.end()) return false;
+
+    double position_in_segment = position_in_segment_ + distance;
+    if (position_in_segment < .0 || position_in_segment >= current_segment_->length)
+    {
+        // If there isn't enough distance left on this segment
+        // then we need to search until we find the line segment that ends further than distance away
+        double abs_distance = std::abs(distance);
+        double new_abs_distance = .0;
+        pixel_position inner_pos; // Inside circle.
+        pixel_position outer_pos; // Outside circle.
+
+        position_ -= position_in_segment_;
+
+        if (distance > .0)
+        {
+            do
+            {
+                position_ += current_segment_->length;
+                if (!next_segment()) return false;
+                new_abs_distance = (current_position_ - current_segment_->pos).length();
+            }
+            while (new_abs_distance < abs_distance);
+
+            inner_pos = segment_starting_point_;
+            outer_pos = current_segment_->pos;
+        }
+        else
+        {
+            do
+            {
+                if (!previous_segment()) return false;
+                position_ -= current_segment_->length;
+                new_abs_distance = (current_position_ - segment_starting_point_).length();
+            }
+            while (new_abs_distance < abs_distance);
+
+            inner_pos = current_segment_->pos;
+            outer_pos = segment_starting_point_;
+        }
+
+        find_line_circle_intersection(current_position_.x, current_position_.y, abs_distance,
+            inner_pos.x, inner_pos.y, outer_pos.x, outer_pos.y,
+            current_position_.x, current_position_.y);
+
+        position_in_segment_ = (current_position_ - segment_starting_point_).length();
+        position_ += position_in_segment_;
+    }
+    else
+    {
+        position_ += distance;
+        distance += position_in_segment_;
+        double factor = distance / current_segment_->length;
+        position_in_segment_ = distance;
+        current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
+    }
     return true;
 }
 
@@ -295,6 +358,52 @@ void vertex_cache::restore_state(state const& s)
     segment_starting_point_ = s.segment_starting_point;
     position_ = s.position_;
     angle_valid_ = false;
+}
+
+void vertex_cache::find_line_circle_intersection(
+    double cx, double cy, double radius,
+    double x1, double y1, double x2, double y2,
+    double & ix, double & iy) const
+{
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+
+    double A = dx * dx + dy * dy;
+    double B = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
+    double C = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy) - radius * radius;
+
+    double det = B * B - 4 * A * C;
+    if (A <= 1.0e-7 || det < 0)
+    {
+        // Should never happen.
+        // No real solutions.
+        return;
+    }
+    else if (det == 0)
+    {
+        // Could potentially happen....
+        // One solution.
+        double t = -B / (2 * A);
+        ix = x1 + t * dx;
+        iy = y1 + t * dy;
+        return;
+    }
+    else
+    {
+        // Two solutions.
+
+        // Always use the 1st one
+        // We only really have one solution here, as we know the line segment will start in the circle and end outside
+        double t = (-B + std::sqrt(det)) / (2 * A);
+        ix = x1 + t * dx;
+        iy = y1 + t * dy;
+
+        //t = (-B - std::sqrt(det)) / (2 * A);
+        //ix = x1 + t * dx;
+        //iy = y1 + t * dy;
+
+        return;
+    }
 }
 
 } //ns mapnik

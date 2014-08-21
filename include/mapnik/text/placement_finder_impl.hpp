@@ -76,11 +76,11 @@ bool placement_finder::find_line_placements(T & path, bool points)
         // halign == H_LEFT -> don't move
         if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO)
         {
-            pp.forward(spacing/2.0);
+            if (!pp.forward(spacing / 2.0)) continue;
         }
         else if (horizontal_alignment_ == H_RIGHT)
         {
-            pp.forward(pp.length());
+            if (!pp.forward(pp.length())) continue;
         }
 
         if (move_dx_ != 0.0) path_move_dx(pp, move_dx_);

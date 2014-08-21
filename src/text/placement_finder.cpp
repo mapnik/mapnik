@@ -214,7 +214,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                    if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
                     {
                         return false;
                     }
