@@ -45,7 +45,8 @@ double vertex_cache::angle(double width)
         {
             angle_ = current_segment_angle();
         }
-    } else
+    }
+    else
     {
         scoped_state s(*this);
         if (move(width))
@@ -69,7 +70,8 @@ bool vertex_cache::next_subpath()
     {
         current_subpath_ = subpaths_.begin();
         initialized_ = true;
-    } else
+    }
+    else
     {
         current_subpath_++;
     }
@@ -130,7 +132,9 @@ vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
     if (pos != offseted_lines_.end())
     {
         offseted_line = pos->second;
-    } else {
+    }
+    else
+    {
         offset_converter<vertex_cache> converter(*this);
         converter.set_offset(offset);
         offseted_line = vertex_cache_ptr(new vertex_cache(converter));
@@ -147,7 +151,8 @@ vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
     return *offseted_line;
 }
 
-inline double dist_sq(pixel_position const &d) {
+inline double dist_sq(pixel_position const &d)
+{
     return d.x*d.x + d.y*d.y;
 }
 
@@ -161,26 +166,33 @@ double vertex_cache::position_closest_to(pixel_position const &target_pos)
     // target position. would be good if there were some kind
     // of prior, or fast test to avoid calculating on each
     // segment, but i can't think of one.
-    for (segment const &seg : current_subpath_->vector) {
-        if (first) {
+    for (segment const &seg : current_subpath_->vector)
+    {
+        if (first)
+        {
             old_pos = seg.pos;
             min_pos = lin_pos;
             min_dist_sq = dist_sq(target_pos - old_pos);
             first = false;
 
-        } else {
+        }
+        else
+        {
             new_pos = seg.pos;
 
             pixel_position d = new_pos - old_pos;
-            if ((d.x != 0.0) || (d.y != 0)) {
+            if ((d.x != 0.0) || (d.y != 0))
+            {
                 pixel_position c = target_pos - old_pos;
                 double t = (c.x * d.x + c.y * d.y) / dist_sq(d);
 
-                if ((t >= 0.0) && (t <= 1.0)) {
+                if ((t >= 0.0) && (t <= 1.0))
+                {
                     pixel_position pt = (d * t) + old_pos;
                     double pt_dist_sq = dist_sq(target_pos - pt);
 
-                    if (pt_dist_sq < min_dist_sq) {
+                    if (pt_dist_sq < min_dist_sq)
+                    {
                         min_dist_sq = pt_dist_sq;
                         min_pos = lin_pos + seg.length * t;
                     }
@@ -191,7 +203,8 @@ double vertex_cache::position_closest_to(pixel_position const &target_pos)
             lin_pos += seg.length;
 
             double end_dist_sq = dist_sq(target_pos - old_pos);
-            if (end_dist_sq < min_dist_sq) {
+            if (end_dist_sq < min_dist_sq)
+            {
                 min_dist_sq = end_dist_sq;
                 min_pos = lin_pos;
             }
