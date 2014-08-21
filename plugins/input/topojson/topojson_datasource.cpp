@@ -205,9 +205,14 @@ void topojson_datasource::parse_topojson(T & stream)
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
+#if BOOST_VERSION >= 105600
     using values_container = std::vector< std::pair<box_type, std::size_t> >;
     values_container values;
     values.reserve(topo_.geometries.size());
+#else
+    tree_ = std::make_unique<spatial_index_type>(16, 4);
+#endif
+
     std::size_t geometry_index = 0;
 
     for (auto const& geom : topo_.geometries)
@@ -229,7 +234,7 @@ void topojson_datasource::parse_topojson(T & stream)
 #if BOOST_VERSION >= 105600
         values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
 #else
-        values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
+        tree_->insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
 #endif
         ++geometry_index;
     }
@@ -237,9 +242,6 @@ void topojson_datasource::parse_topojson(T & stream)
 #if BOOST_VERSION >= 105600
     // packing algorithm
     tree_ = std::make_unique<spatial_index_type>(values);
-#else
-    tree_ = std::make_unique<spatial_index_type>(16, 4);
-    tree_->insert(values.begin(), values.end());
 #endif
 }
 
