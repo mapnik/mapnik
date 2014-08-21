@@ -29,7 +29,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/config_error.hpp>
+//#include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/timer.hpp>
 
@@ -506,10 +506,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
-    catch (mapnik::config_error & ex)
-    {
-        std::cerr << ex.what() << std::endl;
-    }
+    //catch (mapnik::config_error & ex)
+    //{
+    //    std::cerr << ex.what() << std::endl;
+    //}
     catch (const std::exception & ex)
     {
         std::cerr << "exception: " << ex.what() << std::endl;

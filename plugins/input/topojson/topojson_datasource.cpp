@@ -39,6 +39,7 @@
 #include <mapnik/json/topojson_grammar_impl.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/make_unique.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -147,11 +148,7 @@ topojson_datasource::topojson_datasource(parameters const& params)
     inline_string_(),
     extent_(),
     tr_(new mapnik::transcoder(*params.get<std::string>("encoding","utf-8"))),
-#if BOOST_VERSION >= 105600
-    tree_()
-#else
-    tree_(16,1)
-#endif
+    tree_(nullptr)
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (inline_string)
@@ -208,7 +205,11 @@ void topojson_datasource::parse_topojson(T & stream)
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
+    using values_container = std::vector< std::pair<box_type, std::size_t> >;
+    values_container values;
+    values.reserve(topo_.geometries.size());
     std::size_t geometry_index = 0;
+
     for (auto const& geom : topo_.geometries)
     {
         mapnik::box2d<double> box = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
@@ -224,14 +225,22 @@ void topojson_datasource::parse_topojson(T & stream)
             {
                 extent_.expand_to_include(box);
             }
-#if BOOST_VERSION >= 105600
-            tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index));
-#else
-            tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
-#endif
         }
+#if BOOST_VERSION >= 105600
+        values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
+#else
+        values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
+#endif
         ++geometry_index;
     }
+
+#if BOOST_VERSION >= 105600
+    // packing algorithm
+    tree_ = std::make_unique<spatial_index_type>(values);
+#else
+    tree_ = std::make_unique<spatial_index_type>(16, 4);
+    tree_->insert(values.begin(), values.end());
+#endif
 }
 
 topojson_datasource::~topojson_datasource() { }
@@ -291,10 +300,16 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
 #if BOOST_VERSION >= 105600
         topojson_featureset::array_type index_array;
-        tree_.query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
-        return std::make_shared<topojson_featureset>(topo_, *tr_, std::move(index_array));
+        if (tree_)
+        {
+            tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+            return std::make_shared<topojson_featureset>(topo_, *tr_, std::move(index_array));
+        }
 #else
-        return std::make_shared<topojson_featureset>(topo_, *tr_, tree_.find(box));
+        if (tree_)
+        {
+            return std::make_shared<topojson_featureset>(topo_, *tr_, tree_.find(box));
+        }
 #endif
     }
     // otherwise return an empty featureset pointer

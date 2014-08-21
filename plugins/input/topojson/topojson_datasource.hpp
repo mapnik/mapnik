@@ -61,7 +61,7 @@ public:
 
 #if BOOST_VERSION >= 105600
     using item_type = std::pair<box_type,std::size_t>;
-    using linear_type = boost::geometry::index::linear<16,1>;
+    using linear_type = boost::geometry::index::linear<16,4>;
     using spatial_index_type = boost::geometry::index::rtree<item_type,linear_type>;
 #else
     using item_type = std::size_t;
@@ -87,9 +87,9 @@ private:
     std::string filename_;
     std::string inline_string_;
     mapnik::box2d<double> extent_;
-    std::shared_ptr<mapnik::transcoder> tr_;
+    std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::topojson::topology topo_;
-    spatial_index_type tree_;
+    std::unique_ptr<spatial_index_type> tree_;
 };
 
 
