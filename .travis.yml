@@ -30,7 +30,7 @@ install:
  # we need at least g++-4.7 for c++11 features
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  - sudo apt-get update -qq
- - sudo apt-get install -y ttf-wqy-microhei make valgrind boost1.55 python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
+ - sudo apt-get install -y ttf-wqy-microhei make libstdc++6 libstdc++-4.8-dev valgrind boost1.55 python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
 
 before_script:
  - psql -U postgres -c 'create database template_postgis'
