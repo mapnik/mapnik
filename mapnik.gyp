@@ -71,8 +71,8 @@
               'proj.lib',
               'libtiff.lib',
               'libwebp.lib',
-              'libxml2.lib', #dynamic
-              #'libxml2_a.lib', #static
+              #'libxml2.lib', #dynamic
+              'libxml2_a.lib', #static
               'libjpeg.lib',
               'icuuc.lib',
               'icuin.lib',
@@ -80,8 +80,8 @@
               'zlib.lib',
               'cairo.lib'
           ],
-          #'defines': ['MAPNIK_EXPORTS','LIBXML_STATIC'] # static libxml: libxml2_a.lib
-          'defines': ['MAPNIK_EXPORTS'] # dymamic libxml: libxml2.lib
+          'defines': ['MAPNIK_EXPORTS','LIBXML_STATIC'] # static libxml: libxml2_a.lib
+          #'defines': ['MAPNIK_EXPORTS'] # dymamic libxml: libxml2.lib
         },{
             'libraries':[
               '-lboost_filesystem',
