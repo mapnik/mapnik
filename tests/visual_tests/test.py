@@ -256,6 +256,7 @@ files = {
     'marker-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'polygon-winding-order': {'sizes':[(300,300)]},
     'group-symbolizer-1':{'sizes':[(512,512)]},
     'group-symbolizer-2':{'sizes':[(512,512)]},
     'group-symbolizer-line-1':{'sizes':[(512,512)]},
