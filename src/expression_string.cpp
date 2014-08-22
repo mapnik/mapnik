@@ -128,6 +128,10 @@ struct expression_string : util::static_visitor<void>
         str_ +="')";
     }
 
+    void operator() (function_call const& fun) const
+    {
+        str_ += "fun()";// FIXME
+    }
 private:
     std::string & str_;
 };

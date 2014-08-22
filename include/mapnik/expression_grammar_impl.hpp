@@ -150,6 +150,9 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
             )
         ;
 
+    function_expr = func_type >> lit('(') >> expr >> lit(')')
+        ;
+
     unary_expr = primary_expr [_val = _1]
         | '+' >> primary_expr [_val = _1]
         | '-' >> primary_expr [_val = -_1]

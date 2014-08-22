@@ -163,6 +163,7 @@ struct regex_replace_node;
 struct attribute;
 struct global_attribute;
 struct geometry_type_attribute;
+struct function_call;
 
 using expr_node  = util::variant<
 value_null,
@@ -189,7 +190,8 @@ util::recursive_wrapper<unary_node<tags::logical_not> >,
 util::recursive_wrapper<binary_node<tags::logical_and> >,
 util::recursive_wrapper<binary_node<tags::logical_or> >,
 util::recursive_wrapper<regex_match_node>,
-util::recursive_wrapper<regex_replace_node>
+util::recursive_wrapper<regex_replace_node>,
+util::recursive_wrapper<function_call>
 >;
 
 }

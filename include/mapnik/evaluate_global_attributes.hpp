@@ -126,6 +126,11 @@ struct evaluate_expression : util::static_visitor<T>
 #endif
     }
 
+    value_type operator() (function_call const& fun) const
+    {
+        return value_type(123);// FIXME
+    }
+
     template <typename ValueType>
     value_type operator() (ValueType const& val) const
     {
@@ -211,6 +216,12 @@ struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
         return tr_.transcode(repl.c_str());
 #endif
     }
+
+    value_type operator() (function_call const& fun) const
+    {
+        return value_type(123);// FIXME
+    }
+
 
     template <typename ValueType>
     value_type operator() (ValueType const& val) const

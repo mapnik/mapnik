@@ -125,18 +125,21 @@ struct regex_replace_node
 };
 #endif
 
+using nullary_function_impl = std::function<value_type()>;
+using unary_function_impl = std::function<value_type(value_type const&)>;
+using binary_function_impl = std::function<value_type(value_type const&, value_type const&)>;
+
+typedef util::variant<nullary_function_impl, unary_function_impl, binary_function_impl> function_impl;
+
 struct function_call
 {
-    template<typename Fun>
-    explicit function_call (expr_node const a, Fun f)
-        : expr(a),
-          call_(f) {}
+    using arguments_type = std::vector<expr_node>;
+    function_call(function_impl fun, arguments_type const& arguments)
+        : fun(fun), arguments(arguments) { }
 
-    expr_node expr;
-    std::function<value_type(value_type)> call_;
+    function_impl fun;
+    arguments_type arguments;
 };
-
-// ops
 
 inline expr_node& operator- (expr_node& expr)
 {

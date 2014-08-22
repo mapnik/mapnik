@@ -149,6 +149,11 @@ struct evaluate : util::static_visitor<T1>
 #endif
     }
 
+    value_type operator() (function_call const& fun) const
+    {
+        return value_integer(123);// FIXME
+    }
+
     feature_type const& feature_;
     variable_type const& vars_;
 };
