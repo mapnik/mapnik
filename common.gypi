@@ -34,11 +34,6 @@
             'ExceptionHandling': 1, # /EHsc
             'RuntimeTypeInfo': 'true', # /GR
             'RuntimeLibrary': '2' # /MD
-        },
-        'VCLinkerTool': {
-          'AdditionalOptions': [
-            '/NODEFAULTLIB:msvcrt.lib',
-          ],
         }
     },
     'defines': [ 'BOOST_SPIRIT_USE_PHOENIX_V3=1' ],
@@ -74,6 +69,11 @@
             'MinimalRebuild': 'false',
             'OmitFramePointers': 'false',
             'BasicRuntimeChecks': 3 # /RTC1
+          },
+          'VCLinkerTool': {
+            'AdditionalOptions': [
+              '/NODEFAULTLIB:msvcrt.lib'
+            ]
           }
         }
       },
@@ -112,6 +112,9 @@
             'EnableCOMDATFolding': 2, # /OPT:ICF
             'LinkIncremental': 1, # disable incremental linking
             'GenerateDebugInformation': 'false'
+            'AdditionalOptions': [
+                '/NODEFAULTLIB:libcmt.lib'
+            ],
           }
         }
       }
