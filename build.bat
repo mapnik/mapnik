@@ -1,3 +1,8 @@
+::git clone https://chromium.googlesource.com/external/gyp.git
+
+ddt ..\mapnik-sdk
+ddt Build\Release
+
 CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  -Dincludes=%CD%/../mapnik-sdk/includes ^
  -Dlibs=%CD%/../mapnik-sdk/libs ^
@@ -13,59 +18,61 @@ if NOT EXIST ..\mapnik-sdk (
   mkdir ..\mapnik-sdk\
 )
 
+SET DEPSDIR=C:\dev2\mapnik-dependencies
+
 :: includes
-xcopy /i /d /s /q ..\boost_1_55_0\boost ..\mapnik-sdk\includes\boost /Y
-xcopy /i /d /s /q ..\icu\include\unicode ..\mapnik-sdk\includes\unicode /Y
-xcopy /i /d /s /q ..\freetype\include ..\mapnik-sdk\includes\freetype2 /Y
-xcopy /i /d /s /q ..\libxml2\include\libxml ..\mapnik-sdk\includes\libxml /Y
-xcopy /i /d /s /q ..\zlib-1.2.5\zlib.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\zlib-1.2.5\zconf.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libpng\png.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libpng\pnglibconf.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libpng\pngconf.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\jpeg\jpeglib.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\jpeg\jconfig.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\jpeg\jmorecfg.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\webp\include\webp ..\mapnik-sdk\includes\webp /Y
-xcopy /i /d /s /q ..\proj\src\proj_api.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\tiff.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\tiffvers.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\tiffconf.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\tiffio.h ..\mapnik-sdk\includes\ /Y
-xcopy /i /d /s /q ..\cairo\cairo-version.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-features.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-deprecated.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-svg.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-svg-surface-private.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-pdf.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /Y
-xcopy /i /d /s /q ..\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\boost_1_55_0\boost ..\mapnik-sdk\includes\boost /Y
+xcopy /i /d /s /q %DEPSDIR%\icu\include\unicode ..\mapnik-sdk\includes\unicode /Y
+xcopy /i /d /s /q %DEPSDIR%\freetype\include ..\mapnik-sdk\includes\freetype2 /Y
+xcopy /i /d /s /q %DEPSDIR%\libxml2\include\libxml ..\mapnik-sdk\includes\libxml /Y
+xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zconf.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libpng\png.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libpng\pnglibconf.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libpng\pngconf.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\jpeg\jpeglib.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\jpeg\jconfig.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\jpeg\jmorecfg.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\webp\include\webp ..\mapnik-sdk\includes\webp /Y
+xcopy /i /d /s /q %DEPSDIR%\proj\src\proj_api.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\tiff.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\tiffvers.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\tiffconf.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\tiffio.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\cairo-version.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-features.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-deprecated.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-svg.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-svg-surface-private.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-pdf.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
 
 :: libs
-xcopy /i /d /s /q ..\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\icu\lib\icuuc.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\icu\lib\icuin.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2_a.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2_a_dll.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2.dll ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libxml2\win32\bin.msvc\libxml2.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\libtiff.dll ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\libtiff.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libtiff\libtiff\libtiff_i.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\proj\src\proj.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\webp\lib\libwebp.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\libpng\libpng.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\jpeg\libjpeg.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\cairo\src\release\cairo-static.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\cairo\src\release\cairo.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q ..\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\icu\lib\icuuc.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\icu\lib\icuin.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2_a.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2_a_dll.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\libtiff.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\libtiff.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\libtiff_i.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\proj\src\proj.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\webp\lib\libwebp.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libpng\libpng.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\jpeg\libjpeg.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo-static.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
 
 :: data
-xcopy /i /d /s /q ..\proj\nad ..\mapnik-sdk\share\proj /Y
+xcopy /i /d /s /q %DEPSDIR%\proj\nad ..\mapnik-sdk\share\proj /Y
 
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
-msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
+msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release /t:rebuild
 :: /v:diag > build.log
