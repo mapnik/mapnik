@@ -34,6 +34,11 @@
             'ExceptionHandling': 1, # /EHsc
             'RuntimeTypeInfo': 'true', # /GR
             'RuntimeLibrary': '2' # /MD
+        },
+        'VCLinkerTool': {
+          'AdditionalOptions': [
+            '/NODEFAULTLIB:msvcrt.lib',
+          ],
         }
     },
     'defines': [ 'BOOST_SPIRIT_USE_PHOENIX_V3=1' ],

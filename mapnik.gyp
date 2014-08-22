@@ -5,7 +5,6 @@
   'variables': {
     'includes%':'',
     'libs%':'',
-    'cairo%':'false',
     'common_defines': [
       'U_CHARSET_IS_UTF8=1',
       'BIGINT',

@@ -34,13 +34,14 @@ gbench:
 
 g: mapnik.gyp ./deps/gyp
 	export BASE_PATH="/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64-macosx" && \
-	deps/run_gyp mapnik.gyp --depth=. -Iconfig.json -Goutput_dir=.. \
+	export PATH=$$BASE_PATH/bin:$$PATH && \
+	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. \
 	-Dincludes=$$BASE_PATH/include \
 	-Dlibs=$$BASE_PATH/lib \
 	--generator-output=./build/ -f make \
 	--no-duplicate-basename-check
-	#export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64/bin/:$$PATH && make -C build V=$(V) mapnik -j2
-	export PATH=/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64-macosx/bin/:$$PATH && make -C build V=1 -j2
+	#make -C build V=$(V) mapnik -j2
+	make -C build V=$(V) -j2
 	make test
 	make gbench
 
