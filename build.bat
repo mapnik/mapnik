@@ -1,9 +1,22 @@
+@echo off
+
 ::git clone https://chromium.googlesource.com/external/gyp.git
 ::CALL "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86
 ::SET PATH=C:\Python27;%PATH%
 
-ddt ..\mapnik-sdk
-ddt build\Release
+::ddt ..\mapnik-sdk
+::ddt build\Release
+
+if NOT EXIST gyp (
+    CALL git clone https://chromium.googlesource.com/external/gyp.git gyp
+)
+IF ERRORLEVEL 1 GOTO ERROR
+
+:: run find command and bail on error
+:: this ensures we have the unix find command on path
+:: before trying to run gyp
+find deps/clipper/src/ -name "*.cpp"
+IF ERRORLEVEL 1 GOTO ERROR
 
 CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  -Dincludes=%CD%/../mapnik-sdk/includes ^
@@ -11,6 +24,7 @@ CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  -f msvs -G msvs_version=2013 ^
  --generator-output=build ^
  --no-duplicate-basename-check
+IF ERRORLEVEL 1 GOTO ERROR
 
 if NOT EXIST ..\mapnik-sdk (
   mkdir ..\mapnik-sdk
@@ -19,8 +33,9 @@ if NOT EXIST ..\mapnik-sdk (
   mkdir ..\mapnik-sdk\libs
   mkdir ..\mapnik-sdk\
 )
+IF ERRORLEVEL 1 GOTO ERROR
 
-SET DEPSDIR=C:\dev2\mapnik-dependencies
+SET DEPSDIR=..
 
 :: includes
 xcopy /i /d /s /q %DEPSDIR%\boost_1_55_0\boost ..\mapnik-sdk\includes\boost /Y
@@ -50,6 +65,7 @@ xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-svg-surface-private.h ..\mapnik-sdk\
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-pdf.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
+IF ERRORLEVEL 1 GOTO ERROR
 
 :: libs
 xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
@@ -71,10 +87,23 @@ xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo-static.lib ..\mapnik-sdk\lib
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
+IF ERRORLEVEL 1 GOTO ERROR
 
 :: data
 xcopy /i /d /s /q %DEPSDIR%\proj\nad ..\mapnik-sdk\share\proj /Y
+IF ERRORLEVEL 1 GOTO ERROR
 
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
 msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release /t:rebuild
 :: /v:diag > build.log
+IF ERRORLEVEL 1 GOTO ERROR
+
+GOTO DONE
+
+:ERROR
+echo ----------ERROR MAPNIK --------------
+
+:DONE
+
+cd %ROOTDIR%
+EXIT /b %ERRORLEVEL%
