@@ -64,7 +64,7 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'RuntimeLibrary': '1', # static debug /MTd
+            'RuntimeLibrary': '3', # /MDd
             'Optimization': 0, # /Od, no optimization
             'MinimalRebuild': 'false',
             'OmitFramePointers': 'false',
@@ -88,13 +88,13 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'RuntimeLibrary': 0, # static release
+            'RuntimeLibrary': '2', # /MD
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
-            'WholeProgramOptimization': 'true', # /GL, whole program optimization, needed for LTCG
+            #'WholeProgramOptimization': 'true', # /GL, whole program optimization, needed for LTCG
             'OmitFramePointers': 'true',
-            'EnableFunctionLevelLinking': 'true',
+            #'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
             'AdditionalOptions': [
               '/MP', # compile across multiple CPUs
@@ -107,10 +107,10 @@
             ],
           },
           'VCLinkerTool': {
-            'LinkTimeCodeGeneration': 1, # link-time code generation
-            'OptimizeReferences': 2, # /OPT:REF
-            'EnableCOMDATFolding': 2, # /OPT:ICF
-            'LinkIncremental': 1, # disable incremental linking
+            #'LinkTimeCodeGeneration': 1, # link-time code generation
+            #'OptimizeReferences': 2, # /OPT:REF
+            #'EnableCOMDATFolding': 2, # /OPT:ICF
+            'LinkIncremental': 2, # force incremental linking
             'GenerateDebugInformation': 'false',
             'AdditionalOptions': [
                 '/NODEFAULTLIB:libcmt.lib'

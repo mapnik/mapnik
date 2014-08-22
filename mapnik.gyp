@@ -79,7 +79,7 @@
               'zlib.lib',
               'cairo.lib'
           ],
-          'defines': ['MAPNIK_EXPORTS']
+          'defines': ['MAPNIK_EXPORTS','LIBXML_STATIC']
         },{
             'libraries':[
               '-lboost_filesystem',
