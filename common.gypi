@@ -30,6 +30,7 @@
     },
     'msvs_settings': {
         'VCCLCompilerTool': {
+            'ObjectFile': '$(IntDir)/%(RelativeDir)/', # support similiarly named files in different directories
             'ExceptionHandling': 1, # /EHsc
             'RuntimeTypeInfo': 'true', # /GR
             'RuntimeLibrary': '2' # /MD

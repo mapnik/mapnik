@@ -40,8 +40,7 @@
       'sources': [
         '<!@(find deps/agg/src/ -name "*.cpp")',
         '<!@(find deps/clipper/src/ -name "*.cpp")',
-        '<!@(find src -name "*.cpp")',
-        '<!@(find include -name "*.hpp")'
+        '<!@(find src -name "*.cpp")'
       ],
       'xcode_settings': {
         'SDKROOT': 'macosx',
