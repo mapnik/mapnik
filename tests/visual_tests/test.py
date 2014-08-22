@@ -221,6 +221,7 @@ files = {
     'tiff-nodata-tolerance':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
     'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'shield-on-line-and-avoid-edges':{'sizes':[(512,512)]},
     }
 
 class Reporting:
