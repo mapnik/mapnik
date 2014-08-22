@@ -64,6 +64,7 @@ void text_symbolizer_properties::evaluate_text_properties(feature_impl const& fe
     label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
     label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
     avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
+    text_margin = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.text_margin);
     repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.repeat_distance);
     minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
     minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
