@@ -77,7 +77,7 @@
               'icuin.lib',
               'freetype.lib',
               'zlib.lib',
-              'cairo-static.lib'
+              'cairo.lib'
           ],
           'defines': ['MAPNIK_EXPORTS']
         },{

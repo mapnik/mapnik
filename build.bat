@@ -5,11 +5,13 @@ CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  --generator-output=build ^
  --no-duplicate-basename-check
 
-mkdir ..\mapnik-sdk
-mkdir ..\mapnik-sdk\includes
-mkdir ..\mapnik-sdk\share
-mkdir ..\mapnik-sdk\libs
-mkdir ..\mapnik-sdk\
+if NOT EXIST ..\mapnik-sdk (
+  mkdir ..\mapnik-sdk
+  mkdir ..\mapnik-sdk\includes
+  mkdir ..\mapnik-sdk\share
+  mkdir ..\mapnik-sdk\libs
+  mkdir ..\mapnik-sdk\
+)
 
 :: includes
 xcopy /i /d /s /q ..\boost_1_55_0\boost ..\mapnik-sdk\includes\boost /Y
@@ -57,6 +59,7 @@ xcopy /i /d /s /q ..\webp\lib\libwebp.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\libpng\libpng.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\jpeg\libjpeg.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\cairo\src\release\cairo-static.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q ..\cairo\src\release\cairo.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
 
@@ -64,5 +67,5 @@ xcopy /i /d /s /q ..\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q ..\proj\nad ..\mapnik-sdk\share\proj /Y
 
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
-msbuild /m:2 /p:BuildInParallel=true .\build\mapnik.sln /p:Configuration=Release
+msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
 :: /v:diag > build.log

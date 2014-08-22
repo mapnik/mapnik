@@ -111,7 +111,7 @@
             'OptimizeReferences': 2, # /OPT:REF
             'EnableCOMDATFolding': 2, # /OPT:ICF
             'LinkIncremental': 1, # disable incremental linking
-            'GenerateDebugInformation': 'false'
+            'GenerateDebugInformation': 'false',
             'AdditionalOptions': [
                 '/NODEFAULTLIB:libcmt.lib'
             ],
