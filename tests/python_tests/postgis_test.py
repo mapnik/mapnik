@@ -1011,6 +1011,13 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
 
+    @raises(RuntimeError)
+    def test_timeout():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select st_makepoint(0,0) as g, pg_sleep(1)) as s''',
+                            geometry_field='g',
+                            statement_timeout=1)
+        fs = ds.featureset()
+
 
     atexit.register(postgis_takedown)
 
