@@ -20,7 +20,7 @@
  *
  *****************************************************************************
  *
- * Initially developed by Sandro Santilli <strk@keybit.net> 
+ * Initially developed by Sandro Santilli <strk@keybit.net> for CartoDB.
  *
  *****************************************************************************/
 
