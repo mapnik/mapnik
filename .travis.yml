@@ -43,13 +43,9 @@ before_script:
  - ./configure --prefix=/usr --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make && sudo make install
  - cd ../
 
-install:
+script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - if [[ "${CXX}" == 'g++-4.8' ]]; then JOBS=2 make; else JOBS=4 make; fi;
-
-before_script:
  - make test
  - source localize.sh && make grind
-
-script:
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
