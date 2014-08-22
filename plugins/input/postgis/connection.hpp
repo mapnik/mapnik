@@ -209,13 +209,13 @@ public:
 
     PGresult* getResult()
     {
-        std::stringstream ss;
         PGresult *result = NULL;
 
         if ( ! statement_timeout_ ) return PQgetResult(conn_);
 
         int sock = PQsocket(conn_);
         if ( sock < 0 ) {
+            std::stringstream ss;
             ss << "Postgis Plugin: PQsocket() returned " << sock
                << "\nin getResult.\n";
             throw mapnik::datasource_exception(ss.str());
@@ -246,6 +246,7 @@ public:
               int ret = select(sock + 1, &input_mask, NULL, NULL, tmout);
               if ( ret < 1 )
               {
+                std::stringstream ss;
                 ss << "Postgis Plugin: ";
                 if ( ret == 0 ) {
                   ss << "timeout (" <<statement_timeout_ << " ms)";
