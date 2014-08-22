@@ -1,7 +1,7 @@
 {
   'target_defaults': {
     'default_configuration': 'Release',
-    'msbuild_toolset':'CTP_Nov2013',
+    #'msbuild_toolset':'CTP_Nov2013',
     'msvs_configuration_platform': 'Win32',
     'xcode_settings': {
       'CLANG_CXX_LIBRARY': 'libstdc++',
