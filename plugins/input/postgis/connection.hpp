@@ -212,6 +212,8 @@ public:
         std::stringstream ss;
         PGresult *result = NULL;
 
+        if ( ! statement_timeout_ ) return PQgetResult(conn_);
+
         int sock = PQsocket(conn_);
         if ( sock < 0 ) {
             ss << "Postgis Plugin: PQsocket() returned " << sock
