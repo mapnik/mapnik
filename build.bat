@@ -3,7 +3,7 @@
 ::SET PATH=C:\Python27;%PATH%
 
 ddt ..\mapnik-sdk
-ddt Build\Release
+ddt build\Release
 
 CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  -Dincludes=%CD%/../mapnik-sdk/includes ^
