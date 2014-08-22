@@ -114,12 +114,25 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
 
 void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 {
+    // The options 'text-margin' and 'repeat-distance' replace 'minimum-distance'.
+    // Only allow one or the other to be defined here.
+    if (node.has_attribute("text-margin") || node.has_attribute("repeat-distance"))
+    {
+        if (node.has_attribute("minimum-distance"))
+        {
+            throw config_error(std::string("Cannot use deprecated option minimum-distance with "
+                                           "new options text-margin and repeat-distance."));
+        }
+        set_property_from_xml<value_double>(expressions.text_margin, "text-margin", node);
+        set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
+    }
+    else
+    {
+        set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
+    }
     set_property_from_xml<label_placement_e>(expressions.label_placement, "placement", node);
     set_property_from_xml<value_double>(expressions.label_spacing, "spacing", node);
     set_property_from_xml<value_double>(expressions.label_position_tolerance, "label-position-tolerance", node);
-    set_property_from_xml<value_double>(expressions.text_margin, "text-margin", node);
-    set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
-    set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
     set_property_from_xml<value_double>(expressions.minimum_padding, "minimum-padding", node);
     set_property_from_xml<value_double>(expressions.minimum_path_length, "minimum-path-length", node);
     set_property_from_xml<boolean_type>(expressions.avoid_edges, "avoid-edges", node);
