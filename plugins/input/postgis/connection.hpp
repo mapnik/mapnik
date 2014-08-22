@@ -252,7 +252,7 @@ public:
                 } else {
                   ss << "select: " << strerror(errno);
                 }
-                const_cast<Connection*>(this)->close();
+                close();
                 throw mapnik::datasource_exception(ss.str());
               }
             }
