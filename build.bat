@@ -26,7 +26,7 @@ SET DEPSDIR=C:\dev2\mapnik-dependencies
 xcopy /i /d /s /q %DEPSDIR%\boost_1_55_0\boost ..\mapnik-sdk\includes\boost /Y
 xcopy /i /d /s /q %DEPSDIR%\icu\include\unicode ..\mapnik-sdk\includes\unicode /Y
 xcopy /i /d /s /q %DEPSDIR%\freetype\include ..\mapnik-sdk\includes\freetype2 /Y
-xcopy /i /d /s /q %DEPSDIR%\libxml2\include\libxml ..\mapnik-sdk\includes\libxml2 /Y
+xcopy /i /d /s /q %DEPSDIR%\libxml2\include\libxml ..\mapnik-sdk\includes\libxml /Y
 xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.h ..\mapnik-sdk\includes\ /Y
 xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zconf.h ..\mapnik-sdk\includes\ /Y
 xcopy /i /d /s /q %DEPSDIR%\libpng\png.h ..\mapnik-sdk\includes\ /Y
