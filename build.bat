@@ -1,4 +1,6 @@
 ::git clone https://chromium.googlesource.com/external/gyp.git
+::CALL "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86
+::SET PATH=C:\Python27;%PATH%
 
 ddt ..\mapnik-sdk
 ddt Build\Release
