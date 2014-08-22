@@ -271,6 +271,7 @@ files = {
     'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
     'marker-whole-multi-polygon':{'sizes':[(512,512)]},
     'shield-on-line-and-avoid-edges':{'sizes':[(512,512)]},
+    'text-typographic':{'sizes':[(512,512)]},
     }
 
 class Reporting:
