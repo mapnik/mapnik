@@ -61,18 +61,19 @@
       ],
       "conditions": [
         ["OS=='win'", {
-           'msvs_disabled_warnings': [ 4244,4005,4506,4345,4804,4805,4661 ],
            'libraries':[
               'libboost_filesystem-vc120-mt-s-1_55.lib',
               'libboost_regex-vc120-mt-s-1_55.lib',
               'libboost_thread-vc120-mt-s-1_55.lib',
               'libboost_system-vc120-mt-s-1_55.lib',
-              'libpng.lib',
+              'libpng16.lib',
               'proj.lib',
               'libtiff.lib',
               'libwebp.lib',
               #'libxml2.lib', #dynamic
               'libxml2_a.lib', #static
+			  # needed if libxml2 is static
+			  'ws2_32.lib',
               'libjpeg.lib',
               'icuuc.lib',
               'icuin.lib',
@@ -117,10 +118,16 @@
         'include_dirs': [
           '<@(common_includes)'
         ],
-        'libraries': ['-stdlib=libstdc++'],
         'defines': [
           '<@(common_defines)'
         ],
+        'msvs_settings': {
+          'VCLinkerTool': {
+            'AdditionalLibraryDirectories': [
+                '<@(libs)/'
+            ]
+          }
+        }
       }
     },
     {
@@ -128,27 +135,41 @@
         "type": "loadable_module",
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/shape/ -name "*.cpp")' ],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+        "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_thread-vc120-mt-s-1_55.lib',
+                'libboost_system-vc120-mt-s-1_55.lib',
+				'icuuc.lib'
+            ],
+          },{
+              'libraries':[
+                '-lboost_thread'
+              ]
+            }
+          ]
+        ]
     },
     {
         "target_name": "csv",
         "type": "loadable_module",
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/csv/ -name "*.cpp")' ],
-        "dependencies": [ "mapnik" ]
-    },
-    {
-        "target_name": "ogr",
-        "type": "loadable_module",
-        "product_extension": "input",
-        "sources": [ '<!@(find plugins/input/ogr/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
-        'conditions': [
-          ['OS=="win"', {
-            'libraries': [ 'gdal111.dll', 'libexpat.dll']
-          } , {
-            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
-          }]
+        "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_thread-vc120-mt-s-1_55.lib',
+                'libboost_system-vc120-mt-s-1_55.lib',
+				'icuuc.lib'
+            ],
+          },{
+              'libraries':[
+                '-lboost_thread'
+              ]
+            }
+          ]
         ]
     },
     {
@@ -158,20 +179,26 @@
         "sources": [ '<!@(find plugins/input/raster/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ]
     },
-    {
-        "target_name": "gdal",
-        "type": "loadable_module",
-        "product_extension": "input",
-        "sources": [ '<!@(find plugins/input/gdal/ -name "*.cpp")' ],
-        "dependencies": [ "mapnik" ],
-        'conditions': [
-          ['OS=="win"', {
-            'libraries': [ 'gdal111.dll', 'libexpat.dll']
-          } , {
-            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
-          }]
-        ]
-    },
+ #   {
+ #       "target_name": "gdal",
+ #       "type": "loadable_module",
+ #       "product_extension": "input",
+ #       "sources": [ '<!@(find plugins/input/gdal/ -name "*.cpp")' ],
+ #       "dependencies": [ "mapnik" ],
+ #       'conditions': [
+ #         ['OS=="win"', {
+ #           'libraries': [
+#			    'gdal111.dll',
+#			    'libexpat.dll',
+#                'libboost_thread-vc120-mt-s-1_55.lib',
+#                'libboost_system-vc120-mt-s-1_55.lib',
+#				'icuuc.lib'
+#			]
+#          } , {
+#            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+#          }]
+#       ]
+#   },
     {
         "target_name": "postgis",
         "type": "loadable_module",
@@ -180,8 +207,25 @@
         "dependencies": [ "mapnik" ],
         'conditions': [
           ['OS=="win"', {
-            'libraries': [ 'libpq.dll']
-          } , {
+            'libraries': [
+			    'libpq.lib',
+				'wsock32.lib',
+				'advapi32.lib',
+				'shfolder.lib',
+				'secur32.lib',
+				'icuuc.lib',
+				'ws2_32.lib',
+			],
+			# TODO - ideally we find a way to avoid this
+			# currently needed to dodge double-linking
+			'msvs_settings': {
+			  'VCLinkerTool': {
+				'AdditionalOptions': [
+					'/NODEFAULTLIB:libcmt.lib'
+				],
+			  }
+			}
+		  } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
           }]
         ]
@@ -194,8 +238,25 @@
         "dependencies": [ "mapnik" ],
         'conditions': [
           ['OS=="win"', {
-            'libraries': [ 'libpq.dll']
-          } , {
+            'libraries': [
+			    'libpq.lib',
+				'wsock32.lib',
+				'advapi32.lib',
+				'shfolder.lib',
+				'secur32.lib',
+				'icuuc.lib',
+				'ws2_32.lib',
+			],
+			# TODO - ideally we find a way to avoid this
+			# currently needed to dodge double-linking
+			'msvs_settings': {
+			  'VCLinkerTool': {
+				'AdditionalOptions': [
+					'/NODEFAULTLIB:libcmt.lib'
+				],
+			  }
+			}
+		  } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
           }]
         ]
@@ -208,7 +269,10 @@
         "dependencies": [ "mapnik" ],
         'conditions': [
           ['OS=="win"', {
-            'libraries': [ 'sqlite3.dll']
+            'libraries': [
+  			    'sqlite3.lib',
+				'icuuc.lib',
+			]
           } , {
             'libraries': [ '<!@(pkg-config sqlite3 --libs)']
           }]
@@ -219,7 +283,14 @@
         "type": "loadable_module",
         "product_extension": "input",
         "sources": [ '<!@(find plugins/input/geojson/ -name "*.cpp")' ],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [
+				'icuuc.lib',
+			]
+          }]
+        ]
     },
     {
         "target_name": "agg_blend_src_over_test",
@@ -255,7 +326,14 @@
         "target_name": "fontset_runtime_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/fontset_runtime_test.cpp"],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+        "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+				'icuuc.lib'
+            ],
+          }]
+        ]
     },
     {
         "target_name": "geometry_converters_test",
@@ -293,24 +371,24 @@
         "sources": [ "./tests/cpp_tests/wkb_formats_test.cpp"],
         "dependencies": [ "mapnik" ]
     },
-    {
-        "target_name": "test_rendering",
-        "type": "executable",
-        "sources": [ "./benchmark/test_rendering.cpp" ],
-        "dependencies": [ "mapnik" ],
-        "conditions": [
-          ["OS=='win'", {
-             'libraries':[
-                'libboost_thread-vc120-mt-1_55.lib'
-            ],
-            'defines': ['MAPNIK_EXPORTS']
-          },{
-              'libraries':[
-                '-lboost_thread'
-              ]
-            }
-          ]
-        ],
-    },
+#    {
+#        "target_name": "test_rendering",
+#        "type": "executable",
+#       "sources": [ "./benchmark/test_rendering.cpp" ],
+#        "dependencies": [ "mapnik" ],
+#        "conditions": [
+#          ["OS=='win'", {
+#             'libraries':[
+#                'libboost_thread-vc120-mt-s-1_55.lib'
+#            ],
+#            'defines': ['MAPNIK_EXPORTS']
+#          },{
+#              'libraries':[
+#                '-lboost_thread'
+#              ]
+#            }
+#          ]
+#        ]
+#    },
   ]
 }

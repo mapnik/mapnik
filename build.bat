@@ -9,8 +9,8 @@
 
 if NOT EXIST gyp (
     CALL git clone https://chromium.googlesource.com/external/gyp.git gyp
+    IF ERRORLEVEL 1 GOTO ERROR
 )
-IF ERRORLEVEL 1 GOTO ERROR
 
 :: run find command and bail on error
 :: this ensures we have the unix find command on path
@@ -71,6 +71,9 @@ IF ERRORLEVEL 1 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\icu\lib\icuuc.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\icu\lib\icuin.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\icu\bin\icuuc53.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\icu\bin\icudt53.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\icu\bin\icuin53.dll ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2_a.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2_a_dll.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\libxml2\win32\bin.msvc\libxml2.dll ..\mapnik-sdk\libs\ /Y
@@ -81,7 +84,8 @@ xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\libtiff_i.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\proj\src\proj.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\webp\lib\libwebp.lib ..\mapnik-sdk\libs\ /Y
-xcopy /i /d /s /q %DEPSDIR%\libpng\libpng.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libpng\projects\vstudio\Release\libpng16.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\libpng\projects\vstudio\Release\libpng16.dll ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\jpeg\libjpeg.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo-static.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.lib ..\mapnik-sdk\libs\ /Y
@@ -91,12 +95,31 @@ IF ERRORLEVEL 1 GOTO ERROR
 
 :: data
 xcopy /i /d /s /q %DEPSDIR%\proj\nad ..\mapnik-sdk\share\proj /Y
+::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
 IF ERRORLEVEL 1 GOTO ERROR
 
-::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
-msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release /t:rebuild
+:: headers for plugins
+xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\libpq-fe.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\postgresql\src\include\postgres_ext.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\postgresql\src\include\pg_config_ext.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\sqlite\sqlite3.h ..\mapnik-sdk\includes\ /Y
+::xcopy /i /d /s /q %DEPSDIR%\gdal ..\mapnik-sdk\includes\ /Y
+
+:: libs for plugins
+xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\Release\libpq.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\Release\libpq.dll ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\sqlite\sqlite3.lib ..\mapnik-sdk\libs\ /Y
+
+::msbuild /m:2 /t:mapnik /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
+
+msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
+:: /t:rebuild
 :: /v:diag > build.log
 IF ERRORLEVEL 1 GOTO ERROR
+
+:: run tests
+SET PATH=%CD%\..\mapnik-sdk\libs;%PATH%
+for %%t in (build\Release\*test.exe) do ( %%t -d %CD% )
 
 GOTO DONE
 
@@ -105,5 +128,4 @@ echo ----------ERROR MAPNIK --------------
 
 :DONE
 
-cd %ROOTDIR%
 EXIT /b %ERRORLEVEL%

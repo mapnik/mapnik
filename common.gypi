@@ -3,6 +3,7 @@
     'default_configuration': 'Release',
     #'msbuild_toolset':'CTP_Nov2013',
     'msvs_configuration_platform': 'Win32',
+    'msvs_disabled_warnings': [ 4244,4005,4506,4345,4804,4805,4661 ],
     'xcode_settings': {
       'CLANG_CXX_LIBRARY': 'libstdc++',
       'CLANG_CXX_LANGUAGE_STANDARD':'c++03',
@@ -72,7 +73,7 @@
           },
           'VCLinkerTool': {
             'AdditionalOptions': [
-              '/NODEFAULTLIB:msvcrt.lib'
+              #'/NODEFAULTLIB:msvcrt.lib'
             ]
           }
         }
@@ -113,7 +114,7 @@
             'LinkIncremental': 2, # force incremental linking
             'GenerateDebugInformation': 'false',
             'AdditionalOptions': [
-                '/NODEFAULTLIB:libcmt.lib'
+                #'/NODEFAULTLIB:libcmt.lib'
             ],
           }
         }
