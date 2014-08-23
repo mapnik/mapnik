@@ -62,10 +62,10 @@
       "conditions": [
         ["OS=='win'", {
            'libraries':[
-              'libboost_filesystem-vc120-mt-s-1_55.lib',
-              'libboost_regex-vc120-mt-s-1_55.lib',
-              'libboost_thread-vc120-mt-s-1_55.lib',
-              'libboost_system-vc120-mt-s-1_55.lib',
+              'libboost_filesystem-vc120-mt-1_55.lib',
+              'libboost_regex-vc120-mt-1_55.lib',
+              'libboost_thread-vc120-mt-1_55.lib',
+              'libboost_system-vc120-mt-1_55.lib',
               'libpng16.lib',
               'proj.lib',
               'libtiff.lib',
@@ -139,8 +139,8 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'libboost_thread-vc120-mt-s-1_55.lib',
-                'libboost_system-vc120-mt-s-1_55.lib',
+                'libboost_thread-vc120-mt-1_55.lib',
+                'libboost_system-vc120-mt-1_55.lib',
 				'icuuc.lib'
             ],
           },{
@@ -160,8 +160,8 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'libboost_thread-vc120-mt-s-1_55.lib',
-                'libboost_system-vc120-mt-s-1_55.lib',
+                'libboost_thread-vc120-mt-1_55.lib',
+                'libboost_system-vc120-mt-1_55.lib',
 				'icuuc.lib'
             ],
           },{
@@ -190,8 +190,8 @@
  #           'libraries': [
 #			    'gdal111.dll',
 #			    'libexpat.dll',
-#                'libboost_thread-vc120-mt-s-1_55.lib',
-#                'libboost_system-vc120-mt-s-1_55.lib',
+#                'libboost_thread-vc120-mt-1_55.lib',
+#                'libboost_system-vc120-mt-1_55.lib',
 #				'icuuc.lib'
 #			]
 #          } , {
@@ -379,7 +379,7 @@
 #        "conditions": [
 #          ["OS=='win'", {
 #             'libraries':[
-#                'libboost_thread-vc120-mt-s-1_55.lib'
+#                'libboost_thread-vc120-mt-1_55.lib'
 #            ],
 #            'defines': ['MAPNIK_EXPORTS']
 #          },{
