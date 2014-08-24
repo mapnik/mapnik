@@ -62,7 +62,8 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(text_sym
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
-          finder_(0)
+          finder_(0),
+          scale_factor_(scale_factor)
     {
         initialize_geometries();
         if (!geometries_to_process_.size()) return;
@@ -469,6 +470,7 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
     marker_ext_.init(px0, py0, px1, py1);
     marker_ext_.expand_to_include(px2, py2);
     marker_ext_.expand_to_include(px3, py3);
+    marker_ext_ *= scale_factor_;
 }
 
 template <typename FaceManagerT, typename DetectorT>
