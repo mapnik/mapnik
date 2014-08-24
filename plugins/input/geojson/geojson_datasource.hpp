@@ -36,6 +36,8 @@
 // boost
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
@@ -46,6 +48,7 @@
 #else
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
 #endif
+#pragma clang diagnostic pop
 
 // stl
 #include <vector>
