@@ -7,7 +7,8 @@ from utilities import execution_path, run_all
 import mapnik
 
 def test_style_init():
-   s = mapnik.Style()
+   s = mapnik.Style("style")
+   eq_(s.name,"style")
    eq_(s.filter_mode,mapnik.filter_mode.ALL)
    eq_(len(s.rules),0)
    eq_(s.opacity,1)

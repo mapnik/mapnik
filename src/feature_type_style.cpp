@@ -39,8 +39,9 @@ static const char * filter_mode_strings[] = {
 IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 
-feature_type_style::feature_type_style()
-    : rules_(),
+feature_type_style::feature_type_style(std::string const& name)
+    : name_(name),
+      rules_(),
       filter_mode_(FILTER_ALL),
       filters_(),
       direct_filters_(),
@@ -50,7 +51,8 @@ feature_type_style::feature_type_style()
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs)
-    : rules_(rhs.rules_),
+    : name_(rhs.name_),
+      rules_(rhs.rules_),
       filter_mode_(rhs.filter_mode_),
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
@@ -69,6 +71,7 @@ feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 void swap( feature_type_style & lhs, feature_type_style & rhs)
 {
     using std::swap;
+    std::swap(lhs.name_, rhs.name_);
     std::swap(lhs.rules_, rhs.rules_);
     std::swap(lhs.filter_mode_, rhs.filter_mode_);
     std::swap(lhs.filters_, rhs.filters_);
@@ -80,13 +83,24 @@ void swap( feature_type_style & lhs, feature_type_style & rhs)
 
 bool feature_type_style::operator==(feature_type_style const& rhs) const
 {
-    return (rules_ == rhs.rules_) &&
+    return (name_ == rhs.name_) &&
+        (rules_ == rhs.rules_) &&
         (filter_mode_ == rhs.filter_mode_) &&
         (filters_ == rhs.filters_) &&
         (direct_filters_ == rhs.direct_filters_) &&
         (comp_op_ == rhs.comp_op_) &&
         (opacity_ == rhs.opacity_) &&
         (image_filters_inflate_ == rhs.image_filters_inflate_);
+}
+
+std::string const& feature_type_style::name() const
+{
+    return name_;
+}
+
+void feature_type_style::set_name(std::string const& name)
+{
+    name_ = name;
 }
 
 void feature_type_style::add_rule(rule && rule)

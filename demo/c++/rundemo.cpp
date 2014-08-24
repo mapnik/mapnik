@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,21 +29,28 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/agg_renderer.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/unicode.hpp>
 #include <mapnik/save_map.hpp>
+
+#include <mapnik/agg_renderer.hpp>
 
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 
+#if defined(SVG_RENDERER)
+#include <mapnik/svg/output/svg_renderer.hpp>
+#endif
+
+#include <exception>
+#include <memory>
 #include <iostream>
+#include <fstream>
 
 
-int main ( int argc , char** argv)
+int main(int argc, char** argv)
 {
     using namespace mapnik;
     const std::string srs_lcc="+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 \
@@ -62,165 +69,182 @@ int main ( int argc , char** argv)
         // create styles
 
         // Provinces (polygon)
-        feature_type_style provpoly_style;
         {
-            rule r;
-            r.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));
+            feature_type_style style("provinces");
             {
-                polygon_symbolizer poly_sym;
-                put(poly_sym, keys::fill, color(250, 190, 183));
-                r.append(std::move(poly_sym));
+                rule r;
+                r.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));
+                {
+                    polygon_symbolizer poly_sym;
+                    put(poly_sym, keys::fill, color(250, 190, 183));
+                    r.append(std::move(poly_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            provpoly_style.add_rule(std::move(r));
-        }
-        {
-            rule r;
-            r.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
             {
-                polygon_symbolizer poly_sym;
-                put(poly_sym, keys::fill, color(217, 235, 203));
-                r.append(std::move(poly_sym));
+                rule r;
+                r.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
+                {
+                    polygon_symbolizer poly_sym;
+                    put(poly_sym, keys::fill, color(217, 235, 203));
+                    r.append(std::move(poly_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            provpoly_style.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("provinces", std::move(provpoly_style));
 
         // Provinces (polyline)
-        feature_type_style provlines_style;
         {
-            rule r;
+            feature_type_style style("provlines");
             {
-                line_symbolizer line_sym;
-                put(line_sym,keys::stroke,color(0,0,0));
-                put(line_sym,keys::stroke_width,1.0);
-                dash_array dash;
-                dash.emplace_back(8,4);
-                dash.emplace_back(2,2);
-                dash.emplace_back(2,2);
-                put(line_sym,keys::stroke_dasharray,dash);
-                r.append(std::move(line_sym));
+                rule r;
+                {
+                    line_symbolizer line_sym;
+                    put(line_sym,keys::stroke,color(0,0,0));
+                    put(line_sym,keys::stroke_width,1.0);
+                    dash_array dash;
+                    dash.emplace_back(8,4);
+                    dash.emplace_back(2,2);
+                    dash.emplace_back(2,2);
+                    put(line_sym,keys::stroke_dasharray,dash);
+                    r.append(std::move(line_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            provlines_style.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("provlines", std::move(provlines_style));
 
         // Drainage
-        feature_type_style qcdrain_style;
         {
-            rule r;
-            r.set_filter(parse_expression("[HYC] = 8"));
+            feature_type_style style("drainage");
             {
-                polygon_symbolizer poly_sym;
-                put(poly_sym, keys::fill, color(153, 204, 255));
-                r.append(std::move(poly_sym));
+                rule r;
+                r.set_filter(parse_expression("[HYC] = 8"));
+                {
+                    polygon_symbolizer poly_sym;
+                    put(poly_sym, keys::fill, color(153, 204, 255));
+                    r.append(std::move(poly_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            qcdrain_style.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("drainage", std::move(qcdrain_style));
 
         // Roads 3 and 4 (The "grey" roads)
-        feature_type_style roads34_style;
         {
-            rule r;
-            r.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4"));
+            feature_type_style style("smallroads");
             {
-                line_symbolizer line_sym;
-                put(line_sym,keys::stroke,color(171,158,137));
-                put(line_sym,keys::stroke_width,2.0);
-                put(line_sym,keys::stroke_linecap,ROUND_CAP);
-                put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
-                r.append(std::move(line_sym));
+                rule r;
+                r.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4"));
+                {
+                    line_symbolizer line_sym;
+                    put(line_sym,keys::stroke,color(171,158,137));
+                    put(line_sym,keys::stroke_width,2.0);
+                    put(line_sym,keys::stroke_linecap,ROUND_CAP);
+                    put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
+                    r.append(std::move(line_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            roads34_style.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("smallroads", std::move(roads34_style));
 
         // Roads 2 (The thin yellow ones)
-        feature_type_style roads2_style_1;
         {
-            rule r;
-            r.set_filter(parse_expression("[CLASS] = 2"));
+            feature_type_style style("road-border");
             {
-                line_symbolizer line_sym;
-                put(line_sym,keys::stroke,color(171,158,137));
-                put(line_sym,keys::stroke_width,4.0);
-                put(line_sym,keys::stroke_linecap,ROUND_CAP);
-                put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
-                r.append(std::move(line_sym));
+                rule r;
+                r.set_filter(parse_expression("[CLASS] = 2"));
+                {
+                    line_symbolizer line_sym;
+                    put(line_sym,keys::stroke,color(171,158,137));
+                    put(line_sym,keys::stroke_width,4.0);
+                    put(line_sym,keys::stroke_linecap,ROUND_CAP);
+                    put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
+                    r.append(std::move(line_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            roads2_style_1.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("road-border", std::move(roads2_style_1));
 
-        feature_type_style roads2_style_2;
         {
-            rule r;
-            r.set_filter(parse_expression("[CLASS] = 2"));
+            feature_type_style style("road-fill");
             {
-                line_symbolizer line_sym;
-                put(line_sym,keys::stroke,color(255,250,115));
-                put(line_sym,keys::stroke_width,2.0);
-                put(line_sym,keys::stroke_linecap,ROUND_CAP);
-                put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
-                r.append(std::move(line_sym));
+                rule r;
+                r.set_filter(parse_expression("[CLASS] = 2"));
+                {
+                    line_symbolizer line_sym;
+                    put(line_sym,keys::stroke,color(255,250,115));
+                    put(line_sym,keys::stroke_width,2.0);
+                    put(line_sym,keys::stroke_linecap,ROUND_CAP);
+                    put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
+                    r.append(std::move(line_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            roads2_style_2.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("road-fill", std::move(roads2_style_2));
 
         // Roads 1 (The big orange ones, the highways)
-        feature_type_style roads1_style_1;
         {
-            rule r;
-            r.set_filter(parse_expression("[CLASS] = 1"));
+            feature_type_style style("highway-border");
             {
-                line_symbolizer line_sym;
-                put(line_sym,keys::stroke,color(188,149,28));
-                put(line_sym,keys::stroke_width,7.0);
-                put(line_sym,keys::stroke_linecap,ROUND_CAP);
-                put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
-                r.append(std::move(line_sym));
+                rule r;
+                r.set_filter(parse_expression("[CLASS] = 1"));
+                {
+                    line_symbolizer line_sym;
+                    put(line_sym,keys::stroke,color(188,149,28));
+                    put(line_sym,keys::stroke_width,7.0);
+                    put(line_sym,keys::stroke_linecap,ROUND_CAP);
+                    put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
+                    r.append(std::move(line_sym));
+                }
+               style.add_rule(std::move(r));
             }
-            roads1_style_1.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("highway-border", std::move(roads1_style_1));
 
-        feature_type_style roads1_style_2;
         {
-            rule r;
-            r.set_filter(parse_expression("[CLASS] = 1"));
+            feature_type_style style("highway-fill");
             {
-                line_symbolizer line_sym;
-                put(line_sym,keys::stroke,color(242,191,36));
-                put(line_sym,keys::stroke_width,5.0);
-                put(line_sym,keys::stroke_linecap,ROUND_CAP);
-                put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
-                r.append(std::move(line_sym));
+                rule r;
+                r.set_filter(parse_expression("[CLASS] = 1"));
+                {
+                    line_symbolizer line_sym;
+                    put(line_sym,keys::stroke,color(242,191,36));
+                    put(line_sym,keys::stroke_width,5.0);
+                    put(line_sym,keys::stroke_linecap,ROUND_CAP);
+                    put(line_sym,keys::stroke_linejoin,ROUND_JOIN);
+                    r.append(std::move(line_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            roads1_style_2.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-        m.insert_style("highway-fill", std::move(roads1_style_2));
 
         // Populated Places
-        feature_type_style popplaces_style;
         {
-            rule r;
+            feature_type_style style("popplaces");
             {
-                text_symbolizer text_sym;
-                text_placements_ptr placement_finder = std::make_shared<text_placements_dummy>();
-                placement_finder->defaults.format_defaults.face_name = "DejaVu Sans Book";
-                placement_finder->defaults.format_defaults.text_size = 10.0;
-                placement_finder->defaults.format_defaults.fill = color(0,0,0);
-                placement_finder->defaults.format_defaults.halo_fill = color(255,255,200);
-                placement_finder->defaults.format_defaults.halo_radius = 1.0;
-                placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]"));
-                put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
-                r.append(std::move(text_sym));
+                rule r;
+                {
+                    text_symbolizer text_sym;
+                    text_placements_ptr placement_finder = std::make_shared<text_placements_dummy>();
+                    placement_finder->defaults.format_defaults.face_name = "DejaVu Sans Book";
+                    placement_finder->defaults.format_defaults.text_size = 10.0;
+                    placement_finder->defaults.format_defaults.fill = color(0,0,0);
+                    placement_finder->defaults.format_defaults.halo_fill = color(255,255,200);
+                    placement_finder->defaults.format_defaults.halo_radius = 1.0;
+                    placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]"));
+                    put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
+                    r.append(std::move(text_sym));
+                }
+                style.add_rule(std::move(r));
             }
-            popplaces_style.add_rule(std::move(r));
+            m.insert_style(style.name(), style);
         }
-
-        m.insert_style("popplaces", std::move(popplaces_style));
 
         // layers
         // Provincial  polygons
@@ -229,7 +253,6 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="demo/data/boundaries";
             p["encoding"]="latin1";
-
             layer lyr("Provinces");
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provinces");
@@ -238,17 +261,6 @@ int main ( int argc , char** argv)
         }
 
         // Drainage
-        {
-            parameters p;
-            p["type"]="shape";
-            p["file"]="demo/data/qcdrainage";
-            layer lyr("Quebec Hydrography");
-            lyr.set_datasource(datasource_cache::instance().create(p));
-            lyr.set_srs(srs_lcc);
-            lyr.add_style("drainage");
-            m.add_layer(lyr);
-        }
-
         {
             parameters p;
             p["type"]="shape";
@@ -285,7 +297,6 @@ int main ( int argc , char** argv)
             lyr.add_style("road-fill");
             lyr.add_style("highway-border");
             lyr.add_style("highway-fill");
-
             m.add_layer(lyr);
         }
         // popplaces
@@ -361,6 +372,24 @@ int main ( int argc , char** argv)
             "- cairo-demo.pdf\n"
             "- cairo-demo.svg\n"
             "Have a look!\n";
+#endif
+
+#if defined(SVG_RENDERER)
+        std::ofstream output_stream("demo-inkscape.svg",std::ios::out|std::ios::trunc|std::ios::binary);
+        if (output_stream)
+        {
+            using svg_iter_type = std::ostream_iterator<char>;
+            svg_iter_type output_stream_iterator(output_stream);
+            mapnik::svg_renderer<svg_iter_type> ren(m,output_stream_iterator);
+            ren.apply();
+            output_stream.close();
+            std::cout << "One SVG has been rendered by native SVG renderer targeting inkscape/illustrator:\n"
+                "- demo-inkscape.png\n";
+        }
+        else
+        {
+            std::clog << "could not open for writing 'demo-inkscape.svg'\n";
+        }
 #endif
         // save map definition (data + style)
         save_map(m, "map.xml");

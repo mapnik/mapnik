@@ -14,7 +14,7 @@ def test_that_coordinates_do_not_overflow_and_polygon_is_rendered():
   ds = mapnik.MemoryDatasource()
   context = mapnik.Context()
   ds.add_feature(mapnik.Feature.from_geojson(json.dumps(geojson),context))
-  s = mapnik.Style()
+  s = mapnik.Style('style')
   r = mapnik.Rule()
   sym = mapnik.PolygonSymbolizer()
   sym.fill = expected_color
@@ -23,10 +23,10 @@ def test_that_coordinates_do_not_overflow_and_polygon_is_rendered():
   s.rules.append(r)
   lyr = mapnik.Layer('Layer')
   lyr.datasource = ds
-  lyr.styles.append('style')
+  lyr.styles.append(s.name)
   m = mapnik.Map(256,256)
   m.background_color = mapnik.Color('black')
-  m.append_style('style',s)
+  m.append_style(s)
   m.layers.append(lyr)
   # 17/20864/45265.png
   m.zoom_to_box(mapnik.Box2d(-13658379.710221574,6197514.253362091,-13657768.213995293,6198125.749588372))

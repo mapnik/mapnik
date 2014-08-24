@@ -103,6 +103,18 @@ void svg_renderer<T>::end_layer_processing(layer const& lay)
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: End layer processing=" << lay.name();
 }
 
+template <typename T>
+void svg_renderer<T>::start_style_processing(feature_type_style const& st)
+{
+    generator_.generate_opening_group(st.name());
+}
+
+template <typename T>
+void svg_renderer<T>::end_style_processing(feature_type_style const&)
+{
+    generator_.generate_closing_group();
+}
+
 template class svg_renderer<std::ostream_iterator<char> >;
 }
 

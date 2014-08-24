@@ -30,17 +30,17 @@ def make_map():
     f['Name'] = str(pixel_key)
     f.add_geometries_from_wkt('POLYGON ((0 0, 0 256, 256 256, 256 0, 0 0))')
     ds.add_feature(f)
-    s = mapnik.Style()
+    s = mapnik.Style('places_labels')
     r = mapnik.Rule()
     symb = mapnik.PolygonSymbolizer()
     r.symbols.append(symb)
     s.rules.append(r)
     lyr = mapnik.Layer('Places')
     lyr.datasource = ds
-    lyr.styles.append('places_labels')
+    lyr.styles.append(s.name)
     width,height = 256,256
     m = mapnik.Map(width,height)
-    m.append_style('places_labels',s)
+    m.append_style(s)
     m.layers.append(lyr)
     m.zoom_all()
     return m

@@ -75,8 +75,19 @@ void export_style()
     class_<rules>("Rules",init<>("default ctor"))
         .def(vector_indexing_suite<rules>())
         ;
-    class_<feature_type_style>("Style",init<>("default style constructor"))
+    class_<feature_type_style>("Style",init<std::string const&>(
+          ( arg("name")="" ),
+          "Create a Style with a name\n"
+          "\n"
+          "Usage:\n"
+          ">>> from mapnik import Style\n"
+          ">>> s = Style(\"Roads\")\n"
+        ))
 
+        .add_property("name",make_function
+                      (&feature_type_style::name,
+                       return_value_policy<copy_const_reference>()),
+                      &feature_type_style::set_name)
         .add_property("rules",make_function
                       (&feature_type_style::get_rules,
                        return_value_policy<reference_existing_object>()),

@@ -66,7 +66,7 @@ int main(int argc, char** argv)
         lyr.set_datasource(ds);
         lyr.add_style("style");
         m.add_layer(lyr);
-        mapnik::feature_type_style the_style;
+        mapnik::feature_type_style style("style");
         mapnik::rule r;
         mapnik::text_symbolizer text_sym;
         mapnik::text_placements_ptr placement_finder = std::make_shared<mapnik::text_placements_dummy>();
@@ -77,8 +77,8 @@ int main(int argc, char** argv)
         placement_finder->defaults.set_old_style_expression(mapnik::parse_expression("[name]"));
         mapnik::put<mapnik::text_placements_ptr>(text_sym, mapnik::keys::text_placements_, placement_finder);
         r.append(std::move(text_sym));
-        the_style.add_rule(std::move(r));
-        m.insert_style("style",the_style );
+        style.add_rule(std::move(r));
+        m.insert_style(style.name(),style);
         m.zoom_to_box(mapnik::box2d<double>(-256,-256,
                                             256,256));
         mapnik::image_32 buf(m.width(),m.height());

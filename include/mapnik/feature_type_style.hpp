@@ -54,6 +54,7 @@ using rules = std::vector<rule>;
 class MAPNIK_DECL feature_type_style
 {
 private:
+    std::string name_;
     rules rules_;
     filter_mode_e filter_mode_;
     // image_filters
@@ -66,10 +67,12 @@ private:
     friend void swap(feature_type_style& lhs, feature_type_style & rhs);
 public:
     // ctor
-    feature_type_style();
+    feature_type_style(std::string const& name);
     feature_type_style(feature_type_style const& rhs);
     feature_type_style(feature_type_style &&) = default;
     feature_type_style& operator=(feature_type_style rhs);
+    std::string const& name() const;
+    void set_name(std::string const& name);
 
     // comparison
     bool operator==(feature_type_style const& rhs) const;

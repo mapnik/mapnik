@@ -53,6 +53,11 @@ void insert_style(mapnik::Map & m, std::string const& name, mapnik::feature_type
     m.insert_style(name,style);
 }
 
+void insert_style2(mapnik::Map & m, mapnik::feature_type_style const& style)
+{
+    m.insert_style(style.name(),style);
+}
+
 void insert_fontset(mapnik::Map & m, std::string const& name, mapnik::font_set const& fontset)
 {
     m.insert_fontset(name,fontset);
@@ -186,6 +191,16 @@ void export_map()
              "True # style object added to map by name\n"
              ">>> m.append_style('Style Name', sty)\n"
              "False # you can only append styles with unique names\n"
+            )
+
+        .def("append_style",insert_style2,
+             (arg("style_object")),
+             "Insert a Mapnik Style onto the map by appending it.\n"
+             "\n"
+             "Usage:\n"
+             ">>> sty\n"
+             "<mapnik._mapnik.Style object at 0x6a330>\n"
+             ">>> m.append_style(sty)\n"
             )
 
         .def("append_fontset",insert_fontset,

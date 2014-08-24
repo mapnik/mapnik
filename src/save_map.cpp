@@ -395,7 +395,7 @@ void serialize_style( ptree & map_node, std::string const& name, feature_type_st
 
     set_attr(style_node, "name", name);
 
-    feature_type_style dfl;
+    feature_type_style dfl(name);
     filter_mode_e filter_mode = style.get_filter_mode();
     if (filter_mode != dfl.get_filter_mode() || explicit_defaults)
     {

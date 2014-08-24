@@ -133,7 +133,7 @@ def test_render_points():
     ds.add_feature(f)
 
     # create layer/rule/style
-    s = mapnik.Style()
+    s = mapnik.Style('places_labels')
     r = mapnik.Rule()
     symb = mapnik.PointSymbolizer()
     symb.allow_overlap = True
@@ -141,7 +141,7 @@ def test_render_points():
     s.rules.append(r)
     lyr = mapnik.Layer('Places','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     lyr.datasource = ds
-    lyr.styles.append('places_labels')
+    lyr.styles.append(s.name)
     # latlon bounding box corners
     ul_lonlat = mapnik.Coord(142.30,-38.20)
     lr_lonlat = mapnik.Coord(143.40,-38.80)
@@ -154,7 +154,7 @@ def test_render_points():
         }
     for projdescr in projs.iterkeys():
         m = mapnik.Map(1000, 500, projs[projdescr])
-        m.append_style('places_labels',s)
+        m.append_style(s)
         m.layers.append(lyr)
         dest_proj = mapnik.Projection(projs[projdescr])
         src_proj = mapnik.Projection('+init=epsg:4326')
@@ -179,17 +179,17 @@ def test_render_with_detector():
     context = mapnik.Context()
     geojson  = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [ 0, 0 ] } }'
     ds.add_feature(mapnik.Feature.from_geojson(geojson,context))
-    s = mapnik.Style()
+    s = mapnik.Style('point')
     r = mapnik.Rule()
     lyr = mapnik.Layer('point')
     lyr.datasource = ds
-    lyr.styles.append('point')
+    lyr.styles.append(s.name)
     symb = mapnik.MarkersSymbolizer()
     symb.allow_overlap = False
     r.symbols.append(symb)
     s.rules.append(r)
     m = mapnik.Map(256,256)
-    m.append_style('point',s)
+    m.append_style(s)
     m.layers.append(lyr)
     m.zoom_to_box(mapnik.Box2d(-180,-85,180,85))
     im = mapnik.Image(256, 256)

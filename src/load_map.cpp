@@ -406,7 +406,7 @@ void map_parser::parse_style(Map & map, xml_node const& node)
     try
     {
         name = node.get_attr<std::string>("name");
-        feature_type_style style;
+        feature_type_style style(name);
 
         filter_mode_e filter_mode = node.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
