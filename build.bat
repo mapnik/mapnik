@@ -5,18 +5,20 @@
 ::SET PATH=C:\Python27;%PATH%
 
 ::ddt ..\mapnik-sdk
+::IF ERRORLEVEL NEQ 0 GOTO ERROR
 ::ddt build\Release
+::IF ERRORLEVEL NEQ 0 GOTO ERROR
 
 if NOT EXIST gyp (
     CALL git clone https://chromium.googlesource.com/external/gyp.git gyp
-    IF ERRORLEVEL 1 GOTO ERROR
+    IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 )
 
 :: run find command and bail on error
 :: this ensures we have the unix find command on path
 :: before trying to run gyp
 find deps/clipper/src/ -name "*.cpp"
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  -Dincludes=%CD%/../mapnik-sdk/includes ^
@@ -24,16 +26,15 @@ CALL gyp\gyp.bat mapnik.gyp --depth=. ^
  -f msvs -G msvs_version=2013 ^
  --generator-output=build ^
  --no-duplicate-basename-check
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 if NOT EXIST ..\mapnik-sdk (
   mkdir ..\mapnik-sdk
   mkdir ..\mapnik-sdk\includes
   mkdir ..\mapnik-sdk\share
   mkdir ..\mapnik-sdk\libs
-  mkdir ..\mapnik-sdk\
 )
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 SET DEPSDIR=..
 
@@ -65,7 +66,7 @@ xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-svg-surface-private.h ..\mapnik-sdk\
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-pdf.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: libs
 xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
@@ -91,12 +92,12 @@ xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo-static.lib ..\mapnik-sdk\lib
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.lib ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
 xcopy /i /d /s /q %DEPSDIR%\boost_1_55_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: data
 xcopy /i /d /s /q %DEPSDIR%\proj\nad ..\mapnik-sdk\share\proj /Y
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: headers for plugins
 xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\libpq-fe.h ..\mapnik-sdk\includes\ /Y
@@ -115,7 +116,7 @@ xcopy /i /d /s /q %DEPSDIR%\sqlite\sqlite3.lib ..\mapnik-sdk\libs\ /Y
 msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
 :: /t:rebuild
 :: /v:diag > build.log
-IF ERRORLEVEL 1 GOTO ERROR
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: run tests
 SET PATH=%CD%\..\mapnik-sdk\libs;%PATH%
@@ -125,6 +126,7 @@ GOTO DONE
 
 :ERROR
 echo ----------ERROR MAPNIK --------------
+echo ERRORLEVEL %ERRORLEVEL%
 
 :DONE
 

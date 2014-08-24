@@ -34,7 +34,7 @@
             'ObjectFile': '$(IntDir)/%(RelativeDir)/', # support similiarly named files in different directories
             'ExceptionHandling': 1, # /EHsc
             'RuntimeTypeInfo': 'true', # /GR
-            'RuntimeLibrary': '0' # 2:/MD
+            'RuntimeLibrary': '2' # 2:/MD
         }
     },
     'defines': [ 'BOOST_SPIRIT_USE_PHOENIX_V3=1' ],
@@ -89,7 +89,7 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'RuntimeLibrary': '0', #2:/MD, 
+            'RuntimeLibrary': '2', #0:/MT, 2:/MD, 
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
