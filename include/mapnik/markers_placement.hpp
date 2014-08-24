@@ -67,13 +67,9 @@ public:
 
     markers_placement_finder(marker_placement_e placement_type,
                              Locator &locator,
-                             box2d<double> const& size,
-                             agg::trans_affine const& tr,
                              Detector &detector,
-                             double spacing,
-                             double max_error,
-                             bool allow_overlap)
-        : placement_(create(placement_type, locator, size, tr, detector, spacing, max_error, allow_overlap))
+                             markers_placement_params const& params)
+        : placement_(create(placement_type, locator, detector, params))
     {
     }
 
@@ -87,21 +83,13 @@ private:
     // Factory function for particular placement implementations.
     static markers_placement create(marker_placement_e placement_type,
                                     Locator &locator,
-                                    box2d<double> const& size,
-                                    agg::trans_affine const& tr,
                                     Detector &detector,
-                                    double spacing,
-                                    double max_error,
-                                    bool allow_overlap)
+                                    markers_placement_params const& params)
     {
         static const std::map<marker_placement_e, boost::function<markers_placement(
             Locator &locator,
-            box2d<double> const& size,
-            agg::trans_affine const& tr,
             Detector &detector,
-            double spacing,
-            double max_error,
-            bool allow_overlap)>> factories =
+            markers_placement_params const& params)>> factories =
             {
                 { MARKER_POINT_PLACEMENT, boost::value_factory<markers_point_placement<Locator, Detector>>() },
                 { MARKER_INTERIOR_PLACEMENT, boost::value_factory<markers_interior_placement<Locator, Detector>>() },
@@ -109,7 +97,7 @@ private:
                 { MARKER_VERTEX_FIRST_PLACEMENT, boost::value_factory<markers_vertex_first_placement<Locator, Detector>>() },
                 { MARKER_VERTEX_LAST_PLACEMENT, boost::value_factory<markers_vertex_last_placement<Locator, Detector>>() }
             };
-        return factories.at(placement_type)(locator, size, tr, detector, spacing, max_error, allow_overlap);
+        return factories.at(placement_type)(locator, detector, params);
     }
 
     markers_placement placement_;
