@@ -38,11 +38,12 @@ class markers_line_placement : public markers_point_placement<Locator, Detector>
 public:
     markers_line_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
         : markers_point_placement<Locator, Detector>(locator, detector, params),
-            marker_width_((params.size * params.tr).width()),
             last_x(0.0),
             last_y(0.0),
             next_x(0.0),
             next_y(0.0),
+            spacing_(0.0),
+            marker_width_((params.size * params.tr).width()),
             error_(0.0),
             spacing_left_(0.0),
             marker_nr_(0)
