@@ -27,7 +27,7 @@
       './', # boost shim
       '<@(includes)/',
       '<@(includes)/freetype2',
-      '<@(includes)/libxml',
+      '<@(includes)/libxml2',
       '<@(includes)/cairo'
     ]
   },
