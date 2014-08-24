@@ -87,15 +87,9 @@ struct markers_dispatch : mapnik::noncopyable
         coord2d center = bbox_.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine tr = recenter * marker_trans_;
+        markers_placement_params params { bbox_, tr, spacing * scale_factor_, max_error, allow_overlap };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
-            placement_method,
-            path,
-            bbox_,
-            tr,
-            detector_,
-            spacing * scale_factor_,
-            max_error,
-            allow_overlap);
+            placement_method, path, detector_, params);
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
@@ -156,15 +150,9 @@ struct raster_markers_dispatch : mapnik::noncopyable
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_,  false);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_,  false);
         box2d<double> bbox_(0,0, src_.width(),src_.height());
+        markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
-            placement_method,
-            path,
-            bbox_,
-            marker_trans_,
-            detector_,
-            spacing * scale_factor_,
-            max_error,
-            allow_overlap);
+            placement_method, path, detector_, params);
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {

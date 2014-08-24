@@ -31,17 +31,8 @@ template <typename Locator, typename Detector>
 class markers_vertex_last_placement : public markers_point_placement<Locator, Detector>
 {
 public:
-    markers_vertex_last_placement(
-        Locator &locator,
-        box2d<double> const& size,
-        agg::trans_affine const& tr,
-        Detector &detector,
-        double spacing,
-        double max_error,
-        bool allow_overlap)
-          : markers_point_placement<Locator, Detector>(
-              locator, size, tr, detector,
-              spacing, max_error, allow_overlap)
+    markers_vertex_last_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
+        : markers_point_placement<Locator, Detector>(locator, detector, params)
     {
     }
 
@@ -83,7 +74,7 @@ public:
 
         box2d<double> box = this->perform_transform(angle, x, y);
 
-        if (!this->allow_overlap_ && !this->detector_.has_placement(box))
+        if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
         {
             return false;
         }
