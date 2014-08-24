@@ -29,6 +29,19 @@
       '<@(includes)/freetype2',
       '<@(includes)/libxml2',
       '<@(includes)/cairo'
+    ],
+    "conditions": [
+      ["OS=='win'", {
+          'common_defines': ['MAPNIK_EXPORTS','LIBXML_STATIC'], # static libxml: libxml2_a.lib
+          'common_libraries': []
+      }, {
+          'common_defines': ['SHAPE_MEMORY_MAPPED_FILE'],
+          'common_libraries': [
+            '-Wl,-search_paths_first',
+            '-stdlib=libstdc++',
+            '-L<@(libs)'
+          ]
+      }]
     ]
   },
   'targets': [
@@ -59,6 +72,9 @@
       'defines': [
         '<@(common_defines)'
       ],
+      'libraries': [
+        '<@(common_libraries)'
+      ],
       "conditions": [
         ["OS=='win'", {
            'libraries':[
@@ -72,17 +88,15 @@
               'libwebp.lib',
               #'libxml2.lib', #dynamic
               'libxml2_a.lib', #static
-			  # needed if libxml2 is static
-			  'ws2_32.lib',
+              # needed if libxml2 is static
+              'ws2_32.lib',
               'libjpeg.lib',
               'icuuc.lib',
               'icuin.lib',
               'freetype.lib',
               'zlib.lib',
               'cairo.lib'
-          ],
-          'defines': ['MAPNIK_EXPORTS','LIBXML_STATIC'] # static libxml: libxml2_a.lib
-          #'defines': ['MAPNIK_EXPORTS'] # dymamic libxml: libxml2.lib
+          ]
         },{
             'libraries':[
               '-lboost_filesystem',
@@ -102,12 +116,8 @@
               '-licuuc',
               '-lfreetype',
               '-licudata',
-              '-lz',
-              '-Wl,-search_paths_first',
-              '-stdlib=libstdc++',
-              '-L<@(libs)'
-            ],
-            'defines':['SHAPE_MEMORY_MAPPED_FILE']
+              '-lz'
+            ]
           }
         ]
       ],
@@ -120,6 +130,9 @@
         ],
         'defines': [
           '<@(common_defines)'
+        ],
+        'libraries':[
+          '<@(common_libraries)'
         ],
         'msvs_settings': {
           'VCLinkerTool': {
@@ -141,7 +154,7 @@
              'libraries':[
                 'libboost_thread-vc120-mt-1_55.lib',
                 'libboost_system-vc120-mt-1_55.lib',
-				'icuuc.lib'
+                'icuuc.lib'
             ],
           },{
               'libraries':[
@@ -162,7 +175,7 @@
              'libraries':[
                 'libboost_thread-vc120-mt-1_55.lib',
                 'libboost_system-vc120-mt-1_55.lib',
-				'icuuc.lib'
+                'icuuc.lib'
             ],
           },{
               'libraries':[
@@ -188,12 +201,12 @@
  #       'conditions': [
  #         ['OS=="win"', {
  #           'libraries': [
-#			    'gdal111.dll',
-#			    'libexpat.dll',
+#                'gdal111.dll',
+#                'libexpat.dll',
 #                'libboost_thread-vc120-mt-1_55.lib',
 #                'libboost_system-vc120-mt-1_55.lib',
-#				'icuuc.lib'
-#			]
+#                'icuuc.lib'
+#            ]
 #          } , {
 #            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
 #          }]
@@ -208,24 +221,24 @@
         'conditions': [
           ['OS=="win"', {
             'libraries': [
-			    'libpq.lib',
-				'wsock32.lib',
-				'advapi32.lib',
-				'shfolder.lib',
-				'secur32.lib',
-				'icuuc.lib',
-				'ws2_32.lib',
-			],
-			# TODO - ideally we find a way to avoid this
-			# currently needed to dodge double-linking
-			'msvs_settings': {
-			  'VCLinkerTool': {
-				'AdditionalOptions': [
-					'/NODEFAULTLIB:libcmt.lib'
-				],
-			  }
-			}
-		  } , {
+                'libpq.lib',
+                'wsock32.lib',
+                'advapi32.lib',
+                'shfolder.lib',
+                'secur32.lib',
+                'icuuc.lib',
+                'ws2_32.lib',
+            ],
+            # TODO - ideally we find a way to avoid this
+            # currently needed to dodge double-linking
+            'msvs_settings': {
+              'VCLinkerTool': {
+                'AdditionalOptions': [
+                    '/NODEFAULTLIB:libcmt.lib'
+                ],
+              }
+            }
+          } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
           }]
         ]
@@ -239,24 +252,24 @@
         'conditions': [
           ['OS=="win"', {
             'libraries': [
-			    'libpq.lib',
-				'wsock32.lib',
-				'advapi32.lib',
-				'shfolder.lib',
-				'secur32.lib',
-				'icuuc.lib',
-				'ws2_32.lib',
-			],
-			# TODO - ideally we find a way to avoid this
-			# currently needed to dodge double-linking
-			'msvs_settings': {
-			  'VCLinkerTool': {
-				'AdditionalOptions': [
-					'/NODEFAULTLIB:libcmt.lib'
-				],
-			  }
-			}
-		  } , {
+                'libpq.lib',
+                'wsock32.lib',
+                'advapi32.lib',
+                'shfolder.lib',
+                'secur32.lib',
+                'icuuc.lib',
+                'ws2_32.lib',
+            ],
+            # TODO - ideally we find a way to avoid this
+            # currently needed to dodge double-linking
+            'msvs_settings': {
+              'VCLinkerTool': {
+                'AdditionalOptions': [
+                    '/NODEFAULTLIB:libcmt.lib'
+                ],
+              }
+            }
+          } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
           }]
         ]
@@ -270,9 +283,9 @@
         'conditions': [
           ['OS=="win"', {
             'libraries': [
-  			    'sqlite3.lib',
-				'icuuc.lib',
-			]
+                  'sqlite3.lib',
+                  'icuuc.lib',
+            ]
           } , {
             'libraries': [ '<!@(pkg-config sqlite3 --libs)']
           }]
@@ -287,8 +300,8 @@
         'conditions': [
           ['OS=="win"', {
             'libraries': [
-				'icuuc.lib',
-			]
+                'icuuc.lib',
+            ]
           }]
         ]
     },
@@ -330,7 +343,7 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-				'icuuc.lib'
+                'icuuc.lib'
             ],
           }]
         ]
@@ -371,24 +384,31 @@
         "sources": [ "./tests/cpp_tests/wkb_formats_test.cpp"],
         "dependencies": [ "mapnik" ]
     },
-#    {
-#        "target_name": "test_rendering",
-#        "type": "executable",
-#       "sources": [ "./benchmark/test_rendering.cpp" ],
-#        "dependencies": [ "mapnik" ],
-#        "conditions": [
-#          ["OS=='win'", {
-#             'libraries':[
-#                'libboost_thread-vc120-mt-1_55.lib'
-#            ],
-#            'defines': ['MAPNIK_EXPORTS']
-#          },{
-#              'libraries':[
-#                '-lboost_thread'
-#              ]
-#            }
-#          ]
-#        ]
-#    },
+  ],
+  'conditions': [
+    # won't link yet on windows
+    ["OS!='win'", {
+       'targets': [
+       {
+           "target_name": "test_rendering",
+           "type": "executable",
+           "sources": [ "./benchmark/test_rendering.cpp" ],
+           "dependencies": [ "mapnik" ],
+           "conditions": [
+             ["OS=='win'", {
+                'libraries':[
+                   'libboost_thread-vc120-mt-1_55.lib'
+               ],
+               'defines': ['MAPNIK_EXPORTS']
+             },{
+                 'libraries':[
+                   '-lboost_thread'
+                 ]
+               }
+             ]
+           ]
+       }
+    ]}
+    ]
   ]
 }
