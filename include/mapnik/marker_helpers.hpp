@@ -413,16 +413,8 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              attributes const& vars,
                              T const& sym)
 {
-    double width = 0;
-    double height = 0;
-
-    expression_ptr width_expr = get<expression_ptr>(sym, keys::width);
-    if (width_expr)
-        width = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
-
-    expression_ptr height_expr = get<expression_ptr>(sym, keys::height);
-    if (height_expr)
-        height = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
+    double width = get<double>(sym, keys::width, feature, vars, 0);
+    double height = get<double>(sym, keys::height, feature, vars, 0);
 
     if (width > 0 && height > 0)
     {
