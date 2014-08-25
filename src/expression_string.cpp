@@ -128,9 +128,13 @@ struct expression_string : util::static_visitor<void>
         str_ +="')";
     }
 
-    void operator() (function_call const& fun) const
+    void operator() (unary_function_call const& call) const
     {
-        str_ += "fun()";// FIXME
+        str_ += "fun(arg)";// FIXME
+    }
+    void operator() (binary_function_call const& call) const
+    {
+        str_ += "fun(arg1,arg2)";// FIXME
     }
 private:
     std::string & str_;

@@ -126,9 +126,17 @@ struct evaluate_expression : util::static_visitor<T>
 #endif
     }
 
-    value_type operator() (function_call const& fun) const
+    value_type operator() (unary_function_call const& call) const
     {
-        return value_type(123);// FIXME
+        value_type arg = util::apply_visitor(*this, call.arg);
+        return call.fun(arg);
+    }
+
+    value_type operator() (binary_function_call const& call) const
+    {
+        value_type arg1 = util::apply_visitor(*this, call.arg1);
+        value_type arg2 = util::apply_visitor(*this, call.arg2);
+        return call.fun(arg1, arg2);
     }
 
     template <typename ValueType>
@@ -217,11 +225,18 @@ struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
 #endif
     }
 
-    value_type operator() (function_call const& fun) const
+    value_type operator() (unary_function_call const& call) const
     {
-        return value_type(123);// FIXME
+        value_type arg = util::apply_visitor(*this, call.arg);
+        return call.fun(arg);
     }
 
+    value_type operator() (binary_function_call const& call) const
+    {
+        value_type arg1 = util::apply_visitor(*this, call.arg1);
+        value_type arg2 = util::apply_visitor(*this, call.arg2);
+        return call.fun(arg1, arg2);
+    }
 
     template <typename ValueType>
     value_type operator() (ValueType const& val) const

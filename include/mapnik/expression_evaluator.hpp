@@ -149,9 +149,17 @@ struct evaluate : util::static_visitor<T1>
 #endif
     }
 
-    value_type operator() (function_call const& fun) const
+    value_type operator() (unary_function_call const& call) const
     {
-        return value_integer(123);// FIXME
+        value_type arg = util::apply_visitor(*this, call.arg);
+        return call.fun(arg);
+    }
+
+    value_type operator() (binary_function_call const& call) const
+    {
+        value_type arg1 = util::apply_visitor(*this, call.arg1);
+        value_type arg2 = util::apply_visitor(*this, call.arg2);
+        return call.fun(arg1, arg2);
     }
 
     feature_type const& feature_;

@@ -36,6 +36,7 @@
 #include <boost/regex.hpp>
 #endif
 
+#include <boost/variant.hpp>
 #include <functional>
 
 namespace mapnik
@@ -125,23 +126,32 @@ struct regex_replace_node
 };
 #endif
 
-using nullary_function_impl = std::function<value_type()>;
 using unary_function_impl = std::function<value_type(value_type const&)>;
 using binary_function_impl = std::function<value_type(value_type const&, value_type const&)>;
 
-typedef util::variant<nullary_function_impl, unary_function_impl, binary_function_impl> function_impl;
-
-struct function_call
+struct unary_function_call
 {
-    using arguments_type = std::vector<expr_node>;
-    function_call(function_impl fun, arguments_type const& arguments)
-        : fun(fun), arguments(arguments) { }
+    using argument_type = expr_node;
+    unary_function_call() = default;
+    unary_function_call(unary_function_impl fun, argument_type const& arg)
+        : fun(fun), arg(arg) {}
 
-    function_impl fun;
-    arguments_type arguments;
+    unary_function_impl fun;
+    argument_type arg;
 };
 
-inline expr_node& operator- (expr_node& expr)
+struct binary_function_call
+{
+    using argument_type = expr_node;
+    binary_function_call() = default;
+    binary_function_call(binary_function_impl fun, argument_type const& arg1, argument_type const& arg2)
+        : fun(fun), arg1(arg1), arg2(arg2) {}
+    binary_function_impl fun;
+    argument_type arg1;
+    argument_type arg2;
+};
+
+inline expr_node & operator- (expr_node& expr)
 {
     return expr = unary_node<tags::negate>(expr);
 }

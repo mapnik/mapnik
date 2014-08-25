@@ -39,8 +39,15 @@
 // stl
 #include <functional>
 
-BOOST_FUSION_ADAPT_STRUCT(mapnik::function_call,
-                          (mapnik::function_impl, fun)(mapnik::function_call::arguments_type, arguments))
+BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
+                          (mapnik::unary_function_impl, fun)
+                          (mapnik::unary_function_call::argument_type, arg))
+
+BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
+                          (mapnik::binary_function_impl, fun)
+                          (mapnik::binary_function_call::argument_type, arg1)
+                          (mapnik::binary_function_call::argument_type, arg2))
+
 namespace mapnik
 {
 
@@ -122,16 +129,68 @@ inline value_type exp_impl (value_type const& val)
 {
     return std::exp(val.to_double());
 }
-
-struct function_types : qi::symbols<char, function_impl>
+// sin
+inline value_type sin_impl (value_type const& val)
 {
-    function_types()
+    return std::sin(val.to_double());
+}
+// cos
+inline value_type cos_impl (value_type const& val)
+{
+    return std::cos(val.to_double());
+}
+// tan
+inline value_type tan_impl (value_type const& val)
+{
+    return std::tan(val.to_double());
+}
+// atan
+inline value_type atan_impl (value_type const& val)
+{
+    return std::atan(val.to_double());
+}
+
+struct unary_function_types : qi::symbols<char, unary_function_impl>
+{
+    unary_function_types()
     {
         add
-            ("exp", unary_function_impl { &exp_impl })
+            ("sin", unary_function_impl(sin_impl))
+            ("cos", unary_function_impl(cos_impl))
+            ("tan", unary_function_impl(tan_impl))
+            ("atan", unary_function_impl(atan_impl))
+            ("exp", unary_function_impl(exp_impl))
             ;
     }
+};
 
+// binary functions
+// min
+inline value_type min_impl(value_type const& arg1, value_type const& arg2)
+{
+    return std::min(arg1.to_double(), arg2.to_double());
+}
+// max
+inline value_type max_impl(value_type const& arg1, value_type const& arg2)
+{
+    return std::max(arg1.to_double(), arg2.to_double());
+}
+// pow
+inline value_type pow_impl(value_type const& arg1, value_type const& arg2)
+{
+    return std::pow(arg1.to_double(), arg2.to_double());
+}
+
+struct binary_function_types : qi::symbols<char, binary_function_impl>
+{
+    binary_function_types()
+    {
+        add
+            ("min", binary_function_impl(min_impl))
+            ("max", binary_function_impl(max_impl))
+            ("pow", binary_function_impl(pow_impl))
+            ;
+    }
 };
 
 template <typename T>
@@ -168,7 +227,8 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     rule_type unary_expr;
     rule_type not_expr;
     rule_type primary_expr;
-    qi::rule<Iterator, function_call() , space_type> function_expr;
+    qi::rule<Iterator, unary_function_call() , space_type> unary_function_expr;
+    qi::rule<Iterator, binary_function_call() , space_type> binary_function_expr;
     qi::rule<Iterator, std::string() > regex_match_expr;
     qi::rule<Iterator, expr_node(expr_node), qi::locals<std::string,std::string>, space_type> regex_replace_expr;
     qi::rule<Iterator, std::string() , space_type> attr;
@@ -179,7 +239,8 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
     geometry_types geom_type;
-    function_types func_type;
+    unary_function_types unary_func_type;
+    binary_function_types binary_func_type;
 };
 
 } // namespace
