@@ -51,6 +51,11 @@ inline value_type atan_impl (value_type const& val)
 {
     return std::atan(val.to_double());
 }
+// abs
+inline value_type abs_impl (value_type const& val)
+{
+    return std::fabs(val.to_double());
+}
 
 unary_function_types::unary_function_types()
 {
@@ -60,6 +65,7 @@ unary_function_types::unary_function_types()
         ("tan", unary_function_impl(tan_impl))
         ("atan", unary_function_impl(atan_impl))
         ("exp", unary_function_impl(exp_impl))
+        ("abs", unary_function_impl(abs_impl))
         ;
 }
 
