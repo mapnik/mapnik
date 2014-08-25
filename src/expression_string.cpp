@@ -29,7 +29,6 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
-
 // boost
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>          // for u32regex

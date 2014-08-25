@@ -168,6 +168,7 @@ source = Split(
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
+    function_call.cpp
     gradient.cpp
     graphics.cpp
     parse_path.cpp

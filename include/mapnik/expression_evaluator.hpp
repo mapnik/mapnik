@@ -27,6 +27,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/expression_node.hpp>
+#include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
 #if defined(BOOST_REGEX_HAS_ICU)

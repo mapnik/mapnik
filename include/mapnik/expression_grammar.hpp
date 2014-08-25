@@ -28,6 +28,7 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
+#include <mapnik/function_call.hpp>
 
 // spirit2
 #include <boost/spirit/include/qi.hpp>
@@ -36,8 +37,6 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 // fusion
 #include <boost/fusion/adapted/struct.hpp>
-// stl
-#include <functional>
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
                           (mapnik::unary_function_impl, fun)
@@ -50,8 +49,6 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
 
 namespace mapnik
 {
-
-using namespace boost;
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
@@ -119,76 +116,6 @@ struct geometry_types : qi::symbols<char,mapnik::value_integer>
             ("linestring", 2)
             ("polygon",3)
             ("collection",4)
-            ;
-    }
-};
-
-// functions
-// exp
-inline value_type exp_impl (value_type const& val)
-{
-    return std::exp(val.to_double());
-}
-// sin
-inline value_type sin_impl (value_type const& val)
-{
-    return std::sin(val.to_double());
-}
-// cos
-inline value_type cos_impl (value_type const& val)
-{
-    return std::cos(val.to_double());
-}
-// tan
-inline value_type tan_impl (value_type const& val)
-{
-    return std::tan(val.to_double());
-}
-// atan
-inline value_type atan_impl (value_type const& val)
-{
-    return std::atan(val.to_double());
-}
-
-struct unary_function_types : qi::symbols<char, unary_function_impl>
-{
-    unary_function_types()
-    {
-        add
-            ("sin", unary_function_impl(sin_impl))
-            ("cos", unary_function_impl(cos_impl))
-            ("tan", unary_function_impl(tan_impl))
-            ("atan", unary_function_impl(atan_impl))
-            ("exp", unary_function_impl(exp_impl))
-            ;
-    }
-};
-
-// binary functions
-// min
-inline value_type min_impl(value_type const& arg1, value_type const& arg2)
-{
-    return std::min(arg1.to_double(), arg2.to_double());
-}
-// max
-inline value_type max_impl(value_type const& arg1, value_type const& arg2)
-{
-    return std::max(arg1.to_double(), arg2.to_double());
-}
-// pow
-inline value_type pow_impl(value_type const& arg1, value_type const& arg2)
-{
-    return std::pow(arg1.to_double(), arg2.to_double());
-}
-
-struct binary_function_types : qi::symbols<char, binary_function_impl>
-{
-    binary_function_types()
-    {
-        add
-            ("min", binary_function_impl(min_impl))
-            ("max", binary_function_impl(max_impl))
-            ("pow", binary_function_impl(pow_impl))
             ;
     }
 };

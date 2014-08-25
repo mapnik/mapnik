@@ -36,9 +36,6 @@
 #include <boost/regex.hpp>
 #endif
 
-#include <boost/variant.hpp>
-#include <functional>
-
 namespace mapnik
 {
 
@@ -150,6 +147,7 @@ struct binary_function_call
     argument_type arg1;
     argument_type arg2;
 };
+
 
 inline expr_node & operator- (expr_node& expr)
 {

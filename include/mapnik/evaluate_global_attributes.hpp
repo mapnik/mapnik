@@ -31,6 +31,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 
 #if defined(BOOST_REGEX_HAS_ICU)
