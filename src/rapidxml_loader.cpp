@@ -26,6 +26,8 @@
 
 // mapnik
 #include <mapnik/config_error.hpp>
+#include <mapnik/utils.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
@@ -54,8 +56,16 @@ public:
 
     void load(std::string const& filename, xml_node &node)
     {
+        if (!mapnik::util::exists(filename))
+        {
+            throw config_error(std::string("Could not load map file: File does not exist"), 0, filename);
+        }
         filename_ = filename;
+#ifdef _WINDOWS
+        std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
+#else
         std::basic_ifstream<char> stream(filename.c_str());
+#endif
         if (!stream)
         {
             throw config_error("Could not load map file", 0, filename);
