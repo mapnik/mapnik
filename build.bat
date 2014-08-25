@@ -30,9 +30,12 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 if NOT EXIST ..\mapnik-sdk (
   mkdir ..\mapnik-sdk
+  mkdir ..\mapnik-sdk\bin
   mkdir ..\mapnik-sdk\includes
   mkdir ..\mapnik-sdk\share
   mkdir ..\mapnik-sdk\libs
+  mkdir ..\mapnik-sdk\libs\mapnik\input
+  mkdir ..\mapnik-sdk\libs\mapnik\fonts
 )
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
@@ -93,6 +96,9 @@ xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ft.h ..\mapnik-sdk\includes\cairo\ /
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\cairo\src\cairo-ps.h ..\mapnik-sdk\includes\cairo\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\protobuf\vsprojects\include ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
 
 :: libs
 xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
@@ -141,11 +147,16 @@ xcopy /i /d /s /q %DEPSDIR%\cairo\src\release\cairo.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\boost_1_56_0\stage\lib\* ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\protobuf\vsprojects\Release\libprotobuf-lite.lib ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: data
 xcopy /i /d /s /q %DEPSDIR%\proj\nad ..\mapnik-sdk\share\proj /Y
 ::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+:: bin
+xcopy /i /d /s /q %DEPSDIR%\protobuf\vsprojects\Release\protoc.exe ..\mapnik-sdk\bin /Y
 
 :: headers for plugins
 xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\libpq-fe.h ..\mapnik-sdk\includes\ /Y
@@ -176,6 +187,26 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 :: run tests
 SET PATH=%CD%\..\mapnik-sdk\libs;%PATH%
 for %%t in (build\Release\*test.exe) do ( %%t -d %CD% )
+
+:: install mapnik libs
+xcopy /i /d /s /q .\build\Release\mapnik.lib ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q .\build\Release\mapnik.dll ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+:: plugins
+xcopy /i /d /s /q .\build\Release\*input ..\mapnik-sdk\libs\mapnik\input\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+:: install mapnik headers
+xcopy /i /d /s /q .\deps\mapnik\sparsehash ..\mapnik-sdk\includes\mapnik\sparsehash /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q .\deps\agg\include ..\mapnik-sdk\includes\mapnik\agg /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q .\deps\clipper\include ..\mapnik-sdk\includes\mapnik\agg /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q .\include\mapnik ..\mapnik-sdk\includes\mapnik /Y
+
 
 GOTO DONE
 
