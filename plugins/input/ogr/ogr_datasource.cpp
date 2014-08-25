@@ -90,6 +90,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
+    if (!string) string  = params.get<std::string>("inline");
     if (! file && ! string)
     {
         throw datasource_exception("missing <file> or <string> parameter");
