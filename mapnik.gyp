@@ -32,7 +32,7 @@
     ],
     "conditions": [
       ["OS=='win'", {
-          'common_defines': ['MAPNIK_EXPORTS','LIBXML_STATIC'], # static libxml: libxml2_a.lib
+          'common_defines': ['LIBXML_STATIC'], # static libxml: libxml2_a.lib
           'common_libraries': []
       }, {
           'common_defines': ['SHAPE_MEMORY_MAPPED_FILE'],
@@ -77,11 +77,12 @@
       ],
       "conditions": [
         ["OS=='win'", {
+		   'defines': ['MAPNIK_EXPORTS'],
            'libraries':[
-              'libboost_filesystem-vc120-mt-1_55.lib',
-              'libboost_regex-vc120-mt-1_55.lib',
-              'libboost_thread-vc120-mt-1_55.lib',
-              'libboost_system-vc120-mt-1_55.lib',
+              'libboost_filesystem-vc120-mt-1_56.lib',
+              'libboost_regex-vc120-mt-1_56.lib',
+              'libboost_thread-vc120-mt-1_56.lib',
+              'libboost_system-vc120-mt-1_56.lib',
               'libpng16.lib',
               'proj.lib',
               'libtiff.lib',
@@ -152,8 +153,8 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'libboost_thread-vc120-mt-1_55.lib',
-                'libboost_system-vc120-mt-1_55.lib',
+                'libboost_thread-vc120-mt-1_56.lib',
+                'libboost_system-vc120-mt-1_56.lib',
                 'icuuc.lib'
             ],
           },{
@@ -173,8 +174,8 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'libboost_thread-vc120-mt-1_55.lib',
-                'libboost_system-vc120-mt-1_55.lib',
+                'libboost_thread-vc120-mt-1_56.lib',
+                'libboost_system-vc120-mt-1_56.lib',
                 'icuuc.lib'
             ],
           },{
@@ -203,8 +204,8 @@
  #           'libraries': [
 #                'gdal111.dll',
 #                'libexpat.dll',
-#                'libboost_thread-vc120-mt-1_55.lib',
-#                'libboost_system-vc120-mt-1_55.lib',
+#                'libboost_thread-vc120-mt-1_56.lib',
+#                'libboost_system-vc120-mt-1_56.lib',
 #                'icuuc.lib'
 #            ]
 #          } , {
@@ -397,7 +398,7 @@
            "conditions": [
              ["OS=='win'", {
                 'libraries':[
-                   'libboost_thread-vc120-mt-1_55.lib'
+                   'libboost_thread-vc120-mt-1_56.lib'
                ],
                'defines': ['MAPNIK_EXPORTS']
              },{
