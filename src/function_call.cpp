@@ -27,62 +27,89 @@ namespace mapnik {
 
 // functions
 // exp
-inline value_type exp_impl (value_type const& val)
+//template <typename T>
+struct exp_impl
 {
-    return std::exp(val.to_double());
-}
+    //using type = T;
+    static constexpr char const* name = "exp";
+    value_type operator() (value_type const& val) const
+    {
+        return std::exp(val.to_double());
+    }
+
+};
+
 // sin
-inline value_type sin_impl (value_type const& val)
+struct sin_impl
 {
-    return std::sin(val.to_double());
-}
+    static constexpr char const* name = "sin";
+    value_type operator() (value_type const& val) const
+    {
+        return std::sin(val.to_double());
+    }
+};
+
 // cos
-inline value_type cos_impl (value_type const& val)
+struct cos_impl
 {
-    return std::cos(val.to_double());
-}
+    static constexpr char const* name = "cos";
+    value_type operator() (value_type const& val) const
+    {
+        return std::cos(val.to_double());
+    }
+};
+
 // tan
-inline value_type tan_impl (value_type const& val)
+struct tan_impl
 {
-    return std::tan(val.to_double());
-}
+    static constexpr char const* name = "tan";
+    value_type operator() (value_type const& val) const
+    {
+        return std::tan(val.to_double());
+    }
+};
+
 // atan
-inline value_type atan_impl (value_type const& val)
+struct atan_impl
 {
-    return std::atan(val.to_double());
-}
+    static constexpr char const* name = "atan";
+    value_type operator()(value_type const& val) const
+    {
+        return std::atan(val.to_double());
+    }
+};
+
 // abs
-inline value_type abs_impl (value_type const& val)
+struct abs_impl
 {
-    return std::fabs(val.to_double());
-}
+    static constexpr char const* name = "abs";
+    value_type operator() (value_type const& val) const
+    {
+        return std::fabs(val.to_double());
+    }
+};
 
 unary_function_types::unary_function_types()
 {
     add
-        ("sin", unary_function_impl(sin_impl))
-        ("cos", unary_function_impl(cos_impl))
-        ("tan", unary_function_impl(tan_impl))
-        ("atan", unary_function_impl(atan_impl))
-        ("exp", unary_function_impl(exp_impl))
-        ("abs", unary_function_impl(abs_impl))
+        ("sin",  sin_impl())
+        ("cos",  cos_impl())
+        ("tan",  tan_impl())
+        ("atan", atan_impl())
+        ("exp",  exp_impl())
+        ("abs",  abs_impl())
         ;
 }
 
 char const* unary_function_name(unary_function_impl const& fun)
 {
-    value_type(*const* f_ptr)(value_type const&) = fun.target<value_type(*)(value_type const&)>();
-
-    if (f_ptr)
-    {
-        if (*f_ptr == sin_impl) return "sin";
-        else if(*f_ptr == cos_impl) return "cos";
-        else if(*f_ptr == tan_impl) return "tan";
-        else if(*f_ptr == atan_impl) return "atan";
-        else if(*f_ptr == exp_impl) return "exp";
-        else if(*f_ptr == abs_impl) return "abs";
-    }
-    return "";
+    if (fun.target<sin_impl>()) return "sin";
+    else if (fun.target<cos_impl>()) return "cos";
+    else if (fun.target<tan_impl>()) return "tan";
+    else if (fun.target<atan_impl>()) return "atan";
+    else if (fun.target<exp_impl>()) return "exp";
+    else if (fun.target<abs_impl>()) return "abs";
+    else return "unknown";
 }
 
 // binary functions
@@ -122,7 +149,7 @@ char const* binary_function_name(binary_function_impl const& fun)
         else if(*f_ptr == max_impl) return "max";
         else if(*f_ptr == pow_impl) return "pow";
     }
-    return "";
+    return "unknown";
 }
 
 }
