@@ -539,7 +539,7 @@ MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key
 }
 
 template<typename Enum>
-constexpr auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
+auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
 {
     return static_cast<typename std::underlying_type<Enum>::type>(e);
 }
