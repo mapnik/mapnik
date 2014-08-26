@@ -6,7 +6,6 @@
     'includes%':'',
     'libs%':'',
     'common_defines': [
-      'U_CHARSET_IS_UTF8=1',
       'BIGINT',
       'BOOST_REGEX_HAS_ICU',
       'HAVE_JPEG',
@@ -35,7 +34,7 @@
           'common_defines': ['LIBXML_STATIC'], # static libxml: libxml2_a.lib
           'common_libraries': []
       }, {
-          'common_defines': ['SHAPE_MEMORY_MAPPED_FILE'],
+          'common_defines': ['SHAPE_MEMORY_MAPPED_FILE','U_CHARSET_IS_UTF8=1'],
           'common_libraries': [
             '-Wl,-search_paths_first',
             '-stdlib=libstdc++',
@@ -85,7 +84,7 @@
               'libboost_system-vc120-mt-1_56.lib',
               'libpng16.lib',
               'proj.lib',
-              'libtiff.lib',
+              'libtiff_i.lib',
               'libwebp.lib',
               #'libxml2.lib', #dynamic
               'libxml2_a.lib', #static
