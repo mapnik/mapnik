@@ -37,10 +37,14 @@ struct unary_function_types : qi::symbols<char, unary_function_impl>
 {
     unary_function_types();
 };
+
 struct binary_function_types : qi::symbols<char, binary_function_impl>
 {
     binary_function_types();
 };
+
+char const* unary_function_name(unary_function_impl const& fun);
+char const* binary_function_name(binary_function_impl const& fun);
 
 } // namespace mapnik
 

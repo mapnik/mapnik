@@ -129,11 +129,21 @@ struct expression_string : util::static_visitor<void>
 
     void operator() (unary_function_call const& call) const
     {
-        str_ += "fun(arg)";// FIXME
+        str_ += unary_function_name(call.fun);
+        str_ += "(";
+        util::apply_visitor(expression_string(str_),call.arg);
+        str_ += ")";
+
     }
     void operator() (binary_function_call const& call) const
     {
-        str_ += "fun(arg1,arg2)";// FIXME
+        str_ += binary_function_name(call.fun);
+        str_ += "(";
+        util::apply_visitor(expression_string(str_),call.arg1);
+        str_ += ",";
+        util::apply_visitor(expression_string(str_),call.arg2);
+        str_ += ")";
+
     }
 private:
     std::string & str_;

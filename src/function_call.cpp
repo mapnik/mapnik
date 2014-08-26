@@ -69,6 +69,22 @@ unary_function_types::unary_function_types()
         ;
 }
 
+char const* unary_function_name(unary_function_impl const& fun)
+{
+    value_type(*const* f_ptr)(value_type const&) = fun.target<value_type(*)(value_type const&)>();
+
+    if (f_ptr)
+    {
+        if (*f_ptr == sin_impl) return "sin";
+        else if(*f_ptr == cos_impl) return "cos";
+        else if(*f_ptr == tan_impl) return "tan";
+        else if(*f_ptr == atan_impl) return "atan";
+        else if(*f_ptr == exp_impl) return "exp";
+        else if(*f_ptr == abs_impl) return "abs";
+    }
+    return "";
+}
+
 // binary functions
 // min
 inline value_type min_impl(value_type const& arg1, value_type const& arg2)
@@ -93,6 +109,20 @@ binary_function_types::binary_function_types()
         ("max", binary_function_impl(max_impl))
         ("pow", binary_function_impl(pow_impl))
         ;
+}
+
+char const* binary_function_name(binary_function_impl const& fun)
+{
+    value_type(*const* f_ptr)(value_type const&, value_type const&) =
+        fun.target<value_type(*)
+                   (value_type const&, value_type const&)>();
+    if (f_ptr)
+    {
+        if (*f_ptr == min_impl) return "min";
+        else if(*f_ptr == max_impl) return "max";
+        else if(*f_ptr == pow_impl) return "pow";
+    }
+    return "";
 }
 
 }
