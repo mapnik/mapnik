@@ -11,6 +11,8 @@ set MAPNIK_PREFIX=%MAPNIK_PREFIX:~0,-1%
 for %%F in (%MAPNIK_PREFIX%) do set MAPNIK_PREFIX=%%~dpF
 :: strip trailing \
 set MAPNIK_PREFIX=%MAPNIK_PREFIX:~0,-1%
+:: now make double \\ for gyp
+set MAPNIK_PREFIX=%MAPNIK_PREFIX:\=\\%
 set MAPNIK_LIBS=%MAPNIK_PREFIX%\\libs
 set MAPNIK_INCLUDES=%MAPNIK_PREFIX%\\includes
 set MAPNIK_INPUT_PLUGINS_DIRECTORY=%MAPNIK_PREFIX%\\libs\\mapnik\\input
