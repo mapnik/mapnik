@@ -73,9 +73,9 @@ struct expression_string : util::static_visitor<void>
             str_ += "(";
         }
 
-        util::apply_visitor(expression_string(str_),x.left);
+        util::apply_visitor(*this,x.left);
         str_ += x.type();
-        util::apply_visitor(expression_string(str_),x.right);
+        util::apply_visitor(*this,x.right);
         if (x.type() != tags::mult::str() && x.type() != tags::div::str())
         {
             str_ += ")";
@@ -87,13 +87,13 @@ struct expression_string : util::static_visitor<void>
     {
         str_ += Tag::str();
         str_ += "(";
-        util::apply_visitor(expression_string(str_),x.expr);
+        util::apply_visitor(*this,x.expr);
         str_ += ")";
     }
 
     void operator() (regex_match_node const & x) const
     {
-        util::apply_visitor(expression_string(str_),x.expr);
+        util::apply_visitor(*this,x.expr);
         str_ +=".match('";
 #if defined(BOOST_REGEX_HAS_ICU)
         std::string utf8;
@@ -108,7 +108,7 @@ struct expression_string : util::static_visitor<void>
 
     void operator() (regex_replace_node const & x) const
     {
-        util::apply_visitor(expression_string(str_),x.expr);
+        util::apply_visitor(*this,x.expr);
         str_ +=".replace(";
         str_ += "'";
 #if defined(BOOST_REGEX_HAS_ICU)
@@ -131,7 +131,7 @@ struct expression_string : util::static_visitor<void>
     {
         str_ += unary_function_name(call.fun);
         str_ += "(";
-        util::apply_visitor(expression_string(str_),call.arg);
+        util::apply_visitor(*this,call.arg);
         str_ += ")";
 
     }
@@ -139,9 +139,9 @@ struct expression_string : util::static_visitor<void>
     {
         str_ += binary_function_name(call.fun);
         str_ += "(";
-        util::apply_visitor(expression_string(str_),call.arg1);
+        util::apply_visitor(*this,call.arg1);
         str_ += ",";
-        util::apply_visitor(expression_string(str_),call.arg2);
+        util::apply_visitor(*this,call.arg2);
         str_ += ")";
 
     }
