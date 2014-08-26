@@ -112,7 +112,7 @@ inline void read_double_xdr(const char* data, double & val)
     std::memcpy(&val,&bits,8);
 }
 
-#ifdef _WINDOWS
+#if defined(_MSC_VER) && _MSC_VER < 1800
 // msvc doesn't have rint in <cmath>
 inline int rint(double val)
 {
@@ -123,7 +123,9 @@ inline double round(double val)
 {
     return std::floor(val);
 }
+#endif
 
+#if defined(_MSC_VER)
 #define  _USE_MATH_DEFINES
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

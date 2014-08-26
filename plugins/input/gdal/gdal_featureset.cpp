@@ -48,10 +48,6 @@ using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
-#ifdef _WINDOWS
-using mapnik::rint;
-#endif
-
 gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
                                  gdal_query q,
