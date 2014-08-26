@@ -2,7 +2,15 @@
 
 set MAPNIK_VERSION=2.3.0
 set MAPNIK_VERSION_NUMBER=200300
-set MAPNIK_PREFIX=c:\\code\\mapnik-deps\\packages\\mapnik-sdk
+::SET CUR_PATH=%CD%
+::cd %CD%/../
+set MAPNIK_PREFIX=%~dp0
+:: strip trailing \
+set MAPNIK_PREFIX=%MAPNIK_PREFIX:~0,-1%
+:: get dirname
+for %%F in (%MAPNIK_PREFIX%) do set MAPNIK_PREFIX=%%~dpF
+:: strip trailing \
+set MAPNIK_PREFIX=%MAPNIK_PREFIX:~0,-1%
 set MAPNIK_LIBS=%MAPNIK_PREFIX%\\libs
 set MAPNIK_INCLUDES=%MAPNIK_PREFIX%\\includes
 set MAPNIK_INPUT_PLUGINS_DIRECTORY=%MAPNIK_PREFIX%\\libs\\mapnik\\input
