@@ -193,26 +193,48 @@
         "sources": [ '<!@(find plugins/input/raster/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ]
     },
- #   {
- #       "target_name": "gdal",
- #       "type": "loadable_module",
- #       "product_extension": "input",
- #       "sources": [ '<!@(find plugins/input/gdal/ -name "*.cpp")' ],
- #       "dependencies": [ "mapnik" ],
- #       'conditions': [
- #         ['OS=="win"', {
- #           'libraries': [
-#                'gdal111.dll',
-#                'libexpat.dll',
-#                'libboost_thread-vc120-mt-1_56.lib',
-#                'libboost_system-vc120-mt-1_56.lib',
-#                'icuuc.lib'
-#            ]
-#          } , {
-#            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
-#          }]
-#       ]
-#   },
+    {
+        "target_name": "gdal",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/gdal/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [
+                'gdal_i.lib',
+                'libexpat.lib',
+                'libboost_thread-vc120-mt-1_56.lib',
+                'libboost_system-vc120-mt-1_56.lib',
+                'icuuc.lib',
+				'odbccp32.lib'
+            ]
+          } , {
+            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+          }]
+       ]
+    },
+    {
+        "target_name": "ogr",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/ogr/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [
+                'gdal_i.lib',
+                'libexpat.lib',
+                'libboost_thread-vc120-mt-1_56.lib',
+                'libboost_system-vc120-mt-1_56.lib',
+                'icuuc.lib',
+				'odbccp32.lib'
+            ]
+          } , {
+            'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
+          }]
+       ]
+    },
     {
         "target_name": "postgis",
         "type": "loadable_module",

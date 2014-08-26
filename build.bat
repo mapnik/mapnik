@@ -99,7 +99,6 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\protobuf\vsprojects\include ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-
 :: libs
 xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -152,11 +151,13 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: data
 xcopy /i /d /s /q %DEPSDIR%\proj\nad ..\mapnik-sdk\share\proj /Y
-::xcopy /i /d /s /q ..\gdal\gdal\data %PREFIX%\share\gdal
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\data ..\mapnik-sdk\share\gdal
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: bin
 xcopy /i /d /s /q %DEPSDIR%\protobuf\vsprojects\Release\protoc.exe ..\mapnik-sdk\bin /Y
+xcopy /i /d /s /q mapnik-config.bat ..\mapnik-sdk\bin /Y
 
 :: headers for plugins
 xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\libpq-fe.h ..\mapnik-sdk\includes\ /Y
@@ -166,7 +167,50 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\postgresql\src\include\pg_config_ext.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\sqlite\sqlite3.h ..\mapnik-sdk\includes\ /Y
-::xcopy /i /d /s /q %DEPSDIR%\gdal ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+::xcopy /i /d /s /q %DEPSDIR%\gdal\gcore\*h ..\mapnik-sdk\includes\gdal\ /Y
+::IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogr_feature.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogr_spatialref.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogr_geometry.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogr_core.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogr_featurestyle.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogrsf_frmts\ogrsf_frmts.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\ogr\ogr_srs_api.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\gcore\gdal_priv.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\gcore\gdal_frmts.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\gcore\gdal.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\gcore\gdal_version.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_minixml.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_atomic_ops.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_string.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_conv.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_vsi.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_virtualmem.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_error.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_progress.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_port.h ..\mapnik-sdk\includes\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\port\cpl_config.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: libs for plugins
@@ -175,6 +219,18 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\postgresql\src\interfaces\libpq\Release\libpq.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\sqlite\sqlite3.lib ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\gdal_i.lib ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+:: NOTE: impossible to statically link gdal due to:
+:: http://stackoverflow.com/questions/4596212/c-odbc-refuses-to-statically-link-to-libcmt-lib-under-vs2010
+::xcopy /i /d /s /q %DEPSDIR%\gdal\gdal.lib ..\mapnik-sdk\libs\ /Y
+::IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\gdal\gdal111.dll ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\expat\win32\bin\Release\libexpat.lib ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\expat\win32\bin\Release\libexpat.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ::msbuild /m:2 /t:mapnik /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
