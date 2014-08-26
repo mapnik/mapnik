@@ -25,7 +25,6 @@
 #include <mapnik/json/positions_grammar_impl.hpp>
 
 // boost
-#include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
