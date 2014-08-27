@@ -85,7 +85,6 @@ public:
     void parse_geojson(T & stream);
 private:
     mapnik::datasource::datasource_t type_;
-    std::map<std::string, mapnik::parameters> statistics_;
     mapnik::layer_descriptor desc_;
     std::string filename_;
     std::string inline_string_;
