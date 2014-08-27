@@ -138,6 +138,7 @@ private:
     void rewind_subpath();
     bool next_segment();
     bool previous_segment();
+    double current_segment_angle();
     // Position as calculated by last move/forward/next call.
     pixel_position current_position_;
     // First pixel of current segment.
