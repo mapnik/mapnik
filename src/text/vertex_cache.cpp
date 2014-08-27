@@ -20,11 +20,9 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/global.hpp>
 #include <mapnik/text/vertex_cache.hpp>
 #include <mapnik/offset_converter.hpp>
-
-// boost
-
 
 namespace mapnik
 {
