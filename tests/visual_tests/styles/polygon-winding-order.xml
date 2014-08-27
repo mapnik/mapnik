@@ -1,0 +1,61 @@
+<Map
+    background-color="#000"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="polygon">
+        <Rule>
+            <PolygonSymbolizer fill="#800000" />
+            <LineSymbolizer stroke="#ff0000" stroke-width="2" offset="4" />
+        </Rule>
+    </Style>
+
+    <Style name="frame">
+        <Rule>
+            <PolygonSymbolizer />
+        </Rule>
+    </Style>
+    <!--
+      frame is a layer with a single polygon that is used to ensure that
+       m.zoom_all() will zoom the map to a reasonable bounding extent
+    -->
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt|name
+Polygon((-75.0 -75.0, -75.0 75.0, 35.0 75.0, 35.0 -75.0, -75.0 -75.0))|bounds
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!--
+      The inline GeoJSON has two polygons with different winding order
+      (clockwise and counterclockwise), and each of those has two inner rings
+      (again, one clockwise and one counterclockwise)
+    -->
+
+    <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>polygon</StyleName>
+        <Datasource>
+            <Parameter name="type">geojson</Parameter>
+            <Parameter name="inline">{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+
+"features": [
+{ "type": "Feature", "properties": { }, "geometry": { "type": "Polygon", "coordinates":
+    [ [ [ 30, -20 ], [ -70, -20 ], [ -70, -70 ], [ 30, -70 ], [ 30, -20 ] ],
+      [ [ -60, -30 ], [ -30, -30 ], [ -30, -60 ], [ -60, -60 ], [ -60, -30 ] ],
+      [ [ -10, -30 ], [ -10, -60 ], [ 20, -60 ], [ 20, -30 ], [ -10, -30 ] ]
+      ] } },
+{ "type": "Feature", "properties": { }, "geometry": { "type": "Polygon", "coordinates":
+    [ [ [ -70, 70 ], [ 30, 70 ], [ 30, 20 ], [ -70, 20 ], [ -70, 70 ] ],
+      [ [ -60, 60 ], [ -30, 60 ], [ -30, 30 ], [ -60, 30 ], [ -60, 60 ] ],
+      [ [ 20, 30 ], [ 20, 60 ], [ -10, 60 ], [ -10, 30 ], [ 20, 30 ] ]
+      ] } }
+]
+}</Parameter>
+        </Datasource>
+    </Layer>
+</Map>
