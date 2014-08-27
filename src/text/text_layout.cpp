@@ -24,7 +24,7 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/text/harfbuzz_shaper.hpp>
+#include <mapnik/text/icu_shaper.hpp>
 
 // ICU
 #include <unicode/brkiter.h>
@@ -229,7 +229,7 @@ void text_layout::clear()
 
 void text_layout::shape_text(text_line & line)
 {
-    harfbuzz_shaper::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
+    icu_shaper::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
 }
 
 void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attrs)
