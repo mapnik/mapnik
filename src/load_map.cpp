@@ -777,6 +777,46 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
     rule.reserve(node.size());
     for (auto const& sym_node : node)
     {
+#if defined(_MSC_VER) && _MSC_VER <= 1800
+        std::string const& name = sym_node.name();
+        if (name == "PointSymbolizer") {
+            parse_point_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "LinePatternSymbolizer") {
+            parse_line_pattern_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "PolygonPatternSymbolizer") {
+            parse_polygon_pattern_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "TextSymbolizer") {
+            parse_text_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "ShieldSymbolizer") {
+            parse_shield_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "LineSymbolizer") {
+            parse_line_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "PolygonSymbolizer") {
+            parse_polygon_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "BuildingSymbolizer") {
+            parse_building_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "RasterSymbolizer") {
+            parse_raster_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "MarkersSymbolizer") {
+            parse_markers_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "GroupSymbolizer") {
+            parse_group_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        } else if (name == "DebugSymbolizer") {
+            parse_debug_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+        }
+#else
         switch (name2int(sym_node.name().c_str()))
         {
         case name2int("PointSymbolizer"):
@@ -830,6 +870,7 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
         default:
             break;
         }
+#endif
     }
 }
 
