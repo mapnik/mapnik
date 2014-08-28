@@ -8,7 +8,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/geometry.hpp>

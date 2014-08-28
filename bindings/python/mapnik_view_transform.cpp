@@ -25,7 +25,7 @@
 #include <boost/python.hpp>
 
 // mapnik
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 
 using mapnik::view_transform;
 

@@ -26,7 +26,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/variant.hpp>

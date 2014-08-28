@@ -30,7 +30,7 @@
 #include <mapnik/datasource.hpp> // for datasource_exception
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>

@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 
 // boost
 #include <boost/iterator/iterator_adaptor.hpp>

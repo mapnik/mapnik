@@ -24,7 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/feature_factory.hpp>

@@ -24,7 +24,7 @@
 #define MAPNIK_MARKERS_PLACEMENTS_LINE_HPP
 
 #include <mapnik/markers_placements/point.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp> //round
 

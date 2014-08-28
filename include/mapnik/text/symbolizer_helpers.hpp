@@ -29,7 +29,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 namespace mapnik {

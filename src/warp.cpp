@@ -26,7 +26,7 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/proj_transform.hpp>
 

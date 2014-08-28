@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CTRANS_HPP
-#define MAPNIK_CTRANS_HPP
+#ifndef MAPNIK_VIEW_TRANSFORM_HPP
+#define MAPNIK_VIEW_TRANSFORM_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -279,4 +279,4 @@ public:
 };
 }
 
-#endif // MAPNIK_CTRANS_HPP
+#endif // MAPNIK_VIEW_TRANSFORM_HPP

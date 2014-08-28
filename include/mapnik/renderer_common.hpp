@@ -26,7 +26,7 @@
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
 #include <mapnik/box2d.hpp>     // for box2d
-#include <mapnik/ctrans.hpp>    // for view_transform
+#include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/attribute.hpp>
 
 // fwd declarations to speed up compile
