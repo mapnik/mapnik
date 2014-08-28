@@ -6,6 +6,10 @@
 *.so
 *.a
 *.dylib
+*.exe
+*.dll
+build
+gyp
 plugins/input/*.input
 plugins/input/templates/*.input
 demo/c++/rundemo

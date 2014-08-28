@@ -19,6 +19,32 @@ endif
 
 all: mapnik
 
+./deps/gyp:
+	git clone --depth 1 https://chromium.googlesource.com/external/gyp.git ./deps/gyp
+
+gbench:
+	(source localize.sh && ./Release/test_rendering \
+		--name "text rendering" \
+		--map benchmark/data/roads.xml \
+		--extent 1477001.12245,6890242.37746,1480004.49012,6892244.62256 \
+		--width 600 \
+		--height 600 \
+		--iterations 20 \
+		--threads 10)
+
+g: mapnik.gyp ./deps/gyp
+	export BASE_PATH="/Users/dane/projects/mapnik-packaging/osx/out/build-cpp03-libstdcpp-x86_64-macosx" && \
+	export PATH=$$BASE_PATH/bin:$$PATH && \
+	deps/run_gyp mapnik.gyp --depth=. -Goutput_dir=.. \
+	-Dincludes=$$BASE_PATH/include \
+	-Dlibs=$$BASE_PATH/lib \
+	--generator-output=./build/ -f make \
+	--no-duplicate-basename-check
+	#make -C build V=$(V) mapnik -j2
+	make -C build V=$(V) -j2
+	make test
+	make gbench
+
 install:
 	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
