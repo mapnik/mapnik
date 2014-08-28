@@ -85,7 +85,7 @@
               'libpng16.lib',
               'proj.lib',
               'libtiff_i.lib',
-              'libwebp.lib',
+              'libwebp_dll.lib',
               #'libxml2.lib', #dynamic
               'libxml2_a.lib', #static
               # needed if libxml2 is static

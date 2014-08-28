@@ -66,7 +66,7 @@ xcopy /i /d /s /q %DEPSDIR%\jpeg\jconfig.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\jpeg\jmorecfg.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-xcopy /i /d /s /q %DEPSDIR%\webp\include\webp ..\mapnik-sdk\includes\webp /Y
+xcopy /i /d /s /q %DEPSDIR%\webp\src\webp ..\mapnik-sdk\includes\webp /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\proj\src\proj_api.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -130,7 +130,9 @@ xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\proj\src\proj.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-xcopy /i /d /s /q %DEPSDIR%\webp\lib\libwebp.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\webp\output\release-dynamic\x86\lib\libwebp_dll.lib ..\mapnik-sdk\libs\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+xcopy /i /d /s /q %DEPSDIR%\webp\output\release-dynamic\x86\bin\libwebp.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\libpng\projects\vstudio\Release\libpng16.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
