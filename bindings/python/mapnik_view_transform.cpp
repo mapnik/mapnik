@@ -27,12 +27,12 @@
 // mapnik
 #include <mapnik/ctrans.hpp>
 
-using mapnik::CoordTransform;
+using mapnik::view_transform;
 
 struct view_transform_pickle_suite : boost::python::pickle_suite
 {
     static boost::python::tuple
-    getinitargs(const CoordTransform& c)
+    getinitargs(const view_transform& c)
     {
         using namespace boost::python;
         return boost::python::make_tuple(c.width(),c.height(),c.extent());
@@ -41,26 +41,26 @@ struct view_transform_pickle_suite : boost::python::pickle_suite
 
 namespace {
 
-mapnik::coord2d forward_point(mapnik::CoordTransform const& t, mapnik::coord2d const& in)
+mapnik::coord2d forward_point(mapnik::view_transform const& t, mapnik::coord2d const& in)
 {
     mapnik::coord2d out(in);
     t.forward(out);
     return out;
 }
 
-mapnik::coord2d backward_point(mapnik::CoordTransform const& t, mapnik::coord2d const& in)
+mapnik::coord2d backward_point(mapnik::view_transform const& t, mapnik::coord2d const& in)
 {
     mapnik::coord2d out(in);
     t.backward(out);
     return out;
 }
 
-mapnik::box2d<double> forward_envelope(mapnik::CoordTransform const& t, mapnik::box2d<double> const& in)
+mapnik::box2d<double> forward_envelope(mapnik::view_transform const& t, mapnik::box2d<double> const& in)
 {
     return t.forward(in);
 }
 
-mapnik::box2d<double> backward_envelope(mapnik::CoordTransform const& t, mapnik::box2d<double> const& in)
+mapnik::box2d<double> backward_envelope(mapnik::view_transform const& t, mapnik::box2d<double> const& in)
 {
     return t.backward(in);
 }
@@ -72,14 +72,14 @@ void export_view_transform()
     using mapnik::box2d;
     using mapnik::coord2d;
 
-    class_<CoordTransform>("ViewTransform",init<int,int,box2d<double> const& > (
+    class_<view_transform>("ViewTransform",init<int,int,box2d<double> const& > (
                                "Create a ViewTransform with a width and height as integers and extent"))
         .def_pickle(view_transform_pickle_suite())
         .def("forward", forward_point)
         .def("backward",backward_point)
         .def("forward", forward_envelope)
         .def("backward",backward_envelope)
-        .def("scale_x",&CoordTransform::scale_x)
-        .def("scale_y",&CoordTransform::scale_y)
+        .def("scale_x",&view_transform::scale_x)
+        .def("scale_y",&view_transform::scale_y)
         ;
 }

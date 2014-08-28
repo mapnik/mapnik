@@ -42,7 +42,7 @@ group_symbolizer_helper::group_symbolizer_helper(
         attributes const& vars,
         const proj_transform &prj_trans,
         unsigned width, unsigned height, double scale_factor,
-        const CoordTransform &t, DetectorType &detector,
+        const view_transform &t, DetectorType &detector,
         const box2d<double> &query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       detector_(detector)
@@ -66,7 +66,7 @@ pixel_position_list const& group_symbolizer_helper::get()
             if (clipped_)
             {
                 using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
-                using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
+                using path_type = coord_transform<view_transform,clipped_geometry_type>;
 
                 clipped_geometry_type clipped(*geom);
                 clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
@@ -76,7 +76,7 @@ pixel_position_list const& group_symbolizer_helper::get()
             }
             else
             {
-                using path_type = coord_transform<CoordTransform,geometry_type>;
+                using path_type = coord_transform<view_transform,geometry_type>;
                 path_type path(t_, *geom, prj_trans_);
                 find_line_placements(path);
             }

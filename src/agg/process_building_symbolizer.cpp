@@ -53,7 +53,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using path_type = coord_transform<CoordTransform,geometry_type>;
+    using path_type = coord_transform<view_transform,geometry_type>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
 

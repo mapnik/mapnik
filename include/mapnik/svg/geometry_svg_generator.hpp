@@ -49,7 +49,7 @@
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type
-using path_type = mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type>;
+using path_type = mapnik::coord_transform<mapnik::view_transform, mapnik::geometry_type>;
 
 template <>
 struct is_container<path_type const> : mpl::true_ {} ;

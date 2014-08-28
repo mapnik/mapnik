@@ -60,7 +60,7 @@ public:
                             unsigned width,
                             unsigned height,
                             double scale_factor,
-                            CoordTransform const &t,
+                            view_transform const &t,
                             DetectorType &detector,
                             box2d<double> const& query_extent);
 

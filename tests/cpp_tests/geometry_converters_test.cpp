@@ -56,7 +56,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     projection dst(MAPNIK_LONGLAT_PROJ);
     proj_transform prj_trans(src,dst);
     line_symbolizer sym;
-    CoordTransform t(bbox.width(),bbox.height(), bbox);
+    view_transform t(bbox.width(),bbox.height(), bbox);
     mapnik::geometry_container output_paths;
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::LineString);
 
@@ -64,7 +64,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::feature_impl f(ctx,0);
     vertex_converter<box2d<double>, output_geometry_backend, line_symbolizer,
-        CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(bbox, backend, sym, t, prj_trans, tr, f, attributes(), 1.0);
 
     converter.set<clip_line_tag>();
@@ -100,7 +100,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     projection dst(MAPNIK_LONGLAT_PROJ);
     proj_transform prj_trans(src,dst);
     polygon_symbolizer sym;
-    CoordTransform t(bbox.width(),bbox.height(), bbox);
+    view_transform t(bbox.width(),bbox.height(), bbox);
     mapnik::geometry_container output_paths;
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::Polygon);
 
@@ -108,7 +108,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::feature_impl f(ctx,0);
     vertex_converter<box2d<double>, output_geometry_backend, polygon_symbolizer,
-        CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+        view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(bbox, backend, sym, t, prj_trans, tr, f, attributes(), 1.0);
 
     converter.set<clip_poly_tag>();

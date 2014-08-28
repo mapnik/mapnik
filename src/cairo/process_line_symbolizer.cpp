@@ -85,7 +85,7 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
         clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)

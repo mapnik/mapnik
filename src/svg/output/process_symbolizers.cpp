@@ -74,7 +74,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-    using path_type = coord_transform<CoordTransform, geometry_type>;
+    using path_type = coord_transform<view_transform, geometry_type>;
 
     bool process_path = false;
     // process each symbolizer to collect its (path) information.

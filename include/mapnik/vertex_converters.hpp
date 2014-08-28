@@ -254,7 +254,7 @@ template <typename T>
 struct converter_traits<T,mapnik::transform_tag>
 {
     using geometry_type = T;
-    using conv_type = coord_transform<CoordTransform, geometry_type>;
+    using conv_type = coord_transform<view_transform, geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)

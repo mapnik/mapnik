@@ -58,7 +58,7 @@ struct placement_finder_adapter
 
 using conv_types = boost::mpl::vector<clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 using vertex_converter_type = vertex_converter<box2d<double>, placement_finder_adapter<placement_finder> , symbolizer_base,
-                                               CoordTransform, proj_transform, agg::trans_affine,
+                                               view_transform, proj_transform, agg::trans_affine,
                                                conv_types, feature_impl>;
 
 class base_symbolizer_helper
@@ -71,7 +71,7 @@ public:
                            unsigned width,
                            unsigned height,
                            double scale_factor,
-                           CoordTransform const& t,
+                           view_transform const& t,
                            box2d<double> const& query_extent);
 
 protected:
@@ -83,7 +83,7 @@ protected:
     feature_impl const& feature_;
     attributes const& vars_;
     proj_transform const& prj_trans_;
-    CoordTransform const& t_;
+    view_transform const& t_;
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     float scale_factor_;
@@ -119,7 +119,7 @@ public:
                            unsigned width,
                            unsigned height,
                            double scale_factor,
-                           CoordTransform const& t,
+                           view_transform const& t,
                            FaceManagerT & font_manager,
                            DetectorT & detector,
                            box2d<double> const& query_extent,
@@ -133,7 +133,7 @@ public:
                            unsigned width,
                            unsigned height,
                            double scale_factor,
-                           CoordTransform const& t,
+                           view_transform const& t,
                            FaceManagerT & font_manager,
                            DetectorT & detector,
                            box2d<double> const& query_extent,

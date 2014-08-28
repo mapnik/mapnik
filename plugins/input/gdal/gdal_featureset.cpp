@@ -43,7 +43,7 @@ using mapnik::query;
 using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
-using mapnik::CoordTransform;
+using mapnik::view_transform;
 using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
@@ -116,7 +116,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #endif
     */
 
-    CoordTransform t(raster_width_, raster_height_, raster_extent_, 0, 0);
+    view_transform t(raster_width_, raster_height_, raster_extent_, 0, 0);
     box2d<double> intersect = raster_extent_.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
 

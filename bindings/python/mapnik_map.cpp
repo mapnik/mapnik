@@ -345,7 +345,7 @@ void export_map()
              ">>> m.scale_denominator()\n"
             )
 
-        .def("view_transform",&Map::view_transform,
+        .def("view_transform",&Map::transform,
              "Return the map ViewTransform object\n"
              "which is used internally to convert between\n"
              "geographic coordinates and screen coordinates.\n"

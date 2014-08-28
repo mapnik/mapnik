@@ -130,7 +130,7 @@ private:
     proj_transform const* prj_trans_;
 };
 
-class CoordTransform
+class view_transform
 {
 private:
     const int width_;
@@ -143,7 +143,7 @@ private:
     int offset_;
 public:
 
-    CoordTransform(int width, int height, box2d<double> const& extent,
+    view_transform(int width, int height, box2d<double> const& extent,
                    double offset_x = 0.0, double offset_y = 0.0)
         : width_(width),
           height_(height),
@@ -154,7 +154,7 @@ public:
           offset_y_(offset_y),
           offset_(0) {}
 
-    CoordTransform(CoordTransform const&) = default;
+    view_transform(view_transform const&) = default;
 
     inline int offset() const
     {

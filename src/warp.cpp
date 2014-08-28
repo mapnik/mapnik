@@ -53,9 +53,9 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                                 unsigned mesh_size,
                                 scaling_method_e scaling_method)
 {
-    CoordTransform ts(source.data_.width(), source.data_.height(),
+    view_transform ts(source.data_.width(), source.data_.height(),
                       source.ext_);
-    CoordTransform tt(target.data_.width(), target.data_.height(),
+    view_transform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
 
     unsigned mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);

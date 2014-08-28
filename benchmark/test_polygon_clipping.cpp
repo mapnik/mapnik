@@ -34,14 +34,14 @@ void render(mapnik::geometry_type & geom,
             mapnik::box2d<double> const& extent,
             std::string const& name)
 {
-    using path_type = mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type>;
+    using path_type = mapnik::coord_transform<mapnik::view_transform,mapnik::geometry_type>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
     mapnik::image_32 im(256,256);
     im.set_background(mapnik::color("white"));
     mapnik::box2d<double> padded_extent = extent;
     padded_extent.pad(10);
-    mapnik::CoordTransform tr(im.width(),im.height(),padded_extent,0,0);
+    mapnik::view_transform tr(im.width(),im.height(),padded_extent,0,0);
     agg::rendering_buffer buf(im.raw_data(),im.width(),im.height(), im.width() * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
     ren_base renb(pixf);

@@ -82,7 +82,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                 if (image_width > 0 && image_height > 0)
                 {
-                    mapnik::CoordTransform t(image_width, image_height, extent_, 0, 0);
+                    mapnik::view_transform t(image_width, image_height, extent_, 0, 0);
                     box2d<double> intersect = bbox_.intersect(curIter_->envelope());
                     box2d<double> ext = t.forward(intersect);
                     box2d<double> rem = policy_.transform(ext);
@@ -95,14 +95,11 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                         int end_y = static_cast<int>(std::ceil(ext.maxy()));
 
                         // clip to available data
-                        if (x_off < 0)
-                            x_off = 0;
-                        if (y_off < 0)
-                            y_off = 0;
-                        if (end_x > image_width)
-                            end_x = image_width;
-                        if (end_y > image_height)
-                            end_y = image_height;
+                        if (x_off < 0) x_off = 0;
+                        if (y_off < 0) y_off = 0;
+                        if (end_x > image_width)  end_x = image_width;
+                        if (end_y > image_height) end_y = image_height;
+
                         int width = end_x - x_off;
                         int height = end_y - y_off;
 

@@ -612,9 +612,9 @@ double Map::scale_denominator() const
     return mapnik::scale_denominator( scale(), map_proj.is_geographic());
 }
 
-CoordTransform Map::view_transform() const
+view_transform Map::transform() const
 {
-    return CoordTransform(width_,height_,current_extent_);
+    return view_transform(width_,height_,current_extent_);
 }
 
 featureset_ptr Map::query_point(unsigned index, double x, double y) const
@@ -677,7 +677,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
 
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 {
-    CoordTransform tr = view_transform();
+    view_transform tr = transform();
     tr.backward(&x,&y);
     return query_point(index,x,y);
 }
