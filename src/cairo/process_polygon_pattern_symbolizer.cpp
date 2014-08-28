@@ -70,7 +70,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         if (feature.num_geometries() > 0)
         {
             using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
-            using path_type = coord_transform<view_transform,clipped_geometry_type>;
+            using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
             clipped_geometry_type clipped(feature.get_geometry(0));
             clipped.clip_box(clip_box.minx(), clip_box.miny(),
                              clip_box.maxx(), clip_box.maxy());

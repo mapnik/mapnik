@@ -37,6 +37,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
+
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -80,7 +81,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     if (!pat) return;
 
     using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
-    using path_type = coord_transform<view_transform,clipped_geometry_type>;
+    using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
 
     agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(),
                               current_buffer_->height(), current_buffer_->width() * 4);

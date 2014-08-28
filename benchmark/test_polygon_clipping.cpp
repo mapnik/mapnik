@@ -3,6 +3,7 @@
 #include "agg_conv_clip_polygon.h"
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
@@ -11,15 +12,13 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/fs.hpp>
-
+#include <mapnik/polygon_clipper.hpp>
+#include <mapnik/image_util.hpp>
 // agg
 #include "agg_conv_clip_polygon.h"
 // clipper
 #include "agg_conv_clipper.h"
 #include "agg_path_storage.h"
-// boost
-#include <mapnik/polygon_clipper.hpp>
-
 // rendering
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -27,14 +26,15 @@
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
-#include <mapnik/image_util.hpp>
+
+// stl
 #include <fstream>
 
 void render(mapnik::geometry_type & geom,
             mapnik::box2d<double> const& extent,
             std::string const& name)
 {
-    using path_type = mapnik::coord_transform<mapnik::view_transform,mapnik::geometry_type>;
+    using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
     mapnik::image_32 im(256,256);

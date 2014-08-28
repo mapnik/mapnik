@@ -29,6 +29,7 @@
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/expression.hpp>
@@ -57,7 +58,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-    using path_type = coord_transform<view_transform,geometry_type>;
+    using path_type = transform_path_adapter<view_transform,geometry_type>;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);

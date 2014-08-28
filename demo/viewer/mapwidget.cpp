@@ -27,9 +27,9 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/view_transform.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-//#include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/timer.hpp>
 
@@ -191,7 +191,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                 std::get<1>(*itr).to_string().c_str()));
                       }
 
-                      using path_type = mapnik::coord_transform<mapnik::view_transform,mapnik::geometry_type>;
+                      using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
