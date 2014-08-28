@@ -133,32 +133,28 @@ private:
 class CoordTransform
 {
 private:
-    int width_;
-    int height_;
-    box2d<double> extent_;
-    double offset_x_;
-    double offset_y_;
+    const int width_;
+    const int height_;
+    const box2d<double> extent_;
+    const double sx_;
+    const double sy_;
+    const double offset_x_;
+    const double offset_y_;
     int offset_;
-    double sx_;
-    double sy_;
-
 public:
-    CoordTransform(int width, int height, const box2d<double>& extent,
+
+    CoordTransform(int width, int height, box2d<double> const& extent,
                    double offset_x = 0.0, double offset_y = 0.0)
         : width_(width),
           height_(height),
           extent_(extent),
+          sx_(extent_.width() > 0 ? static_cast<double>(width_) / extent_.width() : 1.0),
+          sy_(extent_.height() > 0 ? static_cast<double>(height_) / extent_.height() : 1.0),
           offset_x_(offset_x),
           offset_y_(offset_y),
-          offset_(0),
-          sx_(1.0),
-          sy_(1.0)
-    {
-        if (extent_.width() > 0)
-            sx_ = static_cast<double>(width_) / extent_.width();
-        if (extent_.height() > 0)
-            sy_ = static_cast<double>(height_) / extent_.height();
-    }
+          offset_(0) {}
+
+    CoordTransform(CoordTransform const&) = default;
 
     inline int offset() const
     {
@@ -224,7 +220,7 @@ public:
         return c;
     }
 
-    inline box2d<double> forward(const box2d<double>& e,
+    inline box2d<double> forward(box2d<double> const& e,
                                  proj_transform const& prj_trans) const
     {
         double x0 = e.minx();
@@ -239,7 +235,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> forward(const box2d<double>& e) const
+    inline box2d<double> forward(box2d<double> const& e) const
     {
         double x0 = e.minx();
         double y0 = e.miny();
@@ -250,7 +246,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> backward(const box2d<double>& e,
+    inline box2d<double> backward(box2d<double> const& e,
                                   proj_transform const& prj_trans) const
     {
         double x0 = e.minx();
@@ -265,7 +261,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> backward(const box2d<double>& e) const
+    inline box2d<double> backward(box2d<double> const& e) const
     {
         double x0 = e.minx();
         double y0 = e.miny();
