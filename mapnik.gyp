@@ -78,10 +78,10 @@
         ["OS=='win'", {
 		   'defines': ['MAPNIK_EXPORTS'],
            'libraries':[
-              'libboost_filesystem-vc120-mt-1_56.lib',
-              'libboost_regex-vc120-mt-1_56.lib',
-              'libboost_thread-vc120-mt-1_56.lib',
-              'libboost_system-vc120-mt-1_56.lib',
+              'libboost_filesystem-vc140-mt-1_56.lib',
+              'libboost_regex-vc140-mt-1_56.lib',
+              'libboost_thread-vc140-mt-1_56.lib',
+              'libboost_system-vc140-mt-1_56.lib',
               'libpng16.lib',
               'proj.lib',
               'libtiff_i.lib',
@@ -153,8 +153,8 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'libboost_thread-vc120-mt-1_56.lib',
-                'libboost_system-vc120-mt-1_56.lib',
+                'libboost_thread-vc140-mt-1_56.lib',
+                'libboost_system-vc140-mt-1_56.lib',
                 'icuuc.lib'
             ],
           },{
@@ -174,8 +174,8 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'libboost_thread-vc120-mt-1_56.lib',
-                'libboost_system-vc120-mt-1_56.lib',
+                'libboost_thread-vc140-mt-1_56.lib',
+                'libboost_system-vc140-mt-1_56.lib',
                 'icuuc.lib'
             ],
           },{
@@ -204,8 +204,8 @@
             'libraries': [
                 'gdal_i.lib',
                 'libexpat.lib',
-                'libboost_thread-vc120-mt-1_56.lib',
-                'libboost_system-vc120-mt-1_56.lib',
+                'libboost_thread-vc140-mt-1_56.lib',
+                'libboost_system-vc140-mt-1_56.lib',
                 'icuuc.lib',
 				'odbccp32.lib'
             ]
@@ -225,8 +225,8 @@
             'libraries': [
                 'gdal_i.lib',
                 'libexpat.lib',
-                'libboost_thread-vc120-mt-1_56.lib',
-                'libboost_system-vc120-mt-1_56.lib',
+                'libboost_thread-vc140-mt-1_56.lib',
+                'libboost_system-vc140-mt-1_56.lib',
                 'icuuc.lib',
 				'odbccp32.lib'
             ]
@@ -420,7 +420,7 @@
            "conditions": [
              ["OS=='win'", {
                 'libraries':[
-                   'libboost_thread-vc120-mt-1_56.lib'
+                   'libboost_thread-vc140-mt-1_56.lib'
                ],
                'defines': ['MAPNIK_EXPORTS']
              },{
