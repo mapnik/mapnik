@@ -21,14 +21,15 @@ int main(int argc, char** argv)
     boost::optional<std::string> type;
     try
     {
+#if !defined(_MSC_VER)
         mapnik::image_data_32 im(256,256);
-        unsigned char* bytes = im.getBytes();
-        mapnik::image_data_32 * im_ptr = new mapnik::image_data_32(im.width(),im.height(),static_cast<mapnik::image_data_32::pixel_type *>(bytes));
-        unsigned char* same_bytes = im_ptr->getBytes();
-        BOOST_TEST(bytes == same_bytes);
+        mapnik::image_data_32::pixel_type * data = im.getData();
+        mapnik::image_data_32 * im_ptr = new mapnik::image_data_32(im.width(),im.height(),data);
+        mapnik::image_data_32::pixel_type * same_data = im_ptr->getData();
+        BOOST_TEST(data == same_data);
         delete im_ptr;
-        BOOST_TEST(bytes == same_bytes);
-
+        BOOST_TEST(data == same_data);
+#endif
         BOOST_TEST(set_working_dir(args));
 
 #if defined(HAVE_JPEG)
