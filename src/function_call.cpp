@@ -68,7 +68,6 @@ struct tan_impl
 // atan
 struct atan_impl
 {
-    static constexpr char const* name = "atan";
     value_type operator()(value_type const& val) const
     {
         return std::atan(val.to_double());
