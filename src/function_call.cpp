@@ -31,7 +31,6 @@ namespace mapnik {
 struct exp_impl
 {
     //using type = T;
-    static constexpr char const* name = "exp";
     value_type operator() (value_type const& val) const
     {
         return std::exp(val.to_double());
@@ -42,7 +41,6 @@ struct exp_impl
 // sin
 struct sin_impl
 {
-    static constexpr char const* name = "sin";
     value_type operator() (value_type const& val) const
     {
         return std::sin(val.to_double());
@@ -52,7 +50,6 @@ struct sin_impl
 // cos
 struct cos_impl
 {
-    static constexpr char const* name = "cos";
     value_type operator() (value_type const& val) const
     {
         return std::cos(val.to_double());
@@ -62,7 +59,6 @@ struct cos_impl
 // tan
 struct tan_impl
 {
-    static constexpr char const* name = "tan";
     value_type operator() (value_type const& val) const
     {
         return std::tan(val.to_double());
@@ -82,7 +78,6 @@ struct atan_impl
 // abs
 struct abs_impl
 {
-    static constexpr char const* name = "abs";
     value_type operator() (value_type const& val) const
     {
         return std::fabs(val.to_double());
