@@ -162,7 +162,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
     projection proj(m_.srs(),true);
     if (scale_denom <= 0.0)
         scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-    scale_denom *= p.scale_factor();
+    scale_denom *= p.scale_factor(); // FIXME - we might want to comment this out
 
     // Asynchronous query supports:
     // This is a two steps process,
@@ -293,7 +293,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     std::vector<std::string> const& style_names = lay.styles();
 
     unsigned int num_styles = style_names.size();
-    if (! num_styles)
+    if (num_styles == 0)
     {
         MAPNIK_LOG_DEBUG(feature_style_processor)
             << "feature_style_processor: No style for layer=" << lay.name();
@@ -301,7 +301,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     mapnik::datasource_ptr ds = lay.datasource();
-    if (! ds)
+    if (!ds)
     {
         MAPNIK_LOG_DEBUG(feature_style_processor)
             << "feature_style_processor: No datasource for layer=" << lay.name();

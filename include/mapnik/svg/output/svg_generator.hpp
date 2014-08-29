@@ -24,7 +24,7 @@
 #define MAPNIK_SVG_GENERATOR_HPP
 
 // mapnik
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/svg/geometry_svg_generator.hpp>

@@ -27,7 +27,8 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp> // for container stuff
-#include <mapnik/ctrans.hpp> // for container stuff
+#include <mapnik/view_transform.hpp> // for container stuff
+#include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/util/path_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
 
@@ -49,7 +50,7 @@
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type
-using path_type = mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type>;
+using path_type = mapnik::transform_path_adapter<mapnik::view_transform, mapnik::geometry_type>;
 
 template <>
 struct is_container<path_type const> : mpl::true_ {} ;

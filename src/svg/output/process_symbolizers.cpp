@@ -24,11 +24,13 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/svg/geometry_svg_generator_impl.hpp>
 #include <mapnik/svg/output/svg_output_grammars.hpp>
-#include <boost/spirit/include/karma.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
+// boost
+#include <boost/spirit/include/karma.hpp>
 
 namespace mapnik {
 
@@ -74,7 +76,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-    using path_type = coord_transform<CoordTransform, geometry_type>;
+    using path_type = transform_path_adapter<view_transform, geometry_type>;
 
     bool process_path = false;
     // process each symbolizer to collect its (path) information.

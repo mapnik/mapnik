@@ -92,7 +92,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     }
 
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clipping_extent,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform

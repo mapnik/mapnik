@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CTRANS_HPP
-#define MAPNIK_CTRANS_HPP
+#ifndef MAPNIK_VIEW_TRANSFORM_HPP
+#define MAPNIK_VIEW_TRANSFORM_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -36,129 +36,31 @@
 namespace mapnik
 {
 
-template <typename Transform, typename Geometry>
-struct MAPNIK_DECL coord_transform
-{
-    // SFINAE value_type detector
-    template <typename T>
-    struct void_type
-    {
-        using type = void;
-    };
-
-    template <typename T, typename D, typename _ = void>
-    struct select_value_type
-    {
-        using type = D;
-    };
-
-    template <typename T, typename D>
-    struct select_value_type<T, D, typename void_type<typename T::value_type>::type>
-    {
-        using type = typename T::value_type;
-    };
-
-    using size_type = std::size_t;
-    using value_type = typename select_value_type<Geometry, void>::type;
-
-    coord_transform(Transform const& t,
-                     Geometry & geom,
-                     proj_transform const& prj_trans)
-        : t_(&t),
-        geom_(geom),
-        prj_trans_(&prj_trans)  {}
-
-    explicit coord_transform(Geometry & geom)
-        : t_(0),
-        geom_(geom),
-        prj_trans_(0)  {}
-
-    void set_proj_trans(proj_transform const& prj_trans)
-    {
-        prj_trans_ = &prj_trans;
-    }
-
-    void set_trans(Transform  const& t)
-    {
-        t_ = &t;
-    }
-
-    unsigned vertex(double *x, double *y) const
-    {
-        unsigned command;
-        bool ok = false;
-        bool skipped_points = false;
-        while (!ok)
-        {
-            command = geom_.vertex(x,y);
-            if (command == SEG_END)
-            {
-                return command;
-            }
-            double z=0;
-            ok = prj_trans_->backward(*x, *y, z);
-            if (!ok) {
-                skipped_points = true;
-            }
-        }
-        if (skipped_points && (command == SEG_LINETO))
-        {
-            command = SEG_MOVETO;
-        }
-        t_->forward(x,y);
-        return command;
-    }
-
-    void rewind(unsigned pos) const
-    {
-        geom_.rewind(pos);
-    }
-
-    unsigned type() const
-    {
-        return static_cast<unsigned>(geom_.type());
-    }
-
-    Geometry const& geom() const
-    {
-        return geom_;
-    }
-
-private:
-    Transform const* t_;
-    Geometry & geom_;
-    proj_transform const* prj_trans_;
-};
-
-class CoordTransform
+class view_transform
 {
 private:
-    int width_;
-    int height_;
-    box2d<double> extent_;
-    double offset_x_;
-    double offset_y_;
+    const int width_;
+    const int height_;
+    const box2d<double> extent_;
+    const double sx_;
+    const double sy_;
+    const double offset_x_;
+    const double offset_y_;
     int offset_;
-    double sx_;
-    double sy_;
-
 public:
-    CoordTransform(int width, int height, const box2d<double>& extent,
+
+    view_transform(int width, int height, box2d<double> const& extent,
                    double offset_x = 0.0, double offset_y = 0.0)
         : width_(width),
           height_(height),
           extent_(extent),
+          sx_(extent_.width() > 0 ? static_cast<double>(width_) / extent_.width() : 1.0),
+          sy_(extent_.height() > 0 ? static_cast<double>(height_) / extent_.height() : 1.0),
           offset_x_(offset_x),
           offset_y_(offset_y),
-          offset_(0),
-          sx_(1.0),
-          sy_(1.0)
-    {
-        if (extent_.width() > 0)
-            sx_ = static_cast<double>(width_) / extent_.width();
-        if (extent_.height() > 0)
-            sy_ = static_cast<double>(height_) / extent_.height();
-    }
+          offset_(0) {}
+
+    view_transform(view_transform const&) = default;
 
     inline int offset() const
     {
@@ -224,7 +126,7 @@ public:
         return c;
     }
 
-    inline box2d<double> forward(const box2d<double>& e,
+    inline box2d<double> forward(box2d<double> const& e,
                                  proj_transform const& prj_trans) const
     {
         double x0 = e.minx();
@@ -239,7 +141,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> forward(const box2d<double>& e) const
+    inline box2d<double> forward(box2d<double> const& e) const
     {
         double x0 = e.minx();
         double y0 = e.miny();
@@ -250,7 +152,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> backward(const box2d<double>& e,
+    inline box2d<double> backward(box2d<double> const& e,
                                   proj_transform const& prj_trans) const
     {
         double x0 = e.minx();
@@ -265,7 +167,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> backward(const box2d<double>& e) const
+    inline box2d<double> backward(box2d<double> const& e) const
     {
         double x0 = e.minx();
         double y0 = e.miny();
@@ -283,4 +185,4 @@ public:
 };
 }
 
-#endif // MAPNIK_CTRANS_HPP
+#endif // MAPNIK_VIEW_TRANSFORM_HPP

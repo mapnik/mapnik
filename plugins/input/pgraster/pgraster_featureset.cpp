@@ -35,7 +35,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>

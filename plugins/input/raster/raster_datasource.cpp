@@ -25,7 +25,7 @@
 // mapnik
 #include <mapnik/util/fs.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/boolean.hpp>
@@ -173,7 +173,7 @@ layer_descriptor raster_datasource::get_descriptor() const
 
 featureset_ptr raster_datasource::features(query const& q) const
 {
-    mapnik::CoordTransform t(width_, height_, extent_, 0, 0);
+    mapnik::view_transform t(width_, height_, extent_, 0, 0);
     mapnik::box2d<double> intersect = extent_.intersect(q.get_bbox());
     mapnik::box2d<double> ext = t.forward(intersect);
 

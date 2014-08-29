@@ -99,7 +99,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              renderer_context);
 
                     vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
-                                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
                         converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
@@ -138,7 +138,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              renderer_context);
 
                     vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
-                                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
                         converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
@@ -176,7 +176,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                          renderer_context);
 
                 vertex_converter<box2d<double>, raster_dispatch_type, markers_symbolizer,
-                                 CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                                 view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
                     converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)

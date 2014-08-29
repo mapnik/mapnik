@@ -478,20 +478,20 @@ struct extract_raw_value : public util::static_visitor<T1>
 };
 
 template <typename T>
-MAPNIK_DECL void put(symbolizer_base & sym, keys key, T const& val)
+void put(symbolizer_base & sym, keys key, T const& val)
 {
     constexpr bool enum_ = std::is_enum<T>::value;
     detail::put_impl<T, enum_ >::apply(sym, key, val);
 }
 
 template <typename T>
-MAPNIK_DECL bool has_key(symbolizer_base const& sym, keys key)
+bool has_key(symbolizer_base const& sym, keys key)
 {
     return (sym.properties.count(key) == 1);
 }
 
 template <typename T>
-MAPNIK_DECL T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
+T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -503,7 +503,7 @@ MAPNIK_DECL T get(symbolizer_base const& sym, keys key, mapnik::feature_impl con
 }
 
 template <typename T>
-MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
+boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -515,7 +515,7 @@ MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key
 }
 
 template <typename T>
-MAPNIK_DECL T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
+T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -527,7 +527,7 @@ MAPNIK_DECL T get(symbolizer_base const& sym, keys key, T const& _default_value 
 }
 
 template <typename T>
-MAPNIK_DECL boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
+boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);

@@ -30,7 +30,7 @@ namespace mapnik {
 
 renderer_common::renderer_common(unsigned width, unsigned height, double scale_factor,
                                  attributes const& vars,
-                                 CoordTransform && t,
+                                 view_transform && t,
                                  std::shared_ptr<label_collision_detector4> detector)
    : width_(width),
      height_(height),
@@ -48,9 +48,9 @@ renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned 
                                  unsigned width, unsigned height, double scale_factor)
    : renderer_common(width, height, scale_factor,
                      vars,
-                     CoordTransform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
+                     view_transform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
                      std::make_shared<label_collision_detector4>(
-                        box2d<double>(-m.buffer_size(), -m.buffer_size(), 
+                        box2d<double>(-m.buffer_size(), -m.buffer_size(),
                                       m.width() + m.buffer_size() ,m.height() + m.buffer_size())))
 {}
 
@@ -59,7 +59,7 @@ renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned 
                                  std::shared_ptr<label_collision_detector4> detector)
    : renderer_common(width, height, scale_factor,
                      vars,
-                     CoordTransform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
+                     view_transform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
                      detector)
 {}
 
@@ -67,9 +67,9 @@ renderer_common::renderer_common(request const &req, attributes const& vars, uns
                                  unsigned width, unsigned height, double scale_factor)
    : renderer_common(width, height, scale_factor,
                      vars,
-                     CoordTransform(req.width(),req.height(),req.extent(),offset_x,offset_y),
+                     view_transform(req.width(),req.height(),req.extent(),offset_x,offset_y),
                      std::make_shared<label_collision_detector4>(
-                        box2d<double>(-req.buffer_size(), -req.buffer_size(), 
+                        box2d<double>(-req.buffer_size(), -req.buffer_size(),
                                       req.width() + req.buffer_size() ,req.height() + req.buffer_size())))
 {}
 

@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
 
@@ -41,7 +42,7 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using path_type = coord_transform<CoordTransform,geometry_type>;
+    using path_type = transform_path_adapter<view_transform,geometry_type>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     mapnik::color fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
