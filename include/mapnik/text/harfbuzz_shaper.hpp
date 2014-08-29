@@ -76,7 +76,7 @@ static void shape_text(text_line & line,
         {
             ++pos;
             hb_buffer_clear_contents(buffer.get());
-            hb_buffer_add_utf16(buffer.get(), text.getBuffer(), text.length(), text_item.start, text_item.end - text_item.start);
+            hb_buffer_add_utf16(buffer.get(), reinterpret_cast<const uint16_t *>(text.getBuffer()), text.length(), text_item.start, text_item.end - text_item.start);
             hb_buffer_set_direction(buffer.get(), (text_item.rtl == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
