@@ -275,10 +275,6 @@ msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
 :: /v:diag > build.log
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-:: run tests
-SET PATH=%CD%\..\mapnik-sdk\libs;%PATH%
-for %%t in (build\Release\*test.exe) do ( %%t -d %CD% )
-
 :: install mapnik libs
 xcopy /i /d /s /q .\build\Release\mapnik.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -298,6 +294,9 @@ xcopy /i /d /s /q .\deps\clipper\include ..\mapnik-sdk\includes\mapnik\agg /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q .\include\mapnik ..\mapnik-sdk\includes\mapnik /Y
 
+:: run tests
+SET PATH=%CD%\..\mapnik-sdk\libs;%PATH%
+::for %%t in (build\Release\*test.exe) do ( %%t -d %CD% )
 
 GOTO DONE
 
