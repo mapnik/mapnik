@@ -122,7 +122,7 @@ if /i "%1"=="--libs" (
 
 @rem TODO - figure out how to avoid hardcoding these library names
 if /i "%1"=="--dep-libs" (
-  echo libpng16.lib zlib.lib libwebp_dll.lib libjpeg.lib icuuc.lib icuin.lib cairo.lib libboost_system-vc120-mt-1_56.lib libxml2_a.lib ws2_32.lib
+  echo libpng16.lib zlib.lib harfbuzz.lib libwebp_dll.lib libjpeg.lib icuuc.lib icuin.lib cairo.lib libboost_system-vc120-mt-1_56.lib libxml2_a.lib ws2_32.lib
   set hit="yes"
 )
 
