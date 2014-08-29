@@ -538,12 +538,6 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     return boost::optional<T>();
 }
 
-template<typename Enum>
-auto to_integral(Enum e) -> typename std::underlying_type<Enum>::type
-{
-    return static_cast<typename std::underlying_type<Enum>::type>(e);
-}
-
 using property_meta_type = std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types>;
 MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
 MAPNIK_DECL mapnik::keys get_key(std::string const& name);
