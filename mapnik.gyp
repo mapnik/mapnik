@@ -31,7 +31,7 @@
     ],
     "conditions": [
       ["OS=='win'", {
-          'common_defines': ['LIBXML_STATIC','BOOST_LIB_TOOLSET=vc140','BOOST_COMPILER=14.0'], # static libxml: libxml2_a.lib
+          'common_defines': ['LIBXML_STATIC','BOOST_LIB_TOOLSET="vc140"','BOOST_COMPILER="14.0"'], # static libxml: libxml2_a.lib
           'common_libraries': []
       }, {
           'common_defines': ['SHAPE_MEMORY_MAPPED_FILE','U_CHARSET_IS_UTF8=1'],
