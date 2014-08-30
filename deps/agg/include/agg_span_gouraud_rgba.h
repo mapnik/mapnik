@@ -163,7 +163,7 @@ namespace agg
             // Get the horizontal length with subpixel accuracy
             // and protect it from division by zero
             //-------------------------
-            int nlen = abs(pc2->m_x - pc1->m_x);
+            int nlen = std::abs(pc2->m_x - pc1->m_x);
             if(nlen <= 0) nlen = 1;
 
             dda_line_interpolator<14> r(pc1->m_r, pc2->m_r, nlen);

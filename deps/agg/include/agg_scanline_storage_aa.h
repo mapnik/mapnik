@@ -312,7 +312,7 @@ namespace agg
 
                 sp.x         = span_iterator->x;
                 sp.len       = span_iterator->len;
-                int len      = abs(int(sp.len));
+                int len      = std::abs(int(sp.len));
                 sp.covers_id = 
                     m_covers.add_cells(span_iterator->covers, 
                                        unsigned(len));

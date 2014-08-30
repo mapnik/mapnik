@@ -29,7 +29,7 @@ namespace agg
 // This epsilon is used to prevent us from adding degenerate curves
 // (converging to a single point).
 // The value isn't very critical. Function arc_to_bezier() has a limit
-// of the sweep_angle. If fabs(sweep_angle) exceeds pi/2 the curve
+// of the sweep_angle. If std::fabs(sweep_angle) exceeds pi/2 the curve
 // becomes inaccurate. But slight exceeding is quite appropriate.
 //-------------------------------------------------bezier_arc_angle_epsilon
 const double bezier_arc_angle_epsilon = 0.01;
@@ -39,8 +39,8 @@ void arc_to_bezier(double cx, double cy, double rx, double ry,
                    double start_angle, double sweep_angle,
                    double* curve)
 {
-    double x0 = cos(sweep_angle / 2.0);
-    double y0 = sin(sweep_angle / 2.0);
+    double x0 = std::cos(sweep_angle / 2.0);
+    double y0 = std::sin(sweep_angle / 2.0);
     double tx = (1.0 - x0) * 4.0 / 3.0;
     double ty = y0 - tx * x0 / y0;
     double px[4];
@@ -54,8 +54,8 @@ void arc_to_bezier(double cx, double cy, double rx, double ry,
     px[3] =  x0;
     py[3] =  y0;
 
-    double sn = sin(start_angle + sweep_angle / 2.0);
-    double cs = cos(start_angle + sweep_angle / 2.0);
+    double sn = std::sin(start_angle + sweep_angle / 2.0);
+    double cs = std::cos(start_angle + sweep_angle / 2.0);
 
     unsigned i;
     for(i = 0; i < 4; i++)
@@ -77,14 +77,14 @@ void bezier_arc::init(double x,  double y,
     if(sweep_angle >=  2.0 * pi) sweep_angle =  2.0 * pi;
     if(sweep_angle <= -2.0 * pi) sweep_angle = -2.0 * pi;
 
-    if(fabs(sweep_angle) < 1e-10)
+    if(std::fabs(sweep_angle) < 1e-10)
     {
         m_num_vertices = 4;
         m_cmd = path_cmd_line_to;
-        m_vertices[0] = x + rx * cos(start_angle);
-        m_vertices[1] = y + ry * sin(start_angle);
-        m_vertices[2] = x + rx * cos(start_angle + sweep_angle);
-        m_vertices[3] = y + ry * sin(start_angle + sweep_angle);
+        m_vertices[0] = x + rx * std::cos(start_angle);
+        m_vertices[1] = y + ry * std::sin(start_angle);
+        m_vertices[2] = x + rx * std::cos(start_angle + sweep_angle);
+        m_vertices[3] = y + ry * std::sin(start_angle + sweep_angle);
         return;
     }
 
@@ -152,8 +152,8 @@ void bezier_arc_svg::init(double x0, double y0,
     double dx2 = (x0 - x2) / 2.0;
     double dy2 = (y0 - y2) / 2.0;
 
-    double cos_a = cos(angle);
-    double sin_a = sin(angle);
+    double cos_a = std::cos(angle);
+    double sin_a = std::sin(angle);
 
     // Calculate (x1, y1)
     //------------------------
@@ -211,7 +211,7 @@ void bezier_arc_svg::init(double x0, double y0,
     double v = p / n;
     if(v < -1.0) v = -1.0;
     if(v >  1.0) v =  1.0;
-    double start_angle = sign * acos(v);
+    double start_angle = sign * std::acos(v);
 
     // Calculate the sweep angle
     //------------------------
@@ -221,7 +221,7 @@ void bezier_arc_svg::init(double x0, double y0,
     v = p / n;
     if(v < -1.0) v = -1.0;
     if(v >  1.0) v =  1.0;
-    double sweep_angle = sign * acos(v);
+    double sweep_angle = sign * std::acos(v);
     if(!sweep_flag && sweep_angle > 0)
     {
         sweep_angle -= pi * 2.0;

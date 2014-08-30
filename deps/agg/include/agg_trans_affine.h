@@ -335,8 +335,8 @@ namespace agg
     //------------------------------------------------------------------------
     inline const trans_affine& trans_affine::rotate(double a)
     {
-        double ca = cos(a);
-        double sa = sin(a);
+        double ca = std::cos(a);
+        double sa = std::sin(a);
         double t0 = sx  * ca - shy * sa;
         double t2 = shx * ca - sy * sa;
         double t4 = tx  * ca - ty * sa;
@@ -410,15 +410,15 @@ namespace agg
     }
 
     //====================================================trans_affine_rotation
-    // Rotation matrix. sin() and cos() are calculated twice for the same angle.
-    // There's no harm because the performance of sin()/cos() is very good on all
+    // Rotation matrix. std::sin() and std::cos() are calculated twice for the same angle.
+    // There's no harm because the performance of std::sin()/cos() is very good on all
     // modern processors. Besides, this operation is not going to be invoked too
     // often.
     class trans_affine_rotation : public trans_affine
     {
     public:
         trans_affine_rotation(double a) :
-          trans_affine(cos(a), sin(a), -sin(a), cos(a), 0.0, 0.0)
+          trans_affine(std::cos(a), std::sin(a), -std::sin(a), std::cos(a), 0.0, 0.0)
         {}
     };
 
@@ -452,7 +452,7 @@ namespace agg
     {
     public:
         trans_affine_skewing(double x, double y) :
-          trans_affine(1.0, tan(y), tan(x), 1.0, 0.0, 0.0)
+          trans_affine(1.0, std::tan(y), std::tan(x), 1.0, 0.0, 0.0)
         {}
     };
 
@@ -472,7 +472,7 @@ namespace agg
             {
                 multiply(trans_affine_scaling(sqrt(dx * dx + dy * dy) / dist));
             }
-            multiply(trans_affine_rotation(atan2(dy, dx)));
+            multiply(trans_affine_rotation(std::atan2(dy, dx)));
             multiply(trans_affine_translation(x1, y1));
         }
     };
@@ -503,7 +503,7 @@ namespace agg
     {
     public:
         trans_affine_reflection(double a) :
-          trans_affine_reflection_unit(cos(a), sin(a))
+          trans_affine_reflection_unit(std::cos(a), std::sin(a))
         {}
 
 

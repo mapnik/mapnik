@@ -488,8 +488,8 @@ namespace agg
             m_lp(lp),
             m_li(lp.vertical ? line_dbl_hr(lp.x2 - lp.x1) :
                                line_dbl_hr(lp.y2 - lp.y1),
-                 lp.vertical ? abs(lp.y2 - lp.y1) : 
-                               abs(lp.x2 - lp.x1) + 1),
+                 lp.vertical ? std::abs(lp.y2 - lp.y1) : 
+                               std::abs(lp.x2 - lp.x1) + 1),
             m_di(lp.x1, lp.y1, lp.x2, lp.y2, sx, sy, ex, ey, lp.len, scale_x,
                  lp.x1 & ~line_subpixel_mask, lp.y1 & ~line_subpixel_mask),
             m_ren(ren),
@@ -497,8 +497,8 @@ namespace agg
             m_y(lp.y1 >> line_subpixel_shift),
             m_old_x(m_x),
             m_old_y(m_y),
-            m_count((lp.vertical ? abs((lp.y2 >> line_subpixel_shift) - m_y) :
-                                   abs((lp.x2 >> line_subpixel_shift) - m_x))),
+            m_count((lp.vertical ? std::abs((lp.y2 >> line_subpixel_shift) - m_y) :
+                                   std::abs((lp.x2 >> line_subpixel_shift) - m_x))),
             m_width(ren.subpixel_width()),
             //m_max_extent(m_width >> (line_subpixel_shift - 2)),
             m_max_extent((m_width + line_subpixel_scale) >> line_subpixel_shift),
@@ -959,7 +959,7 @@ namespace agg
                         }
                         else
                         {
-                            while(abs(sx - lp.x1) + abs(sy - lp.y1) > 1 + lp2.len)
+                            while(std::abs(sx - lp.x1) + std::abs(sy - lp.y1) > 1 + lp2.len)
                             {
                                 sx = (lp.x1 + sx) >> 1;
                                 sy = (lp.y1 + sy) >> 1;
@@ -972,7 +972,7 @@ namespace agg
                         }
                         else
                         {
-                            while(abs(ex - lp.x2) + abs(ey - lp.y2) > 1 + lp2.len)
+                            while(std::abs(ex - lp.x2) + std::abs(ey - lp.y2) > 1 + lp2.len)
                             {
                                 ex = (lp.x2 + ex) >> 1;
                                 ey = (lp.y2 + ey) >> 1;

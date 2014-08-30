@@ -147,11 +147,11 @@ namespace agg
 #pragma warning(pop)
     AGG_INLINE unsigned ufloor(double v)         //-------ufloor
     {
-        return unsigned(floor(v));
+        return unsigned(std::floor(v));
     }
     AGG_INLINE unsigned uceil(double v)          //--------uceil
     {
-        return unsigned(ceil(v));
+        return unsigned(std::ceil(v));
     }
 #elif defined(AGG_QIFIST)
     AGG_INLINE int iround(double v)
@@ -164,11 +164,11 @@ namespace agg
     }
     AGG_INLINE unsigned ufloor(double v)
     {
-        return unsigned(floor(v));
+        return unsigned(std::floor(v));
     }
     AGG_INLINE unsigned uceil(double v)
     {
-        return unsigned(ceil(v));
+        return unsigned(std::ceil(v));
     }
 #else
     AGG_INLINE int iround(double v)
@@ -185,7 +185,7 @@ namespace agg
     }
     AGG_INLINE unsigned uceil(double v)
     {
-        return unsigned(ceil(v));
+        return unsigned(std::ceil(v));
     }
 #endif
 
@@ -522,7 +522,7 @@ namespace agg
     //------------------------------------------------------------is_equal_eps
     template<class T> inline bool is_equal_eps(T v1, T v2, T epsilon)
     {
-        return fabs(v1 - v2) <= double(epsilon);
+        return std::fabs(v1 - v2) <= double(epsilon);
     }
 
 }

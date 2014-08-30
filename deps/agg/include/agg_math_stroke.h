@@ -160,7 +160,7 @@ namespace agg
     //-----------------------------------------------------------------------
     template<class VC> void math_stroke<VC>::miter_limit_theta(double t)
     { 
-        m_miter_limit = 1.0 / sin(t * 0.5) ;
+        m_miter_limit = 1.0 / std::sin(t * 0.5) ;
     }
 
     //-----------------------------------------------------------------------
@@ -170,12 +170,12 @@ namespace agg
                                    double dx1, double dy1, 
                                    double dx2, double dy2)
     {
-        double a1 = atan2(dy1 * m_width_sign, dx1 * m_width_sign);
-        double a2 = atan2(dy2 * m_width_sign, dx2 * m_width_sign);
+        double a1 = std::atan2(dy1 * m_width_sign, dx1 * m_width_sign);
+        double a2 = std::atan2(dy2 * m_width_sign, dx2 * m_width_sign);
         double da = a1 - a2;
         int i, n;
 
-        da = acos(m_width_abs / (m_width_abs + 0.125 / m_approx_scale)) * 2;
+        da = std::acos(m_width_abs / (m_width_abs + 0.125 / m_approx_scale)) * 2;
 
         add_vertex(vc, x + dx1, y + dy1);
         if(m_width_sign > 0)
@@ -186,7 +186,7 @@ namespace agg
             a1 += da;
             for(i = 0; i < n; i++)
             {
-                add_vertex(vc, x + cos(a1) * m_width, y + sin(a1) * m_width);
+                add_vertex(vc, x + std::cos(a1) * m_width, y + std::sin(a1) * m_width);
                 a1 += da;
             }
         }
@@ -198,7 +198,7 @@ namespace agg
             a1 -= da;
             for(i = 0; i < n; i++)
             {
-                add_vertex(vc, x + cos(a1) * m_width, y + sin(a1) * m_width);
+                add_vertex(vc, x + std::cos(a1) * m_width, y + std::sin(a1) * m_width);
                 a1 -= da;
             }
         }
@@ -341,7 +341,7 @@ namespace agg
         }
         else
         {
-            double da = acos(m_width_abs / (m_width_abs + 0.125 / m_approx_scale)) * 2;
+            double da = std::acos(m_width_abs / (m_width_abs + 0.125 / m_approx_scale)) * 2;
             double a1;
             int i;
             int n = int(pi / da);
@@ -350,23 +350,23 @@ namespace agg
             add_vertex(vc, v0.x - dx1, v0.y + dy1);
             if(m_width_sign > 0)
             {
-                a1 = atan2(dy1, -dx1);
+                a1 = std::atan2(dy1, -dx1);
                 a1 += da;
                 for(i = 0; i < n; i++)
                 {
-                    add_vertex(vc, v0.x + cos(a1) * m_width, 
-                                   v0.y + sin(a1) * m_width);
+                    add_vertex(vc, v0.x + std::cos(a1) * m_width, 
+                                   v0.y + std::sin(a1) * m_width);
                     a1 += da;
                 }
             }
             else
             {
-                a1 = atan2(-dy1, dx1);
+                a1 = std::atan2(-dy1, dx1);
                 a1 -= da;
                 for(i = 0; i < n; i++)
                 {
-                    add_vertex(vc, v0.x + cos(a1) * m_width, 
-                                   v0.y + sin(a1) * m_width);
+                    add_vertex(vc, v0.x + std::cos(a1) * m_width, 
+                                   v0.y + std::sin(a1) * m_width);
                     a1 -= da;
                 }
             }
