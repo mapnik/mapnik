@@ -293,10 +293,13 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q .\deps\clipper\include ..\mapnik-sdk\includes\mapnik\agg /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q .\include\mapnik ..\mapnik-sdk\includes\mapnik /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: run tests
 SET PATH=%CD%\..\mapnik-sdk\libs;%PATH%
-::for %%t in (build\Release\*test.exe) do ( %%t -d %CD% )
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+for %%t in (build\Release\*test.exe) do ( call %%t -d %CD% )
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 GOTO DONE
 
@@ -305,5 +308,6 @@ echo ----------ERROR MAPNIK --------------
 echo ERRORLEVEL %ERRORLEVEL%
 
 :DONE
+echo DONE building Mapnik
 
 EXIT /b %ERRORLEVEL%
