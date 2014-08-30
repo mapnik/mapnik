@@ -31,7 +31,7 @@
     ],
     "conditions": [
       ["OS=='win'", {
-          'common_defines': ['LIBXML_STATIC'], # static libxml: libxml2_a.lib
+          'common_defines': ['LIBXML_STATIC','BOOST_LIB_TOOLSET=vc140','BOOST_COMPILER=14.0'], # static libxml: libxml2_a.lib
           'common_libraries': []
       }, {
           'common_defines': ['SHAPE_MEMORY_MAPPED_FILE','U_CHARSET_IS_UTF8=1'],
@@ -251,16 +251,8 @@
                 'secur32.lib',
                 'icuuc.lib',
                 'ws2_32.lib',
-            ],
-            # TODO - ideally we find a way to avoid this
-            # currently needed to dodge double-linking
-            'msvs_settings': {
-              'VCLinkerTool': {
-                'AdditionalOptions': [
-                    '/NODEFAULTLIB:libcmt.lib'
-                ],
-              }
-            }
+				'libboost_regex-vc140-mt-1_56.lib'
+            ]
           } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
           }]
@@ -282,16 +274,7 @@
                 'secur32.lib',
                 'icuuc.lib',
                 'ws2_32.lib',
-            ],
-            # TODO - ideally we find a way to avoid this
-            # currently needed to dodge double-linking
-            'msvs_settings': {
-              'VCLinkerTool': {
-                'AdditionalOptions': [
-                    '/NODEFAULTLIB:libcmt.lib'
-                ],
-              }
-            }
+            ]
           } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
           }]
@@ -315,20 +298,6 @@
         ]
     },
     {
-        "target_name": "geojson",
-        "type": "loadable_module",
-        "product_extension": "input",
-        "sources": [ '<!@(find plugins/input/geojson/ -name "*.cpp")' ],
-        "dependencies": [ "mapnik" ],
-        'conditions': [
-          ['OS=="win"', {
-            'libraries': [
-                'icuuc.lib',
-            ]
-          }]
-        ]
-    },
-    {
         "target_name": "agg_blend_src_over_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/agg_blend_src_over_test.cpp"],
@@ -338,7 +307,15 @@
         "target_name": "clipping_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/clipping_test.cpp"],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+ 	    "conditions": [
+		  ["OS=='win'", {
+		 	'libraries':[
+		 	   'libboost_filesystem-vc140-mt-1_56.lib',
+			   'libboost_system-vc140-mt-1_56'
+		    ],
+		  }]
+	    ]
     },
     {
         "target_name": "conversions_test",
@@ -350,14 +327,30 @@
         "target_name": "exceptions_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/exceptions_test.cpp"],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+ 	    "conditions": [
+		  ["OS=='win'", {
+		 	'libraries':[
+		 	   'libboost_filesystem-vc140-mt-1_56.lib',
+			   'libboost_system-vc140-mt-1_56'
+		    ],
+		  }]
+	    ]
     },
     {
         "target_name": "font_registration_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/font_registration_test.cpp"],
-        "dependencies": [ "mapnik" ]
-    },
+        "dependencies": [ "mapnik" ],
+ 	    "conditions": [
+		  ["OS=='win'", {
+		 	'libraries':[
+		 	   'libboost_filesystem-vc140-mt-1_56.lib',
+			   'libboost_system-vc140-mt-1_56'
+		    ],
+		  }]
+	    ]
+	},
     {
         "target_name": "fontset_runtime_test",
         "type": "executable",
@@ -366,7 +359,9 @@
         "conditions": [
           ["OS=='win'", {
              'libraries':[
-                'icuuc.lib'
+                'icuuc.lib',
+		 	   'libboost_filesystem-vc140-mt-1_56.lib',
+			   'libboost_system-vc140-mt-1_56'
             ],
           }]
         ]
@@ -375,13 +370,29 @@
         "target_name": "geometry_converters_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/geometry_converters_test.cpp"],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+ 	    "conditions": [
+		  ["OS=='win'", {
+		 	'libraries':[
+		 	   'libboost_filesystem-vc140-mt-1_56.lib',
+			   'libboost_system-vc140-mt-1_56'
+		    ],
+		  }]
+	    ]
     },
     {
         "target_name": "image_io_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/image_io_test.cpp"],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+ 	    "conditions": [
+		  ["OS=='win'", {
+		 	'libraries':[
+		 	   'libboost_filesystem-vc140-mt-1_56.lib',
+			   'libboost_system-vc140-mt-1_56'
+		    ],
+		  }]
+	    ]
     },
     {
         "target_name": "label_algo_test",
@@ -393,7 +404,14 @@
         "target_name": "map_request_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/map_request_test.cpp"],
-        "dependencies": [ "mapnik" ]
+        "dependencies": [ "mapnik" ],
+ 	    "conditions": [
+		  ["OS=='win'", {
+		 	'libraries':[
+		 	   'libboost_system-vc140-mt-1_56.lib'
+		    ],
+		  }]
+	    ]
     },
     {
         "target_name": "params_test",
@@ -407,11 +425,6 @@
         "sources": [ "./tests/cpp_tests/wkb_formats_test.cpp"],
         "dependencies": [ "mapnik" ]
     },
-  ],
-  'conditions': [
-    # won't link yet on windows
-    ["OS!='win'", {
-       'targets': [
        {
            "target_name": "test_rendering",
            "type": "executable",
@@ -420,9 +433,9 @@
            "conditions": [
              ["OS=='win'", {
                 'libraries':[
-                   'libboost_thread-vc140-mt-1_56.lib'
-               ],
-               'defines': ['MAPNIK_EXPORTS']
+                   'libboost_thread-vc140-mt-1_56.lib',
+				   'libboost_system-vc140-mt-1_56'
+               ]
              },{
                  'libraries':[
                    '-lboost_thread'
@@ -430,7 +443,27 @@
                }
              ]
            ]
-       }
+       },
+
+  ],
+  'conditions': [
+    # won't link yet on windows
+    ["OS!='win'", {
+       'targets': [
+    {
+        "target_name": "geojson",
+        "type": "loadable_module",
+        "product_extension": "input",
+        "sources": [ '<!@(find plugins/input/geojson/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'conditions': [
+          ['OS=="win"', {
+            'libraries': [
+                'icuuc.lib',
+            ]
+          }]
+        ]
+    },
     ]}
     ]
   ]
