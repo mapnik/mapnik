@@ -189,7 +189,6 @@ private:
     unsigned height_;
     bool owns_data_;
     T *pData_;
-    ImageData& operator=(ImageData const&);
 };
 
 using image_data_32 = ImageData<unsigned>;

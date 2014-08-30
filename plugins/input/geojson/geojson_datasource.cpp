@@ -29,7 +29,6 @@
 // boost
 
 #include <boost/algorithm/string.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
 
 // mapnik
 #include <mapnik/unicode.hpp>
@@ -49,7 +48,6 @@
 #include <mapnik/json/geometry_grammar_impl.hpp>
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -127,43 +125,41 @@ geojson_datasource::geojson_datasource(parameters const& params)
     }
     if (!inline_string_.empty())
     {
-        std::istringstream in(inline_string_);
-        parse_geojson(in);
+        parse_geojson(inline_string_);
     }
     else
     {
-#if defined (_WINDOWS)
-        std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
+#ifdef _WINDOWS
+        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(filename_).c_str(), L"rb"), fclose);
 #else
-        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(filename_.c_str(),"rb"), std::fclose);
 #endif
-        if (!in.is_open())
+        if (file == nullptr)
         {
             throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
-        parse_geojson(in);
-        in.close();
+        std::fseek(file.get(), 0, SEEK_END);
+        std::size_t file_size = std::ftell(file.get());
+        std::fseek(file.get(), 0, SEEK_SET);
+        std::string file_buffer;
+        file_buffer.resize(file_size);
+        std::fread(&file_buffer[0], file_size, 1, file.get());
+        parse_geojson(file_buffer);
     }
 }
 
 namespace {
-using base_iterator_type = std::istreambuf_iterator<char>;
+using base_iterator_type = std::string::const_iterator;
 const mapnik::transcoder tr("utf8");
-const mapnik::json::feature_collection_grammar<boost::spirit::multi_pass<base_iterator_type>,mapnik::feature_impl> fc_grammar(tr);
+const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> fc_grammar(tr);
 }
 
 template <typename T>
-void geojson_datasource::parse_geojson(T & stream)
+void geojson_datasource::parse_geojson(T const& buffer)
 {
-    boost::spirit::multi_pass<base_iterator_type> begin =
-        boost::spirit::make_default_multi_pass(base_iterator_type(stream));
-
-    boost::spirit::multi_pass<base_iterator_type> end =
-        boost::spirit::make_default_multi_pass(base_iterator_type());
-
     boost::spirit::standard_wide::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    bool result = boost::spirit::qi::phrase_parse(begin, end, (fc_grammar)(boost::phoenix::ref(ctx)), space, features_);
+    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)(boost::phoenix::ref(ctx)), space, features_);
     if (!result)
     {
         if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
