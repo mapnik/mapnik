@@ -5,13 +5,13 @@
 #include <vector>
 #include <algorithm>
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER < 1900
 #include <cstdio>
 #endif
 
 int main(int argc, char** argv)
 {
-    #if defined(_MSC_VER)
+    #if defined(_MSC_VER) && _MSC_VER < 1900
     unsigned int old = _set_output_format(_TWO_DIGIT_EXPONENT);
     #endif
     std::vector<std::string> args;
