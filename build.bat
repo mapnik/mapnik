@@ -281,6 +281,9 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q .\build\Release\mapnik.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+xcopy /i /d /s /q .\fonts\dejavu-fonts-ttf-2.33\ttf\*ttf ..\mapnik-sdk\libs\mapnik\fonts\ /Y
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
 :: move python binding into local testable location
 xcopy /i /d /s /q .\build\Release\_mapnik.pyd bindings\python\mapnik\ /Y
 echo from os.path import normpath,join,dirname > bindings\python\mapnik\paths.py
