@@ -62,20 +62,15 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
 
 feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 {
-    swap(*this, rhs);
-    return *this;
-}
-
-void swap( feature_type_style & lhs, feature_type_style & rhs)
-{
     using std::swap;
-    std::swap(lhs.rules_, rhs.rules_);
-    std::swap(lhs.filter_mode_, rhs.filter_mode_);
-    std::swap(lhs.filters_, rhs.filters_);
-    std::swap(lhs.direct_filters_, rhs.direct_filters_);
-    std::swap(lhs.comp_op_, rhs.comp_op_);
-    std::swap(lhs.opacity_, rhs.opacity_);
-    std::swap(lhs.image_filters_inflate_, rhs.image_filters_inflate_);
+    std::swap(this->rules_, rhs.rules_);
+    std::swap(this->filter_mode_, rhs.filter_mode_);
+    std::swap(this->filters_, rhs.filters_);
+    std::swap(this->direct_filters_, rhs.direct_filters_);
+    std::swap(this->comp_op_, rhs.comp_op_);
+    std::swap(this->opacity_, rhs.opacity_);
+    std::swap(this->image_filters_inflate_, rhs.image_filters_inflate_);
+    return *this;
 }
 
 bool feature_type_style::operator==(feature_type_style const& rhs) const

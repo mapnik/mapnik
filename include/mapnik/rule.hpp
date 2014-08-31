@@ -85,8 +85,6 @@ public:
         syms_.reserve(size);
     }
 
-private:
-    friend void swap(rule & lhs, rule & rhs);
 };
 
 }
