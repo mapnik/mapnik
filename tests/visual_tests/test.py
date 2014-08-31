@@ -7,6 +7,7 @@ import mapnik
 #mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
 import os.path
+import platform
 from compare import compare, compare_grids
 
 try:
@@ -26,7 +27,8 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
-if 'Linux' == os.uname()[0]:
+UNAME = platform.uname()[0]
+if 'Linux' == UNAME or 'Windows' == UNAME:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
     # to generate the expected images, so we'll rachet back the threshold
@@ -292,9 +294,9 @@ class Reporting:
     def result_fail(self, actual, expected, diff):
         self.failed += 1
         if self.quiet:
-            sys.stderr.write('\x1b[31m.\x1b[0m')
+            sys.stderr.write('x')
         else:
-            print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+            print 'x[34m%u different pixels\x1b[0m)' % diff
 
         if self.overwrite_failures:
             self.errors.append((self.REPLACE, actual, expected, diff, None))
@@ -306,17 +308,17 @@ class Reporting:
     def result_pass(self, actual, expected, diff):
         self.passed += 1
         if self.quiet:
-            sys.stderr.write('\x1b[32m.\x1b[0m')
+            sys.stderr.write('.')
         else:
-            print '\x1b[32m✓\x1b[0m'
+            print '.'
 
     def not_found(self, actual, expected):
         self.failed += 1
         self.errors.append((self.NOT_FOUND, actual, expected, 0, None))
         if self.quiet:
-            sys.stderr.write('\x1b[33m.\x1b[0m')
+            sys.stderr.write('x')
         else:
-            print '\x1b[33m?\x1b[0m (\x1b[34mReference file not found, creating\x1b[0m)'
+            print 'x (\x1b[34mReference file not found, creating\x1b[0m)'
         contents = open(actual, 'r').read()
         open(expected, 'wb').write(contents)
 
@@ -324,9 +326,9 @@ class Reporting:
         self.failed += 1
         self.errors.append((self.OTHER, None, expected, 0, message))
         if self.quiet:
-            sys.stderr.write('\x1b[31m.\x1b[0m')
+            sys.stderr.write('x')
         else:
-            print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
+            print 'x([%s)' % message
 
     def make_html_item(self,actual,expected,diff):
         item = '''
