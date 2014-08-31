@@ -152,7 +152,7 @@
     {
         "target_name": "_mapnik",
         "type": "loadable_module",
-        "product_extension": "so",
+        "product_extension": "pyd",
         "sources": [ '<!@(find bindings/python/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
         'include_dirs': [

@@ -282,7 +282,13 @@ xcopy /i /d /s /q .\build\Release\mapnik.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: move python binding into local testable location
-xcopy /i /d /s /q .\build\Release\_mapnik.so bindings\python\mapnik\ /Y
+xcopy /i /d /s /q .\build\Release\_mapnik.pyd bindings\python\mapnik\ /Y
+echo from os.path import normpath,join,dirname > bindings\python\mapnik\paths.py
+echo mapniklibpath = '%CD%/../mapnik-sdk/libs/mapnik' >> bindings\python\mapnik\paths.py
+echo mapniklibpath = normpath(join(dirname(__file__),mapniklibpath)) >> bindings\python\mapnik\paths.py
+echo inputpluginspath = join(mapniklibpath,'input') >> bindings\python\mapnik\paths.py
+echo fontscollectionpath = join(mapniklibpath,'fonts') >> bindings\python\mapnik\paths.py
+echo __all__ = [mapniklibpath,inputpluginspath,fontscollectionpath] >> bindings\python\mapnik\paths.py
 
 
 :: plugins
