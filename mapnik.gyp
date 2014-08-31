@@ -76,7 +76,7 @@
       ],
       "conditions": [
         ["OS=='win'", {
-		   'defines': ['MAPNIK_EXPORTS'],
+           'defines': ['MAPNIK_EXPORTS'],
            'libraries':[
               'libboost_filesystem-vc140-mt-1_56.lib',
               'libboost_regex-vc140-mt-1_56.lib',
@@ -96,7 +96,7 @@
               'freetype.lib',
               'zlib.lib',
               'cairo.lib',
-			  'harfbuzz.lib'
+              'harfbuzz.lib'
           ]
         },{
             'libraries':[
@@ -207,7 +207,7 @@
                 'libboost_thread-vc140-mt-1_56.lib',
                 'libboost_system-vc140-mt-1_56.lib',
                 'icuuc.lib',
-				'odbccp32.lib'
+                'odbccp32.lib'
             ]
           } , {
             'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
@@ -228,7 +228,7 @@
                 'libboost_thread-vc140-mt-1_56.lib',
                 'libboost_system-vc140-mt-1_56.lib',
                 'icuuc.lib',
-				'odbccp32.lib'
+                'odbccp32.lib'
             ]
           } , {
             'libraries': [ '<!@(gdal-config --libs)', '<!@(gdal-config --dep-libs)']
@@ -251,7 +251,7 @@
                 'secur32.lib',
                 'icuuc.lib',
                 'ws2_32.lib',
-				'libboost_regex-vc140-mt-1_56.lib'
+                'libboost_regex-vc140-mt-1_56.lib'
             ]
           } , {
             'libraries': [ '<!@(pkg-config libpq --libs --static)']
@@ -308,14 +308,14 @@
         "type": "executable",
         "sources": [ "./tests/cpp_tests/clipping_test.cpp"],
         "dependencies": [ "mapnik" ],
- 	    "conditions": [
-		  ["OS=='win'", {
-		 	'libraries':[
-		 	   'libboost_filesystem-vc140-mt-1_56.lib',
-			   'libboost_system-vc140-mt-1_56'
-		    ],
-		  }]
-	    ]
+         "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_filesystem-vc140-mt-1_56.lib',
+               'libboost_system-vc140-mt-1_56'
+            ],
+          }]
+        ]
     },
     {
         "target_name": "conversions_test",
@@ -328,29 +328,29 @@
         "type": "executable",
         "sources": [ "./tests/cpp_tests/exceptions_test.cpp"],
         "dependencies": [ "mapnik" ],
- 	    "conditions": [
-		  ["OS=='win'", {
-		 	'libraries':[
-		 	   'libboost_filesystem-vc140-mt-1_56.lib',
-			   'libboost_system-vc140-mt-1_56'
-		    ],
-		  }]
-	    ]
+         "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_filesystem-vc140-mt-1_56.lib',
+               'libboost_system-vc140-mt-1_56'
+            ],
+          }]
+        ]
     },
     {
         "target_name": "font_registration_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/font_registration_test.cpp"],
         "dependencies": [ "mapnik" ],
- 	    "conditions": [
-		  ["OS=='win'", {
-		 	'libraries':[
-		 	   'libboost_filesystem-vc140-mt-1_56.lib',
-			   'libboost_system-vc140-mt-1_56'
-		    ],
-		  }]
-	    ]
-	},
+         "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_filesystem-vc140-mt-1_56.lib',
+               'libboost_system-vc140-mt-1_56'
+            ],
+          }]
+        ]
+    },
     {
         "target_name": "fontset_runtime_test",
         "type": "executable",
@@ -360,8 +360,8 @@
           ["OS=='win'", {
              'libraries':[
                 'icuuc.lib',
-		 	   'libboost_filesystem-vc140-mt-1_56.lib',
-			   'libboost_system-vc140-mt-1_56'
+                'libboost_filesystem-vc140-mt-1_56.lib',
+               'libboost_system-vc140-mt-1_56'
             ],
           }]
         ]
@@ -371,28 +371,28 @@
         "type": "executable",
         "sources": [ "./tests/cpp_tests/geometry_converters_test.cpp"],
         "dependencies": [ "mapnik" ],
- 	    "conditions": [
-		  ["OS=='win'", {
-		 	'libraries':[
-		 	   'libboost_filesystem-vc140-mt-1_56.lib',
-			   'libboost_system-vc140-mt-1_56'
-		    ],
-		  }]
-	    ]
+         "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_filesystem-vc140-mt-1_56.lib',
+               'libboost_system-vc140-mt-1_56'
+            ],
+          }]
+        ]
     },
     {
         "target_name": "image_io_test",
         "type": "executable",
         "sources": [ "./tests/cpp_tests/image_io_test.cpp"],
         "dependencies": [ "mapnik" ],
- 	    "conditions": [
-		  ["OS=='win'", {
-		 	'libraries':[
-		 	   'libboost_filesystem-vc140-mt-1_56.lib',
-			   'libboost_system-vc140-mt-1_56'
-		    ],
-		  }]
-	    ]
+         "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_filesystem-vc140-mt-1_56.lib',
+               'libboost_system-vc140-mt-1_56'
+            ],
+          }]
+        ]
     },
     {
         "target_name": "label_algo_test",
@@ -405,13 +405,13 @@
         "type": "executable",
         "sources": [ "./tests/cpp_tests/map_request_test.cpp"],
         "dependencies": [ "mapnik" ],
- 	    "conditions": [
-		  ["OS=='win'", {
-		 	'libraries':[
-		 	   'libboost_system-vc140-mt-1_56.lib'
-		    ],
-		  }]
-	    ]
+         "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_system-vc140-mt-1_56.lib'
+            ],
+          }]
+        ]
     },
     {
         "target_name": "params_test",
@@ -434,7 +434,7 @@
              ["OS=='win'", {
                 'libraries':[
                    'libboost_thread-vc140-mt-1_56.lib',
-				   'libboost_system-vc140-mt-1_56'
+                   'libboost_system-vc140-mt-1_56'
                ]
              },{
                  'libraries':[
