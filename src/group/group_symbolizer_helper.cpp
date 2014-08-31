@@ -180,7 +180,7 @@ double group_symbolizer_helper::get_spacing(double path_length) const
     int num_labels = 1;
     if (placement_->properties.label_spacing > 0)
     {
-        num_labels = static_cast<int>(floor(
+        num_labels = static_cast<int>(std::floor(
             path_length / (placement_->properties.label_spacing * scale_factor_)));
     }
     if (num_labels <= 0)

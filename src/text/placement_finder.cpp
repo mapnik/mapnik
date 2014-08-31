@@ -301,7 +301,7 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
     int num_labels = 1;
     if (info_.properties.label_spacing > 0)
     {
-        num_labels = static_cast<int>(floor(
+        num_labels = static_cast<int>(std::floor(
             path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
     }
     if (num_labels <= 0)

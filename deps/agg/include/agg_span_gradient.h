@@ -225,7 +225,7 @@ namespace agg
             double dy = y - m_fy;
             double d2 = dx * m_fy - dy * m_fx;
             double d3 = m_r2 * (dx * dx + dy * dy) - d2 * d2;
-            return iround((dx * m_fx + dy * m_fy + sqrt(fabs(d3))) * m_mul);
+            return iround((dx * m_fx + dy * m_fy + sqrt(std::fabs(d3))) * m_mul);
         }
 
     private:
@@ -284,8 +284,8 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int) 
         { 
-            int ax = abs(x);
-            int ay = abs(y);
+            int ax = std::abs(x);
+            int ay = std::abs(y);
             return ax > ay ? ax : ay; 
         }
     };
@@ -296,7 +296,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int d) 
         { 
-            return abs(x) * abs(y) / d; 
+            return std::abs(x) * std::abs(y) / d; 
         }
     };
 
@@ -306,7 +306,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int) 
         { 
-            return fast_sqrt(abs(x) * abs(y)); 
+            return fast_sqrt(std::abs(x) * std::abs(y)); 
         }
     };
 
@@ -316,7 +316,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int d) 
         { 
-            return uround(fabs(atan2(double(y), double(x))) * double(d) / pi);
+            return uround(std::fabs(std::atan2(double(y), double(x))) * double(d) / pi);
         }
     };
 

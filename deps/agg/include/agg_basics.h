@@ -89,19 +89,11 @@ namespace agg
 #endif
 
 #ifndef AGG_INT64
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-#define AGG_INT64 signed __int64
-#else
 #define AGG_INT64 signed long long
-#endif
 #endif
 
 #ifndef AGG_INT64U
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-#define AGG_INT64U unsigned __int64
-#else
 #define AGG_INT64U unsigned long long
-#endif
 #endif
 
 //------------------------------------------------ Some fixes for MS Visual C++
@@ -127,50 +119,6 @@ namespace agg
     typedef AGG_INT64  int64;        //----int64
     typedef AGG_INT64U int64u;       //----int64u
 
-#if defined(AGG_FISTP)
-#pragma warning(push)
-#pragma warning(disable : 4035) //Disable warning "no return value"
-    AGG_INLINE int iround(double v)              //-------iround
-    {
-        int t;
-        __asm fld   qword ptr [v]
-        __asm fistp dword ptr [t]
-        __asm mov eax, dword ptr [t]
-    }
-    AGG_INLINE unsigned uround(double v)         //-------uround
-    {
-        unsigned t;
-        __asm fld   qword ptr [v]
-        __asm fistp dword ptr [t]
-        __asm mov eax, dword ptr [t]
-    }
-#pragma warning(pop)
-    AGG_INLINE unsigned ufloor(double v)         //-------ufloor
-    {
-        return unsigned(floor(v));
-    }
-    AGG_INLINE unsigned uceil(double v)          //--------uceil
-    {
-        return unsigned(ceil(v));
-    }
-#elif defined(AGG_QIFIST)
-    AGG_INLINE int iround(double v)
-    {
-        return int(v);
-    }
-    AGG_INLINE int uround(double v)
-    {
-        return unsigned(v);
-    }
-    AGG_INLINE unsigned ufloor(double v)
-    {
-        return unsigned(floor(v));
-    }
-    AGG_INLINE unsigned uceil(double v)
-    {
-        return unsigned(ceil(v));
-    }
-#else
     AGG_INLINE int iround(double v)
     {
         return int((v < 0.0) ? v - 0.5 : v + 0.5);
@@ -185,9 +133,8 @@ namespace agg
     }
     AGG_INLINE unsigned uceil(double v)
     {
-        return unsigned(ceil(v));
+        return unsigned(std::ceil(v));
     }
-#endif
 
     //---------------------------------------------------------------saturation
     template<int Limit> struct saturation
@@ -522,7 +469,7 @@ namespace agg
     //------------------------------------------------------------is_equal_eps
     template<class T> inline bool is_equal_eps(T v1, T v2, T epsilon)
     {
-        return fabs(v1 - v2) <= double(epsilon);
+        return std::fabs(v1 - v2) <= double(epsilon);
     }
 
 }

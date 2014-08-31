@@ -67,14 +67,14 @@ unsigned arc::vertex(double* x, double* y)
     if(is_stop(m_path_cmd)) return path_cmd_stop;
     if((m_angle < m_end - m_da/4) != m_ccw)
     {
-        *x = m_x + cos(m_end) * m_rx;
-        *y = m_y + sin(m_end) * m_ry;
+        *x = m_x + std::cos(m_end) * m_rx;
+        *y = m_y + std::sin(m_end) * m_ry;
         m_path_cmd = path_cmd_stop;
         return path_cmd_line_to;
     }
 
-    *x = m_x + cos(m_angle) * m_rx;
-    *y = m_y + sin(m_angle) * m_ry;
+    *x = m_x + std::cos(m_angle) * m_rx;
+    *y = m_y + std::sin(m_angle) * m_ry;
 
     m_angle += m_da;
 
@@ -86,8 +86,8 @@ unsigned arc::vertex(double* x, double* y)
 //------------------------------------------------------------------------
 void arc::normalize(double a1, double a2, bool ccw)
 {
-    double ra = (fabs(m_rx) + fabs(m_ry)) / 2;
-    m_da = acos(ra / (ra + 0.125 / m_scale)) * 2;
+    double ra = (std::fabs(m_rx) + std::fabs(m_ry)) / 2;
+    m_da = std::acos(ra / (ra + 0.125 / m_scale)) * 2;
     if(ccw)
     {
         while(a2 < a1) a2 += pi * 2.0;

@@ -37,7 +37,7 @@ double vertex_cache::angle(double width)
         //Only calculate angle on request as it is expensive
         if (!angle_valid_)
         {
-            angle_ = atan2(-(current_segment_->pos.y - segment_starting_point_.y),
+            angle_ = std::atan2(-(current_segment_->pos.y - segment_starting_point_.y),
                            current_segment_->pos.x - segment_starting_point_.x);
         }
         return width >= 0 ? angle_ : angle_ + M_PI;
@@ -46,7 +46,7 @@ double vertex_cache::angle(double width)
         scoped_state s(*this);
         pixel_position const& old_pos = s.get_state().position();
         move(width);
-        double angle = atan2(-(current_position_.y - old_pos.y),
+        double angle = std::atan2(-(current_position_.y - old_pos.y),
                              current_position_.x - old_pos.x);
         return angle;
     }
@@ -109,7 +109,7 @@ bool vertex_cache::previous_segment()
 
 vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
 {
-    if (fabs(offset) < 0.01)
+    if (std::fabs(offset) < 0.01)
     {
         return *this;
     }

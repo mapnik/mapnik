@@ -56,7 +56,7 @@ namespace agg
                 m_y1  = c1.y - 0.5;
                 m_dx  = c2.x - c1.x;
                 double dy = c2.y - c1.y;
-                m_1dy = (fabs(dy) < 1e-10) ? 1e10 : 1.0 / dy;
+                m_1dy = (std::fabs(dy) < 1e-10) ? 1e10 : 1.0 / dy;
                 m_v1 = c1.color.v;
                 m_a1 = c1.color.a;
                 m_dv = c2.color.v - m_v1;
@@ -151,7 +151,7 @@ namespace agg
             // Get the horizontal length with subpixel accuracy
             // and protect it from division by zero
             //-------------------------
-            int nlen = abs(pc2->m_x - pc1->m_x);
+            int nlen = std::abs(pc2->m_x - pc1->m_x);
             if(nlen <= 0) nlen = 1;
 
             dda_line_interpolator<14> v(pc1->m_v, pc2->m_v, nlen);

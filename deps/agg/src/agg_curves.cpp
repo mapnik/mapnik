@@ -159,7 +159,7 @@ void curve3_div::recursive_bezier(double x1, double y1,
 
     double dx = x3-x1;
     double dy = y3-y1;
-    double d = fabs(((x2 - x3) * dy - (y2 - y3) * dx));
+    double d = std::fabs(((x2 - x3) * dy - (y2 - y3) * dx));
     double da;
 
     if(d > curve_collinearity_epsilon)
@@ -179,7 +179,7 @@ void curve3_div::recursive_bezier(double x1, double y1,
 
             // Angle & Cusp Condition
             //----------------------
-            da = fabs(atan2(y3 - y2, x3 - x2) - atan2(y2 - y1, x2 - x1));
+            da = std::fabs(std::atan2(y3 - y2, x3 - x2) - std::atan2(y2 - y1, x2 - x1));
             if(da >= pi) da = 2*pi - da;
 
             if(da < m_angle_tolerance)
@@ -419,8 +419,8 @@ void curve4_div::recursive_bezier(double x1, double y1,
     double dx = x4-x1;
     double dy = y4-y1;
 
-    double d2 = fabs(((x2 - x4) * dy - (y2 - y4) * dx));
-    double d3 = fabs(((x3 - x4) * dy - (y3 - y4) * dx));
+    double d2 = std::fabs(((x2 - x4) * dy - (y2 - y4) * dx));
+    double d3 = std::fabs(((x3 - x4) * dy - (y3 - y4) * dx));
     double da1, da2, k;
 
     switch((int(d2 > curve_collinearity_epsilon) << 1) +
@@ -489,7 +489,7 @@ void curve4_div::recursive_bezier(double x1, double y1,
 
             // Angle Condition
             //----------------------
-            da1 = fabs(atan2(y4 - y3, x4 - x3) - atan2(y3 - y2, x3 - x2));
+            da1 = std::fabs(std::atan2(y4 - y3, x4 - x3) - std::atan2(y3 - y2, x3 - x2));
             if(da1 >= pi) da1 = 2*pi - da1;
 
             if(da1 < m_angle_tolerance)
@@ -523,7 +523,7 @@ void curve4_div::recursive_bezier(double x1, double y1,
 
             // Angle Condition
             //----------------------
-            da1 = fabs(atan2(y3 - y2, x3 - x2) - atan2(y2 - y1, x2 - x1));
+            da1 = std::fabs(std::atan2(y3 - y2, x3 - x2) - std::atan2(y2 - y1, x2 - x1));
             if(da1 >= pi) da1 = 2*pi - da1;
 
             if(da1 < m_angle_tolerance)
@@ -560,9 +560,9 @@ void curve4_div::recursive_bezier(double x1, double y1,
 
             // Angle & Cusp Condition
             //----------------------
-            k   = atan2(y3 - y2, x3 - x2);
-            da1 = fabs(k - atan2(y2 - y1, x2 - x1));
-            da2 = fabs(atan2(y4 - y3, x4 - x3) - k);
+            k   = std::atan2(y3 - y2, x3 - x2);
+            da1 = std::fabs(k - std::atan2(y2 - y1, x2 - x1));
+            da2 = std::fabs(std::atan2(y4 - y3, x4 - x3) - k);
             if(da1 >= pi) da1 = 2*pi - da1;
             if(da2 >= pi) da2 = 2*pi - da2;
 
