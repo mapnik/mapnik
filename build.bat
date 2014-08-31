@@ -314,6 +314,19 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 for %%t in (build\Release\*test.exe) do ( call %%t -d %CD% )
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+:: wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
+:: python get-pip.py
+:: C:\Python27\Scripts\pip.exe install nose
+::xcopy /i /d /s /q .\build\Release\_mapnik.pyd bindings\python\mapnik\
+::SET PYTHONPATH=%CD%\bindings\python
+::SET GDAL_DATA=%CD%\..\mapnik-sdk\share\gdal
+::SET PROJ_LIB=%CD%\..\mapnik-sdk\share\proj
+::SET ICU_DATA=%CD%\..\mapnik-sdk\share\icu
+:: https://github.com/mapnik/mapnik-packaging/raw/master/osx/icudt53l_only_collator_and_breakiterator.dat
+::python tests\run_tests.py -q
+::python tests\visual_tests\test.py -q
+
+
 GOTO DONE
 
 :ERROR
