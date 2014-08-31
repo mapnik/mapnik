@@ -156,12 +156,12 @@
         "sources": [ '<!@(find bindings/python/ -name "*.cpp")' ],
         "dependencies": [ "mapnik" ],
         'include_dirs': [
-          'c:/tools/python2-x86-32/include'
+          'c:/Python27/include'
         ],
         'msvs_settings': {
           'VCLinkerTool': {
             'AdditionalLibraryDirectories': [
-                'c:/tools/python2-x86-32/libs'
+                'c:/Python27/libs'
             ]
           }
         },
@@ -174,6 +174,7 @@
                 'icuuc.lib',
                 'icuin.lib',
             ],
+			'defines':['HAVE_ROUND','HAVE_HYPOT']
           },{
               'libraries':[
                 '-lboost_thread'
