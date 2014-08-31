@@ -31,7 +31,12 @@
     ],
     "conditions": [
       ["OS=='win'", {
-          'common_defines': ['LIBXML_STATIC','BOOST_LIB_TOOLSET="vc140"','BOOST_COMPILER="14.0"'], # static libxml: libxml2_a.lib
+          'common_defines': [
+             'LIBXML_STATIC', # static libxml: libxml2_a.lib
+             'BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES',
+             'BOOST_LIB_TOOLSET="vc140"',
+             'BOOST_COMPILER="14.0"'
+          ],
           'common_libraries': []
       }, {
           'common_defines': ['SHAPE_MEMORY_MAPPED_FILE','U_CHARSET_IS_UTF8=1'],
@@ -143,6 +148,39 @@
           }
         }
       }
+    },
+    {
+        "target_name": "_mapnik",
+        "type": "loadable_module",
+        "product_extension": "so",
+        "sources": [ '<!@(find bindings/python/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        'include_dirs': [
+          'c:/tools/python2-x86-32/include'
+        ],
+        'msvs_settings': {
+          'VCLinkerTool': {
+            'AdditionalLibraryDirectories': [
+                'c:/tools/python2-x86-32/libs'
+            ]
+          }
+        },
+        "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_thread-vc140-mt-1_56.lib',
+                'libboost_system-vc140-mt-1_56.lib',
+                'libboost_regex-vc140-mt-1_56.lib',
+                'icuuc.lib',
+                'icuin.lib',
+            ],
+          },{
+              'libraries':[
+                '-lboost_thread'
+              ]
+            }
+          ]
+        ]
     },
     {
         "target_name": "shape",

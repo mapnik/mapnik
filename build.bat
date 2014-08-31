@@ -270,7 +270,7 @@ dumpbin /directives ..\mapnik-sdk\libs\*lib | grep LIBCMT
 
 ::msbuild /m:2 /t:mapnik /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
 
-msbuild /m:2 /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
+msbuild /m:%NUMBER_OF_PROCESSORS% /p:BuildInParellel=true .\build\mapnik.sln /p:Configuration=Release
 :: /t:rebuild
 :: /v:diag > build.log
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -280,6 +280,10 @@ xcopy /i /d /s /q .\build\Release\mapnik.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q .\build\Release\mapnik.dll ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+:: move python binding into local testable location
+xcopy /i /d /s /q .\build\Release\_mapnik.so bindings\python\mapnik\ /Y
+
 
 :: plugins
 xcopy /i /d /s /q .\build\Release\*input ..\mapnik-sdk\libs\mapnik\input\ /Y
