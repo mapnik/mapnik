@@ -78,9 +78,9 @@ xcopy /i /d /s /q %DEPSDIR%\freetype\include ..\mapnik-sdk\includes\freetype2 /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\libxml2\include ..\mapnik-sdk\includes\libxml2 /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\zlib\zlib.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zconf.h ..\mapnik-sdk\includes\ /Y
+xcopy /i /d /s /q %DEPSDIR%\zlib\zconf.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\libpng\png.h ..\mapnik-sdk\includes\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -128,7 +128,7 @@ xcopy /i /d /s /q %DEPSDIR%\protobuf\vsprojects\include ..\mapnik-sdk\includes\ 
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: libs
-xcopy /i /d /s /q %DEPSDIR%\harfbuzz-build\Release\harfbuzz.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\harfbuzz-build\harfbuzz.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\freetype\freetype.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -156,7 +156,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 ::IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\libtiff\libtiff\libtiff_i.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-xcopy /i /d /s /q %DEPSDIR%\zlib-1.2.5\zlib.lib ..\mapnik-sdk\libs\ /Y
+xcopy /i /d /s /q %DEPSDIR%\zlib\zlib.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 xcopy /i /d /s /q %DEPSDIR%\proj\src\proj.lib ..\mapnik-sdk\libs\ /Y
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
