@@ -184,6 +184,28 @@
         ]
     },
     {
+        "target_name": "nik2img",
+        "type": "executable",
+        "sources": [ '<!@(find utils/nik2img/ -name "*.cpp")' ],
+        "dependencies": [ "mapnik" ],
+        "conditions": [
+          ["OS=='win'", {
+             'libraries':[
+                'libboost_program_options-vc140-mt-1_56.lib',
+                'libboost_filesystem-vc140-mt-1_56.lib',
+                'libboost_thread-vc140-mt-1_56.lib',
+                'libboost_system-vc140-mt-1_56.lib',
+                'icuuc.lib'
+            ],
+          },{
+              'libraries':[
+                '-lboost_thread'
+              ]
+            }
+          ]
+        ]
+    },
+    {
         "target_name": "shape",
         "type": "loadable_module",
         "product_extension": "input",
