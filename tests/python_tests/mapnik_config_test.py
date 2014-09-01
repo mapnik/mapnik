@@ -10,21 +10,21 @@ import os, sys, glob, mapnik
 def test_mapnik_config_no_args():
     process = Popen('mapnik-config', shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     result = process.communicate()
-    eq_('Usage: mapnik-config ' in result[0],True)
+    eq_('Usage: mapnik-config' in result[0],True)
     eq_(result[1],'')
     eq_(process.returncode,1)
 
 def test_mapnik_config_help():
     process = Popen('mapnik-config --help', shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     result = process.communicate()
-    eq_('Usage: mapnik-config ' in result[0],True)
+    eq_('Usage: mapnik-config' in result[0],True)
     eq_(result[1],'')
     eq_(process.returncode,0)
 
 def test_mapnik_config_help_short():
     process = Popen('mapnik-config -h', shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     result = process.communicate()
-    eq_('Usage: mapnik-config ' in result[0],True)
+    eq_('Usage: mapnik-config' in result[0],True)
     eq_(result[1],'')
     eq_(process.returncode,0)
 
