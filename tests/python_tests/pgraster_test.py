@@ -31,7 +31,10 @@ def call(cmd,silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
         return stdin.strip()
-    elif not silent and 'error' in stderr.lower() or 'could not connect' in stderr.lower():
+    elif not silent and 'error' in stderr.lower() \
+        or 'could not connect' in stderr.lower() \
+        or 'bad connection' in stderr.lower() \
+        or 'not recognized as an internal' in stderr.lower():
         raise RuntimeError(stderr.strip())
 
 def psql_can_connect():
