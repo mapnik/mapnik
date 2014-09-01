@@ -96,11 +96,14 @@ int main (int argc,char** argv)
         if (auto_open)
         {
             std::ostringstream s;
-#ifdef DARWIN
-            s << "open " << img_file;
+#ifdef __APPLE__
+            s << "open ";
+#elif _WIN32
+            s << "start ";
 #else
-            s << "xdg-open " << img_file;
+            s << "xdg-open ";
 #endif
+            s << img_file;
             int ret = system(s.str().c_str());
             if (ret != 0)
                 return_value = ret;
