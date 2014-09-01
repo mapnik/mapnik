@@ -403,6 +403,17 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         feat = fs.next()
         eq_(feat['Name'],u"Winthrop, WA")
 
+    def test_creation_of_csv_from_in_memory_string_with_uft8(**kwargs):
+        csv_string = '''
+           wkt,Name
+          "POINT (120.15 48.47)","Québec"
+          ''' # csv plugin will test lines <= 10 chars for being fully blank
+        ds = mapnik.Datasource(**{"type":"csv","inline":csv_string})
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Point)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['Name'],u"Québec")
+
     def validate_geojson_datasource(ds):
         eq_(len(ds.fields()),1)
         eq_(ds.fields(),['type'])
