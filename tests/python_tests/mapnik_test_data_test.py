@@ -45,6 +45,7 @@ def test_opening_data():
                       kwargs = {'type': plugin,'file': filepath}
                       if plugin is 'ogr':
                           kwargs['layer_by_index'] = 0
+                      print kwargs
                       ds = mapnik.Datasource(**kwargs)
 
 if __name__ == "__main__":
