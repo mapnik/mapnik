@@ -34,19 +34,27 @@ def test_opening_data():
     if os.path.exists('../data/mapnik-test-data/'):
         files = glob('../data/mapnik-test-data/data/*/*.*')
         for filepath in files:
-            if 'topo' in filepath:
-                kwargs = {'type': 'ogr','file': filepath}
-                kwargs['layer_by_index'] = 0
-                ds = mapnik.Datasource(**kwargs)
-            else:
-                ext = os.path.splitext(filepath)[1]
-                if plugin_mapping.get(ext):
+            ext = os.path.splitext(filepath)[1]
+            if plugin_mapping.get(ext):
+                print 'testing opening %s' % filepath
+                if 'topo' in filepath:
+                    kwargs = {'type': 'ogr','file': filepath}
+                    kwargs['layer_by_index'] = 0
+                    try:
+                        ds = mapnik.Datasource(**kwargs)
+                    except Exception, e:
+                        print 'could not open, %s: %s' % (kwargs,e)
+                else:
                    for plugin in plugin_mapping[ext]:
                       kwargs = {'type': plugin,'file': filepath}
                       if plugin is 'ogr':
                           kwargs['layer_by_index'] = 0
-                      print kwargs
-                      ds = mapnik.Datasource(**kwargs)
+                      try:
+                          ds = mapnik.Datasource(**kwargs)
+                      except Exception, e:
+                          print 'could not open, %s: %s' % (kwargs,e)
+            else:
+                print 'skipping opening %s' % filepath
 
 if __name__ == "__main__":
     setup()
