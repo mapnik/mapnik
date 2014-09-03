@@ -1967,9 +1967,6 @@ if not HELP_REQUESTED:
     # build C++ tests
     SConscript('tests/cpp_tests/build.py')
 
-    if env['CPP_TESTS'] and env['SVG_RENDERER']:
-        SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
-
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')
 
