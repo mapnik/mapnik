@@ -14,13 +14,13 @@ endif
 all: mapnik
 
 install:
-	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
+	python2 scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
+	python2 scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
 clean:
-	@python scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
+	@python2 scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	@if test -e "config.log"; then rm  "config.log"; fi
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
@@ -42,7 +42,7 @@ rebuild:
 	make uninstall && make clean && time make && make install
 
 uninstall:
-	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
+	@python2 scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
 	./run_tests
@@ -51,10 +51,10 @@ test-local:
 	make test
 
 test-visual:
-	bash -c "source ./localize.sh && python tests/visual_tests/test.py -q"
+	bash -c "source ./localize.sh && python2 tests/visual_tests/test.py -q"
 
 test-python:
-	bash -c "source ./localize.sh && python tests/run_tests.py -q"
+	bash -c "source ./localize.sh && python2 tests/run_tests.py -q"
 
 test-cpp:
 	./tests/cpp_tests/run
