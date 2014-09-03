@@ -7,6 +7,8 @@ endif
 
 OS:=$(shell uname -s)
 
+PYTHON = python
+
 ifeq ($(JOBS),)
 	JOBS:=1
 	ifeq ($(OS),Linux)
@@ -20,13 +22,13 @@ endif
 all: mapnik
 
 install:
-	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
+	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
+	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
 clean:
-	@python scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
+	@$(PYTHON) scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	@if test -e "config.log"; then rm  "config.log"; fi
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
@@ -46,7 +48,7 @@ rebuild:
 	make uninstall && make clean && time make && make install
 
 uninstall:
-	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
+	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
 	@ ./run_tests
