@@ -49,7 +49,7 @@ topojson_grammar<Iterator>::topojson_grammar()
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
-
+    using phoenix::construct;
     // generic json types
     value = object | array | string_ | number
         ;
@@ -68,11 +68,11 @@ topojson_grammar<Iterator>::topojson_grammar()
         >> lit(']')
         ;
 
-    number %= strict_double
-        | int__
+    number = strict_double[_val = double_converter(_1)]
+        | int__[_val = integer_converter(_1)]
         | lit("true")[_val = true]
         | lit("false")[_val = false]
-        | lit("null")
+        | lit("null")[_val = construct<value_null>()]
         ;
 
     unesc_char.add

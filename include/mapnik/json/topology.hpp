@@ -43,7 +43,7 @@ struct coordinate
     double y;
 };
 
-using value = mapnik::util::variant<value_null,bool,value_integer,value_double,std::string>;
+using value = mapnik::util::variant<value_null,bool,value_double,value_integer,std::string>;
 using property = std::tuple<std::string, value >;
 using properties = std::vector<property>;
 

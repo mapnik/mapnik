@@ -70,7 +70,7 @@ struct value_not_null
 {
     bool operator() (feature_kv_iterator::value_type const& kv) const
     {
-        return !util::apply_visitor(mapnik::detail::is_null_visitor(), std::get<1>(kv).base());
+        return !util::apply_visitor(mapnik::detail::is_null_visitor(), std::get<1>(kv));
     }
 };
 
