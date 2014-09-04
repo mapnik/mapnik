@@ -814,9 +814,7 @@ public:
 
     template <typename T>
     value ( T const& val)
-        : base_() {
-           base_ = static_cast<typename detail::mapnik_value_type<T>::type>(val);
-        }
+        : base_(typename detail::mapnik_value_type<T>::type(val)) {}
 
     value (value const& other)
         : base_(other.base_) {}
