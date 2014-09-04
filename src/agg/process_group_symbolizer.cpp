@@ -46,7 +46,7 @@ namespace mapnik {
 struct thunk_renderer : public util::static_visitor<>
 {
     using renderer_type = agg_renderer<image_32>;
-    using buffer_type = typename renderer_type::buffer_type;
+    using buffer_type = renderer_type::buffer_type;
     using text_renderer_type = agg_text_renderer<buffer_type>;
 
     thunk_renderer(renderer_type &ren,
