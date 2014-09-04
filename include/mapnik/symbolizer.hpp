@@ -117,10 +117,8 @@ struct strict_value : value_base_type
 
     template <typename T>
     strict_value(T const& obj)
-        : value_base_type()
-    {
-        *this = static_cast<typename detail::mapnik_value_type<T>::type>(obj);
-    }
+        : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
+    {}
     // move ctor
     template <typename T>
     strict_value(T && obj) noexcept

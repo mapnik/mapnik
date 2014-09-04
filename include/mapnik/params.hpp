@@ -54,10 +54,8 @@ struct value_holder : value_holder_base
 
     template <typename T>
     value_holder(T const& obj)
-        : value_holder_base()
-    {
-        *this = static_cast<typename detail::mapnik_value_type<T>::type>(obj);
-    }
+        : value_holder_base(typename detail::mapnik_value_type<T>::type(obj))
+    {}
 
     // move
     template <typename T>
