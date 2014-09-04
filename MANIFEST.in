@@ -1,0 +1,15 @@
+global-exclude *
+
+include setup.py
+include COPYING
+include AUTHORS.md
+include MANIFEST.in
+include bindings/python/*.rst
+
+recursive-include bindings/python *.cpp *.hpp
+recursive-include bindings/python/mapnik *.py
+recursive-include bindings/python/mapnik2 *.py
+recursive-include deps/agg/include *.h
+recursive-include tests/python_tests *.py
+recursive-include tests/python_tests/images *.png
+recursive-include bindings/python *.cpp

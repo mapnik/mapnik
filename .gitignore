@@ -52,3 +52,9 @@ demo/viewer/ui_about.h
 demo/viewer/ui_info.h
 demo/viewer/ui_layer_info.h
 tests/cpp_tests/*-bin
+
+# Setuptools artifacts
+dist/
+build/
+*.egg-info
+*.egg
