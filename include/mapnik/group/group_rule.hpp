@@ -40,7 +40,7 @@ struct MAPNIK_DECL group_rule
 {
    using symbolizers = std::vector<symbolizer>;
 
-   group_rule(const expression_ptr& filter =std::make_shared<mapnik::expr_node>(true),
+   group_rule(const expression_ptr& filter = std::make_shared<mapnik::expr_node>(true),
               const expression_ptr& repeat_key = expression_ptr());
 
    group_rule &operator=(const group_rule &rhs);
