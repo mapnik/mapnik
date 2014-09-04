@@ -70,7 +70,7 @@ struct put_property
     explicit put_property(mapnik::transcoder const& tr)
         : tr_(tr) {}
     template <typename T0,typename T1, typename T2>
-    result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
+    result_type operator() (T0 & feature, T1 const& key, T2 && val) const
     {
         feature.put_new(key, mapnik::util::apply_visitor(attribute_value_visitor(tr_),val));
     }
@@ -104,7 +104,7 @@ struct feature_grammar :
 
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator, mapnik::util::variant<value_null,bool,value_integer,value_double,std::string>(), space_type> attribute_value;
+    qi::rule<Iterator, mapnik::util::variant<value_null,value_double,value_integer, bool, std::string>(), space_type> attribute_value;
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;

@@ -199,7 +199,7 @@ struct mapnik_value_type<T, typename std::enable_if<detail::is_value_double<T>::
 template <typename T>
 struct mapnik_value_type<T, typename std::enable_if<detail::is_value_unicode_string<T>::value>::type>
 {
-    using type = mapnik::value_unicode_string;
+    using type = mapnik::value_unicode_string const&;
 };
 
 } // namespace detail

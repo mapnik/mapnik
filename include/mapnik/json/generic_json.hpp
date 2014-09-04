@@ -41,8 +41,10 @@ struct generic_json
     qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,mapnik::util::variant<value_null,bool,
-                                            value_integer,value_double,
+    qi::rule<Iterator,mapnik::util::variant<value_null,
+                                            value_double,
+                                            value_integer,
+                                            bool,
                                             std::string>(),space_type> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;

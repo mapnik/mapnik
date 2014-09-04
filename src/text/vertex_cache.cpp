@@ -27,29 +27,40 @@
 namespace mapnik
 {
 
+double vertex_cache::current_segment_angle()
+{
+    return std::atan2(-(current_segment_->pos.y - segment_starting_point_.y),
+                   current_segment_->pos.x - segment_starting_point_.x);
+}
+
 double vertex_cache::angle(double width)
 {
- /* IMPORTANT NOTE: See note about coordinate systems in placement_finder::find_point_placement()
-  * for imformation about why the y axis is inverted! */
+    // IMPORTANT NOTE: See note about coordinate systems in placement_finder::find_point_placement()
+    // for imformation about why the y axis is inverted!
     double tmp = width + position_in_segment_;
     if ((tmp <= current_segment_->length) && (tmp >= 0))
     {
         //Only calculate angle on request as it is expensive
         if (!angle_valid_)
         {
-            angle_ = std::atan2(-(current_segment_->pos.y - segment_starting_point_.y),
-                           current_segment_->pos.x - segment_starting_point_.x);
+            angle_ = current_segment_angle();
         }
-        return width >= 0 ? angle_ : angle_ + M_PI;
     } else
     {
         scoped_state s(*this);
-        pixel_position const& old_pos = s.get_state().position();
-        move(width);
-        double angle = std::atan2(-(current_position_.y - old_pos.y),
-                             current_position_.x - old_pos.x);
-        return angle;
+        if (move(width))
+        {
+            pixel_position const& old_pos = s.get_state().position();
+            return std::atan2(-(current_position_.y - old_pos.y),
+                           current_position_.x - old_pos.x);
+        }
+        else
+        {
+            s.restore();
+            angle_ = current_segment_angle();
+        }
     }
+    return width >= 0 ? angle_ : angle_ + M_PI;
 }
 
 bool vertex_cache::next_subpath()

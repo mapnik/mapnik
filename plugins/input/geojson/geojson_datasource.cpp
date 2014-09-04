@@ -177,7 +177,7 @@ void geojson_datasource::parse_geojson(T const& buffer)
             {
                 desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
                                                                   mapnik::util::apply_visitor(attr_value_converter(),
-                                                                                              std::get<1>(kv).base())));
+                                                                                              std::get<1>(kv))));
             }
         }
         else
