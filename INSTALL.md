@@ -4,18 +4,14 @@ Mapnik is cross platform and runs on Linux, Mac OSX, Solaris, *BSD, and Windows.
 
 To configure and build Mapnik do:
 
-```bash
-    $ ./configure
-    $ make
-```
+    ./configure
+    make
 
 To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
 
-```bash
-    $ PYTHON=python2 ./configure
-    $ make PYTHON=python2
-```
+    PYTHON=python2 ./configure
+    make PYTHON=python2
 
 NOTE: the above will not work on windows, rather see https://github.com/mapnik/mapnik/wiki/WindowsInstallation
 
