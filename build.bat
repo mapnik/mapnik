@@ -316,18 +316,35 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 if NOT EXIST get-pip.py (
     wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
+    IF %ERRORLEVEL% NEQ 0 GOTO ERROR
     python get-pip.py
+    IF %ERRORLEVEL% NEQ 0 GOTO ERROR
     C:\Python27\Scripts\pip.exe install nose
+    IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 )
 xcopy /i /d /s /q .\build\Release\_mapnik.pyd bindings\python\mapnik\_mapnik.pyd
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 SET PYTHONPATH=%CD%\bindings\python
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 SET GDAL_DATA=%CD%\..\mapnik-sdk\share\gdal
+if NOT EXIST %GDAL_DATA% (
+  mkdir %GDAL_DATA%
+  IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+)
 SET PROJ_LIB=%CD%\..\mapnik-sdk\share\proj
+if NOT EXIST %PROJ_LIB% (
+  mkdir %PROJ_LIB%
+  IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+)
 SET ICU_DATA=%CD%\..\mapnik-sdk\share\icu
+if NOT EXIST %ICU_DATA% (
+  mkdir %ICU_DATA%
+  IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+)
 
 if NOT EXIST ..\mapnik-sdk\share\icu\icudt53l.dat (
     wget --no-check-certificate https://github.com/mapnik/mapnik-packaging/raw/master/osx/icudt53l_only_collator_and_breakiterator.dat
-    rename icudt53l_only_collator_and_breakiterator.dat ..\mapnik-sdk\share\icu\icudt53l.dat
+    xcopy /i /f /s /q icudt53l_only_collator_and_breakiterator.dat ..\mapnik-sdk\share\icu\icudt53l.dat /Y
 )
 
 ::python tests\run_tests.py -q
