@@ -54,7 +54,8 @@ def compare_map(xml):
 def test_compare_map():
     good_maps = glob.glob("../data/good_maps/*.xml")
     # remove one map that round trips CDATA differently, but this is okay
-    #good_maps.remove('../data/good_maps/empty_parameter2.xml')
+    ignorable = os.path.join('..','data','good_maps','empty_parameter2.xml')
+    good_maps.remove(ignorable)
     for m in good_maps:
         compare_map(m)
 
