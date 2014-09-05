@@ -1,0 +1,49 @@
+<Map>
+<Style name="line" filter-mode="first" >
+  <Rule>
+    <LineSymbolizer stroke="#000000" />
+  </Rule>
+</Style>
+<Style name="point-placement" filter-mode="first" >
+  <Rule>
+    <MarkersSymbolizer
+      allow-overlap="true"
+      file="shape://ellipse"
+      placement="line"
+      spacing="30"
+      transform="scale(4,10)"
+      fill="blue"
+      avoid-edges="true"
+      clip="false">
+    </MarkersSymbolizer>
+    <MarkersSymbolizer
+      allow-overlap="true"
+      file="shape://ellipse"
+      placement="vertex-last"
+      transform="scale(10,4)"
+      fill="red"
+      avoid-edges="true"
+      clip="false">
+    </MarkersSymbolizer>
+    <MarkersSymbolizer
+      allow-overlap="true"
+      file="shape://ellipse"
+      placement="vertex-first"
+      transform="scale(10,4)"
+      fill="red"
+      avoid-edges="true"
+      clip="false">
+    </MarkersSymbolizer>
+    <DebugSymbolizer />
+  </Rule>
+</Style>
+<Layer name="carto_tests">
+    <StyleName>line</StyleName>
+    <StyleName>point-placement</StyleName>
+    <Datasource>
+       <Parameter name="type">csv</Parameter>
+       <Parameter name="file">../data/marker-on-line.csv</Parameter>
+       <Parameter name="separator">|</Parameter>
+    </Datasource>
+  </Layer>
+</Map>

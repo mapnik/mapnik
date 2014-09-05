@@ -272,6 +272,7 @@ files = {
     'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
     'marker-whole-multi-polygon':{'sizes':[(512,512)]},
     'shield-on-line-and-avoid-edges':{'sizes':[(512,512)]},
+    'marker-on-line-and-avoid-edges':{'sizes':[(512,512)]},
     'text-typographic':{'sizes':[(512,512)]},
     'functional-expressions':{'sizes':[(256,256)], 'bbox':mapnik.Box2d(-10,-10,10,10)},
     'marker-collide':{'sizes':[(512,512)]},
