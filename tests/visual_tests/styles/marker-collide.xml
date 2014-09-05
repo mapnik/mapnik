@@ -1,0 +1,52 @@
+<Map>
+
+  <Style name="line">
+    <Rule>
+      <LineSymbolizer stroke="#000000" />
+    </Rule>
+  </Style>
+
+  <Style name="text">
+    <Rule>
+      <TextSymbolizer spacing="10" size="14" halo-radius="2" face-name="DejaVu Sans Oblique" placement="line">'text'</TextSymbolizer>
+    </Rule>
+  </Style>
+
+  <Style name="point-placement">
+    <Rule>
+      <MarkersSymbolizer placement="line" marker-type="ellipse" fill="blue" transform="scale(1.5,.3)" spacing="1" allow-overlap="false"/>
+      <MarkersSymbolizer placement="line" marker-type="ellipse" fill="blue" transform="scale(.3,1.5)" spacing="1" allow-overlap="false"/>
+    </Rule>
+  </Style>
+
+  <Layer name="one">
+    <StyleName>line</StyleName>
+    <StyleName>text</StyleName>
+    <StyleName>point-placement</StyleName>
+    <Datasource>
+       <Parameter name="type">csv</Parameter>
+       <Parameter name="inline">
+i|wkt
+1|LINESTRING(-98.465624973178 64.664065539837, -84.403124973178 49.195315539837, -72.449999973178 40.757815539837, -61.199999973178 29.507815539837, -60.496874973178 22.476565539837, -58.387499973178 4.1953155398369, -52.059374973178 -7.7578094601631, -41.512499973178 -34.476559460163, -27.449999973178 -45.023434460163, -14.090624973178 -52.054684460163, 7.0031250268221 -61.195309460163)
+       </Parameter>
+       <Parameter name="separator">|</Parameter>
+    </Datasource>
+  </Layer>
+
+  <Layer name="two">
+    <StyleName>line</StyleName>
+    <StyleName>text</StyleName>
+    <StyleName>point-placement</StyleName>
+    <Datasource>
+       <Parameter name="type">csv</Parameter>
+       <Parameter name="inline">
+i|wkt
+1|LINESTRING(-55.574999973178 68.882815539837, -51.356249973178 42.164065539837, -57.684374973178 33.023440539837, -64.012499973178 21.773440539837, -63.309374973178 3.4921905398369, -45.731249973178 -46.429684460163, -16.903124973178 -50.648434460163, -2.8406249731779 -50.648434460163, 14.737500026822 -50.648434460163, 46.378125026822 -41.507809460163, 78.721875026822 -17.601559460163)
+2|LINESTRING(-21.824999973178 69.585940539837, -108.30937497318 41.460940539837, -13.387499973178 24.585940539837, -108.30937497318 6.3046905398369, -19.012499973178 -2.1328094601631, -83.699999973178 -26.039059460163, 5.5968750268221 -26.039059460163, -30.262499973178 -63.304684460163, 40.050000026822 -19.710934460163, 62.550000026822 -61.195309460163)
+3|LINESTRING(-73.856249973178 77.320315539837, -11.278124973178 -61.898434460163, -112.52812497318 61.148440539837, 31.612500026822 -61.898434460163, 56.925000026822 -13.382809460163)
+       </Parameter>
+       <Parameter name="separator">|</Parameter>
+    </Datasource>
+  </Layer>
+
+</Map>
