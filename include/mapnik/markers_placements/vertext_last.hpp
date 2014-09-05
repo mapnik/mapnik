@@ -32,9 +32,7 @@ class markers_vertex_last_placement : public markers_point_placement<Locator, De
 {
 public:
     markers_vertex_last_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
-        : markers_point_placement<Locator, Detector>(locator, detector, params)
-    {
-    }
+        : markers_point_placement<Locator, Detector>(locator, detector, params) {}
 
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
@@ -74,7 +72,10 @@ public:
         }
 
         box2d<double> box = this->perform_transform(angle, x, y);
-
+        if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+        {
+            return false;
+        }
         if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
         {
             return false;

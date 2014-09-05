@@ -172,6 +172,11 @@ public:
             x = last_x + dx * (spacing_left_ / segment_length);
             y = last_y + dy * (spacing_left_ / segment_length);
             box2d<double> box = this->perform_transform(angle, x, y);
+            if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+            {
+                set_spacing_left(spacing_left_ + spacing_ * this->params_.max_error / 10.0);
+                continue;
+            }
             if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
             {
                 //10.0 is the approxmiate number of positions tried and choosen arbitrarily

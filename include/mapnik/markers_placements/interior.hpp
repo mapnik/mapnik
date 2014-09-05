@@ -69,7 +69,10 @@ public:
         angle = 0;
 
         box2d<double> box = this->perform_transform(angle, x, y);
-
+        if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+        {
+            return false;
+        }
         if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
         {
             return false;
