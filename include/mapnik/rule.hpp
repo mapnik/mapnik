@@ -55,6 +55,7 @@ public:
          double min_scale_denominator = 0,
          double max_scale_denominator = std::numeric_limits<double>::infinity());
     rule(const rule& rhs);
+    rule(rule && rhs);
     rule& operator=(rule rhs);
     bool operator==(rule const& rhs) const;
     void set_max_scale(double scale);

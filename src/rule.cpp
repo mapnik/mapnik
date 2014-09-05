@@ -59,6 +59,15 @@ rule::rule(rule const& rhs)
       else_filter_(rhs.else_filter_),
       also_filter_(rhs.also_filter_) {}
 
+rule::rule(rule && rhs)
+    : name_(std::move(rhs.name_)),
+      min_scale_(std::move(rhs.min_scale_)),
+      max_scale_(std::move(rhs.max_scale_)),
+      syms_(std::move(rhs.syms_)),
+      filter_(std::move(rhs.filter_)),
+      else_filter_(std::move(rhs.else_filter_)),
+      also_filter_(std::move(rhs.also_filter_)) {}
+
 rule& rule::operator=(rule rhs)
 {
     using std::swap;
@@ -82,6 +91,7 @@ bool rule::operator==(rule const& rhs) const
         (else_filter_ == rhs.else_filter_) &&
         (also_filter_ == rhs.also_filter_);
 }
+
 
 void rule::set_max_scale(double scale)
 {

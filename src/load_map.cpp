@@ -976,7 +976,6 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<markers_symbolizer,marker_placement_enum>(sym, keys::markers_placement_type, node);
         // multi-policy
         set_symbolizer_property<markers_symbolizer,marker_multi_policy_enum>(sym, keys::markers_multipolicy, node);
-
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
@@ -1010,17 +1009,17 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
         file = ensure_relative_to_xml(file);
         ensure_exists(file);
 
-        line_pattern_symbolizer symbol;
-        parse_symbolizer_base(symbol, node);
-        put(symbol, keys::file, parse_path(file));
-        set_symbolizer_property<line_pattern_symbolizer,double>(symbol, keys::opacity, node);
+        line_pattern_symbolizer sym;
+        parse_symbolizer_base(sym, node);
+        put(sym, keys::file, parse_path(file));
+        set_symbolizer_property<line_pattern_symbolizer,double>(sym, keys::opacity, node);
 
         // offset value
         optional<double> offset = node.get_opt_attr<double>("offset");
-        if (offset) put(symbol, keys::offset, *offset);
+        if (offset) put(sym, keys::offset, *offset);
         // image transform
-        set_symbolizer_property<line_pattern_symbolizer, transform_type>(symbol, keys::image_transform, node);
-        rule.append(std::move(symbol));
+        set_symbolizer_property<line_pattern_symbolizer, transform_type>(sym, keys::image_transform, node);
+        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
@@ -1561,10 +1560,10 @@ void map_parser::parse_group_rule(group_symbolizer_properties & prop, xml_node c
 
         for (auto const& sym : fake_rule)
         {
-           rule->append(sym);
+           rule->append(std::move(sym));
         }
 
-        prop.add_rule(rule);
+        prop.add_rule(std::move(rule));
      }
      catch (const config_error & ex)
      {
