@@ -937,6 +937,12 @@ operator << (std::basic_ostream<charT,traits>& out,
     return out;
 }
 
+// hash function
+inline std::size_t hash_value(value const& val)
+{
+    return hash_value(val);
+}
+
 } // namespace value_adl_barrier
 
 using value_adl_barrier::value;

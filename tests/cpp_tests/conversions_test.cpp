@@ -1,9 +1,11 @@
 #include <mapnik/value_types.hpp>
+#include <mapnik/value.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <boost/unordered_map.hpp>
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #include <cstdio>
@@ -282,6 +284,14 @@ int main(int argc, char** argv)
         BOOST_TEST_EQ( val, false );
         BOOST_TEST( string2bool("true",val) );
         BOOST_TEST_EQ( val, true );
+
+        // mapnik::value hashability
+        using values_container = boost::unordered_map<mapnik::value, unsigned>;
+        values_container vc;
+        mapnik::value val2(1);
+        vc[val2] = 1;
+        BOOST_TEST_EQ( vc[1], 1 );
+
     }
     catch (std::exception const & ex)
     {
