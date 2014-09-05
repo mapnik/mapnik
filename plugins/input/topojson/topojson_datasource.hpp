@@ -79,7 +79,7 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     template <typename T>
-    void parse_topojson(T & stream);
+    void parse_topojson(T const& buffer);
 private:
     mapnik::datasource::datasource_t type_;
     std::map<std::string, mapnik::parameters> statistics_;

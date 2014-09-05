@@ -27,9 +27,7 @@
 #include <algorithm>
 
 // boost
-
 #include <boost/algorithm/string.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
 
 // mapnik
 #include <mapnik/unicode.hpp>
@@ -168,38 +166,39 @@ topojson_datasource::topojson_datasource(parameters const& params)
     }
     if (!inline_string_.empty())
     {
-        std::istringstream in(inline_string_);
-        parse_topojson(in);
+        parse_topojson(inline_string_);
     }
     else
     {
-#if defined (_WINDOWS)
-        std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
+#ifdef _WINDOWS
+        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(filename_).c_str(), L"rb"), fclose);
 #else
-        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(filename_.c_str(),"rb"), std::fclose);
 #endif
-        if (!in.is_open())
+        if (file == nullptr)
         {
             throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
         }
-        parse_topojson(in);
-        in.close();
+        std::fseek(file.get(), 0, SEEK_END);
+        std::size_t file_size = std::ftell(file.get());
+        std::fseek(file.get(), 0, SEEK_SET);
+        std::string file_buffer;
+        file_buffer.resize(file_size);
+        std::fread(&file_buffer[0], file_size, 1, file.get());
+        parse_topojson(file_buffer);
     }
 }
 
+namespace {
+using base_iterator_type = std::string::const_iterator;
+const mapnik::topojson::topojson_grammar<base_iterator_type> g;
+}
+
 template <typename T>
-void topojson_datasource::parse_topojson(T & stream)
+void topojson_datasource::parse_topojson(T const& buffer)
 {
-    using base_iterator_type = std::istreambuf_iterator<char>;
-    boost::spirit::multi_pass<base_iterator_type> begin =
-        boost::spirit::make_default_multi_pass(base_iterator_type(stream));
-
-    boost::spirit::multi_pass<base_iterator_type> end =
-        boost::spirit::make_default_multi_pass(base_iterator_type());
-
-    static const mapnik::topojson::topojson_grammar<boost::spirit::multi_pass<base_iterator_type> > g;
     boost::spirit::standard_wide::space_type space;
-    bool result = boost::spirit::qi::phrase_parse(begin, end, g, space, topo_);
+    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), g, space, topo_);
     if (!result)
     {
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
