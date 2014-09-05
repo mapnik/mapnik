@@ -957,6 +957,8 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<markers_symbolizer,double>(sym, keys::max_error, node);
         // allow-overlap
         set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::allow_overlap, node);
+        // avoid-edges
+        set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::avoid_edges, node);
         // ignore-placement
         set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
         // width

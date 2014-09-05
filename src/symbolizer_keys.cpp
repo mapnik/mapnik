@@ -116,7 +116,8 @@ static const property_meta_type key_meta[const_max_key] =
                         property_types::target_vertical_alignment},
     property_meta_type{ "upright", enumeration_wrapper(UPRIGHT_AUTO), [](enumeration_wrapper e)
                         {return enumeration<text_upright_enum,text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();},
-                        property_types::target_upright}
+                        property_types::target_upright},
+    property_meta_type{ "avoid-edges",false, nullptr, property_types::target_bool },
 
 };
 

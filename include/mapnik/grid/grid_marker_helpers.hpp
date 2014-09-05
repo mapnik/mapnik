@@ -80,10 +80,11 @@ struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
+        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
         box2d<double> bbox(0,0, src_.width(), src_.height());
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap };
+        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;
@@ -190,11 +191,12 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
+        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
         coord2d center = bbox_.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap };
+        markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, Detector> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;

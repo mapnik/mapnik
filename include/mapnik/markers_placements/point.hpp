@@ -37,6 +37,7 @@ struct markers_placement_params
     double spacing;
     double max_error;
     bool allow_overlap;
+    bool avoid_edges;
 };
 
 template <typename Locator, typename Detector>
@@ -87,6 +88,10 @@ public:
         angle = 0;
         box2d<double> box = perform_transform(angle, x, y);
 
+        if (params_.avoid_edges && !detector_.extent().contains(box))
+        {
+            return false;
+        }
         if (!params_.allow_overlap && !detector_.has_placement(box))
         {
             return false;
