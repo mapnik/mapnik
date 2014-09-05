@@ -69,8 +69,6 @@ if env['HAS_CAIRO']:
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
-lib_env['LIBS'].append('harfbuzz-icu')
-
 if '-DHAVE_PNG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('png')
    enabled_imaging_libraries.append('png_reader.cpp')
