@@ -23,14 +23,19 @@
 #ifndef MAPNIK_GENERIC_JSON_HPP
 #define MAPNIK_GENERIC_JSON_HPP
 
+#include <mapnik/value_types.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/json/value_converters.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
+
+using json_value = mapnik::util::variant<value_null,value_bool, value_integer, value_double, std::string>;
 
 template <typename Iterator>
 struct generic_json
@@ -41,15 +46,14 @@ struct generic_json
     qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,mapnik::util::variant<value_null,
-                                            value_double,
-                                            value_integer,
-                                            bool,
-                                            std::string>(),space_type> number;
+    qi::rule<Iterator,json_value(),space_type> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+    // conversions
+    boost::phoenix::function<detail::value_converter<mapnik::value_integer> > integer_converter;
+    boost::phoenix::function<detail::value_converter<mapnik::value_double> > double_converter;
 };
 
 

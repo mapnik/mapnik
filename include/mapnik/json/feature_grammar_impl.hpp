@@ -70,8 +70,8 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         >> json_.value >> *(lit(',') >> json_.value)
         >> lit(']')
         ;
-    json_.number %= json_.strict_double
-        | json_.int__
+    json_.number = json_.strict_double[_val = json_.double_converter(_1)]
+        | json_.int__[_val = json_.integer_converter(_1)]
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]

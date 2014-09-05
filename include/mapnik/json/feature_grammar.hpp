@@ -30,6 +30,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>
+#include <mapnik/json/value_converters.hpp>
 
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
@@ -104,12 +105,13 @@ struct feature_grammar :
 
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator, mapnik::util::variant<value_null,value_double,value_integer, bool, std::string>(), space_type> attribute_value;
+    qi::rule<Iterator, json_value(), space_type> attribute_value;
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
+    // error handler
     boost::phoenix::function<where_message> where_message_;
-
+    // geometry
     geometry_grammar<Iterator> geometry_grammar_;
 };
 
