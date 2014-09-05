@@ -182,6 +182,7 @@ files = {
     'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-multi-layout-1': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'text-multi-layout-2': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
+    'text-multiline': {'sizes': [(800,800)], 'bbox': default_text_box},
     'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     'tiff-alpha-gdal': {'sizes':[(600,400)]},
     'tiff-alpha-broken-assoc-alpha-gdal': {'sizes':[(600,400)]},
