@@ -150,7 +150,6 @@ private:
     void read_stripped(unsigned x,unsigned y,image_data_32& image);
     void read_tiled(unsigned x,unsigned y,image_data_32& image);
     TIFF* open(std::istream & input);
-    static void on_error(const char* , const char* fmt, va_list argptr);
 };
 
 namespace
@@ -205,27 +204,15 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
 }
 
 template <typename T>
-void tiff_reader<T>::on_error(const char* , const char* fmt, va_list argptr)
-{
-  char msg[10240];
-  vsprintf(msg, fmt, argptr);
-  throw image_reader_exception(msg);
-}
-
-template <typename T>
 void tiff_reader<T>::init()
 {
+    // avoid calling TIFFs global structures
     TIFFSetWarningHandler(0);
-    // Note - we intentially set the error handling to null
-    // when opening the image for the first time to avoid
-    // leaking in TiffOpen: https://github.com/mapnik/mapnik/issues/1783
     TIFFSetErrorHandler(0);
 
     TIFF* tif = open(stream_);
 
     if (!tif) throw image_reader_exception("Can't open tiff file");
-
-    TIFFSetErrorHandler(on_error);
 
     char msg[1024];
 
