@@ -540,6 +540,14 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
     std::string name;
     try
     {
+        optional<mapnik::boolean_type> status = node.get_opt_attr<mapnik::boolean_type>("status");
+
+        // return early is status is off
+        if (status && !(*status)){
+            node.set_ignore(true);
+            return;
+        }
+
         name = node.get_attr("name", std::string("Unnamed"));
 
         // If no projection is given inherit from map
@@ -555,7 +563,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         }
         layer lyr(name, srs);
 
-        optional<mapnik::boolean_type> status = node.get_opt_attr<mapnik::boolean_type>("status");
+
         if (status)
         {
             lyr.set_active(* status);
@@ -1656,32 +1664,34 @@ void map_parser::find_unused_nodes(xml_node const& root)
 
 void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string & error_message)
 {
-    if (!node.processed())
+    if (!node.ignore())
     {
-        if (node.is_text())
+        if (!node.processed())
         {
-            error_message += "\n* text '" + node.text() + "'";
+            if (node.is_text())
+            {
+                error_message += "\n* text '" + node.text() + "'";
+            }
+            else
+            {
+                error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
+            }
+            return; //All attributes and children are automatically unprocessed, too.
         }
-        else
+        xml_node::attribute_map const& attrs = node.get_attributes();
+        for (auto const& attr : attrs)
         {
-            error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
+            if (!attr.second.processed)
+            {
+                error_message += "\n* attribute '" + attr.first +
+                    "' with value '" + attr.second.value +
+                    "' at line " + node.line_to_string();
+            }
         }
-        return; //All attributes and children are automatically unprocessed, too.
-    }
-    xml_node::attribute_map const& attrs = node.get_attributes();
-    for (auto const& attr : attrs)
-    {
-        if (!attr.second.processed)
+        for (auto const& child_node : node)
         {
-            error_message += "\n* attribute '" + attr.first +
-                "' with value '" + attr.second.value +
-                "' at line " + node.line_to_string();
+            find_unused_nodes_recursive(child_node, error_message);
         }
-    }
-
-    for (auto const& child_node : node)
-    {
-        find_unused_nodes_recursive(child_node, error_message);
     }
 }
 

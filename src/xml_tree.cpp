@@ -169,7 +169,8 @@ xml_node::xml_node(xml_tree &tree, std::string && name, unsigned line, bool is_t
       name_(std::move(name)),
       is_text_(is_text),
       line_(line),
-      processed_(false) {}
+      processed_(false),
+      ignore_(false) {}
 
 std::string xml_node::xml_text = "<xmltext>";
 
@@ -242,6 +243,16 @@ void xml_node::set_processed(bool processed) const
 bool xml_node::processed() const
 {
     return processed_;
+}
+
+void xml_node::set_ignore(bool ignore) const
+{
+    ignore_ = ignore;
+}
+
+bool xml_node::ignore() const
+{
+    return ignore_;
 }
 
 std::size_t xml_node::size() const
