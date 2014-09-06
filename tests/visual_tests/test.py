@@ -8,6 +8,7 @@ import mapnik
 import shutil
 import os.path
 from compare import compare, compare_grids
+import platform
 
 try:
     import json
@@ -26,7 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
-if 'Linux' == os.uname()[0]:
+if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
     # to generate the expected images, so we'll rachet back the threshold
@@ -294,7 +295,10 @@ class Reporting:
     def result_fail(self, actual, expected, diff):
         self.failed += 1
         if self.quiet:
-            sys.stderr.write('\x1b[31m.\x1b[0m')
+            if platform.uname()[0] == 'Windows':
+                sys.stderr.write('.')
+            else:
+                sys.stderr.write('\x1b[31m.\x1b[0m')
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
 
@@ -308,9 +312,15 @@ class Reporting:
     def result_pass(self, actual, expected, diff):
         self.passed += 1
         if self.quiet:
-            sys.stderr.write('\x1b[32m.\x1b[0m')
+            if platform.uname()[0] == 'Windows':
+                sys.stderr.write('.')
+            else:
+                sys.stderr.write('\x1b[32m.\x1b[0m')
         else:
-            print '\x1b[32m✓\x1b[0m'
+            if platform.uname()[0] == 'Windows':
+                print '\x1b[32m✓\x1b[0m'
+            else:
+                print '✓'
 
     def not_found(self, actual, expected):
         self.failed += 1
