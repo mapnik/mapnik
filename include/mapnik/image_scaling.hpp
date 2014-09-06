@@ -25,9 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#ifdef _MSC_VER
 #include <mapnik/image_data.hpp>
-#endif
 
 // stl
 #include <iosfwd>
@@ -72,8 +70,7 @@ MAPNIK_DECL void scale_image_agg(Image & target,
                       double y_off_f,
                       double filter_factor);
 
-#ifdef _MSC_VER
-template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
+extern template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
                       mapnik::image_data_32 & target,
                       mapnik::image_data_32 const& source,
                       scaling_method_e scaling_method,
@@ -82,7 +79,6 @@ template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
                       double x_off_f,
                       double y_off_f,
                       double filter_radius);
-#endif
 
 }
 #endif // MAPNIK_IMAGE_SCALING_HPP
