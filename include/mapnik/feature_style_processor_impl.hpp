@@ -71,7 +71,11 @@ struct process_impl<false>
     static void process(T0 & /*ren*/, T1 const& /*sym*/, T2 & /*f*/, T3 const& /*tr*/)
     {
 #ifdef MAPNIK_DEBUG
-        std::clog << "NO-OP ...\n";
+    #ifdef _MSC_VER
+    #pragma NOTE(process function not implemented)
+    #else
+    #warning process function not implemented
+    #endif
 #endif
     }
 };
