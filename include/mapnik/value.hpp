@@ -940,7 +940,7 @@ operator << (std::basic_ostream<charT,traits>& out,
 // hash function
 inline std::size_t hash_value(value const& val)
 {
-    return hash_value(val);
+    return mapnik_hash_value(val);
 }
 
 } // namespace value_adl_barrier
