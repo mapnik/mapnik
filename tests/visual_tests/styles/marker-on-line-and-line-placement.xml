@@ -1,13 +1,19 @@
 <Map>
 <Style name="line" filter-mode="first" >
   <Rule>
-    <LineSymbolizer stroke="#000000" />
+    <LineSymbolizer stroke="red"/>
+    <LineSymbolizer stroke="blue" smooth=".5"/>
+    <LineSymbolizer stroke="orange" smooth="1"/>
+    <LineSymbolizer stroke="green" smooth="1" geometry-transform="translate(10,10)" />
   </Rule>
 </Style>
 <Style name="point-placement" filter-mode="first" >
   <Rule>
-    <MarkersSymbolizer allow-overlap="false" ignore-placement="true" placement="line" marker-type="ellipse" fill="blue" />
-    <DebugSymbolizer  />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" placement="line" marker-type="ellipse" fill="red" />
+    <MarkersSymbolizer stroke-width="0" offset="-10" transform="translate(0,-10)" allow-overlap="true" placement="line" marker-type="ellipse" fill="darkred" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth=".5" transform="translate(10,10) translate(-10,-10)" placement="line" marker-type="ellipse" fill="blue" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth="1" placement="line" marker-type="ellipse" fill="orange" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth="1" geometry-transform="translate(10,10)" placement="line" marker-type="ellipse" fill="darkgreen" />
   </Rule>
 </Style>
 <Layer name="carto_tests">

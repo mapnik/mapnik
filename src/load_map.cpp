@@ -969,6 +969,8 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::avoid_edges, node);
         // ignore-placement
         set_symbolizer_property<markers_symbolizer,boolean_type>(sym, keys::ignore_placement, node);
+        // offset
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
         // width
         //set_symbolizer_property<markers_symbolizer,double>(sym, keys::width, node);
         // height
@@ -1025,8 +1027,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
         set_symbolizer_property<line_pattern_symbolizer,double>(sym, keys::opacity, node);
 
         // offset value
-        optional<double> offset = node.get_opt_attr<double>("offset");
-        if (offset) put(sym, keys::offset, *offset);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
         // image transform
         set_symbolizer_property<line_pattern_symbolizer, transform_type>(sym, keys::image_transform, node);
         rule.append(std::move(sym));
