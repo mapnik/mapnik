@@ -357,8 +357,8 @@ void export_map()
         .def("zoom",&Map::zoom,
              (arg("factor")),
              "Zoom in or out by a given factor.\n"
-             "Positive number zooms in, negative number\n"
-             "zooms out.\n"
+             "positive number larger than 1, zooms out\n"
+             "positive number smaller than 1, zooms in\n"
              "\n"
              "Usage:\n"
              "\n"
