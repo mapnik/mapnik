@@ -311,10 +311,21 @@ private:
 template <typename T>
 void build_ellipse(T const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
 {
-    double width = get<double>(sym, keys::width, feature, vars, 0.0);
-    double height = get<double>(sym, keys::width, feature, vars, 0.0);
-    if (width > 0 && !height) height = width;
-    if (height > 0 && !width) width = height;
+    double width = 0.0;
+    double height = 0.0;
+    if (has_key<double>(sym,keys::width) && has_key<double>(sym,keys::height))
+    {
+        width = get<double>(sym, keys::width, feature, vars, 0.0);
+        height = get<double>(sym, keys::height, feature, vars, 0.0);
+    }
+    else if (has_key<double>(sym,keys::width))
+    {
+        width = height = get<double>(sym, keys::width, feature, vars, 0.0);
+    }
+    else if (has_key<double>(sym,keys::height))
+    {
+        width = height = get<double>(sym, keys::height, feature, vars, 0.0);
+    }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
     styled_svg.push_attr();
     styled_svg.begin_path();
