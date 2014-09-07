@@ -161,19 +161,19 @@ public:
         return true;
     }
 
-    bool has_placement(box2d<double> const& box, double minimum_distance)
+    bool has_placement(box2d<double> const& box, double margin)
     {
-        box2d<double> const& minimum_box = (minimum_distance > 0
-                                               ? box2d<double>(box.minx() - minimum_distance, box.miny() - minimum_distance,
-                                                               box.maxx() + minimum_distance, box.maxy() + minimum_distance)
+        box2d<double> const& margin_box = (margin > 0
+                                               ? box2d<double>(box.minx() - margin, box.miny() - margin,
+                                                               box.maxx() + margin, box.maxy() + margin)
                                                : box);
 
-        tree_t::query_iterator itr = tree_.query_in_box(minimum_box);
+        tree_t::query_iterator itr = tree_.query_in_box(margin_box);
         tree_t::query_iterator end = tree_.query_end();
 
         for (;itr != end; ++itr)
         {
-            if (itr->box.intersects(minimum_box))
+            if (itr->box.intersects(margin_box))
             {
                 return false;
             }
@@ -181,24 +181,27 @@ public:
         return true;
     }
 
-    bool has_placement(box2d<double> const& box, double minimum_distance, mapnik::value_unicode_string const& text, double repeat_distance)
+    bool has_placement(box2d<double> const& box, double margin, mapnik::value_unicode_string const& text, double repeat_distance)
     {
-        box2d<double> const& minimum_box = (minimum_distance > 0
-                                               ? box2d<double>(box.minx() - minimum_distance, box.miny() - minimum_distance,
-                                                               box.maxx() + minimum_distance, box.maxy() + minimum_distance)
+        // Don't bother with any of the repeat checking unless the repeat distance is greater than the margin
+        if (repeat_distance <= margin) {
+            return has_placement(box, margin);
+        }
+
+        box2d<double> repeat_box(box.minx() - repeat_distance, box.miny() - repeat_distance,
+                                 box.maxx() + repeat_distance, box.maxy() + repeat_distance);
+
+        box2d<double> const& margin_box = (margin > 0
+                                               ? box2d<double>(box.minx() - margin, box.miny() - margin,
+                                                               box.maxx() + margin, box.maxy() + margin)
                                                : box);
 
-        box2d<double> const& repeat_box = (repeat_distance > 0
-                                               ? box2d<double>(box.minx() - repeat_distance, box.miny() - repeat_distance,
-                                                               box.maxx() + repeat_distance, box.maxy() + repeat_distance)
-                                               : box);
-
-        tree_t::query_iterator itr = tree_.query_in_box(repeat_distance > minimum_distance ? repeat_box : minimum_box);
+        tree_t::query_iterator itr = tree_.query_in_box(repeat_box);
         tree_t::query_iterator end = tree_.query_end();
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->box.intersects(minimum_box) || (text == itr->text && itr->box.intersects(repeat_box)))
+            if (itr->box.intersects(margin_box) || (text == itr->text && itr->box.intersects(repeat_box)))
             {
                 return false;
             }

@@ -44,6 +44,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       label_spacing(0.0),
       label_position_tolerance(0.0),
       avoid_edges(false),
+      text_margin(0.0),
       repeat_distance(0.0),
       minimum_distance(0.0),
       minimum_padding(0.0),
@@ -63,6 +64,7 @@ void text_symbolizer_properties::evaluate_text_properties(feature_impl const& fe
     label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
     label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
     avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
+    text_margin = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.text_margin);
     repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.repeat_distance);
     minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
     minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
@@ -112,11 +114,25 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
 
 void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 {
+    // The options 'text-margin' and 'repeat-distance' replace 'minimum-distance'.
+    // Only allow one or the other to be defined here.
+    if (node.has_attribute("text-margin") || node.has_attribute("repeat-distance"))
+    {
+        if (node.has_attribute("minimum-distance"))
+        {
+            throw config_error(std::string("Cannot use deprecated option minimum-distance with "
+                                           "new options text-margin and repeat-distance."));
+        }
+        set_property_from_xml<value_double>(expressions.text_margin, "text-margin", node);
+        set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
+    }
+    else
+    {
+        set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
+    }
     set_property_from_xml<label_placement_e>(expressions.label_placement, "placement", node);
     set_property_from_xml<value_double>(expressions.label_spacing, "spacing", node);
     set_property_from_xml<value_double>(expressions.label_position_tolerance, "label-position-tolerance", node);
-    set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
-    set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
     set_property_from_xml<value_double>(expressions.minimum_padding, "minimum-padding", node);
     set_property_from_xml<value_double>(expressions.minimum_path_length, "minimum-path-length", node);
     set_property_from_xml<boolean_type>(expressions.avoid_edges, "avoid-edges", node);
@@ -157,6 +173,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (!(expressions.label_spacing == dfl.expressions.label_spacing) || explicit_defaults)
     {
         serialize_property("spacing", expressions.label_spacing, node);
+    }
+    if (!(expressions.text_margin == dfl.expressions.text_margin) || explicit_defaults)
+    {
+        serialize_property("text-margin", expressions.text_margin, node);
     }
     if (!(expressions.repeat_distance == dfl.expressions.repeat_distance) || explicit_defaults)
     {
@@ -207,6 +227,8 @@ void text_symbolizer_properties::add_expressions(expression_set & output) const
     if (is_expression(expressions.label_spacing)) output.insert(util::get<expression_ptr>(expressions.label_spacing));
     if (is_expression(expressions.label_position_tolerance)) output.insert(util::get<expression_ptr>(expressions.label_position_tolerance));
     if (is_expression(expressions.avoid_edges)) output.insert(util::get<expression_ptr>(expressions.avoid_edges));
+    if (is_expression(expressions.text_margin)) output.insert(util::get<expression_ptr>(expressions.text_margin));
+    if (is_expression(expressions.repeat_distance)) output.insert(util::get<expression_ptr>(expressions.repeat_distance));
     if (is_expression(expressions.minimum_distance)) output.insert(util::get<expression_ptr>(expressions.minimum_distance));
     if (is_expression(expressions.minimum_padding)) output.insert(util::get<expression_ptr>(expressions.minimum_padding));
     if (is_expression(expressions.minimum_path_length)) output.insert(util::get<expression_ptr>(expressions.minimum_path_length));

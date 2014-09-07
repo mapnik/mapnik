@@ -72,7 +72,7 @@ private:
     // Adjusts user defined spacing to place an integer number of labels.
     double get_spacing(double path_length, double layout_width) const;
     // Checks for collision.
-    bool collision(box2d<double> const& box, const value_unicode_string &repeat_key = "") const;
+    bool collision(box2d<double> const& box, const value_unicode_string &repeat_key, bool line_placement) const;
     // Adds marker to glyph_positions and to collision detector. Returns false if there is a collision.
     bool add_marker(glyph_positions_ptr glyphs, pixel_position const& pos) const;
     // Maps upright==auto, left_only and right_only to left,right to simplify processing.
