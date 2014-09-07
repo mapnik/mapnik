@@ -79,13 +79,10 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
             {
                 boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
 
-                auto width_expr = get_optional<expression_ptr>(sym, keys::width);
-                auto height_expr = get_optional<expression_ptr>(sym, keys::height);
-
                 // special case for simple ellipse markers
                 // to allow for full control over rx/ry dimensions
                 if (filename == "shape://ellipse"
-                   && (width_expr || height_expr))
+                   && (has_key<double>(sym,keys::width) || has_key<double>(sym,keys::height)))
                 {
                     svg_storage_type marker_ellipse;
                     vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());

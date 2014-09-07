@@ -311,25 +311,10 @@ private:
 template <typename T>
 void build_ellipse(T const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
 {
-    auto width_expr  = get<expression_ptr>(sym, keys::width);
-    auto height_expr = get<expression_ptr>(sym, keys::height);
-    double width = 0;
-    double height = 0;
-    if (width_expr && height_expr)
-    {
-        width = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
-        height = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
-    }
-    else if (width_expr)
-    {
-        width = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
-        height = width;
-    }
-    else if (height_expr)
-    {
-        height = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
-        width = height;
-    }
+    double width = get<double>(sym, keys::width, feature, vars, 0.0);
+    double height = get<double>(sym, keys::width, feature, vars, 0.0);
+    if (width > 0 && !height) height = width;
+    if (height > 0 && !width) width = height;
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
     styled_svg.push_attr();
     styled_svg.begin_path();
@@ -415,9 +400,8 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              attributes const& vars,
                              T const& sym)
 {
-    double width = get<double>(sym, keys::width, feature, vars, 0);
-    double height = get<double>(sym, keys::height, feature, vars, 0);
-
+    double width = get<double>(sym, keys::width, feature, vars, 0.0);
+    double height = get<double>(sym, keys::height, feature, vars, 0.0);
     if (width > 0 && height > 0)
     {
         double sx = width/svg_width;
