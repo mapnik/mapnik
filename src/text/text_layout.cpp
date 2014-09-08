@@ -25,7 +25,7 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
-
+#include <mapnik/make_unique.hpp>
 // ICU
 #include <unicode/brkiter.h>
 
@@ -125,7 +125,7 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
     mapnik::value_unicode_string const& text = itemizer_.text();
     Locale locale; // TODO: Is the default constructor correct?
     UErrorCode status = U_ZERO_ERROR;
-    BreakIterator *breakitr = BreakIterator::createLineInstance(locale, status);
+    std::unique_ptr<BreakIterator> breakitr(BreakIterator::createLineInstance(locale, status));
 
     // Not breaking the text if an error occurs is probably the best thing we can do.
     // https://github.com/mapnik/mapnik/issues/2072
