@@ -33,8 +33,6 @@ source = Split(
     """
     )
 
-source += program_env.Object('box2d-static', '#src/box2d.cpp')
-
 headers = ['#plugins/input/shape'] + env['CPPPATH'] 
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
