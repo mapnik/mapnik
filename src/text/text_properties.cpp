@@ -258,6 +258,7 @@ void text_layout_properties::from_xml(xml_node const &node, fontset_map const& f
     set_property_from_xml<double>(dy, "dy", node);
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
+    set_property_from_xml<std::string>(wrap_char, "wrap-char", node);
     set_property_from_xml<boolean_type>(wrap_before, "wrap-before", node);
     set_property_from_xml<boolean_type>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
@@ -277,6 +278,7 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
     if (!(jalign == dfl.jalign) || explicit_defaults) serialize_property("justify-alignment", jalign, node);
     if (!(text_ratio == dfl.text_ratio) || explicit_defaults) serialize_property("text-ratio", text_ratio, node);
     if (!(wrap_width == dfl.wrap_width) || explicit_defaults) serialize_property("wrap-width", wrap_width, node);
+    if (!(wrap_char == dfl.wrap_char) || explicit_defaults) serialize_property("wrap-char", wrap_char, node);
     if (!(wrap_before == dfl.wrap_before) || explicit_defaults) serialize_property("wrap-before", wrap_before, node);
     if (!(rotate_displacement == dfl.rotate_displacement) || explicit_defaults)
         serialize_property("rotate-displacement", rotate_displacement, node);
@@ -289,6 +291,7 @@ void text_layout_properties::add_expressions(expression_set & output) const
     if (is_expression(dy)) output.insert(util::get<expression_ptr>(dy));
     if (is_expression(orientation)) output.insert(util::get<expression_ptr>(orientation));
     if (is_expression(wrap_width)) output.insert(util::get<expression_ptr>(wrap_width));
+    if (is_expression(wrap_char)) output.insert(util::get<expression_ptr>(wrap_char));
     if (is_expression(wrap_before)) output.insert(util::get<expression_ptr>(wrap_before));
     if (is_expression(rotate_displacement)) output.insert(util::get<expression_ptr>(rotate_displacement));
     if (is_expression(text_ratio)) output.insert(util::get<expression_ptr>(text_ratio));

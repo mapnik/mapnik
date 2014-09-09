@@ -88,7 +88,14 @@ void text_layout::layout()
         std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
         text_line line(line_limits.first, line_limits.second);
         //Break line if neccessary
-        break_line(line, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
+        if (wrap_char_ != ' ')
+        {
+            break_line(line, wrap_char_, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
+        }
+        else
+        {
+            break_line(line, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
+        }
     }
 
     init_auto_alignment();
@@ -102,7 +109,7 @@ void text_layout::layout()
 
 // In the Unicode string characters are always stored in logical order.
 // This makes line breaking easy. One word is added to the current line at a time. Once the line is too long
-// we either go back one step or inset the line break at the current position (depending on "wrap_before" setting).
+// we either go back one step or insert the line break at the current position (depending on "wrap_before" setting).
 // At the end everything that is left over is added as the final line.
 void text_layout::break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before)
 {
@@ -197,6 +204,100 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
     }
 }
 
+struct line_breaker : mapnik::noncopyable
+{
+    line_breaker(value_unicode_string const& ustr, char  wrap_char)
+        : ustr_(ustr),
+          wrap_char_(wrap_char) {}
+
+    std::int32_t following(std::int32_t offset)
+    {
+        std::int32_t pos = ustr_.indexOf(wrap_char_, offset);
+        if (pos != -1) ++pos;
+        return pos;
+    }
+
+    std::int32_t preceding(std::int32_t offset)
+    {
+        std::int32_t pos = ustr_.lastIndexOf(wrap_char_, 0, offset);
+        if (pos != -1) ++pos;
+        return pos;
+    }
+
+    value_unicode_string const& ustr_;
+    char wrap_char_;
+};
+
+void text_layout::break_line(text_line & line, char wrap_char, double wrap_width,
+                             unsigned text_ratio, bool wrap_before)
+{
+    shape_text(line);
+    if (!wrap_width || line.width() < wrap_width)
+    {
+        add_line(line);
+        return;
+
+    }
+    if (text_ratio)
+    {
+        double wrap_at;
+        double string_width = line.width();
+        double string_height = line.line_height();
+        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio && (string_width/i) > wrap_width; i += 1.0) ;
+        wrap_width = wrap_at;
+    }
+    mapnik::value_unicode_string const& text = itemizer_.text();
+    line_breaker breaker(text, wrap_char);
+    double current_line_length = 0;
+    int last_break_position = static_cast<int>(line.first_char());
+    for (unsigned i=line.first_char(); i < line.last_char(); ++i)
+    {
+        std::map<unsigned, double>::const_iterator width_itr = width_map_.find(i);
+        if (width_itr != width_map_.end())
+        {
+            current_line_length += width_itr->second;
+        }
+        if (current_line_length <= wrap_width) continue;
+
+        int break_position = wrap_before ? breaker.preceding(i) : breaker.following(i);
+        if (break_position <= last_break_position || break_position == static_cast<int>(BreakIterator::DONE))
+        {
+            break_position = breaker.following(i);
+            if (break_position == static_cast<int>(BreakIterator::DONE))
+            {
+                break_position = line.last_char();
+            }
+        }
+        if (break_position < static_cast<int>(line.first_char()))
+        {
+            break_position = line.first_char();
+        }
+        if (break_position > static_cast<int>(line.last_char()))
+        {
+            break_position = line.last_char();
+        }
+
+        text_line new_line(last_break_position, break_position);
+        clear_cluster_widths(last_break_position, break_position);
+        shape_text(new_line);
+        add_line(new_line);
+        last_break_position = break_position;
+        i = break_position - 1;
+        current_line_length = 0;
+    }
+    if (last_break_position == static_cast<int>(line.first_char()))
+    {
+        add_line(line);
+    }
+    else if (last_break_position != static_cast<int>(line.last_char()))
+    {
+        text_line new_line(last_break_position, line.last_char());
+        clear_cluster_widths(last_break_position, line.last_char());
+        shape_text(new_line);
+        add_line(new_line);
+    }
+}
+
 void text_layout::add_line(text_line & line)
 {
     if (lines_.empty())
@@ -238,7 +339,8 @@ void text_layout::evaluate_properties(feature_impl const& feature, attributes co
     double dx = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dx);
     double dy = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dy);
     displacement_ = properties_.displacement_evaluator_(dx,dy);
-
+    std::string wrap_str = util::apply_visitor(extract_value<std::string>(feature,attrs), properties_.wrap_char);
+    if (!wrap_str.empty()) wrap_char_ = wrap_str[0];
     wrap_width_ = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);
 
     double angle = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.orientation);

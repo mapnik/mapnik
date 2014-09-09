@@ -119,6 +119,7 @@ struct MAPNIK_DECL text_layout_properties
     symbolizer_base::value_type orientation;
     symbolizer_base::value_type text_ratio;
     symbolizer_base::value_type wrap_width;
+    symbolizer_base::value_type wrap_char;
     symbolizer_base::value_type wrap_before;
     symbolizer_base::value_type rotate_displacement;
     symbolizer_base::value_type halign;
