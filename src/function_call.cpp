@@ -83,6 +83,15 @@ struct abs_impl
     }
 };
 
+// length
+struct length_impl
+{
+    value_type operator() (value_type const& val) const
+    {
+        return val.to_unicode().length();
+    }
+};
+
 unary_function_types::unary_function_types()
 {
     add
@@ -92,6 +101,7 @@ unary_function_types::unary_function_types()
         ("atan", atan_impl())
         ("exp",  exp_impl())
         ("abs",  abs_impl())
+        ("length",length_impl())
         ;
 }
 
