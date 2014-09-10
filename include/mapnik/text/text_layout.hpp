@@ -113,7 +113,8 @@ public:
 private:
     void break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before);
     void break_line(text_line & line, char wrap_char,
-                    double wrap_width, unsigned text_ratio, bool wrap_before);
+                    double wrap_width, unsigned text_ratio,
+                    bool wrap_before, bool repeat_wrap_char);
     void shape_text(text_line & line);
     void add_line(text_line & line);
     void clear_cluster_widths(unsigned first, unsigned last);
@@ -149,6 +150,7 @@ private:
     char wrap_char_ = ' ';
     double wrap_width_ = 0.0;
     bool wrap_before_ = false;
+    bool repeat_wrap_char_ = false;
     bool rotate_displacement_ = false;
     double text_ratio_ = 0.0;
     pixel_position displacement_ = {0,0};

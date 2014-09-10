@@ -45,6 +45,7 @@ void format_node::to_xml(ptree & xml) const
     if (line_spacing) serialize_property("line-spacing", *line_spacing, new_node);
     if (text_opacity) serialize_property("opacity", *text_opacity, new_node);
     if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
+    if (repeat_wrap_char) serialize_property("repeat-wrap-char", *repeat_wrap_char, new_node);
     if (fill) serialize_property("fill", *fill, new_node);
     if (halo_fill) serialize_property("halo-fill", *halo_fill, new_node);
     if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
@@ -150,6 +151,7 @@ void format_node::add_expressions(expression_set & output) const
     if (text_opacity && is_expression(*text_opacity)) output.insert(util::get<expression_ptr>(*text_opacity));
     //if (halo_opacity && is_expression(*halo_opacity)) output.insert(util::get<expression_ptr>(*halo_opacity));
     if (wrap_before && is_expression(*wrap_before)) output.insert(util::get<expression_ptr>(*wrap_before));
+    if (repeat_wrap_char && is_expression(*repeat_wrap_char)) output.insert(util::get<expression_ptr>(*repeat_wrap_char));
     if (fill && is_expression(*fill)) output.insert(util::get<expression_ptr>(*fill));
     if (halo_fill && is_expression(*halo_fill)) output.insert(util::get<expression_ptr>(*halo_fill));
     if (text_transform && is_expression(*text_transform)) output.insert(util::get<expression_ptr>(*text_transform));

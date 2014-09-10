@@ -90,7 +90,7 @@ void text_layout::layout()
         //Break line if neccessary
         if (wrap_char_ != ' ')
         {
-            break_line(line, wrap_char_, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
+            break_line(line, wrap_char_, wrap_width_ * scale_factor_, text_ratio_, wrap_before_, repeat_wrap_char_);
         }
         else
         {
@@ -228,8 +228,14 @@ struct line_breaker : mapnik::noncopyable
     char wrap_char_;
 };
 
+inline int adjust_last_break_position (int pos, bool repeat_wrap_char)
+{
+    if (repeat_wrap_char)  return (pos==0) ? 0: pos - 1;
+    else return pos;
+}
+
 void text_layout::break_line(text_line & line, char wrap_char, double wrap_width,
-                             unsigned text_ratio, bool wrap_before)
+                             unsigned text_ratio, bool wrap_before, bool repeat_wrap_char)
 {
     shape_text(line);
     if (!wrap_width || line.width() < wrap_width)
@@ -276,9 +282,8 @@ void text_layout::break_line(text_line & line, char wrap_char, double wrap_width
         {
             break_position = line.last_char();
         }
-
-        text_line new_line(last_break_position, break_position);
-        clear_cluster_widths(last_break_position, break_position);
+        text_line new_line(adjust_last_break_position(last_break_position, repeat_wrap_char_), break_position);
+        clear_cluster_widths(adjust_last_break_position(last_break_position, repeat_wrap_char_), break_position);
         shape_text(new_line);
         add_line(new_line);
         last_break_position = break_position;
@@ -291,8 +296,8 @@ void text_layout::break_line(text_line & line, char wrap_char, double wrap_width
     }
     else if (last_break_position != static_cast<int>(line.last_char()))
     {
-        text_line new_line(last_break_position, line.last_char());
-        clear_cluster_widths(last_break_position, line.last_char());
+        text_line new_line(adjust_last_break_position(last_break_position, repeat_wrap_char_), line.last_char());
+        clear_cluster_widths(adjust_last_break_position(last_break_position, repeat_wrap_char_), line.last_char());
         shape_text(new_line);
         add_line(new_line);
     }
@@ -347,6 +352,7 @@ void text_layout::evaluate_properties(feature_impl const& feature, attributes co
     orientation_.init(angle * M_PI/ 180.0);
 
     wrap_before_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.wrap_before);
+    repeat_wrap_char_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.repeat_wrap_char);
     rotate_displacement_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.rotate_displacement);
 
     valign_ = util::apply_visitor(extract_value<vertical_alignment_enum>(feature,attrs),properties_.valign);
