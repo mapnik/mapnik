@@ -137,7 +137,7 @@ struct text_properties_expressions
     symbolizer_base::value_type label_spacing = 0.0;
     symbolizer_base::value_type label_position_tolerance = 0.0;
     symbolizer_base::value_type avoid_edges = false;
-    symbolizer_base::value_type text_margin = 0.0;
+    symbolizer_base::value_type margin = 0.0;
     symbolizer_base::value_type repeat_distance = 0.0;
     symbolizer_base::value_type minimum_distance = 0.0;
     symbolizer_base::value_type minimum_padding = 0.0;
@@ -181,7 +181,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     // distance the label can be moved on the line to fit, if 0 the default is used
     double label_position_tolerance;
     bool avoid_edges;
-    double text_margin;
+    double margin;
     double repeat_distance;
     double minimum_distance;
     double minimum_padding;
