@@ -18,14 +18,14 @@
     <Style name="shield">
         <Rule>
             <Filter>[type] = 'motorway'</Filter>
-            <ShieldSymbolizer text-margin="0" repeat-distance="60" spacing="120" placement="line" face-name="DejaVu Sans Book" size="10" fill="white" file="../../data/svg/rect.svg" transform="scale(0.75)">[ref]</ShieldSymbolizer>
+            <ShieldSymbolizer margin="0" repeat-distance="60" spacing="120" placement="line" face-name="DejaVu Sans Book" size="10" fill="white" file="../../data/svg/rect.svg" transform="scale(0.75)">[ref]</ShieldSymbolizer>
         </Rule>
     </Style>
 
     <Style name="text">
         <Rule>
             <Filter>[type] != 'poi'</Filter>
-            <TextSymbolizer text-margin="0" repeat-distance="40" spacing="70" placement="line" face-name="DejaVu Sans Book" size="12">[name]</TextSymbolizer>
+            <TextSymbolizer margin="0" repeat-distance="40" spacing="70" placement="line" face-name="DejaVu Sans Book" size="12">[name]</TextSymbolizer>
         </Rule>
     </Style>
 
