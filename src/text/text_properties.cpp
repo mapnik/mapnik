@@ -294,6 +294,7 @@ void text_layout_properties::add_expressions(expression_set & output) const
     if (is_expression(orientation)) output.insert(util::get<expression_ptr>(orientation));
     if (is_expression(wrap_width)) output.insert(util::get<expression_ptr>(wrap_width));
     if (is_expression(wrap_char)) output.insert(util::get<expression_ptr>(wrap_char));
+    if (is_expression(wrap_before)) output.insert(util::get<expression_ptr>(wrap_before));
     if (is_expression(repeat_wrap_char)) output.insert(util::get<expression_ptr>(repeat_wrap_char));
     if (is_expression(rotate_displacement)) output.insert(util::get<expression_ptr>(rotate_displacement));
     if (is_expression(text_ratio)) output.insert(util::get<expression_ptr>(text_ratio));
