@@ -128,6 +128,7 @@ private:
     int tile_height_;
     tiff_ptr tif_;
     bool premultiplied_alpha_;
+    bool has_alpha_;
 public:
     enum TiffType {
         generic=1,
@@ -139,7 +140,7 @@ public:
     virtual ~tiff_reader();
     unsigned width() const;
     unsigned height() const;
-    inline bool has_alpha() const { return false; /*FIXME*/ }
+    inline bool has_alpha() const { return has_alpha_; }
     bool premultiplied_alpha() const;
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
@@ -180,7 +181,8 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       rows_per_strip_(0),
       tile_width_(0),
       tile_height_(0),
-      premultiplied_alpha_(false)
+      premultiplied_alpha_(false),
+      has_alpha_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
     init();
@@ -196,7 +198,8 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       rows_per_strip_(0),
       tile_width_(0),
       tile_height_(0),
-      premultiplied_alpha_(false)
+      premultiplied_alpha_(false),
+      has_alpha_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
     stream_.seekg(0, std::ios::beg);
@@ -231,14 +234,18 @@ void tiff_reader<T>::init()
             read_method_=stripped;
         }
         //TIFFTAG_EXTRASAMPLES
-        uint16 extrasamples;
-        uint16* sampleinfo;
-        TIFFGetFieldDefaulted(tif, TIFFTAG_EXTRASAMPLES,
-                              &extrasamples, &sampleinfo);
-        if (extrasamples == 1 &&
-            sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+        uint16 extrasamples = 0;
+        uint16* sampleinfo = nullptr;
+        if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
+                              &extrasamples, &sampleinfo))
         {
-            premultiplied_alpha_ = true;
+            has_alpha_ = true;
+            std::clog << "extrasamples " << extrasamples << " / " << sampleinfo[0] << " " << EXTRASAMPLE_ASSOCALPHA << "\n";
+            if (extrasamples == 1 &&
+                sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+            {
+                premultiplied_alpha_ = true;
+            }
         }
     }
     else
