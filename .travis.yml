@@ -44,6 +44,14 @@ before_script:
  - cd ../
 
 script:
+ # increase swap size
+ - free -k
+ - swapon -s
+ - sudo dd if=/dev/zero of=/newswap bs=1M count=512
+ - sudo mkswap /newswap
+ - sudo swapon /newswap
+ - free -k
+ - swapon -s
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - if [[ "${DEBUG}" == true ]]; then JOBS=2 make; else JOBS=4 make; fi;
  - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
