@@ -202,8 +202,7 @@ files = {
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
 
-    # disabled since fixing is not actionable: https://github.com/mapnik/mapnik/issues/1913
-    #'tiff-reprojection-2': {'sizes':[(250,250)]},
+    'tiff-reprojection-2': {'sizes':[(250,250)]},
 
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
