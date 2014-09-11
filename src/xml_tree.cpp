@@ -33,6 +33,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/text/font_feature_settings.hpp>
 
 // stl
 #include <type_traits>
@@ -74,7 +75,8 @@ DEFINE_NAME_TRAIT( mapnik::value_integer, "int" )
 #endif
 DEFINE_NAME_TRAIT( std::string, "string" )
 DEFINE_NAME_TRAIT( color, "color" )
-DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
+DEFINE_NAME_TRAIT( expression_ptr, "expression_ptr" )
+DEFINE_NAME_TRAIT( font_feature_settings_ptr, "font-feature-settings" )
 
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
@@ -421,6 +423,7 @@ compile_get_opt_attr(justify_alignment_e);
 compile_get_opt_attr(text_upright_e);
 compile_get_opt_attr(halo_rasterizer_e);
 compile_get_opt_attr(expression_ptr);
+compile_get_opt_attr(font_feature_settings_ptr);
 compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);

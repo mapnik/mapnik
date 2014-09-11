@@ -55,6 +55,7 @@ public:
     boost::optional<symbolizer_base::value_type> fill;
     boost::optional<symbolizer_base::value_type> halo_fill;
     boost::optional<symbolizer_base::value_type> halo_radius;
+    boost::optional<symbolizer_base::value_type> font_feature_settings;
 
 private:
     node_ptr child_;

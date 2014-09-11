@@ -118,6 +118,7 @@ static const property_meta_type key_meta[const_max_key] =
                         {return enumeration<text_upright_enum,text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();},
                         property_types::target_upright},
     property_meta_type{ "avoid-edges",false, nullptr, property_types::target_bool },
+    property_meta_type{ "font-feature-settings", nullptr, nullptr, property_types::target_font_feature_settings },
 
 };
 
