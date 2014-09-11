@@ -240,7 +240,6 @@ void tiff_reader<T>::init()
                               &extrasamples, &sampleinfo))
         {
             has_alpha_ = true;
-            std::clog << "extrasamples " << extrasamples << " / " << sampleinfo[0] << " " << EXTRASAMPLE_ASSOCALPHA << "\n";
             if (extrasamples == 1 &&
                 sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
             {
