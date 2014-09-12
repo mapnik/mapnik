@@ -339,15 +339,13 @@ boost::python::dict grid_encode( T const& grid, std::string const& format, bool 
 template boost::python::dict grid_encode( mapnik::grid const& grid, std::string const& format, bool add_features, unsigned int resolution);
 template boost::python::dict grid_encode( mapnik::grid_view const& grid, std::string const& format, bool add_features, unsigned int resolution);
 
-/* new approach: key comes from grid object
- * grid size should be same as the map
- * encoding, resizing handled as method on grid object
- * whether features are dumped is determined by argument not 'fields'
- */
 void render_layer_for_grid(mapnik::Map const& map,
                                   mapnik::grid & grid,
-                                  unsigned layer_idx, // TODO - layer by name or index
-                                  boost::python::list const& fields)
+                                  unsigned layer_idx,
+                                  boost::python::list const& fields,
+                                  double scale_factor,
+                                  unsigned offset_x,
+                                  unsigned offset_y)
 {
     std::vector<mapnik::layer> const& layers = map.layers();
     std::size_t layer_num = layers.size();
@@ -390,7 +388,7 @@ void render_layer_for_grid(mapnik::Map const& map,
         attributes.insert(join_field);
     }
 
-    mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
+    mapnik::grid_renderer<mapnik::grid> ren(map,grid,scale_factor,offset_x,offset_y);
     mapnik::layer const& layer = layers[layer_idx];
     ren.apply(layer,attributes);
 }

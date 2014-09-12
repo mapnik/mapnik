@@ -220,7 +220,10 @@ void render_with_detector(
 
 void render_layer2(mapnik::Map const& map,
                    mapnik::image_32& image,
-                   unsigned layer_idx)
+                   unsigned layer_idx,
+                   double scale_factor,
+                   unsigned offset_x,
+                   unsigned offset_y)
 {
     std::vector<mapnik::layer> const& layers = map.layers();
     std::size_t layer_num = layers.size();
@@ -233,7 +236,7 @@ void render_layer2(mapnik::Map const& map,
 
     python_unblock_auto_block b;
     mapnik::layer const& layer = layers[layer_idx];
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
+    mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x,offset_y);
     std::set<std::string> names;
     ren.apply(layer,names);
 }
@@ -730,12 +733,25 @@ BOOST_PYTHON_MODULE(_mapnik)
             ));
 
     def("render_layer", &render_layer2,
-        (arg("map"),arg("image"),args("layer"))
+        (arg("map"),
+         arg("image"),
+         arg("layer"),
+         arg("scale_factor")=1.0,
+         arg("offset_x")=0,
+         arg("offset_y")=0
+        )
         );
 
 #if defined(GRID_RENDERER)
     def("render_layer", &mapnik::render_layer_for_grid,
-        (arg("map"),arg("grid"),args("layer"),arg("fields")=boost::python::list())
+        (arg("map"),
+         arg("grid"),
+         arg("layer"),
+         arg("fields")=boost::python::list(),
+         arg("scale_factor")=1.0,
+         arg("offset_x")=0,
+         arg("offset_y")=0
+        )
         );
 #endif
 
