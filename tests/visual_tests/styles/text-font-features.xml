@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-1,-1,1,1</Parameter>
+            <Parameter name="inline">
+                id, lat, long, features, text, spacing
+                1,  0.6, 0, "", "The first floor", 10
+                2,  0.4, 0, "kern 0, liga 0", "The first floor", 10
+                3,  0.2, 0, "liga 1, dlig 1", "The first floor", 0
+                4,  0.0, 0, "smcp 1", "The first floor", 0
+                5, -0.2, 0, "frac 1, numr 1, dnom 1", "1⁄2 1⁄3 1⁄4", 0
+                6, -0.4, 0, "zero 1, onum 1", "0123456789", 0
+                7, -0.6, 0, "subs[1] 1, subs[4] 1", "H2SO4", 0
+            </Parameter>
+        </Datasource>
+    </Layer>
+    <Style name="My Style">
+        <Rule>
+            <TextSymbolizer
+                face-name="DejaVu Serif Book"
+                size="15"
+                placement="point"
+                character-spacing="[spacing]"
+                font-feature-settings="[features]"
+                >[text]</TextSymbolizer>
+        </Rule>
+    </Style>
+</Map>
