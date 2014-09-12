@@ -104,10 +104,10 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         ;
 
     properties = lit("\"properties\"")
-        >> lit(':') >> (lit('{') >>  attributes(_r1) >> lit('}')) | lit("null")
+        > lit(':') > (lit('{') > -attributes(_r1) > lit('}')) | lit("null")
         ;
 
-    attributes = (json_.string_ [_a = _1] >> lit(':') >> attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
+    attributes = (json_.string_ [_a = _1] > lit(':') > attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
     attribute_value %= json_.number | json_.string_  ;
