@@ -42,7 +42,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
     text_symbolizer_helper helper(
             sym, feature, common_.vars_, prj_trans,
             common_.width_, common_.height_,
-            common_.scale_factor_ * (1.0/pixmap_.get_resolution()),
+            common_.scale_factor_,
             common_.t_, common_.font_manager_, *common_.detector_,
             common_.query_extent_, tr);
     bool placement_found = false;

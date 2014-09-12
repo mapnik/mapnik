@@ -70,7 +70,7 @@ struct thunk_renderer : public util::static_visitor<>
 
     void operator()(point_render_thunk const &thunk) const
     {
-        ren_.render_marker(feature_, pixmap_.get_resolution(), offset_ + thunk.pos_,
+        ren_.render_marker(feature_, offset_ + thunk.pos_,
                            *thunk.marker_, thunk.tr_, thunk.opacity_, thunk.comp_op_);
     }
 
@@ -86,7 +86,7 @@ struct thunk_renderer : public util::static_visitor<>
             {
                 if (glyphs->marker())
                 {
-                    ren_.render_marker(feature_, pixmap_.get_resolution(),
+                    ren_.render_marker(feature_,
                                        glyphs->marker_pos(),
                                        *(glyphs->marker()->marker),
                                        glyphs->marker()->transform,
