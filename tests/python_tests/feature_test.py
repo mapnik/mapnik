@@ -96,6 +96,7 @@ def test_feature_expression_evaluation_attr_with_spaces():
     eq_(expr.evaluate(f),True)
 
 # https://github.com/mapnik/mapnik/issues/2390
+@raises(RuntimeError)
 def test_feature_from_geojson():
     ctx = mapnik.Context()
     inline_string = """
@@ -111,10 +112,7 @@ def test_feature_from_geojson():
          }
     }
     """
-    try :
-        feat = mapnik.Feature.from_geojson(inline_string,ctx)
-    except RuntimeError, err:
-        print>>sys.stderr,str(err)
+    feat = mapnik.Feature.from_geojson(inline_string,ctx)
 
 if __name__ == "__main__":
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))
