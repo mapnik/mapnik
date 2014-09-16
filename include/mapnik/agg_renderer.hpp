@@ -132,6 +132,8 @@ public:
     }
 
     void painted(bool painted);
+    bool painted();
+
     inline eAttributeCollectionPolicy attribute_collection_policy() const
     {
         return DEFAULT;

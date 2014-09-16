@@ -119,14 +119,22 @@ public:
         // grid renderer doesn't support processing of multiple symbolizers.
         return false;
     }
+
+    bool painted()
+    {
+        pixmap_.painted();
+    }
+
     void painted(bool painted)
     {
         pixmap_.painted(painted);
     }
+
     inline eAttributeCollectionPolicy attribute_collection_policy() const
     {
         return DEFAULT;
     }
+
     inline double scale_factor() const
     {
         return common_.scale_factor_;
