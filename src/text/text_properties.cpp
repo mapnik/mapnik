@@ -98,6 +98,11 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
         format->fontset = format_defaults.fontset;
 
         format->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings_ptr>(feature,attrs), format_defaults.font_feature_settings);
+        // Turn off ligatures if character_spacing > 0.
+        if (format->character_spacing > .0 && format->font_feature_settings->count() == 0)
+        {
+            format->font_feature_settings->append(font_feature_liga_off);
+        }
 
         tree_->apply(format, feature, attrs, output);
     }
