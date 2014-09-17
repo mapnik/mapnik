@@ -1017,7 +1017,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def test_variable_in_subquery1():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
            (select * from test where @zoom = 30 ) as tmp''',
-                            geometry_field='geom',
+                            geometry_field='geom', srid=4326,
                             autodetect_key_field=True)
         fs = ds.featureset(variables={'zoom':30})
         for id in range(1,5):
