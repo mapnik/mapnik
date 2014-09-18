@@ -43,13 +43,16 @@ def render_cairo(m, output, scale_factor):
 
 def render_grid(m, output, scale_factor):
     grid = mapnik.Grid(m.width, m.height)
-    mapnik.render_layer(m, grid, layer=0)
+    mapnik.render_layer(m, grid, layer=0, scale_factor=scale_factor)
     utf1 = grid.encode('utf', resolution=4)
     open(output,'wb').write(json.dumps(utf1, indent=1))
 
+def render_agg(m, output, scale_factor):
+    mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
+
 renderers = [
     { 'name': 'agg',
-      'render': lambda m, output, scale_factor: mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
+      'render': render_agg,
       'compare': lambda actual, reference: compare(actual, reference, alpha=True),
       'threshold': agg_threshold,
       'filetype': 'png',
@@ -417,9 +420,6 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
         return m
 
     for renderer in renderers:
-        # TODO - grid renderer does not support scale_factor yet via python
-        if renderer['name'] == 'grid' and scale_factor != 1.0:
-            continue
         if config.get(renderer['name'], True):
             expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
                 (postfix, renderer['name'], renderer['filetype']))
