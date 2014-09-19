@@ -240,16 +240,23 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
     pixel_position const& base_point = pos.get_base_point();
     start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
     start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
+    start.x += transform_.tx * 64;
+    start.y += transform_.ty * 64;
 
     // now render transformed glyphs
     double halo_radius = 0.0;
+    FT_Matrix halo_matrix;
+    halo_matrix.xx = halo_transform_.sx  * 0x10000L;
+    halo_matrix.xy = halo_transform_.shx * 0x10000L;
+    halo_matrix.yy = halo_transform_.sy  * 0x10000L;
+    halo_matrix.yx = halo_transform_.shy * 0x10000L;
     for (auto & glyph : glyphs_)
     {
         if (glyph.properties)
         {
             halo_radius = glyph.properties->halo_radius * scale_factor_;
         }
-        FT_Glyph_Transform(glyph.image, 0, &start);
+        FT_Glyph_Transform(glyph.image, &halo_matrix, &start);
         error = FT_Glyph_To_Bitmap(&glyph.image, FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
         {
