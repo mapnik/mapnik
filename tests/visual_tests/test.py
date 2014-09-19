@@ -280,6 +280,7 @@ files = {
     'text-typographic':{'sizes':[(512,512)]},
     'functional-expressions':{'sizes':[(256,256)], 'bbox':mapnik.Box2d(-10,-10,10,10)},
     'marker-collide':{'sizes':[(512,512)]},
+    'postgis-inline':{'sizes':[(512,512)]},
     }
 
 class Reporting:
