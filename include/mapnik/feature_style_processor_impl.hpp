@@ -707,7 +707,7 @@ void feature_style_processor<Processor>::render_style(
             }
         }
     }
-    p.painted(was_painted);
+    p.painted(p.painted() | was_painted);
     p.end_style_processing(*style);
 }
 
