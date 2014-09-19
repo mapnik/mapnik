@@ -41,7 +41,8 @@ public:
     using feature_vector = std::vector<font_feature>;
     using feature_iterator = feature_vector::iterator;
 
-    font_feature_settings(std::string const& features = "");
+    font_feature_settings(std::string const& features);
+    font_feature_settings();
 
     void from_string(std::string const& features);
     std::string to_string() const;

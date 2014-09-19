@@ -36,9 +36,13 @@ namespace mapnik
 {
 
 font_feature_settings::font_feature_settings(std::string const& features)
+    : features_()
 {
     from_string(features);
 }
+
+font_feature_settings::font_feature_settings()
+    : features_() {}
 
 void font_feature_settings::from_string(std::string const& features)
 {
