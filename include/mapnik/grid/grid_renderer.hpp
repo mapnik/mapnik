@@ -122,7 +122,7 @@ public:
 
     bool painted()
     {
-        pixmap_.painted();
+        return pixmap_.painted();
     }
 
     void painted(bool painted)
