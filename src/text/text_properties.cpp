@@ -265,9 +265,9 @@ void text_layout_properties::from_xml(xml_node const &node, fontset_map const& f
     set_property_from_xml<double>(dy, "dy", node);
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
-    set_property_from_xml<std::string>(wrap_char, "wrap-char", node);
+    set_property_from_xml<std::string>(wrap_char, "wrap-character", node);
     set_property_from_xml<boolean_type>(wrap_before, "wrap-before", node);
-    set_property_from_xml<boolean_type>(repeat_wrap_char, "repeat-wrap-char", node);
+    set_property_from_xml<boolean_type>(repeat_wrap_char, "repeat-wrap-character", node);
     set_property_from_xml<boolean_type>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
@@ -286,9 +286,9 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
     if (!(jalign == dfl.jalign) || explicit_defaults) serialize_property("justify-alignment", jalign, node);
     if (!(text_ratio == dfl.text_ratio) || explicit_defaults) serialize_property("text-ratio", text_ratio, node);
     if (!(wrap_width == dfl.wrap_width) || explicit_defaults) serialize_property("wrap-width", wrap_width, node);
-    if (!(wrap_char == dfl.wrap_char) || explicit_defaults) serialize_property("wrap-char", wrap_char, node);
+    if (!(wrap_char == dfl.wrap_char) || explicit_defaults) serialize_property("wrap-character", wrap_char, node);
     if (!(wrap_before == dfl.wrap_before) || explicit_defaults) serialize_property("wrap-before", wrap_before, node);
-    if (!(repeat_wrap_char == dfl.repeat_wrap_char) || explicit_defaults) serialize_property("repeat-wrap-char", repeat_wrap_char, node);
+    if (!(repeat_wrap_char == dfl.repeat_wrap_char) || explicit_defaults) serialize_property("repeat-wrap-character", repeat_wrap_char, node);
     if (!(rotate_displacement == dfl.rotate_displacement) || explicit_defaults)
         serialize_property("rotate-displacement", rotate_displacement, node);
     if (!(orientation == dfl.orientation) || explicit_defaults) serialize_property("orientation", orientation, node);

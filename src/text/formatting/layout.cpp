@@ -51,7 +51,7 @@ void layout_node::to_xml(ptree &xml) const
     if (text_ratio) serialize_property("text-ratio", *text_ratio, new_node);
     if (wrap_width) serialize_property("wrap-width", *wrap_width, new_node);
     if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
-    if (repeat_wrap_char) serialize_property("repeat-wrap-char", *repeat_wrap_char, new_node);
+    if (repeat_wrap_char) serialize_property("repeat-wrap-character", *repeat_wrap_char, new_node);
     if (rotate_displacement) serialize_property("rotate-displacement", *rotate_displacement, new_node);
     if (orientation) serialize_property("orientation", *orientation, new_node);
     if (halign) serialize_property("horizontal-alignment", *halign, new_node);
@@ -72,7 +72,7 @@ node_ptr layout_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     if (xml.has_attribute("text-ratio")) set_property_from_xml<double>(n->text_ratio, "text-ratio", xml);
     if (xml.has_attribute("wrap-width")) set_property_from_xml<double>(n->wrap_width, "wrap-width", xml);
     if (xml.has_attribute("wrap-before")) set_property_from_xml<mapnik::boolean_type>(n->wrap_before, "wrap-before", xml);
-    if (xml.has_attribute("repeat-wrap-char")) set_property_from_xml<mapnik::boolean_type>(n->repeat_wrap_char, "repeat-wrap-char", xml);
+    if (xml.has_attribute("repeat-wrap-character")) set_property_from_xml<mapnik::boolean_type>(n->repeat_wrap_char, "repeat-wrap-character", xml);
     if (xml.has_attribute("rotate-displacement")) set_property_from_xml<mapnik::boolean_type>(n->rotate_displacement, "rotate-displacement", xml);
     if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
     if (xml.has_attribute("horizontal-alignment")) set_property_from_xml<horizontal_alignment_e>(n->halign, "horizontal-alignment", xml);

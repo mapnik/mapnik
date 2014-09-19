@@ -45,7 +45,7 @@ void format_node::to_xml(ptree & xml) const
     if (line_spacing) serialize_property("line-spacing", *line_spacing, new_node);
     if (text_opacity) serialize_property("opacity", *text_opacity, new_node);
     if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
-    if (repeat_wrap_char) serialize_property("repeat-wrap-char", *repeat_wrap_char, new_node);
+    if (repeat_wrap_char) serialize_property("repeat-wrap-character", *repeat_wrap_char, new_node);
     if (fill) serialize_property("fill", *fill, new_node);
     if (halo_fill) serialize_property("halo-fill", *halo_fill, new_node);
     if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
