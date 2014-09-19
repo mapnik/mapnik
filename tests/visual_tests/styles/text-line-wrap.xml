@@ -2,28 +2,14 @@
 <Map background-color="#b5d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="0.7.2">
     <Style name="1">
         <Rule>
-            <Filter>[name] = one</Filter>
             <TextSymbolizer
                 size="15"
                 dy="-5"
                 allow-overlap="true"
                 face-name="DejaVu Sans Book"
                 wrap-width=".1"
-                repeat-wrap-character="true"
-                wrap-character=","
-                halo-radius="1">[label]</TextSymbolizer>
-            <PointSymbolizer allow-overlap="true" />
-        </Rule>        
-        <Rule>
-            <Filter>[name] = two</Filter>
-            <TextSymbolizer
-                size="15"
-                dy="-5"
-                allow-overlap="true"
-                face-name="DejaVu Sans Book"
-                wrap-width=".1"
-                repeat-wrap-character="true"
-                wrap-character="-"
+                repeat-wrap-character="[repeat-wrap-character]"
+                wrap-character="[wrap-character]"
                 halo-radius="1">[label]</TextSymbolizer>
             <PointSymbolizer allow-overlap="true" />
         </Rule>        
@@ -42,14 +28,16 @@
                     { "type": "Feature", 
                         "properties": {
                             "label": "this,that",
-                            "name":"one"
+                            "wrap-character":",",
+                            "repeat-wrap-character":true
                         },
                         "geometry"  : { "type": "Point", "coordinates": [ 2.5, 2.5 ] }
                     },
                     { "type": "Feature", 
                         "properties": {
                             "label": "this-that",
-                            "name":"two"
+                            "wrap-character":"-",
+                            "repeat-wrap-character":true
                         },
                         "geometry"  : { "type": "Point", "coordinates": [ 0, 5 ] }
                     }
