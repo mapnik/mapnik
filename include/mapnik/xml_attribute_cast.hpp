@@ -33,6 +33,7 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/text/font_feature_settings.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -197,6 +198,16 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
             tree.expr_cache_.emplace(source,expr);
             return expr;
         }
+    }
+};
+
+// specialization for mapnik::font_feature_settings_ptr
+template <>
+struct do_xml_attribute_cast<mapnik::font_feature_settings_ptr>
+{
+    static inline boost::optional<mapnik::font_feature_settings_ptr> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
+    {
+        return std::make_shared<font_feature_settings>(source);
     }
 };
 

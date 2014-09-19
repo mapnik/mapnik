@@ -50,6 +50,7 @@ void format_node::to_xml(ptree & xml) const
     if (halo_fill) serialize_property("halo-fill", *halo_fill, new_node);
     if (halo_radius) serialize_property("halo-radius", *halo_radius, new_node);
     if (text_transform) serialize_property("text-transform", *text_transform, new_node);
+    if (font_feature_settings) serialize_property("font-feature-settings", *font_feature_settings, new_node);
 
     if (face_name) set_attr(new_node, "face-name", *face_name);
     if (fontset) set_attr(new_node, "fontset-name", fontset->get_name());
@@ -73,6 +74,7 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     set_property_from_xml<color>(n->fill, "fill", xml);
     set_property_from_xml<color>(n->halo_fill, "halo-fill", xml);
     set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
+    set_property_from_xml<font_feature_settings_ptr>(n->font_feature_settings, "font-feature-settings", xml);
 
     boost::optional<std::string> face_name = xml.get_opt_attr<std::string>("face-name");
     if (face_name)
@@ -112,6 +114,7 @@ void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     if (fill) new_properties->fill = util::apply_visitor(extract_value<color>(feature,attrs), *fill);
     if (halo_fill) new_properties->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
     if (text_transform) new_properties->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), *text_transform);
+    if (font_feature_settings) new_properties->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings_ptr>(feature,attrs), *font_feature_settings);
 
     if (fontset)
     {
@@ -155,6 +158,7 @@ void format_node::add_expressions(expression_set & output) const
     if (fill && is_expression(*fill)) output.insert(util::get<expression_ptr>(*fill));
     if (halo_fill && is_expression(*halo_fill)) output.insert(util::get<expression_ptr>(*halo_fill));
     if (text_transform && is_expression(*text_transform)) output.insert(util::get<expression_ptr>(*text_transform));
+    if (font_feature_settings && is_expression(*font_feature_settings)) output.insert(util::get<expression_ptr>(*font_feature_settings));
     if (child_) child_->add_expressions(output);
 }
 

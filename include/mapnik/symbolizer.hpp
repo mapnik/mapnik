@@ -41,6 +41,7 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/text/font_feature_settings.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/variant.hpp>
 
@@ -104,7 +105,8 @@ using value_base_type = util::variant<value_bool,
                                       text_placements_ptr,
                                       dash_array,
                                       raster_colorizer_ptr,
-                                      group_symbolizer_properties_ptr>;
+                                      group_symbolizer_properties_ptr,
+                                      font_feature_settings_ptr>;
 
 struct strict_value : value_base_type
 {
@@ -173,7 +175,8 @@ enum class property_types : std::uint8_t
     target_horizontal_alignment,
     target_justify_alignment,
     target_vertical_alignment,
-    target_upright
+    target_upright,
+    target_font_feature_settings
 };
 
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
@@ -412,6 +415,20 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
             util::add_dashes(buf,dash);
         }
         return dash;
+    }
+};
+
+// mapnik::font_feature_settings_ptr
+template <>
+struct evaluate_expression_wrapper<mapnik::font_feature_settings_ptr>
+{
+    template <typename T1, typename T2, typename T3>
+    mapnik::font_feature_settings_ptr operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    {
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
+        // FIXME - throw instead?
+        if (val.is_null()) return std::make_shared<mapnik::font_feature_settings>();
+        return std::make_shared<mapnik::font_feature_settings>(val.to_string());
     }
 };
 

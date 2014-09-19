@@ -91,6 +91,7 @@ enum class keys : std::uint8_t
     vertical_alignment,
     upright,
     avoid_edges,
+    font_feature_settings,
     MAX_SYMBOLIZER_KEY
 };
 

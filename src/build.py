@@ -211,6 +211,7 @@ source = Split(
     text/renderer.cpp
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
+    text/font_feature_settings.cpp
     text/formatting/base.cpp
     text/formatting/list.cpp
     text/formatting/text.cpp
