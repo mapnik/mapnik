@@ -126,9 +126,14 @@ public:
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    void painted(bool)
+    bool painted() const
     {
-        // nothing to do
+        return painted_;
+    }
+
+    void painted(bool painted)
+    {
+        painted_ = painted;
     }
 
     inline eAttributeCollectionPolicy attribute_collection_policy() const
