@@ -48,7 +48,7 @@ namespace mapnik
 struct Featureset;
 using featureset_ptr = std::shared_ptr<Featureset>;
 class feature_type_style;
-class CoordTransform;
+class view_transform;
 class layer;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
@@ -389,7 +389,7 @@ public:
 
     double scale_denominator() const;
 
-    CoordTransform view_transform() const;
+    view_transform transform() const;
 
     /*!
      * @brief Query a Map layer (by layer index) for features

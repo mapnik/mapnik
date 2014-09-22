@@ -30,7 +30,7 @@
 #include "geojson_featureset.hpp"
 
 geojson_featureset::geojson_featureset(std::vector<mapnik::feature_ptr> const& features,
-                                       std::deque<std::size_t> && index_array)
+                                       array_type && index_array)
     : features_(features),
       index_array_(std::move(index_array)),
       index_itr_(index_array_.begin()),
@@ -42,7 +42,12 @@ mapnik::feature_ptr geojson_featureset::next()
 {
     if (index_itr_ != index_end_)
     {
+#if BOOST_VERSION >= 105600
+        geojson_datasource::item_type const& item = *index_itr_++;
+        std::size_t index = item.second;
+#else
         std::size_t index = *index_itr_++;
+#endif
         if ( index < features_.size())
         {
             return features_.at(index);

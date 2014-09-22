@@ -25,7 +25,9 @@
 
 // mapnik
 #include <mapnik/value.hpp>
+#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/topology.hpp>
+#include <mapnik/json/value_converters.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
 #include <boost/spirit/include/qi.hpp>
@@ -63,20 +65,7 @@ struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>
     topojson_grammar();
 private:
     // generic JSON support
-    qi::rule<Iterator,space_type> value;
-    qi::symbols<char const, char const> unesc_char;
-    qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
-    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
-    qi::rule<Iterator,std::string(), space_type> string_;
-    qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,space_type, util::variant<value_null,bool,
-                                                value_integer,value_double,
-                                                std::string>()> number;
-    qi::rule<Iterator,space_type> object;
-    qi::rule<Iterator,space_type> array;
-    qi::rule<Iterator,space_type> pairs;
-    qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
-
+    json::generic_json<Iterator> json_;
     // topoJSON
     qi::rule<Iterator, space_type, mapnik::topojson::topology()> topology;
     qi::rule<Iterator, space_type, std::vector<mapnik::topojson::geometry>()> objects;
@@ -99,10 +88,9 @@ private:
     // properties
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties;
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> attributes;
-    qi::rule<Iterator, space_type, mapnik::topojson::value()> attribute_value;
+    qi::rule<Iterator, space_type, mapnik::json::json_value()> attribute_value;
     // id
     qi::rule<Iterator,space_type> id;
-
     // error
     boost::phoenix::function<where_message> where_message_;
 };

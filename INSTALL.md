@@ -4,8 +4,18 @@ Mapnik is cross platform and runs on Linux, Mac OSX, Solaris, *BSD, and Windows.
 
 To configure and build Mapnik do:
 
-    ./configure
-    make
+```bash
+    $ ./configure
+    $ make
+```
+
+To use a Python interpreter that is not named `python` for your build, do
+something like the following instead:
+
+```bash
+    $ PYTHON=python2 ./configure
+    $ make PYTHON=python2
+```
 
 NOTE: the above will not work on windows, rather see https://github.com/mapnik/mapnik/wiki/WindowsInstallation
 
@@ -33,7 +43,7 @@ For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationT
 Build system dependencies are:
 
  * C++ compiler (like g++ or clang++)
- * >= 2 GB RAM
+ * >= 2 GB RAM (> 5 GB for g++)
  * Python 2.4-2.7 
  * Scons (a copy is bundled)
 

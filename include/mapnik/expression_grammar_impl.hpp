@@ -150,6 +150,12 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
             )
         ;
 
+    unary_function_expr = unary_func_type > lit('(') > expr > lit(')')
+        ;
+
+    binary_function_expr = binary_func_type > lit('(') > expr > lit(',') > expr > lit(')')
+        ;
+
     unary_expr = primary_expr [_val = _1]
         | '+' >> primary_expr [_val = _1]
         | '-' >> primary_expr [_val = -_1]
@@ -166,6 +172,8 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
         | global_attr [_val = construct<mapnik::global_attribute>( _1 )]
         | lit("not") >> expr [_val =  !_1]
+        | unary_function_expr [_val = _1]
+        | binary_function_expr [_val = _1]
         | '(' >> expr [_val = _1 ] >> ')'
         | ustring[_val = unicode_(_1)] // if we get here then try parsing as unquoted string
         ;

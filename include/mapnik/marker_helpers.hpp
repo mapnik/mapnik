@@ -111,21 +111,16 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
         marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
+        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
         coord2d center = bbox_.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine tr = recenter * marker_trans_;
+        markers_placement_params params { bbox_, tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, Detector> placement_finder(
-            placement_method,
-            path,
-            bbox_,
-            tr,
-            detector_,
-            spacing * scale_factor_,
-            max_error,
-            allow_overlap);
+            placement_method, path, detector_, params);
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
@@ -201,20 +196,15 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
     {
         marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
+        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
         box2d<double> bbox_(0,0, src_.width(),src_.height());
         double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
-            placement_method,
-            path,
-            bbox_,
-            marker_trans_,
-            detector_,
-            spacing * scale_factor_,
-            max_error,
-            allow_overlap);
+            placement_method, path, detector_, params);
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
@@ -321,24 +311,20 @@ private:
 template <typename T>
 void build_ellipse(T const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
 {
-    auto width_expr  = get<expression_ptr>(sym, keys::width);
-    auto height_expr = get<expression_ptr>(sym, keys::height);
-    double width = 0;
-    double height = 0;
-    if (width_expr && height_expr)
+    double width = 0.0;
+    double height = 0.0;
+    if (has_key<double>(sym,keys::width) && has_key<double>(sym,keys::height))
     {
-        width = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
-        height = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
+        width = get<double>(sym, keys::width, feature, vars, 0.0);
+        height = get<double>(sym, keys::height, feature, vars, 0.0);
     }
-    else if (width_expr)
+    else if (has_key<double>(sym,keys::width))
     {
-        width = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
-        height = width;
+        width = height = get<double>(sym, keys::width, feature, vars, 0.0);
     }
-    else if (height_expr)
+    else if (has_key<double>(sym,keys::height))
     {
-        height = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
-        width = height;
+        width = height = get<double>(sym, keys::height, feature, vars, 0.0);
     }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
     styled_svg.push_attr();
@@ -425,17 +411,8 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              attributes const& vars,
                              T const& sym)
 {
-    double width = 0;
-    double height = 0;
-
-    expression_ptr width_expr = get<expression_ptr>(sym, keys::width);
-    if (width_expr)
-        width = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *width_expr).to_double();
-
-    expression_ptr height_expr = get<expression_ptr>(sym, keys::height);
-    if (height_expr)
-        height = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *height_expr).to_double();
-
+    double width = get<double>(sym, keys::width, feature, vars, 0.0);
+    double height = get<double>(sym, keys::height, feature, vars, 0.0);
     if (width > 0 && height > 0)
     {
         double sx = width/svg_width;

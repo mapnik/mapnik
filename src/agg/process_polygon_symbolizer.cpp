@@ -51,7 +51,7 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
 {
     using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     using vertex_converter_type = vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
-                                                   CoordTransform, proj_transform, agg::trans_affine,
+                                                   view_transform, proj_transform, agg::trans_affine,
                                                    conv_types, feature_impl>;
 
     ras_ptr->reset();

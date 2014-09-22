@@ -28,6 +28,7 @@
 #include <mapnik/geometry.hpp>
 
 #include <algorithm>
+#include <deque>
 
 namespace mapnik {
 

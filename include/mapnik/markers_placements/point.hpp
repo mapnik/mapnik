@@ -23,7 +23,6 @@
 #ifndef MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
 #define MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
 
-#include <mapnik/markers_placements/point.hpp>
 #include <mapnik/geom_util.hpp>
 
 #include "agg_basics.h"
@@ -31,26 +30,24 @@
 
 namespace mapnik {
 
+struct markers_placement_params
+{
+    box2d<double> const& size;
+    agg::trans_affine const& tr;
+    double spacing;
+    double max_error;
+    bool allow_overlap;
+    bool avoid_edges;
+};
+
 template <typename Locator, typename Detector>
 class markers_point_placement
 {
 public:
-    markers_point_placement(
-        Locator &locator,
-        box2d<double> const& size,
-        agg::trans_affine const& tr,
-        Detector &detector,
-        double spacing,
-        double max_error,
-        bool allow_overlap)
+    markers_point_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
         : locator_(locator),
-          size_(size),
-          tr_(tr),
           detector_(detector),
-          spacing_(spacing),
-          max_error_(max_error),
-          allow_overlap_(allow_overlap),
-          marker_width_((size_ * tr_).width()),
+          params_(params),
           done_(false)
     {
         rewind();
@@ -89,11 +86,13 @@ public:
         }
 
         angle = 0;
-        agg::trans_affine matrix = tr_;
-        matrix.translate(x,y);
-        box2d<double> box = size_ * matrix;
+        box2d<double> box = perform_transform(angle, x, y);
 
-        if (!allow_overlap_ && !detector_.has_placement(box))
+        if (params_.avoid_edges && !detector_.extent().contains(box))
+        {
+            return false;
+        }
+        if (!params_.allow_overlap && !detector_.has_placement(box))
         {
             return false;
         }
@@ -109,24 +108,18 @@ public:
 
 protected:
     Locator &locator_;
-    box2d<double> size_;
-    agg::trans_affine tr_;
     Detector &detector_;
-    double spacing_;
-    double max_error_;
-    bool allow_overlap_;
-    double marker_width_;
+    markers_placement_params const& params_;
     bool done_;
 
     // Rotates the size_ box and translates the position.
     box2d<double> perform_transform(double angle, double dx, double dy)
     {
-        double x1 = size_.minx();
-        double x2 = size_.maxx();
-        double y1 = size_.miny();
-        double y2 = size_.maxy();
-        agg::trans_affine tr = tr_ * agg::trans_affine_rotation(angle)
-            .translate(dx, dy);
+        double x1 = params_.size.minx();
+        double x2 = params_.size.maxx();
+        double y1 = params_.size.miny();
+        double y2 = params_.size.maxy();
+        agg::trans_affine tr = params_.tr * agg::trans_affine_rotation(angle).translate(dx, dy);
         double xA = x1, yA = y1,
                xB = x2, yB = y1,
                xC = x2, yC = y2,

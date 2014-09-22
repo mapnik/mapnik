@@ -112,7 +112,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     using rasterizer_type = line_pattern_rasterizer<cairo_context>;
     rasterizer_type ras(context_, *pattern, width, height);
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clipping_extent, ras, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)

@@ -28,18 +28,27 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
+#include <mapnik/function_call.hpp>
 
 // spirit2
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_locals.hpp>
-
 // phoenix
 #include <boost/spirit/include/phoenix_function.hpp>
+// fusion
+#include <boost/fusion/adapted/struct.hpp>
+
+BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
+                          (mapnik::unary_function_impl, fun)
+                          (mapnik::unary_function_call::argument_type, arg))
+
+BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
+                          (mapnik::binary_function_impl, fun)
+                          (mapnik::binary_function_call::argument_type, arg1)
+                          (mapnik::binary_function_call::argument_type, arg2))
 
 namespace mapnik
 {
-
-using namespace boost;
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
@@ -145,6 +154,8 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     rule_type unary_expr;
     rule_type not_expr;
     rule_type primary_expr;
+    qi::rule<Iterator, unary_function_call() , space_type> unary_function_expr;
+    qi::rule<Iterator, binary_function_call() , space_type> binary_function_expr;
     qi::rule<Iterator, std::string() > regex_match_expr;
     qi::rule<Iterator, expr_node(expr_node), qi::locals<std::string,std::string>, space_type> regex_replace_expr;
     qi::rule<Iterator, std::string() , space_type> attr;
@@ -155,6 +166,8 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
     geometry_types geom_type;
+    unary_function_types unary_func_type;
+    binary_function_types binary_func_type;
 };
 
 } // namespace

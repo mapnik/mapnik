@@ -207,7 +207,6 @@ public:
     void set_opacity(float opacity);
     float get_opacity() const;
 private:
-    friend void swap(layer & lhs, layer & rhs);
     std::string name_;
     std::string srs_;
     double min_zoom_;

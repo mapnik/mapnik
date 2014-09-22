@@ -56,8 +56,7 @@ int main (int argc,char** argv)
     bool auto_open = false;
     int return_value = 0;
     std::vector<std::string> svg_files;
-    mapnik::logger logger;
-    logger.set_severity(mapnik::logger::error);
+    mapnik::logger::instance().set_severity(mapnik::logger::error);
 
     try
     {

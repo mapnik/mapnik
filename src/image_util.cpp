@@ -132,14 +132,14 @@ void save_to_file(T const& image,
 void handle_png_options(std::string const& type,
                         png_options & opts)
 {
-    if (type == "png" || type == "png8" || type == "png256")
-    {
-        // stick with defaults
-        return;
-    }
-    else if (type == "png24" || type == "png32")
+    if (type == "png" || type == "png24" || type == "png32")
     {
         opts.paletted = false;
+        return;
+    }
+    else if (type == "png8" || type == "png256")
+    {
+        opts.paletted = true;
         return;
     }
     boost::char_separator<char> sep(":");
@@ -148,11 +148,11 @@ void handle_png_options(std::string const& type,
     bool set_gamma = false;
     for (std::string const& t : tokens)
     {
-        if (t == "png" || t == "png8")
+        if (t == "png8" || t == "png256")
         {
             opts.paletted = true;
         }
-        else if (t == "png24" || t == "png32")
+        else if (t == "png" || t == "png24" || t == "png32")
         {
             opts.paletted = false;
         }

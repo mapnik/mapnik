@@ -70,7 +70,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         if (feature.num_geometries() > 0)
         {
             using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
-            using path_type = coord_transform<CoordTransform,clipped_geometry_type>;
+            using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
             clipped_geometry_type clipped(feature.get_geometry(0));
             clipped.clip_box(clip_box.minx(), clip_box.miny(),
                              clip_box.maxx(), clip_box.maxy());
@@ -104,7 +104,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clip_box, context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)

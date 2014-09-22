@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     r.append(std::move(mapnik::markers_symbolizer()));
     mapnik::feature_type_style style;
     style.add_rule(std::move(r));
-    map.insert_style("style",style);
+    map.insert_style("style", std::move(style));
 
     std::string csv_plugin("./plugins/input/csv.input");
     if (mapnik::util::exists(csv_plugin)) {

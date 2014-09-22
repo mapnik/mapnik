@@ -27,6 +27,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/expression_node.hpp>
+#include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
 #if defined(BOOST_REGEX_HAS_ICU)
@@ -147,6 +148,19 @@ struct evaluate : util::static_visitor<T1>
         mapnik::transcoder tr_("utf8");
         return tr_.transcode(repl.c_str());
 #endif
+    }
+
+    value_type operator() (unary_function_call const& call) const
+    {
+        value_type arg = util::apply_visitor(*this, call.arg);
+        return call.fun(arg);
+    }
+
+    value_type operator() (binary_function_call const& call) const
+    {
+        value_type arg1 = util::apply_visitor(*this, call.arg1);
+        value_type arg2 = util::apply_visitor(*this, call.arg2);
+        return call.fun(arg1, arg2);
     }
 
     feature_type const& feature_;

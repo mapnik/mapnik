@@ -62,7 +62,7 @@ struct value_hasher: public util::static_visitor<std::size_t>
 } // namespace  detail
 
 template <typename T>
-std::size_t hash_value(T const& val)
+std::size_t mapnik_hash_value(T const& val)
 {
     std::size_t seed = util::apply_visitor(detail::value_hasher(), val);
     detail::hash_combine(seed, val.get_type_index());

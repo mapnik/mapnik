@@ -34,6 +34,7 @@
 // stl
 #include <tuple>
 #include <cstring>  // required for memcpy with linux/g++
+#include <cstdint>
 
 namespace mapnik
 {

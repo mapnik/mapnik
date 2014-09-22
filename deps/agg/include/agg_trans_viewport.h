@@ -241,10 +241,10 @@ namespace agg
     inline void trans_viewport::update()
     {
         const double epsilon = 1e-30;
-        if(fabs(m_world_x1  - m_world_x2)  < epsilon ||
-           fabs(m_world_y1  - m_world_y2)  < epsilon ||
-           fabs(m_device_x1 - m_device_x2) < epsilon ||
-           fabs(m_device_y1 - m_device_y2) < epsilon)
+        if(std::fabs(m_world_x1  - m_world_x2)  < epsilon ||
+           std::fabs(m_world_y1  - m_world_y2)  < epsilon ||
+           std::fabs(m_device_x1 - m_device_x2) < epsilon ||
+           std::fabs(m_device_y1 - m_device_y2) < epsilon)
         {
             m_wx1 = m_world_x1;
             m_wy1 = m_world_y1;

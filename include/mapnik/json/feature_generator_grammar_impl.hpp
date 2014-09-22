@@ -89,7 +89,7 @@ feature_generator_grammar<OutputIterator>::feature_generator_grammar()
     pair = lit('"')
         << kstring[_1 = boost::phoenix::at_c<0>(_val)] << lit('"')
         << lit(':')
-        << value[_1 = extract_string_(value_base_(at_c<1>(_val)))]
+        << value[_1 = extract_string_(at_c<1>(_val))]
         ;
 
     value = eps(at_c<1>(_val)) << escaped_string_(quote_.c_str())[_1 = at_c<0>(_val)]

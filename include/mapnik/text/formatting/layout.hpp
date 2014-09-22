@@ -48,6 +48,7 @@ public:
     boost::optional<symbolizer_base::value_type> text_ratio;
     boost::optional<symbolizer_base::value_type> wrap_width;
     boost::optional<symbolizer_base::value_type> wrap_before;
+    boost::optional<symbolizer_base::value_type> repeat_wrap_char;
     boost::optional<symbolizer_base::value_type> rotate_displacement;
     boost::optional<symbolizer_base::value_type> orientation;
 

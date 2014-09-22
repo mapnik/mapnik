@@ -31,6 +31,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 
 #if defined(BOOST_REGEX_HAS_ICU)
@@ -126,6 +127,19 @@ struct evaluate_expression : util::static_visitor<T>
 #endif
     }
 
+    value_type operator() (unary_function_call const& call) const
+    {
+        value_type arg = util::apply_visitor(*this, call.arg);
+        return call.fun(arg);
+    }
+
+    value_type operator() (binary_function_call const& call) const
+    {
+        value_type arg1 = util::apply_visitor(*this, call.arg1);
+        value_type arg2 = util::apply_visitor(*this, call.arg2);
+        return call.fun(arg1, arg2);
+    }
+
     template <typename ValueType>
     value_type operator() (ValueType const& val) const
     {
@@ -210,6 +224,19 @@ struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
         mapnik::transcoder tr_("utf8");
         return tr_.transcode(repl.c_str());
 #endif
+    }
+
+    value_type operator() (unary_function_call const& call) const
+    {
+        value_type arg = util::apply_visitor(*this, call.arg);
+        return call.fun(arg);
+    }
+
+    value_type operator() (binary_function_call const& call) const
+    {
+        value_type arg1 = util::apply_visitor(*this, call.arg1);
+        value_type arg2 = util::apply_visitor(*this, call.arg2);
+        return call.fun(arg1, arg2);
     }
 
     template <typename ValueType>

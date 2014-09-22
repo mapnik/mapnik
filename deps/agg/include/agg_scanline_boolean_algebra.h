@@ -406,7 +406,7 @@ namespace agg
     {
         static AGG_INLINE unsigned calculate(unsigned a, unsigned b)
         {
-            return unsigned(abs(int(a) - int(b)));
+            return unsigned(std::abs(int(a) - int(b)));
         }
     };
 
@@ -633,7 +633,7 @@ namespace agg
         unsigned num_spans = sl1.num_spans();
         for(;;)
         {
-            add_span(span, span->x, abs((int)span->len), sl);
+            add_span(span, span->x, std::abs((int)span->len), sl);
             if(--num_spans == 0) break;
             ++span;
         }
@@ -678,8 +678,8 @@ namespace agg
         {
             int xb1 = span1->x;
             int xb2 = span2->x;
-            int xe1 = xb1 + abs((int)span1->len) - 1;
-            int xe2 = xb2 + abs((int)span2->len) - 1;
+            int xe1 = xb1 + std::abs((int)span1->len) - 1;
+            int xe2 = xb2 + std::abs((int)span2->len) - 1;
 
             // Determine what spans we should advance in the next step
             // The span with the least ending X should be advanced
@@ -872,7 +872,7 @@ namespace agg
         {
             span1 = sl1.begin();
             xb1 = span1->x;
-            xe1 = xb1 + abs((int)span1->len) - 1;
+            xe1 = xb1 + std::abs((int)span1->len) - 1;
             --num1;
         }
 
@@ -882,7 +882,7 @@ namespace agg
         {
             span2 = sl2.begin();
             xb2 = span2->x;
-            xe2 = xb2 + abs((int)span2->len) - 1;
+            xe2 = xb2 + std::abs((int)span2->len) - 1;
             --num2;
         }
 
@@ -896,7 +896,7 @@ namespace agg
                 --num1;
                 ++span1;
                 xb1 = span1->x;
-                xe1 = xb1 + abs((int)span1->len) - 1;
+                xe1 = xb1 + std::abs((int)span1->len) - 1;
             }
 
             // Retrieve a new span2 if it's invalid
@@ -906,7 +906,7 @@ namespace agg
                 --num2;
                 ++span2;
                 xb2 = span2->x;
-                xe2 = xb2 + abs((int)span2->len) - 1;
+                xe2 = xb2 + std::abs((int)span2->len) - 1;
             }
 
             if(xb1 > xe1 && xb2 > xe2) break;
@@ -1392,7 +1392,7 @@ namespace agg
     // Apply eXclusive OR to two anti-aliased scanline shapes. 
     // There's the absolute difference used to calculate 
     // Anti-Aliasing values, that is:
-    // a XOR b : abs(a-b)
+    // a XOR b : std::abs(a-b)
     // See intersect_shapes_aa for more comments
     //----------
     template<class ScanlineGen1, 

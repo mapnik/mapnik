@@ -35,12 +35,17 @@
 #include <mapnik/json/topology.hpp>
 // boost
 #include <boost/optional.hpp>
-
-#include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/algorithms/area.hpp>
+#include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
+#include <boost/geometry.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 105600
+#include <boost/geometry/index/rtree.hpp>
+#else
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
+#endif
+
 // stl
 #include <vector>
 #include <string>
@@ -53,7 +58,15 @@ class topojson_datasource : public mapnik::datasource
 public:
     using point_type = boost::geometry::model::d2::point_xy<double>;
     using box_type = boost::geometry::model::box<point_type>;
+
+#if BOOST_VERSION >= 105600
+    using item_type = std::pair<box_type,std::size_t>;
+    using linear_type = boost::geometry::index::linear<16,4>;
+    using spatial_index_type = boost::geometry::index::rtree<item_type,linear_type>;
+#else
+    using item_type = std::size_t;
     using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
+#endif
 
     // constructor
     topojson_datasource(mapnik::parameters const& params);
@@ -66,7 +79,7 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     template <typename T>
-    void parse_topojson(T & stream);
+    void parse_topojson(T const& buffer);
 private:
     mapnik::datasource::datasource_t type_;
     std::map<std::string, mapnik::parameters> statistics_;
@@ -74,9 +87,9 @@ private:
     std::string filename_;
     std::string inline_string_;
     mapnik::box2d<double> extent_;
-    std::shared_ptr<mapnik::transcoder> tr_;
+    std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::topojson::topology topo_;
-    spatial_index_type tree_;
+    std::unique_ptr<spatial_index_type> tree_;
 };
 
 

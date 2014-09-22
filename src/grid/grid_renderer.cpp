@@ -61,9 +61,7 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
     : feature_style_processor<grid_renderer>(m, scale_factor),
       pixmap_(pixmap),
       ras_ptr(new grid_rasterizer),
-      // NOTE: can change this to m dims instead of pixmap_ if render-time
-      // resolution support is dropped from grid_renderer python interface
-      common_(m, attributes(), offset_x, offset_y, pixmap_.width(), pixmap_.height(), scale_factor)
+      common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
 {
     setup(m);
 }
@@ -73,9 +71,7 @@ grid_renderer<T>::grid_renderer(Map const& m, request const& req, attributes con
     : feature_style_processor<grid_renderer>(m, scale_factor),
       pixmap_(pixmap),
       ras_ptr(new grid_rasterizer),
-      // NOTE: can change this to m dims instead of pixmap_ if render-time
-      // resolution support is dropped from grid_renderer python interface
-      common_(req, vars, offset_x, offset_y, pixmap_.width(), pixmap_.height(), scale_factor)
+      common_(req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
     setup(m);
 }
@@ -130,7 +126,7 @@ void grid_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity, composite_mode_e /*comp_op*/)
+void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity, composite_mode_e /*comp_op*/)
 {
     if (marker.is_vector())
     {
@@ -152,7 +148,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, unsign
         agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
         // apply symbol transformation to get to map space
         mtx *= tr;
-        mtx *= agg::trans_affine_scaling(common_.scale_factor_*(1.0/step));
+        mtx *= agg::trans_affine_scaling(common_.scale_factor_);
         // render the marker at the center of the marker box
         mtx.translate(pos.x, pos.y);
         using namespace mapnik::svg;
@@ -174,7 +170,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, unsign
         double height = data.height();
         double cx = 0.5 * width;
         double cy = 0.5 * height;
-        if (step == 1 && (std::fabs(1.0 - common_.scale_factor_) < 0.001 && tr.is_identity()))
+        if ((std::fabs(1.0 - common_.scale_factor_) < 0.001 && tr.is_identity()))
         {
             // TODO - support opacity
             pixmap_.set_rectangle(feature.id(), data,
@@ -183,14 +179,12 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, unsign
         }
         else
         {
-            // TODO - remove support for step != or add support for agg scaling with opacity
-            double ratio = (1.0/step);
-            image_data_32 target(ratio * data.width(), ratio * data.height());
+            image_data_32 target(data.width(), data.height());
             mapnik::scale_image_agg<image_data_32>(target,
                                                    data,
                                                    SCALING_NEAR,
-                                                   ratio,
-                                                   ratio,
+                                                   1,
+                                                   1,
                                                    0.0, 0.0, 1.0); // TODO: is 1.0 a valid default here, and do we even care in grid_renderer what the image looks like?
             pixmap_.set_rectangle(feature.id(), target,
                                   boost::math::iround(pos.x - cx),

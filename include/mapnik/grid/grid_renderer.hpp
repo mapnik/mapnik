@@ -32,7 +32,7 @@
 #include <mapnik/rule.hpp>              // for rule, symbolizers
 #include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/color.hpp>     // for color
-#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/renderer_common.hpp>
@@ -75,7 +75,7 @@ public:
     void end_layer_processing(layer const& lay);
     void start_style_processing(feature_type_style const& /*st*/) {}
     void end_style_processing(feature_type_style const& /*st*/) {}
-    void render_marker(mapnik::feature_impl const& feature, unsigned int step,
+    void render_marker(mapnik::feature_impl const& feature,
                        pixel_position const& pos, marker const& marker,
                        agg::trans_affine const& tr, double opacity, composite_mode_e comp_op);
 
@@ -119,14 +119,22 @@ public:
         // grid renderer doesn't support processing of multiple symbolizers.
         return false;
     }
+
+    bool painted()
+    {
+        return pixmap_.painted();
+    }
+
     void painted(bool painted)
     {
         pixmap_.painted(painted);
     }
+
     inline eAttributeCollectionPolicy attribute_collection_policy() const
     {
         return DEFAULT;
     }
+
     inline double scale_factor() const
     {
         return common_.scale_factor_;

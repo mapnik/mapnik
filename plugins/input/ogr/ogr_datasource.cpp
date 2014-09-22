@@ -90,6 +90,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
+    if (!string) string  = params.get<std::string>("inline");
     if (! file && ! string)
     {
         throw datasource_exception("missing <file> or <string> parameter");
@@ -266,12 +267,12 @@ void ogr_datasource::init(mapnik::parameters const& params)
         {
             if (layer->GetFeatureCount() == 0)
             {
-                MAPNIK_LOG_ERROR(ogr) << "could not determine extent, layer '" << layer->GetName() << "' appears to have no features";
+                MAPNIK_LOG_ERROR(ogr) << "could not determine extent, layer '" << layer->GetLayerDefn()->GetName() << "' appears to have no features";
             }
             else
             {
                 std::ostringstream s;
-                s << "OGR Plugin: Cannot determine extent for layer '" << layer->GetName() << "'. Please provide a manual extent string (minx,miny,maxx,maxy).";
+                s << "OGR Plugin: Cannot determine extent for layer '" << layer->GetLayerDefn()->GetName() << "'. Please provide a manual extent string (minx,miny,maxx,maxy).";
                 throw datasource_exception(s.str());
             }
         }

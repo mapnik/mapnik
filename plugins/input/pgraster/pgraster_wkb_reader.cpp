@@ -18,6 +18,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
+ *****************************************************************************
+ *
+ * Initially developed by Sandro Santilli <strk@keybit.net> for CartoDB
+ *
  *****************************************************************************/
 
 #include "pgraster_wkb_reader.hpp"
@@ -26,7 +30,7 @@
 #include <mapnik/datasource.hpp> // for datasource_exception
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>

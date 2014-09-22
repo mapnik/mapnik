@@ -1,0 +1,79 @@
+<Map>
+    <Style name="lines" filter-mode="first">
+        <Rule>
+            <Filter>[id]=1</Filter>
+            <LineSymbolizer stroke="blue" />
+            <LineSymbolizer stroke="darkblue" stroke-width="3" geometry-transform="translate(15,15)"/>
+        </Rule>
+        <Rule>
+            <Filter>[id]=2</Filter>
+            <LineSymbolizer stroke="red" geometry-transform="rotate(90,256,256)"/>
+            <LineSymbolizer stroke="darkred" stroke-width="3" geometry-transform="rotate(90,256,256) translate(15,15)"/>
+        </Rule>
+    </Style>
+    <Style name="texts">
+        <Rule>
+            <Filter>[id]=1</Filter>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="12"
+                halo-radius="2"
+                placement="line"
+                allow-overlap="true"
+                spacing="1"
+                max-char-angle-delta="0"
+                upright="right"
+                text-transform="uppercase"
+              >'Cádiz España • '</TextSymbolizer>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="12"
+                halo-radius="2"
+                placement="line"
+                allow-overlap="true"
+                spacing="1"
+                max-char-angle-delta="0"
+                upright="right"
+                geometry-transform="translate(15,15)"
+              >'Cádiz España • '</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[id]=2</Filter>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="12"
+                halo-radius="2"
+                placement="line"
+                allow-overlap="true"
+                spacing="1"
+                max-char-angle-delta="0"
+                geometry-transform="rotate(90,256,256)"
+                upright="left"
+                text-transform="uppercase"
+              >'Brückenstraße • '</TextSymbolizer>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="12"
+                halo-radius="2"
+                placement="line"
+                allow-overlap="true"
+                spacing="1"
+                max-char-angle-delta="0"
+                geometry-transform="rotate(90,256,256) translate(15,15)"
+                upright="left"
+              >'Brückenstraße • '</TextSymbolizer>
+        </Rule>
+    </Style>
+    <Layer name="layer">
+        <StyleName>lines</StyleName>
+        <StyleName>texts</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+id,wkt
+1,"LINESTRING(0 0, 1 0, 1 1, 2 1, 2 2, 3 2, 3 3, 4 3, 4 4, 5 4, 5 5, 6 5, 6 6, 7 6, 7 7, 8 7, 8 8, 9 8, 9 9, 10 9, 10 10)"
+2,"LINESTRING(10 10, 10 9, 9 9, 9 8, 8 8, 8 7, 7 7, 7 6, 6 6, 6 5, 5 5, 5 4, 4 4, 4 3, 3 3, 3 2, 2 2, 2 1, 1 1, 1 0, 0 0)"
+            </Parameter>
+        </Datasource>
+    </Layer>
+</Map>

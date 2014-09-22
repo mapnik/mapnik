@@ -1,0 +1,64 @@
+<Map background-color="#eee" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="frame" filter-mode="first">
+        <Rule>
+            <Filter>[mapnik::geometry_type]=linestring</Filter>
+            <LineSymbolizer
+                stroke="[color]"
+                stroke-width="[width]"
+                offset="abs([offset]*2.0)"/>
+            <LineSymbolizer
+                stroke="[color]"
+                stroke-width="[width]"
+                offset="-[offset]*2.0"
+                geometry-transform="rotate(360-(tan(-180)*10))"/>
+        </Rule>
+        <Rule>
+            <Filter>[mapnik::geometry_type]=point</Filter>
+            <MarkersSymbolizer
+                file="../../../[base-path]/[filetype]/[filename].[filetype]"
+                width="exp([width])"
+            />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">ogr</Parameter>
+            <Parameter name="layer_by_index">0</Parameter>
+            <Parameter name="inline"><![CDATA[
+                {
+                   "type" : "FeatureCollection",
+                   "features" : [
+                      {
+                         "properties" : {
+                            "width":"5",
+                            "color" : "red",
+                            "offset": 10
+                         },
+                         "geometry" : {
+                            "coordinates" : [[-10,-10],[10,10]],
+                            "type" : "LineString"
+                         },
+                         "type" : "Feature",
+                      },
+                      {
+                         "geometry" : {
+                            "coordinates" : [ 0,0 ],
+                            "type" : "Point"
+                         },
+                         "properties" : {
+                            "base-path":"./tests/data",
+                            "filetype":"svg",
+                            "filename":"octocat",
+                            "width":"5",
+                            "color" : "#ace"
+                         },
+                         "type" : "Feature",
+                      }
+                   ]
+                }]]></Parameter>
+        </Datasource>
+    </Layer>
+</Map>

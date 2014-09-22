@@ -54,6 +54,8 @@ namespace agg
             m_trans = &tr;
         }
 
+        unsigned type() const { return m_source->type(); }
+
     private:
         conv_transform(const conv_transform<VertexSource>&);
         const conv_transform<VertexSource>& 

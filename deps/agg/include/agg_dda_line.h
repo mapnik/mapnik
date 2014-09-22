@@ -233,9 +233,9 @@ namespace agg
             m_y1_lr(line_lr(y1)),
             m_x2_lr(line_lr(x2)),
             m_y2_lr(line_lr(y2)),
-            m_ver(abs(m_x2_lr - m_x1_lr) < abs(m_y2_lr - m_y1_lr)),
-            m_len(m_ver ? abs(m_y2_lr - m_y1_lr) : 
-                          abs(m_x2_lr - m_x1_lr)),
+            m_ver(std::abs(m_x2_lr - m_x1_lr) < std::abs(m_y2_lr - m_y1_lr)),
+            m_len(m_ver ? std::abs(m_y2_lr - m_y1_lr) : 
+                          std::abs(m_x2_lr - m_x1_lr)),
             m_inc(m_ver ? ((y2 > y1) ? 1 : -1) : ((x2 > x1) ? 1 : -1)),
             m_interpolator(m_ver ? x1 : y1, 
                            m_ver ? x2 : y2, 

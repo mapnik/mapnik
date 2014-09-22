@@ -100,6 +100,13 @@ boost::optional<mapnik::boolean_type> parameters::get(std::string const& key) co
 template MAPNIK_DECL
 boost::optional<mapnik::boolean_type> parameters::get(std::string const& key,
                                          mapnik::boolean_type const& default_opt_value) const;
+
+template MAPNIK_DECL
+boost::optional<mapnik::value_null> parameters::get(std::string const& key) const;
+template MAPNIK_DECL
+boost::optional<mapnik::value_null> parameters::get(std::string const& key,
+                                         mapnik::value_null const& default_opt_value) const;
+
 #endif
 
 }

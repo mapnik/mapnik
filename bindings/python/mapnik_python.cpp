@@ -39,6 +39,7 @@
 
 // stl
 #include <stdexcept>
+#include <fstream>
 
 void export_color();
 void export_coord();
@@ -109,6 +110,10 @@ void export_logger();
 #include <mapnik/marker_cache.hpp>
 #if defined(SHAPE_MEMORY_MAPPED_FILE)
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
+
+#if defined(SVG_RENDERER)
+#include <mapnik/svg/output/svg_renderer.hpp>
 #endif
 
 namespace mapnik {
@@ -215,7 +220,10 @@ void render_with_detector(
 
 void render_layer2(mapnik::Map const& map,
                    mapnik::image_32& image,
-                   unsigned layer_idx)
+                   unsigned layer_idx,
+                   double scale_factor,
+                   unsigned offset_x,
+                   unsigned offset_y)
 {
     std::vector<mapnik::layer> const& layers = map.layers();
     std::size_t layer_num = layers.size();
@@ -228,7 +236,7 @@ void render_layer2(mapnik::Map const& map,
 
     python_unblock_auto_block b;
     mapnik::layer const& layer = layers[layer_idx];
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
+    mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x,offset_y);
     std::set<std::string> names;
     ren.apply(layer,names);
 }
@@ -342,7 +350,23 @@ void render_to_file1(mapnik::Map const& map,
                      std::string const& filename,
                      std::string const& format)
 {
-    if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
+    if (format == "svg-ng")
+    {
+#if defined(SVG_RENDERER)
+        std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
+        if (!file)
+        {
+            throw mapnik::ImageWriterException("could not open file for writing: " + filename);
+        }
+        using iter_type = std::ostream_iterator<char>;
+        iter_type output_stream_iterator(file);
+        mapnik::svg_renderer<iter_type> ren(map,output_stream_iterator);
+        ren.apply();
+#else
+        throw mapnik::ImageWriterException("SVG backend not available, cannot write to format: " + format);
+#endif
+    }
+    else if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
         mapnik::save_to_cairo_file(map,filename,format,1.0);
@@ -383,7 +407,23 @@ void render_to_file3(mapnik::Map const& map,
                      double scale_factor = 1.0
     )
 {
-    if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
+    if (format == "svg-ng")
+    {
+#if defined(SVG_RENDERER)
+        std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
+        if (!file)
+        {
+            throw mapnik::ImageWriterException("could not open file for writing: " + filename);
+        }
+        using iter_type = std::ostream_iterator<char>;
+        iter_type output_stream_iterator(file);
+        mapnik::svg_renderer<iter_type> ren(map,output_stream_iterator,scale_factor);
+        ren.apply();
+#else
+        throw mapnik::ImageWriterException("SVG backend not available, cannot write to format: " + format);
+#endif
+    }
+    else if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
         mapnik::save_to_cairo_file(map,filename,format,scale_factor);
@@ -693,12 +733,25 @@ BOOST_PYTHON_MODULE(_mapnik)
             ));
 
     def("render_layer", &render_layer2,
-        (arg("map"),arg("image"),args("layer"))
+        (arg("map"),
+         arg("image"),
+         arg("layer"),
+         arg("scale_factor")=1.0,
+         arg("offset_x")=0,
+         arg("offset_y")=0
+        )
         );
 
 #if defined(GRID_RENDERER)
     def("render_layer", &mapnik::render_layer_for_grid,
-        (arg("map"),arg("grid"),args("layer"),arg("fields")=boost::python::list())
+        (arg("map"),
+         arg("grid"),
+         arg("layer"),
+         arg("fields")=boost::python::list(),
+         arg("scale_factor")=1.0,
+         arg("offset_x")=0,
+         arg("offset_y")=0
+        )
         );
 #endif
 
@@ -863,6 +916,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_png", &has_png, "Get png read/write support status");
     def("has_tiff", &has_tiff, "Get tiff read/write support status");
     def("has_webp", &has_webp, "Get webp read/write support status");
+    def("has_svg_renderer", &has_svg_renderer, "Get svg_renderer status");
     def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");

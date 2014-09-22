@@ -26,6 +26,8 @@
 
 // mapnik
 #include <mapnik/config_error.hpp>
+#include <mapnik/utils.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
@@ -54,18 +56,20 @@ public:
 
     void load(std::string const& filename, xml_node &node)
     {
+        if (!mapnik::util::exists(filename))
+        {
+            throw config_error(std::string("Could not load map file: File does not exist"), 0, filename);
+        }
         filename_ = filename;
+#ifdef _WINDOWS
+        std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
+#else
         std::basic_ifstream<char> stream(filename.c_str());
+#endif
         if (!stream)
         {
             throw config_error("Could not load map file", 0, filename);
         }
-//        TODO: stream.imbue(loc);
-        load(stream, node);
-    }
-
-    void load(std::basic_istream<char> &stream, xml_node &node)
-    {
         stream.unsetf(std::ios::skipws);
         std::vector<char> v(std::istreambuf_iterator<char>(stream.rdbuf()),
                             std::istreambuf_iterator<char>());
@@ -74,6 +78,12 @@ public:
             throw config_error("Could not load map file", 0, filename_);
         }
         v.push_back(0); // zero-terminate
+        load_array(v, node);
+    }
+
+    template <typename T>
+    void load_array(T && array, xml_node & node)
+    {
         try
         {
             // Parse using appropriate flags
@@ -81,7 +91,7 @@ public:
             // const int f_tws = rapidxml::parse_normalize_whitespace;
             const int f_tws = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
             rapidxml::xml_document<> doc;
-            doc.parse<f_tws>(&v.front());
+            doc.parse<f_tws>(&array.front());
 
             for (rapidxml::xml_node<char> *child = doc.first_node();
                  child; child = child->next_sibling())
@@ -92,26 +102,15 @@ public:
         catch (rapidxml::parse_error const& e)
         {
             long line = static_cast<long>(
-                std::count(&v.front(), e.where<char>(), '\n') + 1);
+                std::count(&array.front(), e.where<char>(), '\n') + 1);
             throw config_error(e.what(), line, filename_);
         }
     }
 
-    void load_string(std::string const& buffer, xml_node &node, std::string const & base_path )
+    void load_string(std::string const& buffer, xml_node &node, std::string const & )
     {
-
-//        if (!base_path.empty())
-//        {
-//            if (!mapnik::util::exists(base_path)) {
-//                throw config_error(std::string("Could not locate base_path '") +
-//                                   base_path + "': file or directory does not exist");
-//            }
-//        }
-
-        // https://github.com/mapnik/mapnik/issues/1857
-        std::stringstream s;
-        s << buffer;
-        load(s, node);
+        // Note: base_path ignored because its not relevant - only needed for xml2 to load entities (see libxml2_loader.cpp)
+        load_array(std::string(buffer), node);
     }
 private:
     void populate_tree(rapidxml::xml_node<char> *cur_node, xml_node &node)

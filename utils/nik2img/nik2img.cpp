@@ -6,6 +6,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <string>
@@ -84,8 +85,9 @@ int main (int argc,char** argv)
         }
 
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
+        mapnik::freetype_engine::register_fonts("./fonts",true);
         mapnik::Map map(600,400);
-        mapnik::load_map(map,xml_file);
+        mapnik::load_map(map,xml_file,true);
         map.zoom_all();
         mapnik::image_32 im(map.width(),map.height());
         mapnik::agg_renderer<mapnik::image_32> ren(map,im);
@@ -94,11 +96,14 @@ int main (int argc,char** argv)
         if (auto_open)
         {
             std::ostringstream s;
-#ifdef DARWIN
-            s << "open " << img_file;
+#ifdef __APPLE__
+            s << "open ";
+#elif _WIN32
+            s << "start ";
 #else
-            s << "xdg-open " << img_file;
+            s << "xdg-open ";
 #endif
+            s << img_file;
             int ret = system(s.str().c_str());
             if (ret != 0)
                 return_value = ret;

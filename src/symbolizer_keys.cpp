@@ -29,8 +29,10 @@
 
 namespace mapnik {
 
+static constexpr std::uint8_t const_max_key = static_cast<std::uint8_t>(keys::MAX_SYMBOLIZER_KEY);
+
 // tuple -> name, default value, enumeration to string converter lambda, target property type
-static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] =
+static const property_meta_type key_meta[const_max_key] =
 {
     property_meta_type{ "gamma", 1.0, nullptr, property_types::target_double},
     property_meta_type{ "gamma-method", static_cast<value_integer>(GAMMA_POWER), nullptr, property_types::target_gamma_method},
@@ -114,7 +116,9 @@ static const property_meta_type key_meta[to_integral(keys::MAX_SYMBOLIZER_KEY)] 
                         property_types::target_vertical_alignment},
     property_meta_type{ "upright", enumeration_wrapper(UPRIGHT_AUTO), [](enumeration_wrapper e)
                         {return enumeration<text_upright_enum,text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();},
-                        property_types::target_upright}
+                        property_types::target_upright},
+    property_meta_type{ "avoid-edges",false, nullptr, property_types::target_bool },
+    property_meta_type{ "font-feature-settings", nullptr, nullptr, property_types::target_font_feature_settings },
 
 };
 
@@ -127,7 +131,7 @@ mapnik::keys get_key(std::string const& name)
 {
     std::string name_copy(name);
     boost::algorithm::replace_all(name_copy,"_","-");
-    for (unsigned i=0; i< to_integral(keys::MAX_SYMBOLIZER_KEY) ; ++i)
+    for (unsigned i=0; i< const_max_key ; ++i)
     {
         property_meta_type const& item = key_meta[i];
         if (name_copy == std::get<0>(item))

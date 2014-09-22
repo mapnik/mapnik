@@ -77,27 +77,22 @@ layer::layer(layer && rhs)
 
 layer& layer::operator=(layer rhs)
 {
-    swap(*this, rhs);
-    return *this;
-}
-
-void swap(layer & lhs, layer & rhs)
-{
     using std::swap;
-    std::swap(lhs.name_,rhs.name_);
-    std::swap(lhs.srs_, rhs.srs_);
-    std::swap(lhs.min_zoom_, rhs.min_zoom_);
-    std::swap(lhs.max_zoom_,rhs.max_zoom_);
-    std::swap(lhs.active_, rhs.active_);
-    std::swap(lhs.queryable_, rhs.queryable_);
-    std::swap(lhs.clear_label_cache_, rhs.clear_label_cache_);
-    std::swap(lhs.cache_features_, rhs.cache_features_);
-    std::swap(lhs.group_by_, rhs.group_by_);
-    std::swap(lhs.styles_, rhs.styles_);
-    std::swap(lhs.ds_, rhs.ds_);
-    std::swap(lhs.buffer_size_, rhs.buffer_size_);
-    std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
-    std::swap(lhs.opacity_, rhs.opacity_);
+    std::swap(this->name_,rhs.name_);
+    std::swap(this->srs_, rhs.srs_);
+    std::swap(this->min_zoom_, rhs.min_zoom_);
+    std::swap(this->max_zoom_,rhs.max_zoom_);
+    std::swap(this->active_, rhs.active_);
+    std::swap(this->queryable_, rhs.queryable_);
+    std::swap(this->clear_label_cache_, rhs.clear_label_cache_);
+    std::swap(this->cache_features_, rhs.cache_features_);
+    std::swap(this->group_by_, rhs.group_by_);
+    std::swap(this->styles_, rhs.styles_);
+    std::swap(this->ds_, rhs.ds_);
+    std::swap(this->buffer_size_, rhs.buffer_size_);
+    std::swap(this->maximum_extent_, rhs.maximum_extent_);
+    std::swap(this->opacity_, rhs.opacity_);
+    return *this;
 }
 
 bool layer::operator==(layer const& rhs) const

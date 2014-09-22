@@ -26,10 +26,10 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/timer.hpp>
 
@@ -48,7 +48,7 @@ using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::feature_ptr;
 using mapnik::geometry_ptr;
-using mapnik::CoordTransform;
+using mapnik::view_transform;
 using mapnik::projection;
 using mapnik::scale_denominator;
 using mapnik::feature_kv_iterator;
@@ -159,7 +159,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
 
             projection map_proj(map_->srs()); // map projection
             double scale_denom = scale_denominator(map_->scale(),map_proj.is_geographic());
-            CoordTransform t(map_->width(),map_->height(),map_->get_current_extent());
+            view_transform t(map_->width(),map_->height(),map_->get_current_extent());
 
             for (unsigned index = 0; index <  map_->layer_count();++index)
             {
@@ -191,7 +191,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                 std::get<1>(*itr).to_string().c_str()));
                       }
 
-                      using path_type = mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type>;
+                      using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
@@ -264,7 +264,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
          drag_=false;
          if (map_)
          {
-            CoordTransform t(map_->width(),map_->height(),map_->get_current_extent());
+            view_transform t(map_->width(),map_->height(),map_->get_current_extent());
             box2d<double> box = t.backward(box2d<double>(start_x_,start_y_,end_x_,end_y_));
             map_->zoom_to_box(box);
             updateMap();
@@ -506,10 +506,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
-    catch (mapnik::config_error & ex)
-    {
-        std::cerr << ex.what() << std::endl;
-    }
+    //catch (mapnik::config_error & ex)
+    //{
+    //    std::cerr << ex.what() << std::endl;
+    //}
     catch (const std::exception & ex)
     {
         std::cerr << "exception: " << ex.what() << std::endl;

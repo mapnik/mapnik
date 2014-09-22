@@ -472,6 +472,12 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
 }
 
 template <typename T0, typename T1>
+bool agg_renderer<T0,T1>::painted()
+{
+    return pixmap_.painted();
+}
+
+template <typename T0, typename T1>
 void agg_renderer<T0,T1>::painted(bool painted)
 {
     pixmap_.painted(painted);

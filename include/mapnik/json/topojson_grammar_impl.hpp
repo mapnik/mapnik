@@ -49,33 +49,33 @@ topojson_grammar<Iterator>::topojson_grammar()
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
-
+    using phoenix::construct;
     // generic json types
-    value = object | array | string_ | number
+    json_.value = json_.object | json_.array | json_.string_ | json_.number
         ;
 
-    pairs = key_value % lit(',')
+    json_.pairs = json_.key_value % lit(',')
         ;
 
-    key_value = (string_ >> lit(':') >> value)
+    json_.key_value = (json_.string_ >> lit(':') >> json_.value)
         ;
 
-    object = lit('{') >> *pairs >> lit('}')
+    json_.object = lit('{') >> *json_.pairs >> lit('}')
         ;
 
-    array = lit('[')
-        >> value >> *(lit(',') >> value)
+    json_.array = lit('[')
+        >> json_.value >> *(lit(',') >> json_.value)
         >> lit(']')
         ;
 
-    number %= strict_double
-        | int__
+    json_.number = json_.strict_double[_val = json_.double_converter(_1)]
+        | json_.int__[_val = json_.integer_converter(_1)]
         | lit("true")[_val = true]
         | lit("false")[_val = false]
-        | lit("null")
+        | lit("null")[_val = construct<value_null>()]
         ;
 
-    unesc_char.add
+    json_.unesc_char.add
         ("\\\"", '\"') // quotation mark
         ("\\\\", '\\') // reverse solidus
         ("\\/", '/')   // solidus
@@ -86,7 +86,7 @@ topojson_grammar<Iterator>::topojson_grammar()
         ("\\t", '\t')  // tab
         ;
 
-    string_ %= lit('"') >> no_skip[*(unesc_char | "\\u" >> hex4 | (char_ - lit('"')))] >> lit('"')
+    json_.string_ %= lit('"') >> no_skip[*(json_.unesc_char | "\\u" >> json_.hex4 | (char_ - lit('"')))] >> lit('"')
         ;
 
     // topo json
@@ -114,7 +114,7 @@ topojson_grammar<Iterator>::topojson_grammar()
     objects = lit("\"objects\"")
         >> lit(':')
         >> lit('{')
-        >> -((omit[string_]
+        >> -((omit[json_.string_]
               >> lit(':')
               >>  (geometry_collection(_val) | geometry)) % lit(','))
         >> lit('}')
@@ -127,7 +127,7 @@ topojson_grammar<Iterator>::topojson_grammar()
         multi_point |
         multi_linestring |
         multi_polygon |
-        omit[object]
+        omit[json_.object]
         ;
 
     geometry_collection =  lit('{')
@@ -183,7 +183,7 @@ topojson_grammar<Iterator>::topojson_grammar()
         >> lit('}')
         ;
 
-    id = lit("\"id\"") >> lit(':') >> omit[value]
+    id = lit("\"id\"") >> lit(':') >> omit[json_.value]
         ;
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
@@ -191,13 +191,13 @@ topojson_grammar<Iterator>::topojson_grammar()
 
     properties = lit("\"properties\"")
         >> lit(':')
-        >> (( lit('{') >> attributes >> lit('}')) | object)
+        >> (( lit('{') >> attributes >> lit('}')) | json_.object)
         ;
 
-    attributes = (string_ >> lit(':') >> attribute_value) % lit(',')
+    attributes = (json_.string_ >> lit(':') >> attribute_value) % lit(',')
         ;
 
-    attribute_value %= number | string_  ;
+    attribute_value %= json_.number | json_.string_  ;
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;
@@ -211,7 +211,7 @@ topojson_grammar<Iterator>::topojson_grammar()
     objects.name("objects");
     arc.name("arc");
     arcs.name("arcs");
-    value.name("value");
+    json_.value.name("value");
     coordinate.name("coordinate");
 
     point.name("point");

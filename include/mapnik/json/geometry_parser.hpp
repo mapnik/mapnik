@@ -29,7 +29,6 @@
 
 // boost
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 
 namespace mapnik { namespace json {

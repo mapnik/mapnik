@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
-
+#include <mapnik/view_transform.hpp>
+#include <mapnik/transform_path_adapter.hpp>
 // boost
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <memory>
@@ -171,7 +171,7 @@ private:
 // The Value type is a std::tuple that holds 5 elements, the command and the x and y coordinate.
 // Each coordinate is stored twice to match the needs of the grammar.
 //using path_iterator_type = path_iterator<std::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
-//                      coord_transform<CoordTransform, geometry_type> >;
+//                      transform_path_adapter<view_transform, geometry_type> >;
 
 }}
 

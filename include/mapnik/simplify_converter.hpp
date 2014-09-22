@@ -109,6 +109,11 @@ public:
         cache
     };
 
+    unsigned type() const
+    {
+        return static_cast<unsigned>(geom_.type());
+    }
+
     simplify_algorithm_e get_simplify_algorithm()
     {
         return algorithm_;

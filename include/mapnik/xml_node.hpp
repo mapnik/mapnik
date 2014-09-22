@@ -92,6 +92,9 @@ public:
     void add_attribute(const char * name, const char * value);
     attribute_map const& get_attributes() const;
 
+    bool ignore() const;
+    void set_ignore(bool ignore) const;
+
     bool processed() const;
     void set_processed(bool processed) const;
 
@@ -130,6 +133,7 @@ private:
     bool is_text_;
     unsigned line_;
     mutable bool processed_;
+    mutable bool ignore_;
     static std::string xml_text;
 };
 

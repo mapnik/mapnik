@@ -799,9 +799,8 @@ struct to_expression_string : public util::static_visitor<std::string>
 
 namespace value_adl_barrier {
 
-class value
+class value : public value_base
 {
-    value_base base_;
     friend const value operator+(value const&,value const&);
     friend const value operator-(value const&,value const&);
     friend const value operator*(value const&,value const&);
@@ -810,64 +809,55 @@ class value
 
 public:
     value () noexcept //-- comment out for VC++11
-        : base_(value_null()) {}
+        : value_base(value_null()) {}
+
+    value (value const& other) = default;
+
+    value( value && other) noexcept = default;
 
     template <typename T>
     value ( T const& val)
-        : base_(typename detail::mapnik_value_type<T>::type(val)) {}
+        : value_base(typename detail::mapnik_value_type<T>::type(val)) {}
 
-    value (value const& other)
-        : base_(other.base_) {}
+    template <typename T>
+    value ( T && val)
+        : value_base(std::move(typename detail::mapnik_value_type<T>::type(val))) {}
 
-    value & operator=( value const& other)
-    {
-        if (this == &other)
-            return *this;
-        base_ = other.base_;
-        return *this;
-    }
-
-    value( value && other) noexcept
-        :  base_(std::move(other.base_)) {}
+    value & operator=( value const& other) = default;
 
     bool operator==(value const& other) const
     {
-        return util::apply_visitor(impl::equals(),base_,other.base_);
+        return util::apply_visitor(impl::equals(),*this,other);
     }
 
     bool operator!=(value const& other) const
     {
-        return util::apply_visitor(impl::not_equals(),base_,other.base_);
+        return util::apply_visitor(impl::not_equals(),*this,other);
     }
 
     bool operator>(value const& other) const
     {
-        return util::apply_visitor(impl::greater_than(),base_,other.base_);
+        return util::apply_visitor(impl::greater_than(),*this,other);
     }
 
     bool operator>=(value const& other) const
     {
-        return util::apply_visitor(impl::greater_or_equal(),base_,other.base_);
+        return util::apply_visitor(impl::greater_or_equal(),*this,other);
     }
 
     bool operator<(value const& other) const
     {
-        return util::apply_visitor(impl::less_than(),base_,other.base_);
+        return util::apply_visitor(impl::less_than(),*this,other);
     }
 
     bool operator<=(value const& other) const
     {
-        return util::apply_visitor(impl::less_or_equal(),base_,other.base_);
+        return util::apply_visitor(impl::less_or_equal(),*this,other);
     }
 
     value operator- () const
     {
-        return util::apply_visitor(impl::negate<value>(), base_);
-    }
-
-    value_base const& base() const
-    {
-        return base_;
+        return util::apply_visitor(impl::negate<value>(), *this);
     }
 
     bool is_null() const;
@@ -875,68 +865,67 @@ public:
     template <typename T>
     T convert() const
     {
-        return util::apply_visitor(impl::convert<T>(),base_);
+        return util::apply_visitor(impl::convert<T>(),*this);
     }
 
     value_bool to_bool() const
     {
-        return util::apply_visitor(impl::convert<value_bool>(),base_);
+        return util::apply_visitor(impl::convert<value_bool>(),*this);
     }
 
     std::string to_expression_string(char quote = '\'') const
     {
-        return util::apply_visitor(impl::to_expression_string(quote),base_);
+        return util::apply_visitor(impl::to_expression_string(quote),*this);
     }
 
     std::string to_string() const
     {
-        return util::apply_visitor(impl::convert<std::string>(),base_);
+        return util::apply_visitor(impl::convert<std::string>(),*this);
     }
 
     value_unicode_string to_unicode() const
     {
-        return util::apply_visitor(impl::to_unicode(),base_);
+        return util::apply_visitor(impl::to_unicode(),*this);
     }
 
     value_double to_double() const
     {
-        return util::apply_visitor(impl::convert<value_double>(),base_);
+        return util::apply_visitor(impl::convert<value_double>(),*this);
     }
 
     value_integer to_int() const
     {
-        return util::apply_visitor(impl::convert<value_integer>(),base_);
+        return util::apply_visitor(impl::convert<value_integer>(),*this);
     }
 };
 
 inline const value operator+(value const& p1,value const& p2)
 {
-
-    return value(util::apply_visitor(impl::add<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::add<value>(),p1, p2));
 }
 
 inline const value operator-(value const& p1,value const& p2)
 {
 
-    return value(util::apply_visitor(impl::sub<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::sub<value>(),p1, p2));
 }
 
 inline const value operator*(value const& p1,value const& p2)
 {
 
-    return value(util::apply_visitor(impl::mult<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::mult<value>(),p1, p2));
 }
 
 inline const value operator/(value const& p1,value const& p2)
 {
 
-    return value(util::apply_visitor(impl::div<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::div<value>(),p1, p2));
 }
 
 inline const value operator%(value const& p1,value const& p2)
 {
 
-    return value(util::apply_visitor(impl::mod<value>(),p1.base_, p2.base_));
+    return value(util::apply_visitor(impl::mod<value>(),p1, p2));
 }
 
 template <typename charT, typename traits>
@@ -951,7 +940,7 @@ operator << (std::basic_ostream<charT,traits>& out,
 // hash function
 inline std::size_t hash_value(value const& val)
 {
-    return hash_value(val.base());
+    return mapnik_hash_value(val);
 }
 
 } // namespace value_adl_barrier
@@ -984,7 +973,7 @@ struct is_null_visitor : public util::static_visitor<bool>
 
 inline bool value::is_null() const
 {
-    return util::apply_visitor(mapnik::detail::is_null_visitor(), base_);
+    return util::apply_visitor(mapnik::detail::is_null_visitor(), *this);
 }
 
 } // namespace mapnik

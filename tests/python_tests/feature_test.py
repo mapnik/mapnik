@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import itertools
+import itertools,sys
 import unittest
 from nose.tools import *
 from utilities import execution_path, run_all
@@ -94,6 +94,25 @@ def test_feature_expression_evaluation_attr_with_spaces():
     expr = mapnik.Expression("[name with space]='a'")
     eq_(str(expr),"([name with space]='a')")
     eq_(expr.evaluate(f),True)
+
+# https://github.com/mapnik/mapnik/issues/2390
+@raises(RuntimeError)
+def test_feature_from_geojson():
+    ctx = mapnik.Context()
+    inline_string = """
+    {
+         "geometry" : {
+            "coordinates" : [ 0,0 ]
+            "type" : "Point"
+         },
+         "type" : "Feature",
+         "properties" : {
+            "this":"that"
+            "known":"nope because missing comma"
+         }
+    }
+    """
+    feat = mapnik.Feature.from_geojson(inline_string,ctx)
 
 if __name__ == "__main__":
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

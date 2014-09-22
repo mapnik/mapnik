@@ -26,7 +26,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/variant.hpp>
@@ -43,14 +43,10 @@ using mapnik::query;
 using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
-using mapnik::CoordTransform;
+using mapnik::view_transform;
 using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
-
-#ifdef _WINDOWS
-using mapnik::rint;
-#endif
 
 gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
@@ -120,7 +116,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #endif
     */
 
-    CoordTransform t(raster_width_, raster_height_, raster_extent_, 0, 0);
+    view_transform t(raster_width_, raster_height_, raster_extent_, 0, 0);
     box2d<double> intersect = raster_extent_.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
 

@@ -26,6 +26,7 @@
 #include <vector>
 #include <list>
 
+#include <mapnik/json/generic_json.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/variant.hpp>
 
@@ -43,8 +44,7 @@ struct coordinate
     double y;
 };
 
-using value = mapnik::util::variant<value_null,bool,value_integer,value_double,std::string>;
-using property = std::tuple<std::string, value >;
+using property = std::tuple<std::string, json::json_value >;
 using properties = std::vector<property>;
 
 struct point

@@ -59,9 +59,25 @@ rule::rule(rule const& rhs)
       else_filter_(rhs.else_filter_),
       also_filter_(rhs.also_filter_) {}
 
+rule::rule(rule && rhs)
+    : name_(std::move(rhs.name_)),
+      min_scale_(std::move(rhs.min_scale_)),
+      max_scale_(std::move(rhs.max_scale_)),
+      syms_(std::move(rhs.syms_)),
+      filter_(std::move(rhs.filter_)),
+      else_filter_(std::move(rhs.else_filter_)),
+      also_filter_(std::move(rhs.also_filter_)) {}
+
 rule& rule::operator=(rule rhs)
 {
-    swap(*this, rhs);
+    using std::swap;
+    swap(this->name_, rhs.name_);
+    swap(this->min_scale_, rhs.min_scale_);
+    swap(this->max_scale_, rhs.max_scale_);
+    swap(this->syms_, rhs.syms_);
+    swap(this->filter_, rhs.filter_);
+    swap(this->else_filter_, rhs.else_filter_);
+    swap(this->also_filter_, rhs.also_filter_);
     return *this;
 }
 
@@ -76,17 +92,6 @@ bool rule::operator==(rule const& rhs) const
         (also_filter_ == rhs.also_filter_);
 }
 
-void swap(rule & lhs, rule & rhs)
-{
-    using std::swap;
-    swap(lhs.name_, rhs.name_);
-    swap(lhs.min_scale_, rhs.min_scale_);
-    swap(lhs.max_scale_, rhs.max_scale_);
-    swap(lhs.syms_, rhs.syms_);
-    swap(lhs.filter_, rhs.filter_);
-    swap(lhs.else_filter_, rhs.else_filter_);
-    swap(lhs.also_filter_, rhs.also_filter_);
-}
 
 void rule::set_max_scale(double scale)
 {

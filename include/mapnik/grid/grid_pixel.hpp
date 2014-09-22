@@ -69,20 +69,6 @@ struct gray16
         return *this;
     }
 
-    //--------------------------------------------------------------------
-    void opacity(double a_)
-    {
-        if(a_ < 0.0) a_ = 0.0;
-        if(a_ > 1.0) a_ = 1.0;
-        a = (value_type)agg::uround(a_ * double(base_mask));
-    }
-
-    //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return double(a) / double(base_mask);
-    }
-
 
     //--------------------------------------------------------------------
     const self_type& premultiply()
@@ -211,20 +197,6 @@ struct gray32
         return *this;
     }
 
-    //--------------------------------------------------------------------
-    void opacity(double a_)
-    {
-        if(a_ < 0.0) a_ = 0.0;
-        if(a_ > 1.0) a_ = 1.0;
-        a = (value_type)agg::uround(a_ * double(base_mask));
-    }
-
-    //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return double(a) / double(base_mask);
-    }
-
 
     //--------------------------------------------------------------------
     const self_type& premultiply()
@@ -351,20 +323,6 @@ struct gray64
     {
         a = 0;
         return *this;
-    }
-
-    //--------------------------------------------------------------------
-    void opacity(double a_)
-    {
-        if(a_ < 0.0) a_ = 0.0;
-        if(a_ > 1.0) a_ = 1.0;
-        a = (value_type)agg::uround(a_ * double(base_mask));
-    }
-
-    //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return double(a) / double(base_mask);
     }
 
 

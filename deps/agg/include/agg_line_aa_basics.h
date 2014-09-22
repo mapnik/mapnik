@@ -84,8 +84,8 @@ namespace agg
         line_parameters() {}
         line_parameters(int x1_, int y1_, int x2_, int y2_, int len_) :
             x1(x1_), y1(y1_), x2(x2_), y2(y2_), 
-            dx(abs(x2_ - x1_)),
-            dy(abs(y2_ - y1_)),
+            dx(std::abs(x2_ - x1_)),
+            dy(std::abs(y2_ - y1_)),
             sx((x2_ > x1_) ? 1 : -1),
             sy((y2_ > y1_) ? 1 : -1),
             vertical(dy >= dx),
@@ -124,14 +124,14 @@ namespace agg
             lp1.x2  = xmid;
             lp1.y2  = ymid;
             lp1.len = len2;
-            lp1.dx  = abs(lp1.x2 - lp1.x1);
-            lp1.dy  = abs(lp1.y2 - lp1.y1);
+            lp1.dx  = std::abs(lp1.x2 - lp1.x1);
+            lp1.dy  = std::abs(lp1.y2 - lp1.y1);
 
             lp2.x1  = xmid;
             lp2.y1  = ymid;
             lp2.len = len2;
-            lp2.dx  = abs(lp2.x2 - lp2.x1);
-            lp2.dy  = abs(lp2.y2 - lp2.y1);
+            lp2.dx  = std::abs(lp2.x2 - lp2.x1);
+            lp2.dy  = std::abs(lp2.y2 - lp2.y1);
         }
         
         //---------------------------------------------------------------------

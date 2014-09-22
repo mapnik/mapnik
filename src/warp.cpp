@@ -26,7 +26,7 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/proj_transform.hpp>
 
@@ -39,7 +39,7 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_basics.h"
-#include "agg_scanline_u.h"
+#include "agg_scanline_bin.h"
 #include "agg_renderer_scanline.h"
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
@@ -53,9 +53,9 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                                 unsigned mesh_size,
                                 scaling_method_e scaling_method)
 {
-    CoordTransform ts(source.data_.width(), source.data_.height(),
+    view_transform ts(source.data_.width(), source.data_.height(),
                       source.ext_);
-    CoordTransform tt(target.data_.width(), target.data_.height(),
+    view_transform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
 
     unsigned mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);
@@ -82,7 +82,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     using renderer_base = agg::renderer_base<pixfmt>;
 
     agg::rasterizer_scanline_aa<> rasterizer;
-    agg::scanline_u8 scanline;
+    agg::scanline_bin scanline;
     agg::rendering_buffer buf((unsigned char*)target.data_.getData(),
                               target.data_.width(),
                               target.data_.height(),
@@ -179,7 +179,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                     using span_gen_type = agg::span_image_filter_rgba_nn
                         <img_accessor_type, interpolator_type>;
                     span_gen_type sg(ia, interpolator);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb,
+                    agg::render_scanlines_bin(rasterizer, scanline, rb,
                                              sa, sg);
                 }
                 else
@@ -187,7 +187,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                     using span_gen_type = agg::span_image_resample_rgba_affine
                         <img_accessor_type>;
                     span_gen_type sg(ia, interpolator, filter);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb,
+                    agg::render_scanlines_bin(rasterizer, scanline, rb,
                                              sa, sg);
                 }
             }

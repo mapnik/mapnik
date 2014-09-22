@@ -49,11 +49,18 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     using raster_dispatch_type = T1;
     using renderer_context_type = T2;
 
-    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag>;
     using svg_attribute_type = agg::pod_bvector<path_attributes>;
+    using conv_types = boost::mpl::vector<clip_line_tag,
+                                          clip_poly_tag,
+                                          transform_tag,
+                                          affine_transform_tag,
+                                          simplify_tag, smooth_tag,
+                                          offset_transform_tag>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
+    double offset = get<value_double>(sym, keys::offset, feature, common.vars_, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common.vars_, 0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, false);
 
     // https://github.com/mapnik/mapnik/issues/1316
@@ -63,19 +70,19 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
         if (mark && *mark)
         {
-            agg::trans_affine tr = agg::trans_affine_scaling(common.scale_factor_);
+            agg::trans_affine geom_tr;
+            auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+            if (transform) evaluate_transform(geom_tr, feature, common.vars_, *transform, common.scale_factor_);
+            agg::trans_affine image_tr = agg::trans_affine_scaling(common.scale_factor_);
 
             if ((*mark)->is_vector())
             {
                 boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
 
-                auto width_expr = get_optional<expression_ptr>(sym, keys::width);
-                auto height_expr = get_optional<expression_ptr>(sym, keys::height);
-
                 // special case for simple ellipse markers
                 // to allow for full control over rx/ry dimensions
                 if (filename == "shape://ellipse"
-                   && (width_expr || height_expr))
+                   && (has_key<double>(sym,keys::width) || has_key<double>(sym,keys::height)))
                 {
                     svg_storage_type marker_ellipse;
                     vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
@@ -84,12 +91,12 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-                    if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
+                    if (image_transform) evaluate_transform(image_tr, feature, common.vars_, *image_transform);
                     box2d<double> bbox = marker_ellipse.bounding_box();
                     vector_dispatch_type rasterizer_dispatch(svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
                                                              bbox,
-                                                             tr,
+                                                             image_tr,
                                                              sym,
                                                              *common.detector_,
                                                              common.scale_factor_,
@@ -99,28 +106,29 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              renderer_context);
 
                     vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
-                                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
+                                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
                         if (type == geometry_type::types::Polygon)
                             converter.template set<clip_poly_tag>();
-                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                        //else if (type == LineString)
-                        //    converter.template set<clip_line_tag>();
-                        // don't clip if type==Point
+                        else if (type == geometry_type::types::LineString)
+                            converter.template set<clip_line_tag>();
                     }
                     converter.template set<transform_tag>(); //always transform
+                    if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
+                    converter.template set<affine_transform_tag>(); // optional affine transform
+                    if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
                     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                     apply_markers_multi(feature, common.vars_, converter, sym);
                 }
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
-                    setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, common.vars_, sym);
+                    setup_transform_scaling(image_tr, bbox.width(), bbox.height(), feature, common.vars_, sym);
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-                    if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
+                    if (image_transform) evaluate_transform(image_tr, feature, common.vars_, *image_transform);
                     vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
                     svg_path_adapter svg_path(stl_storage);
                     svg_attribute_type attributes;
@@ -128,7 +136,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     vector_dispatch_type rasterizer_dispatch(svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
                                                              bbox,
-                                                             tr,
+                                                             image_tr,
                                                              sym,
                                                              *common.detector_,
                                                              common.scale_factor_,
@@ -138,34 +146,35 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              renderer_context);
 
                     vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
-                                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
+                                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
                         if (type == geometry_type::types::Polygon)
                             converter.template set<clip_poly_tag>();
-                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                        //else if (type == LineString)
-                        //    converter.template set<clip_line_tag>();
-                        // don't clip if type==Point
+                        else if (type == geometry_type::types::LineString)
+                            converter.template set<clip_line_tag>();
                     }
                     converter.template set<transform_tag>(); //always transform
+                    if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
+                    converter.template set<affine_transform_tag>(); // optional affine transform
+                    if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
                     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                     apply_markers_multi(feature, common.vars_, converter, sym);
                 }
             }
             else // raster markers
             {
-                setup_transform_scaling(tr, (*mark)->width(), (*mark)->height(), feature, common.vars_, sym);
+                setup_transform_scaling(image_tr, (*mark)->width(), (*mark)->height(), feature, common.vars_, sym);
                 auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-                if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
+                if (image_transform) evaluate_transform(image_tr, feature, common.vars_, *image_transform);
                 box2d<double> const& bbox = (*mark)->bounding_box();
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
                 // - clamp sizes to > 4 pixels of interactivity
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
-                agg::trans_affine marker_trans = recenter * tr;
+                agg::trans_affine marker_trans = recenter * image_tr;
                 raster_dispatch_type rasterizer_dispatch(**marker,
                                                          marker_trans,
                                                          sym,
@@ -176,20 +185,21 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                          renderer_context);
 
                 vertex_converter<box2d<double>, raster_dispatch_type, markers_symbolizer,
-                                 CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
-                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,tr,feature,common.vars_,common.scale_factor_);
+                                 view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {
                     geometry_type::types type = feature.paths()[0].type();
                     if (type == geometry_type::types::Polygon)
                         converter.template set<clip_poly_tag>();
-                    // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                    //else if (type == geometry_type::types::LineString)
-                    //    converter.template set<clip_line_tag>();
-                    // don't clip if type==geometry_type::types::Point
+                    else if (type == geometry_type::types::LineString)
+                        converter.template set<clip_line_tag>();
                 }
                 converter.template set<transform_tag>(); //always transform
+                if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
+                converter.template set<affine_transform_tag>(); // optional affine transform
+                if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
                 if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                 apply_markers_multi(feature, common.vars_, converter, sym);
             }

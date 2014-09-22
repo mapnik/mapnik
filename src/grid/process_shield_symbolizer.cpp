@@ -69,7 +69,6 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
         if (glyphs->marker())
         {
             render_marker(feature,
-                          pixmap_.get_resolution(),
                           glyphs->marker_pos(),
                           *(glyphs->marker()->marker),
                           glyphs->marker()->transform,

@@ -8,6 +8,7 @@ import mapnik
 import shutil
 import os.path
 from compare import compare, compare_grids
+import platform
 
 try:
     import json
@@ -26,7 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
-if 'Linux' == os.uname()[0]:
+if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
     # to generate the expected images, so we'll rachet back the threshold
@@ -42,13 +43,16 @@ def render_cairo(m, output, scale_factor):
 
 def render_grid(m, output, scale_factor):
     grid = mapnik.Grid(m.width, m.height)
-    mapnik.render_layer(m, grid, layer=0)
+    mapnik.render_layer(m, grid, layer=0, scale_factor=scale_factor)
     utf1 = grid.encode('utf', resolution=4)
     open(output,'wb').write(json.dumps(utf1, indent=1))
 
+def render_agg(m, output, scale_factor):
+    mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
+
 renderers = [
     { 'name': 'agg',
-      'render': lambda m, output, scale_factor: mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
+      'render': render_agg,
       'compare': lambda actual, reference: compare(actual, reference, alpha=True),
       'threshold': agg_threshold,
       'filetype': 'png',
@@ -180,6 +184,7 @@ files = {
     'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
+    'text-font-features': {'sizes': [(500, 500)]},
     'text-multi-layout-1': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'text-multi-layout-2': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
@@ -201,8 +206,7 @@ files = {
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
 
-    # disabled since fixing is not actionable: https://github.com/mapnik/mapnik/issues/1913
-    #'tiff-reprojection-2': {'sizes':[(250,250)]},
+    'tiff-reprojection-2': {'sizes':[(250,250)]},
 
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
@@ -256,6 +260,7 @@ files = {
     'marker-symbolizer-expressions-all':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
     'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
+    'polygon-winding-order': {'sizes':[(300,300)]},
     'group-symbolizer-1':{'sizes':[(512,512)]},
     'group-symbolizer-2':{'sizes':[(512,512)]},
     'group-symbolizer-line-1':{'sizes':[(512,512)]},
@@ -269,7 +274,14 @@ files = {
     'line-smooth-and-offset':{'sizes':[(512,512)]},
     'line-pattern-smooth-and-offset':{'sizes':[(512,512)]},
     'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
-    'marker-whole-multi-polygon':{'sizes':[(512,512)]}
+    'marker-whole-multi-polygon':{'sizes':[(512,512)]},
+    'shield-on-line-and-avoid-edges':{'sizes':[(512,512)]},
+    'marker-on-line-and-avoid-edges':{'sizes':[(512,512)]},
+    'text-typographic':{'sizes':[(512,512)]},
+    'functional-expressions':{'sizes':[(256,256)], 'bbox':mapnik.Box2d(-10,-10,10,10)},
+    'marker-collide':{'sizes':[(512,512)]},
+    'postgis-inline':{'sizes':[(512,512)]},
+    'text-line-wrap':{'sizes':[(512,512)]},
     }
 
 class Reporting:
@@ -288,7 +300,10 @@ class Reporting:
     def result_fail(self, actual, expected, diff):
         self.failed += 1
         if self.quiet:
-            sys.stderr.write('\x1b[31m.\x1b[0m')
+            if platform.uname()[0] == 'Windows':
+                sys.stderr.write('.')
+            else:
+                sys.stderr.write('\x1b[31m.\x1b[0m')
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
 
@@ -302,9 +317,15 @@ class Reporting:
     def result_pass(self, actual, expected, diff):
         self.passed += 1
         if self.quiet:
-            sys.stderr.write('\x1b[32m.\x1b[0m')
+            if platform.uname()[0] == 'Windows':
+                sys.stderr.write('.')
+            else:
+                sys.stderr.write('\x1b[32m.\x1b[0m')
         else:
-            print '\x1b[32m✓\x1b[0m'
+            if platform.uname()[0] == 'Windows':
+                print '\x1b[32m✓\x1b[0m'
+            else:
+                print '✓'
 
     def not_found(self, actual, expected):
         self.failed += 1
@@ -402,9 +423,6 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
         return m
 
     for renderer in renderers:
-        # TODO - grid renderer does not support scale_factor yet via python
-        if renderer['name'] == 'grid' and scale_factor != 1.0:
-            continue
         if config.get(renderer['name'], True):
             expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
                 (postfix, renderer['name'], renderer['filetype']))

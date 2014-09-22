@@ -1,0 +1,74 @@
+<!DOCTYPE Map>
+<Map background-color="#b5d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="0.7.2">
+    <Style name="1">
+        <Rule>
+            <TextSymbolizer
+                size="15"
+                dy="-5"
+                allow-overlap="true"
+                face-name="DejaVu Sans Book"
+                wrap-width=".1"
+                repeat-wrap-character="[repeat-wrap-character]"
+                wrap-character="[wrap-character]"
+                halo-radius="1">[label]</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true" />
+        </Rule>        
+    </Style>
+
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="inline">
+
+            {
+                "type": "FeatureCollection",
+                            
+                "features": [
+                
+                    { "type": "Feature", 
+                        "properties": {
+                            "label": "this,that",
+                            "wrap-character":",",
+                            "repeat-wrap-character":true
+                        },
+                        "geometry"  : { "type": "Point", "coordinates": [ 2.5, 2.5 ] }
+                    },
+                    { "type": "Feature", 
+                        "properties": {
+                            "label": "this-that",
+                            "wrap-character":"-",
+                            "repeat-wrap-character":true
+                        },
+                        "geometry"  : { "type": "Point", "coordinates": [ 0, 5 ] }
+                    }
+                ]
+            }
+            
+            </Parameter>
+            <Parameter name="type">geojson</Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+-1,-1
+6,-1
+-1,6
+6,6
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>

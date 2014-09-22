@@ -55,7 +55,8 @@ struct evaluated_format_properties
       text_transform(NONE),
       fill(0,0,0),
       halo_fill(0,0,0),
-      halo_radius(0.0) {}
+      halo_radius(0.0),
+      font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
@@ -67,6 +68,7 @@ struct evaluated_format_properties
     color fill;
     color halo_fill;
     double halo_radius;
+    font_feature_settings_ptr font_feature_settings;
 };
 
 }
@@ -94,6 +96,7 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type halo_fill;
     symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type text_transform;
+    symbolizer_base::value_type font_feature_settings;
 
 };
 
@@ -119,7 +122,9 @@ struct MAPNIK_DECL text_layout_properties
     symbolizer_base::value_type orientation;
     symbolizer_base::value_type text_ratio;
     symbolizer_base::value_type wrap_width;
+    symbolizer_base::value_type wrap_char;
     symbolizer_base::value_type wrap_before;
+    symbolizer_base::value_type repeat_wrap_char;
     symbolizer_base::value_type rotate_displacement;
     symbolizer_base::value_type halign;
     symbolizer_base::value_type jalign;
@@ -137,6 +142,7 @@ struct text_properties_expressions
     symbolizer_base::value_type label_spacing = 0.0;
     symbolizer_base::value_type label_position_tolerance = 0.0;
     symbolizer_base::value_type avoid_edges = false;
+    symbolizer_base::value_type margin = 0.0;
     symbolizer_base::value_type repeat_distance = 0.0;
     symbolizer_base::value_type minimum_distance = 0.0;
     symbolizer_base::value_type minimum_padding = 0.0;
@@ -180,6 +186,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     // distance the label can be moved on the line to fit, if 0 the default is used
     double label_position_tolerance;
     bool avoid_edges;
+    double margin;
     double repeat_distance;
     double minimum_distance;
     double minimum_padding;

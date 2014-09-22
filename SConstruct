@@ -1296,7 +1296,7 @@ if not preconfigured:
 
     # test for C++11 support, which is required
     if not conf.supports_cxx11():
-        color_print(1,"C++ compiler does not support C++11 standard, which is required. Please use Mapnik 2.x instead of 3.x as an alternative")
+        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler to at least g++ 4.7 (ideally 4.8)")
         Exit(1)
 
     if not env['HOST']:
@@ -2010,9 +2010,6 @@ if not HELP_REQUESTED:
 
     # build C++ tests
     SConscript('tests/cpp_tests/build.py')
-
-    if env['CPP_TESTS'] and env['SVG_RENDERER']:
-        SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')

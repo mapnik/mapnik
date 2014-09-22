@@ -64,6 +64,11 @@ struct MAPNIK_DECL offset_converter
         process
     };
 
+    unsigned type() const
+    {
+        return static_cast<unsigned>(geom_.type());
+    }
+
     double get_offset() const
     {
         return offset_;

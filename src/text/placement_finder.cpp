@@ -22,7 +22,7 @@
 //mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text/placement_finder_impl.hpp>
 #include <mapnik/text/text_layout.hpp>
@@ -121,7 +121,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         bbox.re_center(layout_center.x, layout_center.y);
 
         /* For point placements it is faster to just check the bounding box. */
-        if (collision(bbox, layouts_.text())) return false;
+        if (collision(bbox, layouts_.text(), false)) return false;
 
         if (layout.num_lines()) bboxes.push_back(std::move(bbox));
 
@@ -214,7 +214,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                    if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
                     {
                         return false;
                     }
@@ -244,7 +244,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 cluster_offset.y -= rot.sin * glyph.advance();
 
                 box2d<double> bbox = get_bbox(layout, glyph, pos, rot);
-                if (collision(bbox, layouts_.text())) return false;
+                if (collision(bbox, layouts_.text(), true)) return false;
                 bboxes.push_back(std::move(bbox));
                 glyphs->push_back(glyph, pos, rot);
             }
@@ -301,7 +301,7 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
     int num_labels = 1;
     if (info_.properties.label_spacing > 0)
     {
-        num_labels = static_cast<int>(floor(
+        num_labels = static_cast<int>(std::floor(
             path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
     }
     if (num_labels <= 0)
@@ -311,25 +311,30 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
     return path_length / num_labels;
 }
 
-bool placement_finder::collision(const box2d<double> &box, const value_unicode_string &repeat_key) const
+bool placement_finder::collision(const box2d<double> &box, const value_unicode_string &repeat_key, bool line_placement) const
 {
-    if (!detector_.extent().intersects(box)
-            ||
-        (info_.properties.avoid_edges && !extent_.contains(box))
-            ||
-        (info_.properties.minimum_padding > 0 &&
-         !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
-            ||
-        (!info_.properties.allow_overlap &&
-            ((repeat_key.length() == 0 && !detector_.has_placement(box, info_.properties.minimum_distance * scale_factor_))
-                ||
-             (repeat_key.length() > 0  && !detector_.has_placement(box, info_.properties.minimum_distance * scale_factor_,
-                                                                   repeat_key, info_.properties.repeat_distance * scale_factor_))))
-        )
+    double margin, repeat_distance;
+    if (line_placement)
     {
-        return true;
+        margin = info_.properties.margin * scale_factor_;
+        repeat_distance = (info_.properties.repeat_distance != 0 ? info_.properties.repeat_distance : info_.properties.minimum_distance) * scale_factor_;
     }
-    return false;
+    else
+    {
+        margin = (info_.properties.margin != 0 ? info_.properties.margin : info_.properties.minimum_distance) * scale_factor_;
+        repeat_distance = info_.properties.repeat_distance * scale_factor_;
+    }
+    return !detector_.extent().intersects(box)
+               ||
+           (info_.properties.avoid_edges && !extent_.contains(box))
+               ||
+           (info_.properties.minimum_padding > 0 &&
+            !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
+               ||
+           (!info_.properties.allow_overlap &&
+               ((repeat_key.length() == 0 && !detector_.has_placement(box, margin))
+                   ||
+               (repeat_key.length() > 0 && !detector_.has_placement(box, margin, repeat_key, repeat_distance))));
 }
 
 void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement)
@@ -348,7 +353,7 @@ bool placement_finder::add_marker(glyph_positions_ptr glyphs, pixel_position con
     box2d<double> bbox = marker_box_;
     bbox.move(real_pos.x, real_pos.y);
     glyphs->set_marker(marker_, real_pos);
-    if (collision(bbox, layouts_.text())) return false;
+    if (collision(bbox, layouts_.text(), false)) return false;
     detector_.insert(bbox);
     return true;
 }

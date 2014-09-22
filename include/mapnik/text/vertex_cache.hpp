@@ -110,7 +110,7 @@ public:
 
 
     // Skip a certain amount of space.
-    // This function automatically calculates new points if the position is not exactly
+    // This functions automatically calculate new points if the position is not exactly
     // on a point on the path.
 
     bool forward(double length);
@@ -118,6 +118,8 @@ public:
     bool backward(double length);
     // Move in any direction (based on sign of length). Returns false if it reaches either end of the path.
     bool move(double length);
+    // Move to given distance.
+    bool move_to_distance(double distance);
     // Work on next subpath. Returns false if the is no next subpath.
     bool next_subpath();
 
@@ -138,6 +140,11 @@ private:
     void rewind_subpath();
     bool next_segment();
     bool previous_segment();
+    double current_segment_angle();
+    void find_line_circle_intersection(
+        double cx, double cy, double radius,
+        double x1, double y1, double x2, double y2,
+        double & ix, double & iy) const;
     // Position as calculated by last move/forward/next call.
     pixel_position current_position_;
     // First pixel of current segment.

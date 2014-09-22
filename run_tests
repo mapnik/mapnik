@@ -3,9 +3,10 @@
 failures=0
 
 source ./localize.sh
+PYTHON=${PYTHON:-python}
 
 echo "*** Running visual tests..."
-python tests/visual_tests/test.py -q
+$PYTHON tests/visual_tests/test.py -q
 failures=$((failures+$?))
 
 echo "*** Running C++ tests..."
@@ -14,7 +15,7 @@ failures=$((failures+$?))
 echo
 
 echo "*** Running python tests..."
-python tests/run_tests.py -q
+$PYTHON tests/run_tests.py -q
 failures=$((failures+$?))
 
 exit $failures

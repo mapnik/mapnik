@@ -29,6 +29,9 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
+#include <boost/optional.hpp>
+
+// stl
 #include <memory>
 
 #include "dbfile.hpp"

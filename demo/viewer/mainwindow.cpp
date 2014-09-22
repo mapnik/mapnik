@@ -39,7 +39,7 @@
 // mapnik
 
 #ifndef Q_MOC_RUN // QT moc chokes on BOOST_JOIN
-#include <mapnik/config_error.hpp>
+//#include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/projection.hpp>
@@ -196,10 +196,10 @@ void MainWindow::load_map_file(QString const& filename)
         mapnik::auto_cpu_timer t(std::clog, "loading map took: ");
         mapnik::load_map(*map,filename.toStdString());
     }
-    catch (mapnik::config_error & ex)
-    {
-        std::cout << ex.what() << "\n";
-    }
+    //catch (mapnik::config_error & ex)
+    //{
+    //    std::cout << ex.what() << "\n";
+    //}
     catch (...)
     {
         std::cerr << "Exception caught in load_map\n";

@@ -69,8 +69,6 @@ if env['HAS_CAIRO']:
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
-lib_env['LIBS'].append('harfbuzz-icu')
-
 if '-DHAVE_PNG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('png')
    enabled_imaging_libraries.append('png_reader.cpp')
@@ -168,6 +166,7 @@ source = Split(
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
+    function_call.cpp
     gradient.cpp
     graphics.cpp
     parse_path.cpp
@@ -212,6 +211,7 @@ source = Split(
     text/renderer.cpp
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
+    text/font_feature_settings.cpp
     text/formatting/base.cpp
     text/formatting/list.cpp
     text/formatting/text.cpp

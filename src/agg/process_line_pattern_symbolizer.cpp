@@ -127,7 +127,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
                                           simplify_tag,smooth_tag,
                                           offset_transform_tag>;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
         converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)

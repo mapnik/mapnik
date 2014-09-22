@@ -6,12 +6,22 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## 3.x / Future
+## 3.0.0
 
-- Default PNG encoding method when `png` is supplied is now `png8:m=h`, so paletted png using hextree color quantization (#2028)
-  Use `png32` now for full color png. More details at https://github.com/mapnik/mapnik/wiki/Image-IO.
+- Improved support for International Text (now uses harfbuzz library for text shaping)
+- Uses latest c++11 features for better performance (especially map loading)
+- Expressions everywhere: all symbolizer properties can now be data driven expression (which the exception of `face-name` and `fontset-name`).
+- New functions supported in expressions: `exp`, `sin`, `cos`, `tan`, `atan`, `abs`.
+- Pattern symbolizers now support SVG input and applying transformations on them dynamically
+- Experimental / interface may change: `@variables` can be passed to renderer and evaluated in expressions
+- Supports being built with clang++ using `-fvisibility=hidden -flto` for smaller binaries
+- Supports being built with Visual Studio 2014 CTP #3
+- Shield icons are now pixel snapped for crisp rendering
+- `MarkersSymbolizer` now supports `avoid-edges`, `offset`, `geometry-transform`, `simplify` for `line` placement and two new `placement` options called `vertex-last` and `vertex-first` to place a single marker at the end or beginning of a path. Also `clip` is now respected when rendering markers on a LineString 
+geometry.
+- `TextSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
+- `ShieldSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
 
-## 2.3.0
 
 Released ...
 
@@ -44,9 +54,6 @@ Summary: TODO
 - Fixed crash when rendering to cairo context from python (#2031)
 
 - Moved `label-position-tolerance` from unsigned type to double
-
-- Default PNG encoding method when `png` is supplied is now `png8:m=h`, so paletted png using hextree color quantization (#2028)
-  Use `png32` now for full color png. More details at https://github.com/mapnik/mapnik/wiki/Image-IO.
 
 - Added support for more seamless blurring by rendering to a larger internal image to avoid edge effects (#1478)
 

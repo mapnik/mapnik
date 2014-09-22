@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,9 @@
 
 // mapnik
 #include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/json/positions_grammar_impl.hpp>
 
 // boost
-#include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -35,7 +35,7 @@ namespace mapnik { namespace json {
 
 template <typename Iterator>
 geometry_grammar<Iterator>::geometry_grammar()
-    : geometry_grammar::base_type(geometry,"geometry")
+    : geometry_grammar::base_type(start,"geometry")
 {
 
     qi::lit_type lit;
@@ -46,108 +46,49 @@ geometry_grammar<Iterator>::geometry_grammar()
     qi::_3_type _3;
     qi::_4_type _4;
     qi::_a_type _a;
+    qi::_b_type _b;
     qi::_r1_type _r1;
-    qi::_r2_type _r2;
     qi::eps_type eps;
-    qi::_pass_type _pass;
     using qi::fail;
     using qi::on_error;
-    using boost::phoenix::new_;
-    using boost::phoenix::push_back;
-    using boost::phoenix::construct;
-   // Nabialek trick - FIXME: how to bind argument to dispatch rule?
-    // geometry = lit("\"geometry\"")
-    //    >> lit(':') >> lit('{')
-    //    >> lit("\"type\"") >> lit(':') >> geometry_dispatch[_a = _1]
-    //    >> lit(',') >> lit("\"coordinates\"") >> lit(':')
-    //    >> qi::lazy(*_a)
-    //    >> lit('}')
-    //    ;
-    // geometry_dispatch.add
-    //    ("\"Point\"",&point_coordinates)
-    //    ("\"LineString\"",&linestring_coordinates)
-    //    ("\"Polygon\"",&polygon_coordinates)
-    //    ;
-    //////////////////////////////////////////////////////////////////
+
+    start = geometry(_r1) | geometry_collection(_r1);
 
     geometry = (lit('{')[_a = 0 ]
-                >> lit("\"type\"") >> lit(':') >> geometry_dispatch[_a = _1] // <---- should be Nabialek trick!
-                >> lit(',')
-                >> (lit("\"coordinates\"") > lit(':') > coordinates(_r1,_a)
-                    |
-                    lit("\"geometries\"") > lit(':')
-                    >> lit('[') >> geometry_collection(_r1) >> lit(']'))
+                >> (-lit(',') >> lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1]
+                    ^
+                    (-lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinates[_b = _1]))[create_geometry(_r1,_a,_b)]
                 >> lit('}'))
         | lit("null")
         ;
 
-    geometry_dispatch.add
+    geometry_collection = (lit('{')
+                           >> (-lit(',') >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
+                               ^
+                               -lit(',') >> lit("\"geometries\"") >> lit(':')
+                               >> lit('[') >> geometry(_r1) % lit(',') >> lit(']'))
+                           >> lit('}'))
+        | lit("null")
+        ;
+
+    geometry_type_dispatch.add
         ("\"Point\"",1)
         ("\"LineString\"",2)
         ("\"Polygon\"",3)
         ("\"MultiPoint\"",4)
         ("\"MultiLineString\"",5)
         ("\"MultiPolygon\"",6)
-        ("\"GeometryCollection\"",7)
-        //
         ;
-
-    coordinates = (eps(_r2 == 1) > point_coordinates(_r1))
-        | (eps(_r2 == 2) > linestring_coordinates(_r1))
-        | (eps(_r2 == 3) > polygon_coordinates(_r1))
-        | (eps(_r2 == 4) > multipoint_coordinates(_r1))
-        | (eps(_r2 == 5) > multilinestring_coordinates(_r1))
-        | (eps(_r2 == 6) > multipolygon_coordinates(_r1))
-        ;
-
-    point_coordinates =  eps[ _a = new_<geometry_type>(geometry_type::types::Point) ]
-        > ( point(SEG_MOVETO,_a) [push_back(_r1,_a)] | eps[cleanup_(_a)][_pass = false] )
-        ;
-
-    linestring_coordinates = eps[ _a = new_<geometry_type>(geometry_type::types::LineString)]
-        > -(points(_a) [push_back(_r1,_a)]
-           | eps[cleanup_(_a)][_pass = false])
-        ;
-
-    polygon_coordinates = eps[ _a = new_<geometry_type>(geometry_type::types::Polygon) ]
-        > ((lit('[')
-            > -(points(_a)[close_path_(_a)] % lit(','))
-            > lit(']')) [push_back(_r1,_a)]
-           | eps[cleanup_(_a)][_pass = false])
-        ;
-
-    multipoint_coordinates =  lit('[')
-        > -(point_coordinates(_r1) % lit(','))
-        > lit(']')
-        ;
-
-    multilinestring_coordinates =  lit('[')
-        > -(linestring_coordinates(_r1) % lit(','))
-        > lit(']')
-        ;
-
-    multipolygon_coordinates =  lit('[')
-        > -(polygon_coordinates(_r1) % lit(','))
-        > lit(']')
-        ;
-
-    geometry_collection = *geometry(_r1) >> *(lit(',') >> geometry(_r1))
-        ;
-
-    // point
-    point = lit('[') > -((double_ > lit(',') > double_)[push_vertex_(_r1,_r2,_1,_2)]) > lit(']');
-    // points
-    points = lit('[')[_a = SEG_MOVETO] > -(point (_a,_r1) % lit(',')[_a = SEG_LINETO]) > lit(']');
 
     // give some rules names
     geometry.name("Geometry");
     geometry_collection.name("GeometryCollection");
-    geometry_dispatch.name("Geometry dispatch");
+    geometry_type_dispatch.name("Geometry dispatch");
     coordinates.name("Coordinates");
     // error handler
     on_error<fail>
         (
-            geometry
+            start
             , std::clog
             << boost::phoenix::val("Error! Expecting ")
             << _4  // what failed?

@@ -30,10 +30,12 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>
-
+#include <mapnik/json/value_converters.hpp>
+#include <mapnik/debug.hpp>
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 
 namespace mapnik { namespace json {
 
@@ -70,7 +72,7 @@ struct put_property
     explicit put_property(mapnik::transcoder const& tr)
         : tr_(tr) {}
     template <typename T0,typename T1, typename T2>
-    result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
+    result_type operator() (T0 & feature, T1 const& key, T2 && val) const
     {
         feature.put_new(key, mapnik::util::apply_visitor(attribute_value_visitor(tr_),val));
     }
@@ -87,7 +89,19 @@ struct extract_geometry
     }
 };
 
-template <typename Iterator, typename FeatureType>
+template <typename Iterator>
+struct error_handler
+{
+    using result_type = void;
+    void operator() (
+        Iterator first, Iterator last,
+        Iterator err_pos, boost::spirit::info const& what) const
+    {
+        MAPNIK_LOG_WARN(error_handler) << what << " expected in input";
+    }
+};
+
+template <typename Iterator, typename FeatureType, typename ErrorHandler = error_handler<Iterator> >
 struct feature_grammar :
         qi::grammar<Iterator, void(FeatureType&),
                     space_type>
@@ -104,12 +118,13 @@ struct feature_grammar :
 
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator, mapnik::util::variant<value_null,bool,value_integer,value_double,std::string>(), space_type> attribute_value;
+    qi::rule<Iterator, json_value(), space_type> attribute_value;
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
-    boost::phoenix::function<where_message> where_message_;
-
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
+    // geometry
     geometry_grammar<Iterator> geometry_grammar_;
 };
 

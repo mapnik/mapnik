@@ -67,7 +67,7 @@ void vcgen_dash::add_dash(double dash_len, double gap_len)
 void vcgen_dash::dash_start(double ds)
 {
     m_dash_start = ds;
-    calc_dash_start(fabs(ds));
+    calc_dash_start(std::fabs(ds));
 }
 
 

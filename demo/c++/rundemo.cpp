@@ -63,6 +63,7 @@ int main ( int argc , char** argv)
 
         // Provinces (polygon)
         feature_type_style provpoly_style;
+        provpoly_style.reserve(2); // prevent reallocation and copying in add_rule
         {
             rule r;
             r.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));

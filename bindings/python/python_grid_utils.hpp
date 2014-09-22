@@ -66,15 +66,13 @@ void grid_encode_utf(T const& grid_type,
 template <typename T>
 boost::python::dict grid_encode( T const& grid, std::string const& format, bool add_features, unsigned int resolution);
 
-/* new approach: key comes from grid object
- * grid size should be same as the map
- * encoding, resizing handled as method on grid object
- * whether features are dumped is determined by argument not 'fields'
- */
 void render_layer_for_grid(const mapnik::Map& map,
                            mapnik::grid& grid,
                            unsigned layer_idx, // TODO - layer by name or index
-                           boost::python::list const& fields);
+                           boost::python::list const& fields,
+                           double scale_factor,
+                           unsigned offset_x,
+                           unsigned offset_y);
 
 }
 

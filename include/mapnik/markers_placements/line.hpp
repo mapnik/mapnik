@@ -24,7 +24,7 @@
 #define MAPNIK_MARKERS_PLACEMENTS_LINE_HPP
 
 #include <mapnik/markers_placements/point.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp> //round
 
@@ -36,32 +36,19 @@ template <typename Locator, typename Detector>
 class markers_line_placement : public markers_point_placement<Locator, Detector>
 {
 public:
-    markers_line_placement(Locator &locator,
-                           box2d<double> const& size,
-                           agg::trans_affine const& tr,
-                           Detector &detector,
-                           double spacing,
-                           double max_error,
-                           bool allow_overlap)
-      : markers_point_placement<Locator, Detector>(
-            locator, size, tr, detector,
-            spacing, max_error, allow_overlap),
-        last_x(0.0),
-        last_y(0.0),
-        next_x(0.0),
-        next_y(0.0),
-        error_(0.0),
-        spacing_left_(0.0),
-        marker_nr_(0)
+    markers_line_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
+        : markers_point_placement<Locator, Detector>(locator, detector, params),
+            last_x(0.0),
+            last_y(0.0),
+            next_x(0.0),
+            next_y(0.0),
+            spacing_(0.0),
+            marker_width_((params.size * params.tr).width()),
+            error_(0.0),
+            spacing_left_(0.0),
+            marker_nr_(0)
     {
-        if (spacing >= 1)
-        {
-          this->spacing_ = spacing;
-        }
-        else
-        {
-          this->spacing_ = 100;
-        }
+        spacing_ = params.spacing < 1 ? 100 : params.spacing;
         rewind();
     }
 
@@ -103,31 +90,31 @@ public:
         {
             //First marker
             marker_nr_++;
-            this->spacing_left_ = this->spacing_ / 2;
+            spacing_left_ = spacing_ / 2;
         }
         else
         {
-            this->spacing_left_ = this->spacing_;
+            spacing_left_ = spacing_;
         }
         spacing_left_ -= error_;
         error_ = 0.0;
-        double max_err_allowed = this->max_error_ * this->spacing_;
+        double max_err_allowed = this->params_.max_error * spacing_;
         //Loop exits when a position is found or when no more segments are available
         while (true)
         {
             //Do not place markers too close to the beginning of a segment
-            if (spacing_left_ < this->marker_width_/2)
+            if (spacing_left_ < this->marker_width_ / 2)
             {
-                set_spacing_left(this->marker_width_/2); //Only moves forward
+                set_spacing_left(this->marker_width_ / 2); //Only moves forward
             }
             //Error for this marker is too large. Skip to the next position.
             if (std::fabs(error_) > max_err_allowed)
             {
-                while (this->error_ > this->spacing_)
+                while (this->error_ > spacing_)
                 {
-                    error_ -= this->spacing_; //Avoid moving backwards
+                    error_ -= spacing_; //Avoid moving backwards
                 }
-                spacing_left_ += this->spacing_ - this->error_;
+                spacing_left_ += spacing_ - this->error_;
                 error_ = 0.0;
             }
             double dx = next_x - last_x;
@@ -185,10 +172,15 @@ public:
             x = last_x + dx * (spacing_left_ / segment_length);
             y = last_y + dy * (spacing_left_ / segment_length);
             box2d<double> box = this->perform_transform(angle, x, y);
-            if (!this->allow_overlap_ && !this->detector_.has_placement(box))
+            if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+            {
+                set_spacing_left(spacing_left_ + spacing_ * this->params_.max_error / 10.0);
+                continue;
+            }
+            if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
             {
                 //10.0 is the approxmiate number of positions tried and choosen arbitrarily
-                set_spacing_left(spacing_left_ + this->spacing_ * this->max_error_ / 10.0); //Only moves forward
+                set_spacing_left(spacing_left_ + spacing_ * this->params_.max_error / 10.0); //Only moves forward
                 continue;
             }
             if (!ignore_placement)
@@ -206,6 +198,8 @@ private:
     double last_y;
     double next_x;
     double next_y;
+    double spacing_;
+    double marker_width_;
     // If a marker could not be placed at the exact point where it should
     // go the next marker's distance will be a bit lower.
     double error_;

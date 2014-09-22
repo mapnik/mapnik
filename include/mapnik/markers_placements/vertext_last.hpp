@@ -31,19 +31,8 @@ template <typename Locator, typename Detector>
 class markers_vertex_last_placement : public markers_point_placement<Locator, Detector>
 {
 public:
-    markers_vertex_last_placement(
-        Locator &locator,
-        box2d<double> const& size,
-        agg::trans_affine const& tr,
-        Detector &detector,
-        double spacing,
-        double max_error,
-        bool allow_overlap)
-          : markers_point_placement<Locator, Detector>(
-              locator, size, tr, detector,
-              spacing, max_error, allow_overlap)
-    {
-    }
+    markers_vertex_last_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
+        : markers_point_placement<Locator, Detector>(locator, detector, params) {}
 
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
@@ -52,10 +41,18 @@ public:
             return false;
         }
 
-        double next_x, next_y;
         double x0, y0;
-        double x1, y1;
-        unsigned command0, command1 = agg::path_cmd_stop;
+        unsigned command0 = this->locator_.vertex(&x0, &y0);
+
+        if (agg::is_stop(command0))
+        {
+            this->done_ = true;
+            return false;
+        }
+
+        double next_x, next_y;
+        double x1 = x0, y1 = y0;
+        unsigned command1 = command0;
 
         while (!agg::is_stop(command0 = this->locator_.vertex(&next_x, &next_y)))
         {
@@ -64,13 +61,6 @@ public:
             y1 = y0;
             x0 = next_x;
             y0 = next_y;
-        }
-
-        // If path stopped on the very firts vertex.
-        if (agg::is_stop(command1))
-        {
-            this->done_ = true;
-            return false;
         }
 
         x = x0;
@@ -82,8 +72,11 @@ public:
         }
 
         box2d<double> box = this->perform_transform(angle, x, y);
-
-        if (!this->allow_overlap_ && !this->detector_.has_placement(box))
+        if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+        {
+            return false;
+        }
+        if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
         {
             return false;
         }

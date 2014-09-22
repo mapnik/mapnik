@@ -24,16 +24,14 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 
-// boost
-#include <boost/spirit/include/support_multi_pass.hpp>
-
 namespace mapnik { namespace json {
 
-template <typename Iterator, typename FeatureType>
-feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const& tr)
+template <typename Iterator, typename FeatureType, typename ErrorHandler>
+feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::transcoder const& tr)
     : feature_grammar::base_type(feature,"feature"),
       json_(),
-      put_property_(put_property(tr))
+      put_property_(put_property(tr)),
+      error_handler(ErrorHandler())
 {
     qi::lit_type lit;
     qi::long_long_type long_long;
@@ -73,8 +71,8 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         >> json_.value >> *(lit(',') >> json_.value)
         >> lit(']')
         ;
-    json_.number %= json_.strict_double
-        | json_.int__
+    json_.number = json_.strict_double[_val = json_.double_converter(_1)]
+        | json_.int__[_val = json_.integer_converter(_1)]
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]
@@ -107,10 +105,10 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         ;
 
     properties = lit("\"properties\"")
-        >> lit(':') >> (lit('{') >>  attributes(_r1) >> lit('}')) | lit("null")
+        > lit(':') > (lit('{') > -attributes(_r1) > lit('}')) | lit("null")
         ;
 
-    attributes = (json_.string_ [_a = _1] >> lit(':') >> attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
+    attributes = (json_.string_ [_a = _1] > lit(':') > attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
     attribute_value %= json_.number | json_.string_  ;
@@ -119,17 +117,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
     properties.name("Properties");
     attributes.name("Attributes");
 
-    on_error<fail>
-        (
-            feature
-            , std::clog
-            << phoenix::val("Error! Expecting ")
-            << _4 // what failed?
-            << phoenix::val(" here: \"")
-            << where_message_(_3, _2, 16) // where? 16 is max chars to output
-            << phoenix::val("\"")
-            << std::endl
-            );
+    on_error<fail>(feature, error_handler(_1, _2, _3, _4));
 
 }
 

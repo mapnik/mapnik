@@ -78,8 +78,8 @@ void rounded_rect::radius(double rx1, double ry1, double rx2, double ry2,
 //--------------------------------------------------------------------
 void rounded_rect::normalize_radius()
 {
-    double dx = fabs(m_x2 - m_x1);
-    double dy = fabs(m_y2 - m_y1);
+    double dx = std::fabs(m_x2 - m_x1);
+    double dy = std::fabs(m_y2 - m_y1);
 
     double k = 1.0;
     double t;

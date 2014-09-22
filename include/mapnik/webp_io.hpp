@@ -145,8 +145,7 @@ void save_as_webp(T1& file,
                   WebPConfig const& config,
                   bool alpha)
 {
-    bool valid = WebPValidateConfig(&config);
-    if (!valid)
+    if (WebPValidateConfig(&config) != 1)
     {
         throw std::runtime_error("Invalid configuration");
     }

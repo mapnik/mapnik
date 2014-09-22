@@ -18,6 +18,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
+ *****************************************************************************
+ *
+ * Initially developed by Sandro Santilli <strk@keybit.net> for CartoDB
+ *
  *****************************************************************************/
 
 #include "pgraster_featureset.hpp"
@@ -31,7 +35,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/ctrans.hpp>
+#include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/util/conversions.hpp>

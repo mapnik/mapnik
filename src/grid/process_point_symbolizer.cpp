@@ -59,7 +59,6 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
         [&](pixel_position const &pos, marker const &marker,
             agg::trans_affine const &tr, double opacity) {
                 render_marker(feature,
-                              pixmap_.get_resolution(),
                               pos,
                               marker,
                               tr,

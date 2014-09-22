@@ -36,8 +36,6 @@
 #include <boost/regex.hpp>
 #endif
 
-#include <functional>
-
 namespace mapnik
 {
 
@@ -125,20 +123,33 @@ struct regex_replace_node
 };
 #endif
 
-struct function_call
-{
-    template<typename Fun>
-    explicit function_call (expr_node const a, Fun f)
-        : expr(a),
-          call_(f) {}
+using unary_function_impl = std::function<value_type(value_type const&)>;
+using binary_function_impl = std::function<value_type(value_type const&, value_type const&)>;
 
-    expr_node expr;
-    std::function<value_type(value_type)> call_;
+struct unary_function_call
+{
+    using argument_type = expr_node;
+    unary_function_call() = default;
+    unary_function_call(unary_function_impl fun, argument_type const& arg)
+        : fun(fun), arg(arg) {}
+
+    unary_function_impl fun;
+    argument_type arg;
 };
 
-// ops
+struct binary_function_call
+{
+    using argument_type = expr_node;
+    binary_function_call() = default;
+    binary_function_call(binary_function_impl fun, argument_type const& arg1, argument_type const& arg2)
+        : fun(fun), arg1(arg1), arg2(arg2) {}
+    binary_function_impl fun;
+    argument_type arg1;
+    argument_type arg2;
+};
 
-inline expr_node& operator- (expr_node& expr)
+
+inline expr_node & operator- (expr_node& expr)
 {
     return expr = unary_node<tags::negate>(expr);
 }

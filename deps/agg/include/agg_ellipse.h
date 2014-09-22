@@ -86,8 +86,8 @@ namespace agg
     //------------------------------------------------------------------------
     inline void ellipse::calc_num_steps()
     {
-        double ra = (fabs(m_rx) + fabs(m_ry)) / 2;
-        double da = acos(ra / (ra + 0.125 / m_scale)) * 2;
+        double ra = (std::fabs(m_rx) + std::fabs(m_ry)) / 2;
+        double da = std::acos(ra / (ra + 0.125 / m_scale)) * 2;
         m_num = uround(2*pi / da);
     }
 
@@ -108,8 +108,8 @@ namespace agg
         if(m_step > m_num) return path_cmd_stop;
         double angle = double(m_step) / double(m_num) * 2.0 * pi;
         if(m_cw) angle = 2.0 * pi - angle;
-        *x = m_x + cos(angle) * m_rx;
-        *y = m_y + sin(angle) * m_ry;
+        *x = m_x + std::cos(angle) * m_rx;
+        *y = m_y + std::sin(angle) * m_ry;
         m_step++;
         return ((m_step == 1) ? path_cmd_move_to : path_cmd_line_to);
     }

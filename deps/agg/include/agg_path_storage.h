@@ -956,8 +956,8 @@ namespace agg
             double y0 = 0.0;
             m_vertices.last_vertex(&x0, &y0);
 
-            rx = fabs(rx);
-            ry = fabs(ry);
+            rx = std::fabs(rx);
+            ry = std::fabs(ry);
 
             // Ensure radii are valid
             //-------------------------

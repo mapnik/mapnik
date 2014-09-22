@@ -50,10 +50,12 @@ public:
     boost::optional<symbolizer_base::value_type> line_spacing;
     boost::optional<symbolizer_base::value_type> text_opacity;
     boost::optional<symbolizer_base::value_type> wrap_before;
+    boost::optional<symbolizer_base::value_type> repeat_wrap_char;
     boost::optional<symbolizer_base::value_type> text_transform;
     boost::optional<symbolizer_base::value_type> fill;
     boost::optional<symbolizer_base::value_type> halo_fill;
     boost::optional<symbolizer_base::value_type> halo_radius;
+    boost::optional<symbolizer_base::value_type> font_feature_settings;
 
 private:
     node_ptr child_;

@@ -44,6 +44,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       label_spacing(0.0),
       label_position_tolerance(0.0),
       avoid_edges(false),
+      margin(0.0),
       repeat_distance(0.0),
       minimum_distance(0.0),
       minimum_padding(0.0),
@@ -63,6 +64,7 @@ void text_symbolizer_properties::evaluate_text_properties(feature_impl const& fe
     label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
     label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
     avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
+    margin = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.margin);
     repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.repeat_distance);
     minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
     minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
@@ -95,6 +97,13 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
         format->face_name = format_defaults.face_name;
         format->fontset = format_defaults.fontset;
 
+        format->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings_ptr>(feature,attrs), format_defaults.font_feature_settings);
+        // Turn off ligatures if character_spacing > 0.
+        if (format->character_spacing > .0 && format->font_feature_settings->count() == 0)
+        {
+            format->font_feature_settings->append(font_feature_liga_off);
+        }
+
         tree_->apply(format, feature, attrs, output);
     }
     else MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
@@ -112,11 +121,25 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
 
 void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 {
+    // The options 'margin' and 'repeat-distance' replace 'minimum-distance'.
+    // Only allow one or the other to be defined here.
+    if (node.has_attribute("margin") || node.has_attribute("repeat-distance"))
+    {
+        if (node.has_attribute("minimum-distance"))
+        {
+            throw config_error(std::string("Cannot use deprecated option minimum-distance with "
+                                           "new options margin and repeat-distance."));
+        }
+        set_property_from_xml<value_double>(expressions.margin, "margin", node);
+        set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
+    }
+    else
+    {
+        set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
+    }
     set_property_from_xml<label_placement_e>(expressions.label_placement, "placement", node);
     set_property_from_xml<value_double>(expressions.label_spacing, "spacing", node);
     set_property_from_xml<value_double>(expressions.label_position_tolerance, "label-position-tolerance", node);
-    set_property_from_xml<value_double>(expressions.repeat_distance, "repeat-distance", node);
-    set_property_from_xml<value_double>(expressions.minimum_distance, "minimum-distance", node);
     set_property_from_xml<value_double>(expressions.minimum_padding, "minimum-padding", node);
     set_property_from_xml<value_double>(expressions.minimum_path_length, "minimum-path-length", node);
     set_property_from_xml<boolean_type>(expressions.avoid_edges, "avoid-edges", node);
@@ -157,6 +180,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (!(expressions.label_spacing == dfl.expressions.label_spacing) || explicit_defaults)
     {
         serialize_property("spacing", expressions.label_spacing, node);
+    }
+    if (!(expressions.margin == dfl.expressions.margin) || explicit_defaults)
+    {
+        serialize_property("margin", expressions.margin, node);
     }
     if (!(expressions.repeat_distance == dfl.expressions.repeat_distance) || explicit_defaults)
     {
@@ -207,6 +234,8 @@ void text_symbolizer_properties::add_expressions(expression_set & output) const
     if (is_expression(expressions.label_spacing)) output.insert(util::get<expression_ptr>(expressions.label_spacing));
     if (is_expression(expressions.label_position_tolerance)) output.insert(util::get<expression_ptr>(expressions.label_position_tolerance));
     if (is_expression(expressions.avoid_edges)) output.insert(util::get<expression_ptr>(expressions.avoid_edges));
+    if (is_expression(expressions.margin)) output.insert(util::get<expression_ptr>(expressions.margin));
+    if (is_expression(expressions.repeat_distance)) output.insert(util::get<expression_ptr>(expressions.repeat_distance));
     if (is_expression(expressions.minimum_distance)) output.insert(util::get<expression_ptr>(expressions.minimum_distance));
     if (is_expression(expressions.minimum_padding)) output.insert(util::get<expression_ptr>(expressions.minimum_padding));
     if (is_expression(expressions.minimum_path_length)) output.insert(util::get<expression_ptr>(expressions.minimum_path_length));
@@ -236,7 +265,9 @@ void text_layout_properties::from_xml(xml_node const &node, fontset_map const& f
     set_property_from_xml<double>(dy, "dy", node);
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
+    set_property_from_xml<std::string>(wrap_char, "wrap-character", node);
     set_property_from_xml<boolean_type>(wrap_before, "wrap-before", node);
+    set_property_from_xml<boolean_type>(repeat_wrap_char, "repeat-wrap-character", node);
     set_property_from_xml<boolean_type>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
@@ -255,7 +286,9 @@ void text_layout_properties::to_xml(boost::property_tree::ptree & node,
     if (!(jalign == dfl.jalign) || explicit_defaults) serialize_property("justify-alignment", jalign, node);
     if (!(text_ratio == dfl.text_ratio) || explicit_defaults) serialize_property("text-ratio", text_ratio, node);
     if (!(wrap_width == dfl.wrap_width) || explicit_defaults) serialize_property("wrap-width", wrap_width, node);
+    if (!(wrap_char == dfl.wrap_char) || explicit_defaults) serialize_property("wrap-character", wrap_char, node);
     if (!(wrap_before == dfl.wrap_before) || explicit_defaults) serialize_property("wrap-before", wrap_before, node);
+    if (!(repeat_wrap_char == dfl.repeat_wrap_char) || explicit_defaults) serialize_property("repeat-wrap-character", repeat_wrap_char, node);
     if (!(rotate_displacement == dfl.rotate_displacement) || explicit_defaults)
         serialize_property("rotate-displacement", rotate_displacement, node);
     if (!(orientation == dfl.orientation) || explicit_defaults) serialize_property("orientation", orientation, node);
@@ -267,7 +300,9 @@ void text_layout_properties::add_expressions(expression_set & output) const
     if (is_expression(dy)) output.insert(util::get<expression_ptr>(dy));
     if (is_expression(orientation)) output.insert(util::get<expression_ptr>(orientation));
     if (is_expression(wrap_width)) output.insert(util::get<expression_ptr>(wrap_width));
+    if (is_expression(wrap_char)) output.insert(util::get<expression_ptr>(wrap_char));
     if (is_expression(wrap_before)) output.insert(util::get<expression_ptr>(wrap_before));
+    if (is_expression(repeat_wrap_char)) output.insert(util::get<expression_ptr>(repeat_wrap_char));
     if (is_expression(rotate_displacement)) output.insert(util::get<expression_ptr>(rotate_displacement));
     if (is_expression(text_ratio)) output.insert(util::get<expression_ptr>(text_ratio));
     if (is_expression(halign)) output.insert(util::get<expression_ptr>(halign));
@@ -287,7 +322,8 @@ format_properties::format_properties()
       fill(color(0,0,0)),
       halo_fill(color(255,255,255)),
       halo_radius(0.0),
-      text_transform(enumeration_wrapper(NONE)) {}
+      text_transform(enumeration_wrapper(NONE)),
+      font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
 
 void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
 {
@@ -300,6 +336,7 @@ void format_properties::from_xml(xml_node const& node, fontset_map const& fontse
     set_property_from_xml<color>(fill, "fill", node);
     set_property_from_xml<color>(halo_fill, "halo-fill", node);
     set_property_from_xml<text_transform_e>(text_transform,"text-transform", node);
+    set_property_from_xml<font_feature_settings_ptr>(font_feature_settings, "font-feature-settings", node);
 
     optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");
     if (face_name_) face_name = *face_name_;
@@ -349,6 +386,7 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
     if (!(fill == dfl.fill) || explicit_defaults) serialize_property("fill", fill, node);
     if (!(halo_fill == dfl.halo_fill) || explicit_defaults) serialize_property("halo-fill", halo_fill, node);
     if (!(text_transform == dfl.text_transform) || explicit_defaults) serialize_property("text-transform", text_transform, node);
+    if (!(font_feature_settings == dfl.font_feature_settings) || explicit_defaults) serialize_property("font-feature-settings", font_feature_settings, node);
 }
 
 void format_properties::add_expressions(expression_set & output) const
@@ -362,6 +400,7 @@ void format_properties::add_expressions(expression_set & output) const
     if (is_expression(fill)) output.insert(util::get<expression_ptr>(fill));
     if (is_expression(halo_fill)) output.insert(util::get<expression_ptr>(halo_fill));
     if (is_expression(text_transform)) output.insert(util::get<expression_ptr>(text_transform));
+    if (is_expression(font_feature_settings)) output.insert(util::get<expression_ptr>(font_feature_settings));
 }
 
 
