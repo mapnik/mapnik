@@ -68,6 +68,31 @@ struct set_property_from_xml_impl
     }
 };
 
+
+template <>
+struct set_property_from_xml_impl<std::string,false>
+{
+    using target_type = std::string;
+    template <typename T1>
+    static void apply(T1 & val, char const* name, xml_node const& node)
+    {
+        try
+        {
+            boost::optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
+            if (val_) val = *val_;
+        }
+        catch (config_error const& ex)
+        {
+            boost::optional<target_type> val_ = node.get_opt_attr<target_type>(name);
+            if (val_) val = *val_;
+            else
+            {
+                ex.append_context(std::string("set_property_from_xml'"+ std::string(name) + "'"), node);
+            }
+        }
+    }
+};
+
 template <typename T0>
 struct set_property_from_xml_impl<T0, true>
 {
