@@ -31,10 +31,11 @@
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/value_converters.hpp>
-
+#include <mapnik/debug.hpp>
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 
 namespace mapnik { namespace json {
 
@@ -88,7 +89,19 @@ struct extract_geometry
     }
 };
 
-template <typename Iterator, typename FeatureType>
+template <typename Iterator>
+struct error_handler
+{
+    using result_type = void;
+    void operator() (
+        Iterator first, Iterator last,
+        Iterator err_pos, boost::spirit::info const& what) const
+    {
+        MAPNIK_LOG_WARN(error_handler) << what << " expected in input";
+    }
+};
+
+template <typename Iterator, typename FeatureType, typename ErrorHandler = error_handler<Iterator> >
 struct feature_grammar :
         qi::grammar<Iterator, void(FeatureType&),
                     space_type>
@@ -110,7 +123,7 @@ struct feature_grammar :
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
     // error handler
-    boost::phoenix::function<where_message> where_message_;
+    boost::phoenix::function<ErrorHandler> const error_handler;
     // geometry
     geometry_grammar<Iterator> geometry_grammar_;
 };
