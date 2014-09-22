@@ -415,6 +415,31 @@ double text_layout::jalign_offset(double line_width) const
     return 0;
 }
 
+text_line const& text_layout::longest_line() const
+{
+    if (lines_.empty())
+    {
+        throw std::runtime_error("longest_line: Text layout has no lines.");
+    }
+    text_layout::const_iterator longest = lines_.begin();
+    for (text_layout::const_iterator line = longest + 1; line != lines_.end(); ++line)
+    {
+        if (line->glyphs_width() > longest->glyphs_width())
+        {
+            longest = line;
+        }
+    }
+    return *longest;
+}
+
+void text_layout::set_character_spacing(double spacing, double scale_factor)
+{
+    for (auto & line : lines_)
+    {
+        line.set_character_spacing(spacing, scale_factor);
+    }
+}
+
 void layout_container::add(text_layout_ptr layout)
 {
     text_ += layout->text();
@@ -461,5 +486,20 @@ void layout_container::clear()
     line_count_ = 0;
 }
 
-
+void layout_container::adjust(double width, double scale_factor)
+{
+    for (auto & layout_ptr : layouts_)
+    {
+        text_layout & layout = *layout_ptr;
+        if (layout.horizontal_alignment() == H_ADJUST)
+        {
+            text_line const& longest_line = layout.longest_line();
+            double character_spacing = ((width - longest_line.glyphs_width()) / longest_line.space_count()) / scale_factor;
+            if (character_spacing >= .0)
+            {
+                layout.set_character_spacing(character_spacing, scale_factor);
+            }
+        }
+    }
+}
 } //ns mapnik

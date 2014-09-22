@@ -137,6 +137,7 @@ static const char * horizontal_alignment_strings[] = {
     "middle",
     "right",
     "auto",
+    "adjust",
     ""
 };
 

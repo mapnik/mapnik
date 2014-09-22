@@ -31,9 +31,11 @@ text_line::text_line(unsigned first_char, unsigned last_char)
       line_height_(0.0),
       max_char_height_(0.0),
       width_(0.0),
+      glyphs_width_(0.0),
       first_char_(first_char),
       last_char_(last_char),
-      first_line_(false)
+      first_line_(false),
+      space_count_(0)
 {}
 
 void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
@@ -43,11 +45,15 @@ void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
     if (glyphs_.empty())
     {
         width_ = advance;
+        glyphs_width_ = advance;
+        space_count_ = 0;
     }
     else if (advance)
     {
         // Only add character spacing if the character is not a zero-width part of a cluster.
         width_ += advance + glyphs_.back().format->character_spacing  * scale_factor_;
+        glyphs_width_ += advance;
+        space_count_++;
     }
     glyphs_.push_back(glyph);
 }
@@ -97,6 +103,25 @@ unsigned text_line::last_char() const
 unsigned text_line::size() const
 {
     return glyphs_.size();
+}
+
+void text_line::set_character_spacing(double character_spacing, double scale_factor)
+{
+    bool first = true;
+    for (auto const& glyph : glyphs_)
+    {
+        glyph.format->character_spacing = character_spacing;
+        double advance = glyph.advance();
+        if (first)
+        {
+            width_ = advance;
+            first = false;
+        }
+        else if (advance)
+        {
+            width_ += advance + character_spacing * scale_factor;
+        }
+    }
 }
 
 } // end namespace mapnik
