@@ -100,7 +100,12 @@ private:
     int srid_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
+    bool grid_geometries_;
+    double grid_geometries_max_resolution_;
     bool simplify_geometries_;
+    double simplify_geometries_max_resolution_;
+    bool clip_geometries_;
+    double clip_geometries_min_resolution_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;
