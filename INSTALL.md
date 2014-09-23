@@ -9,6 +9,13 @@ To configure and build Mapnik do:
     $ make
 ```
 
+To trigger parallel compilation you can pass a JOBS value to make:
+
+```bash
+    $ JOBS=4 make
+```
+
+
 To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
 

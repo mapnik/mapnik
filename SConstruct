@@ -396,7 +396,6 @@ opts.AddVariables(
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
-    ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
@@ -1909,9 +1908,6 @@ if not HELP_REQUESTED:
         EnsureSConsVersion(0,98)
         SetOption('implicit_cache', 1)
         SetOption('max_drift', 1)
-
-    if env['JOBS'] > 1:
-        SetOption("num_jobs", env['JOBS'])
 
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared':
