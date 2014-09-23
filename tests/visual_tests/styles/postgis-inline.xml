@@ -12,6 +12,7 @@
     <StyleName>carto_tests</StyleName>
     <Datasource>
        <Parameter name="type"><![CDATA[postgis]]></Parameter>
+       <Parameter name="dbname">template_postgis</Parameter>
        <Parameter name="extent_from_subquery">true</Parameter>
        <Parameter name="simplify"><![CDATA[true]]></Parameter>
        <Parameter name="geometry_field"><![CDATA[geom]]></Parameter>
