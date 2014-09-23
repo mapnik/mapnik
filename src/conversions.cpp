@@ -33,13 +33,6 @@
 #define snprintf _snprintf
 #endif
 
-#define BOOST_SPIRIT_AUTO(domain_, name, expr)                  \
-    using name##_expr_type = boost::proto::result_of::          \
-        deep_copy<BOOST_TYPEOF(expr)>::type ;                   \
-    BOOST_SPIRIT_ASSERT_MATCH(                                  \
-        boost::spirit::domain_::domain, name##_expr_type);      \
-    BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
-
 // karma is used by default
 #define MAPNIK_KARMA_TO_STRING
 
@@ -53,12 +46,12 @@ namespace util {
 
 using namespace boost::spirit;
 
-BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_type())
+auto INTEGER = qi::int_type();
 #ifdef BIGINT
-BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long_type())
+auto LONGLONG = qi::long_long_type();
 #endif
-BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_type())
-BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_type())
+auto FLOAT = qi::float_type();
+auto DOUBLE = qi::double_type();
 
 bool string2int(const char * iter, const char * end, int & result)
 {
