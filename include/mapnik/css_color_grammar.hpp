@@ -125,7 +125,11 @@ struct alpha_conv_impl
 
 struct hsl_conv_impl
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template<typename T>
+#else
     template<typename T0,typename T1, typename T2, typename T3>
+#endif
     struct result
     {
         typedef void type;
@@ -413,7 +417,11 @@ struct alpha_conv_impl
 
 struct hsl_conv_impl
 {
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template<typename T>
+#else
     template<typename T0,typename T1, typename T2, typename T3>
+#endif
     struct result
     {
         typedef void type;

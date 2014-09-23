@@ -23,6 +23,7 @@
 #ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
+
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp> // for container stuff
@@ -41,13 +42,11 @@
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
-/*!
- * adapted to conform to the concepts
- * required by Karma to be recognized as a container of
- * attributes for output generation.
- */
+// adapted to conform to the concepts
+// required by Karma to be recognized as a container of
+// attributes for output generation.
+
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type
@@ -76,7 +75,7 @@ template <>
 struct end_container<path_type const>
 {
     static mapnik::util::path_iterator<path_type>
-    call (path_type const& g)
+    call (path_type const& /*g*/)
     {
         return mapnik::util::path_iterator<path_type>();
     }
@@ -92,6 +91,31 @@ namespace mapnik { namespace util {
 
     namespace svg_detail {
 
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename Geometry>
+    struct get_type
+    {
+        typedef int result_type;
+        result_type operator() (Geometry const& geom) const
+        {
+            return static_cast<int>(geom.type());
+        }
+    };
+
+    template <typename T>
+    struct get_first
+    {
+        typedef T geometry_type;
+        typedef typename geometry_type::value_type const result_type;
+        result_type operator() (geometry_type const& geom) const
+        {
+            typename geometry_type::value_type coord;
+            geom.rewind(0);
+            boost::get<0>(coord) = geom.vertex(&boost::get<1>(coord),&boost::get<2>(coord));
+            return coord;
+        }
+    };
+#else
     template <typename Geometry>
     struct get_type
     {
@@ -112,7 +136,7 @@ namespace mapnik { namespace util {
         template <typename U>
         struct result { typedef typename geometry_type::value_type const type; };
 
-        typename geometry_type::value_type const operator() (geometry_type const& geom) const
+        typename geometry_type::value_type operator() (geometry_type const& geom) const
         {
             typename geometry_type::value_type coord;
             geom.rewind(0);
@@ -121,12 +145,13 @@ namespace mapnik { namespace util {
         }
     };
 
+#endif
     template <typename T>
     struct coordinate_policy : karma::real_policies<T>
     {
         typedef boost::spirit::karma::real_policies<T> base_type;
         static int floatfield(T n) { return base_type::fmtflags::fixed; }
-        static unsigned precision(T n) { return 6u ;}
+        static unsigned precision(T n) { return 4u ;}
     };
     }
 
@@ -161,15 +186,15 @@ namespace mapnik { namespace util {
                 ;
 
             linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
-                << svg_path << lit('\"')
+                << lit("d=\"") << svg_path << lit("\"")
                 ;
 
             polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
-                << svg_path << lit('\"')
+                << lit("d=\"") << svg_path << lit("\"")
                 ;
 
-            svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit("d=\"") << lit('M')
-                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ] ])
+            svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
+                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1u) [_1 = "L" ].else_[_1 =""]])
                          << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
                 ;
 

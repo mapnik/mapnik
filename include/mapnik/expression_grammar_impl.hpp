@@ -145,7 +145,7 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
     multiplicative_expr = unary_expr [_val = _1]
         >> *(     '*' >> unary_expr [_val *= _1]
                   | '/' >> unary_expr [_val /= _1]
-                  | '%' >> unary_expr [_val %= _1]
+                  | '%' >> unary_expr [_val %= construct<mapnik::expr_node>(_1)] //needed by clang++ with -std=c++11
                   |  regex_match_expr[_val = regex_match_(_val, _1)]
                   |  regex_replace_expr(_val) [_val = _1]
             )

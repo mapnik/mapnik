@@ -66,6 +66,30 @@ public:
     mapnik::transcoder const& tr_;
 };
 
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+struct put_property
+{
+    typedef void result_type;
+    explicit put_property(mapnik::transcoder const& tr)
+        : tr_(tr) {}
+    template <typename T0,typename T1, typename T2>
+    result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
+    {
+        feature.put_new(key, boost::apply_visitor(attribute_value_visitor(tr_),val));
+    }
+    mapnik::transcoder const& tr_;
+};
+
+struct extract_geometry
+{
+    typedef  boost::ptr_vector<mapnik::geometry_type>& result_type;
+    template <typename T>
+    result_type operator() (T & feature) const
+    {
+        return feature.paths();
+    }
+};
+#else
 struct put_property
 {
     template <typename T0,typename T1, typename T2>
@@ -100,6 +124,7 @@ struct extract_geometry
         return feature.paths();
     }
 };
+#endif
 
 template <typename Iterator, typename FeatureType>
 struct feature_grammar :

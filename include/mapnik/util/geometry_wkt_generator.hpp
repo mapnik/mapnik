@@ -40,7 +40,6 @@
 #include <boost/type_traits/remove_pointer.hpp>
 
 #include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 namespace boost { namespace spirit { namespace traits {
 
@@ -205,8 +204,7 @@ template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
         karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
-    typedef GeometryContainer geometry_contaner;
-    typedef boost::remove_pointer<typename geometry_container::value_type>::type geometry_type;
+    typedef typename boost::remove_pointer<typename GeometryContainer::value_type>::type geometry_type;
 
     wkt_multi_generator();
     // rules
