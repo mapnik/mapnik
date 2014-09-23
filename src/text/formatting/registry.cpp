@@ -36,6 +36,8 @@ registry::registry()
 {
     register_name("<xmltext>", &text_node::from_xml);
     register_name("Format", &format_node::from_xml);
+    // back compatibility shim - to be removed at mapnik 4
+    register_name("ExpressionFormat", &format_node::from_xml);
     register_name("Layout", &layout_node::from_xml);
 }
 
