@@ -97,7 +97,7 @@ struct error_handler
         Iterator first, Iterator last,
         Iterator err_pos, boost::spirit::info const& what) const
     {
-        MAPNIK_LOG_WARN(error_handler) << what << " expected in input";
+        MAPNIK_LOG_ERROR(error_handler) << what << " expected but got: " << where_message()(err_pos, last, 16);
     }
 };
 

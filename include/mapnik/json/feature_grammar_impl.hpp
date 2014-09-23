@@ -114,8 +114,10 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     attribute_value %= json_.number | json_.string_  ;
 
     feature.name("Feature");
+    feature_type.name("Feature Type");
     properties.name("Properties");
     attributes.name("Attributes");
+    attribute_value.name("Attribute Value");
 
     on_error<fail>(feature, error_handler(_1, _2, _3, _4));
 
