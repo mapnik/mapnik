@@ -49,15 +49,15 @@ positions_grammar<Iterator, ErrorHandler>::positions_grammar()
     using qi::fail;
     using qi::on_error;
 
-    coords = pos[set_position(_val,_1)] | ring[_val = _1] | rings [_val = _1] | rings_array[_val = _1]
+    coords = rings_array[_val = _1] | rings [_val = _1] | ring[_val = _1] |  pos[set_position(_val,_1)]
         ;
-    pos = lit('[') >> -(double_ >> lit(',') >> double_) >> omit[*(lit(',') >> double_)] >> lit(']')
+    pos = lit('[') > -(double_ > lit(',') > double_) > omit[*(lit(',') > double_)] > lit(']')
         ;
-    ring = lit('[') >> pos[push_position(_val,_1)] % lit(',') >> lit(']')
+    ring = lit('[') >> pos[push_position(_val,_1)] % lit(',') > lit(']')
         ;
-    rings = lit('[') >> ring % lit(',') >> lit(']')
+    rings = lit('[') >> ring % lit(',') > lit(']')
         ;
-    rings_array = lit('[') >> rings % lit(',') >> lit(']')
+    rings_array = lit('[') >> rings % lit(',') > lit(']')
         ;
     coords.name("Coordinates");
     pos.name("Position");
