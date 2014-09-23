@@ -24,20 +24,20 @@
 #define MAPNIK_JSON_ERROR_HANDLER_HPP
 
 #include <string>
+#include <mapnik/debug.hpp>
+#include <boost/spirit/home/support/info.hpp>
 
 namespace mapnik { namespace json {
 
-struct where_message
+template <typename Iterator>
+struct error_handler
 {
-    using result_type = std::string;
-
-    template <typename Iterator>
-    std::string operator() (Iterator first, Iterator last, std::size_t size) const
+    using result_type = void;
+    void operator() (
+        Iterator first, Iterator last,
+        Iterator err_pos, boost::spirit::info const& what) const
     {
-        std::string str(first, last);
-        if (str.length() > size)
-            return str.substr(0, size) + "..." ;
-        return str;
+        MAPNIK_LOG_ERROR(error_handler) << what << " expected but got: " << std::string(err_pos, std::min(err_pos + 16,last));
     }
 };
 

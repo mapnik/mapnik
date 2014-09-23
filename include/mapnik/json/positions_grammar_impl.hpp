@@ -34,8 +34,8 @@
 
 namespace mapnik { namespace json {
 
-template <typename Iterator>
-positions_grammar<Iterator>::positions_grammar()
+template <typename Iterator, typename ErrorHandler>
+positions_grammar<Iterator, ErrorHandler>::positions_grammar()
     : positions_grammar::base_type(coords,"coordinates")
 {
     qi::lit_type lit;
@@ -60,18 +60,13 @@ positions_grammar<Iterator>::positions_grammar()
     rings_array = lit('[') >> rings % lit(',') >> lit(']')
         ;
     coords.name("Coordinates");
+    pos.name("Position");
+    ring.name("Ring");
+    rings.name("Rings");
+    rings_array.name("Rings array");
+
     // error handler
-    on_error<fail>
-        (
-            coords,
-            std::clog
-            << boost::phoenix::val("Error! Expecting ")
-            << _4  // what failed?
-            << boost::phoenix::val(" here: \"")
-            << message(_3, _2, 16) // max 16 chars
-            << boost::phoenix::val("\"")
-            << std::endl
-            );
+    on_error<fail>(coords, error_handler(_1, _2, _3, _4));
 }
 
 }}

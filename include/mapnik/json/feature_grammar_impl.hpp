@@ -30,8 +30,7 @@ template <typename Iterator, typename FeatureType, typename ErrorHandler>
 feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::transcoder const& tr)
     : feature_grammar::base_type(feature,"feature"),
       json_(),
-      put_property_(put_property(tr)),
-      error_handler(ErrorHandler())
+      put_property_(put_property(tr))
 {
     qi::lit_type lit;
     qi::long_long_type long_long;

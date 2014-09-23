@@ -31,6 +31,7 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_utils.hpp>
+#include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/generic_json.hpp>
 
 namespace mapnik { namespace json {
@@ -113,7 +114,7 @@ struct put_property
     }
 };
 
-template <typename Iterator>
+template <typename Iterator, typename ErrorHandler = error_handler<Iterator>>
 struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 {
     using json_value_type = util::variant<value_null,value_bool,value_integer,value_double, std::string>;
@@ -210,7 +211,7 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 
     phoenix::function<put_property> put_property_;
     // error
-    //boost::phoenix::function<where_message> where_message_;
+    on_error<fail>(sym, error_handler(_1, _2, _3, _4));
 };
 
 

@@ -22,6 +22,7 @@
 
 
 // mapnik
+#include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 
 // spirit::qi

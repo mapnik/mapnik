@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/value.hpp>
+#include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/json/value_converters.hpp>
@@ -44,21 +45,7 @@ namespace fusion = boost::fusion;
 namespace standard_wide = boost::spirit::standard_wide;
 using standard_wide::space_type;
 
-struct where_message
-{
-    using result_type = std::string;
-
-    template <typename Iterator>
-    std::string operator() (Iterator first, Iterator last, std::size_t size) const
-    {
-        std::string str(first, last);
-        if (str.length() > size)
-            return str.substr(0, size) + "..." ;
-        return str;
-    }
-};
-
-template <typename Iterator>
+template <typename Iterator, typename ErrorHandler = json::error_handler<Iterator> >
 struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>
 
 {
@@ -91,8 +78,8 @@ private:
     qi::rule<Iterator, space_type, mapnik::json::json_value()> attribute_value;
     // id
     qi::rule<Iterator,space_type> id;
-    // error
-    boost::phoenix::function<where_message> where_message_;
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
 }}

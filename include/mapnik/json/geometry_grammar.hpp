@@ -29,7 +29,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/geometry_util.hpp>
-#include <mapnik/json/error_handler.hpp>
+
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -40,7 +40,7 @@ namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
-template <typename Iterator>
+template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct geometry_grammar :
         qi::grammar<Iterator,void(mapnik::geometry_container& )
         , space_type>
@@ -51,8 +51,9 @@ struct geometry_grammar :
     qi::symbols<char, int> geometry_type_dispatch;
     qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> geometry_collection;
     positions_grammar<Iterator> coordinates;
-    boost::phoenix::function<where_message> where_message_;
     boost::phoenix::function<create_geometry_impl> create_geometry;
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
 }}
