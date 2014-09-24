@@ -13,4 +13,4 @@ import mapnik
 #    ts = mapnik.TextSymbolizer('Name', 'Invalid Font Name', int(8), mapnik.Color('black'))
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

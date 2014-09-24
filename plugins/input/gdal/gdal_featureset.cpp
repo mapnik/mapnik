@@ -48,10 +48,6 @@ using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
-#ifdef _WINDOWS
-using mapnik::rint;
-#endif
-
 gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
                                  gdal_query q,
@@ -277,8 +273,21 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         break;
                     }
                     case GCI_Undefined:
+#if GDAL_VERSION_NUM <= 1730
+                        if (nbands_ == 4)
+                        {
+                            MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found undefined band (assumming alpha band)";
+                            alpha = band;
+                        }
+                        else
+                        {
+                            MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found undefined band (assumming gray band)";
+                            grey = band;
+                        }
+#else
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found undefined band (assumming gray band)";
                         grey = band;
+#endif
                         break;
                     default:
                         MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Band type unknown!";

@@ -57,6 +57,7 @@ static const char * aspect_fix_mode_strings[] = {
     "ADJUST_BBOX_HEIGHT",
     "ADJUST_CANVAS_WIDTH",
     "ADJUST_CANVAS_HEIGHT",
+    "RESPECT",
     ""
 };
 
@@ -473,6 +474,7 @@ void Map::zoom_to_box(box2d<double> const& box)
 
 void Map::fixAspectRatio()
 {
+    if (aspectFixMode_ == RESPECT) return;
     if (current_extent_.width() > 0 && current_extent_.height() > 0)
     {
         double ratio1 = static_cast<double>(width_) / static_cast<double>(height_);

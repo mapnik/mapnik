@@ -111,6 +111,7 @@ protected:
 
     text_placement_info_ptr placement_;
     boost::scoped_ptr<placement_finder<DetectorT> > finder_;
+    double scale_factor_;
 };
 
 template <typename FaceManagerT, typename DetectorT>
@@ -182,6 +183,7 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::angle_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::finder_;
+    using text_symbolizer_helper<FaceManagerT, DetectorT>::scale_factor_;
 };
 } //namespace
 #endif // SYMBOLIZER_HELPERS_HPP

@@ -115,4 +115,4 @@ def test_proj_transform_between_init_and_literal():
 
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

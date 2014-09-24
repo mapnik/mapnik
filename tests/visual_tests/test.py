@@ -175,8 +175,7 @@ files = {
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
 
-    # disabled since fixing is not actionable: https://github.com/mapnik/mapnik/issues/1913
-    #'tiff-reprojection-2': {'sizes':[(250,250)]},
+    'tiff-reprojection-2': {'sizes':[(250,250)]},
 
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
@@ -221,6 +220,7 @@ files = {
     'tiff-nodata-tolerance':{'sizes':[(512,512)]},
     # https://github.com/mapnik/mapnik/issues/2202
     'line-smooth-and-offset':{'sizes':[(512,512)]},
+    'shield-on-line-and-avoid-edges':{'sizes':[(512,512)]},
     }
 
 class Reporting:
@@ -296,7 +296,7 @@ class Reporting:
     def summary(self):
         if self.passed == 0:
             print '\nNOTICE: No valid visual tests were run'
-            return 0
+            #return 0
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0

@@ -458,6 +458,12 @@ void agg_renderer<T>::painted(bool painted)
 }
 
 template <typename T>
+bool agg_renderer<T>::painted()
+{
+    return pixmap_.painted();
+}
+
+template <typename T>
 void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {

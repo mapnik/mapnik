@@ -100,6 +100,7 @@ pretty_dep_names = {
 PLUGINS = { # plugins with external dependencies
             # configured by calling project, hence 'path':None
             'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
+            'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
             # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
@@ -487,14 +488,17 @@ HELP_REQUESTED = False
 if ('-h' in command_line_args) or ('--help' in command_line_args):
     HELP_REQUESTED = True
 
-if ('install' not in command_line_args) and ('-c' in command_line_args) or ('--clean' in command_line_args):
-    HELP_REQUESTED = True
-
 if 'configure' in command_line_args and not HELP_REQUESTED:
     force_configure = True
 elif HELP_REQUESTED:
     # to ensure config gets skipped when help is requested
     preconfigured = True
+
+# need no-op for clean on fresh checkout
+# https://github.com/mapnik/mapnik/issues/2112
+if not os.path.exists(SCONS_LOCAL_LOG) and ('-c' in command_line_args or '--clean' in command_line_args):
+    print 'all good: nothing to clean, but you might want to run "make distclean"'
+    Exit(0)
 
 # initially populate environment with defaults and any possible custom arguments
 opts.Update(env)
@@ -1384,7 +1388,7 @@ if not preconfigured:
                                      env['LIBS'].remove(libname)
                             else:
                                 details['lib'] = libname
-                elif plugin == 'postgis':
+                elif plugin == 'postgis' or plugin == 'pgraster':
                     conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
                     if conf.ogr_enabled():
@@ -1486,7 +1490,7 @@ if not preconfigured:
                 env["CAIRO_ALL_LIBS"] = ['cairo']
                 if env['RUNTIME_LINK'] == 'static':
                     env["CAIRO_ALL_LIBS"].extend(
-                        ['pixman-1','expat','fontconfig']
+                        ['pixman-1','expat']
                     )
                 # todo - run actual checkLib?
                 env['HAS_CAIRO'] = True
@@ -1681,9 +1685,8 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
-        # c++11 support / https://github.com/mapnik/mapnik/issues/1683
-        #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
-        if 'c++11' in env['CUSTOM_CXXFLAGS']:
+        boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+        if boost_version_from_header > 53 or 'c++11' in env['CUSTOM_CXXFLAGS']:
             env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
             #  - workaround boost gil channel_algorithm.hpp narrowing error
             # TODO - remove when building against >= 1.55
@@ -1963,9 +1966,6 @@ if not HELP_REQUESTED:
 
     # build C++ tests
     SConscript('tests/cpp_tests/build.py')
-
-    if env['CPP_TESTS'] and env['SVG_RENDERER']:
-        SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')

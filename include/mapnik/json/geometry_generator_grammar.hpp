@@ -268,7 +268,7 @@ struct geometry_generator_grammar :
             ;
 
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
-                           << karma::string[ if_ (_r1 > 1) [_1 = "],["]
+                           << karma::string[ if_ (_r1 > 1u) [_1 = "],["]
                                              .else_[_1 = '[' ]]
                            |
                            &uint_(mapnik::SEG_LINETO)
@@ -340,9 +340,9 @@ struct multi_geometry_generator_grammar :
         geometry = ( &bool_(true)[_1 = not_empty_(_val)] << lit("{\"type\":")
                      << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = multi_type_(_val)]
                      << lit(",\"coordinates\":")
-                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
+                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3u) [_1 = '['].else_[_1 = ""]]
                      << coordinates
-                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
+                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3u) [_1 = ']'].else_[_1 = ""]]
                      << lit('}')) | lit("null")
             ;
 

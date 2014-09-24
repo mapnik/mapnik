@@ -1,0 +1,24 @@
+PostGIS Raster input plugin for mapnik
+======================================
+
+This plugin shares directives with the "postgis" one,
+with the following differences:
+
+ - "raster_field" replaces "geometry_field"
+
+ - "raster_table" replaces "geometry_table"
+
+ - "prescale_rasters" replaces "simplify_geometries"
+
+ - "use_overviews" introduced
+
+ - "clip_rasters" boolean introduced, defaults to false
+
+ - "band" introduced, with same semantic of the GDAL driver
+
+Credits
+=======
+
+The plugin was initially developed by Sandro Santilli <strk@keybit.net>
+with support from CartoDB.
+

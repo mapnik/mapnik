@@ -1510,9 +1510,9 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         if (scaling)
         {
             std::string scaling_method = *scaling;
-            if (scaling_method == "fast")
+            if (scaling_method == "fast" || scaling_method == "bilinear8")
             {
-                MAPNIK_LOG_ERROR(raster_symbolizer) << "'scaling' value of 'fast' is deprecated and will be removed in Mapnik 3.x, use 'near' with Mapnik >= 2.1.x";
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "'scaling' value of '" << scaling_method << "' is deprecated and will be removed in Mapnik 3.x";
                 raster_sym.set_scaling_method(SCALING_NEAR);
             }
             else

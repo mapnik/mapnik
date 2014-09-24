@@ -89,15 +89,52 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
 
+namespace {
+
 unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count) {
     if (count <= 0) return 0;
     FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
-    std::fseek (file , offset , SEEK_SET);
-    return std::fread ((char*)buffer, 1, count, file);
+    if (!file) return 0;
+    std::fseek(file , offset , SEEK_SET);
+    return std::fread((char*)buffer, 1, count, file);
 }
 
-void ft_close_cb(FT_Stream stream) {
-    std::fclose (static_cast<std::FILE *>(stream->descriptor.pointer));
+struct ft_file_guard {
+    ft_file_guard(FILE * file)
+      : file_(file) {}
+    ~ft_file_guard()
+    {
+        if (file_) std::fclose(file_);
+    }
+    FILE * file_;
+};
+
+struct ft_library_guard {
+    ft_library_guard(FT_Library l)
+      : l_(l) {}
+    ~ft_library_guard()
+    {
+        if (l_)
+        {
+            FT_Done_FreeType(l_);
+        }
+    }
+    FT_Library l_;
+};
+
+struct ft_face_guard {
+    ft_face_guard(FT_Face face)
+      : face_(face) {}
+    ~ft_face_guard()
+    {
+        if (face_)
+        {
+            FT_Done_Face(face_);
+        }
+    }
+    FT_Face face_;
+};
+
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -118,6 +155,7 @@ bool freetype_engine::register_font(std::string const& file_name,
     FILE * file = std::fopen(file_name.c_str(),"rb");
 #endif
     if (file == NULL) return false;
+    ft_file_guard f_gaurd(file);
 
     FT_Library library = 0;
     FT_Error error = FT_Init_FreeType(&library);
@@ -125,8 +163,8 @@ bool freetype_engine::register_font(std::string const& file_name,
     {
         throw std::runtime_error("Failed to initialize FreeType2 library");
     }
+    ft_library_guard library_guard(library);
 
-    FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
@@ -139,21 +177,20 @@ bool freetype_engine::register_font(std::string const& file_name,
     streamRec.size = file_size;
     streamRec.descriptor.pointer = file;
     streamRec.read  = ft_read_cb;
-    streamRec.close = ft_close_cb;
+    streamRec.close = NULL;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
-    int num_faces = 0;
     bool success = false;
-    // some font files have multiple fonts in a file
-    // the count is in the 'root' face library[0]
-    // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
-        // if face is null then this is the first face
-        error = FT_Open_Face(library, &args, i, &face);
-        if (error)
+    int num_faces = 0;
+    for (int i = 0; i == 0 || i < num_faces; ++i) {
+        FT_Face face = 0;
+        FT_Error err = FT_Open_Face(library, &args, i, &face);
+        if (err)
         {
+            MAPNIK_LOG_ERROR(font_engine_freetype) << " Error " << err << ": could not open face " << i << " for " << file_name;
             break;
         }
+        ft_face_guard face_guard(face);
         // store num_faces locally, after FT_Done_Face it can not be accessed any more
         if (!num_faces)
             num_faces = face->num_faces;
@@ -179,13 +216,9 @@ bool freetype_engine::register_font(std::string const& file_name,
                 s << "which reports a family name of '" << std::string(face->family_name) << "' and lacks a style name";
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
-
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
-        if (face) FT_Done_Face(face);
     }
-    if (library)
-        FT_Done_FreeType(library);
     return success;
 }
 

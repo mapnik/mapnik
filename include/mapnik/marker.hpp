@@ -124,12 +124,12 @@ public:
 
     inline bool is_bitmap() const
     {
-        return bitmap_data_;
+        return bitmap_data_ ? true : false;
     }
 
     inline bool is_vector() const
     {
-        return vector_data_;
+        return vector_data_ ? true : false;
     }
 
     boost::optional<mapnik::image_ptr> get_bitmap_data() const

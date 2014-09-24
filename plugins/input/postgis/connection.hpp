@@ -67,6 +67,18 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
+        PGresult *result = PQexec(conn_, "SET DEFAULT_TRANSACTION_READ_ONLY = TRUE; SET CLIENT_MIN_MESSAGES = WARNING;");
+        bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
+        if ( result ) PQclear(result);
+        if ( ! ok ) {
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
+            err_msg += "\nConnection string: '";
+            err_msg += connection_str;
+            err_msg += "'\n";
+            close();
+            throw mapnik::datasource_exception(err_msg);
+        }
     }
 
     ~Connection()

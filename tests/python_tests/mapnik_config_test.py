@@ -77,4 +77,4 @@ def test_mapnik_config_valid_and_invalid_option():
     eq_(process.returncode,0)
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

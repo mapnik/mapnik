@@ -1,0 +1,23 @@
+- Automated tests
+  - Test subqueries      [x]
+  - Test Data input      [x]
+  - Test RGB input       [x]
+  - Test RGBA input      [x]
+  - Test Grayscale input [x]
+- Support for all band types:
+  - PT_1BB    data[x] rgb[ ] grayscale[x]
+  - PT_2BUI   data[x] rgb[ ] grayscale[x]
+  - PT_4BUI   data[x] rgb[ ] grayscale[x]
+  - PT_8BSI   data[x] rgb[x] grayscale[x]
+  - PT_8BUI   data[x] rgb[x] grayscale[x]
+  - PT_16BSI  data[x] rgb[ ] grayscale[x]
+  - PT_16BUI  data[x] rgb[ ] grayscale[x]
+  - PT_32BSI  data[x] rgb[ ] grayscale[x]
+  - PT_32BUI  data[x] rgb[ ] grayscale[x]
+  - PT_32BF   data[x] rgb[ ] grayscale[ ]
+  - PT_64BF   data[x] rgb[ ] grayscale[ ]
+- Have pgraster and postgis plugins share the same connection pool
+- Make overviews enabled by default if table is not a subquery ?
+- Make clipping enabled automatically when needed ?
+- Allow more flexible band layout specification, see
+  http://github.com/mapnik/mapnik/wiki/RFC:-Raster-color-interpretation

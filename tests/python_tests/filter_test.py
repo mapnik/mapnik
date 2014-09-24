@@ -442,4 +442,4 @@ def test_division_by_zero():
     eq_(expr.evaluate(f),None)
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

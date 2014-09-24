@@ -7,6 +7,12 @@ To configure and build Mapnik do:
     ./configure
     make
 
+To use a Python interpreter that is not named `python` for your build, do
+something like the following instead:
+
+    PYTHON=python2 ./configure
+    make PYTHON=python2
+
 NOTE: the above will not work on windows, rather see https://github.com/mapnik/mapnik/wiki/WindowsInstallation
 
 Then to run the tests locally (without needing to install):

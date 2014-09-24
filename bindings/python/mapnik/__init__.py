@@ -439,6 +439,52 @@ def PostGIS(**keywords):
     keywords['type'] = 'postgis'
     return CreateDatasource(keywords)
 
+def PgRaster(**keywords):
+    """Create a PgRaster Datasource.
+
+    Required keyword arguments:
+      dbname -- database name to connect to
+      table -- table name or subselect query
+
+      *Note: if using subselects for the 'table' value consider also
+       passing the 'raster_field' and 'srid' and 'extent_from_subquery'
+       options and/or specifying the 'raster_table' option.
+
+    Optional db connection keyword arguments:
+      user -- database user to connect as (default: see postgres docs)
+      password -- password for database user (default: see postgres docs)
+      host -- portgres hostname (default: see postgres docs)
+      port -- postgres port (default: see postgres docs)
+      initial_size -- integer size of connection pool (default: 1)
+      max_size -- integer max of connection pool (default: 10)
+      persist_connection -- keep connection open (default: True)
+
+    Optional table-level keyword arguments:
+      extent -- manually specified data extent (comma delimited string, default: None)
+      estimate_extent -- boolean, direct PostGIS to use the faster, less accurate `estimate_extent` over `extent` (default: False)
+      extent_from_subquery -- boolean, direct Mapnik to query Postgis for the extent of the raw 'table' value (default: uses 'geometry_table')
+      raster_table -- specify geometry table to use to look up metadata (default: automatically parsed from 'table' value)
+      raster_field -- specify geometry field to use (default: first entry in raster_columns)
+      srid -- specify srid to use (default: auto-detected from geometry_field)
+      row_limit -- integer limit of rows to return (default: 0)
+      cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
+      use_overviews -- boolean, use overviews when available (default: false)
+      prescale_rasters -- boolean, scale rasters on the db side (default: false)
+      clip_rasters -- boolean, clip rasters on the db side (default: false)
+      band -- integer, if non-zero interprets the given band (1-based offset) as a data raster (default: 0)
+
+    >>> from mapnik import PgRaster, Layer
+    >>> params = dict(dbname='mapnik',table='osm',user='postgres',password='gis')
+    >>> params['estimate_extent'] = False
+    >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
+    >>> pgraster = PgRaster(**params)
+    >>> lyr = Layer('PgRaster Layer')
+    >>> lyr.datasource = pgraster
+
+    """
+    keywords['type'] = 'pgraster'
+    return CreateDatasource(keywords)
+
 
 def Raster(**keywords):
     """Create a Raster (Tiff) Datasource.

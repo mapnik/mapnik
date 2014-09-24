@@ -39,7 +39,7 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_basics.h"
-#include "agg_scanline_u.h"
+#include "agg_scanline_bin.h"
 #include "agg_renderer_scanline.h"
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
@@ -83,7 +83,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     typedef agg::renderer_base<pixfmt> renderer_base;
 
     agg::rasterizer_scanline_aa<> rasterizer;
-    agg::scanline_u8  scanline;
+    agg::scanline_bin scanline;
     agg::rendering_buffer buf((unsigned char*)target.data_.getData(),
                               target.data_.width(),
                               target.data_.height(),
@@ -182,13 +182,13 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                         <img_accessor_type, interpolator_type>
                         span_gen_type;
                     span_gen_type sg(ia, interpolator);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb,
+                    agg::render_scanlines_bin(rasterizer, scanline, rb,
                                              sa, sg);
                 } else {
                     typedef agg::span_image_resample_rgba_affine
                         <img_accessor_type> span_gen_type;
                     span_gen_type sg(ia, interpolator, filter);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb,
+                    agg::render_scanlines_bin(rasterizer, scanline, rb,
                                              sa, sg);
                 }
             }

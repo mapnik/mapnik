@@ -134,6 +134,7 @@ void export_map()
         .value("ADJUST_BBOX_HEIGHT",mapnik::Map::ADJUST_BBOX_HEIGHT)
         .value("ADJUST_CANVAS_WIDTH",mapnik::Map::ADJUST_CANVAS_WIDTH)
         .value("ADJUST_CANVAS_HEIGHT", mapnik::Map::ADJUST_CANVAS_HEIGHT)
+        .value("RESPECT", mapnik::Map::RESPECT)
         ;
 
     class_<std::vector<layer> >("Layers")

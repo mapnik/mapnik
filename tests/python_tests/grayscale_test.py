@@ -10,4 +10,4 @@ def test_grayscale_conversion():
     eq_((pixel >> 24) & 0xff,255);
 
 if __name__ == "__main__":
-    run_all(eval(x) for x in dir() if x.startswith("test_"))
+    exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

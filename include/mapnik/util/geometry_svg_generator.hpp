@@ -194,7 +194,7 @@ namespace mapnik { namespace util {
                 ;
 
             svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
-                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ].else_[_1 =""]])
+                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1u) [_1 = "L" ].else_[_1 =""]])
                          << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
                 ;
 

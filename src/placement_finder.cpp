@@ -417,6 +417,40 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     // save each character rendering position and build envelope as go thru loop
     std::queue< box2d<double> > c_envelopes;
 
+    // check the placement of any additional envelopes
+    if (!additional_boxes_.empty())
+    {
+        BOOST_FOREACH(box2d<double> const& box, additional_boxes_)
+        {
+            box2d<double> pt(box.minx() + current_placement->center.x,
+                             box.miny() + current_placement->center.y,
+                             box.maxx() + current_placement->center.x,
+                             box.maxy() + current_placement->center.y);
+
+            if (p.minimum_padding > 0)
+            {
+                box2d<double> epad = pt;
+                epad.pad(pi.get_actual_minimum_padding());
+                if (!dimensions_.contains(epad))
+                {
+                    return;
+                }
+            }
+            else if (p.avoid_edges && !dimensions_.contains(pt))
+            {
+                return;
+            }
+
+            // abort the whole placement if the additional envelopes can't be placed.
+            if (!detector_.extent().intersects(pt) || (!p.allow_overlap && !detector_.has_point_placement(pt, p.minimum_distance)))
+            {
+                return;
+            }
+
+            c_envelopes.push(pt);
+        }
+    }
+
     for (std::size_t i = 0; i < info_.num_characters(); i++)
     {
         char_info const& ci = info_.at(i);
@@ -492,23 +526,6 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
             c_envelopes.push(e);  // add character's envelope to temp storage
         }
         x += cwidth;  // move position to next character
-    }
-
-    // check the placement of any additional envelopes
-    if (!p.allow_overlap && !additional_boxes_.empty())
-    {
-        BOOST_FOREACH(box2d<double> const& box, additional_boxes_)
-        {
-            box2d<double> pt(box.minx() + current_placement->center.x,
-                             box.miny() + current_placement->center.y,
-                             box.maxx() + current_placement->center.x,
-                             box.maxy() + current_placement->center.y);
-
-            // abort the whole placement if the additional envelopes can't be placed.
-            if (!detector_.has_point_placement(pt, p.minimum_distance)) return;
-
-            c_envelopes.push(pt);
-        }
     }
 
     // since there was no early exit, add the character envelopes to the placements' envelopes

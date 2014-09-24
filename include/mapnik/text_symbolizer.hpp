@@ -37,12 +37,6 @@
 // stl
 #include <string>
 
-#if (!defined(NO_DEPRECATION_WARNINGS) && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
-#define func_deprecated __attribute__ ((deprecated))
-#else
-#define func_deprecated
-#endif
-
 namespace mapnik
 {
 
@@ -69,71 +63,71 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
         );
     text_symbolizer(text_symbolizer const& rhs);
     text_symbolizer& operator=(text_symbolizer const& rhs);
-    expression_ptr get_name() const func_deprecated;
+    expression_ptr get_name() const;
     void set_name(expression_ptr expr);
 
-    expression_ptr get_orientation() const func_deprecated; // orienation (rotation angle atm)
+    expression_ptr get_orientation() const; // orienation (rotation angle atm)
     void set_orientation(expression_ptr expr);
 
-    double get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
+    double get_text_ratio() const; // target ratio for text bounding box in pixels
     void set_text_ratio(double ratio);
-    double get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio
+    double get_wrap_width() const; // width to wrap text at, or trigger ratio
     void set_wrap_width(double width);
-    unsigned char get_wrap_char() const func_deprecated; // character used to wrap lines
-    std::string get_wrap_char_string() const func_deprecated; // character used to wrap lines as std::string
+    unsigned char get_wrap_char() const; // character used to wrap lines
+    std::string get_wrap_char_string() const; // character used to wrap lines as std::string
     void set_wrap_char(unsigned char character);
     void set_wrap_char_from_string(std::string const& character);
-    text_transform_e get_text_transform() const func_deprecated; // text conversion on strings before display
+    text_transform_e get_text_transform() const; // text conversion on strings before display
     void set_text_transform(text_transform_e convert);
-    double get_line_spacing() const func_deprecated; // spacing between lines of text
+    double get_line_spacing() const; // spacing between lines of text
     void set_line_spacing(double spacing);
-    double get_character_spacing() const func_deprecated; // spacing between characters in text
+    double get_character_spacing() const; // spacing between characters in text
     void set_character_spacing(double spacing);
-    double get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
+    double get_label_spacing() const; // spacing between repeated labels on lines
     void set_label_spacing(double spacing);
-    double get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
+    double get_label_position_tolerance() const; //distance the label can be moved on the line to fit, if 0 the default is used
     void set_label_position_tolerance(double tolerance);
-    double get_max_char_angle_delta() const func_deprecated; // maximum change in angle between adjacent characters
+    double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
     void set_max_char_angle_delta(double angle);
-    double get_text_size() const func_deprecated;
+    double get_text_size() const;
     void set_text_size(double size);
-    std::string const& get_face_name() const func_deprecated;
+    std::string const& get_face_name() const;
     void set_face_name(std::string face_name);
-    boost::optional<font_set> const& get_fontset() const func_deprecated;
+    boost::optional<font_set> const& get_fontset() const;
     void set_fontset(font_set const& fset);
-    color const& get_fill() const func_deprecated;
+    color const& get_fill() const;
     void set_fill(color const& fill);
     void set_halo_fill(color const& fill);
-    color const& get_halo_fill() const func_deprecated;
+    color const& get_halo_fill() const;
     void set_halo_radius(double radius);
-    double get_halo_radius() const func_deprecated;
+    double get_halo_radius() const;
     void set_halo_rasterizer(halo_rasterizer_e rasterizer_p);
     halo_rasterizer_e get_halo_rasterizer() const;
     void set_label_placement(label_placement_e label_p);
-    label_placement_e get_label_placement() const func_deprecated;
+    label_placement_e get_label_placement() const;
     void set_vertical_alignment(vertical_alignment_e valign);
-    vertical_alignment_e get_vertical_alignment() const func_deprecated;
+    vertical_alignment_e get_vertical_alignment() const;
     void set_displacement(double x, double y);
     void set_displacement(position const& p);
-    position const& get_displacement() const func_deprecated;
+    position const& get_displacement() const;
     void set_avoid_edges(bool avoid);
-    bool get_avoid_edges() const func_deprecated;
+    bool get_avoid_edges() const;
     void set_minimum_distance(double distance);
-    double get_minimum_distance() const func_deprecated;
+    double get_minimum_distance() const;
     void set_minimum_padding(double distance);
-    double get_minimum_padding() const func_deprecated;
+    double get_minimum_padding() const;
     void set_minimum_path_length(double size);
     double get_minimum_path_length() const;
     void set_allow_overlap(bool overlap);
-    bool get_allow_overlap() const func_deprecated;
+    bool get_allow_overlap() const;
     void set_text_opacity(double opacity);
-    double get_text_opacity() const func_deprecated;
+    double get_text_opacity() const;
     void set_wrap_before(bool wrap_before);
-    bool get_wrap_before() const func_deprecated; // wrap text at wrap_char immediately before current work
+    bool get_wrap_before() const; // wrap text at wrap_char immediately before current work
     void set_horizontal_alignment(horizontal_alignment_e valign);
-    horizontal_alignment_e get_horizontal_alignment() const func_deprecated;
+    horizontal_alignment_e get_horizontal_alignment() const;
     void set_justify_alignment(justify_alignment_e valign);
-    justify_alignment_e get_justify_alignment() const func_deprecated;
+    justify_alignment_e get_justify_alignment() const;
     text_placements_ptr get_placement_options() const;
     void set_placement_options(text_placements_ptr placement_options);
     void set_largest_bbox_only(bool val);
