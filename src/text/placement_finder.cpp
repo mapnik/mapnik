@@ -29,7 +29,6 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/vertex_cache.hpp>
-#include <mapnik/text/tolerance_iterator.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
