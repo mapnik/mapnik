@@ -40,12 +40,12 @@ before_script:
  - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
  - tar xf harfbuzz-0.9.34.tar.bz2
  - cd harfbuzz-0.9.34
- - ./configure --prefix=/usr --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make && sudo make install
+ - ./configure --prefix=/usr --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make -j2 && sudo make -j2 install
  - cd ../
 
 script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
- - if [[ "${DEBUG}" == true ]]; then JOBS=1 make; else JOBS=1 make; fi;
+ - if [[ "${DEBUG}" == true ]]; then JOBS=1 make; else JOBS=2 make; fi;
  - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - source localize.sh && make grind
