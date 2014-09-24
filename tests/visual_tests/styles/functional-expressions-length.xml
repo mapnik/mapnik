@@ -1,7 +1,6 @@
 <Map background-color="#eee" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
   <FontSet name="book-fonts">
     <Font face-name="DejaVu Sans Book"/>
-    <Font face-name="unifont Medium"/>
   </FontSet>
   <Style name="frame" filter-mode="first">
     <Rule>
