@@ -420,8 +420,9 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
 	else:
 	    m.zoom_all()
     except Exception, e:
-	if 'Could not create datasource' in str(e):
-	    return m
+        if 'Could not create datasource' in str(e) \
+           or 'Bad connection' in str(e):
+            return m
 	reporting.other_error(filename, repr(e))
 	return m
 
