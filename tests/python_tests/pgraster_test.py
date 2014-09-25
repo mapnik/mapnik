@@ -32,6 +32,7 @@ def call(cmd,silent=False):
     if not stderr:
         return stdin.strip()
     elif not silent and 'error' in stderr.lower() \
+        or 'not found' in stderr.lower() \
         or 'could not connect' in stderr.lower() \
         or 'bad connection' in stderr.lower() \
         or 'not recognized as an internal' in stderr.lower():
