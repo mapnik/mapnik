@@ -38,6 +38,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include <agg_trans_affine.h>
@@ -47,6 +48,35 @@ namespace mapnik {
 class proj_transform;
 struct glyph_info;
 class text_symbolizer_helper;
+
+struct virtual_renderer_common : private mapnik::noncopyable
+{
+
+    virtual_renderer_common(renderer_common & common) :
+        width_(common.width_),
+        height_(common.height_),
+        scale_factor_(common.scale_factor_),
+        vars_(common.vars_),
+        shared_font_engine_(common.shared_font_engine_),
+        font_engine_(*shared_font_engine_),
+        font_manager_(common.font_manager_),
+        query_extent_(common.query_extent_),
+        t_(common.t_),
+        detector_(std::make_shared<label_collision_detector4>(common.detector_->extent())) {}
+
+    unsigned & width_;
+    unsigned & height_;
+    double & scale_factor_;
+    attributes & vars_;
+    // TODO: dirty hack for cairo renderer, figure out how to remove this
+    std::shared_ptr<freetype_engine> & shared_font_engine_;
+    freetype_engine & font_engine_;
+    face_manager<freetype_engine> & font_manager_;
+    box2d<double> & query_extent_;
+    view_transform & t_;
+    std::shared_ptr<label_collision_detector4> detector_;
+};
+
 
 // General:
 
@@ -117,7 +147,7 @@ struct render_thunk_extractor : public util::static_visitor<>
                            feature_impl & feature,
                            attributes const& vars,
                            proj_transform const& prj_trans,
-                           renderer_common & common,
+                           virtual_renderer_common & common,
                            box2d<double> const& clipping_extent);
 
     void operator()(point_symbolizer const& sym) const;
@@ -140,7 +170,7 @@ private:
     feature_impl & feature_;
     attributes const& vars_;
     proj_transform const& prj_trans_;
-    renderer_common & common_;
+    virtual_renderer_common & common_;
     box2d<double> clipping_extent_;
 
     void update_box() const;
@@ -211,8 +241,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
 
     // create a copied 'virtual' common renderer for processing sub feature symbolizers
     // create an empty detector for it, so we are sure we won't hit anything
-    renderer_common virtual_renderer(common);
-    virtual_renderer.detector_ = std::make_shared<label_collision_detector4>(common.detector_->extent());
+    virtual_renderer_common virtual_renderer(common);
 
     // keep track of which lists of render thunks correspond to
     // entries in the group_layout_manager.

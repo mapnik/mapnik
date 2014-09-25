@@ -32,11 +32,11 @@
 
 namespace mapnik {
 
-template <typename F>
+template <typename F,typename RendererType>
 void render_point_symbolizer(point_symbolizer const &sym,
                              mapnik::feature_impl &feature,
                              proj_transform const &prj_trans,
-                             renderer_common &common,
+                             RendererType &common,
                              F render_marker)
 {
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_);

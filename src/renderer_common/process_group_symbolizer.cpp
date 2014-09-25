@@ -76,7 +76,7 @@ render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
                                                feature_impl & feature,
                                                attributes const& vars,
                                                proj_transform const& prj_trans,
-                                               renderer_common & common,
+                                               virtual_renderer_common & common,
                                                box2d<double> const& clipping_extent)
     : box_(box), thunks_(thunks), feature_(feature), vars_(vars), prj_trans_(prj_trans),
       common_(common), clipping_extent_(clipping_extent)

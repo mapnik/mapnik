@@ -73,18 +73,4 @@ renderer_common::renderer_common(request const &req, attributes const& vars, uns
                                       req.width() + req.buffer_size() ,req.height() + req.buffer_size())))
 {}
 
-renderer_common::renderer_common(renderer_common const &other)
-   : width_(other.width_),
-     height_(other.height_),
-     scale_factor_(other.scale_factor_),
-     vars_(other.vars_),
-     shared_font_engine_(other.shared_font_engine_),
-     font_engine_(*shared_font_engine_),
-     font_manager_(font_engine_),
-     query_extent_(),
-     t_(other.t_),
-     detector_(other.detector_)
-{
-}
-
 }
