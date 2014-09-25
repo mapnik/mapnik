@@ -52,12 +52,12 @@ py_env['LIBS'] = [env['MAPNIK_NAME'],env['BOOST_PYTHON_LIB']]
 
 link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])
 
-if link_all_libs:
-    py_env.AppendUnique(LIBS=env['LIBMAPNIK_LIBS'])
-
 # even though boost_thread is no longer used in mapnik core
 # we need to link in for boost_python to avoid missing symbol: _ZN5boost6detail12get_tss_dataEPKv / boost::detail::get_tss_data
 py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
+
+if link_all_libs:
+    py_env.AppendUnique(LIBS=env['LIBMAPNIK_LIBS'])
 
 # note: on linux -lrt must be linked after thread to avoid: undefined symbol: clock_gettime
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
