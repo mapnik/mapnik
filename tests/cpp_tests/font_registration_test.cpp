@@ -83,10 +83,40 @@ int main(int argc, char** argv)
         face_names = mapnik::freetype_engine::face_names();
         BOOST_TEST( face_names.size() == 2 );
 
+        // now, inspect font mapping and confirm the correct 'DejaVu Sans Mono Bold Oblique' is registered
+        using font_file_mapping = std::map<std::string, std::pair<int,std::string> >;
+        font_file_mapping const& name2file = mapnik::freetype_engine::get_mapping();
+        bool found_dejavu = false;
+        for (auto const& item : name2file)
+        {
+            if (item.first == "DejaVu Sans Mono Bold Oblique")
+            {
+                found_dejavu = true;
+                BOOST_TEST( item.second.first == 0 );
+                BOOST_TEST( item.second.second == dejavu_bold_oblique );
+            }
+        }
+        BOOST_TEST( found_dejavu );
+
         // recurse to find all dejavu fonts
         BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir, true) );
         face_names = mapnik::freetype_engine::face_names();
         BOOST_TEST( face_names.size() == 22 );
+
+        // we should have re-registered 'DejaVu Sans Mono Bold Oblique' again,
+        // but now at a new path
+        bool found_dejavu2 = false;
+        for (auto const& item : name2file)
+        {
+            if (item.first == "DejaVu Sans Mono Bold Oblique")
+            {
+                found_dejavu2 = true;
+                BOOST_TEST( item.second.first == 0 );
+                // path should be different
+                BOOST_TEST( item.second.second != dejavu_bold_oblique );
+            }
+        }
+        BOOST_TEST( found_dejavu2 );
 
         // check that we can correctly read a .ttc containing
         // multiple valid faces
