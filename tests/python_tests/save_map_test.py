@@ -26,7 +26,8 @@ def compare_map(xml):
         mapnik.load_map(m, xml, False, absolute_base)
     except RuntimeError, e:
         # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
+        if not 'Could not create datasource' in str(e) \
+           and not 'Bad connection' in str(e):
             raise RuntimeError(str(e))
         return
     (handle, test_map) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map1-')
