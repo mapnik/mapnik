@@ -113,6 +113,7 @@ char const* unary_function_name(unary_function_impl const& fun)
     else if (fun.target<atan_impl>()) return "atan";
     else if (fun.target<exp_impl>()) return "exp";
     else if (fun.target<abs_impl>()) return "abs";
+    else if (fun.target<length_impl>()) return "length";
     else return "unknown";
 }
 
