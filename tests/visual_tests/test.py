@@ -119,22 +119,22 @@ files = {
     'marker-svg-empty-g-element':{},
     'marker-multi-policy': {'sizes':[(600,400)]},
     'marker-on-line': {'sizes':[(600,400)],
-	'bbox': mapnik.Box2d(-10, 0, 15, 20)},
+        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
     'marker-on-line-and-line-placement': {'sizes':[(600,400)],
-	'bbox': mapnik.Box2d(-10, 0, 15, 20)},
+        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
     'marker-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'marker-on-line-spacing-eq-width-overlap': {'sizes':[(600,400)]},
     'marker_line_placement_on_points':{},
     'marker-on-line-and-vertex-first-placement':{'sizes':[(600,400)],
-	'bbox': mapnik.Box2d(-1, -1, 11, 4)},
+        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
     'marker-on-line-and-vertex-last-placement':{'sizes':[(600,400)],
-	'bbox': mapnik.Box2d(-1, -1, 11, 4)},
+        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
     'marker-with-background-image-linear-comp-op': {},
     'marker-with-background-image': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-with-background-image-and-hsla-transform': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-on-hex-grid': {'sizes':[(600,400),(400,600),(257,256)]},
     'whole-centroid': {'sizes':[(600,400)],
-	'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
+        'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     'text-halo-rasterizer': {'sizes':[(600,400)]},
     'text-halo-transform': {'sizes':[(600,400)]},
     'text-ttc-font': {'sizes':[(600,400)]},
@@ -201,10 +201,10 @@ files = {
     'gdal-filter-factor': {'sizes':[(600,400)]},
     # https://github.com/mapnik/mapnik/issues/1622
     'tiff-edge-alignment-gdal1': {'sizes':[(256,256),(255,257)],
-	'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
+        'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
     },
     'tiff-edge-alignment-gdal2': {'sizes':[(256,256),(255,257)],
-	'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
+        'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
 
@@ -217,10 +217,10 @@ files = {
     #'tiff-nodata-edge-raster': {'sizes':[(600,400)]},
     #'tiff-opaque-edge-raster': {'sizes':[(256,256)]},
     'road-casings-grouped-rendering': {'sizes':[(600,600)],
-	'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
+        'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
     },
     'road-casings-non-grouped-rendering': {'sizes':[(600,600)],
-	'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
+        'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
     },
     'style-level-compositing-tiled-0,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,0']},
     'style-level-compositing-tiled-1,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,0']},
@@ -293,159 +293,159 @@ class Reporting:
     OTHER = 3
     REPLACE = 4
     def __init__(self, quiet, overwrite_failures = False):
-	self.quiet = quiet
-	self.passed = 0
-	self.failed = 0
-	self.overwrite_failures = overwrite_failures
-	self.errors = [ #(type, actual, expected, diff, message)
-	 ]
+        self.quiet = quiet
+        self.passed = 0
+        self.failed = 0
+        self.overwrite_failures = overwrite_failures
+        self.errors = [ #(type, actual, expected, diff, message)
+         ]
 
     def result_fail(self, actual, expected, diff):
-	self.failed += 1
-	if self.quiet:
-	    if platform.uname()[0] == 'Windows':
-		sys.stderr.write('.')
-	    else:
-		sys.stderr.write('\x1b[31m.\x1b[0m')
-	else:
-	    print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+        self.failed += 1
+        if self.quiet:
+            if platform.uname()[0] == 'Windows':
+                sys.stderr.write('.')
+            else:
+                sys.stderr.write('\x1b[31m.\x1b[0m')
+        else:
+            print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
 
-	if self.overwrite_failures:
-	    self.errors.append((self.REPLACE, actual, expected, diff, None))
-	    contents = open(actual, 'r').read()
-	    open(expected, 'wb').write(contents)
-	else:
-	    self.errors.append((self.DIFF, actual, expected, diff, None))
+        if self.overwrite_failures:
+            self.errors.append((self.REPLACE, actual, expected, diff, None))
+            contents = open(actual, 'r').read()
+            open(expected, 'wb').write(contents)
+        else:
+            self.errors.append((self.DIFF, actual, expected, diff, None))
 
     def result_pass(self, actual, expected, diff):
-	self.passed += 1
-	if self.quiet:
-	    if platform.uname()[0] == 'Windows':
-		sys.stderr.write('.')
-	    else:
-		sys.stderr.write('\x1b[32m.\x1b[0m')
-	else:
-	    if platform.uname()[0] == 'Windows':
-		print '\x1b[32m✓\x1b[0m'
-	    else:
-		print '✓'
+        self.passed += 1
+        if self.quiet:
+            if platform.uname()[0] == 'Windows':
+                sys.stderr.write('.')
+            else:
+                sys.stderr.write('\x1b[32m.\x1b[0m')
+        else:
+            if platform.uname()[0] == 'Windows':
+                print '\x1b[32m✓\x1b[0m'
+            else:
+                print '✓'
 
     def not_found(self, actual, expected):
-	self.failed += 1
-	self.errors.append((self.NOT_FOUND, actual, expected, 0, None))
-	if self.quiet:
-	    sys.stderr.write('\x1b[33m.\x1b[0m')
-	else:
-	    print '\x1b[33m?\x1b[0m (\x1b[34mReference file not found, creating\x1b[0m)'
-	contents = open(actual, 'r').read()
-	open(expected, 'wb').write(contents)
+        self.failed += 1
+        self.errors.append((self.NOT_FOUND, actual, expected, 0, None))
+        if self.quiet:
+            sys.stderr.write('\x1b[33m.\x1b[0m')
+        else:
+            print '\x1b[33m?\x1b[0m (\x1b[34mReference file not found, creating\x1b[0m)'
+        contents = open(actual, 'r').read()
+        open(expected, 'wb').write(contents)
 
     def other_error(self, expected, message):
-	self.failed += 1
-	self.errors.append((self.OTHER, None, expected, 0, message))
-	if self.quiet:
-	    sys.stderr.write('\x1b[31m.\x1b[0m')
-	else:
-	    print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
+        self.failed += 1
+        self.errors.append((self.OTHER, None, expected, 0, message))
+        if self.quiet:
+            sys.stderr.write('\x1b[31m.\x1b[0m')
+        else:
+            print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
 
     def make_html_item(self,actual,expected,diff):
-	item = '''
-	     <div class="expected">
-	       <a href="%s">
-		 <img src="%s" width="100%s">
-	       </a>
-	     </div>
-	      ''' % (expected,expected,'%')
-	item += '<div class="text">%s</div>' % (diff)
-	item += '''
-	     <div class="actual">
-	       <a href="%s">
-		 <img src="%s" width="100%s">
-	       </a>
-	     </div>
-	      ''' % (actual,actual,'%')
-	return item
+        item = '''
+             <div class="expected">
+               <a href="%s">
+                 <img src="%s" width="100%s">
+               </a>
+             </div>
+              ''' % (expected,expected,'%')
+        item += '<div class="text">%s</div>' % (diff)
+        item += '''
+             <div class="actual">
+               <a href="%s">
+                 <img src="%s" width="100%s">
+               </a>
+             </div>
+              ''' % (actual,actual,'%')
+        return item
 
     def summary(self):
-	if len(self.errors) == 0:
-	    print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
-	    return 0
-	sortable_errors = []
-	print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
-	for idx, error in enumerate(self.errors):
-	    if error[0] == self.OTHER:
-		print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s (\x1b[34m%s\x1b[0m)" % (error[2],error[4])
-	    elif error[0] == self.NOT_FOUND:
-		print str(idx+1) + ") Generating reference image: '%s'" % error[2]
-		continue
-	    elif error[0] == self.DIFF:
-		print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
-		if '.png' in error[1]: # ignore grids
-		    sortable_errors.append((error[3],error))
-	    elif error[0] == self.REPLACE:
-		print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
-	if len(sortable_errors):
-	    # drop failure results in folder
-	    vdir = os.path.join(visual_output_dir,'visual-test-results')
-	    if not os.path.exists(vdir):
-		os.makedirs(vdir)
-	    html_template = open(os.path.join(dirname,'html_report_template.html'),'r').read()
-	    name = 'comparison.html'
-	    failures_realpath = os.path.join(vdir,name)
-	    html_out = open(failures_realpath,'w+')
-	    sortable_errors.sort(reverse=True)
-	    html_body = ''
-	    for item in sortable_errors:
-		# copy images into single directory
-		actual = item[1][1]
-		expected = item[1][2]
-		diff = item[0]
-		actual_new = os.path.join(vdir,os.path.basename(actual))
-		shutil.copy(actual,actual_new)
-		expected_new = os.path.join(vdir,os.path.basename(expected))
-		shutil.copy(expected,expected_new)
-		html_body += self.make_html_item(os.path.relpath(actual_new,vdir),os.path.relpath(expected_new,vdir),diff)
-	    html_out.write(html_template.replace('{{RESULTS}}',html_body))
-	    print 'View failures by opening %s' % failures_realpath
-	return 1
+        if len(self.errors) == 0:
+            print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
+            return 0
+        sortable_errors = []
+        print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
+        for idx, error in enumerate(self.errors):
+            if error[0] == self.OTHER:
+                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s (\x1b[34m%s\x1b[0m)" % (error[2],error[4])
+            elif error[0] == self.NOT_FOUND:
+                print str(idx+1) + ") Generating reference image: '%s'" % error[2]
+                continue
+            elif error[0] == self.DIFF:
+                print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
+                if '.png' in error[1]: # ignore grids
+                    sortable_errors.append((error[3],error))
+            elif error[0] == self.REPLACE:
+                print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
+        if len(sortable_errors):
+            # drop failure results in folder
+            vdir = os.path.join(visual_output_dir,'visual-test-results')
+            if not os.path.exists(vdir):
+                os.makedirs(vdir)
+            html_template = open(os.path.join(dirname,'html_report_template.html'),'r').read()
+            name = 'comparison.html'
+            failures_realpath = os.path.join(vdir,name)
+            html_out = open(failures_realpath,'w+')
+            sortable_errors.sort(reverse=True)
+            html_body = ''
+            for item in sortable_errors:
+                # copy images into single directory
+                actual = item[1][1]
+                expected = item[1][2]
+                diff = item[0]
+                actual_new = os.path.join(vdir,os.path.basename(actual))
+                shutil.copy(actual,actual_new)
+                expected_new = os.path.join(vdir,os.path.basename(expected))
+                shutil.copy(expected,expected_new)
+                html_body += self.make_html_item(os.path.relpath(actual_new,vdir),os.path.relpath(expected_new,vdir),diff)
+            html_out.write(html_template.replace('{{RESULTS}}',html_body))
+            print 'View failures by opening %s' % failures_realpath
+        return 1
 
 def render(filename,config, width, height, bbox, scale_factor, reporting):
     m = mapnik.Map(width, height)
     postfix = "%s-%d-%d-%s" % (filename, width, height, scale_factor)
 
     try:
-	mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), True)
-	if bbox is not None:
-	    m.zoom_to_box(bbox)
-	else:
-	    m.zoom_all()
+        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), True)
+        if bbox is not None:
+            m.zoom_to_box(bbox)
+        else:
+            m.zoom_all()
     except Exception, e:
         if 'Could not create datasource' in str(e) \
            or 'Bad connection' in str(e):
             return m
-	reporting.other_error(filename, repr(e))
-	return m
+        reporting.other_error(filename, repr(e))
+        return m
 
     for renderer in renderers:
-	if config.get(renderer['name'], True):
-	    expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
-		(postfix, renderer['name'], renderer['filetype']))
-	    actual = os.path.join(visual_output_dir, '%s-%s.%s' %
-		(postfix, renderer['name'], renderer['filetype']))
-	    if not quiet:
-		print "\"%s\" with %s..." % (postfix, renderer['name']),
-	    try:
-		renderer['render'](m, actual, scale_factor)
-		if not os.path.exists(expected):
-		    reporting.not_found(actual, expected)
-		else:
-		    diff = renderer['compare'](actual, expected)
-		    if diff > renderer['threshold']:
-			reporting.result_fail(actual, expected, diff)
-		    else:
-			reporting.result_pass(actual, expected, diff)
-	    except Exception, e:
-		reporting.other_error(expected, repr(e))
+        if config.get(renderer['name'], True):
+            expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
+                (postfix, renderer['name'], renderer['filetype']))
+            actual = os.path.join(visual_output_dir, '%s-%s.%s' %
+                (postfix, renderer['name'], renderer['filetype']))
+            if not quiet:
+                print "\"%s\" with %s..." % (postfix, renderer['name']),
+            try:
+                renderer['render'](m, actual, scale_factor)
+                if not os.path.exists(expected):
+                    reporting.not_found(actual, expected)
+                else:
+                    diff = renderer['compare'](actual, expected)
+                    if diff > renderer['threshold']:
+                        reporting.result_fail(actual, expected, diff)
+                    else:
+                        reporting.result_pass(actual, expected, diff)
+            except Exception, e:
+                reporting.other_error(expected, repr(e))
     return m
 
 if __name__ == "__main__":
@@ -463,32 +463,32 @@ if __name__ == "__main__":
 
     select_files = {}
     if len(sys.argv) > 1:
-	for name in sys.argv[1:]:
-	    if name in files:
-		select_files[name]=files[name]
-	    else:
-		select_files[name]={}
+        for name in sys.argv[1:]:
+            if name in files:
+                select_files[name]=files[name]
+            else:
+                select_files[name]={}
     if len(select_files) > 0:
-	files = select_files
+        files = select_files
 
     if not os.path.exists(visual_output_dir):
-	os.makedirs(visual_output_dir)
+        os.makedirs(visual_output_dir)
 
     reporting = Reporting(quiet, overwrite_failures)
     try:
-	for filename in files:
-	    config = dict(defaults)
-	    config.update(files[filename])
-	    for size in config['sizes']:
-		for scale_factor in config['scales']:
-		    m = render(filename,
-			       config,
-			       size[0],
-			       size[1],
-			       config.get('bbox'),
-			       scale_factor,
-			       reporting)
-	    #mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
+        for filename in files:
+            config = dict(defaults)
+            config.update(files[filename])
+            for size in config['sizes']:
+                for scale_factor in config['scales']:
+                    m = render(filename,
+                               config,
+                               size[0],
+                               size[1],
+                               config.get('bbox'),
+                               scale_factor,
+                               reporting)
+            #mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
     except KeyboardInterrupt:
-	pass
+        pass
     sys.exit(reporting.summary())
