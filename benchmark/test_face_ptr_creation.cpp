@@ -9,18 +9,30 @@ public:
      : test_case(params) {}
     bool validate() const
     {
-        return true;
+        std::size_t count = 0;
+        std::size_t expected_count = mapnik::freetype_engine::face_names().size();
+        mapnik::freetype_engine engine;
+        for (std::string const& name : mapnik::freetype_engine::face_names())
+        {
+            mapnik::face_ptr f = engine.create_face(name);
+            if (f) ++count;
+        }
+        return count == expected_count;
     }
     void operator()() const
     {
         mapnik::freetype_engine engine;
-        unsigned long count = 0;
+        std::size_t expected_count = mapnik::freetype_engine::face_names().size();
         for (unsigned i=0;i<iterations_;++i)
         {
-            for ( std::string const& name : mapnik::freetype_engine::face_names())
+            std::size_t count = 0;
+            for (std::string const& name : mapnik::freetype_engine::face_names())
             {
                 mapnik::face_ptr f = engine.create_face(name);
                 if (f) ++count;
+            }
+            if (count != expected_count) {
+                std::clog << "warning: face creation not working as expected\n";
             }
         }
     }
@@ -37,6 +49,6 @@ int main(int argc, char** argv)
     } 
     std::size_t face_count = mapnik::freetype_engine::face_names().size();
     test test_runner(params);
-    return run(test_runner,(boost::format("font_engine: creating %ld faces") % (face_count * 1000 * 10)).str());
+    return run(test_runner,(boost::format("font_engine: creating %ld faces") % (face_count)).str());
 }
 
