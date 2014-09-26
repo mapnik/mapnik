@@ -314,8 +314,6 @@ inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
     }
 }
 
-
-
 template <typename Symbolizer, typename T>
 inline void set_property_from_value(Symbolizer & sym, mapnik::keys key, T const& val)
 {
@@ -371,7 +369,6 @@ struct set_symbolizer_property_impl
             }
             else
             {
-                ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
                 throw;
             }
         }
@@ -436,53 +433,45 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
     static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
     {
         using value_type = T;
-        try
+        boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
+        if (enum_str)
         {
-            boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
-            if (enum_str)
+            boost::optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);
+            if (enum_val)
             {
-                boost::optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);
-                if (enum_val)
+                put(sym, key, *enum_val);
+            }
+            else
+            {
+                boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
+                if (val)
                 {
-                    put(sym, key, *enum_val);
-                }
-                else
-                {
-                    boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
-                    if (val)
+                    // first try pre-evaluating expression
+                    auto result = pre_evaluate_expression<value>(*val);
+                    if (std::get<1>(result))
                     {
-                        // first try pre-evaluating expression
-                        auto result = pre_evaluate_expression<value>(*val);
-                        if (std::get<1>(result))
+                        boost::optional<T> enum_val = detail::enum_traits<T>::from_string(std::get<0>(result).to_string());
+                        if (enum_val)
                         {
-                            boost::optional<T> enum_val = detail::enum_traits<T>::from_string(std::get<0>(result).to_string());
-                            if (enum_val)
-                            {
-                                put(sym, key, *enum_val);
-                            }
-                            else
-                            {
-                                // can't evaluate
-                                throw config_error("failed to parse symbolizer property: '" + name + "'");
-                            }
+                            put(sym, key, *enum_val);
                         }
                         else
                         {
-                            // put expression_ptr
-                            put(sym, key, *val);
+                            // can't evaluate
+                            throw config_error("failed to parse '" + name + "'");
                         }
                     }
                     else
                     {
-                        throw config_error("failed to parse symbolizer property: '" + name + "'");
+                        // put expression_ptr
+                        put(sym, key, *val);
                     }
                 }
+                else
+                {
+                    throw config_error("failed to parse '" + name + "'");
+                }
             }
-        }
-        catch (config_error const& ex)
-        {
-            ex.append_context(std::string("set_symbolizer_property '") + name + "'", node);
-            throw;
         }
     }
 };
