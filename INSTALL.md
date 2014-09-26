@@ -15,6 +15,7 @@ To trigger parallel compilation you can pass a JOBS value to make:
     $ JOBS=4 make
 ```
 
+(Note that compiling Mapnik needs several GBytes of RAM. If you use parallel compiliation it needs more.)
 
 To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
