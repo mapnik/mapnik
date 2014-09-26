@@ -184,6 +184,7 @@ files = {
     'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-halign-adjust': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-halign-adjust-multiline': {'sizes': [(800,800)], 'bbox': default_text_box},
+    'text-vertical-alignment': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-font-features': {'sizes': [(500, 500)]},
