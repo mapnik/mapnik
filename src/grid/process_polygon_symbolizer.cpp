@@ -54,9 +54,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
     using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
-    using vertex_converter_type = vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
-                                                   view_transform, proj_transform, agg::trans_affine,
-                                                   conv_types, feature_impl>;
+    using vertex_converter_type = vertex_converter<grid_rasterizer,conv_types>;
 
     ras_ptr->reset();
 

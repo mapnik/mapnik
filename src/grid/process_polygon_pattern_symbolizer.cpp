@@ -78,8 +78,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     }
 
     using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag>;
-    vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,
-                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+    vertex_converter<grid_rasterizer,conv_types>
         converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)

@@ -119,8 +119,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     put<value_double>(line, keys::simplify_tolerance, value_double(simplify_tolerance));
     put<value_double>(line, keys::smooth, value_double(smooth));
 
-    vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
-                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+    vertex_converter<grid_rasterizer,conv_types>
         converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
