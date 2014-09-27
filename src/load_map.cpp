@@ -84,10 +84,10 @@ constexpr unsigned name2int(const char *str, int off = 0)
 class map_parser : mapnik::noncopyable
 {
 public:
-    map_parser(bool strict, std::string const& filename = "") :
+    map_parser(Map & map, bool strict, std::string const& filename = "") :
         strict_(strict),
         filename_(filename),
-        font_manager_(font_engine_),
+        font_manager_(font_engine_,map.get_font_file_mapping(),map.get_font_memory_cache()),
         xml_base_path_()
     {}
 
@@ -130,7 +130,7 @@ private:
     std::string filename_;
     std::map<std::string,parameters> datasource_templates_;
     freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
+    face_manager_freetype font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
     std::string xml_base_path_;
@@ -143,7 +143,7 @@ void load_map(Map & map, std::string const& filename, bool strict, std::string b
     xml_tree tree("utf8");
     tree.set_filename(filename);
     read_xml(filename, tree.root());
-    map_parser parser(strict, filename);
+    map_parser parser(map, strict, filename);
     parser.parse_map(map, tree.root(), base_path);
     //dump_xml(tree.root());
 }
@@ -160,7 +160,7 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     {
         read_xml_string(str, tree.root(), map.base_path()); // FIXME - this value is not fully known yet
     }
-    map_parser parser(strict, base_path);
+    map_parser parser(map, strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
 }
 
@@ -262,7 +262,9 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
             optional<std::string> font_directory = map_node.get_opt_attr<std::string>("font-directory");
             if (font_directory)
             {
-                if (!freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false))
+                map.set_font_directory(*font_directory);
+                if (!map.register_fonts(ensure_relative_to_xml(font_directory), false))
+                //if (!freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false))
                 {
                     if (strict_)
                     {
