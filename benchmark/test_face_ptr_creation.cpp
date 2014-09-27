@@ -16,7 +16,7 @@ public:
         mapnik::freetype_engine::font_memory_cache_type font_cache;
         for (std::string const& name : mapnik::freetype_engine::face_names())
         {
-            mapnik::face_ptr f = engine.create_face(name,font_file_mapping,font_cache);
+            mapnik::face_ptr f = engine.create_face(name,engine.get_library(),font_file_mapping,font_cache);
             if (f) ++count;
         }
         return count == expected_count;
@@ -32,7 +32,7 @@ public:
             mapnik::freetype_engine::font_memory_cache_type font_cache;
             for (std::string const& name : mapnik::freetype_engine::face_names())
             {
-                mapnik::face_ptr f = engine.create_face(name,font_file_mapping,font_cache);
+                mapnik::face_ptr f = engine.create_face(name,engine.get_library(),font_file_mapping,font_cache);
                 if (f) ++count;
             }
             if (count != expected_count) {
