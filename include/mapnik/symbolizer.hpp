@@ -31,7 +31,6 @@
 #include <mapnik/simplify.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/expression_node.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/parse_path.hpp>
