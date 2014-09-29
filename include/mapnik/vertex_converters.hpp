@@ -328,8 +328,10 @@ struct dispatcher : mapnik::noncopyable
     using this_type = dispatcher;
     using args_type = Args;
 
-    dispatcher(args_type const& args)
-        : args_(args)
+    dispatcher(typename Args::processor_type & proc, box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
+               proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
+               attributes const& vars, double scale_factor)
+        : args_(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor)
     {
         std::fill(vec_.begin(), vec_.end(), 0);
     }
@@ -339,8 +341,9 @@ struct dispatcher : mapnik::noncopyable
 };
 
 template <typename Processor>
-struct arguments //: mapnik::noncopyable
+struct arguments : mapnik::noncopyable
 {
+    using processor_type = Processor;
     arguments(Processor & proc, box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
               proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
               attributes const& vars, double scale_factor)
@@ -389,7 +392,7 @@ struct vertex_converter : private mapnik::noncopyable
                      feature_type const& feature,
                      attributes const& vars,
                      double scale_factor)
-        : disp_(args_type(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor)) {}
+        : disp_(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor) {}
 
     template <typename Geometry>
     void apply(Geometry & geom)
