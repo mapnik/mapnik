@@ -211,7 +211,6 @@ struct converter_traits<T,mapnik::clip_poly_tag>
     {
         auto const& box = args.bbox;
         geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
-        //geom.set_clip_box(box);
     }
 };
 
@@ -221,10 +220,7 @@ struct converter_traits<T,mapnik::close_poly_tag>
     using geometry_type = T;
     using conv_type = typename agg::conv_close_polygon<geometry_type>;
     template <typename Args>
-    static void setup(geometry_type & , Args const&)
-    {
-        // no-op
-    }
+    static void setup(geometry_type & , Args const&) {}
 };
 
 template <typename T>
