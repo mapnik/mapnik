@@ -24,14 +24,9 @@
 #define MAPNIK_VIEW_TRANSFORM_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/vertex.hpp>
 #include <mapnik/proj_transform.hpp>
-
-// stl
-#include <cstddef>
 
 namespace mapnik
 {
