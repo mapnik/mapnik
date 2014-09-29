@@ -70,7 +70,8 @@ namespace util {
         FT_Add_Default_Modules(library_);
     }
 
-    FT_Library font_library::get() {
+    FT_Library font_library::get()
+    {
         return library_;
     }
 
@@ -88,9 +89,8 @@ namespace util {
         return face_ptr();
     }
 
-
-
-    font_library::~font_library() {
+    font_library::~font_library()
+    {
         FT_Done_Library(library_);
     }
 

@@ -264,7 +264,6 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
             {
                 map.set_font_directory(*font_directory);
                 if (!map.register_fonts(ensure_relative_to_xml(font_directory), false))
-                //if (!freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false))
                 {
                     if (strict_)
                     {
