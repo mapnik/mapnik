@@ -267,7 +267,6 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     // look for font registered on specific map
     if (itr != font_file_mapping.end())
     {
-        found_font_file = true;
         auto mem_font_itr = font_cache.find(itr->second.second);
         // if map has font already in memory, use it
         if (mem_font_itr != font_cache.end())
@@ -278,6 +277,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         }
         // we don't add to cache here because the map and its font_cache
         // must be immutable during rendering for predictable thread safety
+        found_font_file = true;
     }
     else
     {
@@ -285,41 +285,36 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         itr = global_font_file_mapping_.find(family_name);
         if (itr != global_font_file_mapping_.end())
         {
+            auto mem_font_itr = global_memory_fonts_.find(itr->second.second);
+            // if font already in memory, use it
+            if (mem_font_itr != global_memory_fonts_.end())
+            {
+                return library.face_from_memory(mem_font_itr->second.first.get(),
+                                                mem_font_itr->second.second,
+                                                itr->second.first);
+            }
             found_font_file = true;
         }
     }
+    // if we found file file but it is not yet in memory
     if (found_font_file)
     {
-        auto mem_font_itr = global_memory_fonts_.find(itr->second.second);
-        // if font already in memory, use it
-        if (mem_font_itr != global_memory_fonts_.end())
+        mapnik::util::file file(itr->second.second);
+        if (file.open())
         {
-            face_ptr face = library.face_from_memory(mem_font_itr->second.first.get(),
-                                                     mem_font_itr->second.second,
-                                                     itr->second.first);
-            if (face) return face;
-        }
-        else
-        {
-            // otherwise load into memory and cache globally
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
-
-            mapnik::util::file file(itr->second.second);
-            if (file.open())
+            auto result = global_memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
+            face_ptr face = library.face_from_memory(result.first->second.first.get(),
+                                                     result.first->second.second,
+                                                     itr->second.first);
+            if (!face)
             {
-                auto result = global_memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
-                face_ptr face = library.face_from_memory(result.first->second.first.get(),
-                                                         result.first->second.second,
-                                                         itr->second.first);
-                if (!face)
-                {
-                    // we can't load font, erase it.
-                    global_memory_fonts_.erase(result.first);
-                }
-                return face;
+                // we can't load font, erase it.
+                global_memory_fonts_.erase(result.first);
             }
+            return face;
         }
     }
     return face_ptr();
