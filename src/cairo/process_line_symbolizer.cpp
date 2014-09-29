@@ -36,12 +36,6 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
-                                          affine_transform_tag,
-                                          simplify_tag, smooth_tag,
-                                          offset_transform_tag,
-                                          dash_tag, stroke_tag>;
-
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
     double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
@@ -84,7 +78,13 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
         padding *= common_.scale_factor_;
         clipping_extent.pad(padding);
     }
-    vertex_converter<cairo_context,conv_types>
+    vertex_converter<cairo_context,
+                     clip_line_tag,
+                     transform_tag,
+                     affine_transform_tag,
+                     simplify_tag, smooth_tag,
+                     offset_transform_tag,
+                     dash_tag, stroke_tag>
         converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
