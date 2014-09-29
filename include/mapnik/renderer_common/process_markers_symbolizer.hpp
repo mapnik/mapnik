@@ -31,9 +31,6 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
 
-// boost
-#include <boost/mpl/vector.hpp>
-
 namespace mapnik {
 
 template <typename T0, typename T1, typename T2>
