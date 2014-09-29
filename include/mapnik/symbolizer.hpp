@@ -410,7 +410,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
         dash_array dash;
         std::vector<double> buf;
         std::string str = val.to_string();
-        if (util::parse_dasharray(str.begin(),str.end(),buf))
+        if (util::parse_dasharray(str,buf))
         {
             util::add_dashes(buf,dash);
         }

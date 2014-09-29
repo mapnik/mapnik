@@ -38,10 +38,6 @@
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// fusion
-//#include <boost/fusion/include/at_c.hpp>
-//#include <boost/fusion/container/vector.hpp>
-
 // agg
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"

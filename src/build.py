@@ -142,6 +142,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    dasharray_parser.cpp
     expression_grammar.cpp
     fs.cpp
     request.cpp
