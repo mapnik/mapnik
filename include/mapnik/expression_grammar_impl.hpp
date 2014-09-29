@@ -69,21 +69,13 @@ binary_function_types::binary_function_types()
 template <typename T0,typename T1>
 expr_node regex_match_impl::operator() (T0 & node, T1 const& pattern) const
 {
-#if defined(BOOST_REGEX_HAS_ICU)
-    return regex_match_node(node,tr_.transcode(pattern.c_str()));
-#else
-    return regex_match_node(node,pattern);
-#endif
+    return regex_match_node(tr_,node,pattern);
 }
 
 template <typename T0,typename T1,typename T2>
 expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const& format) const
 {
-#if defined(BOOST_REGEX_HAS_ICU)
-    return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
-#else
-    return regex_replace_node(node,pattern,format);
-#endif
+    return regex_replace_node(tr_,node,pattern,format);
 }
 
 template <typename Iterator>

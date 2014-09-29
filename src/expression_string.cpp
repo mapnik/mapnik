@@ -29,10 +29,6 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
-// boost
-#if defined(BOOST_REGEX_HAS_ICU)
-#include <boost/regex/icu.hpp>          // for u32regex
-#endif
 
 namespace mapnik
 {
@@ -94,37 +90,13 @@ struct expression_string : util::static_visitor<void>
     void operator() (regex_match_node const & x) const
     {
         util::apply_visitor(*this,x.expr);
-        str_ +=".match('";
-#if defined(BOOST_REGEX_HAS_ICU)
-        std::string utf8;
-        mapnik::value_unicode_string ustr = mapnik::value_unicode_string::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
-        to_utf8(ustr,utf8);
-        str_ += utf8;
-#else
-        str_ += x.pattern.str();
-#endif
-        str_ +="')";
+        str_ += x.to_string();
     }
 
     void operator() (regex_replace_node const & x) const
     {
         util::apply_visitor(*this,x.expr);
-        str_ +=".replace(";
-        str_ += "'";
-#if defined(BOOST_REGEX_HAS_ICU)
-        std::string utf8;
-        mapnik::value_unicode_string ustr = mapnik::value_unicode_string::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
-        to_utf8(ustr,utf8);
-        str_ += utf8;
-        str_ +="','";
-        to_utf8(x.format ,utf8);
-        str_ += utf8;
-#else
-        str_ += x.pattern.str();
-        str_ +="','";
-        str_ += x.format;
-#endif
-        str_ +="')";
+        str_ += x.to_string();
     }
 
     void operator() (unary_function_call const& call) const
