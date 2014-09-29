@@ -47,7 +47,7 @@ namespace mapnik
 class stroker;
 using stroker_ptr = std::shared_ptr<stroker>;
 class font_face_set;
-using face_set_ptr = std::shared_ptr<font_face_set>;
+using face_set_ptr = std::unique_ptr<font_face_set>;
 class font_face;
 using face_ptr = std::shared_ptr<font_face>;
 
