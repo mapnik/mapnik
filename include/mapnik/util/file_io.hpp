@@ -40,6 +40,7 @@ class file : public noncopyable
 {
 public:
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    using data_type = std::unique_ptr<char[]>;
     
     explicit file(std::string const& filename)
 #ifdef _WINDOWS
@@ -72,11 +73,11 @@ public:
         return size_;
     }
 
-    inline std::unique_ptr<char[]> data() const
+    inline data_type data() const
     {
         if (!size_) return nullptr;
         std::fseek(file_.get(), 0, SEEK_SET);
-        std::unique_ptr<char[]> buffer(new char[size_]);
+        data_type buffer(new char[size_]);
         std::fread(buffer.get(), size_, 1, file_.get());
         return std::move(buffer);
     }

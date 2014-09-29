@@ -365,7 +365,7 @@ face_set_ptr face_manager::get_face_set(font_set const& fset)
 {
     std::vector<std::string> const& names = fset.get_face_names();
     face_set_ptr face_set = std::make_shared<font_face_set>();
-    for (auto const& name  : names)
+    for (auto const& name : names)
     {
         face_ptr face = get_face(name);
         if (face)
@@ -384,7 +384,7 @@ face_set_ptr face_manager::get_face_set(font_set const& fset)
     return face_set;
 }
 
-face_set_ptr face_manager::get_face_set(const std::string &name, boost::optional<font_set> fset)
+face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional<font_set> fset)
 {
     if (fset && fset->size() > 0)
     {
@@ -400,6 +400,6 @@ face_set_ptr face_manager::get_face_set(const std::string &name, boost::optional
 std::mutex freetype_engine::mutex_;
 #endif
 freetype_engine::font_file_mapping_type freetype_engine::global_font_file_mapping_;
-std::map<std::string,std::pair<std::unique_ptr<char[]>,std::size_t> > freetype_engine::global_memory_fonts_;
+freetype_engine::font_memory_cache_type freetype_engine::global_memory_fonts_;
 
 }
