@@ -279,7 +279,7 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
     {
         if (std::is_same<Converter,Current>::value)
         {
-            std::size_t index = sizeof...(ConverterTypes) ;
+            constexpr std::size_t index = sizeof...(ConverterTypes) ;
             disp.vec_[index] = state;
         }
         else
@@ -291,7 +291,7 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
     template <typename Geometry>
     static void forward(Dispatcher & disp, Geometry & geom)
     {
-        std::size_t index = sizeof...(ConverterTypes);
+        constexpr std::size_t index = sizeof...(ConverterTypes);
         if (disp.vec_[index] == 1)
         {
             using conv_type = typename detail::converter_traits<Geometry,Current>::conv_type;
