@@ -60,10 +60,9 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     mapnik::geometry_container output_paths;
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::LineString);
 
-    using conv_types = boost::mpl::vector<clip_line_tag>;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::feature_impl f(ctx,0);
-    vertex_converter<output_geometry_backend,conv_types>
+    vertex_converter<output_geometry_backend,clip_line_tag>
         converter(bbox, backend, sym, t, prj_trans, tr, f, attributes(), 1.0);
 
     converter.set<clip_line_tag>();
@@ -103,10 +102,9 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     mapnik::geometry_container output_paths;
     output_geometry_backend backend(output_paths, mapnik::geometry_type::types::Polygon);
 
-    using conv_types = boost::mpl::vector<clip_poly_tag>;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::feature_impl f(ctx,0);
-    vertex_converter<output_geometry_backend, conv_types>
+    vertex_converter<output_geometry_backend, clip_poly_tag>
         converter(bbox, backend, sym, t, prj_trans, tr, f, attributes(), 1.0);
 
     converter.set<clip_poly_tag>();
