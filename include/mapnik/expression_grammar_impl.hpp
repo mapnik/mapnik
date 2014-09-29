@@ -28,6 +28,7 @@
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/function_call.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>
@@ -42,6 +43,28 @@ namespace mapnik {
 
 namespace mapnik
 {
+
+unary_function_types::unary_function_types()
+{
+    add
+        ("sin",  sin_impl())
+        ("cos",  cos_impl())
+        ("tan",  tan_impl())
+        ("atan", atan_impl())
+        ("exp",  exp_impl())
+        ("abs",  abs_impl())
+        ("length",length_impl())
+        ;
+}
+
+binary_function_types::binary_function_types()
+{
+    add
+        ("min", binary_function_impl(min_impl))
+        ("max", binary_function_impl(max_impl))
+        ("pow", binary_function_impl(pow_impl))
+        ;
+}
 
 template <typename T0,typename T1>
 expr_node regex_match_impl::operator() (T0 & node, T1 const& pattern) const

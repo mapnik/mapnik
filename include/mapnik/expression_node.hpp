@@ -27,6 +27,7 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/function_call.hpp>
 #include <mapnik/expression_node_types.hpp>
 
 // boost
@@ -122,9 +123,6 @@ struct regex_replace_node
     std::string format;
 };
 #endif
-
-using unary_function_impl = std::function<value_type(value_type const&)>;
-using binary_function_impl = std::function<value_type(value_type const&, value_type const&)>;
 
 struct unary_function_call
 {
