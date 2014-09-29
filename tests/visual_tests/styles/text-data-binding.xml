@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="l1" srs="+proj=latlong +datum=WGS84">
+        <StyleName>text</StyleName>
+        <Datasource>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="file">../data/text-data-binding.sqlite</Parameter>
+            <Parameter name="table">text_layer</Parameter>
+            <Parameter name="extent">-1,-1,1,1</Parameter>
+        </Datasource>
+    </Layer>
+    <Layer name="l2" srs="+proj=latlong +datum=WGS84">
+        <StyleName>circular</StyleName>
+        <Datasource>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="file">../data/text-data-binding.sqlite</Parameter>
+            <Parameter name="table">circular_layer</Parameter>
+            <Parameter name="extent">-1,-1,1,1</Parameter>
+        </Datasource>
+    </Layer>
+    <Style name="circular">
+        <Rule>
+            <LineSymbolizer
+                stroke-width="[double] * 2"
+                stroke="[color2]" />
+            <TextSymbolizer
+                placement="[placement]"
+                face-name="DejaVu Serif Book"
+                spacing="[double] * 2"
+                repeat-distance="[double] * 2"
+                fill="[color1]"
+                >
+                [text1]
+            </TextSymbolizer>
+            <TextSymbolizer
+                geometry-transform="scale(0.7)"
+                placement="[placement]"
+                face-name="DejaVu Sans Book"
+                spacing="[double]"
+                >
+                [text1]
+            </TextSymbolizer>
+            <LineSymbolizer
+                stroke-width="[double] * 2"
+                geometry-transform="scale(0.25) translate(300, 300)"
+                stroke="[color2]" />
+            <TextSymbolizer
+                geometry-transform="scale(0.25) translate(300, 300)"
+                size="[double] * 2"
+                placement="[placement]"
+                face-name="DejaVu Sans Book"
+                horizontal-alignment="[alignment]"
+                allow-overlap="[bool]"
+                max-char-angle-delta="[double] * 0"
+                fill="[color3]"
+                >
+                [text2]
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+    <Style name="text">
+        <Rule>
+            <TextSymbolizer
+                face-name="DejaVu Serif Book"
+                size="[double] * 1.5"
+                placement="[placement1]"
+                vertical-alignment="[alignment1]"
+                horizontal-alignment="[alignment1]"
+                margin="[double] * 5"
+                upright="[upright]"
+                >
+                <Layout wrap-before="[bool]" wrap-width="[double] * 40" justify-alignment="[alignment2]">
+                    <Format line-spacing="[double] * 3">[text1]</Format>" "
+                    <Format fill="[color1]" font-feature-settings="[features]">[text2]</Format>" "
+                    <Format halo-fill="[color2]" halo-radius="[double] * 0.8" size="[double] * 3">[text3]</Format>" "
+                    <Format face-name="DejaVu Serif Bold">[text4]</Format>" "
+                    <Format face-name="DejaVu Sans Mono Bold" character-spacing="[double] * 0.8">[text5]</Format>" "
+                    <Format>[text6]</Format>" "
+                    <Format>[text7]</Format>" "
+                    <Format>[text8]</Format>" "
+                    <Format>[text9]</Format>
+                </Layout>
+                <Layout dy="[double] * 5" dx="[double] * 2" rotate-displacement="[bool]" orientation="[double] * 1.25">
+                    <Format>[text10]</Format>" "
+                    <Format face-name="DejaVu Sans Book">[text11]</Format>" "
+                    <Format text-transform="[text_transform]">[text12]</Format>
+                </Layout>
+                <Layout dy="[double] * 15" dx="[double] * -5" wrap-width="[double]" wrap-character="[wrap_char]">
+                    <Format>[text13]</Format>" "
+                </Layout>
+                <Layout dy="[double] * 15" dx="[double] * 5" wrap-width="[double]" wrap-character="[wrap_char]" repeat-wrap-character="[bool]">
+                    <Format>[text13]</Format>" "
+                </Layout>
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+</Map>
