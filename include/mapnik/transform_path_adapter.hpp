@@ -24,6 +24,10 @@
 #define MAPNIK_TRANSFORM_PATH_ADAPTER_HPP
 
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/vertex.hpp>
+#include <mapnik/config.hpp>
+
+#include <cstddef>
 
 namespace mapnik  {
 
