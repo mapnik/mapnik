@@ -164,7 +164,8 @@ void swap (Map & lhs, Map & rhs)
     std::swap(lhs.extra_params_, rhs.extra_params_);
     std::swap(lhs.font_directory_,rhs.font_directory_);
     std::swap(lhs.font_file_mapping_,rhs.font_file_mapping_);
-    std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
+    // on assignment discard memory cache
+    //std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
 }
 
 bool Map::operator==(Map const& rhs) const
@@ -186,8 +187,8 @@ bool Map::operator==(Map const& rhs) const
         (base_path_ == rhs.base_path_) &&
         (extra_params_ == rhs.extra_params_) &&
         (font_directory_ == rhs.font_directory_) &&
-        (font_file_mapping_ == rhs.font_file_mapping_) &&
-        (font_memory_cache_ == rhs.font_memory_cache_);
+        (font_file_mapping_ == rhs.font_file_mapping_);
+        // Note: we don't care about font_memory_cache in comparison
 }
 
 std::map<std::string,feature_type_style> const& Map::styles() const
