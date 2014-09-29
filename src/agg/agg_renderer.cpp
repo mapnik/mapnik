@@ -87,7 +87,7 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, attributes c
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
-      common_(req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
+      common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
     setup(m);
 }

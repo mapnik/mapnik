@@ -71,7 +71,7 @@ grid_renderer<T>::grid_renderer(Map const& m, request const& req, attributes con
     : feature_style_processor<grid_renderer>(m, scale_factor),
       pixmap_(pixmap),
       ras_ptr(new grid_rasterizer),
-      common_(req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
+      common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
     setup(m);
 }

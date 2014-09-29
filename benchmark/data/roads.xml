@@ -8,68 +8,78 @@
 <Style name="marking" filter-mode="first">
   <Rule>
     <Filter>([class] = 'railways')</Filter>
-    <LineSymbolizer stroke="#ffffff" stroke-width="1.8" stroke-dasharray="5, 5" />
+    <LineSymbolizer stroke="#ffffff" stroke-width="1.8" stroke-dasharray="5, 5" clip="false" />
   </Rule>
 </Style>
 <Style name="fill" filter-mode="first">
   <Rule>
     <Filter>([class] = 'minorroads')</Filter>
-    <LineSymbolizer stroke-width="2.5" stroke="#ffffff" stroke-linecap="round" />
+    <LineSymbolizer stroke-width="2.5" stroke="#ffffff" stroke-linecap="round" clip="false" />
   </Rule>
   <Rule>
     <Filter>([class] = 'mainroads')</Filter>
-    <LineSymbolizer stroke-width="4" stroke="#ff9999" stroke-linecap="round" />
+    <LineSymbolizer stroke-width="4" stroke="#ff9999" stroke-linecap="round" clip="false" />
   </Rule>
   <Rule>
     <Filter>([class] = 'motorways')</Filter>
-    <LineSymbolizer stroke-width="6" stroke="#ff6666" stroke-linecap="round" />
+    <LineSymbolizer stroke-width="6" stroke="#ff6666" stroke-linecap="round" clip="false" />
   </Rule>
   <Rule>
     <Filter>([class] = 'railways')</Filter>
-    <LineSymbolizer stroke-width="3" stroke="#333333" stroke-linecap="round" />
+    <LineSymbolizer stroke-width="3" stroke="#333333" stroke-linecap="round" clip="false" />
   </Rule>
 </Style>
 <Style name="bridge" filter-mode="first">
   <Rule>
     <Filter>([class] = 'railways') and ([bridge] = 1)</Filter>
-    <LineSymbolizer stroke-width="6" stroke="#ffffff" />
+    <LineSymbolizer stroke-width="6" stroke="#ffffff" clip="false" />
   </Rule>
 </Style>
 <Style name="casing" filter-mode="first">
   <Rule>
     <Filter>([class] = 'railways') and ([bridge] = 1)</Filter>
-    <LineSymbolizer stroke-width="8" stroke="#333333" />
+    <LineSymbolizer stroke-width="8" stroke="#333333" clip="false" />
   </Rule>
   <Rule>
     <Filter>([class] = 'minorroads')</Filter>
-    <LineSymbolizer stroke-width="3" stroke="#a69269" />
+    <LineSymbolizer stroke-width="3" stroke="#a69269" clip="false" />
   </Rule>
   <Rule>
     <Filter>([class] = 'mainroads')</Filter>
-    <LineSymbolizer stroke-width="5" stroke="#ff0000" />
+    <LineSymbolizer stroke-width="5" stroke="#ff0000" clip="false" />
   </Rule>
   <Rule>
     <Filter>([class] = 'motorways')</Filter>
-    <LineSymbolizer stroke-width="8" stroke="#990000" />
+    <LineSymbolizer stroke-width="8" stroke="#990000" clip="false" />
   </Rule>
 </Style>
 <Style name="labels">
   <Rule>
-    <TextSymbolizer halo-rasterizer="fast" placement="line" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true">[type]</TextSymbolizer>
+    <TextSymbolizer
+       halo-rasterizer="fast"
+       placement="line"
+       face-name="DejaVu Sans Book"
+       halo-radius="2"
+       allow-overlap="false"
+       clip="false"
+       >[type]</TextSymbolizer>
   </Rule>
 </Style>
 <Layer name="layer"
   srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+<!--
     <StyleName>casing</StyleName>
     <StyleName>bridge</StyleName>
     <StyleName>fill</StyleName>
     <StyleName>marking</StyleName>
+-->
     <StyleName>labels</StyleName>
     <Datasource>
        <!--
          ogr2ogr -f CSV tests/visual_tests/data/roads.csv -lco GEOMETRY=AS_WKT tests/visual_tests/data/grouped-rendering.sqlite roads -sql "SELECT fid,geometry, type, tunnel, bridge, oneway, class, z_order, CAST((z_order / 10.0) AS INTEGER) AS z FROM roads ORDER BY z_order"
         -->
        <Parameter name="file">./roads.csv</Parameter>
+       <Parameter name="extent">1477001.12245,6890242.37746,1480004.49012,6892244.62256</Parameter>
        <Parameter name="type">csv</Parameter>
     </Datasource>
   </Layer>

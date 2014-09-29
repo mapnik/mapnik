@@ -47,7 +47,7 @@ struct renderer_common : private mapnik::noncopyable
     renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor,
                        std::shared_ptr<label_collision_detector4> detector);
-    renderer_common(request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y,
+    renderer_common(Map const &m, request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor);
 
     unsigned width_;
@@ -63,7 +63,7 @@ struct renderer_common : private mapnik::noncopyable
     std::shared_ptr<label_collision_detector4> detector_;
 
 private:
-    renderer_common(unsigned width, unsigned height, double scale_factor,
+    renderer_common(Map const &m, unsigned width, unsigned height, double scale_factor,
                     attributes const& vars, view_transform &&t, std::shared_ptr<label_collision_detector4> detector);
 };
 

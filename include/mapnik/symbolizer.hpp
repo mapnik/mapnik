@@ -139,7 +139,7 @@ struct MAPNIK_DECL symbolizer_base
 
 inline bool is_expression(symbolizer_base::value_type const& val)
 {
-    return (val.get_type_index() == 6);
+    return val.is<expression_ptr>();
 }
 
 // symbolizer properties target types

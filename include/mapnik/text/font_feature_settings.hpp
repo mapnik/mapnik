@@ -60,7 +60,7 @@ private:
 using font_feature_settings_ptr = std::shared_ptr<font_feature_settings>;
 
 constexpr unsigned int font_feature_range_global_start = 0u;
-constexpr unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
+static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
 
 constexpr hb_feature_t font_feature_liga_off = { HB_TAG('l', 'i', 'g', 'a'), 0, font_feature_range_global_start, font_feature_range_global_end };
 
