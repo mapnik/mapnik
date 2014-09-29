@@ -49,10 +49,8 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
-    using vertex_converter_type = vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
-                                                   view_transform, proj_transform, agg::trans_affine,
-                                                   conv_types, feature_impl>;
+    //using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type = vertex_converter<rasterizer,clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
 
     ras_ptr->reset();
     double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);

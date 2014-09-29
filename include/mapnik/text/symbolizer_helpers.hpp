@@ -56,10 +56,7 @@ struct placement_finder_adapter
 
 };
 
-using conv_types = boost::mpl::vector<clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
-using vertex_converter_type = vertex_converter<box2d<double>, placement_finder_adapter<placement_finder> , symbolizer_base,
-                                               view_transform, proj_transform, agg::trans_affine,
-                                               conv_types, feature_impl>;
+using vertex_converter_type = vertex_converter<placement_finder_adapter<placement_finder>,clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 
 class base_symbolizer_helper
 {

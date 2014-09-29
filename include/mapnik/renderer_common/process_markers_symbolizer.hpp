@@ -50,12 +50,6 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     using renderer_context_type = T2;
 
     using svg_attribute_type = agg::pod_bvector<path_attributes>;
-    using conv_types = boost::mpl::vector<clip_line_tag,
-                                          clip_poly_tag,
-                                          transform_tag,
-                                          affine_transform_tag,
-                                          simplify_tag, smooth_tag,
-                                          offset_transform_tag>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
@@ -105,8 +99,12 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              snap_to_pixels,
                                                              renderer_context);
 
-                    vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
-                                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                    vertex_converter<vector_dispatch_type,clip_line_tag,
+                                     clip_poly_tag,
+                                     transform_tag,
+                                     affine_transform_tag,
+                                     simplify_tag, smooth_tag,
+                                     offset_transform_tag>
                         converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
@@ -145,8 +143,12 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              snap_to_pixels,
                                                              renderer_context);
 
-                    vertex_converter<box2d<double>, vector_dispatch_type, markers_symbolizer,
-                                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                    vertex_converter<vector_dispatch_type,clip_line_tag,
+                                     clip_poly_tag,
+                                     transform_tag,
+                                     affine_transform_tag,
+                                     simplify_tag, smooth_tag,
+                                     offset_transform_tag>
                         converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
@@ -184,8 +186,12 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                          common.vars_,
                                                          renderer_context);
 
-                vertex_converter<box2d<double>, raster_dispatch_type, markers_symbolizer,
-                                 view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+                vertex_converter<raster_dispatch_type,clip_line_tag,
+                                 clip_poly_tag,
+                                 transform_tag,
+                                 affine_transform_tag,
+                                 simplify_tag, smooth_tag,
+                                 offset_transform_tag>
                     converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)

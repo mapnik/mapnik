@@ -38,11 +38,7 @@ void cairo_renderer<T>::process(polygon_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
-    using vertex_converter_type = vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
-                                                   view_transform, proj_transform, agg::trans_affine,
-                                                   conv_types, feature_impl>;
-
+    using vertex_converter_type = vertex_converter<cairo_context,clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     context_.set_operator(comp_op);
