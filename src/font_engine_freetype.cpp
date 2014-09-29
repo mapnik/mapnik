@@ -264,23 +264,24 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
 {
     bool found_font_file = false;
     font_file_mapping_type::const_iterator itr = font_file_mapping.find(family_name);
+    // look for font registered on specific map
     if (itr != font_file_mapping.end())
     {
         found_font_file = true;
         auto mem_font_itr = font_cache.find(itr->second.second);
-        if (mem_font_itr != font_cache.end()) // memory font
+        // if map has font already in memory, use it
+        if (mem_font_itr != font_cache.end())
         {
-            face_ptr face = library.face_from_memory(mem_font_itr->second.first.get(),
-                                                     mem_font_itr->second.second,
-                                                     itr->second.first);
-            if (face)
-            {
-                return face;
-            }
+            return library.face_from_memory(mem_font_itr->second.first.get(),
+                                            mem_font_itr->second.second,
+                                            itr->second.first);
         }
+        // we don't add to cache here because the map and its font_cache
+        // must be immutable during rendering for predictable thread safety
     }
     else
     {
+        // otherwise search global registry
         itr = global_font_file_mapping_.find(family_name);
         if (itr != global_font_file_mapping_.end())
         {
@@ -290,7 +291,8 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     if (found_font_file)
     {
         auto mem_font_itr = global_memory_fonts_.find(itr->second.second);
-        if (mem_font_itr != global_memory_fonts_.end()) // memory font
+        // if font already in memory, use it
+        if (mem_font_itr != global_memory_fonts_.end())
         {
             face_ptr face = library.face_from_memory(mem_font_itr->second.first.get(),
                                                      mem_font_itr->second.second,
@@ -299,7 +301,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         }
         else
         {
-            // load font into memory
+            // otherwise load into memory and cache globally
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
