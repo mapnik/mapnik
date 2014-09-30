@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_container.hpp>
 #include <mapnik/vertex.hpp>
 
 // stl
@@ -187,7 +188,7 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
 
     using point_type = std::pair<double,double>;
     using linear_ring = std::vector<point_type>;
-    boost::ptr_vector<linear_ring> rings;
+    std::vector<linear_ring> rings;
 
     double x = 0;
     double y = 0;
@@ -197,8 +198,10 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
         unsigned command = g.vertex(i,&x,&y);
         if (command == SEG_MOVETO)
         {
-            rings.push_back(new linear_ring); // start new loop
-            rings.back().emplace_back(x,y);
+            linear_ring ring;
+            ring.reserve(1);
+            ring.emplace_back(x,y);
+            rings.push_back(std::move(ring)); // start new loop
             size += 4; // num_points
             size += 2 * 8; // point
         }

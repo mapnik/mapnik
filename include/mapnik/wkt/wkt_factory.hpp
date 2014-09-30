@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_container.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
 
 // stl
