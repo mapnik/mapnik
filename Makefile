@@ -18,7 +18,8 @@ mapnik:
 clean:
 	@$(PYTHON) scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
-	@if test -e "config.log"; then rm  "config.log"; fi
+	@if test -e "config.log"; then rm "config.log"; fi
+	@if test -e "config.cache"; then rm "config.cache"; fi
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@find ./ -name "*.os" -exec rm {} \;
@@ -29,7 +30,6 @@ clean:
 	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
 
 distclean:
-	@if test -e "config.cache"; then rm "config.cache"; fi
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
 
 reset: distclean
