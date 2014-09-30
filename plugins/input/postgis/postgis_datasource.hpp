@@ -104,8 +104,10 @@ private:
     double grid_geometries_max_resolution_;
     bool simplify_geometries_;
     double simplify_geometries_max_resolution_;
+    double simplify_geometries_factor_;
     bool clip_geometries_;
     double clip_geometries_min_resolution_;
+    double clip_geometries_factor_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;

@@ -71,9 +71,17 @@ postgis_datasource::postgis_datasource(parameters const& params)
       grid_geometries_(*params_.get<mapnik::boolean>("grid_geometries", false)),
       grid_geometries_max_resolution_(*params.get<mapnik::value_double>("grid_geometries_max_resolution", FMAX)),
       simplify_geometries_(*params_.get<mapnik::boolean>("simplify_geometries", false)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
       simplify_geometries_max_resolution_(*params.get<mapnik::value_double>("simplify_geometries_max_resolution", FMAX)),
+      simplify_geometries_factor_(*params.get<mapnik::value_double>("simplify_geometries_factor", 1.0/20)),
       clip_geometries_(*params_.get<mapnik::boolean>("clip_geometries", false)),
       clip_geometries_min_resolution_(*params.get<mapnik::value_double>("clip_geometries_min_resolution", 0)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
+      clip_geometries_factor_(*params.get<mapnik::value_double>("clip_geometries_factor", 1.0/20)),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -774,18 +782,12 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         if (do_grid) {
-          // 1/20 of pixel seems to be a good compromise to avoid
-          // drop of collapsed polygons.
-          // See https://github.com/mapnik/mapnik/issues/1639
-          const double tolerance = px_min_size / 20.0;
+          const double tolerance = px_min_size * clip_geometries_factor_;
           s << ", " << tolerance << ")";
         }
 
         if (do_simp) {
-          // 1/20 of pixel seems to be a good compromise to avoid
-          // drop of collapsed polygons.
-          // See https://github.com/mapnik/mapnik/issues/1639
-          const double tolerance = px_min_size / 20.0;
+          const double tolerance = px_min_size * simplify_geometries_factor_;
           s << ", " << tolerance << ")";
         }
 
