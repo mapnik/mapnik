@@ -24,6 +24,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/label_collision_detector.hpp>

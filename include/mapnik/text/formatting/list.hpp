@@ -24,12 +24,17 @@
 
 // mapnik
 #include <mapnik/text/formatting/base.hpp>
-#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
 
+// stl
+#include <vector>
+
 namespace mapnik {
+
+class feature_impl;
+
 namespace formatting {
 class MAPNIK_DECL list_node: public node {
 public:

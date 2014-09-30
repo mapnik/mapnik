@@ -24,7 +24,6 @@
 //mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/rotation.hpp>
 #include <mapnik/marker_cache.hpp>
 

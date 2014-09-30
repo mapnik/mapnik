@@ -27,9 +27,6 @@
 #include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
 
-// boost
-#include <boost/optional/optional.hpp>
-
 namespace mapnik
 {
 

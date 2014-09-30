@@ -34,7 +34,8 @@
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 
 // stl
 #include <memory>

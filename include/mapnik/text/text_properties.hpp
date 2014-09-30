@@ -27,21 +27,29 @@
 #include <mapnik/color.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // stl
 #include <map>
 #include <functional>
+
 // boost
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+
+class feature_impl;
+class text_layout;
+
+namespace detail {
 
 struct evaluated_format_properties
 {
@@ -133,8 +141,6 @@ struct MAPNIK_DECL text_layout_properties
     std::function<pixel_position(double,double)> displacement_evaluator_ =
         [](double dx, double dy) { return pixel_position(dx,dy);};
 };
-
-class text_layout;
 
 struct text_properties_expressions
 {

@@ -437,7 +437,7 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
         boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
         if (enum_str)
         {
-            boost::optional<T> enum_val = detail::enum_traits<T>::from_string(*enum_str);
+            boost::optional<value_type> enum_val = detail::enum_traits<value_type>::from_string(*enum_str);
             if (enum_val)
             {
                 put(sym, key, *enum_val);
@@ -451,7 +451,7 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                     auto result = pre_evaluate_expression<value>(*val);
                     if (std::get<1>(result))
                     {
-                        boost::optional<T> enum_val = detail::enum_traits<T>::from_string(std::get<0>(result).to_string());
+                        boost::optional<value_type> enum_val = detail::enum_traits<value_type>::from_string(std::get<0>(result).to_string());
                         if (enum_val)
                         {
                             put(sym, key, *enum_val);

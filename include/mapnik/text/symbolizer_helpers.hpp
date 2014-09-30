@@ -23,16 +23,15 @@
 #define SYMBOLIZER_HELPERS_HPP
 
 //mapnik
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
 #include <mapnik/text/placement_finder.hpp>
-#include <mapnik/proj_transform.hpp>
-#include <mapnik/view_transform.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 namespace mapnik {
+
+class feature_impl;
+class proj_transform;
+class view_transform;
+struct symbolizer_base;
 
 template <typename T>
 struct placement_finder_adapter

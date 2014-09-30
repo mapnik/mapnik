@@ -25,6 +25,7 @@
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>

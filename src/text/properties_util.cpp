@@ -22,6 +22,8 @@
 
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/ptree_helpers.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
 
 namespace mapnik { namespace detail {

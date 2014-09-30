@@ -25,8 +25,12 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/expression_node_types.hpp>
+#include <mapnik/symbolizer_base.hpp>
 #include <mapnik/expression.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace mapnik
 {

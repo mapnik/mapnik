@@ -29,6 +29,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/feature.hpp>
 
 namespace mapnik
 {

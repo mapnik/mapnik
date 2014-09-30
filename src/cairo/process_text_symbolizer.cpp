@@ -26,7 +26,7 @@
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
-
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik
 {

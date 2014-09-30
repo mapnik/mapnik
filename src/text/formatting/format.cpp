@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/text/formatting/format.hpp>
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
