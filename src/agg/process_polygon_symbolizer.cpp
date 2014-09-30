@@ -49,7 +49,6 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    //using conv_types = boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
     using vertex_converter_type = vertex_converter<rasterizer,clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
 
     ras_ptr->reset();

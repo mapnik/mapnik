@@ -116,11 +116,6 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
-    //using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
-    //                                      affine_transform_tag,
-    //                                      simplify_tag, smooth_tag,
-    //                                      offset_transform_tag,
-    //                                      dash_tag, stroke_tag>;
 
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
