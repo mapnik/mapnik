@@ -333,7 +333,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
     std::size_t geom_count = feature.paths().size();
     if (geom_count == 1)
     {
-        converter.apply(feature.paths()[0]);
+        converter.apply(const_cast<geometry_type&>(feature.paths()[0]));
     }
     else if (geom_count > 1)
     {
@@ -372,7 +372,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             }
             if (largest)
             {
-                converter.apply(*largest);
+                converter.apply(const_cast<geometry_type&>(*largest));
             }
         }
         else
@@ -383,7 +383,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             }
             for (geometry_type const& path : feature.paths())
             {
-                converter.apply(path);
+                converter.apply(const_cast<geometry_type&>(path));
             }
         }
     }
