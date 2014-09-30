@@ -51,6 +51,11 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <map>
+#include <tuple>
+
+// boost
+#include <boost/optional.hpp>
 
 namespace agg { struct trans_affine; }
 
