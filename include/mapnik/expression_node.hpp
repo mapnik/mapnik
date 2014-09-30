@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/expression_node_types.hpp>

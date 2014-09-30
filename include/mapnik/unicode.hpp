@@ -26,14 +26,13 @@
 //mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
-
-// icu
 #include <mapnik/value_types.hpp>
-#include <unicode/ucnv.h>
 
 // stl
 #include <cstdint>
 #include <string>
+
+struct UConverter;
 
 namespace mapnik {
 
@@ -47,15 +46,6 @@ private:
     bool ok_;
     UConverter * conv_;
 };
-}
-
-namespace U_ICU_NAMESPACE {
-
-inline std::size_t hash_value(mapnik::value_unicode_string const& val)
-{
-    return val.hashCode();
-}
-
 }
 
 #endif // MAPNIK_UNICODE_HPP

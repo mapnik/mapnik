@@ -28,6 +28,9 @@
 #include <cstdlib>
 #include <string>
 
+// icu
+#include <unicode/ucnv.h>
+
 namespace mapnik {
 
 transcoder::transcoder (std::string const& encoding)

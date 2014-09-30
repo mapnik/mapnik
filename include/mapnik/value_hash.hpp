@@ -26,9 +26,12 @@
 // mapnik
 #include <mapnik/util/variant.hpp>
 #include <mapnik/value_types.hpp>
-#include <mapnik/unicode.hpp>
+
 // stl
 #include <functional>
+
+// icu
+#include <unicode/unistr.h>
 
 namespace mapnik { namespace detail {
 
@@ -48,7 +51,7 @@ struct value_hasher: public util::static_visitor<std::size_t>
 
     std::size_t operator() (value_unicode_string const& val) const
     {
-        return hash_value(val);
+        return val.hashCode();
     }
 
     template <class T>
