@@ -51,7 +51,6 @@
 
 namespace mapnik {
 
-class text_path;
 template <typename T> class box2d;
 
 using ErrorStatus = cairo_status_t;
