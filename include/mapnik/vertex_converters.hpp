@@ -46,6 +46,7 @@
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/geometry.hpp>
 
 // agg
 #include "agg_conv_clip_polygon.h"
@@ -358,10 +359,8 @@ struct vertex_converter : private mapnik::noncopyable
                           boost::cref(affine_trans),
                           scale_factor)) {}
 
-    template <typename Geometry>
-    void apply(Geometry & geom)
+    void apply(geometry_type & geom)
     {
-        typedef Geometry geometry_type;
         disp_.template apply<geometry_type>(geom);
     }
 
