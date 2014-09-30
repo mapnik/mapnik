@@ -26,7 +26,6 @@
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
@@ -45,8 +44,6 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     using vector_dispatch_type = T0;
     using raster_dispatch_type = T1;
     using renderer_context_type = T2;
-
-    using svg_attribute_type = agg::pod_bvector<path_attributes>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
@@ -96,13 +93,13 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              snap_to_pixels,
                                                              renderer_context);
 
-                    vertex_converter<vector_dispatch_type,clip_line_tag,
-                                     clip_poly_tag,
-                                     transform_tag,
-                                     affine_transform_tag,
-                                     simplify_tag, smooth_tag,
-                                     offset_transform_tag>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
+                    using vertex_converter_type = vertex_converter<vector_dispatch_type,clip_line_tag,
+                                                  clip_poly_tag,
+                                                  transform_tag,
+                                                  affine_transform_tag,
+                                                  simplify_tag, smooth_tag,
+                                                  offset_transform_tag>;
+                    vertex_converter_type converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -140,13 +137,13 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                              snap_to_pixels,
                                                              renderer_context);
 
-                    vertex_converter<vector_dispatch_type,clip_line_tag,
-                                     clip_poly_tag,
-                                     transform_tag,
-                                     affine_transform_tag,
-                                     simplify_tag, smooth_tag,
-                                     offset_transform_tag>
-                        converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
+                    using vertex_converter_type = vertex_converter<vector_dispatch_type,clip_line_tag,
+                                                  clip_poly_tag,
+                                                  transform_tag,
+                                                  affine_transform_tag,
+                                                  simplify_tag, smooth_tag,
+                                                  offset_transform_tag>;
+                    vertex_converter_type converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -183,13 +180,13 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                          common.vars_,
                                                          renderer_context);
 
-                vertex_converter<raster_dispatch_type,clip_line_tag,
-                                 clip_poly_tag,
-                                 transform_tag,
-                                 affine_transform_tag,
-                                 simplify_tag, smooth_tag,
-                                 offset_transform_tag>
-                    converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
+                using vertex_converter_type = vertex_converter<raster_dispatch_type,clip_line_tag,
+                                              clip_poly_tag,
+                                              transform_tag,
+                                              affine_transform_tag,
+                                              simplify_tag, smooth_tag,
+                                              offset_transform_tag>;
+                vertex_converter_type converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
 
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {

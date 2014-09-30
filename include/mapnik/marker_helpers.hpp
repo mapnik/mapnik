@@ -60,10 +60,13 @@
 // stl
 #include <memory>
 #include <type_traits> // remove_reference
+#include <cmath>
 
 namespace mapnik {
 
 struct clip_poly_tag;
+
+using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
 template <typename SvgRenderer, typename Detector, typename RendererContext>
 struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
@@ -80,7 +83,7 @@ struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
                                        attribute_source_type const& attrs,
                                        box2d<double> const& bbox,
                                        agg::trans_affine const& marker_trans,
-                                       markers_symbolizer const& sym,
+                                       symbolizer_base const& sym,
                                        Detector & detector,
                                        double scale_factor,
                                        feature_impl & feature,
@@ -145,7 +148,7 @@ private:
     RasterizerType & ras_;
     box2d<double> const& bbox_;
     agg::trans_affine const& marker_trans_;
-    markers_symbolizer const& sym_;
+    symbolizer_base const& sym_;
     Detector & detector_;
     feature_impl & feature_;
     attributes const& vars_;
@@ -168,7 +171,7 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
 
     raster_markers_rasterizer_dispatch(image_data_32 const& src,
                                        agg::trans_affine const& marker_trans,
-                                       markers_symbolizer const& sym,
+                                       symbolizer_base const& sym,
                                        Detector & detector,
                                        double scale_factor,
                                        feature_impl & feature,
@@ -299,7 +302,7 @@ private:
     RasterizerType & ras_;
     image_data_32 const& src_;
     agg::trans_affine const& marker_trans_;
-    markers_symbolizer const& sym_;
+    symbolizer_base const& sym_;
     Detector & detector_;
     feature_impl & feature_;
     attributes const& vars_;
@@ -308,132 +311,24 @@ private:
 };
 
 
-template <typename T>
-void build_ellipse(T const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
-{
-    double width = 0.0;
-    double height = 0.0;
-    if (has_key<double>(sym,keys::width) && has_key<double>(sym,keys::height))
-    {
-        width = get<double>(sym, keys::width, feature, vars, 0.0);
-        height = get<double>(sym, keys::height, feature, vars, 0.0);
-    }
-    else if (has_key<double>(sym,keys::width))
-    {
-        width = height = get<double>(sym, keys::width, feature, vars, 0.0);
-    }
-    else if (has_key<double>(sym,keys::height))
-    {
-        width = height = get<double>(sym, keys::height, feature, vars, 0.0);
-    }
-    svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
-    styled_svg.push_attr();
-    styled_svg.begin_path();
-    agg::ellipse c(0, 0, width/2.0, height/2.0);
-    styled_svg.storage().concat_path(c);
-    styled_svg.end_path();
-    styled_svg.pop_attr();
-    double lox,loy,hix,hiy;
-    styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
-    styled_svg.set_dimensions(width,height);
-    marker_ellipse.set_dimensions(width,height);
-    marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
-}
+void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path);
 
-template <typename Attr>
-bool push_explicit_style(Attr const& src, Attr & dst,
-                         markers_symbolizer const& sym,
+bool push_explicit_style(svg_attribute_type const& src,
+                         svg_attribute_type & dst,
+                         symbolizer_base const& sym,
                          feature_impl & feature,
-                         attributes const& vars)
-{
-    auto fill_color = get_optional<color>(sym, keys::fill, feature, vars);
-    auto fill_opacity = get_optional<double>(sym, keys::fill_opacity, feature, vars);
-    auto stroke_color = get_optional<color>(sym, keys::stroke, feature, vars);
-    auto stroke_width = get_optional<double>(sym, keys::stroke_width, feature, vars);
-    auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity, feature, vars);
-    if (fill_color ||
-        fill_opacity ||
-        stroke_color ||
-        stroke_width ||
-        stroke_opacity)
-    {
-        bool success = false;
-        for(unsigned i = 0; i < src.size(); ++i)
-        {
-            success = true;
-            dst.push_back(src[i]);
-            mapnik::svg::path_attributes & attr = dst.last();
-            if (attr.stroke_flag)
-            {
-                if (stroke_width)
-                {
-                    attr.stroke_width = *stroke_width;
-                }
-                if (stroke_color)
-                {
-                    color const& s_color = *stroke_color;
-                    attr.stroke_color = agg::rgba(s_color.red()/255.0,
-                                                  s_color.green()/255.0,
-                                                  s_color.blue()/255.0,
-                                                  s_color.alpha()/255.0);
-                }
-                if (stroke_opacity)
-                {
-                    attr.stroke_opacity = *stroke_opacity;
-                }
-            }
-            if (attr.fill_flag)
-            {
-                if (fill_color)
-                {
-                    color const& f_color = *fill_color;
-                    attr.fill_color = agg::rgba(f_color.red()/255.0,
-                                                f_color.green()/255.0,
-                                                f_color.blue()/255.0,
-                                                f_color.alpha()/255.0);
-                }
-                if (fill_opacity)
-                {
-                    attr.fill_opacity = *fill_opacity;
-                }
-            }
-        }
-        return success;
-    }
-    return false;
-}
+                         attributes const& vars);
 
-template <typename T>
 void setup_transform_scaling(agg::trans_affine & tr,
                              double svg_width,
                              double svg_height,
                              mapnik::feature_impl & feature,
                              attributes const& vars,
-                             T const& sym)
-{
-    double width = get<double>(sym, keys::width, feature, vars, 0.0);
-    double height = get<double>(sym, keys::height, feature, vars, 0.0);
-    if (width > 0 && height > 0)
-    {
-        double sx = width/svg_width;
-        double sy = height/svg_height;
-        tr *= agg::trans_affine_scaling(sx,sy);
-    }
-    else if (width > 0)
-    {
-        double sx = width/svg_width;
-        tr *= agg::trans_affine_scaling(sx);
-    }
-    else if (height > 0)
-    {
-        double sy = height/svg_height;
-        tr *= agg::trans_affine_scaling(sy);
-    }
-}
+                             symbolizer_base const& sym);
 
 // Apply markers to a feature with multiple geometries
 template <typename Converter>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, markers_symbolizer const& sym)
+void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, symbolizer_base const& sym)
 {
     std::size_t geom_count = feature.paths().size();
     if (geom_count == 1)
