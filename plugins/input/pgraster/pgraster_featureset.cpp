@@ -41,7 +41,6 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/global.hpp> // for int2net
-#include <boost/scoped_array.hpp>
 
 // stl
 #include <sstream>
