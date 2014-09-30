@@ -37,7 +37,7 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
-
+#include <mapnik/geometry.hpp>
 // agg
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"
@@ -390,10 +390,9 @@ struct vertex_converter : private mapnik::noncopyable
                      double scale_factor)
         : disp_(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor) {}
 
-    template <typename Geometry>
-    void apply(Geometry & geom)
+    void apply(geometry_type & geom)
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<Geometry>(disp_, geom);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<geometry_type>(disp_, geom);
     }
 
     template <typename Converter>
