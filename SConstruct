@@ -501,7 +501,8 @@ elif HELP_REQUESTED:
 
 # need no-op for clean on fresh checkout
 # https://github.com/mapnik/mapnik/issues/2112
-if not os.path.exists(SCONS_LOCAL_LOG) and ('-c' in command_line_args or '--clean' in command_line_args):
+if not os.path.exists(SCONS_LOCAL_LOG) and not os.path.exists(SCONS_CONFIGURE_CACHE) \
+  and ('-c' in command_line_args or '--clean' in command_line_args):
     print 'all good: nothing to clean, but you might want to run "make distclean"'
     Exit(0)
 
