@@ -26,9 +26,15 @@
 
 #include <string>
 #include <boost/algorithm/string.hpp>
+#include <cstdio>
 
 namespace csv_utils
 {
+    static inline bool is_likely_number(std::string const& value)
+    {
+        return( strspn( value.c_str(), "e-.+0123456789" ) == value.size() );
+    }
+
     static inline void fix_json_quoting(std::string & csv_line)
     {
         std::string wrapping_char;
