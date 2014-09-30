@@ -81,7 +81,7 @@ int main (int argc, char ** argv )
         while(f)
         {
             std::cerr << *f << std::endl;
-            boost::ptr_vector<mapnik::geometry_type> & paths = f->paths();
+            mapnik::geometry_container const& paths = f->paths();
             for (mapnik::geometry_type const& geom : paths)
             {
                 // NDR

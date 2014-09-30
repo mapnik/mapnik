@@ -53,7 +53,6 @@ porting notes -->
 
 #include <mapnik/debug.hpp>
 #include <mapnik/geom_util.hpp>
-#include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>

@@ -30,9 +30,6 @@
 // boost
 #include <boost/operators.hpp>
 
-// stl
-#include <iomanip>
-
 // agg
 // forward declare so that apps using mapnik do not need agg headers
 namespace agg {
@@ -105,6 +102,7 @@ public:
     bool from_string(std::string const& str);
     bool valid() const;
     void move(T x, T y);
+    std::string to_string() const;
 
     // define some operators
     box2d_type& operator+=(box2d_type const& other);
@@ -124,13 +122,7 @@ inline std::basic_ostream<charT,traits>&
 operator << (std::basic_ostream<charT,traits>& out,
              const box2d<T>& e)
 {
-    std::basic_ostringstream<charT,traits> s;
-    s.copyfmt(out);
-    s.width(0);
-    s << "box2d(" << std::fixed << std::setprecision(16)
-      << e.minx() << ',' << e.miny() << ','
-      << e.maxx() << ',' << e.maxy() << ')';
-    out << s.str();
+    out << e.to_string();
     return out;
 }
 }

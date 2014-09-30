@@ -24,28 +24,104 @@
 #define MAPNIK_FUNCTION_CALL_HPP
 
 #include <mapnik/value.hpp>
-#include <mapnik/expression_node.hpp>
 #include <functional>
-#include <boost/spirit/include/qi_symbols.hpp>
+#include <algorithm>
+#include <cmath>
 
 namespace mapnik {
 
 using value_type = mapnik::value;
-namespace qi = boost::spirit::qi;
 
-struct unary_function_types : qi::symbols<char, unary_function_impl>
-{
-    unary_function_types();
-};
-
-struct binary_function_types : qi::symbols<char, binary_function_impl>
-{
-    binary_function_types();
-};
+using unary_function_impl = std::function<value_type(value_type const&)>;
+using binary_function_impl = std::function<value_type(value_type const&, value_type const&)>;
 
 char const* unary_function_name(unary_function_impl const& fun);
 char const* binary_function_name(binary_function_impl const& fun);
 
+// functions
+// exp
+struct exp_impl
+{
+    //using type = T;
+    value_type operator() (value_type const& val) const
+    {
+        return std::exp(val.to_double());
+    }
+
+};
+
+// sin
+struct sin_impl
+{
+    value_type operator() (value_type const& val) const
+    {
+        return std::sin(val.to_double());
+    }
+};
+
+// cos
+struct cos_impl
+{
+    value_type operator() (value_type const& val) const
+    {
+        return std::cos(val.to_double());
+    }
+};
+
+// tan
+struct tan_impl
+{
+    value_type operator() (value_type const& val) const
+    {
+        return std::tan(val.to_double());
+    }
+};
+
+// atan
+struct atan_impl
+{
+    value_type operator()(value_type const& val) const
+    {
+        return std::atan(val.to_double());
+    }
+};
+
+// abs
+struct abs_impl
+{
+    value_type operator() (value_type const& val) const
+    {
+        return std::fabs(val.to_double());
+    }
+};
+
+// length
+struct length_impl
+{
+    value_type operator() (value_type const& val) const
+    {
+        return val.to_unicode().length();
+    }
+};
+
+// min
+inline value_type min_impl(value_type const& arg1, value_type const& arg2)
+{
+    return std::min(arg1.to_double(), arg2.to_double());
+}
+
+// max
+inline value_type max_impl(value_type const& arg1, value_type const& arg2)
+{
+    return std::max(arg1.to_double(), arg2.to_double());
+}
+
+// pow
+inline value_type pow_impl(value_type const& arg1, value_type const& arg2)
+{
+    return std::pow(arg1.to_double(), arg2.to_double());
+}
+
 } // namespace mapnik
 
-#endif //MAPNIK_FUNCTION_CALL_HPP
+#endif // MAPNIK_FUNCTION_CALL_HPP

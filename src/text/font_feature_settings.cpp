@@ -58,7 +58,7 @@ void font_feature_settings::from_string(std::string const& features)
 
     if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][app] % ','))
     {
-        throw config_error("failed to parse font-features: '" + features + "'");
+        throw config_error("failed to parse font-feature-settings: '" + features + "'");
     }
 }
 
@@ -91,7 +91,7 @@ void font_feature_settings::append(std::string const& feature)
     if (!hb_feature_from_string(feature.c_str(), feature.length(), &*current_feature))
     {
         features_.erase(current_feature);
-        throw config_error("failed to parse font-features: '" + feature + "'");
+        throw config_error("failed to parse font-feature-settings: '" + feature + "'");
     }
 }
 

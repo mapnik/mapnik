@@ -122,12 +122,10 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
         clip_box.pad(padding);
     }
 
-    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
-                                          affine_transform_tag,
-                                          simplify_tag,smooth_tag,
-                                          offset_transform_tag>;
-    vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
-                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+    vertex_converter<rasterizer_type, clip_line_tag, transform_tag,
+                     affine_transform_tag,
+                     simplify_tag,smooth_tag,
+                     offset_transform_tag>
         converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)

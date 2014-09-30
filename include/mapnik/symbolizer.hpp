@@ -31,7 +31,6 @@
 #include <mapnik/simplify.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/expression_node.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/parse_path.hpp>
@@ -52,6 +51,11 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <map>
+#include <tuple>
+
+// boost
+#include <boost/optional.hpp>
 
 namespace agg { struct trans_affine; }
 
@@ -410,7 +414,7 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
         dash_array dash;
         std::vector<double> buf;
         std::string str = val.to_string();
-        if (util::parse_dasharray(str.begin(),str.end(),buf))
+        if (util::parse_dasharray(str,buf))
         {
             util::add_dashes(buf,dash);
         }

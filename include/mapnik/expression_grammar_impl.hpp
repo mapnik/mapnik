@@ -28,6 +28,7 @@
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/function_call.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>
@@ -43,24 +44,38 @@ namespace mapnik {
 namespace mapnik
 {
 
+unary_function_types::unary_function_types()
+{
+    add
+        ("sin",  sin_impl())
+        ("cos",  cos_impl())
+        ("tan",  tan_impl())
+        ("atan", atan_impl())
+        ("exp",  exp_impl())
+        ("abs",  abs_impl())
+        ("length",length_impl())
+        ;
+}
+
+binary_function_types::binary_function_types()
+{
+    add
+        ("min", binary_function_impl(min_impl))
+        ("max", binary_function_impl(max_impl))
+        ("pow", binary_function_impl(pow_impl))
+        ;
+}
+
 template <typename T0,typename T1>
 expr_node regex_match_impl::operator() (T0 & node, T1 const& pattern) const
 {
-#if defined(BOOST_REGEX_HAS_ICU)
-    return regex_match_node(node,tr_.transcode(pattern.c_str()));
-#else
-    return regex_match_node(node,pattern);
-#endif
+    return regex_match_node(tr_,node,pattern);
 }
 
 template <typename T0,typename T1,typename T2>
 expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const& format) const
 {
-#if defined(BOOST_REGEX_HAS_ICU)
-    return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
-#else
-    return regex_replace_node(node,pattern,format);
-#endif
+    return regex_replace_node(tr_,node,pattern,format);
 }
 
 template <typename Iterator>

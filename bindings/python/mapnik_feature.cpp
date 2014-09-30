@@ -30,11 +30,9 @@
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/to_python_converter.hpp>
-
 #include <boost/noncopyable.hpp>
 
 // mapnik
-
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -56,7 +54,7 @@ using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
 mapnik::geometry_type const& (mapnik::feature_impl::*get_geometry_by_const_ref)(std::size_t) const = &mapnik::feature_impl::get_geometry;
-boost::ptr_vector<mapnik::geometry_type> const& (mapnik::feature_impl::*get_paths_by_const_ref)() const = &mapnik::feature_impl::paths;
+mapnik::geometry_container const& (mapnik::feature_impl::*get_paths_by_const_ref)() const = &mapnik::feature_impl::paths;
 
 void feature_add_geometries_from_wkb(mapnik::feature_impl & feature, std::string wkb)
 {

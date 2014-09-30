@@ -37,6 +37,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/parse_transform.hpp>
+#include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/variant.hpp>
 
 namespace mapnik {
@@ -395,7 +396,7 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
         {
             std::vector<double> buf;
             dash_array dash;
-            if (util::parse_dasharray((*str).begin(),(*str).end(),buf) && util::add_dashes(buf,dash))
+            if (util::parse_dasharray(*str,buf) && util::add_dashes(buf,dash))
             {
                 put(sym,key,dash);
             }

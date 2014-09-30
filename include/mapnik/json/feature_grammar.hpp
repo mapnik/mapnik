@@ -27,6 +27,7 @@
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/geometry_container.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>

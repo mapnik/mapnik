@@ -20,43 +20,16 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#ifndef MAPNIK_GEOMETRY_CONTAINER_HPP
+#define MAPNIK_GEOMETRY_CONTAINER_HPP
 
-// stl
-#include <cstdlib>
-#include <string>
-
-// icu
-#include <unicode/ucnv.h>
+// boost
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik {
 
-transcoder::transcoder (std::string const& encoding)
-    : ok_(false),
-      conv_(0)
-{
-    UErrorCode err = U_ZERO_ERROR;
-    conv_ = ucnv_open(encoding.c_str(),&err);
-    if (U_SUCCESS(err)) ok_ = true;
-    // TODO ??
+using geometry_container = boost::ptr_vector<geometry_type>;
+
 }
 
-mapnik::value_unicode_string transcoder::transcode(const char* data, std::int32_t length) const
-{
-    UErrorCode err = U_ZERO_ERROR;
-
-    mapnik::value_unicode_string ustr(data,length,conv_,err);
-    if (ustr.isBogus())
-    {
-        ustr.remove();
-    }
-    return ustr;
-}
-
-transcoder::~transcoder()
-{
-    if (conv_) ucnv_close(conv_);
-}
-}
+#endif // MAPNIK_GEOMETRY_CONTAINER_HPP

@@ -41,13 +41,6 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-
-    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
-                                          affine_transform_tag,
-                                          simplify_tag, smooth_tag,
-                                          offset_transform_tag,
-                                          dash_tag, stroke_tag>;
-
     std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
@@ -111,8 +104,11 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     using rasterizer_type = line_pattern_rasterizer<cairo_context>;
     rasterizer_type ras(context_, *pattern, width, height);
-    vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
-                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+    vertex_converter<rasterizer_type,clip_line_tag, transform_tag,
+                     affine_transform_tag,
+                     simplify_tag, smooth_tag,
+                     offset_transform_tag,
+                     dash_tag, stroke_tag>
         converter(clipping_extent, ras, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)

@@ -32,6 +32,7 @@
 // stl
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 namespace mapnik
 {

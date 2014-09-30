@@ -26,21 +26,17 @@
 #ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
 #endif
+#include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/proj_transform.hpp>
-
-// boost
-#include <boost/math/constants/constants.hpp>
 
 // stl
 #include <cmath>
+#include <vector>
+#include <cstddef>
 
 namespace mapnik
 {
-
-const double pi = boost::math::constants::pi<double>();
 
 template <typename Geometry>
 struct MAPNIK_DECL offset_converter
@@ -176,13 +172,13 @@ private:
 
     static double explement_reflex_angle(double angle)
     {
-        if (angle > pi)
+        if (angle > M_PI)
         {
-            return angle - 2 * pi;
+            return angle - 2 * M_PI;
         }
-        else if (angle < -pi)
+        else if (angle < -M_PI)
         {
-            return angle + 2 * pi;
+            return angle + 2 * M_PI;
         }
         else
         {
@@ -320,22 +316,22 @@ private:
             {
                 if (joint_angle > 0.0)
                 {
-                    joint_angle = joint_angle - 2 * pi;
+                    joint_angle = joint_angle - 2 * M_PI;
                 }
                 else
                 {
-                    bulge_steps = 1 + static_cast<int>(std::floor(half_turns / pi));
+                    bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
                 }
             }
             else
             {
                 if (joint_angle < 0.0)
                 {
-                    joint_angle = joint_angle + 2 * pi;
+                    joint_angle = joint_angle + 2 * M_PI;
                 }
                 else
                 {
-                    bulge_steps = 1 + static_cast<int>(std::floor(half_turns / pi));
+                    bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
                 }
             }
 
@@ -344,14 +340,14 @@ private:
             {
                 // inside turn (sharp/obtuse angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Sharp joint [<< inside turn " << int(joint_angle*180/pi)
+                    << " Sharp joint [<< inside turn " << int(joint_angle*180/M_PI)
                     << " degrees >>]";
             }
             else
             {
                 // outside turn (reflex angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Bulge joint >)) outside turn " << int(joint_angle*180/pi)
+                    << " Bulge joint >)) outside turn " << int(joint_angle*180/M_PI)
                     << " degrees ((< with " << bulge_steps << " segments";
             }
             #endif

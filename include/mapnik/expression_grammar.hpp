@@ -126,6 +126,17 @@ struct integer_parser
     using type = qi::int_parser<T,10,1,-1>;
 };
 
+struct unary_function_types : qi::symbols<char, unary_function_impl>
+{
+    unary_function_types();
+};
+
+struct binary_function_types : qi::symbols<char, binary_function_impl>
+{
+    binary_function_types();
+};
+
+
 #ifdef __GNUC__
 template <typename Iterator>
 struct MAPNIK_DECL expression_grammar : qi::grammar<Iterator, expr_node(), space_type>

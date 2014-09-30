@@ -31,7 +31,9 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/variant.hpp>
 #include <boost/functional/value_factory.hpp>
-#include <boost/function.hpp>
+
+// stl
+#include <map>
 
 namespace mapnik
 {
@@ -86,7 +88,7 @@ private:
                                     Detector &detector,
                                     markers_placement_params const& params)
     {
-        static const std::map<marker_placement_e, boost::function<markers_placement(
+        static const std::map<marker_placement_e, std::function<markers_placement(
             Locator &locator,
             Detector &detector,
             markers_placement_params const& params)>> factories =
