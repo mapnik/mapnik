@@ -245,12 +245,12 @@ pgraster_featureset::~pgraster_featureset()
 
 std::string numeric2string(const char* buf)
 {
-    boost::int16_t ndigits = int2net(buf);
-    boost::int16_t weight  = int2net(buf+2);
-    boost::int16_t sign    = int2net(buf+4);
-    boost::int16_t dscale  = int2net(buf+6);
+    std::int16_t ndigits = int2net(buf);
+    std::int16_t weight  = int2net(buf+2);
+    std::int16_t sign    = int2net(buf+4);
+    std::int16_t dscale  = int2net(buf+6);
 
-    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    std::unique_ptr<std::int16_t[]> digits(new std::int16_t[ndigits]);
     for (int n=0; n < ndigits ;++n)
     {
         digits[n] = int2net(buf+8+n*2);
@@ -260,7 +260,7 @@ std::string numeric2string(const char* buf)
 
     if (sign == 0x4000) ss << "-";
 
-    int i = std::max(weight,boost::int16_t(0));
+    int i = std::max(weight,std::int16_t(0));
     int d = 0;
 
     // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.
