@@ -37,9 +37,9 @@ before_script:
  - psql -U postgres -c 'create extension postgis' -d template_postgis
  - if [[ "${CXX}" == 'g++' ]]; then sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
  - if [[ "${CXX}" == 'clang++' ]]; then export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
- - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.34.tar.bz2
- - tar xf harfbuzz-0.9.34.tar.bz2
- - cd harfbuzz-0.9.34
+ - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.35.tar.bz2
+ - tar xf harfbuzz-0.9.35.tar.bz2
+ - cd harfbuzz-0.9.35
  - ./configure --prefix=/usr --with-icu --with-cairo=no --with-glib=no --with-gobject=no --with-graphite2=no --with-freetype --with-uniscribe=no --with-coretext=no && make -j2 && sudo make -j2 install
  - cd ../
 

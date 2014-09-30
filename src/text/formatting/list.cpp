@@ -23,9 +23,9 @@
 // mapnik
 #include <mapnik/text/formatting/list.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // boost
-
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {

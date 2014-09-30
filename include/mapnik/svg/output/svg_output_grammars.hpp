@@ -25,24 +25,21 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
+
+#include <vector>
 
 // fwd declare
 namespace mapnik { namespace svg {
-  struct path_output_attributes;
-  struct rect_output_attributes;
-  struct root_output_attributes;
-} }
+    struct path_output_attributes;
+    struct rect_output_attributes;
+    struct root_output_attributes;
+}}
 
 // boost
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/karma_omit.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
-#include <boost/fusion/include/std_pair.hpp>
-#include <boost/fusion/include/struct.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/spirit/include/karma_nonterminal.hpp>
+#include <boost/spirit/include/karma_rule.hpp>
+#include <boost/fusion/adapted/struct.hpp>
 
 /*!
  * mapnik::svg::path_output_attributes is adapted as a fusion sequence
@@ -61,7 +58,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, stroke_linecap_)
     (std::string, stroke_linejoin_)
     (double, stroke_dashoffset_)
-    )
+    );
 
 /*!
  * mapnik::svg::rect_output_attributes is adapted as a fusion sequence
@@ -74,7 +71,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     (unsigned, width_)
     (unsigned, height_)
     (std::string, fill_color_)
-    )
+    );
 
 /*!
  * mapnik::svg::root_output_attributes is adapted as a fusion sequence
@@ -86,98 +83,38 @@ BOOST_FUSION_ADAPT_STRUCT(
     (unsigned, height_)
     (double, svg_version_)
     (std::string, svg_namespace_url_)
-    )
+    );
 
 namespace mapnik { namespace svg {
 
     using namespace boost::spirit;
-    using namespace boost::phoenix;
 
 
 template <typename OutputIterator>
 struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::path_output_attributes()>
 {
-    explicit svg_path_attributes_grammar()
-        : svg_path_attributes_grammar::base_type(svg_path_attributes)
-    {
-        karma::lit_type lit;
-        karma::double_type double_;
-        karma::string_type kstring;
-
-        svg_path_attributes =
-            lit("fill=\"")
-            << kstring
-            << lit("\" fill-opacity=\"") << double_
-            << lit("\" stroke=\"") << kstring
-            << lit("\" stroke-opacity=\"") << double_
-            << lit("\" stroke-width=\"") << double_ << lit("px")
-            << lit("\" stroke-linecap=\"") << kstring
-            << lit("\" stroke-linejoin=\"") << kstring
-            << lit("\" stroke-dashoffset=\"") << double_ << lit("px") << lit('"');
-    }
-
+    explicit svg_path_attributes_grammar();
     karma::rule<OutputIterator, mapnik::svg::path_output_attributes()> svg_path_attributes;
 };
 
 template <typename OutputIterator>
 struct svg_path_dash_array_grammar : karma::grammar<OutputIterator, mapnik::dash_array()>
 {
-    explicit svg_path_dash_array_grammar()
-        : svg_path_dash_array_grammar::base_type(svg_path_dash_array)
-    {
-        karma::double_type double_;
-        karma::lit_type lit;
-
-        svg_path_dash_array = lit("stroke-dasharray=\"") <<
-                -((double_ << lit(',') << double_) % lit(',')) << lit('"');
-    }
-
+    explicit svg_path_dash_array_grammar();
     karma::rule<OutputIterator, mapnik::dash_array()> svg_path_dash_array;
 };
 
 template <typename OutputIterator>
 struct svg_rect_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::rect_output_attributes()>
 {
-    explicit svg_rect_attributes_grammar()
-        : svg_rect_attributes_grammar::base_type(svg_rect_attributes)
-    {
-        karma::lit_type lit;
-        karma::int_type int_;
-        karma::string_type kstring;
-
-        svg_rect_attributes =
-            lit("x=\"")
-            << int_
-            << lit("\" y=\"") << int_
-            << lit("\" width=\"") << int_ << lit("px")
-            << lit("\" height=\"") << int_ << lit("px")
-            << lit("\" fill=\"") << kstring << lit('"');
-    }
-
+    explicit svg_rect_attributes_grammar();
     karma::rule<OutputIterator, mapnik::svg::rect_output_attributes()> svg_rect_attributes;
 };
 
 template <typename OutputIterator>
 struct svg_root_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::root_output_attributes()>
 {
-    explicit svg_root_attributes_grammar()
-        : svg_root_attributes_grammar::base_type(svg_root_attributes)
-    {
-        karma::lit_type lit;
-        karma::int_type int_;
-        karma::string_type kstring;
-        karma::double_type double_;
-
-        svg_root_attributes =
-            lit("width=\"")
-            << int_
-            << lit("px")
-            << lit("\" height=\"") << int_ << lit("px")
-            << lit("\" version=\"") << double_
-            << lit("\" xmlns=\"") << kstring
-            << lit("\" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"");
-    }
-
+    explicit svg_root_attributes_grammar();
     karma::rule<OutputIterator, mapnik::svg::root_output_attributes()> svg_root_attributes;
 };
 }

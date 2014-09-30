@@ -25,7 +25,8 @@
 
 // mapnik
 #include <mapnik/color.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 
 // stl
 #include <string>

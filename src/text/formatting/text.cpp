@@ -24,6 +24,7 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/text/text_layout.hpp>

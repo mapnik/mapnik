@@ -24,7 +24,7 @@
 #define MAPNIK_SYMBOLIZER_HASH_HPP
 
 // mapnik
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
 #include <mapnik/util/variant.hpp>
 // stl
 #include <typeinfo>

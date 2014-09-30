@@ -24,6 +24,8 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
 #include <mapnik/make_unique.hpp>
 // ICU

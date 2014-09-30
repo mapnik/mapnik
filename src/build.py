@@ -346,6 +346,7 @@ if env['GRID_RENDERER']:
 if env['SVG_RENDERER']: # svg backend
     source += Split(
     """
+    svg/output/svg_output_grammars.cpp
     svg/output/svg_renderer.cpp
     svg/output/svg_generator.cpp
     svg/output/svg_output_attributes.cpp

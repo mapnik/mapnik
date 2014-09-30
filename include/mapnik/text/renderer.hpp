@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/noncopyable.hpp>
 // agg
 #include <agg_trans_affine.h>

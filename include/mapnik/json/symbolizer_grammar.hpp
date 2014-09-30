@@ -23,6 +23,8 @@
 #ifndef MAPNIK_SYMBOLIZER_GRAMMAR_HPP
 #define MAPNIK_SYMBOLIZER_GRAMMAR_HPP
 
+#include <mapnik/config.hpp>
+
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
@@ -122,21 +124,15 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
         : symbolizer_grammar::base_type(sym, "symbolizer"),
           json_()
     {
-        using qi::lit;
-        using qi::double_;
-        using qi::int_;
-        using qi::no_skip;
-        using qi::omit;
-        using qi::_val;
-        using qi::_a;
-        using qi::_r1;
-        using qi::_1;
-        using qi::_2;
-        using qi::_3;
-        using qi::_4;
-        using qi::fail;
-        using qi::on_error;
-        using standard_wide::char_;
+        qi::lit_type lit;
+        qi::double_type double_;
+        qi::int_type int_;
+        qi::no_skip_type no_skip;
+        qi::_val_type _val;
+        qi::_a_type _a;
+        qi::_r1_type _r1;
+        qi::_1_type _1;
+        standard_wide::char_type char_;
         using phoenix::construct;
 
         // generic json types
@@ -197,7 +193,7 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
         property = (json_.string_ [_a = _1] >> lit(':') >> property_value [put_property_(_r1,_a,_1)]) % lit(',')
             ;
 
-        property_value %= json.number | json.string_  ;
+        property_value %= json_.number | json_.string_  ;
 
 
     }
@@ -211,7 +207,7 @@ struct symbolizer_grammar : qi::grammar<Iterator, space_type, symbolizer()>
 
     phoenix::function<put_property> put_property_;
     // error
-    on_error<fail>(sym, error_handler(_1, _2, _3, _4));
+    //qi::on_error<qi::fail>(sym, error_handler(_1, _2, _3, _4));
 };
 
 

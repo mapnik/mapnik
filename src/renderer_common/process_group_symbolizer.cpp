@@ -20,8 +20,10 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
+#include <mapnik/text/glyph_info.hpp>
 
 namespace mapnik {
 

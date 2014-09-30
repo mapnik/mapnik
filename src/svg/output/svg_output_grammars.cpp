@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,38 +20,12 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_REQUEST_HPP
-#define MAPNIK_REQUEST_HPP
+#include <mapnik/svg/output/svg_output_attributes.hpp>
+#include <mapnik/svg/output/svg_output_grammars.hpp>
+#include <mapnik/svg/output/svg_output_grammars_impl.hpp>
+#include <string>
 
-// mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
-
-namespace mapnik
-{
-
-class MAPNIK_DECL request
-{
-public:
-    request(unsigned width,
-            unsigned height,
-            box2d<double> const& extent);
-    unsigned width() const;
-    unsigned height() const;
-    void set_buffer_size(int buffer_size);
-    int buffer_size() const;
-    box2d<double> const& extent() const;
-    void set_extent(box2d<double> const& box);
-    box2d<double> get_buffered_extent() const;
-    double scale() const;
-    ~request();
-private:
-    unsigned width_;
-    unsigned height_;
-    box2d<double> extent_;
-    int buffer_size_;
-};
-
-}
-
-#endif // MAPNIK_REQUEST_HPP
+template struct mapnik::svg::svg_path_attributes_grammar<std::ostream_iterator<char> >;
+template struct mapnik::svg::svg_path_dash_array_grammar<std::ostream_iterator<char> >;
+template struct mapnik::svg::svg_rect_attributes_grammar<std::ostream_iterator<char> >;
+template struct mapnik::svg::svg_root_attributes_grammar<std::ostream_iterator<char> >;

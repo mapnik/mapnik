@@ -69,7 +69,7 @@ Mapnik Core depends on:
  * libz - Zlib compression
  * libfreetype - Freetype2 for font support (Install requires freetype-config)
  * libxml2 - XML parsing (Install requires xml2-config)
- * libharfbuzz - an OpenType text shaping engine
+ * libharfbuzz - an OpenType text shaping engine (>=0.9.34 needed for CSS font-feature-settings support)
 
 Mapnik Core optionally depends on:
 

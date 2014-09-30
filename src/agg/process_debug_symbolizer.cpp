@@ -24,6 +24,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/label_collision_detector.hpp>
 
 namespace mapnik {
