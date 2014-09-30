@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/function_call.hpp>
@@ -107,7 +108,7 @@ struct binary_function_call
 struct _regex_match_impl;
 struct _regex_replace_impl;
 
-struct regex_match_node
+struct MAPNIK_DECL regex_match_node
 {
     regex_match_node(transcoder const& tr, expr_node const& a, std::string const& ustr);
     mapnik::value apply(mapnik::value const& v) const;
@@ -117,7 +118,7 @@ struct regex_match_node
     std::shared_ptr<_regex_match_impl> impl_;
 };
 
-struct regex_replace_node
+struct MAPNIK_DECL regex_replace_node
 {
     regex_replace_node(transcoder const& tr, expr_node const& a, std::string const& ustr, std::string const& f);
     mapnik::value apply(mapnik::value const& v) const;
