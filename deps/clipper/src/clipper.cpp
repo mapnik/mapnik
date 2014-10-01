@@ -2839,11 +2839,17 @@ void Clipper::PrepareHorzJoins(TEdge* horzEdge, bool isTopOfScanbeam)
   //the AEL before we process the horizontal edges at the bottom of the next,
   //we need to create 'ghost' Join records of 'contrubuting' horizontals that
   //we can compare with horizontals at the bottom of the next SB.
-  if (isTopOfScanbeam) 
+  if (isTopOfScanbeam)
+  {
     if (outPt->Pt == horzEdge->Top)
+    {
       AddGhostJoin(outPt, horzEdge->Bot); 
+    }
     else
+    {
       AddGhostJoin(outPt, horzEdge->Top);
+    }
+  }
 }
 //------------------------------------------------------------------------------
 
