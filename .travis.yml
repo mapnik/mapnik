@@ -48,7 +48,7 @@ before_script:
 script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - echo $JOBS
- - if [[ "${DEBUG}" == true ]]; then export JOBS=$((JOBS/3)); fi;
+ - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
  - echo $JOBS
  - make
  - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
