@@ -5,17 +5,14 @@
 #include <mapnik/params.hpp>
 #include <mapnik/value_types.hpp>
 
-// boost
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono/process_cpu_clocks.hpp>
-#include <boost/chrono.hpp>
-
 // stl
+#include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <set>
+#include <sstream>
 #include <thread>
 #include <vector>
-#include <set>
-#include <iomanip>
 
 namespace benchmark {
 
@@ -88,8 +85,8 @@ int run(T const& test_runner, std::string const& name)
             std::clog << "test did not validate: " << name << "\n";
             return -1;
         }
-        boost::chrono::process_cpu_clock::time_point start;
-        boost::chrono::process_cpu_clock::duration elapsed;
+        std::chrono::high_resolution_clock::time_point start;
+        std::chrono::high_resolution_clock::duration elapsed;
         std::stringstream s;
         s << name << ":"
             << std::setw(45 - (int)s.tellp()) << std::right
@@ -104,18 +101,18 @@ int run(T const& test_runner, std::string const& name)
             {
                 tg.emplace_back(new std::thread(test_runner));
             }
-            start = boost::chrono::process_cpu_clock::now();
+            start = std::chrono::high_resolution_clock::now();
             std::for_each(tg.begin(), tg.end(), [](value_type & t) {if (t->joinable()) t->join();});
-            elapsed = boost::chrono::process_cpu_clock::now() - start;
+            elapsed = std::chrono::high_resolution_clock::now() - start;
         }
         else
         {
-            start = boost::chrono::process_cpu_clock::now();
+            start = std::chrono::high_resolution_clock::now();
             test_runner();
-            elapsed = boost::chrono::process_cpu_clock::now() - start;
+            elapsed = std::chrono::high_resolution_clock::now() - start;
         }
         s << std::setw(65 - (int)s.tellp()) << std::right
-            << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed) << "\n";
+            << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " milliseconds\n";
         std::clog << s.str();
         return 0;
     }
