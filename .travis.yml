@@ -37,8 +37,8 @@ install:
 before_script:
  - psql -U postgres -c 'create database template_postgis'
  - psql -U postgres -c 'create extension postgis' -d template_postgis
- - if [[ "${CXX}" == 'g++' ]]; then export JOBS=4; sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
- - if [[ "${CXX}" == 'clang++' ]]; then export JOBS=6; export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
+ - if [[ "${CXX}" == 'g++' ]]; then export JOBS=2; sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
+ - if [[ "${CXX}" == 'clang++' ]]; then export JOBS=4; export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
  - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.35.tar.bz2
  - tar xf harfbuzz-0.9.35.tar.bz2
  - cd harfbuzz-0.9.35
@@ -47,9 +47,7 @@ before_script:
 
 script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
- - echo $JOBS
- - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
- - echo $JOBS
+ #- if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
  - make
  - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
