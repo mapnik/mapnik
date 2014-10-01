@@ -43,8 +43,8 @@ layer::layer(std::string const& name, std::string const& srs)
       group_by_(),
       styles_(),
       ds_(),
-      buffer_size_(0) {
-      }
+      buffer_size_(),
+      maximum_extent_() {}
 
 layer::layer(layer const& rhs)
     : name_(rhs.name_),
