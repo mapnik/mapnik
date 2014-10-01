@@ -43,7 +43,6 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     using namespace mapnik::svg;
     using vector_dispatch_type = T0;
     using raster_dispatch_type = T1;
-    using renderer_context_type = T2;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
