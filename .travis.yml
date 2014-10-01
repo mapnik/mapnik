@@ -19,6 +19,8 @@ before_install:
   - sudo apt-add-repository -y ppa:cartodb/gis
   # we need at least g++-4.7 for c++11 features
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  # upgrade boost
+  - sudo add-apt-repository -y ppa:boost-latest/ppa
   - sudo rm -Rf /var/lib/postgresql /etc/postgresql
   - sudo apt-get update -qq
   - sudo apt-get install -q postgresql-9.3-postgis-2.1
@@ -28,14 +30,15 @@ before_install:
   - sudo service postgresql restart
 
 install:
- - sudo apt-get purge libboost1.46-dev
- - sudo apt-get install -y ttf-wqy-microhei make libstdc++6 libstdc++-4.8-dev valgrind libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
+ #- sudo apt-get install -y libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev
+ - sudo apt-get instal -y boost1.55
+ - sudo apt-get install -y ttf-wqy-microhei make libstdc++6 libstdc++-4.8-dev valgrind python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
 
 before_script:
  - psql -U postgres -c 'create database template_postgis'
  - psql -U postgres -c 'create extension postgis' -d template_postgis
- - if [[ "${CXX}" == 'g++' ]]; then sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
- - if [[ "${CXX}" == 'clang++' ]]; then export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
+ - if [[ "${CXX}" == 'g++' ]]; then export JOBS=2; sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
+ - if [[ "${CXX}" == 'clang++' ]]; then export JOBS=6; export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
  - wget http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.35.tar.bz2
  - tar xf harfbuzz-0.9.35.tar.bz2
  - cd harfbuzz-0.9.35
@@ -44,8 +47,9 @@ before_script:
 
 script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
- - if [[ "${DEBUG}" == true ]]; then JOBS=4 make; else JOBS=8 make; fi;
+ - if [[ "${DEBUG}" == true ]]; then JOBS=$((JOBS/2)); fi;
+ - JOBS=${JOBS} make;
  - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
- - JOBS=${JOBS} make test
+ -  make test
  - source localize.sh && make grind
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
