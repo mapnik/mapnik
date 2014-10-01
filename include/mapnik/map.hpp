@@ -166,13 +166,21 @@ public:
      */
     style_iterator end_styles();
 
-    /*! \brief Insert a style in the map.
+    /*! \brief Insert a style in the map by copying.
      *  @param name The name of the style.
      *  @param style The style to insert.
      *  @return true If success.
      *          false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style style);
+    bool insert_style(std::string const& name,feature_type_style const& style);
+
+    /*! \brief Insert a style in the map by moving..
+     *  @param name The name of the style.
+     *  @param style The style to insert.
+     *  @return true If success.
+     *          false If no success.
+     */
+    bool insert_style(std::string const& name,feature_type_style && style);
 
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
@@ -185,13 +193,21 @@ public:
      */
     boost::optional<feature_type_style const&> find_style(std::string const& name) const;
 
-    /*! \brief Insert a fontset into the map.
+    /*! \brief Insert a fontset into the map by copying.
      *  @param name The name of the fontset.
      *  @param fontset The fontset to insert.
      *  @return true If success.
      *          false If failure.
      */
-    bool insert_fontset(std::string const& name, font_set fontset);
+    bool insert_fontset(std::string const& name, font_set const& fontset);
+
+    /*! \brief Insert a fontset into the map by moving.
+     *  @param name The name of the fontset.
+     *  @param fontset The fontset to insert.
+     *  @return true If success.
+     *          false If failure.
+     */
+    bool insert_fontset(std::string const& name, font_set && fontset);
 
     /*! \brief Find a fontset.
      *  @param name The name of the fontset.
@@ -213,10 +229,15 @@ public:
      */
     size_t layer_count() const;
 
-    /*! \brief Add a layer to the map.
+    /*! \brief Add a layer to the map by copying it.
      *  @param l The layer to add.
      */
-    void add_layer(layer l);
+    void add_layer(layer const& l);
+
+    /*! \brief Add a layer to the map by moving it.
+     *  @param l The layer to add.
+     */
+    void insert_layer(layer && l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
