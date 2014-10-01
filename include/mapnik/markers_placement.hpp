@@ -30,8 +30,6 @@
 #include <mapnik/markers_placements/vertext_last.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/variant.hpp>
-#include <boost/functional/value_factory.hpp>
-#include <boost/function.hpp>
 
 namespace mapnik
 {
@@ -86,18 +84,21 @@ private:
                                     Detector &detector,
                                     markers_placement_params const& params)
     {
-        static const std::map<marker_placement_e, boost::function<markers_placement(
-            Locator &locator,
-            Detector &detector,
-            markers_placement_params const& params)>> factories =
-            {
-                { MARKER_POINT_PLACEMENT, boost::value_factory<markers_point_placement<Locator, Detector>>() },
-                { MARKER_INTERIOR_PLACEMENT, boost::value_factory<markers_interior_placement<Locator, Detector>>() },
-                { MARKER_LINE_PLACEMENT, boost::value_factory<markers_line_placement<Locator, Detector>>() },
-                { MARKER_VERTEX_FIRST_PLACEMENT, boost::value_factory<markers_vertex_first_placement<Locator, Detector>>() },
-                { MARKER_VERTEX_LAST_PLACEMENT, boost::value_factory<markers_vertex_last_placement<Locator, Detector>>() }
-            };
-        return factories.at(placement_type)(locator, detector, params);
+        switch (placement_type)
+        {
+        case MARKER_POINT_PLACEMENT:
+            return markers_point_placement<Locator, Detector>(locator,detector,params);
+        case MARKER_INTERIOR_PLACEMENT:
+            return markers_interior_placement<Locator, Detector>(locator,detector,params);
+        case MARKER_LINE_PLACEMENT:
+            return markers_line_placement<Locator, Detector>(locator,detector,params);
+        case MARKER_VERTEX_FIRST_PLACEMENT:
+            return markers_vertex_first_placement<Locator, Detector>(locator,detector,params);
+        case MARKER_VERTEX_LAST_PLACEMENT:
+            return markers_vertex_last_placement<Locator, Detector>(locator,detector,params);
+        default: // point
+            return markers_point_placement<Locator, Detector>(locator,detector,params);
+        }
     }
 
     markers_placement placement_;

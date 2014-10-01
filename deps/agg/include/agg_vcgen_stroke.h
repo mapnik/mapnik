@@ -17,7 +17,7 @@
 #define AGG_VCGEN_STROKE_INCLUDED
 
 #include "agg_math_stroke.h"
-
+#include <mapnik/config.hpp>
 
 namespace agg
 {
@@ -28,7 +28,7 @@ namespace agg
     // Stroke generator
     //
     //------------------------------------------------------------------------
-    class vcgen_stroke
+    class MAPNIK_DECL vcgen_stroke
     {
         enum status_e
         {

@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/symbolizer.hpp>  // for transform_list_ptr
+#include <mapnik/symbolizer_base.hpp>  // for transform_list_ptr
 
 namespace mapnik {
 

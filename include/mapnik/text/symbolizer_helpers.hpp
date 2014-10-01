@@ -23,16 +23,15 @@
 #define SYMBOLIZER_HELPERS_HPP
 
 //mapnik
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
 #include <mapnik/text/placement_finder.hpp>
-#include <mapnik/proj_transform.hpp>
-#include <mapnik/view_transform.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 namespace mapnik {
+
+class feature_impl;
+class proj_transform;
+class view_transform;
+struct symbolizer_base;
 
 template <typename T>
 struct placement_finder_adapter
@@ -56,10 +55,7 @@ struct placement_finder_adapter
 
 };
 
-using conv_types = boost::mpl::vector<clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
-using vertex_converter_type = vertex_converter<box2d<double>, placement_finder_adapter<placement_finder> , symbolizer_base,
-                                               view_transform, proj_transform, agg::trans_affine,
-                                               conv_types, feature_impl>;
+using vertex_converter_type = vertex_converter<placement_finder_adapter<placement_finder>,clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 
 class base_symbolizer_helper
 {

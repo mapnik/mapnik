@@ -102,10 +102,11 @@ lib_env['LIBS'].append(env['ICU_LIB_NAME'])
 lib_env['LIBS'].append('freetype')
 
 if env['RUNTIME_LINK'] == 'static':
-    if env['PLATFORM'] == 'Linux':
-        lib_env['LINKFLAGS'].append('-pthread')
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
+
+if env['PLATFORM'] == 'Linux':
+    lib_env['LINKFLAGS'].append('-pthread')
 
 if env['RUNTIME_LINK'] != 'static':
     lib_env['LIBS'].insert(0, 'agg')
@@ -142,6 +143,8 @@ else: # unix, non-macos
 
 source = Split(
     """
+    marker_helpers.cpp
+    dasharray_parser.cpp
     expression_grammar.cpp
     fs.cpp
     request.cpp
@@ -343,6 +346,7 @@ if env['GRID_RENDERER']:
 if env['SVG_RENDERER']: # svg backend
     source += Split(
     """
+    svg/output/svg_output_grammars.cpp
     svg/output/svg_renderer.cpp
     svg/output/svg_generator.cpp
     svg/output/svg_output_attributes.cpp

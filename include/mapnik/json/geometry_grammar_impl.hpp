@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/positions_grammar_impl.hpp>
 
@@ -33,8 +34,8 @@
 
 namespace mapnik { namespace json {
 
-template <typename Iterator>
-geometry_grammar<Iterator>::geometry_grammar()
+template <typename Iterator, typename ErrorHandler >
+geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     : geometry_grammar::base_type(start,"geometry")
 {
 
@@ -83,20 +84,10 @@ geometry_grammar<Iterator>::geometry_grammar()
     // give some rules names
     geometry.name("Geometry");
     geometry_collection.name("GeometryCollection");
-    geometry_type_dispatch.name("Geometry dispatch");
+    geometry_type_dispatch.name("Geometry type");
     coordinates.name("Coordinates");
     // error handler
-    on_error<fail>
-        (
-            start
-            , std::clog
-            << boost::phoenix::val("Error! Expecting ")
-            << _4  // what failed?
-            << boost::phoenix::val(" here: \"")
-            << where_message_(_3, _2, 16) // max 16 chars
-            << boost::phoenix::val("\"")
-            << std::endl
-            );
+    on_error<fail>(start, error_handler(_1, _2, _3, _4));
 }
 
 }}

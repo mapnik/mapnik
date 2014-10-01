@@ -28,6 +28,7 @@
 #include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/attribute.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // fwd declarations to speed up compile
 namespace mapnik {
@@ -39,16 +40,15 @@ namespace mapnik {
 
 namespace mapnik {
 
-struct renderer_common
+struct renderer_common : private mapnik::noncopyable
 {
     renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor);
     renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor,
                        std::shared_ptr<label_collision_detector4> detector);
-    renderer_common(request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y,
+    renderer_common(Map const &m, request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor);
-    renderer_common(renderer_common const& other);
 
     unsigned width_;
     unsigned height_;
@@ -63,7 +63,7 @@ struct renderer_common
     std::shared_ptr<label_collision_detector4> detector_;
 
 private:
-    renderer_common(unsigned width, unsigned height, double scale_factor,
+    renderer_common(Map const &m, unsigned width, unsigned height, double scale_factor,
                     attributes const& vars, view_transform &&t, std::shared_ptr<label_collision_detector4> detector);
 };
 

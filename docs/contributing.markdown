@@ -17,6 +17,8 @@ Also read the design philosophy page for the motivations that lead to code decis
 
 Templates are good, within reason. We seek to use templates where possible for flexible code, but not in cases where functional patterns would be just as concise and clear.
 
+Since version 3.0 we use C++11 which brings many advantages and makes the code easier to write and to read.
+
 In general we use Boost, it makes more possible in C++. It is a big build time dependency (as in time to compile against and # of headers) but ultimately compiles to small object code and is very fast (particularly spirit). It also has no dependencies itself (it's really an extension to the C++ language) so requiring it is much easier than requiring a hard dependency that itself has other dependencies. This is a big reason that we prefer AGG to Cairo as our primary renderer. Also AGG produces the best visual output and strikes an excellent balance between speed and thread safety by using very lightweight objects. Cairo not so much.
 
 You will also notice that we don't use many of the standard geo libraries when we could. For instance we don't use GDAL, OGR, or GEOS anywhere in core, and only leverage them in optional plugins. We feel we can often write code that is faster and more thread safe than these libraries but that still does the job. If this ever changes we can adapt and start using these libraries or others as dependencies - nothing is nicer than standing on the shoulders of giants when it makes sense.
@@ -102,11 +104,13 @@ which triggers locks
 
     (int)value; // no
 
+
 #### Use const keyword after the type
 
     std::string const& variable_name // preferred, for consistency
 
     const std::string & variable_name // no
+
 
 #### Pass built-in types by value, all others by const&
 
@@ -114,7 +118,11 @@ which triggers locks
 
     void my_function(std::string const& val); // if std::string or user type, pass by const&
 
+
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
+
+Since Mapnik 3.0 use std::make_shared.
+
 
 #### Use assignment operator for zero initialized numbers
 
@@ -129,17 +137,20 @@ which triggers locks
 
     void foo (int a) // no
 
+
 #### Separate arguments by a single space:
 
     void foo(int a, float b) // please
 
     void foo(int a,float b) // no
 
+
 #### Space between operators:
 
     if (a == b) // please
 
     if(a==b) // no
+
 
 #### Braces should always be used:
 
@@ -160,6 +171,7 @@ which triggers locks
         // more...
     }
 
+
 #### Prefer `empty()` over `size() == 0` if container supports it
 
 This avoids implicit conversions to bool and reduces compiler warnings.
@@ -171,8 +183,7 @@ This avoids implicit conversions to bool and reduces compiler warnings.
 
 ### Other C++ style resources
 
-Many also follow the useful [google](http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml) which mostly fits our style. However, Google obviously has to maintain a lot of aging codebases. Mapnik can move faster, so we don't follow all
-of those style recommendations.
+Many also follow the useful [Google style guide](http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml) which mostly fits our style. However, Google obviously has to maintain a lot of aging codebases. Mapnik can move faster, so we don't follow all of those style recommendations.
 
 
 ### Emacs helper

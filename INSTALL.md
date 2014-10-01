@@ -9,6 +9,14 @@ To configure and build Mapnik do:
     $ make
 ```
 
+To trigger parallel compilation you can pass a JOBS value to make:
+
+```bash
+    $ JOBS=4 make
+```
+
+(Note that compiling Mapnik needs several GBytes of RAM. If you use parallel compiliation it needs more.)
+
 To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
 
@@ -61,7 +69,7 @@ Mapnik Core depends on:
  * libz - Zlib compression
  * libfreetype - Freetype2 for font support (Install requires freetype-config)
  * libxml2 - XML parsing (Install requires xml2-config)
- * libharfbuzz - an OpenType text shaping engine
+ * libharfbuzz - an OpenType text shaping engine (>=0.9.34 needed for CSS font-feature-settings support)
 
 Mapnik Core optionally depends on:
 

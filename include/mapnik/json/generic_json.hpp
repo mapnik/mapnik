@@ -56,7 +56,6 @@ struct generic_json
     boost::phoenix::function<detail::value_converter<mapnik::value_double> > double_converter;
 };
 
-
 }}
 
 #endif // MAPNIK_GENERIC_JSON_HPP

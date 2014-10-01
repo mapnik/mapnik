@@ -27,6 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
+grid_threshold = 0
 if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
@@ -34,6 +35,7 @@ if 'Linux' == platform.uname()[0]:
     # https://github.com/mapnik/mapnik/issues/1868
     cairo_threshold = 230
     agg_threshold = 12
+    grid_threshold = 6
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
@@ -68,7 +70,7 @@ renderers = [
     { 'name': 'grid',
       'render': render_grid,
       'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
-      'threshold': agg_threshold,
+      'threshold': grid_threshold,
       'filetype': 'json',
       'dir': 'grids'
     }
@@ -182,6 +184,9 @@ files = {
     'text-bug2037': {'sizes': [(800, 300)], 'bbox': default_text_box},
     'text-expressionformat-color': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
+    'text-halign-adjust': {'sizes': [(800,800)], 'bbox': default_text_box},
+    'text-halign-adjust-multiline': {'sizes': [(800,800)], 'bbox': default_text_box},
+    'text-vertical-alignment': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-font-features': {'sizes': [(500, 500)]},
@@ -205,15 +210,14 @@ files = {
         'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
-
-    'tiff-reprojection-2': {'sizes':[(250,250)]},
-
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #'tiff-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-alpha-broken-assoc-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-nodata-edge-raster': {'sizes':[(600,400)]},
     #'tiff-opaque-edge-raster': {'sizes':[(256,256)]},
+    # https://github.com/mapnik/mapnik/issues/2438
+    #'tiff-reprojection-2': {'sizes':[(250,250)]},
     'road-casings-grouped-rendering': {'sizes':[(600,600)],
         'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
     },
@@ -279,6 +283,7 @@ files = {
     'marker-on-line-and-avoid-edges':{'sizes':[(512,512)]},
     'text-typographic':{'sizes':[(512,512)]},
     'functional-expressions':{'sizes':[(256,256)], 'bbox':mapnik.Box2d(-10,-10,10,10)},
+    'functional-expressions-length':{'sizes':[(512,512)], 'bbox':mapnik.Box2d(-15,-15,15,15)},
     'marker-collide':{'sizes':[(512,512)]},
     'postgis-inline':{'sizes':[(512,512)]},
     'text-line-wrap':{'sizes':[(512,512)]},
@@ -417,7 +422,8 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
         else:
             m.zoom_all()
     except Exception, e:
-        if 'Could not create datasource' in str(e):
+        if 'Could not create datasource' in str(e) \
+           or 'Bad connection' in str(e):
             return m
         reporting.other_error(filename, repr(e))
         return m

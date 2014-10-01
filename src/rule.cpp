@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
+#include <mapnik/expression_node.hpp>
 
 // stl
 #include <limits>

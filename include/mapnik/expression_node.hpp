@@ -26,15 +26,11 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/config.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/function_call.hpp>
 #include <mapnik/expression_node_types.hpp>
-
-// boost
-#if defined(BOOST_REGEX_HAS_ICU)
-#include <boost/regex/icu.hpp>
-#else
-#include <boost/regex.hpp>
-#endif
 
 namespace mapnik
 {
@@ -86,46 +82,6 @@ struct binary_node
     expr_node left,right;
 };
 
-#if defined(BOOST_REGEX_HAS_ICU)
-
-struct regex_match_node
-{
-    regex_match_node (expr_node const& a, mapnik::value_unicode_string const& ustr);
-    expr_node expr;
-    boost::u32regex pattern;
-};
-
-
-struct regex_replace_node
-{
-    regex_replace_node (expr_node const& a, mapnik::value_unicode_string const& ustr, mapnik::value_unicode_string const& f);
-    expr_node expr;
-    boost::u32regex pattern;
-    mapnik::value_unicode_string format;
-};
-
-#else
-
-struct regex_match_node
-{
-    regex_match_node (expr_node const& a, std::string const& str);
-    expr_node expr;
-    boost::regex pattern;
-};
-
-
-struct regex_replace_node
-{
-    regex_replace_node (expr_node const& a, std::string const& str, std::string const& f);
-    expr_node expr;
-    boost::regex pattern;
-    std::string format;
-};
-#endif
-
-using unary_function_impl = std::function<value_type(value_type const&)>;
-using binary_function_impl = std::function<value_type(value_type const&, value_type const&)>;
-
 struct unary_function_call
 {
     using argument_type = expr_node;
@@ -148,6 +104,29 @@ struct binary_function_call
     argument_type arg2;
 };
 
+// pimpl
+struct _regex_match_impl;
+struct _regex_replace_impl;
+
+struct MAPNIK_DECL regex_match_node
+{
+    regex_match_node(transcoder const& tr, expr_node const& a, std::string const& ustr);
+    mapnik::value apply(mapnik::value const& v) const;
+    std::string to_string() const;
+    expr_node expr;
+    // TODO - use unique_ptr once https://github.com/mapnik/mapnik/issues/2457 is fixed
+    std::shared_ptr<_regex_match_impl> impl_;
+};
+
+struct MAPNIK_DECL regex_replace_node
+{
+    regex_replace_node(transcoder const& tr, expr_node const& a, std::string const& ustr, std::string const& f);
+    mapnik::value apply(mapnik::value const& v) const;
+    std::string to_string() const;
+    expr_node expr;
+    // TODO - use unique_ptr once https://github.com/mapnik/mapnik/issues/2457 is fixed
+    std::shared_ptr<_regex_replace_impl> impl_;
+};
 
 inline expr_node & operator- (expr_node& expr)
 {

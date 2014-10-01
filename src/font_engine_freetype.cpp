@@ -172,7 +172,17 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
             // skip fonts with leading . in the name
             if (!boost::algorithm::starts_with(name,"."))
             {
-                name2file_.emplace(name,std::make_pair(i,file_name));
+                // http://stackoverflow.com/a/24795559/2333354
+                auto range = name2file_.equal_range(name);
+                if (range.first == range.second) // the key was previously absent; insert a pair
+                {
+                    name2file_.emplace_hint(range.first,name,std::move(std::make_pair(i,file_name)));
+                }
+                else // the key was present, replace the associated value
+                { /* some action with value range.first->second about to be overwritten here */
+                    MAPNIK_LOG_WARN(font_engine_freetype) << "registering new " << name << " at '" << file_name << "'";
+                    range.first->second = std::move(std::make_pair(i,file_name)); // replace value
+                }
                 success = true;
             }
         }

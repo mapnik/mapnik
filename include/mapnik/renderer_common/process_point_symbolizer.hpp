@@ -25,6 +25,7 @@
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
@@ -32,23 +33,18 @@
 
 namespace mapnik {
 
-template <typename F>
+template <typename F,typename RendererType>
 void render_point_symbolizer(point_symbolizer const &sym,
                              mapnik::feature_impl &feature,
                              proj_transform const &prj_trans,
-                             renderer_common &common,
+                             RendererType &common,
                              F render_marker)
 {
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_);
-    boost::optional<mapnik::marker_ptr> marker;
-    if (!filename.empty())
-    {
-        marker = marker_cache::instance().find(filename, true);
-    }
-    else
-    {
-        marker.reset(std::make_shared<mapnik::marker>());
-    }
+    boost::optional<mapnik::marker_ptr> marker = filename.empty()
+       ? std::make_shared<mapnik::marker>()
+       : marker_cache::instance().find(filename, true);
+
     if (marker)
     {
         double opacity = get<double>(sym,keys::opacity,feature, common.vars_, 1.0);

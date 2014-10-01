@@ -23,7 +23,11 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP
 
+#include <mapnik/renderer_common.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/feature.hpp>
 
 namespace mapnik {
 

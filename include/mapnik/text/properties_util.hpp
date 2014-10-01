@@ -23,12 +23,14 @@
 #ifndef MAPNIK_PROPERTIES_UTIL_HPP
 #define MAPNIK_PROPERTIES_UTIL_HPP
 
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/ptree_helpers.hpp>
 #include <mapnik/config_error.hpp>
 #include <boost/optional.hpp>
 #include <string>
+
+// boost
+#include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik { namespace detail {
 

@@ -27,11 +27,11 @@
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/geometry_container.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/value_converters.hpp>
-#include <mapnik/debug.hpp>
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
@@ -86,18 +86,6 @@ struct extract_geometry
     result_type operator() (T & feature) const
     {
         return feature.paths();
-    }
-};
-
-template <typename Iterator>
-struct error_handler
-{
-    using result_type = void;
-    void operator() (
-        Iterator first, Iterator last,
-        Iterator err_pos, boost::spirit::info const& what) const
-    {
-        MAPNIK_LOG_WARN(error_handler) << what << " expected in input";
     }
 };
 

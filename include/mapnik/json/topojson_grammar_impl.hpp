@@ -30,8 +30,8 @@ namespace fusion = boost::fusion;
 namespace standard_wide = boost::spirit::standard_wide;
 using standard_wide::space_type;
 
-template <typename Iterator>
-topojson_grammar<Iterator>::topojson_grammar()
+template <typename Iterator, typename ErrorHandler>
+topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     : topojson_grammar::base_type(topology, "topojson")
 {
     qi::lit_type lit;
@@ -220,19 +220,8 @@ topojson_grammar<Iterator>::topojson_grammar()
     polygon.name("polygon");
     multi_polygon.name("multi_polygon");
     geometry_collection.name("geometry_collection");
-
-    on_error<fail>
-        (
-            topology
-            , std::clog
-            << phoenix::val("Error! Expecting ")
-            << _4 // what failed?
-            << phoenix::val(" here: \"")
-            << where_message_(_3, _2, 16) // where? 16 is max chars to output
-            << phoenix::val("\"")
-            << std::endl
-            );
-
+    // error handler
+    on_error<fail>(topology, error_handler(_1, _2, _3, _4));
 }
 
 }}

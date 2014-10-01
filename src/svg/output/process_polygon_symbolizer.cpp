@@ -24,6 +24,8 @@
 
 // mapnik
 #include <mapnik/svg/output/svg_renderer.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik
 {

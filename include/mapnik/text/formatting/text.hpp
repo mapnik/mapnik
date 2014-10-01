@@ -22,13 +22,16 @@
 #ifndef FORMATTING_TEXT_HPP
 #define FORMATTING_TEXT_HPP
 
+// mapnik
 #include <mapnik/text/formatting/base.hpp>
-#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik {
+
+class feature_impl;
+
 namespace formatting {
 class MAPNIK_DECL text_node: public node {
 public:

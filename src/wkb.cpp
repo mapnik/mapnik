@@ -30,9 +30,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/format.hpp>
-
 namespace mapnik
 {
 
@@ -128,7 +125,7 @@ public:
         needSwap_ = byteOrder_ ? wkbXDR : wkbNDR;
     }
 
-    void read(boost::ptr_vector<geometry_type> & paths)
+    void read(geometry_container & paths)
     {
         int type = read_integer();
 
@@ -307,7 +304,7 @@ private:
         }
     }
 
-    void read_point(boost::ptr_vector<geometry_type> & paths)
+    void read_point(geometry_container & paths)
     {
         double x = read_double();
         double y = read_double();
@@ -316,7 +313,7 @@ private:
         paths.push_back(pt.release());
     }
 
-    void read_multipoint(boost::ptr_vector<geometry_type> & paths)
+    void read_multipoint(geometry_container & paths)
     {
         int num_points = read_integer();
         for (int i = 0; i < num_points; ++i)
@@ -326,7 +323,7 @@ private:
         }
     }
 
-    void read_point_xyz(boost::ptr_vector<geometry_type> & paths)
+    void read_point_xyz(geometry_container & paths)
     {
         double x = read_double();
         double y = read_double();
@@ -336,7 +333,7 @@ private:
         paths.push_back(pt.release());
     }
 
-    void read_point_xyzm(boost::ptr_vector<geometry_type> & paths)
+    void read_point_xyzm(geometry_container & paths)
     {
         double x = read_double();
         double y = read_double();
@@ -346,7 +343,7 @@ private:
         paths.push_back(pt.release());
     }
 
-    void read_multipoint_xyz(boost::ptr_vector<geometry_type> & paths)
+    void read_multipoint_xyz(geometry_container & paths)
     {
         int num_points = read_integer();
         for (int i = 0; i < num_points; ++i)
@@ -356,7 +353,7 @@ private:
         }
     }
 
-    void read_multipoint_xyzm(boost::ptr_vector<geometry_type> & paths)
+    void read_multipoint_xyzm(geometry_container & paths)
     {
         int num_points = read_integer();
         for (int i = 0; i < num_points; ++i)
@@ -366,7 +363,7 @@ private:
         }
     }
 
-    void read_linestring(boost::ptr_vector<geometry_type> & paths)
+    void read_linestring(geometry_container & paths)
     {
         int num_points = read_integer();
         if (num_points > 0)
@@ -383,7 +380,7 @@ private:
         }
     }
 
-    void read_multilinestring(boost::ptr_vector<geometry_type> & paths)
+    void read_multilinestring(geometry_container & paths)
     {
         int num_lines = read_integer();
         for (int i = 0; i < num_lines; ++i)
@@ -393,7 +390,7 @@ private:
         }
     }
 
-    void read_linestring_xyz(boost::ptr_vector<geometry_type> & paths)
+    void read_linestring_xyz(geometry_container & paths)
     {
         int num_points = read_integer();
         if (num_points > 0)
@@ -410,7 +407,7 @@ private:
         }
     }
 
-    void read_linestring_xyzm(boost::ptr_vector<geometry_type> & paths)
+    void read_linestring_xyzm(geometry_container & paths)
     {
         int num_points = read_integer();
         if (num_points > 0)
@@ -427,7 +424,7 @@ private:
         }
     }
 
-    void read_multilinestring_xyz(boost::ptr_vector<geometry_type> & paths)
+    void read_multilinestring_xyz(geometry_container & paths)
     {
         int num_lines = read_integer();
         for (int i = 0; i < num_lines; ++i)
@@ -437,7 +434,7 @@ private:
         }
     }
 
-    void read_multilinestring_xyzm(boost::ptr_vector<geometry_type> & paths)
+    void read_multilinestring_xyzm(geometry_container & paths)
     {
         int num_lines = read_integer();
         for (int i = 0; i < num_lines; ++i)
@@ -447,7 +444,7 @@ private:
         }
     }
 
-    void read_polygon(boost::ptr_vector<geometry_type> & paths)
+    void read_polygon(geometry_container & paths)
     {
         int num_rings = read_integer();
         if (num_rings > 0)
@@ -473,7 +470,7 @@ private:
         }
     }
 
-    void read_multipolygon(boost::ptr_vector<geometry_type> & paths)
+    void read_multipolygon(geometry_container & paths)
     {
         int num_polys = read_integer();
         for (int i = 0; i < num_polys; ++i)
@@ -483,7 +480,7 @@ private:
         }
     }
 
-    void read_polygon_xyz(boost::ptr_vector<geometry_type> & paths)
+    void read_polygon_xyz(geometry_container & paths)
     {
         int num_rings = read_integer();
         if (num_rings > 0)
@@ -509,7 +506,7 @@ private:
         }
     }
 
-    void read_polygon_xyzm(boost::ptr_vector<geometry_type> & paths)
+    void read_polygon_xyzm(geometry_container & paths)
     {
         int num_rings = read_integer();
         if (num_rings > 0)
@@ -535,7 +532,7 @@ private:
         }
     }
 
-    void read_multipolygon_xyz(boost::ptr_vector<geometry_type> & paths)
+    void read_multipolygon_xyz(geometry_container & paths)
     {
         int num_polys = read_integer();
         for (int i = 0; i < num_polys; ++i)
@@ -545,7 +542,7 @@ private:
         }
     }
 
-    void read_multipolygon_xyzm(boost::ptr_vector<geometry_type> & paths)
+    void read_multipolygon_xyzm(geometry_container & paths)
     {
         int num_polys = read_integer();
         for (int i = 0; i < num_polys; ++i)
@@ -555,7 +552,7 @@ private:
         }
     }
 
-    void read_collection(boost::ptr_vector<geometry_type> & paths)
+    void read_collection(geometry_container & paths)
     {
         int num_geometries = read_integer();
         for (int i = 0; i < num_geometries; ++i)
@@ -607,7 +604,7 @@ private:
 
 };
 
-bool geometry_utils::from_wkb(boost::ptr_vector<geometry_type>& paths,
+bool geometry_utils::from_wkb(geometry_container& paths,
                                const char* wkb,
                                unsigned size,
                                wkbFormat format)

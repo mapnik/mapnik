@@ -34,12 +34,6 @@
 #include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 
-#if defined(BOOST_REGEX_HAS_ICU)
-#include <boost/regex/icu.hpp>
-#else
-#include <boost/regex.hpp>
-#endif
-
 namespace mapnik {
 
 namespace {
@@ -107,24 +101,13 @@ struct evaluate_expression : util::static_visitor<T>
     value_type operator() (regex_match_node const& x) const
     {
         value_type v = util::apply_visitor(*this, x.expr);
-#if defined(BOOST_REGEX_HAS_ICU)
-        return boost::u32regex_match(v.to_unicode(),x.pattern);
-#else
-        return boost::regex_match(v.to_string(),x.pattern);
-#endif
-
+        return x.apply(v);
     }
 
     value_type operator() (regex_replace_node const& x) const
     {
         value_type v = util::apply_visitor(*this, x.expr);
-#if defined(BOOST_REGEX_HAS_ICU)
-        return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
-#else
-        std::string repl = boost::regex_replace(v.to_string(),x.pattern,x.format);
-        mapnik::transcoder tr_("utf8");
-        return tr_.transcode(repl.c_str());
-#endif
+        return x.apply(v);
     }
 
     value_type operator() (unary_function_call const& call) const
@@ -206,24 +189,13 @@ struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
     value_type operator() (regex_match_node const& x) const
     {
         value_type v = util::apply_visitor(*this, x.expr);
-#if defined(BOOST_REGEX_HAS_ICU)
-        return boost::u32regex_match(v.to_unicode(),x.pattern);
-#else
-        return boost::regex_match(v.to_string(),x.pattern);
-#endif
-
+        return x.apply(v);
     }
 
     value_type operator() (regex_replace_node const& x) const
     {
         value_type v = util::apply_visitor(*this, x.expr);
-#if defined(BOOST_REGEX_HAS_ICU)
-        return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
-#else
-        std::string repl = boost::regex_replace(v.to_string(),x.pattern,x.format);
-        mapnik::transcoder tr_("utf8");
-        return tr_.transcode(repl.c_str());
-#endif
+        return x.apply(v);
     }
 
     value_type operator() (unary_function_call const& call) const

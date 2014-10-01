@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/warp.hpp>
 #include <mapnik/raster.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/feature.hpp>

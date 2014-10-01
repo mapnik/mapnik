@@ -73,9 +73,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-    using conv_types = boost::mpl::vector<clip_line_tag, transform_tag,
-                                          offset_transform_tag, affine_transform_tag,
-                                          simplify_tag, smooth_tag, stroke_tag>;
+
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
@@ -119,8 +117,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     put<value_double>(line, keys::simplify_tolerance, value_double(simplify_tolerance));
     put<value_double>(line, keys::smooth, value_double(smooth));
 
-    vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
-                     view_transform, proj_transform, agg::trans_affine, conv_types, feature_impl>
+    vertex_converter<grid_rasterizer,
+                     clip_line_tag, transform_tag,
+                     offset_transform_tag, affine_transform_tag,
+                     simplify_tag, smooth_tag, stroke_tag>
         converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform

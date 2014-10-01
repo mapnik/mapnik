@@ -26,6 +26,8 @@
 
 // stl
 #include <stdexcept>
+#include <sstream>
+#include <iomanip>
 
 // boost
 // fusion
@@ -359,6 +361,17 @@ void box2d<T>::move(T x, T y)
     miny_ += y;
     maxy_ += y;
 }
+
+template <typename T>
+std::string box2d<T>::to_string() const
+{
+    std::ostringstream s;
+    s << "box2d(" << std::fixed << std::setprecision(16)
+      << minx_ << ',' << miny_ << ','
+      << maxx_ << ',' << maxy_ << ')';
+    return s.str();
+}
+
 
 template <typename T>
 box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)

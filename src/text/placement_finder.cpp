@@ -26,10 +26,10 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text/placement_finder_impl.hpp>
 #include <mapnik/text/text_layout.hpp>
+#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/vertex_cache.hpp>
-#include <mapnik/text/tolerance_iterator.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
@@ -192,6 +192,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
         double offset = layout_displacement.y + 0.5 * sign * layout.height();
+        bool move_by_length = layout.horizontal_alignment() == H_ADJUST;
 
         for (auto const& line : layout)
         {
@@ -214,10 +215,17 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                    if (move_by_length)
                     {
-                        return false;
+                        if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                            return false;
                     }
+                    else
+                    {
+                        if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                            return false;
+                    }
+
                     current_cluster = glyph.char_index;
                     last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                     // Only calculate new angle at the start of each cluster!

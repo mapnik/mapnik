@@ -24,6 +24,7 @@
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text/formatting/text.hpp>

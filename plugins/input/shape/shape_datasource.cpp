@@ -26,7 +26,6 @@
 
 // boost
 #include <boost/version.hpp>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
 // mapnik
@@ -43,6 +42,7 @@
 
 // stl
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 
 DATASOURCE_PLUGIN(shape_datasource)
@@ -166,8 +166,9 @@ void shape_datasource::init(shape_io& shape)
     int file_code=shape.shp().read_xdr_integer();
     if (file_code!=9994)
     {
-        //invalid file code
-        throw datasource_exception("Shape Plugin: " + (boost::format("wrong file code : %d") % file_code).str());
+        std::ostringstream s;
+        s << "Shape Plugin: wrong file code " << file_code;
+        throw datasource_exception(s.str());
     }
 
     shape.shp().skip(5*4);
@@ -176,8 +177,9 @@ void shape_datasource::init(shape_io& shape)
 
     if (version!=1000)
     {
-        //invalid version number
-        throw datasource_exception("Shape Plugin: " + (boost::format("invalid version number: %d") % version).str());
+        std::ostringstream s;
+        s << "Shape Plugin: nvalid version number " << version;
+        throw datasource_exception(s.str());
     }
 
     shape_type_ = static_cast<shape_io::shapeType>(shape.shp().read_ndr_integer());

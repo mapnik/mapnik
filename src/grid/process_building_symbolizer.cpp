@@ -33,10 +33,8 @@
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
-
-// boost
-
 
 // stl
 #include <deque>

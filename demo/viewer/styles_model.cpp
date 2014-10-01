@@ -25,7 +25,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
-
+#include <mapnik/symbolizer.hpp>
 // boost
 #include <boost/concept_check.hpp>
 

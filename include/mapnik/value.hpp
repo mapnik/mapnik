@@ -26,12 +26,9 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/value_hash.hpp>
-#include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
 
-#include <boost/functional/hash.hpp>
 // stl
 #include <string>
 #include <cmath>

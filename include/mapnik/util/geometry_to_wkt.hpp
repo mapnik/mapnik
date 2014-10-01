@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_container.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
 
 namespace mapnik { namespace util {

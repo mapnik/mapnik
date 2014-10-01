@@ -23,6 +23,7 @@
 #if defined(SVG_RENDERER)
 
 // mapnik
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>

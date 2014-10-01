@@ -40,6 +40,8 @@
 // boost
 #include <boost/bind.hpp>
 
+#include <cstdint>
+
 namespace {
 
 uint8_t
@@ -48,7 +50,7 @@ read_uint8(const uint8_t** from) {
 }
 
 uint16_t
-read_uint16(const boost::uint8_t** from, boost::uint8_t littleEndian) {
+read_uint16(const uint8_t** from, uint8_t littleEndian) {
     uint16_t ret = 0;
 
     if (littleEndian) {
@@ -71,7 +73,7 @@ read_int16(const uint8_t** from, uint8_t littleEndian) {
 }
 
 double
-read_float64(const boost::uint8_t** from, boost::uint8_t littleEndian) {
+read_float64(const uint8_t** from, uint8_t littleEndian) {
 
     union {
         double d;
@@ -104,7 +106,7 @@ read_float64(const boost::uint8_t** from, boost::uint8_t littleEndian) {
 }
 
 uint32_t
-read_uint32(const boost::uint8_t** from, boost::uint8_t littleEndian) {
+read_uint32(const uint8_t** from, uint8_t littleEndian) {
     uint32_t ret = 0;
 
     if (littleEndian) {
@@ -125,7 +127,7 @@ read_uint32(const boost::uint8_t** from, boost::uint8_t littleEndian) {
 }
 
 int32_t
-read_int32(const boost::uint8_t** from, boost::uint8_t littleEndian) {
+read_int32(const uint8_t** from, uint8_t littleEndian) {
 
     return read_uint32(from, littleEndian);
 }

@@ -28,10 +28,6 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <memory>
-#include <boost/ptr_container/ptr_vector.hpp>
-
 namespace mapnik {
 
 template <typename T, template <typename> class Container=vertex_vector>
@@ -154,8 +150,6 @@ public:
 };
 
 using geometry_type = geometry<double,vertex_vector>;
-using geometry_ptr = std::shared_ptr<geometry_type>;
-using geometry_container = boost::ptr_vector<geometry_type>;
 
 }
 

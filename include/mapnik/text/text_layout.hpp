@@ -110,6 +110,10 @@ public:
 
     void evaluate_properties(feature_impl const& feature, attributes const& attr);
 
+    text_line const& longest_line() const;
+
+    void set_character_spacing(double spacing, double scale_factor);
+
 private:
     void break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before);
     void break_line(text_line & line, char wrap_char,
@@ -185,6 +189,8 @@ public:
 
     inline double width() const { return bounds_.width(); }
     inline double height() const { return bounds_.height(); }
+
+    void adjust(double width, double scale_factor);
 
 private:
     text_layout_vector layouts_;

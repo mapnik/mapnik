@@ -34,7 +34,8 @@
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_base.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 
 // stl
 #include <memory>
@@ -51,7 +52,6 @@
 
 namespace mapnik {
 
-class text_path;
 template <typename T> class box2d;
 
 using ErrorStatus = cairo_status_t;

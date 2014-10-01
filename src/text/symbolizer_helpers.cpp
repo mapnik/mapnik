@@ -25,6 +25,9 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/text_layout.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/marker_cache.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/debug.hpp>

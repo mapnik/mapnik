@@ -1,0 +1,116 @@
+<Map background-color="#eee" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <FontSet name="book-fonts">
+    <Font face-name="DejaVu Sans Book"/>
+  </FontSet>
+  <Style name="frame" filter-mode="first">
+    <Rule>
+      <Filter>[mapnik::geometry_type]=linestring</Filter>
+      <LineSymbolizer
+	  stroke="[color]"
+	  stroke-width="[width]"
+	  offset="abs([offset]*2.0)"/>
+    </Rule>
+    <Rule>
+      <Filter>[mapnik::geometry_type]=point</Filter>
+      <MarkersSymbolizer
+	  file="../../../[base-path]/[filetype]/[filename].[filetype]"
+	  width="exp(0.4*length([name]))"
+	  />
+    </Rule>
+  </Style>
+
+  <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>frame</StyleName>
+    <Datasource>
+      <Parameter name="type">ogr</Parameter>
+      <Parameter name="layer_by_index">0</Parameter>
+      <Parameter name="inline"><![CDATA[
+      {
+      "type" : "FeatureCollection",
+      "features" : [
+      {
+      "properties" : {
+      "width":"5",
+      "color" : "red",
+      "offset": 10
+      },
+      "geometry" : {
+      "coordinates" : [[-15,-15],[15,15]],
+      "type" : "LineString"
+      },
+      "type" : "Feature",
+      },
+      {
+      "geometry" : {
+      "coordinates" : [ 0,0 ],
+      "type" : "Point"
+      },
+      "properties" : {
+      "base-path":"./tests/data",
+      "filetype":"svg",
+      "filename":"octocat",
+      "width":"5",
+      "name": "Large octocat",
+      "color" : "#ace"
+      },
+      "type" : "Feature",
+      },
+      {
+      "geometry" : {
+      "coordinates" : [ -10,-10 ],
+      "type" : "Point"
+      },
+      "properties" : {
+      "base-path":"./tests/data",
+      "filetype":"svg",
+      "filename":"octocat",
+      "width":"5",
+      "name": "tiny cat",
+      "color" : "#ace"
+      },
+      "type" : "Feature",
+      },
+      {
+      "geometry" : {
+      "coordinates" : [ 10,10 ],
+      "type" : "Point"
+      },
+      "properties" : {
+      "base-path":"./tests/data",
+      "filetype":"svg",
+      "filename":"octocat",
+      "name": "tiny cat"
+      },
+      "type" : "Feature",
+      },
+      {
+      "geometry" : {
+      "coordinates" : [ -10,10 ],
+      "type" : "Point"
+      },
+      "properties" : {
+      "base-path":"./tests/data",
+      "filetype":"svg",
+      "filename":"octocat",
+      "name": "small cat"
+      },
+      "type" : "Feature",
+      },
+      {
+      "geometry" : {
+      "coordinates" : [ 10,-10 ],
+      "type" : "Point"
+      },
+      "properties" : {
+      "base-path":"./tests/data",
+      "filetype":"svg",
+      "filename":"octocat",
+      "name": "small cat"
+      },
+      "type" : "Feature",
+      }
+      ]
+      }]]></Parameter>
+    </Datasource>
+  </Layer>
+</Map>

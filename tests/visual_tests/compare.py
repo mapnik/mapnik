@@ -41,10 +41,7 @@ def compare_pixels(pixel1, pixel2, alpha=True):
 # compare two images and return number of different pixels
 def compare(actual, expected, alpha=True):
     im1 = mapnik.Image.open(actual)
-    try:
-        im2 = mapnik.Image.open(expected)
-    except RuntimeError:
-        return 99999990
+    im2 = mapnik.Image.open(expected)
     diff = 0
     pixels = im1.width() * im1.height()
     delta_pixels = (im2.width() * im2.height()) - pixels
@@ -60,12 +57,29 @@ def compare_grids(actual, expected, threshold=0, alpha=True):
     global errors
     global passed
     im1 = json.loads(open(actual).read())
-    try:
-        im2 = json.loads(open(expected).read())
-    except RuntimeError:
-        return 9999990
-    equal = (im1 == im2)
+    im2 = json.loads(open(expected).read())
     # TODO - real diffing
-    if not equal:
+    if not im1['data'] == im2['data']:
         return 99999999
-    return 0
+    if not im1['keys'] == im2['keys']:
+        return 99999999
+    grid1 = im1['grid']
+    grid2 = im2['grid']
+    # dimensions must be exact
+    width1 = len(grid1[0])
+    width2 = len(grid2[0])
+    if not width1 == width2:
+        return 99999999
+    height1 = len(grid1)
+    height2 = len(grid2)
+    if not height1 == height2:
+        return 99999999
+    diff = 0;
+    for y in range(0,height1-1):
+        row1 = grid1[y]
+        row2 = grid2[y]
+        width = min(len(row1),len(row2))
+        for w in range(0,width):
+            if row1[w] != row2[w]:
+                diff += 1
+    return diff

@@ -47,7 +47,6 @@ using mapnik::layer;
 using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::feature_ptr;
-using mapnik::geometry_ptr;
 using mapnik::view_transform;
 using mapnik::projection;
 using mapnik::scale_denominator;

@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_container.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
 
 // boost
@@ -33,7 +34,7 @@
 
 namespace mapnik { namespace json {
 
-inline bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths)
+inline bool from_geojson(std::string const& json, geometry_container & paths)
 {
     using namespace boost::spirit;
     static const geometry_grammar<std::string::const_iterator> g;
