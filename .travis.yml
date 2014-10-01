@@ -2,11 +2,11 @@ language: cpp
 
 compiler:
  - clang
- - gcc
+ #- gcc
 
 env:
   matrix:
-   - DEBUG=True  ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
+   #- DEBUG=True  ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
    - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none  XMLPARSER="ptree"   DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
 
 # travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
@@ -47,7 +47,7 @@ before_script:
 
 script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
- #- if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
+ - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
  - make
  - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
