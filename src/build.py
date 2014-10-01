@@ -102,10 +102,11 @@ lib_env['LIBS'].append(env['ICU_LIB_NAME'])
 lib_env['LIBS'].append('freetype')
 
 if env['RUNTIME_LINK'] == 'static':
-    if env['PLATFORM'] == 'Linux':
-        lib_env['LINKFLAGS'].append('-pthread')
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
+
+if env['PLATFORM'] == 'Linux':
+    lib_env['LINKFLAGS'].append('-pthread')
 
 if env['RUNTIME_LINK'] != 'static':
     lib_env['LIBS'].insert(0, 'agg')
