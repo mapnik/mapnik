@@ -121,7 +121,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     # initialize test database
     postgis_setup()
 
-    # dataraster.tif, 2283x1913 int16 single-band
+    # [old]dataraster.tif, 2283x1913 int16 single-band
+    # dataraster-small.tif, 457x383 int16 single-band
     def _test_dataraster_16bsi_rendering(lbl, overview, rescale, clip):
       if rescale:
         lbl += ' Sc'
@@ -145,6 +146,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       # as base scale and multiply by the overview factor.
       # NOTE: the overview table extent only grows north and east
       pixsize = 500 # see gdalinfo dataraster.tif
+      pixsize = 2497 # see gdalinfo dataraster-small.tif
       tol = pixsize * max(overview.split(',')) if overview else 0
       assert_almost_equal(env.minx, expenv.minx)
       assert_almost_equal(env.miny, expenv.miny, delta=tol) 
@@ -205,7 +207,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       eq_(hexlify(im.view(255, 0,1,1).tostring()), '404040ff')
 
     def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
-      import_raster('../data/raster/dataraster.tif', 'dataRaster', tilesize, constraint, overview)
+      import_raster('../data/raster/dataraster-small.tif', 'dataRaster', tilesize, constraint, overview)
       if constraint:
         lbl += ' C'
       if tilesize:
@@ -220,7 +222,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
     def test_dataraster_16bsi():
       for tilesize in ['','256x256']:
         for constraint in [0,1]:
-          for overview in ['','4','2,16']:
+          #for overview in ['','4','2,16']:
+          for overview in ['','2']:
             _test_dataraster_16bsi('data_16bsi', tilesize, constraint, overview)
 
     # river.tiff, RGBA 8BUI
