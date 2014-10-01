@@ -68,7 +68,7 @@ public:
     // ctor
     feature_type_style();
     feature_type_style(feature_type_style const& rhs);
-    feature_type_style(feature_type_style &&) = default;
+    feature_type_style(feature_type_style && rhs);
     feature_type_style& operator=(feature_type_style rhs);
 
     // comparison

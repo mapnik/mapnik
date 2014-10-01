@@ -56,9 +56,16 @@ feature_type_style::feature_type_style(feature_type_style const& rhs)
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
       opacity_(rhs.opacity_),
-      image_filters_inflate_(rhs.image_filters_inflate_)
-{
-}
+      image_filters_inflate_(rhs.image_filters_inflate_) {}
+
+feature_type_style::feature_type_style(feature_type_style && rhs)
+    : rules_(std::move(rhs.rules_)),
+      filter_mode_(std::move(rhs.filter_mode_)),
+      filters_(std::move(rhs.filters_)),
+      direct_filters_(std::move(rhs.direct_filters_)),
+      comp_op_(std::move(rhs.comp_op_)),
+      opacity_(std::move(rhs.opacity_)),
+      image_filters_inflate_(std::move(rhs.image_filters_inflate_)) {}
 
 feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 {
