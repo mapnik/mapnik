@@ -40,7 +40,7 @@ using bound_box = box2d<double>;
 
 struct group_layout_manager
 {
-    group_layout_manager(const group_layout &layout)
+    group_layout_manager(group_layout const& layout)
         : layout_(layout),
           input_origin_(0, 0),
           member_boxes_(vector<bound_box>()),
@@ -49,7 +49,7 @@ struct group_layout_manager
     {
     }
 
-    group_layout_manager(const group_layout &layout, const pixel_position &input_origin)
+    group_layout_manager(group_layout const& layout, pixel_position const& input_origin)
         : layout_(layout),
           input_origin_(input_origin),
           member_boxes_(vector<bound_box>()),
@@ -58,8 +58,8 @@ struct group_layout_manager
     {
     }
 
-    group_layout_manager(const group_layout &layout, const pixel_position &input_origin,
-                         const vector<bound_box> &item_boxes)
+    group_layout_manager(group_layout const& layout, pixel_position const& input_origin,
+                         vector<bound_box> const& item_boxes)
         : layout_(layout),
           input_origin_(input_origin),
           member_boxes_(item_boxes),
@@ -68,19 +68,19 @@ struct group_layout_manager
     {
     }
 
-    inline void set_layout(const group_layout &layout)
+    inline void set_layout(group_layout const& layout)
     {
         layout_ = layout;
         update_layout_ = true;
     }
 
-    inline void add_member_bound_box(const bound_box &member_box)
+    inline void add_member_bound_box(bound_box const& member_box)
     {
         member_boxes_.push_back(member_box);
         update_layout_ = true;
     }
 
-    inline const pixel_position &offset_at(size_t i)
+    inline pixel_position const& offset_at(size_t i)
     {
         handle_update();
         return member_offsets_.at(i);
