@@ -30,11 +30,11 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
-#include <boost/format.hpp>
+
 // stl
 #include <cmath>
 #include <memory>
+#include <sstream>
 
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
@@ -210,7 +210,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             {
                 if (band_ > nbands_)
                 {
-                    throw datasource_exception((boost::format("GDAL Plugin: '%d' is an invalid band, dataset only has '%d' bands\n") % band_ % nbands_).str());
+                    std::ostringstream s;
+                    s << "GDAL Plugin: " << band_ << " is an invalid band, dataset only has " << nbands_ << "bands";
+                    throw datasource_exception(s.str());
                 }
                 float* imageData = (float*)image.getBytes();
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
@@ -484,8 +486,9 @@ void gdal_featureset::get_overview_meta(GDALRasterBand* band)
         for (int b = 0; b < band_overviews; b++)
         {
             GDALRasterBand * overview = band->GetOverview(b);
-            MAPNIK_LOG_DEBUG(gdal) << boost::format("gdal_featureset: Overview=%d Width=%d Height=%d")
-                % b % overview->GetXSize() % overview->GetYSize();
+            MAPNIK_LOG_DEBUG(gdal) << "Overview= " << b
+              << " Width=" << overview->GetXSize()
+              << " Height=" << overview->GetYSize();
         }
     }
     else
@@ -498,8 +501,9 @@ void gdal_featureset::get_overview_meta(GDALRasterBand* band)
     band->GetBlockSize(&bsx, &bsy);
     scale = band->GetScale();
 
-    MAPNIK_LOG_DEBUG(gdal) << boost::format("gdal_featureset: Block=%dx%d Scale=%f Type=%s Color=%s") % bsx % bsy % scale
-        % GDALGetDataTypeName(band->GetRasterDataType())
-        % GDALGetColorInterpretationName(band->GetColorInterpretation());
+    MAPNIK_LOG_DEBUG(gdal) << "Block=" << bsx << "x" << bsy
+        << " Scale=" << scale
+        << " Type=" << GDALGetDataTypeName(band->GetRasterDataType())
+        << "Color=" << GDALGetColorInterpretationName(band->GetColorInterpretation());
 }
 #endif
