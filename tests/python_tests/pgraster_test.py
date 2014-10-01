@@ -220,7 +220,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       drop_imported('dataRaster', overview)
 
     def test_dataraster_16bsi():
-      for tilesize in ['','256x256']:
+      #for tilesize in ['','256x256']:
+      for tilesize in ['256x256']:
         for constraint in [0,1]:
           #for overview in ['','4','2,16']:
           for overview in ['','2']:
