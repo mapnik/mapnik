@@ -31,7 +31,7 @@ before_install:
 
 install:
  #- sudo apt-get install -y libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev
- - sudo apt-get instal -y boost1.55
+ - sudo apt-get install -y boost1.55
  - sudo apt-get install -y ttf-wqy-microhei make libstdc++6 libstdc++-4.8-dev valgrind python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
 
 before_script:
