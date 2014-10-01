@@ -237,7 +237,7 @@ public:
     /*! \brief Add a layer to the map by moving it.
      *  @param l The layer to add.
      */
-    void insert_layer(layer && l);
+    void add_layer(layer && l);
 
     /*! \brief Get a layer.
      *  @param index layer number.

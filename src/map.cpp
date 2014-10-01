@@ -271,7 +271,7 @@ void Map::add_layer(layer const& l)
     layers_.emplace_back(l);
 }
 
-void Map::insert_layer(layer && l)
+void Map::add_layer(layer && l)
 {
     layers_.push_back(std::move(l));
 }
