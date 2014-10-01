@@ -11,12 +11,6 @@ PYTHON = python
 
 ifeq ($(JOBS),)
 	JOBS:=1
-	ifeq ($(OS),Linux)
-		JOBS:=$(shell grep -c ^processor /proc/cpuinfo)
-	endif
-	ifeq ($(OS),Darwin)
-		JOBS:=$(shell sysctl -n hw.ncpu)
-	endif
 endif
 
 all: mapnik

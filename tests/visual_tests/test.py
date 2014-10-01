@@ -175,7 +175,8 @@ files = {
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
 
-    'tiff-reprojection-2': {'sizes':[(250,250)]},
+    # https://github.com/mapnik/mapnik/issues/2438
+    #'tiff-reprojection-2': {'sizes':[(250,250)]},
 
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
