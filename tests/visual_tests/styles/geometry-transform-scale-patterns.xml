@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>polygon</StyleName>
+        <StyleName>polygon-svg</StyleName>
+        <StyleName>line</StyleName>
+        <StyleName>line-svg</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-1,-1,1,1</Parameter>
+            <Parameter name="inline">
+                wkt
+                "LINESTRING (-1 0, 0 1, 1 0, 0 -1, -1 0)"
+            </Parameter>
+        </Datasource>
+    </Layer>
+    <Style name="polygon">
+        <Rule>
+            <PolygonPatternSymbolizer
+                file="../../data/images/stripes_pattern.png"
+            />
+            <PolygonPatternSymbolizer
+                file="../../data/images/stripes_pattern.png"
+                geometry-transform="scale(0.5)"
+            />
+        </Rule>
+    </Style>
+    <Style name="line">
+        <Rule>
+            <LinePatternSymbolizer
+                file="../../data/images/stripes_pattern.png"
+            />
+            <LinePatternSymbolizer
+                file="../../data/images/stripes_pattern.png"
+                geometry-transform="scale(0.5)"
+            />
+        </Rule>
+    </Style>
+    <Style name="polygon-svg">
+        <Rule>
+            <PolygonPatternSymbolizer
+                file="../../data/svg/octocat.svg"
+                transform="scale(.05)"
+            />
+            <PolygonPatternSymbolizer
+                file="../../data/svg/octocat.svg"
+                transform="scale(.05)"
+                geometry-transform="scale(0.5)"
+            />
+        </Rule>
+    </Style>
+    <Style name="line-svg">
+        <Rule>
+            <LinePatternSymbolizer
+                file="../../data/svg/octocat.svg"
+                transform="scale(.1)"
+            />
+            <LinePatternSymbolizer
+                file="../../data/svg/octocat.svg"
+                transform="scale(.1)"
+                geometry-transform="scale(0.5)"
+            />
+        </Rule>
+    </Style>
+</Map>
