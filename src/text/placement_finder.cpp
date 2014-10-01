@@ -36,7 +36,6 @@
 
 // stl
 #include <vector>
-#include <functional>
 
 namespace mapnik
 {
@@ -211,17 +210,22 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             double angle;
             rotation rot;
             double last_glyph_spacing = 0.;
-            std::function<bool(double)> glyph_move_method = std::bind(
-                move_by_length ? &vertex_cache::move : &vertex_cache::move_to_distance, &off_pp, std::placeholders::_1);
 
             for (auto const& glyph : line)
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (!glyph_move_method(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                    if (move_by_length)
                     {
-                        return false;
+                        if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                            return false;
                     }
+                    else
+                    {
+                        if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                            return false;
+                    }
+
                     current_cluster = glyph.char_index;
                     last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                     // Only calculate new angle at the start of each cluster!
