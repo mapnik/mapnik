@@ -78,6 +78,7 @@ public:
 
 private:
     std::string sql_bbox(box2d<double> const& env) const;
+    std::string substitute_tokens(std::string const& sql, double scale_denom, std::string const& box, double pixel_width, double pixel_height, bool &hasbbox) const;
     std::string populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const;
     std::string populate_tokens(std::string const& sql) const;
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
@@ -92,6 +93,7 @@ private:
     std::string schema_;
     std::string geometry_table_;
     const std::string geometry_field_;
+    const std::string geometry_display_expression_;
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;
