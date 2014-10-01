@@ -210,15 +210,14 @@ files = {
         'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
-
-    'tiff-reprojection-2': {'sizes':[(250,250)]},
-
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #'tiff-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-alpha-broken-assoc-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-nodata-edge-raster': {'sizes':[(600,400)]},
     #'tiff-opaque-edge-raster': {'sizes':[(256,256)]},
+    # https://github.com/mapnik/mapnik/issues/2438
+    #'tiff-reprojection-2': {'sizes':[(250,250)]},
     'road-casings-grouped-rendering': {'sizes':[(600,600)],
         'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
     },
