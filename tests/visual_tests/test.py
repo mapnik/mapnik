@@ -27,6 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
+grid_threshold = 0
 if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
@@ -34,6 +35,7 @@ if 'Linux' == platform.uname()[0]:
     # https://github.com/mapnik/mapnik/issues/1868
     cairo_threshold = 230
     agg_threshold = 12
+    grid_threshold = 6
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
@@ -68,7 +70,7 @@ renderers = [
     { 'name': 'grid',
       'render': render_grid,
       'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
-      'threshold': agg_threshold,
+      'threshold': grid_threshold,
       'filetype': 'json',
       'dir': 'grids'
     }
