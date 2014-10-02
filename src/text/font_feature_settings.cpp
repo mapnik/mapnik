@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <functional>
 
 namespace mapnik
 {
@@ -54,9 +55,11 @@ void font_feature_settings::from_string(std::string const& features)
     qi::char_type char_;
     qi::as_string_type as_string;
 
-    auto app = [&](std::string const& s) { append(s); };
+    // Call correct overload.
+    using std::placeholders::_1;
+    void (font_feature_settings::*append)(std::string const&) = &font_feature_settings::append;
 
-    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][app] % ','))
+    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][std::bind(append, this, _1)] % ','))
     {
         throw config_error("failed to parse font-feature-settings: '" + features + "'");
     }
@@ -96,4 +99,3 @@ void font_feature_settings::append(std::string const& feature)
 }
 
 }
-
