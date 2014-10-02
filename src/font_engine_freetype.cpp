@@ -26,6 +26,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
+#include <mapnik/util/file_io.hpp>
 #include <mapnik/utils.hpp>
 
 // boost
@@ -109,37 +110,26 @@ bool freetype_engine::register_font(std::string const& file_name)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-
-    FT_Library library = 0;
-    std::unique_ptr<FT_MemoryRec_> memory(new FT_MemoryRec_);
-    init_freetype(&*memory, library);
-    bool result = register_font_impl(file_name, library);
-    FT_Done_Library(library);
+    font_library library;
+    bool result = register_font_impl(file_name, library.get());
     return result;
 }
 
 bool freetype_engine::register_font_impl(std::string const& file_name, FT_LibraryRec_ * library)
 {
     MAPNIK_LOG_DEBUG(font_engine_freetype) << "registering: " << file_name;
-#ifdef _WINDOWS
-    FILE * file = _wfopen(mapnik::utf8_to_utf16(file_name).c_str(), L"rb");
-#else
-    FILE * file = std::fopen(file_name.c_str(),"rb");
-#endif
-    if (file == nullptr) return false;
+    mapnik::util::file file(file_name);
+    if (!file.open()) return false;
 
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
     memset(&args, 0, sizeof(args));
     memset(&streamRec, 0, sizeof(streamRec));
-    fseek(file, 0, SEEK_END);
-    std::size_t file_size = std::ftell(file);
-    fseek(file, 0, SEEK_SET);
     streamRec.base = 0;
     streamRec.pos = 0;
-    streamRec.size = file_size;
-    streamRec.descriptor.pointer = file;
+    streamRec.size = file.size();
+    streamRec.descriptor.pointer = file.get();
     streamRec.read  = ft_read_cb;
     streamRec.close = NULL;
     args.flags = FT_OPEN_STREAM;
@@ -193,7 +183,6 @@ bool freetype_engine::register_font_impl(std::string const& file_name, FT_Librar
         }
         if (face) FT_Done_Face(face);
     }
-    std::fclose(file);
     return success;
 }
 
@@ -202,11 +191,8 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    std::unique_ptr<FT_MemoryRec_> memory(new FT_MemoryRec_);
-    FT_Library library = 0;
-    init_freetype(&*memory, library);
-    bool result = register_fonts_impl(dir, library, recurse);
-    FT_Done_Library(library);
+    font_library library;
+    bool result = register_fonts_impl(dir, library.get(), recurse);
     return result;
 }
 
@@ -318,19 +304,10 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
             mapnik::scoped_lock lock(mutex_);
 #endif
 
-#ifdef _WINDOWS
-            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(itr->second.second).c_str(), L"rb"), fclose);
-#else
-            std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(itr->second.second.c_str(),"rb"), std::fclose);
-#endif
-            if (file != nullptr)
+            mapnik::util::file file(itr->second.second);
+            if (file.open())
             {
-                std::fseek(file.get(), 0, SEEK_END);
-                std::size_t file_size = std::ftell(file.get());
-                std::fseek(file.get(), 0, SEEK_SET);
-                std::unique_ptr<char[]> buffer(new char[file_size]);
-                std::fread(buffer.get(), file_size, 1, file.get());
-                auto result = memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(buffer),file_size));
+                auto result = memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
                 FT_Error error = FT_New_Memory_Face (library_.get(),
                                                      reinterpret_cast<FT_Byte const*>(result.first->second.first.get()),
                                                      static_cast<FT_Long>(result.first->second.second),
