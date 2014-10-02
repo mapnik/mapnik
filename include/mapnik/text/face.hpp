@@ -98,7 +98,7 @@ public:
 private:
     std::vector<face_ptr> faces_;
 };
-using face_set_ptr = std::shared_ptr<font_face_set>;
+using face_set_ptr = std::unique_ptr<font_face_set>;
 
 
 // FT_Stroker wrapper

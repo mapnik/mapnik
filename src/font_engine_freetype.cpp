@@ -28,6 +28,7 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/make_unique.hpp>
 
 // boost
 #include <boost/algorithm/string/predicate.hpp>
@@ -361,7 +362,7 @@ face_ptr face_manager<T>::get_face(std::string const& name)
 template <typename T>
 face_set_ptr face_manager<T>::get_face_set(std::string const& name)
 {
-    face_set_ptr face_set = std::make_shared<font_face_set>();
+    face_set_ptr face_set = std::make_unique<font_face_set>();
     if (face_ptr face = get_face(name))
     {
         face_set->add(face);
@@ -373,7 +374,7 @@ template <typename T>
 face_set_ptr face_manager<T>::get_face_set(font_set const& fset)
 {
     std::vector<std::string> const& names = fset.get_face_names();
-    face_set_ptr face_set = std::make_shared<font_face_set>();
+    face_set_ptr face_set = std::make_unique<font_face_set>();
     for (auto const& name  : names)
     {
         face_ptr face = get_face(name);
