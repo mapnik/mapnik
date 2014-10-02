@@ -52,9 +52,7 @@ extern "C"
 namespace mapnik
 {
 
-freetype_engine::freetype_engine()
-    : library_() {}
-
+freetype_engine::freetype_engine() {}
 freetype_engine::~freetype_engine() {}
 
 bool freetype_engine::is_font_file(std::string const& file_name)
@@ -256,11 +254,17 @@ freetype_engine::font_file_mapping_type const& freetype_engine::get_mapping()
     return global_font_file_mapping_;
 }
 
+freetype_engine::font_memory_cache_type & freetype_engine::get_cache()
+{
+    return global_memory_fonts_;
+}
 
 face_ptr freetype_engine::create_face(std::string const& family_name,
                                       font_library & library,
                                       freetype_engine::font_file_mapping_type const& font_file_mapping,
-                                      freetype_engine::font_memory_cache_type const& font_cache)
+                                      freetype_engine::font_memory_cache_type const& font_cache,
+                                      freetype_engine::font_file_mapping_type const& global_font_file_mapping,
+                                      freetype_engine::font_memory_cache_type & global_memory_fonts)
 {
     bool found_font_file = false;
     font_file_mapping_type::const_iterator itr = font_file_mapping.find(family_name);
@@ -277,7 +281,6 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
                                                 static_cast<FT_Long>(mem_font_itr->second.second), // size
                                                 itr->second.first, // face index
                                                 &face);
-
             if (!error) return std::make_shared<font_face>(face);
         }
         // we don't add to cache here because the map and its font_cache
@@ -287,8 +290,8 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     else
     {
         // otherwise search global registry
-        itr = global_font_file_mapping_.find(family_name);
-        if (itr != global_font_file_mapping_.end())
+        itr = global_font_file_mapping.find(family_name);
+        if (itr != global_font_file_mapping.end())
         {
             auto mem_font_itr = global_memory_fonts_.find(itr->second.second);
             // if font already in memory, use it
@@ -300,7 +303,6 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
                                                     static_cast<FT_Long>(mem_font_itr->second.second), // size
                                                     itr->second.first, // face index
                                                     &face);
-
                 if (!error) return std::make_shared<font_face>(face);
             }
             found_font_file = true;
@@ -334,16 +336,22 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     return face_ptr();
 }
 
-stroker_ptr freetype_engine::create_stroker()
-{
-    FT_Stroker s;
-    FT_Error error = FT_Stroker_New(library_.get(), &s);
-    if (!error)
-    {
-        return std::make_shared<stroker>(s);
-    }
-    return stroker_ptr();
-}
+
+face_manager::face_manager(font_library & library,
+                           freetype_engine::font_file_mapping_type const& font_file_mapping,
+                           freetype_engine::font_memory_cache_type const& font_cache)
+    : face_ptr_cache_(),
+      library_(library),
+      font_file_mapping_(font_file_mapping),
+      font_memory_cache_(font_cache)
+      {
+            FT_Stroker s;
+            FT_Error error = FT_Stroker_New(library_.get(), &s);
+            if (!error)
+            {
+                stroker_ = std::make_shared<stroker>(s);
+            }
+      }
 
 face_ptr face_manager::get_face(std::string const& name)
 {
@@ -354,7 +362,12 @@ face_ptr face_manager::get_face(std::string const& name)
     }
     else
     {
-        face_ptr face = engine_.create_face(name,library_,font_file_mapping_,font_memory_cache_);
+        face_ptr face = freetype_engine::create_face(name,
+                                                     library_,
+                                                     font_file_mapping_,
+                                                     font_memory_cache_,
+                                                     freetype_engine::get_mapping(),
+                                                     freetype_engine::get_cache());
         if (face)
         {
             face_ptr_cache_.emplace(name,face);

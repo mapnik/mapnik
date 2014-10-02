@@ -36,9 +36,9 @@ renderer_common::renderer_common(Map const& map, unsigned width, unsigned height
      height_(height),
      scale_factor_(scale_factor),
      vars_(vars),
-     shared_font_engine_(std::make_shared<freetype_engine>()),
-     font_engine_(*shared_font_engine_),
-     font_manager_(font_engine_,map.get_font_file_mapping(),map.get_font_memory_cache()),
+     shared_font_library_(std::make_shared<font_library>()),
+     font_library_(*shared_font_library_),
+     font_manager_(font_library_,map.get_font_file_mapping(),map.get_font_memory_cache()),
      query_extent_(),
      t_(t),
      detector_(detector)

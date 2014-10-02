@@ -87,7 +87,8 @@ public:
     map_parser(Map & map, bool strict, std::string const& filename = "") :
         strict_(strict),
         filename_(filename),
-        font_manager_(font_engine_,map.get_font_file_mapping(),map.get_font_memory_cache()),
+        font_library_(),
+        font_manager_(font_library_,map.get_font_file_mapping(),map.get_font_memory_cache()),
         xml_base_path_()
     {}
 
@@ -129,7 +130,7 @@ private:
     bool strict_;
     std::string filename_;
     std::map<std::string,parameters> datasource_templates_;
-    freetype_engine font_engine_;
+    font_library font_library_;
     face_manager_freetype font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
