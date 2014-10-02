@@ -26,8 +26,8 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
+#include <mapnik/text/font_library.hpp>
 #include <mapnik/noncopyable.hpp>
-#include <mapnik/util/font_library.hpp>
 
 // stl
 #include <memory>
@@ -71,25 +71,27 @@ public:
     static std::vector<std::string> face_names();
     static font_file_mapping_type const& get_mapping();
     static face_ptr create_face(std::string const& family_name,
-                         util::font_library & library,
+                         font_library & library,
                          font_file_mapping_type const& font_file_mapping,
                          freetype_engine::font_memory_cache_type const& font_cache);
     stroker_ptr create_stroker();
     virtual ~freetype_engine();
     freetype_engine();
     static bool register_font_impl(std::string const& file_name,
-                                   util::font_library & libary,
+                                   font_library & libary,
                                    font_file_mapping_type & font_file_mapping);
     static bool register_fonts_impl(std::string const& dir,
-                                    util::font_library & libary,
+                                    font_library & libary,
                                     font_file_mapping_type & font_file_mapping,
                                     bool recurse = false);
-    util::font_library & get_library()
+    font_library & get_library()
     {
         return library_;
     }
 private:
-    util::font_library library_;
+    static bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
+    static bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
+    font_library library_;
 #ifdef MAPNIK_THREADSAFE
     static std::mutex mutex_;
 #endif
@@ -121,7 +123,7 @@ private:
     freetype_engine & engine_;
     stroker_ptr stroker_;
     face_ptr_cache_type face_ptr_cache_;
-    util::font_library & library_;
+    font_library & library_;
     freetype_engine::font_file_mapping_type const& font_file_mapping_;
     freetype_engine::font_memory_cache_type const& font_memory_cache_;
 };

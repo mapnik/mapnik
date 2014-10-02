@@ -86,12 +86,12 @@ bool freetype_engine::register_font(std::string const& file_name)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    util::font_library library;
+    font_library library;
     return register_font_impl(file_name, library, global_font_file_mapping_);
 }
 
 bool freetype_engine::register_font_impl(std::string const& file_name,
-                                         util::font_library & library,
+                                         font_library & library,
                                          freetype_engine::font_file_mapping_type & font_file_mapping)
 {
     MAPNIK_LOG_DEBUG(font_engine_freetype) << "registering: " << file_name;
@@ -168,12 +168,12 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    util::font_library library;
+    font_library library;
     return register_fonts_impl(dir, library, global_font_file_mapping_, recurse);
 }
 
 bool freetype_engine::register_fonts_impl(std::string const& dir,
-                                          util::font_library & library,
+                                          font_library & library,
                                           freetype_engine::font_file_mapping_type & font_file_mapping,
                                           bool recurse)
 {
@@ -258,7 +258,7 @@ freetype_engine::font_file_mapping_type const& freetype_engine::get_mapping()
 
 
 face_ptr freetype_engine::create_face(std::string const& family_name,
-                                      util::font_library & library,
+                                      font_library & library,
                                       freetype_engine::font_file_mapping_type const& font_file_mapping,
                                       freetype_engine::font_memory_cache_type const& font_cache)
 {
@@ -271,9 +271,14 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         // if map has font already in memory, use it
         if (mem_font_itr != font_cache.end())
         {
-            return library.face_from_memory(mem_font_itr->second.first.get(),
-                                            mem_font_itr->second.second,
-                                            itr->second.first);
+            FT_Face face;
+            FT_Error error = FT_New_Memory_Face(library.get(),
+                                                reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                                static_cast<FT_Long>(mem_font_itr->second.second), // size
+                                                itr->second.first, // face index
+                                                &face);
+
+            if (!error) return std::make_shared<font_face>(face);
         }
         // we don't add to cache here because the map and its font_cache
         // must be immutable during rendering for predictable thread safety
@@ -289,9 +294,14 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
             // if font already in memory, use it
             if (mem_font_itr != global_memory_fonts_.end())
             {
-                return library.face_from_memory(mem_font_itr->second.first.get(),
-                                                mem_font_itr->second.second,
-                                                itr->second.first);
+                FT_Face face;
+                FT_Error error = FT_New_Memory_Face(library.get(),
+                                                    reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                                    static_cast<FT_Long>(mem_font_itr->second.second), // size
+                                                    itr->second.first, // face index
+                                                    &face);
+
+                if (!error) return std::make_shared<font_face>(face);
             }
             found_font_file = true;
         }
@@ -306,15 +316,19 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
             mapnik::scoped_lock lock(mutex_);
 #endif
             auto result = global_memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
-            face_ptr face = library.face_from_memory(result.first->second.first.get(),
-                                                     result.first->second.second,
-                                                     itr->second.first);
-            if (!face)
+            FT_Face face;
+            FT_Error error = FT_New_Memory_Face(library.get(),
+                                                reinterpret_cast<FT_Byte const*>(result.first->second.first.get()), // data
+                                                static_cast<FT_Long>(result.first->second.second), // size
+                                                itr->second.first, // face index
+                                                &face);
+            if (error)
             {
                 // we can't load font, erase it.
                 global_memory_fonts_.erase(result.first);
+                return face_ptr();
             }
-            return face;
+            return std::make_shared<font_face>(face);
         }
     }
     return face_ptr();

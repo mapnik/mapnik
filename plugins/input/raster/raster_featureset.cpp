@@ -142,6 +142,7 @@ std::string tiled_multi_file_policy::interpolate(std::string const& pattern, int
     // TODO: make from some sort of configurable interpolation
     int tms_y = tile_stride_ * ((image_height_ / tile_size_) - y - 1);
     int tms_x = tile_stride_ * x;
+    // TODO - optimize by avoiding boost::format
     std::string xs = (boost::format("%03d/%03d/%03d") % (tms_x / 1000000) % ((tms_x / 1000) % 1000) % (tms_x % 1000)).str();
     std::string ys = (boost::format("%03d/%03d/%03d") % (tms_y / 1000000) % ((tms_y / 1000) % 1000) % (tms_y % 1000)).str();
     std::string rv(pattern);

@@ -27,6 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
+grid_threshold = 0
 if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
@@ -34,6 +35,7 @@ if 'Linux' == platform.uname()[0]:
     # https://github.com/mapnik/mapnik/issues/1868
     cairo_threshold = 230
     agg_threshold = 12
+    grid_threshold = 6
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
@@ -68,7 +70,7 @@ renderers = [
     { 'name': 'grid',
       'render': render_grid,
       'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
-      'threshold': agg_threshold,
+      'threshold': grid_threshold,
       'filetype': 'json',
       'dir': 'grids'
     }
@@ -208,15 +210,14 @@ files = {
         'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
-
-    'tiff-reprojection-2': {'sizes':[(250,250)]},
-
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #'tiff-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-alpha-broken-assoc-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-nodata-edge-raster': {'sizes':[(600,400)]},
     #'tiff-opaque-edge-raster': {'sizes':[(256,256)]},
+    # https://github.com/mapnik/mapnik/issues/2438
+    #'tiff-reprojection-2': {'sizes':[(250,250)]},
     'road-casings-grouped-rendering': {'sizes':[(600,600)],
         'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
     },

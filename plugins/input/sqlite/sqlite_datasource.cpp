@@ -278,9 +278,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(use_spatial_index)");
 #endif
 
+        bool index_db_attached = false;
         if (mapnik::util::exists(index_db))
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
+            index_db_attached = true;
         }
         has_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
 
@@ -304,7 +306,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                 {
                     //extent_initialized_ = true;
                     has_spatial_index_ = true;
-                    if (mapnik::util::exists(index_db))
+                    if (!index_db_attached && mapnik::util::exists(index_db))
                     {
                         dataset_->execute("attach database '" + index_db + "' as " + index_table_);
                     }

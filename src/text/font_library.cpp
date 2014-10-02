@@ -21,11 +21,11 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/util/font_library.hpp>
-#include <mapnik/text/face.hpp>
+#include <mapnik/text/font_library.hpp>
 
 // stl
 #include <cstdlib>
+#include <stdexcept>
 
 // freetype2
 extern "C"
@@ -56,44 +56,26 @@ void* _Realloc_Func(FT_Memory memory, long cur_size, long new_size, void* block)
 
 namespace mapnik {
 
-namespace util {
+font_library::font_library()
+  : library_(nullptr),
+    memory_(new FT_MemoryRec_)
+{
+    memory_->alloc = _Alloc_Func;
+    memory_->free = _Free_Func;
+    memory_->realloc = _Realloc_Func;
+    FT_Error error = FT_New_Library(&*memory_, &library_);
+    if (error) throw std::runtime_error("can not initalize FreeType2 library");
+    FT_Add_Default_Modules(library_);
+}
 
-    font_library::font_library()
-      : library_(nullptr),
-        memory_(new FT_MemoryRec_)
-    {
-        memory_->alloc = _Alloc_Func;
-        memory_->free = _Free_Func;
-        memory_->realloc = _Realloc_Func;
-        FT_Error error = FT_New_Library(&*memory_, &library_);
-        if (error) throw std::runtime_error("can not initalize FreeType2 library");
-        FT_Add_Default_Modules(library_);
-    }
+FT_Library font_library::get()
+{
+    return library_;
+}
 
-    FT_Library font_library::get()
-    {
-        return library_;
-    }
-
-    face_ptr font_library::face_from_memory(const char * buffer,
-                                            std::size_t size,
-                                            int index)
-    {
-        FT_Face face;
-        FT_Error error = FT_New_Memory_Face(library_,
-                                            reinterpret_cast<FT_Byte const*>(buffer), // data
-                                            static_cast<FT_Long>(size), // size
-                                            index, // face index
-                                            &face);
-        if (!error) return std::make_shared<font_face>(face);
-        return face_ptr();
-    }
-
-    font_library::~font_library()
-    {
-        FT_Done_Library(library_);
-    }
-
-} // end namespace util
+font_library::~font_library()
+{
+    FT_Done_Library(library_);
+}
 
 } // end namespace mapnik

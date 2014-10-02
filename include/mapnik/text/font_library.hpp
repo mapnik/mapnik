@@ -28,17 +28,12 @@
 #include <mapnik/noncopyable.hpp>
 
 // stl
-#include <string>
+#include <memory>
 
 struct FT_LibraryRec_;
 struct FT_MemoryRec_;
 
 namespace mapnik {
-
-class font_face;
-using face_ptr = std::shared_ptr<font_face>;
-
-namespace util {
 
 class MAPNIK_DECL font_library : public noncopyable
 {
@@ -46,14 +41,11 @@ public:
     explicit font_library();
     ~font_library();
     FT_LibraryRec_ * get();
-    face_ptr face_from_memory(const char * buffer,
-                              std::size_t size,
-                              int index);
 private:
     FT_LibraryRec_ * library_;
     std::unique_ptr<FT_MemoryRec_> memory_;
 };
 
-}}
+}
 
 #endif // MAPNIK_FONT_LIBRARY_HPP

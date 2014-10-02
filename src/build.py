@@ -102,10 +102,11 @@ lib_env['LIBS'].append(env['ICU_LIB_NAME'])
 lib_env['LIBS'].append('freetype')
 
 if env['RUNTIME_LINK'] == 'static':
-    if env['PLATFORM'] == 'Linux':
-        lib_env['LINKFLAGS'].append('-pthread')
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
+
+if env['PLATFORM'] == 'Linux':
+    lib_env['LINKFLAGS'].append('-pthread')
 
 if env['RUNTIME_LINK'] != 'static':
     lib_env['LIBS'].insert(0, 'agg')
@@ -142,7 +143,6 @@ else: # unix, non-macos
 
 source = Split(
     """
-    font_library.cpp
     marker_helpers.cpp
     dasharray_parser.cpp
     expression_grammar.cpp
@@ -203,6 +203,7 @@ source = Split(
     svg/svg_transform_parser.cpp
     warp.cpp
     css_color_grammar.cpp
+    text/font_library.cpp
     text/vertex_cache.cpp
     text/text_layout.cpp
     text/text_line.cpp

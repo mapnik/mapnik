@@ -30,9 +30,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/format.hpp>
-
 namespace mapnik
 {
 

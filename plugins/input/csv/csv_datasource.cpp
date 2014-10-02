@@ -694,10 +694,7 @@ void csv_datasource::parse_csv(T & stream,
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
-                else if ((value[0] >= '0' && value[0] <= '9') ||
-                         value[0] == '-' ||
-                         value[0] == '+' ||
-                         value[0] == '.')
+                else if (csv_utils::is_likely_number(value))
                 {
                     bool has_e = value.find("e") != std::string::npos;
                     if (has_dot || has_e)

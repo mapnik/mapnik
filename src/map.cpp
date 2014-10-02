@@ -38,7 +38,7 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
-#include <mapnik/util/font_library.hpp>
+#include <mapnik/text/font_library.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
@@ -221,7 +221,12 @@ Map::const_style_iterator Map::end_styles() const
     return styles_.end();
 }
 
-bool Map::insert_style(std::string const& name,feature_type_style style)
+bool Map::insert_style(std::string const& name, feature_type_style const& style)
+{
+    return styles_.emplace(name, style).second;
+}
+
+bool Map::insert_style(std::string const& name, feature_type_style && style)
 {
     return styles_.emplace(name, std::move(style)).second;
 }
@@ -240,7 +245,16 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
 
-bool Map::insert_fontset(std::string const& name, font_set fontset)
+bool Map::insert_fontset(std::string const& name, font_set const& fontset)
+{
+    if (fontset.get_name() != name)
+    {
+        throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
+    }
+    return fontsets_.emplace(name, fontset).second;
+}
+
+bool Map::insert_fontset(std::string const& name, font_set && fontset)
 {
     if (fontset.get_name() != name)
     {
@@ -270,7 +284,7 @@ std::map<std::string,font_set> & Map::fontsets()
 
 bool Map::register_fonts(std::string const& dir, bool recurse)
 {
-    util::font_library library;
+    font_library library;
     return freetype_engine::register_fonts_impl(dir, library, font_file_mapping_, recurse);
 }
 
@@ -294,7 +308,12 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-void Map::add_layer(layer l)
+void Map::add_layer(layer const& l)
+{
+    layers_.emplace_back(l);
+}
+
+void Map::add_layer(layer && l)
 {
     layers_.push_back(std::move(l));
 }

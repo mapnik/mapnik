@@ -30,6 +30,7 @@
 
 namespace mapnik
 {
+
 layer::layer(std::string const& name, std::string const& srs)
     : name_(name),
       srs_(srs),
@@ -39,8 +40,11 @@ layer::layer(std::string const& name, std::string const& srs)
       queryable_(false),
       clear_label_cache_(false),
       cache_features_(false),
-      group_by_(""),
-      ds_() {}
+      group_by_(),
+      styles_(),
+      ds_(),
+      buffer_size_(),
+      maximum_extent_() {}
 
 layer::layer(layer const& rhs)
     : name_(rhs.name_),
@@ -229,7 +233,6 @@ void layer::reset_buffer_size()
 {
     buffer_size_.reset();
 }
-
 
 box2d<double> layer::envelope() const
 {
