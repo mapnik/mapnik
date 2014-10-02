@@ -19,8 +19,8 @@ before_install:
   - sudo apt-add-repository -y ppa:cartodb/gis
   # we need at least g++-4.7 for c++11 features
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  # upgrade boost
-  - sudo add-apt-repository -y ppa:boost-latest/ppa
+  # enable to test against latest boost rather that v1.48
+  #- sudo add-apt-repository -y ppa:boost-latest/ppa
   - sudo rm -Rf /var/lib/postgresql /etc/postgresql
   - sudo apt-get update -qq
   - sudo apt-get install -q postgresql-9.3-postgis-2.1
@@ -30,8 +30,8 @@ before_install:
   - sudo service postgresql restart
 
 install:
- #- sudo apt-get install -y libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev
- - sudo apt-get install -y boost1.55
+ - sudo apt-get install -y libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev
+ #- sudo apt-get install -y boost1.55
  - sudo apt-get install -y ttf-wqy-microhei make libstdc++6 libstdc++-4.8-dev valgrind python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
 
 before_script:
