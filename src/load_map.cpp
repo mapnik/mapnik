@@ -130,7 +130,7 @@ private:
     std::string filename_;
     std::map<std::string,parameters> datasource_templates_;
     freetype_engine font_engine_;
-    face_manager<freetype_engine> font_manager_;
+    face_manager_freetype font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
     std::string xml_base_path_;

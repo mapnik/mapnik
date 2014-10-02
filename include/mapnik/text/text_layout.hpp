@@ -97,7 +97,7 @@ public:
     void add_child(text_layout_ptr const& child_layout);
 
     inline text_layout_vector const& get_child_layouts() const { return child_layout_list_; }
-    inline face_manager<freetype_engine> & get_font_manager() const { return font_manager_; }
+    inline face_manager_freetype & get_font_manager() const { return font_manager_; }
     inline double get_scale_factor() const { return scale_factor_; }
     inline text_layout_properties const& get_layout_properties() const { return properties_; }
 

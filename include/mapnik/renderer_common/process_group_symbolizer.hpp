@@ -71,7 +71,7 @@ struct virtual_renderer_common : private mapnik::noncopyable
     // TODO: dirty hack for cairo renderer, figure out how to remove this
     std::shared_ptr<freetype_engine> & shared_font_engine_;
     freetype_engine & font_engine_;
-    face_manager<freetype_engine> & font_manager_;
+    face_manager_freetype & font_manager_;
     box2d<double> & query_extent_;
     view_transform & t_;
     std::shared_ptr<label_collision_detector4> detector_;
