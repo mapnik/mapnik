@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
+#include <mapnik/text/font_library.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // stl
@@ -77,8 +78,7 @@ public:
 private:
     static bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
     static bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
-    FT_LibraryRec_ * library_;
-    std::unique_ptr<FT_MemoryRec_> memory_;
+    font_library library_;
 #ifdef MAPNIK_THREADSAFE
     static std::mutex mutex_;
 #endif

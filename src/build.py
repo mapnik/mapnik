@@ -203,6 +203,7 @@ source = Split(
     svg/svg_transform_parser.cpp
     warp.cpp
     css_color_grammar.cpp
+    text/font_library.cpp
     text/vertex_cache.cpp
     text/text_layout.cpp
     text/text_line.cpp

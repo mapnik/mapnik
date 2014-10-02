@@ -76,16 +76,9 @@ void init_freetype(FT_Memory memory, FT_Library & library)
 }
 
 freetype_engine::freetype_engine()
-    : library_(nullptr),
-      memory_(new FT_MemoryRec_)
-{
-    init_freetype(&*memory_, library_);
-}
+    : library_() {}
 
-freetype_engine::~freetype_engine()
-{
-    FT_Done_Library(library_);
-}
+freetype_engine::~freetype_engine() {}
 
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
@@ -310,7 +303,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 
         if (mem_font_itr != memory_fonts_.end()) // memory font
         {
-            FT_Error error = FT_New_Memory_Face(library_,
+            FT_Error error = FT_New_Memory_Face(library_.get(),
                                                 reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
                                                 static_cast<FT_Long>(mem_font_itr->second.second), // size
                                                 itr->second.first, // face index
@@ -338,7 +331,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 std::unique_ptr<char[]> buffer(new char[file_size]);
                 std::fread(buffer.get(), file_size, 1, file.get());
                 auto result = memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(buffer),file_size));
-                FT_Error error = FT_New_Memory_Face (library_,
+                FT_Error error = FT_New_Memory_Face (library_.get(),
                                                      reinterpret_cast<FT_Byte const*>(result.first->second.first.get()),
                                                      static_cast<FT_Long>(result.first->second.second),
                                                      itr->second.first,
@@ -359,7 +352,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 stroker_ptr freetype_engine::create_stroker()
 {
     FT_Stroker s;
-    FT_Error error = FT_Stroker_New(library_, &s);
+    FT_Error error = FT_Stroker_New(library_.get(), &s);
     if (!error)
     {
         return std::make_shared<stroker>(s);
