@@ -28,7 +28,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // stl
-#include <string>
+#include <memory>
 
 struct FT_LibraryRec_;
 struct FT_MemoryRec_;
