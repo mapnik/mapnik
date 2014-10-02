@@ -65,6 +65,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
             draw_rect(pixmap_, itr->box);
         }
     }
+    // TODO - random color per feature
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
         for (auto const& geom : feature.paths())
