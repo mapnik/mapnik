@@ -71,7 +71,11 @@ public:
     static std::vector<std::string> face_names();
     static font_file_mapping_type const& get_mapping();
     static font_memory_cache_type & get_cache();
-    static face_ptr create_face(std::string const& family_name,
+    static bool can_open(std::string const& face_name,
+                         font_library & library,
+                         font_file_mapping_type const& font_file_mapping,
+                         font_file_mapping_type const& global_font_file_mapping);
+    static face_ptr create_face(std::string const& face_name,
                          font_library & library,
                          font_file_mapping_type const& font_file_mapping,
                          freetype_engine::font_memory_cache_type const& font_cache,

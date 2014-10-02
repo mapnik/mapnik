@@ -88,9 +88,8 @@ public:
         strict_(strict),
         filename_(filename),
         font_library_(),
-        font_manager_(font_library_,map.get_font_file_mapping(),map.get_font_memory_cache()),
-        xml_base_path_()
-    {}
+        font_file_mapping_(map.get_font_file_mapping()),
+        xml_base_path_() {}
 
     void parse_map(Map & map, xml_node const& node, std::string const& base_path);
 private:
@@ -131,7 +130,7 @@ private:
     std::string filename_;
     std::map<std::string,parameters> datasource_templates_;
     font_library font_library_;
-    face_manager_freetype font_manager_;
+    freetype_engine::font_file_mapping_type & font_file_mapping_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
     std::string xml_base_path_;
@@ -518,8 +517,11 @@ bool map_parser::parse_font(font_set &fset, xml_node const& f)
     optional<std::string> face_name = f.get_opt_attr<std::string>("face-name");
     if (face_name)
     {
-        face_ptr face = font_manager_.get_face(*face_name);
-        if (face)
+        // TODO - cache results to avoid repeated opens
+        if (freetype_engine::can_open(*face_name,
+                                      font_library_,
+                                      font_file_mapping_,
+                                      freetype_engine::get_mapping()))
         {
             fset.add_face_name(*face_name);
             return true;
@@ -1521,7 +1523,11 @@ void map_parser::parse_pair_layout(group_symbolizer_properties & prop, xml_node 
 
 void map_parser::ensure_font_face(std::string const& face_name)
 {
-    if (! font_manager_.get_face(face_name))
+    // TODO - cache results to avoid repeated opens
+    if (!freetype_engine::can_open(face_name,
+                                  font_library_,
+                                  font_file_mapping_,
+                                  freetype_engine::get_mapping()))
     {
         throw config_error("Failed to find font face '" +
                            face_name + "'");

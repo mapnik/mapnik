@@ -259,6 +259,48 @@ freetype_engine::font_memory_cache_type & freetype_engine::get_cache()
     return global_memory_fonts_;
 }
 
+bool freetype_engine::can_open(std::string const& face_name,
+                               font_library & library,
+                               font_file_mapping_type const& font_file_mapping,
+                               font_file_mapping_type const& global_font_file_mapping)
+{
+    bool found_font_file = false;
+    font_file_mapping_type::const_iterator itr = font_file_mapping.find(face_name);
+    if (itr != font_file_mapping.end())
+    {
+        found_font_file = true;
+    }
+    else
+    {
+        itr = global_font_file_mapping.find(face_name);
+        if (itr != global_font_file_mapping.end())
+        {
+            found_font_file = true;
+        }
+    }
+    if (!found_font_file) return false;
+    mapnik::util::file file(itr->second.second);
+    if (!file.open()) return false;
+    FT_Face face = 0;
+    FT_Open_Args args;
+    FT_StreamRec streamRec;
+    memset(&args, 0, sizeof(args));
+    memset(&streamRec, 0, sizeof(streamRec));
+    streamRec.base = 0;
+    streamRec.pos = 0;
+    streamRec.size = file.size();
+    streamRec.descriptor.pointer = file.get();
+    streamRec.read  = ft_read_cb;
+    streamRec.close = NULL;
+    args.flags = FT_OPEN_STREAM;
+    args.stream = &streamRec;
+    // -1 is used to quickly check if the font file appears valid without iterating each face
+    FT_Error error = FT_Open_Face(library.get(), &args, -1, &face);
+    if (face) FT_Done_Face(face);
+    if (error) return false;
+    return true;
+}
+
 face_ptr freetype_engine::create_face(std::string const& family_name,
                                       font_library & library,
                                       freetype_engine::font_file_mapping_type const& font_file_mapping,
