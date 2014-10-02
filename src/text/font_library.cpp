@@ -25,6 +25,7 @@
 
 // stl
 #include <cstdlib>
+#include <stdexcept>
 
 // freetype2
 extern "C"
