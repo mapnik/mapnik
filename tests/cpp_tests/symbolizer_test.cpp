@@ -1,4 +1,3 @@
-#include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <mapnik/symbolizer.hpp>
