@@ -1024,6 +1024,18 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         for id in range(1,5):
             eq_(fs.next().id(),id)
 
+    def test_geometry_display_expression():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                            table='(select ST_MakePoint(0,0) g) t',
+                            geometry_field='g',
+                            geometry_display_expression='st_translate(g,-1,1)')
+        eq_(len(ds.fields()),0)
+        fs = ds.featureset()
+        feat = fs.next()
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms[0].to_wkt(),'Point(-1 1)')
+
 
     atexit.register(postgis_takedown)
 

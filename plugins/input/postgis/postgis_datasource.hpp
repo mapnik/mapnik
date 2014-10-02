@@ -98,6 +98,7 @@ private:
     std::string schema_;
     std::string geometry_table_;
     const std::string geometry_field_;
+    const std::string geometry_display_expression_;
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;
