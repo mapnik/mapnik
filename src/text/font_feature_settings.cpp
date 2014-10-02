@@ -26,6 +26,7 @@
 
 // boost
 #include <boost/spirit/include/qi.hpp>
+#include <boost/bind.hpp>
 
 // stl
 #include <algorithm>
@@ -54,9 +55,10 @@ void font_feature_settings::from_string(std::string const& features)
     qi::char_type char_;
     qi::as_string_type as_string;
 
-    auto app = [&](std::string const& s) { append(s); };
+    // Call correct overload.
+    void (font_feature_settings::*append)(std::string const&) = &font_feature_settings::append;
 
-    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][app] % ','))
+    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][boost::bind(append, this, ::_1)] % ','))
     {
         throw config_error("failed to parse font-feature-settings: '" + features + "'");
     }
