@@ -293,11 +293,16 @@ bool Map::load_fonts()
     bool result = false;
     for (auto const& kv : font_file_mapping_)
     {
-        mapnik::util::file file(kv.second.second);
-        if (file.open())
+        auto const& global_mapping = freetype_engine::get_mapping();
+        if ((global_mapping.find(kv.first) == global_mapping.end()) &&
+            (font_memory_cache_.find(kv.second.second) == font_memory_cache_.end()))
         {
-            auto item = font_memory_cache_.emplace(kv.second.second, std::make_pair(std::move(file.data()),file.size()));
-            if (item.second) result = true;
+            mapnik::util::file file(kv.second.second);
+            if (file.open())
+            {
+                auto item = font_memory_cache_.emplace(kv.second.second, std::make_pair(std::move(file.data()),file.size()));
+                if (item.second) result = true;
+            }
         }
     }
     return result;
