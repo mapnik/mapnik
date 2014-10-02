@@ -38,8 +38,9 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
-
-// boost
+#include <mapnik/text/font_library.hpp>
+#include <mapnik/util/file_io.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // stl
 #include <stdexcept>
@@ -70,7 +71,11 @@ Map::Map()
     background_image_comp_op_(src_over),
     background_image_opacity_(1.0),
     aspectFixMode_(GROW_BBOX),
-    base_path_("") {}
+    base_path_(""),
+    extra_params_(),
+    font_directory_(),
+    font_file_mapping_(),
+    font_memory_cache_() {}
 
 Map::Map(int width,int height, std::string const& srs)
     : width_(width),
@@ -80,7 +85,11 @@ Map::Map(int width,int height, std::string const& srs)
       background_image_comp_op_(src_over),
       background_image_opacity_(1.0),
       aspectFixMode_(GROW_BBOX),
-      base_path_("") {}
+      base_path_(""),
+      extra_params_(),
+      font_directory_(),
+      font_file_mapping_(),
+      font_memory_cache_() {}
 
 Map::Map(Map const& rhs)
     : width_(rhs.width_),
@@ -98,7 +107,11 @@ Map::Map(Map const& rhs)
       current_extent_(rhs.current_extent_),
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
-      extra_params_(rhs.extra_params_) {}
+      extra_params_(rhs.extra_params_),
+      font_directory_(rhs.font_directory_),
+      font_file_mapping_(rhs.font_file_mapping_),
+      // on copy discard memory cache
+      font_memory_cache_() {}
 
 
 Map::Map(Map && rhs)
@@ -117,10 +130,12 @@ Map::Map(Map && rhs)
       current_extent_(std::move(rhs.current_extent_)),
       maximum_extent_(std::move(rhs.maximum_extent_)),
       base_path_(std::move(rhs.base_path_)),
-      extra_params_(std::move(rhs.extra_params_)) {}
+      extra_params_(std::move(rhs.extra_params_)),
+      font_directory_(std::move(rhs.font_directory_)),
+      font_file_mapping_(std::move(rhs.font_file_mapping_)),
+      font_memory_cache_(std::move(rhs.font_memory_cache_)) {}
 
 Map::~Map() {}
-
 
 Map& Map::operator=(Map rhs)
 {
@@ -147,8 +162,11 @@ void swap (Map & lhs, Map & rhs)
     std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
     std::swap(lhs.base_path_, rhs.base_path_);
     std::swap(lhs.extra_params_, rhs.extra_params_);
+    std::swap(lhs.font_directory_,rhs.font_directory_);
+    std::swap(lhs.font_file_mapping_,rhs.font_file_mapping_);
+    // on assignment discard memory cache
+    //std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
 }
-
 
 bool Map::operator==(Map const& rhs) const
 {
@@ -167,7 +185,10 @@ bool Map::operator==(Map const& rhs) const
         (current_extent_ == rhs.current_extent_) &&
         (maximum_extent_ == rhs.maximum_extent_) &&
         (base_path_ == rhs.base_path_) &&
-        (extra_params_ == rhs.extra_params_);
+        (extra_params_ == rhs.extra_params_) &&
+        (font_directory_ == rhs.font_directory_) &&
+        (font_file_mapping_ == rhs.font_file_mapping_);
+        // Note: we don't care about font_memory_cache in comparison
 }
 
 std::map<std::string,feature_type_style> const& Map::styles() const
@@ -259,6 +280,32 @@ std::map<std::string,font_set> const& Map::fontsets() const
 std::map<std::string,font_set> & Map::fontsets()
 {
     return fontsets_;
+}
+
+bool Map::register_fonts(std::string const& dir, bool recurse)
+{
+    font_library library;
+    return freetype_engine::register_fonts_impl(dir, library, font_file_mapping_, recurse);
+}
+
+bool Map::load_fonts()
+{
+    bool result = false;
+    for (auto const& kv : font_file_mapping_)
+    {
+        auto const& global_mapping = freetype_engine::get_mapping();
+        if ((global_mapping.find(kv.first) == global_mapping.end()) &&
+            (font_memory_cache_.find(kv.second.second) == font_memory_cache_.end()))
+        {
+            mapnik::util::file file(kv.second.second);
+            if (file.open())
+            {
+                auto item = font_memory_cache_.emplace(kv.second.second, std::make_pair(std::move(file.data()),file.size()));
+                if (item.second) result = true;
+            }
+        }
+    }
+    return result;
 }
 
 size_t Map::layer_count() const

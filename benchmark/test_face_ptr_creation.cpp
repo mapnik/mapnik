@@ -11,24 +11,38 @@ public:
     {
         std::size_t count = 0;
         std::size_t expected_count = mapnik::freetype_engine::face_names().size();
-        mapnik::freetype_engine engine;
+        mapnik::freetype_engine::font_file_mapping_type font_file_mapping;
+        mapnik::freetype_engine::font_memory_cache_type font_cache;
+        mapnik::font_library library;
         for (std::string const& name : mapnik::freetype_engine::face_names())
         {
-            mapnik::face_ptr f = engine.create_face(name);
+            mapnik::face_ptr f = mapnik::freetype_engine::create_face(name,
+                                                                      library,
+                                                                      font_file_mapping,
+                                                                      font_cache,
+                                                                      mapnik::freetype_engine::get_mapping(),
+                                                                      mapnik::freetype_engine::get_cache());
             if (f) ++count;
         }
         return count == expected_count;
     }
     void operator()() const
     {
-        mapnik::freetype_engine engine;
         std::size_t expected_count = mapnik::freetype_engine::face_names().size();
         for (unsigned i=0;i<iterations_;++i)
         {
             std::size_t count = 0;
+            mapnik::freetype_engine::font_file_mapping_type font_file_mapping;
+            mapnik::freetype_engine::font_memory_cache_type font_cache;
+            mapnik::font_library library;
             for (std::string const& name : mapnik::freetype_engine::face_names())
             {
-                mapnik::face_ptr f = engine.create_face(name);
+                mapnik::face_ptr f = mapnik::freetype_engine::create_face(name,
+                                                                          library,
+                                                                          font_file_mapping,
+                                                                          font_cache,
+                                                                          mapnik::freetype_engine::get_mapping(),
+                                                                          mapnik::freetype_engine::get_cache());
                 if (f) ++count;
             }
             if (count != expected_count) {

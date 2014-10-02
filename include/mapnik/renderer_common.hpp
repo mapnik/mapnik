@@ -55,8 +55,8 @@ struct renderer_common : private mapnik::noncopyable
     double scale_factor_;
     attributes vars_;
     // TODO: dirty hack for cairo renderer, figure out how to remove this
-    std::shared_ptr<freetype_engine> shared_font_engine_;
-    freetype_engine & font_engine_;
+    std::shared_ptr<font_library> shared_font_library_;
+    font_library & font_library_;
     face_manager_freetype font_manager_;
     box2d<double> query_extent_;
     view_transform t_;

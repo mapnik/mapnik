@@ -78,18 +78,18 @@ void check_object_status_and_throw_exception(T const& object)
 class cairo_face : private mapnik::noncopyable
 {
 public:
-    cairo_face(std::shared_ptr<freetype_engine> const& engine, face_ptr const& face);
+    cairo_face(std::shared_ptr<font_library> const& library, face_ptr const& face);
     ~cairo_face();
     cairo_font_face_t * face() const;
 private:
     class handle
     {
     public:
-        handle(std::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
-            : engine_(engine), face_(face) {}
+        handle(std::shared_ptr<font_library> const& library, face_ptr const& face)
+            : library_(library), face_(face) {}
 
     private:
-        std::shared_ptr<freetype_engine> engine_;
+        std::shared_ptr<font_library> library_;
         face_ptr face_;
     };
 
@@ -109,12 +109,12 @@ using cairo_face_ptr = std::shared_ptr<cairo_face>;
 class cairo_face_manager : private mapnik::noncopyable
 {
 public:
-    cairo_face_manager(std::shared_ptr<freetype_engine> engine);
+    cairo_face_manager(std::shared_ptr<font_library> library);
     cairo_face_ptr get_face(face_ptr face);
 
 private:
     using cairo_face_cache = std::map<face_ptr,cairo_face_ptr>;
-    std::shared_ptr<freetype_engine> font_engine_;
+    std::shared_ptr<font_library> font_library_;
     cairo_face_cache cache_;
 };
 

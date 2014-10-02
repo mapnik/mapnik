@@ -1,5 +1,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/util/fs.hpp>
+#include <mapnik/map.hpp>
+#include <mapnik/load_map.hpp>
 #include <mapnik/debug.hpp>
 
 #include <boost/detail/lightweight_test.hpp>
@@ -31,10 +33,34 @@ int main(int argc, char** argv)
         BOOST_TEST( mapnik::util::exists( fontdir ) );
         BOOST_TEST( mapnik::util::is_directory( fontdir ) );
 
+        // test map cached fonts
+        mapnik::Map m(1,1);
+        BOOST_TEST( m.register_fonts(fontdir , false ) );
+        BOOST_TEST( m.get_font_memory_cache().size() == 0 );
+        BOOST_TEST( m.get_font_file_mapping().size() == 1 );
+        BOOST_TEST( m.load_fonts() );
+        BOOST_TEST( m.get_font_memory_cache().size() == 1 );
+        BOOST_TEST( m.register_fonts(fontdir , true ) );
+        BOOST_TEST( m.get_font_file_mapping().size() == 22 );
+        BOOST_TEST( m.load_fonts() );
+        BOOST_TEST( m.get_font_memory_cache().size() == 22 );
+
+        // copy discards memory cache but not file mapping
+        mapnik::Map m2(m);
+        BOOST_TEST( m2.get_font_memory_cache().size() == 0 );
+        BOOST_TEST( m2.get_font_file_mapping().size() == 22 );
+        BOOST_TEST( m2.load_fonts() );
+        BOOST_TEST( m2.get_font_memory_cache().size() == 22 );
+
+        // test font-directory from XML
+        mapnik::Map m3(1,1);
+        mapnik::load_map_string(m3,"<Map font-directory=\"fonts/\"></Map>");
+        BOOST_TEST( m3.get_font_memory_cache().size() == 0 );
+        BOOST_TEST( m3.load_fonts() );
+        BOOST_TEST( m3.get_font_memory_cache().size() == 1 );
+
         std::vector<std::string> face_names;
-
         std::string foo("foo");
-
         // fake directories
         BOOST_TEST( !mapnik::freetype_engine::register_fonts(foo , true ) );
         face_names = mapnik::freetype_engine::face_names();
