@@ -88,7 +88,7 @@ public:
     bool is_text() const;
     bool is(std::string const& name) const;
 
-    xml_node & add_child(std::string && name, unsigned line=0, bool is_text = false);
+    xml_node & add_child(const char * name, unsigned line=0, bool is_text = false);
     void add_attribute(const char * name, const char * value);
     attribute_map const& get_attributes() const;
 

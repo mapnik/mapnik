@@ -154,7 +154,8 @@ private:
     {
         for (; attributes; attributes = attributes->next )
         {
-            node.add_attribute((const char *)attributes->name,(const char *)attributes->children->content);
+            node.add_attribute(reinterpret_cast<const char *>(attributes->name),
+                               reinterpret_cast<const char *>(attributes->children->content));
         }
     }
 
@@ -166,18 +167,17 @@ private:
             {
             case XML_ELEMENT_NODE:
             {
-                std::string name((const char *)cur_node->name);
-                xml_node &new_node = node.add_child(std::move(name), cur_node->line, false);
+                xml_node &new_node = node.add_child(reinterpret_cast<const char *>(cur_node->name), cur_node->line, false);
                 append_attributes(cur_node->properties, new_node);
                 populate_tree(cur_node->children, new_node);
             }
             break;
             case XML_TEXT_NODE:
             {
-                std::string trimmed((const char*)cur_node->content);
+                std::string trimmed(reinterpret_cast<const char *>(cur_node->content));
                 mapnik::util::trim(trimmed);
                 if (trimmed.empty()) break; //Don't add empty text nodes
-                node.add_child(std::move(trimmed), cur_node->line, true);
+                node.add_child(trimmed.c_str(), cur_node->line, true);
             }
             break;
             case XML_COMMENT_NODE:

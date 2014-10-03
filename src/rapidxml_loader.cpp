@@ -54,7 +54,7 @@ public:
     {
     }
 
-    void load(std::string const& filename, xml_node &node)
+    void load(std::string const& filename, xml_node & node)
     {
         if (!mapnik::util::exists(filename))
         {
@@ -107,19 +107,19 @@ public:
         }
     }
 
-    void load_string(std::string const& buffer, xml_node &node, std::string const & )
+    void load_string(std::string const& buffer, xml_node & node, std::string const & )
     {
         // Note: base_path ignored because its not relevant - only needed for xml2 to load entities (see libxml2_loader.cpp)
         load_array(std::string(buffer), node);
     }
 private:
-    void populate_tree(rapidxml::xml_node<char> *cur_node, xml_node &node)
+    void populate_tree(rapidxml::xml_node<char> *cur_node, xml_node & node)
     {
         switch (cur_node->type())
         {
         case rapidxml::node_element:
         {
-            xml_node &new_node = node.add_child((char *)cur_node->name(), 0, false);
+            xml_node & new_node = node.add_child(cur_node->name(), 0, false);
             // Copy attributes
             for (rapidxml::xml_attribute<char> *attr = cur_node->first_attribute();
                  attr; attr = attr->next_attribute())
@@ -154,12 +154,12 @@ private:
     std::string filename_;
 };
 
-void read_xml(std::string const & filename, xml_node &node)
+void read_xml(std::string const& filename, xml_node & node)
 {
     rapidxml_loader loader;
     loader.load(filename, node);
 }
-void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path)
+void read_xml_string(std::string const& str, xml_node & node, std::string const& base_path)
 {
     rapidxml_loader loader;
     loader.load_string(str, node, base_path);

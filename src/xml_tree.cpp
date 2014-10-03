@@ -114,22 +114,19 @@ std::string const& xml_tree::filename() const
     return file_;
 }
 
-xml_node &xml_tree::root()
+xml_node & xml_tree::root()
 {
     return node_;
 }
 
-const xml_node &xml_tree::root() const
+const xml_node & xml_tree::root() const
 {
     return node_;
 }
 
 xml_attribute::xml_attribute(const char * value_)
     : value(value_),
-      processed(false)
-{
-
-}
+      processed(false) {}
 
 node_not_found::node_not_found(std::string const& node_name)
     : node_name_(node_name) {}
@@ -221,9 +218,9 @@ bool xml_node::is(std::string const& name) const
     return false;
 }
 
-xml_node &xml_node::add_child(std::string && name, unsigned line, bool is_text)
+xml_node & xml_node::add_child(const char * name, unsigned line, bool is_text)
 {
-    children_.emplace_back(tree_, std::move(name), line, is_text);
+    children_.emplace_back(tree_, name, line, is_text);
     return children_.back();
 }
 
