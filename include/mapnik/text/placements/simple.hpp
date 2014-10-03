@@ -30,19 +30,6 @@ namespace mapnik {
 
 class text_placement_info_simple;
 
-enum directions_e
-{
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
-    NORTHEAST,
-    SOUTHEAST,
-    NORTHWEST,
-    SOUTHWEST,
-    EXACT_POSITION
-};
-
 // Automatically generates placement options from a user selected list of directions and text sizes.
 class text_placements_simple: public text_placements
 {

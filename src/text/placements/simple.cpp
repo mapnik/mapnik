@@ -64,66 +64,8 @@ bool text_placement_info_simple::next()
 bool text_placement_info_simple::next_position_only()
 {
     if (position_state >= parent_->direction_.size()) return false;
-    directions_e dir = parent_->direction_[position_state];
-    switch (dir)
-    {
-    case EXACT_POSITION:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(dx,dy);
-            };
-        break;
-    case NORTH:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(0,-std::abs(dy));
-            };
-        break;
-    case EAST:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(std::abs(dx),0);
-            };
-        break;
-    case SOUTH:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(0,std::abs(dy));
-            };
-        break;
-    case WEST:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(-std::abs(dx),0);
-            };
-        break;
-    case NORTHEAST:
-        properties.layout_defaults.displacement_evaluator_ =  [](double dx, double dy)
-            {
-                return pixel_position(std::abs(dx),-std::abs(dy));
-            };
-        break;
-    case SOUTHEAST:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(std::abs(dx),std::abs(dy));
-            };
-        break;
-    case NORTHWEST:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(-std::abs(dx),-std::abs(dy));
-            };
-        break;
-    case SOUTHWEST:
-        properties.layout_defaults.displacement_evaluator_ = [](double dx, double dy)
-            {
-                return pixel_position(-std::abs(dx),std::abs(dy));
-            };
-        break;
-    default:
-        MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
-    }
+    //directions_e dir = parent_->direction_[position_state];
+    properties.layout_defaults.dir = parent_->direction_[position_state];
     ++position_state;
     return true;
 }

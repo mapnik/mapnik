@@ -340,12 +340,46 @@ void text_layout::shape_text(text_line & line)
     harfbuzz_shaper::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
 }
 
+pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
+{
+    switch (dir)
+    {
+    case EXACT_POSITION:
+        return pixel_position(dx,dy);
+        break;
+    case NORTH:
+        return pixel_position(0,-std::abs(dy));
+        break;
+    case EAST:
+        return pixel_position(std::abs(dx),0);
+        break;
+    case SOUTH:
+        return pixel_position(0,std::abs(dy));
+        break;
+    case WEST:
+        return pixel_position(-std::abs(dx),0);
+        break;
+    case NORTHEAST:
+        return pixel_position(std::abs(dx),-std::abs(dy));
+        break;
+    case SOUTHEAST:
+        return pixel_position(std::abs(dx),std::abs(dy));
+        break;
+    case NORTHWEST:
+        return pixel_position(-std::abs(dx),-std::abs(dy));
+        break;
+    case SOUTHWEST:
+        return pixel_position(-std::abs(dx),std::abs(dy));
+        break;
+    }
+}
+
 void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attrs)
 {
     // dx,dy
     double dx = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dx);
     double dy = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dy);
-    displacement_ = properties_.displacement_evaluator_(dx,dy);
+    displacement_ = evaluate_displacement(dx,dy, properties_.dir);
     std::string wrap_str = util::apply_visitor(extract_value<std::string>(feature,attrs), properties_.wrap_char);
     if (!wrap_str.empty()) wrap_char_ = wrap_str[0];
     wrap_width_ = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);

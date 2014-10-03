@@ -35,10 +35,8 @@
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/noncopyable.hpp>
-
 // stl
 #include <map>
-#include <functional>
 
 // boost
 #include <boost/optional.hpp>
@@ -80,6 +78,19 @@ struct evaluated_format_properties
 };
 
 }
+
+enum directions_e
+{
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+    NORTHEAST,
+    SOUTHEAST,
+    NORTHWEST,
+    SOUTHWEST,
+    EXACT_POSITION
+};
 
 using fontset_map = std::map<std::string, font_set>;
 
@@ -137,9 +148,7 @@ struct MAPNIK_DECL text_layout_properties
     symbolizer_base::value_type halign;
     symbolizer_base::value_type jalign;
     symbolizer_base::value_type valign;
-
-    std::function<pixel_position(double,double)> displacement_evaluator_ =
-        [](double dx, double dy) { return pixel_position(dx,dy);};
+    directions_e dir = EXACT_POSITION;
 };
 
 struct text_properties_expressions
