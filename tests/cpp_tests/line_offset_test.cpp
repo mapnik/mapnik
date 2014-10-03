@@ -4,7 +4,6 @@
 
 // boost
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/version.hpp>
 
 // stl
 #include <stdexcept>

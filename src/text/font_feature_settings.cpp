@@ -26,11 +26,13 @@
 
 // boost
 #include <boost/spirit/include/qi.hpp>
+#include <boost/version.hpp>
 
 // stl
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <functional>
 
 namespace mapnik
 {
@@ -54,9 +56,16 @@ void font_feature_settings::from_string(std::string const& features)
     qi::char_type char_;
     qi::as_string_type as_string;
 
+#if BOOST_VERSION <= 104800
+    // Call correct overload.
+    using std::placeholders::_1;
+    void (font_feature_settings::*append)(std::string const&) = &font_feature_settings::append;
+    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][std::bind(append, this, _1)] % ','))
+#else
     auto app = [&](std::string const& s) { append(s); };
-
     if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][app] % ','))
+#endif
+
     {
         throw config_error("failed to parse font-feature-settings: '" + features + "'");
     }
@@ -96,4 +105,3 @@ void font_feature_settings::append(std::string const& feature)
 }
 
 }
-

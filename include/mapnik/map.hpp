@@ -32,6 +32,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -97,6 +98,9 @@ private:
     boost::optional<box2d<double> > maximum_extent_;
     std::string base_path_;
     parameters extra_params_;
+    boost::optional<std::string> font_directory_;
+    freetype_engine::font_file_mapping_type font_file_mapping_;
+    freetype_engine::font_memory_cache_type font_memory_cache_;
 
 public:
 
@@ -166,13 +170,21 @@ public:
      */
     style_iterator end_styles();
 
-    /*! \brief Insert a style in the map.
+    /*! \brief Insert a style in the map by copying.
      *  @param name The name of the style.
      *  @param style The style to insert.
      *  @return true If success.
      *          false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style style);
+    bool insert_style(std::string const& name,feature_type_style const& style);
+
+    /*! \brief Insert a style in the map by moving..
+     *  @param name The name of the style.
+     *  @param style The style to insert.
+     *  @return true If success.
+     *          false If no success.
+     */
+    bool insert_style(std::string const& name,feature_type_style && style);
 
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
@@ -185,13 +197,21 @@ public:
      */
     boost::optional<feature_type_style const&> find_style(std::string const& name) const;
 
-    /*! \brief Insert a fontset into the map.
+    /*! \brief Insert a fontset into the map by copying.
      *  @param name The name of the fontset.
      *  @param fontset The fontset to insert.
      *  @return true If success.
      *          false If failure.
      */
-    bool insert_fontset(std::string const& name, font_set fontset);
+    bool insert_fontset(std::string const& name, font_set const& fontset);
+
+    /*! \brief Insert a fontset into the map by moving.
+     *  @param name The name of the fontset.
+     *  @param fontset The fontset to insert.
+     *  @return true If success.
+     *          false If failure.
+     */
+    bool insert_fontset(std::string const& name, font_set && fontset);
 
     /*! \brief Find a fontset.
      *  @param name The name of the fontset.
@@ -209,14 +229,27 @@ public:
      */
     std::map<std::string,font_set> & fontsets();
 
+    /*! \brief register fonts.
+     */
+    bool register_fonts(std::string const& dir, bool recurse);
+
+    /*! \brief cache registered fonts.
+     */
+    bool load_fonts();
+
     /*! \brief Get number of all layers.
      */
     size_t layer_count() const;
 
-    /*! \brief Add a layer to the map.
+    /*! \brief Add a layer to the map by copying it.
      *  @param l The layer to add.
      */
-    void add_layer(layer l);
+    void add_layer(layer const& l);
+
+    /*! \brief Add a layer to the map by moving it.
+     *  @param l The layer to add.
+     */
+    void add_layer(layer && l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
@@ -436,6 +469,36 @@ public:
      * @brief Set extra, arbitary Parameters of the Map
      */
     void set_extra_parameters(parameters& params);
+
+    boost::optional<std::string> const& font_directory() const
+    {
+        return font_directory_;
+    }
+
+    void set_font_directory(std::string const& dir)
+    {
+        font_directory_ = dir;
+    }
+
+    freetype_engine::font_file_mapping_type const& get_font_file_mapping() const
+    {
+        return font_file_mapping_;
+    }
+
+    freetype_engine::font_file_mapping_type & get_font_file_mapping()
+    {
+        return font_file_mapping_;
+    }
+
+    freetype_engine::font_memory_cache_type const& get_font_memory_cache() const
+    {
+        return font_memory_cache_;
+    }
+
+    freetype_engine::font_memory_cache_type & get_font_memory_cache()
+    {
+        return font_memory_cache_;
+    }
 
 private:
     friend void swap(Map & rhs, Map & lhs);

@@ -344,7 +344,7 @@ template text_symbolizer_helper::text_symbolizer_helper(
     unsigned height,
     double scale_factor,
     view_transform const& t,
-    face_manager<freetype_engine> &font_manager,
+    face_manager_freetype & font_manager,
     label_collision_detector4 &detector,
     box2d<double> const& query_extent,
     agg::trans_affine const&);
@@ -358,7 +358,7 @@ template text_symbolizer_helper::text_symbolizer_helper(
     unsigned height,
     double scale_factor,
     view_transform const& t,
-    face_manager<freetype_engine> &font_manager,
+    face_manager_freetype & font_manager,
     label_collision_detector4 &detector,
     box2d<double> const& query_extent,
     agg::trans_affine const&);

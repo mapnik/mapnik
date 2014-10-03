@@ -60,7 +60,7 @@ public:
                             unsigned width,
                             unsigned height,
                             double scale_factor,
-                            view_transform const &t,
+                            view_transform const& t,
                             DetectorType &detector,
                             box2d<double> const& query_extent);
 
@@ -89,10 +89,10 @@ private:
     /** Check if a point placement fits at given position */
     bool check_point_placement(pixel_position const& pos);
     /** Checks for collision. */
-    bool collision(box2d<double> const& box, const value_unicode_string &repeat_key = "") const;
+    bool collision(box2d<double> const& box, value_unicode_string const& repeat_key = "") const;
     double get_spacing(double path_length) const;
 
-    DetectorType &detector_;
+    DetectorType & detector_;
 
     /** Boxes and repeat keys to take into account when finding placement.
      *  Boxes are relative to starting point of current placement.

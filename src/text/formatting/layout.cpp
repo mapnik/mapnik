@@ -50,6 +50,7 @@ void layout_node::to_xml(ptree &xml) const
     if (dy) serialize_property("dy", *dy, new_node);
     if (text_ratio) serialize_property("text-ratio", *text_ratio, new_node);
     if (wrap_width) serialize_property("wrap-width", *wrap_width, new_node);
+    if (wrap_char) serialize_property("wrap-character", *wrap_char, new_node);
     if (wrap_before) serialize_property("wrap-before", *wrap_before, new_node);
     if (repeat_wrap_char) serialize_property("repeat-wrap-character", *repeat_wrap_char, new_node);
     if (rotate_displacement) serialize_property("rotate-displacement", *rotate_displacement, new_node);
@@ -71,6 +72,7 @@ node_ptr layout_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     if (xml.has_attribute("dy")) set_property_from_xml<double>(n->dy, "dy", xml);
     if (xml.has_attribute("text-ratio")) set_property_from_xml<double>(n->text_ratio, "text-ratio", xml);
     if (xml.has_attribute("wrap-width")) set_property_from_xml<double>(n->wrap_width, "wrap-width", xml);
+    if (xml.has_attribute("wrap-character")) set_property_from_xml<std::string>(n->wrap_char, "wrap-character", xml);
     if (xml.has_attribute("wrap-before")) set_property_from_xml<mapnik::boolean_type>(n->wrap_before, "wrap-before", xml);
     if (xml.has_attribute("repeat-wrap-character")) set_property_from_xml<mapnik::boolean_type>(n->repeat_wrap_char, "repeat-wrap-character", xml);
     if (xml.has_attribute("rotate-displacement")) set_property_from_xml<mapnik::boolean_type>(n->rotate_displacement, "rotate-displacement", xml);
@@ -88,6 +90,7 @@ void layout_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     if (dy) new_properties.dy = *dy;
     if (text_ratio) new_properties.text_ratio = *text_ratio;
     if (wrap_width) new_properties.wrap_width = *wrap_width;
+    if (wrap_char) new_properties.wrap_char = *wrap_char;
     if (wrap_before) new_properties.wrap_before = *wrap_before;
     if (repeat_wrap_char) new_properties.repeat_wrap_char = *repeat_wrap_char;
     if (rotate_displacement) new_properties.rotate_displacement = *rotate_displacement;
@@ -128,6 +131,7 @@ void layout_node::add_expressions(expression_set & output) const
     if (dy && is_expression(*dy)) output.insert(util::get<expression_ptr>(*dy));
     if (orientation && is_expression(*orientation)) output.insert(util::get<expression_ptr>(*orientation));
     if (wrap_width && is_expression(*wrap_width)) output.insert(util::get<expression_ptr>(*wrap_width));
+    if (wrap_char && is_expression(*wrap_char)) output.insert(util::get<expression_ptr>(*wrap_char));
     if (wrap_before && is_expression(*wrap_before)) output.insert(util::get<expression_ptr>(*wrap_before));
     if (repeat_wrap_char && is_expression(*repeat_wrap_char)) output.insert(util::get<expression_ptr>(*repeat_wrap_char));
     if (rotate_displacement && is_expression(*rotate_displacement)) output.insert(util::get<expression_ptr>(*rotate_displacement));

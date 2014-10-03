@@ -58,7 +58,7 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
       m_(m),
       context_(cairo),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor),
-      face_manager_(common_.shared_font_engine_)
+      face_manager_(common_.shared_font_library_)
 {
     setup(m);
 }
@@ -75,7 +75,7 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
       m_(m),
       context_(cairo),
       common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor),
-      face_manager_(common_.shared_font_engine_)
+      face_manager_(common_.shared_font_library_)
 {
     setup(m);
 }
@@ -91,7 +91,7 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
       m_(m),
       context_(cairo),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector),
-      face_manager_(common_.shared_font_engine_)
+      face_manager_(common_.shared_font_library_)
 {
     setup(m);
 }

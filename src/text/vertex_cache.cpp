@@ -23,6 +23,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/text/vertex_cache.hpp>
 #include <mapnik/offset_converter.hpp>
+#include <mapnik/make_unique.hpp>
 
 namespace mapnik
 {
@@ -127,18 +128,15 @@ vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
         return *this;
     }
 
-    vertex_cache_ptr offseted_line;
     offseted_lines_map::iterator pos = offseted_lines_.find(offset);
-    if (pos != offseted_lines_.end())
-    {
-        offseted_line = pos->second;
-    }
-    else
+    if (pos == offseted_lines_.end())
     {
         offset_converter<vertex_cache> converter(*this);
         converter.set_offset(offset);
-        offseted_line = vertex_cache_ptr(new vertex_cache(converter));
+        pos = offseted_lines_.emplace(offset, std::make_unique<vertex_cache>(converter)).first;
     }
+    vertex_cache_ptr & offseted_line = pos->second;
+
     offseted_line->reset();
     offseted_line->next_subpath(); //TODO: Multiple subpath support
 
@@ -146,8 +144,6 @@ vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
     // which we'll use to make the offset line aligned to this one.
     double seek = offseted_line->position_closest_to(current_position_);
     offseted_line->move(seek);
-
-    offseted_lines_[offset] = offseted_line;
     return *offseted_line;
 }
 

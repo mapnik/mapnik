@@ -38,12 +38,12 @@
 namespace mapnik {
 
 group_symbolizer_helper::group_symbolizer_helper(
-        const group_symbolizer &sym, const feature_impl &feature,
+        group_symbolizer const& sym, feature_impl const& feature,
         attributes const& vars,
-        const proj_transform &prj_trans,
+        proj_transform const& prj_trans,
         unsigned width, unsigned height, double scale_factor,
-        const view_transform &t, DetectorType &detector,
-        const box2d<double> &query_extent)
+        view_transform const& t, DetectorType & detector,
+        box2d<double> const& query_extent)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       detector_(detector)
 {}
@@ -154,7 +154,7 @@ bool group_symbolizer_helper::check_point_placement(pixel_position const& pos)
     return true;
 }
 
-bool group_symbolizer_helper::collision(const box2d<double> &box, const value_unicode_string &repeat_key) const
+bool group_symbolizer_helper::collision(box2d<double> const& box, value_unicode_string const& repeat_key) const
 {
     if (!detector_.extent().intersects(box)
             ||

@@ -50,7 +50,7 @@ For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationT
 
 Build system dependencies are:
 
- * C++ compiler (like g++ or clang++)
+ * C++ compiler supporting `-std=c++11` (like >= g++ 4.8 or >= clang++ 3.4)
  * >= 2 GB RAM (> 5 GB for g++)
  * Python 2.4-2.7 
  * Scons (a copy is bundled)

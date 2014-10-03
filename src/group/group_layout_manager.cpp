@@ -44,9 +44,9 @@ struct process_layout : public util::static_visitor<>
     //      and the offset values should position them around (0,0)
     pixel_position const& input_origin_;
 
-    process_layout(const vector<bound_box> &member_bboxes,
+    process_layout(vector<bound_box> const& member_bboxes,
                    vector<pixel_position> &member_offsets,
-                   const pixel_position &input_origin)
+                   pixel_position const& input_origin)
        : member_boxes_(member_bboxes),
          member_offsets_(member_offsets),
          input_origin_(input_origin)
@@ -140,7 +140,7 @@ private:
     // stores corresponding offset, and returns modified bounding box
     bound_box box_offset_align(size_t i, double x, double y, int x_dir, int y_dir) const
     {
-        const bound_box &box = member_boxes_[i];
+        bound_box const& box = member_boxes_[i];
         pixel_position offset((x_dir == 0 ? x - input_origin_.x : x - (x_dir < 0 ? box.maxx() : box.minx())),
                              (y_dir == 0 ? y - input_origin_.y : y - (y_dir < 0 ? box.maxy() : box.miny())));
 
@@ -152,8 +152,8 @@ private:
 bound_box group_layout_manager::offset_box_at(size_t i)
 {
     handle_update();
-    const pixel_position &offset = member_offsets_.at(i);
-    const bound_box &box = member_boxes_.at(i);
+    pixel_position const& offset = member_offsets_.at(i);
+    bound_box const& box = member_boxes_.at(i);
     return box2d<double>(box.minx() + offset.x, box.miny() + offset.y,
                          box.maxx() + offset.x, box.maxy() + offset.y);
 }
