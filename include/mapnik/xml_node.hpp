@@ -52,6 +52,8 @@ public:
     ~node_not_found() throw ();
 private:
     std::string node_name_;
+protected:
+    mutable std::string msg_;
 };
 
 class attribute_not_found: public std::exception
@@ -63,6 +65,8 @@ public:
 private:
     std::string node_name_;
     std::string attribute_name_;
+protected:
+    mutable std::string msg_;
 };
 
 class more_than_one_child: public std::exception
@@ -73,6 +77,8 @@ public:
     ~more_than_one_child() throw ();
 private:
     std::string node_name_;
+protected:
+    mutable std::string msg_;
 };
 
 class xml_node
