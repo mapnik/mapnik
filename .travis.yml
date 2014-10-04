@@ -2,6 +2,7 @@ language: cpp
 
 compiler:
  - clang
+ - gcc
 
 env:
   matrix:
