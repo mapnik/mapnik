@@ -53,7 +53,6 @@ enum eAttributeCollectionPolicy
 template <typename Processor>
 class MAPNIK_DECL feature_style_processor
 {
-    struct symbol_dispatch;
 public:
     explicit feature_style_processor(Map const& m,
                                      double scale_factor = 1.0);

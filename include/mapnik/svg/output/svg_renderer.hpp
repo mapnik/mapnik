@@ -166,31 +166,6 @@ private:
     svg::svg_generator<OutputIterator> generator_;
     bool painted_;
     renderer_common common_;
-
-
-    // Visitor that makes the calls to process each symbolizer when stored in a variant.
-    // This object follows the model of that found in feature_style_processor. It appears here, because
-    // the logic that iterates over the set of symbolizer has been moved to an SVG renderer's internal
-    // method.
-    struct symbol_dispatch : public util::static_visitor<>
-    {
-        symbol_dispatch(svg_renderer<OutputIterator>& processor,
-                        mapnik::feature_impl & feature,
-                        proj_transform const& prj_trans)
-            : processor_(processor),
-              feature_(feature),
-              prj_trans_(prj_trans) {}
-
-        template <typename Symbolizer>
-        void operator()(Symbolizer const& sym) const
-        {
-            processor_.process(sym, feature_, prj_trans_);
-        }
-
-        svg_renderer<OutputIterator>& processor_;
-        mapnik::feature_impl & feature_;
-        proj_transform const& prj_trans_;
-    };
 };
 }
 
