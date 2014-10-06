@@ -63,7 +63,8 @@ using boost::optional;
 
 void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool explicit_defaults)
 {
-    p->defaults.to_xml(node, explicit_defaults);
+    text_symbolizer_properties dfl;
+    p->defaults.to_xml(node, explicit_defaults, dfl);
     // Known types:
     //   - text_placements_dummy: no handling required
     //   - text_placements_simple: positions string

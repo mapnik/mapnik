@@ -23,18 +23,16 @@
 #define MAPNIK_TEXT_PROPERTIES_HPP
 
 // mapnik
-#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/value.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/text/formatting/base.hpp>
-#include <mapnik/pixel_position.hpp>
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/text/font_feature_settings.hpp>
+
 // stl
 #include <map>
 
@@ -99,7 +97,7 @@ struct MAPNIK_DECL format_properties
     format_properties();
     void from_xml(xml_node const& sym, fontset_map const& fontsets);
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                format_properties const& dfl = format_properties()) const;
+                format_properties const& dfl) const;
     // collect expressions
     void add_expressions(expression_set & output) const;
 
@@ -116,7 +114,6 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type text_transform;
     symbolizer_base::value_type font_feature_settings;
-
 };
 
 
@@ -129,7 +126,7 @@ struct MAPNIK_DECL text_layout_properties
     void from_xml(xml_node const &sym, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                text_layout_properties const& dfl = text_layout_properties()) const;
+                text_layout_properties const& dfl) const;
 
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
@@ -178,7 +175,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     void from_xml(xml_node const& node, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                text_symbolizer_properties const& dfl = text_symbolizer_properties()) const;
+                text_symbolizer_properties const& dfl) const;
 
     // Takes a feature and produces formatted text as output.
     // The output object has to be created by the caller and passed in for thread safety.
