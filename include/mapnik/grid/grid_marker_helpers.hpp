@@ -192,17 +192,18 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        coord2d center = bbox_.center();
-        agg::trans_affine_translation recenter(-center.x, -center.y);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
+        coord2d center = bbox_.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine tr = recenter * marker_trans_;
+        markers_placement_params params { bbox_, tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, Detector> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
         {
-            agg::trans_affine matrix = recenter * marker_trans_;
+            agg::trans_affine matrix = tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
             svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
