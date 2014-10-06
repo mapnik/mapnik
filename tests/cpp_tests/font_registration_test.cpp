@@ -28,13 +28,28 @@ int main(int argc, char** argv)
 
         BOOST_TEST(set_working_dir(args));
 
+
+        // grab references to global statics of registered/cached fonts
+        auto const& global_mapping = mapnik::freetype_engine::get_mapping();
+        auto const& global_cache = mapnik::freetype_engine::get_cache();
+
+        // mapnik.Map object has parallel structure for localized fonts
+        mapnik::Map m(1,1);
+        auto const& local_mapping = m.get_font_file_mapping();
+        auto const& local_cache = m.get_font_memory_cache();
+
+        // should be empty to start
+        BOOST_TEST( global_mapping.empty() );
+        BOOST_TEST( global_cache.empty() );
+        BOOST_TEST( local_mapping.empty() );
+        BOOST_TEST( local_cache.empty() );
+
         std::string fontdir("fonts/");
 
         BOOST_TEST( mapnik::util::exists( fontdir ) );
         BOOST_TEST( mapnik::util::is_directory( fontdir ) );
 
         // test map cached fonts
-        mapnik::Map m(1,1);
         BOOST_TEST( m.register_fonts(fontdir , false ) );
         BOOST_TEST( m.get_font_memory_cache().size() == 0 );
         BOOST_TEST( m.get_font_file_mapping().size() == 1 );
