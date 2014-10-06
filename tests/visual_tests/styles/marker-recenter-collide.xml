@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    
+    <Style name="point">
+        <Rule>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" dx="[offset]" dy="[offset]">"I"</TextSymbolizer>
+            <MarkersSymbolizer file="shape://arrow"/>
+            <DebugSymbolizer/>
+        </Rule>
+    </Style>
+
+    <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>point</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+                lat,lon,offset
+                0,-0.35,10
+                0,0.35,0
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>
