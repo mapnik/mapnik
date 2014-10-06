@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/markers_placement.hpp>
+#include <mapnik/marker_helpers.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 
@@ -42,7 +43,7 @@
 namespace mapnik {
 
 template <typename RendererBase, typename RendererType, typename Detector, typename RendererContext>
-struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
+struct raster_markers_rasterizer_dispatch_grid : public raster_markers_dispatch<Detector>
 {
     using pixfmt_type = typename RendererBase::pixfmt_type;
     using color_type = typename RendererBase::pixfmt_type::color_type;
@@ -56,53 +57,20 @@ struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
                                             markers_symbolizer const& sym,
                                             Detector & detector,
                                             double scale_factor,
-                                            mapnik::feature_impl const& feature,
+                                            mapnik::feature_impl & feature,
                                             attributes const& vars,
                                             RendererContext const& renderer_context)
-    : buf_(std::get<0>(renderer_context)),
+    : raster_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor,
+                                        feature, vars, false),
+        buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),
         ras_(std::get<1>(renderer_context)),
-        src_(src),
-        marker_trans_(marker_trans),
-        sym_(sym),
-        detector_(detector),
-        scale_factor_(scale_factor),
-        feature_(feature),
-        vars_(vars),
         pixmap_(std::get<2>(renderer_context)),
-        placed_(false) {}
+        placed_(false)
+    {}
 
-    template <typename T>
-    void add_path(T & path)
-    {
-        agg::scanline_bin sl_;
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        box2d<double> bbox(0,0, src_.width(), src_.height());
-        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
-        markers_placement_finder<T, label_collision_detector4> placement_finder(
-            placement_method, path, detector_, params);
-        double x, y, angle = .0;
-        while (placement_finder.get_point(x, y, angle, ignore_placement))
-        {
-            agg::trans_affine matrix = marker_trans_;
-            matrix.rotate(angle);
-            matrix.translate(x, y);
-            render_raster_marker(matrix);
-            if (!placed_)
-            {
-                pixmap_.add_feature(feature_);
-                placed_ = true;
-            }
-        }
-    }
-
-    void render_raster_marker(agg::trans_affine const& marker_tr)
+    void render_raster_marker(agg::trans_affine const& marker_tr, double opacity)
     {
         agg::scanline_bin sl_;
         double width  = src_.width();
@@ -123,6 +91,11 @@ struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
         RendererType ren(renb_);
         ren.color(color_type(feature_.id()));
         agg::render_scanlines(ras_, sl_, ren);
+        if (!placed_)
+        {
+            pixmap_.add_feature(feature_);
+            placed_ = true;
+        }
     }
 
 private:
@@ -130,20 +103,17 @@ private:
     pixfmt_type pixf_;
     RendererBase renb_;
     RasterizerType & ras_;
-    image_data_32 const& src_;
-    agg::trans_affine const& marker_trans_;
-    markers_symbolizer const& sym_;
-    Detector & detector_;
-    double scale_factor_;
-    mapnik::feature_impl const& feature_;
-    attributes const& vars_;
     PixMapType & pixmap_;
     bool placed_;
+
+    using raster_markers_dispatch<Detector>::src_;
+    using raster_markers_dispatch<Detector>::feature_;
+    using raster_markers_dispatch<Detector>::snap_to_pixels_;
 };
 
 
 template <typename SvgRenderer, typename Detector, typename RendererContext>
-struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
+struct vector_markers_rasterizer_dispatch_grid : public vector_markers_dispatch<Detector>
 {
     using renderer_base = typename SvgRenderer::renderer_base        ;
     using vertex_source_type = typename SvgRenderer::vertex_source_type   ;
@@ -161,56 +131,28 @@ struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
                                             markers_symbolizer const& sym,
                                             Detector & detector,
                                             double scale_factor,
-                                            mapnik::feature_impl const& feature,
+                                            mapnik::feature_impl & feature,
                                             attributes const& vars,
                                             bool snap_to_pixels,
                                             RendererContext const& renderer_context)
-    : buf_(std::get<0>(renderer_context)),
+    : vector_markers_dispatch<Detector>(bbox, marker_trans, sym, detector, scale_factor, feature, vars, snap_to_pixels),
+        buf_(std::get<0>(renderer_context)),
         pixf_(buf_),
         renb_(pixf_),
         svg_renderer_(path, attrs),
         ras_(std::get<1>(renderer_context)),
-        bbox_(bbox),
-        marker_trans_(marker_trans),
-        sym_(sym),
-        detector_(detector),
-        scale_factor_(scale_factor),
-        feature_(feature),
-        vars_(vars),
         pixmap_(std::get<2>(renderer_context)),
         placed_(false)
-    {
-    }
+    {}
 
-    template <typename T>
-    void add_path(T & path)
+    void render_vector_marker(agg::trans_affine & marker_tr, double opacity)
     {
         agg::scanline_bin sl_;
-        marker_placement_enum placement_method =
-            get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
-        double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        coord2d center = bbox_.center();
-        agg::trans_affine_translation recenter(-center.x, -center.y);
-        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
-        markers_placement_finder<T, Detector> placement_finder(
-            placement_method, path, detector_, params);
-        double x, y, angle = .0;
-        while (placement_finder.get_point(x, y, angle, ignore_placement))
+        svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), marker_tr, opacity, bbox_);
+        if (!placed_)
         {
-            agg::trans_affine matrix = recenter * marker_trans_;
-            matrix.rotate(angle);
-            matrix.translate(x, y);
-            svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), matrix, opacity, bbox_);
-            if (!placed_)
-            {
-                pixmap_.add_feature(feature_);
-                placed_ = true;
-            }
+            pixmap_.add_feature(feature_);
+            placed_ = true;
         }
     }
 
@@ -220,15 +162,12 @@ private:
     renderer_base renb_;
     SvgRenderer svg_renderer_;
     RasterizerType & ras_;
-    box2d<double> const& bbox_;
-    agg::trans_affine const& marker_trans_;
-    markers_symbolizer const& sym_;
-    Detector & detector_;
-    double scale_factor_;
-    mapnik::feature_impl const& feature_;
-    attributes const& vars_;
     PixMapType & pixmap_;
     bool placed_;
+
+    using vector_markers_dispatch<Detector>::bbox_;
+    using vector_markers_dispatch<Detector>::feature_;
+    using vector_markers_dispatch<Detector>::snap_to_pixels_;
 };
 
 }

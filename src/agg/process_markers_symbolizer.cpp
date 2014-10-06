@@ -94,8 +94,8 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
     using context_type = decltype(renderer_context);
-    using vector_dispatch_type = vector_markers_rasterizer_dispatch<svg_renderer_type, detector_type, context_type>;
-    using raster_dispatch_type = raster_markers_rasterizer_dispatch<detector_type, context_type>;
+    using vector_dispatch_type = vector_markers_rasterizer_dispatch_agg<svg_renderer_type, detector_type, context_type>;
+    using raster_dispatch_type = raster_markers_rasterizer_dispatch_agg<detector_type, context_type>;
 
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
         sym, feature, prj_trans, common_, clip_box, renderer_context);
