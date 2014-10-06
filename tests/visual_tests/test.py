@@ -27,7 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
-grid_threshold = 0
+grid_threshold = 5
 if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
