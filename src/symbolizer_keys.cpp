@@ -58,7 +58,9 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "stroke-dasharray", false, nullptr, property_types::target_dash_array },
     property_meta_type{ "stroke-miterlimit", 4.0, nullptr, property_types::target_double },
     property_meta_type{ "geometry-transform", false, nullptr, property_types::target_transform },
-    property_meta_type{ "line-rasterizer", enumeration_wrapper(RASTERIZER_FULL),
+    // TODO - should be called 'line-rasterizer' but for back compat with 2.3.x we keep as 'rasterizer'
+    // https://github.com/mapnik/mapnik/issues/2503
+    property_meta_type{ "rasterizer", enumeration_wrapper(RASTERIZER_FULL),
                         [](enumeration_wrapper e) { return enumeration<line_rasterizer_enum,line_rasterizer_enum_MAX>(line_rasterizer_enum(e.value)).as_string();}, property_types::target_double },
     property_meta_type{ "transform", false, nullptr, property_types::target_transform },
     property_meta_type{ "spacing", 0.0, nullptr, property_types::target_double },
