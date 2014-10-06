@@ -292,12 +292,10 @@ bool Map::load_fonts()
 {
     bool result = false;
     auto const& global_mapping = freetype_engine::get_mapping();
-    auto const& global_cache = freetype_engine::get_cache();
+    //auto const& global_cache = freetype_engine::get_cache();
     for (auto const& kv : font_file_mapping_) // for every face-name:filepath
     {
-        auto const& face_name = kv.second.second;
-        // if font data is already cached
-        std::clog << "kv.first " << kv.first << "\n";
+        //auto const& face_name = kv.second.second;
         if ((global_mapping.find(kv.first) == global_mapping.end()) &&
             (font_memory_cache_.find(kv.second.second) == font_memory_cache_.end()))
         {
