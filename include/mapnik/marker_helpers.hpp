@@ -40,19 +40,7 @@
 #include <mapnik/label_collision_detector.hpp>
 
 // agg
-#include "agg_ellipse.h"
-#include "agg_color_rgba.h"
-#include "agg_renderer_base.h"
-#include "agg_renderer_scanline.h"
-#include "agg_rendering_buffer.h"
-#include "agg_scanline_u.h"
-#include "agg_image_filters.h"
 #include "agg_trans_affine.h"
-#include "agg_span_allocator.h"
-#include "agg_image_accessors.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_span_image_filter_rgba.h"
-#include "agg_span_interpolator_linear.h"
 
 // boost
 #include <boost/optional.hpp>
@@ -71,22 +59,20 @@ using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 template <typename Detector>
 struct vector_markers_dispatch : mapnik::noncopyable
 {
-    vector_markers_dispatch(box2d<double> const& bbox,
+    vector_markers_dispatch(svg_path_ptr const& src,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector & detector,
                             double scale_factor,
                             feature_impl & feature,
-                            attributes const& vars,
-                            bool snap_to_pixels)
-    : bbox_(bbox),
+                            attributes const& vars)
+    : src_(src),
         marker_trans_(marker_trans),
         sym_(sym),
         detector_(detector),
         feature_(feature),
         vars_(vars),
-        scale_factor_(scale_factor),
-        snap_to_pixels_(snap_to_pixels)
+        scale_factor_(scale_factor)
     {}
 
     virtual ~vector_markers_dispatch() {}
@@ -101,10 +87,11 @@ struct vector_markers_dispatch : mapnik::noncopyable
         double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        coord2d center = bbox_.center();
+        box2d<double> const& bbox = src_->bounding_box();
+        coord2d center = bbox.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine tr = recenter * marker_trans_;
-        markers_placement_params params { bbox_, tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
+        markers_placement_params params { bbox, tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, Detector> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;
@@ -113,42 +100,39 @@ struct vector_markers_dispatch : mapnik::noncopyable
             agg::trans_affine matrix = tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            render_vector_marker(matrix, opacity);
+            render_marker(matrix, opacity);
         }
     }
 
-    virtual void render_vector_marker(agg::trans_affine & marker_tr, double opacity) = 0;
+    virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
 
 protected:
-    box2d<double> const& bbox_;
+    svg_path_ptr const& src_;
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;
     feature_impl & feature_;
     attributes const& vars_;
     double scale_factor_;
-    bool snap_to_pixels_;
 };
 
 template <typename Detector>
 struct raster_markers_dispatch : mapnik::noncopyable
 {
-    raster_markers_dispatch(image_data_32 const& src,
+    raster_markers_dispatch(image_data_32 & src,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector & detector,
                             double scale_factor,
                             feature_impl & feature,
-                            attributes const& vars,
-                            bool snap_to_pixels = false)
+                            attributes const& vars)
     : src_(src),
         marker_trans_(marker_trans),
         sym_(sym),
         detector_(detector),
         feature_(feature),
         vars_(vars),
-        scale_factor_(scale_factor),
-        snap_to_pixels_(snap_to_pixels)
+        scale_factor_(scale_factor)
     {}
 
     virtual ~raster_markers_dispatch() {}
@@ -159,11 +143,11 @@ struct raster_markers_dispatch : mapnik::noncopyable
         marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
         bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
         bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        box2d<double> bbox(0,0, src_.width(), src_.height());
         double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
         bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
         double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
         double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        box2d<double> bbox(0,0, src_.width(), src_.height());
         markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
             placement_method, path, detector_, params);
@@ -173,199 +157,20 @@ struct raster_markers_dispatch : mapnik::noncopyable
             agg::trans_affine matrix = marker_trans_;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            render_raster_marker(matrix, opacity);
+            render_marker(matrix, opacity);
         }
     }
 
-    virtual void render_raster_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
+    virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
 
 protected:
-    image_data_32 const& src_;
+    image_data_32 & src_;
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;
     feature_impl & feature_;
     attributes const& vars_;
     double scale_factor_;
-    bool snap_to_pixels_;
-};
-
-template <typename SvgRenderer, typename Detector, typename RendererContext>
-struct vector_markers_rasterizer_dispatch_agg : public vector_markers_dispatch<Detector>
-{
-    using renderer_base = typename SvgRenderer::renderer_base        ;
-    using vertex_source_type = typename SvgRenderer::vertex_source_type   ;
-    using attribute_source_type = typename SvgRenderer::attribute_source_type;
-    using pixfmt_type = typename renderer_base::pixfmt_type        ;
-
-    using BufferType = typename std::tuple_element<0,RendererContext>::type;
-    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
-
-    vector_markers_rasterizer_dispatch_agg(vertex_source_type & path,
-                                           attribute_source_type const& attrs,
-                                           box2d<double> const& bbox,
-                                           agg::trans_affine const& marker_trans,
-                                           symbolizer_base const& sym,
-                                           Detector & detector,
-                                           double scale_factor,
-                                           feature_impl & feature,
-                                           attributes const& vars,
-                                           bool snap_to_pixels,
-                                           RendererContext const& renderer_context)
-    : vector_markers_dispatch<Detector>(bbox, marker_trans, sym, detector, scale_factor, feature, vars, snap_to_pixels),
-        buf_(std::get<0>(renderer_context)),
-        pixf_(buf_),
-        renb_(pixf_),
-        svg_renderer_(path, attrs),
-        ras_(std::get<1>(renderer_context))
-    {
-        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, vars, src_over)));
-    }
-
-    ~vector_markers_rasterizer_dispatch_agg() {}
-
-    void render_vector_marker(agg::trans_affine & marker_tr, double opacity)
-    {
-        agg::scanline_u8 sl_;
-
-        if (snap_to_pixels_)
-        {
-            // https://github.com/mapnik/mapnik/issues/1316
-            marker_tr.tx = std::floor(marker_tr.tx + .5);
-            marker_tr.ty = std::floor(marker_tr.ty + .5);
-        }
-        svg_renderer_.render(ras_, sl_, renb_, marker_tr, opacity, bbox_);
-    }
-
-private:
-    BufferType & buf_;
-    pixfmt_type pixf_;
-    renderer_base renb_;
-    SvgRenderer svg_renderer_;
-    RasterizerType & ras_;
-
-    using vector_markers_dispatch<Detector>::bbox_;
-    using vector_markers_dispatch<Detector>::snap_to_pixels_;
-};
-
-template <typename Detector, typename RendererContext>
-struct raster_markers_rasterizer_dispatch_agg : public raster_markers_dispatch<Detector>
-{
-    using BufferType = typename std::remove_reference<typename std::tuple_element<0,RendererContext>::type>::type;
-    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
-
-    using color_type = agg::rgba8;
-    using order_type = agg::order_rgba;
-    using pixel_type = agg::pixel32_type;
-    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
-    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
-    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
-
-    raster_markers_rasterizer_dispatch_agg(image_data_32 const& src,
-                                           agg::trans_affine const& marker_trans,
-                                           symbolizer_base const& sym,
-                                           Detector & detector,
-                                           double scale_factor,
-                                           feature_impl & feature,
-                                           attributes const& vars,
-                                           RendererContext const& renderer_context,
-                                           bool snap_to_pixels = false)
-    : raster_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor,
-                                        feature, vars, snap_to_pixels),
-        buf_(std::get<0>(renderer_context)),
-        pixf_(buf_),
-        renb_(pixf_),
-        ras_(std::get<1>(renderer_context))
-    {
-        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, vars, src_over)));
-    }
-
-    ~raster_markers_rasterizer_dispatch_agg() {}
-
-    void render_raster_marker(agg::trans_affine const& marker_tr, double opacity)
-    {
-        using pixfmt_pre = agg::pixfmt_rgba32_pre;
-        agg::scanline_u8 sl_;
-        double width  = this->src_.width();
-        double height = this->src_.height();
-        if (std::fabs(1.0 - this->scale_factor_) < 0.001
-            && (std::fabs(1.0 - marker_tr.sx) < agg::affine_epsilon)
-            && (std::fabs(0.0 - marker_tr.shy) < agg::affine_epsilon)
-            && (std::fabs(0.0 - marker_tr.shx) < agg::affine_epsilon)
-            && (std::fabs(1.0 - marker_tr.sy) < agg::affine_epsilon))
-        {
-            agg::rendering_buffer src_buffer((unsigned char *)src_.getBytes(),src_.width(),src_.height(),src_.width() * 4);
-            pixfmt_pre pixf_mask(src_buffer);
-            if (snap_to_pixels_)
-            {
-                renb_.blend_from(pixf_mask,
-                                 0,
-                                 std::floor(marker_tr.tx + .5),
-                                 std::floor(marker_tr.ty + .5),
-                                 unsigned(255*opacity));
-            }
-            else
-            {
-                renb_.blend_from(pixf_mask,
-                                 0,
-                                 marker_tr.tx,
-                                 marker_tr.ty,
-                                 unsigned(255*opacity));
-            }
-        }
-        else
-        {
-            using img_accessor_type = agg::image_accessor_clone<pixfmt_pre>;
-            using interpolator_type = agg::span_interpolator_linear<>;
-            //using span_gen_type = agg::span_image_filter_rgba_2x2<img_accessor_type,interpolator_type>;
-            using span_gen_type = agg::span_image_resample_rgba_affine<img_accessor_type>;
-            using renderer_type = agg::renderer_scanline_aa_alpha<renderer_base,
-                                                                  agg::span_allocator<color_type>,
-                                                                  span_gen_type>;
-
-            double p[8];
-            p[0] = 0;     p[1] = 0;
-            p[2] = width; p[3] = 0;
-            p[4] = width; p[5] = height;
-            p[6] = 0;     p[7] = height;
-            marker_tr.transform(&p[0], &p[1]);
-            marker_tr.transform(&p[2], &p[3]);
-            marker_tr.transform(&p[4], &p[5]);
-            marker_tr.transform(&p[6], &p[7]);
-            agg::span_allocator<color_type> sa;
-            agg::image_filter_lut filter;
-            filter.calculate(agg::image_filter_bilinear(), true);
-            agg::rendering_buffer marker_buf((unsigned char *)src_.getBytes(),
-                                             src_.width(),
-                                             src_.height(),
-                                             src_.width()*4);
-            pixfmt_pre pixf(marker_buf);
-            img_accessor_type ia(pixf);
-            agg::trans_affine final_tr(p, 0, 0, width, height);
-            if (snap_to_pixels_)
-            {
-                final_tr.tx = std::floor(final_tr.tx+.5);
-                final_tr.ty = std::floor(final_tr.ty+.5);
-            }
-            interpolator_type interpolator(final_tr);
-            span_gen_type sg(ia, interpolator, filter);
-            renderer_type rp(renb_,sa, sg, unsigned(opacity*255));
-            ras_.move_to_d(p[0],p[1]);
-            ras_.line_to_d(p[2],p[3]);
-            ras_.line_to_d(p[4],p[5]);
-            ras_.line_to_d(p[6],p[7]);
-            agg::render_scanlines(ras_, sl_, rp);
-        }
-    }
-
-private:
-    BufferType & buf_;
-    pixfmt_comp_type pixf_;
-    renderer_base renb_;
-    RasterizerType & ras_;
-
-    using raster_markers_dispatch<Detector>::src_;
-    using raster_markers_dispatch<Detector>::snap_to_pixels_;
 };
 
 void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path);

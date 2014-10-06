@@ -32,17 +32,17 @@
 
 namespace mapnik {
 
-template <typename T0, typename T1, typename T2>
+template <typename VD, typename RD, typename RendererType, typename ContextType>
 void render_markers_symbolizer(markers_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans,
-                               renderer_common const& common,
+                               RendererType const& common,
                                box2d<double> const& clip_box,
-                               T2 const& renderer_context)
+                               ContextType const& renderer_context)
 {
     using namespace mapnik::svg;
-    using vector_dispatch_type = T0;
-    using raster_dispatch_type = T1;
+    using vector_dispatch_type = VD;
+    using raster_dispatch_type = RD;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
@@ -71,18 +71,17 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                 if (filename == "shape://ellipse"
                    && (has_key<double>(sym,keys::width) || has_key<double>(sym,keys::height)))
                 {
-                    svg_storage_type marker_ellipse;
-                    vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
+                    svg_path_ptr marker_ellipse = std::make_shared<svg_storage_type>();
+                    vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse->source());
                     svg_path_adapter svg_path(stl_storage);
-                    build_ellipse(sym, feature, common.vars_, marker_ellipse, svg_path);
+                    build_ellipse(sym, feature, common.vars_, *marker_ellipse, svg_path);
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
                     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
                     if (image_transform) evaluate_transform(image_tr, feature, common.vars_, *image_transform);
-                    box2d<double> bbox = marker_ellipse.bounding_box();
-                    vector_dispatch_type rasterizer_dispatch(svg_path,
+                    vector_dispatch_type rasterizer_dispatch(marker_ellipse,
+                                                             svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
-                                                             bbox,
                                                              image_tr,
                                                              sym,
                                                              *common.detector_,
@@ -124,9 +123,9 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     svg_path_adapter svg_path(stl_storage);
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym, feature, common.vars_);
-                    vector_dispatch_type rasterizer_dispatch(svg_path,
+                    vector_dispatch_type rasterizer_dispatch(*stock_vector_marker,
+                                                             svg_path,
                                                              result ? attributes : (*stock_vector_marker)->attributes(),
-                                                             bbox,
                                                              image_tr,
                                                              sym,
                                                              *common.detector_,

@@ -201,13 +201,20 @@ void cairo_renderer<T>::render_marker(pixel_position const& pos,
         mapnik::svg_path_ptr vmarker = *marker.get_vector_data();
         if (vmarker)
         {
-            agg::trans_affine marker_tr = tr;
-            marker_tr *=agg::trans_affine_scaling(common_.scale_factor_);
             box2d<double> bbox = vmarker->bounding_box();
+            agg::trans_affine marker_tr = tr;
+            if (recenter)
+            {
+                coord<double,2> c = bbox.center();
+                marker_tr = agg::trans_affine_translation(-c.x,-c.y);
+                marker_tr *= tr;
+            }
+            marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
             agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
             svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(vmarker->source());
             svg::svg_path_adapter svg_path(stl_storage);
-            render_vector_marker(context_, pos, svg_path, bbox, attributes, marker_tr, opacity, recenter);
+            marker_tr.translate(pos.x, pos.y);
+            render_vector_marker(context_, svg_path, attributes, bbox, marker_tr, opacity);
         }
     }
     else if (marker.is_bitmap())

@@ -45,11 +45,14 @@ porting notes -->
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/marker_helpers.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
+#include <mapnik/grid/grid_render_marker.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/grid/grid_marker_helpers.hpp>
 
 #include <mapnik/debug.hpp>
 #include <mapnik/geom_util.hpp>
@@ -77,6 +80,111 @@ porting notes -->
 
 namespace mapnik {
 
+namespace detail {
+
+template <typename SvgRenderer, typename Detector, typename RendererContext>
+struct vector_markers_rasterizer_dispatch : public vector_markers_dispatch<Detector>
+{
+    using renderer_base = typename SvgRenderer::renderer_base;
+    using vertex_source_type = typename SvgRenderer::vertex_source_type;
+    using attribute_source_type = typename SvgRenderer::attribute_source_type;
+    using pixfmt_type = typename renderer_base::pixfmt_type;
+
+    using BufferType = typename std::tuple_element<0,RendererContext>::type;
+    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
+    using PixMapType = typename std::tuple_element<2,RendererContext>::type;
+
+    vector_markers_rasterizer_dispatch(svg_path_ptr const& src,
+                                       vertex_source_type & path,
+                                       svg_attribute_type const& attrs,
+                                       agg::trans_affine const& marker_trans,
+                                       markers_symbolizer const& sym,
+                                       Detector & detector,
+                                       double scale_factor,
+                                       mapnik::feature_impl & feature,
+                                       attributes const& vars,
+                                       bool snap_to_pixels,
+                                       RendererContext const& renderer_context)
+    : vector_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars, snap_to_pixels),
+        buf_(std::get<0>(renderer_context)),
+        pixf_(buf_),
+        renb_(pixf_),
+        svg_renderer_(path, attrs),
+        ras_(std::get<1>(renderer_context)),
+        pixmap_(std::get<2>(renderer_context)),
+        placed_(false)
+    {}
+
+    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    {
+        agg::scanline_bin sl_;
+        svg_renderer_.render_id(ras_, sl_, renb_, this->feature_.id(), marker_tr, opacity, this->src_->bounding_box());
+        if (!placed_)
+        {
+            pixmap_.add_feature(this->feature_);
+            placed_ = true;
+        }
+    }
+
+private:
+    BufferType & buf_;
+    pixfmt_type pixf_;
+    renderer_base renb_;
+    SvgRenderer svg_renderer_;
+    RasterizerType & ras_;
+    PixMapType & pixmap_;
+    bool placed_;
+};
+
+template <typename RendererBase, typename RendererType, typename Detector, typename RendererContext>
+struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detector>
+{
+    using pixfmt_type = typename RendererBase::pixfmt_type;
+    using color_type = typename RendererBase::pixfmt_type::color_type;
+
+    using BufferType = typename std::tuple_element<0,RendererContext>::type;
+    using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
+    using PixMapType = typename std::tuple_element<2,RendererContext>::type;
+
+    raster_markers_rasterizer_dispatch(image_data_32 & src,
+                                       agg::trans_affine const& marker_trans,
+                                       markers_symbolizer const& sym,
+                                       Detector & detector,
+                                       double scale_factor,
+                                       mapnik::feature_impl & feature,
+                                       attributes const& vars,
+                                       RendererContext const& renderer_context)
+    : raster_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor,
+                                        feature, vars, false),
+        buf_(std::get<0>(renderer_context)),
+        pixf_(buf_),
+        renb_(pixf_),
+        ras_(std::get<1>(renderer_context)),
+        pixmap_(std::get<2>(renderer_context)),
+        placed_(false)
+    {}
+
+    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    {
+        render_raster_marker(RendererType(renb_), ras_, this->src_, this->feature_, marker_tr, opacity);
+        if (!placed_)
+        {
+            pixmap_.add_feature(this->feature_);
+            placed_ = true;
+        }
+    }
+
+private:
+    BufferType & buf_;
+    pixfmt_type pixf_;
+    RendererBase renb_;
+    RasterizerType & ras_;
+    PixMapType & pixmap_;
+    bool placed_;
+};
+
+}
+
 template <typename T>
 void grid_renderer<T>::process(markers_symbolizer const& sym,
                                mapnik::feature_impl & feature,
@@ -100,13 +208,13 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 
     auto renderer_context = std::tie(render_buf,*ras_ptr,pixmap_);
     using context_type = decltype(renderer_context);
-    using vector_dispatch_type = vector_markers_rasterizer_dispatch_grid<svg_renderer_type,
-                                                                         detector_type,
-                                                                         context_type>;
-    using raster_dispatch_type = raster_markers_rasterizer_dispatch_grid<grid_renderer_base_type,
-                                                                           renderer_type,
-                                                                           detector_type,
-                                                                           context_type>;
+    using vector_dispatch_type = detail::vector_markers_rasterizer_dispatch<svg_renderer_type,
+                                                                            detector_type,
+                                                                            context_type>;
+    using raster_dispatch_type = detail::raster_markers_rasterizer_dispatch<grid_renderer_base_type,
+                                                                            renderer_type,
+                                                                            detector_type,
+                                                                            context_type>;
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
         sym, feature, prj_trans, common_, clip_box,renderer_context);
 }
