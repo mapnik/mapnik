@@ -24,6 +24,7 @@
 #define MAPNIK_JSON_ERROR_HANDLER_HPP
 
 #include <string>
+#include <sstream>
 #include <mapnik/debug.hpp>
 #include <boost/spirit/home/support/info.hpp>
 
@@ -37,7 +38,9 @@ struct error_handler
         Iterator first, Iterator last,
         Iterator err_pos, boost::spirit::info const& what) const
     {
-        MAPNIK_LOG_ERROR(error_handler) << what << " expected but got: " << std::string(err_pos, std::min(err_pos + 16,last));
+        std::stringstream s;
+        s << what << " expected but got: " << std::string(err_pos, std::min(err_pos + 16,last));
+        throw std::runtime_error(s.str());
     }
 };
 
