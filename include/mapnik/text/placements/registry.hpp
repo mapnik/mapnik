@@ -36,7 +36,7 @@ namespace mapnik
 namespace placements
 {
 
-using from_xml_function_ptr = text_placements_ptr (*) (xml_node const&, fontset_map const&) ;
+using from_xml_function_ptr = text_placements_ptr (*) (xml_node const&, fontset_map const&, bool) ;
 
 class registry : public singleton<registry, CreateStatic>,
                  private mapnik::noncopyable
@@ -47,7 +47,8 @@ public:
     void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
     text_placements_ptr from_xml(std::string name,
                                  xml_node const& xml,
-                                 fontset_map const & fontsets);
+                                 fontset_map const & fontsets,
+                                 bool is_shield);
 private:
     std::map<std::string, from_xml_function_ptr> map_;
 };

@@ -141,11 +141,11 @@ std::string text_placements_simple::get_positions()
     return positions_; //TODO: Build string from data in direction_ and text_sizes_
 }
 
-text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontset_map const& fontsets)
+text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield)
 {
     text_placements_ptr ptr = std::make_shared<text_placements_simple>(
         xml.get_attr<std::string>("placements", "X"));
-    ptr->defaults.from_xml(xml, fontsets);
+    ptr->defaults.from_xml(xml, fontsets, is_shield);
     return ptr;
 }
 

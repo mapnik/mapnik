@@ -95,7 +95,7 @@ using fontset_map = std::map<std::string, font_set>;
 struct MAPNIK_DECL format_properties
 {
     format_properties();
-    void from_xml(xml_node const& sym, fontset_map const& fontsets);
+    void from_xml(xml_node const& sym, fontset_map const& fontsets, bool is_shield);
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 format_properties const& dfl) const;
     // collect expressions
@@ -172,7 +172,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     // Load only placement related values from XML ptree.
     void text_properties_from_xml(xml_node const& node);
     // Load all values from XML ptree.
-    void from_xml(xml_node const& node, fontset_map const& fontsets);
+    void from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield);
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 text_symbolizer_properties const& dfl) const;

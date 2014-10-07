@@ -61,7 +61,6 @@ enum class keys : std::uint8_t
     shield_dx,
     shield_dy,
     unlock_image,
-    text_opacity,
     mode,
     scaling,
     filter_factor,

@@ -73,7 +73,6 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "shield-dx", 0.0, nullptr, property_types::target_double },
     property_meta_type{ "shield-dy", 0.0, nullptr, property_types::target_double },
     property_meta_type{ "unlock-image",false, nullptr, property_types::target_bool },
-    property_meta_type{ "text-opacity", 1.0, nullptr, property_types::target_double },
     property_meta_type{ "mode",false, nullptr, property_types::target_double },
     property_meta_type{ "scaling", 1.0, nullptr, property_types::target_double },
     property_meta_type{ "filter-factor", 1.0, nullptr, property_types::target_double },

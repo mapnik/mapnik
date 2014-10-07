@@ -150,7 +150,7 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
     set_property_from_xml<text_upright_e>(expressions.upright, "upright", node);
 }
 
-void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
+void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
 {
     text_properties_from_xml(node);
     layout_defaults.from_xml(node,fontsets);
@@ -161,7 +161,7 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
         set_old_style_expression(*name_);
     }
 
-    format_defaults.from_xml(node, fontsets);
+    format_defaults.from_xml(node, fontsets, is_shield);
     formatting::node_ptr n(formatting::node::from_xml(node,fontsets));
     if (n) set_format_tree(n);
 }
@@ -326,13 +326,21 @@ format_properties::format_properties()
       text_transform(enumeration_wrapper(NONE)),
       font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
 
-void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
+void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
 {
     set_property_from_xml<double>(text_size, "size", node);
     set_property_from_xml<double>(character_spacing, "character-spacing", node);
     set_property_from_xml<double>(line_spacing, "line-spacing", node);
     set_property_from_xml<double>(halo_radius, "halo-radius", node);
-    set_property_from_xml<double>(text_opacity, "opacity", node);
+    // https://github.com/mapnik/mapnik/issues/2507
+    if (is_shield)
+    {
+        set_property_from_xml<double>(text_opacity, "text-opacity", node);
+    }
+    else
+    {
+        set_property_from_xml<double>(text_opacity, "opacity", node);
+    }
     set_property_from_xml<double>(halo_opacity, "halo-opacity", node);
     set_property_from_xml<color>(fill, "fill", node);
     set_property_from_xml<color>(halo_fill, "halo-fill", node);
@@ -380,10 +388,15 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
     if (!(character_spacing == dfl.character_spacing) || explicit_defaults) serialize_property("character-spacing", character_spacing, node);
     if (!(line_spacing == dfl.line_spacing) || explicit_defaults) serialize_property("line-spacing", line_spacing, node);
     if (!(halo_radius == dfl.halo_radius) || explicit_defaults) serialize_property("halo-radius", halo_radius, node);
-    // for shield_symbolizer this is later overridden -- FIXME
-    if (!(text_opacity == dfl.text_opacity) || explicit_defaults) serialize_property("opacity", text_opacity, node);
+    // NOTE: this is dodgy: for text-symbolizer this should do the right thing
+    // but for shield_symbolizer it won't but 'opacity' should be overwritten by save_map later on
+    // since it is a property of the symbolizer_base rather than these properties
+    if (!(text_opacity == dfl.text_opacity) || explicit_defaults)
+    {
+        serialize_property("text-opacity", text_opacity, node);
+        serialize_property("opacity", text_opacity, node);
+    }
     if (!(halo_opacity == dfl.halo_opacity) || explicit_defaults) serialize_property("halo-opacity", halo_opacity, node);
-    //
     if (!(fill == dfl.fill) || explicit_defaults) serialize_property("fill", fill, node);
     if (!(halo_fill == dfl.halo_fill) || explicit_defaults) serialize_property("halo-fill", halo_fill, node);
     if (!(text_transform == dfl.text_transform) || explicit_defaults) serialize_property("text-transform", text_transform, node);

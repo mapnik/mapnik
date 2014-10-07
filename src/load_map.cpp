@@ -1076,12 +1076,12 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
         optional<std::string> placement_type = node.get_opt_attr<std::string>("placement-type");
         if (placement_type)
         {
-            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
+            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_, false);
         }
         else
         {
             placements = std::make_shared<text_placements_dummy>();
-            placements->defaults.from_xml(node, fontsets_);
+            placements->defaults.from_xml(node, fontsets_, false);
         }
         if (strict_ && !placements->defaults.format_defaults.fontset)
         {
@@ -1110,11 +1110,11 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         optional<std::string> placement_type = node.get_opt_attr<std::string>("placement-type");
         if (placement_type)
         {
-            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_);
+            placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_, true);
         } else {
             placements = std::make_shared<text_placements_dummy>();
         }
-        placements->defaults.from_xml(node, fontsets_);
+        placements->defaults.from_xml(node, fontsets_, true);
         if (strict_ &&
             !placements->defaults.format_defaults.fontset)
         {
@@ -1128,7 +1128,6 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base,double>(sym, keys::shield_dx, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::shield_dy, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
-        set_symbolizer_property<symbolizer_base,double>(sym, keys::text_opacity, node);
         set_symbolizer_property<symbolizer_base,mapnik::boolean_type>(sym, keys::unlock_image, node);
 
         std::string file = node.get_attr<std::string>("file");
