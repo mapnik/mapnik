@@ -5,8 +5,9 @@
     <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>My Style</StyleName>
         <Datasource>
-            <Parameter name="type">osm</Parameter>
-            <Parameter name="file">../data/bug1532.osm</Parameter>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">0.0121962878686,0.14886974508,0.906367305121,0.389927385014</Parameter>
+            <Parameter name="file">../data/bug1532.csv</Parameter>
         </Datasource>
     </Layer>
 
