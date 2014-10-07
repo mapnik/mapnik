@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     mapnik::Map m2(200,100);
 
     // mapnik::datasource
-    mapnik::datasource_cache::instance().register_datasources("plugins/input/");
+    mapnik::datasource_cache::instance().register_datasources("plugins/input/shape.input");
     mapnik::parameters p;
     p["type"]="shape";
     p["file"]="demo/data/boundaries";

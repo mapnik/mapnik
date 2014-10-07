@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
         BOOST_TEST(set_working_dir(args));
 
-        mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
+        mapnik::datasource_cache::instance().register_datasources("plugins/input/csv.input");
         mapnik::freetype_engine::register_fonts("./fonts", true );
         mapnik::Map m(256,256);
         mapnik::load_map(m,"./tests/data/good_maps/marker-text-line.xml",false);

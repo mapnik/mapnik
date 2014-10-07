@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
     try
     {
-        datasource_cache::instance().register_datasources("plugins/input/");
+        datasource_cache::instance().register_datasources("plugins/input/csv.input");
 
         Map m(256, 256);
 

@@ -155,8 +155,16 @@ void datasource_cache::register_datasources(std::string const& str)
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
+    if (!mapnik::util::exists(str))
+    {
+        return;
+    }
     plugin_directories_.insert(str);
-    if (mapnik::util::exists(str) && mapnik::util::is_directory(str))
+    if (!mapnik::util::is_directory(str))
+    {
+        register_datasource(str);
+    }
+    else
     {
         boost::filesystem::directory_iterator end_itr;
 #ifdef _WINDOWS
