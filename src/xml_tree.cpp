@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_attribute_cast.hpp>
@@ -230,7 +231,11 @@ xml_node & xml_node::add_child(const char * name, unsigned line, bool is_text)
 
 void xml_node::add_attribute(const char * name, const char * value)
 {
-    attributes_.emplace(name,xml_attribute(value));
+    auto result = attributes_.emplace(name,xml_attribute(value));
+    if (!result.second)
+    {
+        MAPNIK_LOG_ERROR(xml_tree) << "ignoring duplicate attribute '" << name << "'";
+    }
 }
 
 xml_node::attribute_map const& xml_node::get_attributes() const
