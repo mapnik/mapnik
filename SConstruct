@@ -998,10 +998,12 @@ int main()
     if (rc != SQLITE_OK)
     {
         printf("error 2: %s\\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
     }
     else
     {
         printf("yes, has rtree!\\n");
+        sqlite3_close(db);
         return 0;
     }
 
