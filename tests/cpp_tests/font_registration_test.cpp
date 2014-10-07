@@ -118,7 +118,7 @@ int main(int argc, char** argv)
         face_names = mapnik::freetype_engine::face_names();
         BOOST_TEST( face_names.size() == 1 );
 
-        // register a single dejavu font
+        // single dejavu font in separate location
         std::string dejavu_bold_oblique("tests/data/fonts/DejaVuSansMono-BoldOblique.ttf");
         BOOST_TEST( mapnik::freetype_engine::register_font(dejavu_bold_oblique) );
         face_names = mapnik::freetype_engine::face_names();
@@ -158,6 +158,18 @@ int main(int argc, char** argv)
             }
         }
         BOOST_TEST( found_dejavu2 );
+
+        // now that global registry is populated
+        // now test that a map only loads new fonts
+        mapnik::Map m4(1,1);
+        BOOST_TEST( m4.register_fonts(fontdir , true ) );
+        BOOST_TEST( m4.get_font_memory_cache().size() == 0 );
+        BOOST_TEST( m4.get_font_file_mapping().size() == 22 );
+        BOOST_TEST( !m4.load_fonts() );
+        BOOST_TEST( m4.get_font_memory_cache().size() == 0 );
+        BOOST_TEST( m4.register_fonts(dejavu_bold_oblique, false) );
+        BOOST_TEST( m4.load_fonts() );
+        BOOST_TEST( m4.get_font_memory_cache().size() == 1 );
 
         // check that we can correctly read a .ttc containing
         // multiple valid faces
