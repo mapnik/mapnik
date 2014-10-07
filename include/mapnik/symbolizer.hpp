@@ -410,8 +410,7 @@ void put(symbolizer_base & sym, keys key, T const& val)
     detail::put_impl<T, enum_ >::apply(sym, key, val);
 }
 
-template <typename T>
-bool has_key(symbolizer_base const& sym, keys key)
+inline bool has_key(symbolizer_base const& sym, keys key)
 {
     return (sym.properties.count(key) == 1);
 }

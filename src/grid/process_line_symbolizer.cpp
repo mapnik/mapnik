@@ -75,7 +75,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     double offset = get<value_double>(sym, keys::offset, feature, common_.vars_,0.0);
     double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_,0.0);
     double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_,false);
-    bool has_dash = has_key<dash_array>(sym, keys::stroke_dasharray);
+    bool has_dash = has_key(sym, keys::stroke_dasharray);
 
     if (clip)
     {

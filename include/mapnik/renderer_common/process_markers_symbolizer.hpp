@@ -69,7 +69,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                 // special case for simple ellipse markers
                 // to allow for full control over rx/ry dimensions
                 if (filename == "shape://ellipse"
-                   && (has_key<double>(sym,keys::width) || has_key<double>(sym,keys::height)))
+                   && (has_key(sym,keys::width) || has_key(sym,keys::height)))
                 {
                     svg_storage_type marker_ellipse;
                     vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
