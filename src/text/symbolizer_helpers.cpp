@@ -304,8 +304,6 @@ void text_symbolizer_helper::init_marker()
     if (filename.empty()) return;
     boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
     if (!marker) return;
-    //FIXME - need to test this
-    //std::string filename = path_processor_type::evaluate(filename_string, feature_);
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
     if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
