@@ -28,6 +28,9 @@
 
 // boost
 #include <boost/filesystem/convenience.hpp>
+#ifdef _WINDOWS
+#include <boost/regex.hpp>
+#endif
 
 // stl
 #include <stdexcept>
@@ -110,13 +113,13 @@ namespace util {
 
     bool is_relative(std::string const& filepath)
     {
-
+        if (filepath.empty()) return true;
 #ifdef _WINDOWS
-        boost::filesystem::path child_path(mapnik::utf8_to_utf16(filepath));
+        static const boost::regex expression("^[a-zA-Z]:");
+        return (filepath[0] != '\\') && (filepath[0] != '/') && boost::regex_search(filepath,expression);
 #else
-        boost::filesystem::path child_path(filepath);
+        return (filepath[0] != '/');
 #endif
-        return (! child_path.has_root_directory() && ! child_path.has_root_name());
     }
 
 
@@ -141,21 +144,12 @@ namespace util {
 
     std::string make_absolute(std::string const& filepath, std::string const& base)
     {
-/*
-#if (BOOST_FILESYSTEM_VERSION == 3)
-        // TODO - normalize is now deprecated, use make_preferred?
-        return boost::filesystem::absolute(boost::filesystem::path(base)/filepath).string();
-#else // v2
-        return boost::filesystem::complete(boost::filesystem::path(base)/filepath).normalize().string();
-#endif
-*/
         // http://insanecoding.blogspot.com/2007/11/directory-safety-when-working-with.html
         char * _base = realpath(base.c_str(),NULL);
         if (_base != nullptr) {
             std::string absolute(_base);
             free(_base);
             absolute += "/" + filepath;
-            //std::clog << "abs " << absolute << "\n";
             return absolute;
             /*
             char * res = realpath(absolute.c_str(),NULL);
