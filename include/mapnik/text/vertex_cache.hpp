@@ -81,7 +81,7 @@ public:
         pixel_position const& position() const { return current_position; }
     };
 
-    class scoped_state
+    class scoped_state : noncopyable
     {
     public:
         scoped_state(vertex_cache &pp) : pp_(pp), state_(pp.save_state()), restored_(false) {}
@@ -90,7 +90,7 @@ public:
         state const& get_state() const { return state_; }
     private:
         vertex_cache &pp_;
-        class state state_;
+        state state_;
         bool restored_;
     };
 
@@ -223,9 +223,6 @@ vertex_cache::vertex_cache(T & path)
         old_y = new_y;
     }
 }
-
-
-
 
 }
 #endif
