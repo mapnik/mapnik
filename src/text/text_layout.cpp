@@ -27,7 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
-#include <mapnik/make_unique.hpp>
+
 // ICU
 #include <unicode/brkiter.h>
 
