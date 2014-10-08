@@ -53,8 +53,7 @@ namespace detail {
 template <typename Geometry>
 struct get_type
 {
-    template <typename T>
-    struct result { using type = int; };
+    using result_type = int;
 
     int operator() (Geometry const& geom) const
     {
@@ -62,31 +61,24 @@ struct get_type
     }
 };
 
-template <typename T>
+template <typename Geometry>
 struct get_first
 {
-    using geometry_type = T;
-
-    template <typename U>
-    struct result { using type  = const typename geometry_type::value_type; };
-
-    typename geometry_type::value_type const operator() (geometry_type const& geom) const
+    using result_type = const typename Geometry::value_type;
+    typename geometry_type::value_type const operator() (Geometry const& geom) const
     {
-        typename geometry_type::value_type coord;
+        typename Geometry::value_type coord;
         geom.rewind(0);
         std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
         return coord;
     }
 };
 
-template <typename T>
+template <typename GeometryContainer>
 struct multi_geometry_
 {
-    using geometry_container = T;
-
-    template <typename U>
-    struct result { using type = bool; };
-    bool operator() (geometry_container const& geom) const
+    using result_type = bool;
+    bool operator() (GeometryContainer const& geom) const
     {
         return geom.size() > 1 ? true : false;
     }
@@ -96,10 +88,7 @@ template <typename T>
 struct get_x
 {
     using value_type = T;
-
-    template <typename U>
-    struct result { using type = double; };
-
+    using result_type = double;
     double operator() (value_type const& val) const
     {
         return std::get<1>(val);
@@ -110,25 +99,18 @@ template <typename T>
 struct get_y
 {
     using value_type = T;
-
-    template <typename U>
-    struct result { using type = double; };
-
+    using result_type = double;
     double operator() (value_type const& val) const
     {
         return std::get<2>(val);
     }
 };
 
-template <typename T>
+template <typename GeometryContainer>
 struct multi_geometry_type
 {
-    using geometry_container = T;
-
-    template <typename U>
-    struct result { using type = std::tuple<unsigned,bool>; };
-
-    std::tuple<unsigned,bool> operator() (geometry_container const& geom) const;
+    using result_type = std::tuple<unsigned,bool>;
+    std::tuple<unsigned,bool> operator() (GeometryContainer const& geom) const;
 };
 
 
