@@ -17,7 +17,7 @@
 #include <stdexcept>
 
 // Convenience method for test cases
-void simplify(const std::string& wkt_in, double tolerance, const std::string& method, const std::string& expected)
+void simplify(std::string const& wkt_in, double tolerance, std::string const& method, std::string const& expected)
 {
     //grab the geom
     mapnik::geometry_container multi_input;
@@ -33,7 +33,7 @@ void simplify(const std::string& wkt_in, double tolerance, const std::string& me
     mapnik::geometry_type* output = new mapnik::geometry_type(multi_input.front().type());
     mapnik::CommandType cmd;
     double x, y;
-    while((cmd = (mapnik::CommandType)generalizer.vertex(&x, &y)) != mapnik::SEG_END)
+    while ((cmd = (mapnik::CommandType)generalizer.vertex(&x, &y)) != mapnik::SEG_END)
     {
         output->push_vertex(x, y, cmd);
     }

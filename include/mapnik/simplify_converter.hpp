@@ -439,13 +439,15 @@ private:
     void RDP(std::vector<vertex2d>& vertices, const size_t start, const size_t end)
     {
         // Squared length of a vector
-        auto sqlen = [] (const vertex2d& vec) { return vec.x*vec.x + vec.y*vec.y; };
+        auto sqlen = [] (vertex2d const& vec) { return vec.x*vec.x + vec.y*vec.y; };
         // Compute square distance of p to a line segment
-        auto segment_distance = [&sqlen] (const vertex2d& p, const vertex2d& a, const vertex2d& b, const vertex2d& dir, double dir_sq_len)
+        auto segment_distance = [&sqlen] (vertex2d const& p, vertex2d const& a, vertex2d const& b, vertex2d const& dir, double dir_sq_len)
         {
             // Special case where segment has same start and end point at which point we are just doing a radius check
-            if(dir_sq_len == 0)
+            if (dir_sq_len == 0)
+            {
                 return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
+            }
 
             // Project p onto dir by ((p dot dir / dir dot dir) * dir)
             double scale = ((p.x - a.x) * dir.x + (p.y - a.y) * dir.y) / dir_sq_len;
@@ -454,17 +456,22 @@ private:
             double projected_origin_distance = projected_x * projected_x + projected_y * projected_y;
 
             // Projected point doesn't lie on the segment
-            if(projected_origin_distance > dir_sq_len)
+            if (projected_origin_distance > dir_sq_len)
             {
                 // Projected point lies past the end of the segment
-                if(scale > 0)
+                if (scale > 0)
+                {
                     return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
-                // Projected point lies before the beginning of the segment
+                }// Projected point lies before the beginning of the segment
                 else
+                {
                     return sqlen(vertex2d(p.x - a.x, p.y - a.y, SEG_END));
+                }
             }// Projected point lies on the segment
             else
+            {
                 return sqlen(vertex2d(p.x - (projected_x + a.x), p.y - (projected_y + a.y), SEG_END));
+            }
         };
 
         // Compute the directional vector along the segment
@@ -474,7 +481,7 @@ private:
         // Find the point with the maximum distance from this line segment
         double max = std::numeric_limits<double>::min();
         size_t keeper = 0;
-        for(size_t i = start + 1; i < end; ++i)
+        for (size_t i = start + 1; i < end; ++i)
         {
             double d = segment_distance(vertices[i], vertices[start], vertices[end], dir, dir_sq_len);
             if (d > max)
@@ -489,13 +496,19 @@ private:
         if (max > tolerance_ * tolerance_)
         {
             // Make sure not to smooth out the biggest outlier (keeper)
-            if(keeper - start != 1) RDP(vertices, start, keeper);
-            if(end - keeper != 1)   RDP(vertices, keeper, end);
+            if (keeper - start != 1)
+            {
+                RDP(vertices, start, keeper);
+            }
+            if (end - keeper != 1)
+            {
+                RDP(vertices, keeper, end);
+            }
         }// Everyone between the start and the end was close enough to the line
         else
         {
             // Mark each of them as discarded
-            for(size_t i = start + 1; i < end; ++i)
+            for (size_t i = start + 1; i < end; ++i)
             {
                 vertices[i].cmd = SEG_END;
             }
@@ -514,16 +527,18 @@ private:
         }
 
         // Run ramer douglas peucker on it
-        if(vertices.size() > 2)
+        if (vertices.size() > 2)
         {
             RDP(vertices, 0, vertices.size() - 1);
         }
 
         // Slurp the points back out that haven't been marked as discarded
-        for(vertex2d& vertex : vertices)
+        for (vertex2d& vertex : vertices)
         {
-            if(vertex.cmd != SEG_END)
+            if (vertex.cmd != SEG_END)
+            {
                 vertices_.emplace_back(vertex);
+            }
         }
 
         return status_ = process;
