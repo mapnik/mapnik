@@ -29,7 +29,7 @@
 namespace mapnik
 {
 
-class text_placements_info_dummy;
+class text_placement_info_dummy;
 
 // Dummy placement algorithm. Always takes the default value.
 class MAPNIK_DECL text_placements_dummy: public text_placements
