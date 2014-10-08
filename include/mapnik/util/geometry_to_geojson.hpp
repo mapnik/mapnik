@@ -32,7 +32,7 @@ namespace mapnik { namespace util {
 inline bool to_geojson(std::string & json, mapnik::geometry_type const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::json::geometry_generator_grammar<sink_type> grammar;
+    static const mapnik::json::geometry_generator_grammar<sink_type, mapnik::geometry_type> grammar;
     sink_type sink(json);
     return boost::spirit::karma::generate(sink, grammar, geom);
 }
@@ -40,7 +40,7 @@ inline bool to_geojson(std::string & json, mapnik::geometry_type const& geom)
 inline bool to_geojson(std::string & json, mapnik::geometry_container const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::json::multi_geometry_generator_grammar<sink_type> grammar;
+    static const mapnik::json::multi_geometry_generator_grammar<sink_type, mapnik::geometry_container> grammar;
     sink_type sink(json);
     return boost::spirit::karma::generate(sink, grammar, geom);
 }

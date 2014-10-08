@@ -34,8 +34,8 @@ namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
 
-template <typename OutputIterator>
-geometry_generator_grammar<OutputIterator>::geometry_generator_grammar()
+template <typename OutputIterator, typename Geometry>
+geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar()
   : geometry_generator_grammar::base_type(coordinates)
 {
     boost::spirit::karma::uint_type uint_;
@@ -69,7 +69,7 @@ geometry_generator_grammar<OutputIterator>::geometry_generator_grammar()
 
     point_coord = &uint_
         << lit('[')
-        << coord_type << lit(',') << coord_type
+        << coordinate << lit(',') << coordinate
         << lit(']')
         ;
 
@@ -78,7 +78,7 @@ geometry_generator_grammar<OutputIterator>::geometry_generator_grammar()
                                          .else_[_1 = '[' ]]
                        |
                        &uint_(mapnik::SEG_LINETO)
-                       << lit(',')) << lit('[') << coord_type << lit(',') << coord_type << lit(']')
+                       << lit(',')) << lit('[') << coordinate << lit(',') << coordinate << lit(']')
         ;
 
     coords2 %= *polygon_coord(_a)
@@ -88,8 +88,8 @@ geometry_generator_grammar<OutputIterator>::geometry_generator_grammar()
         ;
 }
 
-template <typename OutputIterator>
-multi_geometry_generator_grammar<OutputIterator>::multi_geometry_generator_grammar()
+template <typename OutputIterator, typename GeometryContainer>
+multi_geometry_generator_grammar<OutputIterator, GeometryContainer>::multi_geometry_generator_grammar()
   : multi_geometry_generator_grammar::base_type(start)
 {
     boost::spirit::karma::uint_type uint_;
