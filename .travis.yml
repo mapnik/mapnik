@@ -49,3 +49,4 @@ script:
  - make test
  - source localize.sh && make grind
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
+ - if [[ ${BENCHMARK} != False ]]; then for i in $(ls tests/visual_tests/styles/*xml); do echo $i;./benchmark/out/test_rendering --name "text rendering" --map $i --width 1024 --height 1024 --iterations 2 --threads 10;done;fi
