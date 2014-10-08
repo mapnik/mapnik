@@ -37,11 +37,11 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
 
 // stl
 #include <tuple>
+#include <type_traits>
 
 namespace mapnik { namespace wkt {
 
@@ -167,7 +167,7 @@ struct wkt_generator :
     karma::grammar<OutputIterator, Geometry const& ()>
 {
     using geometry_type = Geometry;
-    using coord_type = typename boost::remove_pointer<typename geometry_type::value_type>::type;
+    using coord_type = typename std::remove_pointer<typename geometry_type::value_type>::type;
 
     wkt_generator(bool single = false);
     // rules
@@ -195,7 +195,7 @@ template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
         karma::grammar<OutputIterator, karma::locals< std::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
-    using geometry_type = typename boost::remove_pointer<typename GeometryContainer::value_type>::type;
+    using geometry_type = typename std::remove_pointer<typename GeometryContainer::value_type>::type;
 
     wkt_multi_generator();
     // rules
