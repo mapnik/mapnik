@@ -110,6 +110,7 @@ files = {
     'lines-multi-layout-shield': {'sizes': [(800,800)],'bbox':default_text_box},
     'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
     'collision': {'sizes':[(600,400)]},
+    'simple-shield': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'geometry-transform-translate': {'sizes':[(200,200)]},

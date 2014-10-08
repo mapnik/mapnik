@@ -6,13 +6,25 @@
     <StyleName>My Style</StyleName>
     <Datasource>
       <Parameter name="type">csv</Parameter>
-      <Parameter name="file">../data/points.csv</Parameter>
+      <Parameter name="inline">
+lat,long,name,nr,color,file-token
+0,0,Test one,1,#ff0000
+0,0.1,Test two,2,red
+0,0.2,Test three,3,#00ff00
+0,0.3,Test four,4,green
+0,0.4,Test five,5,#0000ff
+0,0.5,Test six,6,blue
+0,0.6,Test seven,7,#000000
+0,0.7,Test eight,8,black
+0,0.8,Test nine,9,#ffffff
+0,0.9,Test ten,10,white
+      </Parameter>
     </Datasource>
   </Layer>
 
     <Style name="My Style">
     <Rule>
-      <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="5" dy="16" file="../../data/svg/crosshair16x16.svg" horizontal-alignment="middle" vertical-alignment="middle" placement-type="simple" placements="N,S,E,W,SW,10,5">[name]</ShieldSymbolizer>
+      <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="5" dy="16" file="../../data/svg/[file-token]crosshair16x16.svg" horizontal-alignment="middle" vertical-alignment="middle" placement-type="simple" placements="N,S,E,W,SW,10,5">[name]</ShieldSymbolizer>
       <PointSymbolizer allow-overlap="true"/>
     </Rule>
   </Style>
