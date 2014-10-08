@@ -443,25 +443,26 @@ private:
         // Compute square distance of p to a line segment
         auto segment_distance = [&sqlen] (const vertex2d& p, const vertex2d& a, const vertex2d& b, const vertex2d& dir, double dir_sq_len)
         {
-            //special case where segment has same start and end point at which point we are just doing a radius check
+            // Special case where segment has same start and end point at which point we are just doing a radius check
             if(dir_sq_len == 0)
                 return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
 
-            //project p onto dir by ((p dot dir / dir dot dir) * dir)
+            // Project p onto dir by ((p dot dir / dir dot dir) * dir)
             double scale = ((p.x - a.x) * dir.x + (p.y - a.y) * dir.y) / dir_sq_len;
             double projected_x = dir.x * scale;
             double projected_y = dir.y * scale;
             double projected_origin_distance = projected_x * projected_x + projected_y * projected_y;
-            //projected point doesn't lie on the segment
+
+            // Projected point doesn't lie on the segment
             if(projected_origin_distance > dir_sq_len)
             {
-                //projected point lies past the end of the segment
+                // Projected point lies past the end of the segment
                 if(scale > 0)
                     return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
-                //projected point lies before the beginning of the segment
+                // Projected point lies before the beginning of the segment
                 else
                     return sqlen(vertex2d(p.x - a.x, p.y - a.y, SEG_END));
-            }//projected point lies on the segment
+            }// Projected point lies on the segment
             else
                 return sqlen(vertex2d(p.x - (projected_x + a.x), p.y - (projected_y + a.y), SEG_END));
         };
@@ -503,7 +504,7 @@ private:
 
     status init_vertices_RDP()
     {
-        //slurp out the original vertices
+        // Slurp out the original vertices
         std::vector<vertex2d> vertices;
         //vertices.reserve(geom_.size());
         vertex2d vtx(vertex2d::no_init);
@@ -512,13 +513,13 @@ private:
             vertices.push_back(vtx);
         }
 
-        //run ramer douglas peucker on it
+        // Run ramer douglas peucker on it
         if(vertices.size() > 2)
         {
             RDP(vertices, 0, vertices.size() - 1);
         }
 
-        //slurp the points back out that haven't been marked as discarded
+        // Slurp the points back out that haven't been marked as discarded
         for(vertex2d& vertex : vertices)
         {
             if(vertex.cmd != SEG_END)
