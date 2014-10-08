@@ -47,10 +47,10 @@ inline bool from_wkt(std::string const& wkt, mapnik::geometry_container & paths)
 
 inline bool to_wkt(const mapnik::geometry_container& paths, std::string& wkt)
 {
-	using sink_type = std::back_insert_iterator<std::string>;
-	static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
-	sink_type sink(wkt);
-	return boost::spirit::karma::generate(sink, generator, paths);
+    using sink_type = std::back_insert_iterator<std::string>;
+    static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    sink_type sink(wkt);
+    return boost::spirit::karma::generate(sink, generator, paths);
 }
 
 

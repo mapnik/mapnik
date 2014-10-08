@@ -172,7 +172,7 @@ private:
         {
         case visvalingam_whyatt:
         case douglas_peucker:
-        	return output_vertex_cached(x, y);
+            return output_vertex_cached(x, y);
         case radial_distance:
             return output_vertex_distance(x, y);
         case zhao_saalfeld:
@@ -361,7 +361,7 @@ private:
             case zhao_saalfeld:
                 return status_ = cache;
             case douglas_peucker:
-            	return init_vertices_RDP();
+                return init_vertices_RDP();
             default:
                 throw std::runtime_error("simplification algorithm not yet implemented");
         }
@@ -438,33 +438,33 @@ private:
 
     void RDP(std::vector<vertex2d>& vertices, const size_t start, const size_t end)
     {
-    	// Squared length of a vector
-    	auto sqlen = [] (const vertex2d& vec) { return vec.x*vec.x + vec.y*vec.y; };
-    	// Compute square distance of p to a line segment
-    	auto segment_distance = [&sqlen] (const vertex2d& p, const vertex2d& a, const vertex2d& b, const vertex2d& dir, double dir_sq_len)
-		{
-    		//special case where segment has same start and end point at which point we are just doing a radius check
-    		if(dir_sq_len == 0)
-    			return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
+        // Squared length of a vector
+        auto sqlen = [] (const vertex2d& vec) { return vec.x*vec.x + vec.y*vec.y; };
+        // Compute square distance of p to a line segment
+        auto segment_distance = [&sqlen] (const vertex2d& p, const vertex2d& a, const vertex2d& b, const vertex2d& dir, double dir_sq_len)
+        {
+            //special case where segment has same start and end point at which point we are just doing a radius check
+            if(dir_sq_len == 0)
+                return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
 
-    		//project p onto dir by ((p dot dir / dir dot dir) * dir)
-    		double scale = ((p.x - a.x) * dir.x + (p.y - a.y) * dir.y) / dir_sq_len;
-    		double projected_x = dir.x * scale;
-    		double projected_y = dir.y * scale;
-    		double projected_origin_distance = projected_x * projected_x + projected_y * projected_y;
-    		//projected point doesn't lie on the segment
-    		if(projected_origin_distance > dir_sq_len)
-    		{
-    			//projected point lies past the end of the segment
-    			if(scale > 0)
-    				return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
-    			//projected point lies before the beginning of the segment
-    			else
-    				return sqlen(vertex2d(p.x - a.x, p.y - a.y, SEG_END));
-    		}//projected point lies on the segment
-    		else
-    			return sqlen(vertex2d(p.x - (projected_x + a.x), p.y - (projected_y + a.y), SEG_END));
-		};
+            //project p onto dir by ((p dot dir / dir dot dir) * dir)
+            double scale = ((p.x - a.x) * dir.x + (p.y - a.y) * dir.y) / dir_sq_len;
+            double projected_x = dir.x * scale;
+            double projected_y = dir.y * scale;
+            double projected_origin_distance = projected_x * projected_x + projected_y * projected_y;
+            //projected point doesn't lie on the segment
+            if(projected_origin_distance > dir_sq_len)
+            {
+                //projected point lies past the end of the segment
+                if(scale > 0)
+                    return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
+                //projected point lies before the beginning of the segment
+                else
+                    return sqlen(vertex2d(p.x - a.x, p.y - a.y, SEG_END));
+            }//projected point lies on the segment
+            else
+                return sqlen(vertex2d(p.x - (projected_x + a.x), p.y - (projected_y + a.y), SEG_END));
+        };
 
         // Compute the directional vector along the segment
         vertex2d dir = vertex2d(vertices[end].x - vertices[start].x, vertices[end].y - vertices[start].y, SEG_END);
@@ -478,8 +478,8 @@ private:
             double d = segment_distance(vertices[i], vertices[start], vertices[end], dir, dir_sq_len);
             if (d > max)
             {
-            	keeper = i;
-            	max = d;
+                keeper = i;
+                max = d;
             }
         }
 
@@ -487,42 +487,42 @@ private:
         // NOTE: we work in square distances to avoid sqrt so we sqaure tolerance accordingly
         if (max > tolerance_ * tolerance_)
         {
-        	// Make sure not to smooth out the biggest outlier (keeper)
+            // Make sure not to smooth out the biggest outlier (keeper)
             if(keeper - start != 1) RDP(vertices, start, keeper);
             if(end - keeper != 1)   RDP(vertices, keeper, end);
         }// Everyone between the start and the end was close enough to the line
         else
         {
-        	// Mark each of them as discarded
-        	for(size_t i = start + 1; i < end; ++i)
-        	{
-        		vertices[i].cmd = SEG_END;
-        	}
+            // Mark each of them as discarded
+            for(size_t i = start + 1; i < end; ++i)
+            {
+                vertices[i].cmd = SEG_END;
+            }
         }
     }
 
     status init_vertices_RDP()
     {
-    	//slurp out the original vertices
+        //slurp out the original vertices
         std::vector<vertex2d> vertices;
         //vertices.reserve(geom_.size());
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
-        	vertices.push_back(vtx);
+            vertices.push_back(vtx);
         }
 
         //run ramer douglas peucker on it
-		if(vertices.size() > 2)
-		{
-			RDP(vertices, 0, vertices.size() - 1);
-		}
+        if(vertices.size() > 2)
+        {
+            RDP(vertices, 0, vertices.size() - 1);
+        }
 
         //slurp the points back out that haven't been marked as discarded
         for(vertex2d& vertex : vertices)
         {
-        	if(vertex.cmd != SEG_END)
-        		vertices_.emplace_back(vertex);
+            if(vertex.cmd != SEG_END)
+                vertices_.emplace_back(vertex);
         }
 
         return status_ = process;
