@@ -1572,10 +1572,10 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
     if (!xml_base_path_.empty())
     {
         std::string starting_path = *opt_path;
-        if (mapnik::util::is_relative(starting_path))
-        {
+        //if (mapnik::util::is_relative(starting_path))
+        //{
             return mapnik::util::make_absolute(starting_path,xml_base_path_);
-        }
+        //}
     }
     return *opt_path;
 }

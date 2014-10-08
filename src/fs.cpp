@@ -31,6 +31,8 @@
 
 // stl
 #include <stdexcept>
+#include <cstdlib>
+#include <iostream>
 
 #if (BOOST_FILESYSTEM_VERSION <= 2)
 
@@ -139,12 +141,38 @@ namespace util {
 
     std::string make_absolute(std::string const& filepath, std::string const& base)
     {
+/*
 #if (BOOST_FILESYSTEM_VERSION == 3)
         // TODO - normalize is now deprecated, use make_preferred?
         return boost::filesystem::absolute(boost::filesystem::path(base)/filepath).string();
 #else // v2
         return boost::filesystem::complete(boost::filesystem::path(base)/filepath).normalize().string();
 #endif
+*/
+        // http://insanecoding.blogspot.com/2007/11/directory-safety-when-working-with.html
+        char * _base = realpath(base.c_str(),NULL);
+        if (_base != nullptr) {
+            std::string absolute(_base);
+            free(_base);
+            absolute += "/" + filepath;
+            std::clog << "abs " << absolute << "\n";
+            return absolute;
+            /*
+            char * res = realpath(absolute.c_str(),NULL);
+            if (res == nullptr) // get here for files that do not exist like ../[this].png
+            {
+                return absolute;
+            }
+            else
+            {
+                std::string result(res);
+                std::clog << "res " << result << "\n";
+                free(res);
+                return result;
+            }
+            */
+        }
+        return filepath;
     }
 
     std::string dirname(std::string const& filepath)
