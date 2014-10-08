@@ -5,6 +5,7 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 #include <stdexcept>
 
 class test : public benchmark::test_case
@@ -36,17 +37,22 @@ public:
             if (!extent_.from_string(*ext))
                 throw std::runtime_error("could not parse `extent` string" + *ext);
         }
+        /*
         else
         {
             throw std::runtime_error("please provide a --extent=<minx,miny,maxx,maxy> arg");
-        }
+        }*/
 
       }
     bool validate() const
     {
         mapnik::Map m(width_,height_);
         mapnik::load_map(m,xml_,true);
-        m.zoom_to_box(extent_);
+        if (extent_.valid()) {
+            m.zoom_to_box(extent_);
+        } else {
+            m.zoom_all();
+        }
         mapnik::image_32 im(m.width(),m.height());
         mapnik::agg_renderer<mapnik::image_32> ren(m,im);
         ren.apply();
@@ -57,7 +63,11 @@ public:
     {
         mapnik::Map m(width_,height_);
         mapnik::load_map(m,xml_);
-        m.zoom_to_box(extent_);
+        if (extent_.valid()) {
+            m.zoom_to_box(extent_);
+        } else {
+            m.zoom_all();
+        }
         for (unsigned i=0;i<iterations_;++i)
         {
             mapnik::image_32 im(m.width(),m.height());
@@ -80,6 +90,7 @@ int main(int argc, char** argv)
             std::clog << "please provide a name for this test\n";
             return -1;
         }
+        mapnik::freetype_engine::register_fonts("./fonts/",true);
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         {
             test test_runner(params);
