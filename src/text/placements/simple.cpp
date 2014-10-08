@@ -25,7 +25,7 @@
 #include <mapnik/text/placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/make_unique.hpp>
+
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -72,7 +72,7 @@ bool text_placement_info_simple::next_position_only()
 
 text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor) const
 {
-    return std::make_unique<text_placement_info_simple>(this, scale_factor);
+    return std::make_shared<text_placement_info_simple>(this, scale_factor);
 }
 
 // Position string: [POS][SIZE]

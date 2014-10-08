@@ -61,7 +61,7 @@ public:
 
 };
 
-using text_placement_info_ptr = std::unique_ptr<text_placement_info>;
+using text_placement_info_ptr = std::shared_ptr<text_placement_info>;
 
 // This object handles the management of all TextSymbolizer properties. It can
 // be used as a base class for own objects which implement new processing
