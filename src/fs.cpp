@@ -155,7 +155,7 @@ namespace util {
             std::string absolute(_base);
             free(_base);
             absolute += "/" + filepath;
-            std::clog << "abs " << absolute << "\n";
+            //std::clog << "abs " << absolute << "\n";
             return absolute;
             /*
             char * res = realpath(absolute.c_str(),NULL);
