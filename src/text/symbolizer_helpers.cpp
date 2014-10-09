@@ -58,7 +58,6 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      clipped_(get<bool>(sym_, keys::clip, feature_, vars_, false)),
       placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
 {
     placement_->properties.evaluate_text_properties(feature_, vars_);
@@ -211,12 +210,12 @@ placements_list const& text_symbolizer_helper::get()
     }
     else
     {
-        while (next_line_placement(clipped_));
+        while (next_line_placement());
     }
     return finder_.placements();
 }
 
-bool text_symbolizer_helper::next_line_placement(bool clipped)
+bool text_symbolizer_helper::next_line_placement()
 {
     while (!geometries_to_process_.empty())
     {

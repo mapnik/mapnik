@@ -83,7 +83,6 @@ protected:
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     float scale_factor_;
-    bool clipped_;
 
     //Processing
     // Using list instead of vector, because we delete random elements and need iterators to stay valid.
@@ -139,7 +138,7 @@ public:
     placements_list const& get();
 protected:
     bool next_point_placement();
-    bool next_line_placement(bool clipped);
+    bool next_line_placement();
 
     placement_finder finder_;
 

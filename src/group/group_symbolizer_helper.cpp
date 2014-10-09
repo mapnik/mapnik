@@ -63,23 +63,11 @@ pixel_position_list const& group_symbolizer_helper::get()
     {
         for (auto const& geom : geometries_to_process_)
         {
-            if (clipped_)
-            {
-                using clipped_geometry_type = agg::conv_clip_polyline<geometry_type>;
-                using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
-
-                clipped_geometry_type clipped(*geom);
-                clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
-                                 query_extent_.maxx(), query_extent_.maxy());
-                path_type path(t_, clipped, prj_trans_);
-                find_line_placements(path);
-            }
-            else
-            {
-                using path_type = transform_path_adapter<view_transform,geometry_type>;
-                path_type path(t_, *geom, prj_trans_);
-                find_line_placements(path);
-            }
+            // TODO to support clipped geometries this needs to use
+            // vertext_converters
+            using path_type = transform_path_adapter<view_transform,geometry_type>;
+            path_type path(t_, *geom, prj_trans_);
+            find_line_placements(path);
         }
     }
 
