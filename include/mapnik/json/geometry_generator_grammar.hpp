@@ -164,14 +164,14 @@ struct multi_geometry_generator_grammar :
     using geometry_type = typename std::remove_pointer<typename GeometryContainer::value_type>::type;
     multi_geometry_generator_grammar();
     karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                geometry_container const&()> start;
+                GeometryContainer const&()> start;
     karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                geometry_container const&()> geometry_collection;
+                GeometryContainer const&()> geometry_collection;
     karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                geometry_container const&()> geometry;
+                GeometryContainer const&()> geometry;
     karma::rule<OutputIterator, karma::locals<unsigned>,
                 geometry_type const&()> geometry2;
-    karma::rule<OutputIterator, geometry_container const&()> coordinates;
+    karma::rule<OutputIterator, GeometryContainer const&()> coordinates;
     geometry_generator_grammar<OutputIterator, geometry_type>  path;
     // phoenix functions
     boost::phoenix::function<detail::multi_geometry_type<GeometryContainer> > multi_type_;
