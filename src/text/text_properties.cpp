@@ -154,13 +154,6 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
 {
     text_properties_from_xml(node);
     layout_defaults.from_xml(node,fontsets);
-    optional<expression_ptr> name_ = node.get_opt_attr<expression_ptr>("name");
-    if (name_)
-    {
-        MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
-        set_old_style_expression(*name_);
-    }
-
     format_defaults.from_xml(node, fontsets, is_shield);
     formatting::node_ptr n(formatting::node::from_xml(node,fontsets));
     if (n) set_format_tree(n);
@@ -248,11 +241,6 @@ void text_symbolizer_properties::add_expressions(expression_set & output) const
     layout_defaults.add_expressions(output);
     format_defaults.add_expressions(output);
     if (tree_) tree_->add_expressions(output);
-}
-
-void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
-{
-    tree_ = std::make_shared<formatting::text_node>(expr);
 }
 
 text_layout_properties::text_layout_properties()
