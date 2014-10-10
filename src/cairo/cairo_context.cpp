@@ -447,7 +447,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
     set_operator(halo_comp_op);
     for (auto const& glyph_pos : *path)
     {
-        glyph_info const& glyph = *(glyph_pos.glyph);
+        glyph_info const& glyph = glyph_pos.glyph;
 
         if (glyph.format)
         {
@@ -479,9 +479,9 @@ void cairo_context::add_text(glyph_positions_ptr path,
         stroke();
     }
     set_operator(comp_op);
-    for (auto const &glyph_pos : *path)
+    for (auto const& glyph_pos : *path)
     {
-        glyph_info const& glyph = *(glyph_pos.glyph);
+        glyph_info const& glyph = glyph_pos.glyph;
 
         if (glyph.format)
         {

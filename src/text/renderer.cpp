@@ -61,7 +61,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
 
     for (auto const& glyph_pos : positions)
     {
-        glyph_info const& glyph = *(glyph_pos.glyph);
+        glyph_info const& glyph = glyph_pos.glyph;
         glyph.face->set_character_sizes(glyph.format->text_size * scale_factor_); //TODO: Optimize this?
 
         matrix.xx = static_cast<FT_Fixed>( glyph_pos.rot.cos * 0x10000L);

@@ -64,7 +64,7 @@ text_render_thunk::text_render_thunk(placements_list const& placements,
 
         for (glyph_position const& pos : *positions)
         {
-            glyph_vec.push_back(*pos.glyph);
+            glyph_vec.push_back(pos.glyph);
             new_pos.push_back(glyph_vec.back(), pos.pos, pos.rot);
         }
 

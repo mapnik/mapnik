@@ -42,8 +42,8 @@ struct glyph_info;
 struct glyph_position
 {
     glyph_position(glyph_info const& _glyph, pixel_position const& _pos, rotation const& _rot)
-        : glyph(&_glyph), pos(_pos), rot(_rot) { }
-    glyph_info const* glyph;
+        : glyph(_glyph), pos(_pos), rot(_rot) { }
+    glyph_info const& glyph;
     pixel_position pos;
     rotation rot;
 };
