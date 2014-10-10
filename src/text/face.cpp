@@ -36,19 +36,6 @@ font_face::font_face(FT_Face face)
       glyph_info_cache_(),
       char_height_(0.0) {}
 
-double font_face::get_char_height(double size) const
-{
-    if (char_height_ != 0.0) return char_height_;
-    glyph_info tmp;
-    tmp.glyph_index = FT_Get_Char_Index(face_, 'X');
-    if (glyph_dimensions(tmp))
-    {
-        tmp.scale_multiplier = size / face_->units_per_EM;
-        char_height_ = tmp.height();
-    }
-    return char_height_;
-}
-
 bool font_face::set_character_sizes(double size)
 {
     char_height_ = 0.0;

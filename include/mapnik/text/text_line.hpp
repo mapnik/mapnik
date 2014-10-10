@@ -61,8 +61,10 @@ public:
 
     // Height of the tallest glyph in this line.
     double max_char_height() const { return max_char_height_; }
+
     // Called for each font/style to update the maximum height of this line.
     void update_max_char_height(double max_char_height);
+
     // Line height including line spacing.
     double line_height() const { return line_height_; }
 
@@ -85,7 +87,7 @@ public:
 private:
     glyph_vector glyphs_;
     double line_height_; // Includes line spacing (returned by freetype)
-    double max_char_height_; // Height of 'X' character of the largest font in this run. //TODO: Initialize this!
+    double max_char_height_; // Max height of any glyphs in line - calculated by shaper
     double width_;
     double glyphs_width_;
     unsigned first_char_;
