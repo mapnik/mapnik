@@ -183,8 +183,6 @@ struct MAPNIK_DECL text_symbolizer_properties
     void evaluate_text_properties(feature_impl const& feature, attributes const& attrs);
     // Sets new format tree.
     void set_format_tree(formatting::node_ptr tree);
-    // Get format tree.
-    formatting::node_ptr format_tree() const;
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
     void add_expressions(expression_set & output) const;

@@ -115,11 +115,6 @@ void text_symbolizer_properties::set_format_tree(formatting::node_ptr tree)
     tree_ = tree;
 }
 
-formatting::node_ptr text_symbolizer_properties::format_tree() const
-{
-    return tree_;
-}
-
 void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
 {
     // The options 'margin' and 'repeat-distance' replace 'minimum-distance'.
