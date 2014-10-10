@@ -65,8 +65,6 @@ public:
         return face_;
     }
 
-    double get_char_height(double size) const;
-
     bool set_character_sizes(double size);
     bool set_unscaled_character_sizes();
 
