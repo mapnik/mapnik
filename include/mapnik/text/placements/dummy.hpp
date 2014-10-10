@@ -46,9 +46,9 @@ public:
     text_placement_info_dummy(text_placements_dummy const* parent, double scale_factor)
         : text_placement_info(parent, scale_factor),
         state(0) {}
-    bool next();
+    bool next() const;
 private:
-unsigned state;
+    mutable unsigned state;
 };
 
 } //ns mapnik

@@ -42,7 +42,7 @@ namespace phoenix = boost::phoenix;
 using phoenix::push_back;
 using phoenix::ref;
 
-bool text_placement_info_simple::next()
+bool text_placement_info_simple::next() const
 {
     while (true)
     {
@@ -61,7 +61,7 @@ bool text_placement_info_simple::next()
     return true;
 }
 
-bool text_placement_info_simple::next_position_only()
+bool text_placement_info_simple::next_position_only() const
 {
     if (position_state >= parent_->direction_.size()) return false;
     //directions_e dir = parent_->direction_[position_state];

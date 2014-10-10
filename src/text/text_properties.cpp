@@ -59,7 +59,7 @@ text_symbolizer_properties::text_symbolizer_properties()
       tree_() {}
 
 
-void text_symbolizer_properties::evaluate_text_properties(feature_impl const& feature, attributes const& attrs)
+void text_symbolizer_properties::evaluate_text_properties(feature_impl const& feature, attributes const& attrs) //const
 {
     label_placement = util::apply_visitor(extract_value<label_placement_enum>(feature,attrs), expressions.label_placement);
     label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);

@@ -56,11 +56,11 @@ public:
                                double scale_factor)
         : text_placement_info(parent, scale_factor),
           state(0), position_state(0), parent_(parent) {}
-    bool next();
+    bool next() const;
 protected:
-    bool next_position_only();
-    unsigned state;
-    unsigned position_state;
+    bool next_position_only() const;
+    mutable unsigned state;
+    mutable unsigned position_state;
     text_placements_simple const* parent_;
 };
 

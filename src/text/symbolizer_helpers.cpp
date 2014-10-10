@@ -76,7 +76,7 @@ struct largest_bbox_first
     }
 };
 
-void base_symbolizer_helper::initialize_geometries()
+void base_symbolizer_helper::initialize_geometries() const
 {
     bool largest_box_only = placement_->properties.largest_bbox_only;
     double minimum_path_length = placement_->properties.minimum_path_length;
@@ -109,7 +109,7 @@ void base_symbolizer_helper::initialize_geometries()
     geo_itr_ = geometries_to_process_.begin();
 }
 
-void base_symbolizer_helper::initialize_points()
+void base_symbolizer_helper::initialize_points() const
 {
     label_placement_enum how_placed = placement_->properties.label_placement;
     if (how_placed == LINE_PLACEMENT)
@@ -202,7 +202,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     if (geometries_to_process_.size()) finder_.next_position();
 }
 
-placements_list const& text_symbolizer_helper::get()
+placements_list const& text_symbolizer_helper::get() const
 {
     if (point_placement_)
     {
@@ -215,7 +215,7 @@ placements_list const& text_symbolizer_helper::get()
     return finder_.placements();
 }
 
-bool text_symbolizer_helper::next_line_placement()
+bool text_symbolizer_helper::next_line_placement() const
 {
     while (!geometries_to_process_.empty())
     {
@@ -241,7 +241,7 @@ bool text_symbolizer_helper::next_line_placement()
     return false;
 }
 
-bool text_symbolizer_helper::next_point_placement()
+bool text_symbolizer_helper::next_point_placement() const
 {
     while (!points_.empty())
     {
@@ -297,7 +297,7 @@ text_symbolizer_helper::text_symbolizer_helper(
 }
 
 
-void text_symbolizer_helper::init_marker()
+void text_symbolizer_helper::init_marker() const
 {
     std::string filename = mapnik::get<std::string>(sym_, keys::file, feature_, vars_);
     if (filename.empty()) return;

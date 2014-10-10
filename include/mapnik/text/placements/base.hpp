@@ -49,12 +49,12 @@ public:
     // If this functions returns false the placement data should be
     // considered invalid!
 
-    virtual bool next() = 0;
+    virtual bool next() const = 0;
     virtual ~text_placement_info() {}
 
     // Properties actually used by placement finder and renderer. Values in
     // here are modified each time next() is called.
-    text_symbolizer_properties properties;
+    mutable text_symbolizer_properties properties;
 
     // Scale factor used by the renderer.
     double scale_factor;

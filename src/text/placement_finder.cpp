@@ -44,7 +44,7 @@ placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
                                    DetectorType &detector,
                                    box2d<double> const& extent,
-                                   text_placement_info & placement_info,
+                                   text_placement_info const& placement_info,
                                    face_manager_freetype & font_manager,
                                    double scale_factor)
     : feature_(feature),

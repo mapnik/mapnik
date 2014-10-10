@@ -74,7 +74,7 @@ public:
         box_elements_.clear();
     }
 
-    inline text_symbolizer_properties const& get_properties()
+    inline text_symbolizer_properties const& get_properties() const
     {
         return placement_->properties;
     }

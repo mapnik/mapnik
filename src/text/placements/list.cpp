@@ -30,7 +30,7 @@
 namespace mapnik
 {
 
-bool text_placement_info_list::next()
+bool text_placement_info_list::next() const
 {
     if (state == 0)
     {
