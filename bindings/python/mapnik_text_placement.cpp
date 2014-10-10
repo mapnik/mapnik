@@ -98,6 +98,7 @@ public:
     }
 };
 
+/*
 boost::python::tuple get_displacement(text_layout_properties const& t)
 {
     return boost::python::make_tuple(0.0,0.0);// FIXME t.displacement.x, t.displacement.y);
@@ -119,7 +120,7 @@ void set_displacement(text_layout_properties &t, boost::python::tuple arg)
     //t.displacement.set(x, y); FIXME
 }
 
-/*
+
 struct NodeWrap
     : formatting::node, wrapper<formatting::node>
 {
@@ -315,7 +316,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
     }
 };
 */
-
+/*
 struct TextPlacementsWrap: text_placements, wrapper<text_placements>
 {
     text_placement_info_ptr get_placement_info(double scale_factor_) const
@@ -347,7 +348,7 @@ void insert_expression(expression_set *set, expression_ptr p)
     set->insert(p);
 }
 
-/*
+
 evaluated_format_properties_ptr get_format(text_symbolizer const& sym)
 {
     return sym.get_placement_options()->defaults.format;
@@ -372,6 +373,7 @@ void set_properties(text_symbolizer const& sym, text_symbolizer_properties & def
 
 void export_text_placement()
 {
+    /*
     using namespace boost::python;
 
     enumeration_<label_placement_e>("label_placement")
@@ -412,11 +414,11 @@ void export_text_placement()
         .value("FULL",HALO_RASTERIZER_FULL)
         .value("FAST",HALO_RASTERIZER_FAST)
         ;
-
+    */
     class_<text_symbolizer>("TextSymbolizer",
                             init<>())
         ;
-
+    /*
 
     class_with_converter<text_symbolizer_properties>
         ("TextSymbolizerProperties")
@@ -438,11 +440,11 @@ void export_text_placement()
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);
-    /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
-       add_expressions isn't useful in python either. The result is only needed by
-       attribute_collector (which isn't exposed in python) and
-       it just calls add_expressions of the associated formatting tree.
-       set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
+    //from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
+     //  add_expressions isn't useful in python either. The result is only needed by
+     //  attribute_collector (which isn't exposed in python) and
+     //  it just calls add_expressions of the associated formatting tree.
+     //  set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python.
     ;
 
     class_with_converter<text_layout_properties>
@@ -456,7 +458,7 @@ void export_text_placement()
         .def_readwrite("orientation", &text_layout_properties::orientation)
         .def_readwrite("rotate_displacement", &text_layout_properties::rotate_displacement)
         .add_property("displacement", &get_displacement, &set_displacement);
-/*
+
     class_with_converter<detail::evaluated_format_properties>
         ("CharProperties")
         .def_readwrite_convert("text_transform", &detail::evaluated_format_properties::text_transform)
@@ -472,14 +474,13 @@ void export_text_placement()
         .def_readwrite("halo_radius", &evaluated_format_properties::halo_radius)
         //from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
         ;
-*/
     class_<TextPlacementsWrap,
         std::shared_ptr<TextPlacementsWrap>,
         boost::noncopyable>
         ("TextPlacements")
         .def_readwrite("defaults", &text_placements::defaults)
         //.def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
-        /* TODO: add_expressions() */
+        // TODO: add_expressions()
         ;
     register_ptr_to_python<std::shared_ptr<text_placements> >();
 
@@ -500,7 +501,6 @@ void export_text_placement()
         .def("insert", &insert_expression);
     ;
 
-/*
     class_<formatting::node,std::shared_ptr<formatting::node>,
            boost::noncopyable>("FormattingNode")
         .def("apply", pure_virtual(&formatting::node::apply))
