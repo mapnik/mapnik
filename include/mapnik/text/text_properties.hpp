@@ -60,7 +60,7 @@ struct evaluated_format_properties
       fill(0,0,0),
       halo_fill(0,0,0),
       halo_radius(0.0),
-      font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
+      font_feature_settings() {}
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
@@ -72,7 +72,7 @@ struct evaluated_format_properties
     color fill;
     color halo_fill;
     double halo_radius;
-    font_feature_settings_ptr font_feature_settings;
+    font_feature_settings font_feature_settings;
 };
 
 }

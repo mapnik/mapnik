@@ -289,7 +289,6 @@ struct evaluate_expression_wrapper<mapnik::color>
     mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        // FIXME - throw instead?
         if (val.is_null()) return mapnik::color(255,192,203); // pink
         return mapnik::color(val.to_string());
     }
@@ -314,7 +313,6 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
     mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        // FIXME - throw?
         if (val.is_null()) return dash_array();
         dash_array dash;
         std::vector<double> buf;
@@ -327,17 +325,16 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
     }
 };
 
-// mapnik::font_feature_settings_ptr
+// mapnik::font_feature_settings
 template <>
-struct evaluate_expression_wrapper<mapnik::font_feature_settings_ptr>
+struct evaluate_expression_wrapper<mapnik::font_feature_settings>
 {
     template <typename T1, typename T2, typename T3>
-    mapnik::font_feature_settings_ptr operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    mapnik::font_feature_settings operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
-        // FIXME - throw instead?
-        if (val.is_null()) return std::make_shared<mapnik::font_feature_settings>();
-        return std::make_shared<mapnik::font_feature_settings>(val.to_string());
+        if (val.is_null()) return mapnik::font_feature_settings();
+        return mapnik::font_feature_settings(val.to_string());
     }
 };
 

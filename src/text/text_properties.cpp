@@ -98,7 +98,7 @@ void text_symbolizer_properties::process(text_layout & output, feature_impl cons
         format->face_name = format_defaults.face_name;
         format->fontset = format_defaults.fontset;
 
-        format->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings_ptr>(feature,attrs), format_defaults.font_feature_settings);
+        format->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings>(feature,attrs), format_defaults.font_feature_settings);
         // Turn off ligatures if character_spacing > 0.
         if (format->character_spacing > .0 && format->font_feature_settings->count() == 0)
         {
@@ -345,7 +345,7 @@ void format_properties::from_xml(xml_node const& node, fontset_map const& fontse
     set_property_from_xml<color>(fill, "fill", node);
     set_property_from_xml<color>(halo_fill, "halo-fill", node);
     set_property_from_xml<text_transform_e>(text_transform,"text-transform", node);
-    set_property_from_xml<font_feature_settings_ptr>(font_feature_settings, "font-feature-settings", node);
+    set_property_from_xml<font_feature_settings>(font_feature_settings, "font-feature-settings", node);
 
     optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");
     if (face_name_) face_name = *face_name_;

@@ -52,12 +52,16 @@ public:
 
     const font_feature* get_features() const { return features_.data(); }
     feature_vector::size_type count() const { return features_.size(); }
+    feature_vector const& features() const { return features_; }
 
 private:
     feature_vector features_;
 };
 
-using font_feature_settings_ptr = std::shared_ptr<font_feature_settings>;
+inline bool operator==(font_feature_settings const& lhs, font_feature_settings const& rhs)
+{
+    return (lhs.features() == rhs.features());
+}
 
 constexpr unsigned int font_feature_range_global_start = 0u;
 static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();

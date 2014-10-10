@@ -75,7 +75,7 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     set_property_from_xml<color>(n->fill, "fill", xml);
     set_property_from_xml<color>(n->halo_fill, "halo-fill", xml);
     set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
-    set_property_from_xml<font_feature_settings_ptr>(n->font_feature_settings, "font-feature-settings", xml);
+    set_property_from_xml<font_feature_settings>(n->font_feature_settings, "font-feature-settings", xml);
 
     boost::optional<std::string> face_name = xml.get_opt_attr<std::string>("face-name");
     if (face_name)
@@ -115,7 +115,7 @@ void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     if (fill) new_properties->fill = util::apply_visitor(extract_value<color>(feature,attrs), *fill);
     if (halo_fill) new_properties->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), *halo_fill);
     if (text_transform) new_properties->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), *text_transform);
-    if (font_feature_settings) new_properties->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings_ptr>(feature,attrs), *font_feature_settings);
+    if (font_feature_settings) new_properties->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings>(feature,attrs), *font_feature_settings);
 
     if (fontset)
     {

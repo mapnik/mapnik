@@ -76,7 +76,7 @@ static void shape_text(text_line & line,
     hb_buffer_pre_allocate(buffer.get(), length);
     mapnik::value_unicode_string const& text = itemizer.text();
 
-    font_feature_settings_ptr features = list.front().format->font_feature_settings;
+    font_feature_settings features = list.front().format->font_feature_settings;
 
     for (auto const& text_item : list)
     {
@@ -93,7 +93,7 @@ static void shape_text(text_line & line,
             hb_buffer_set_direction(buffer.get(), (text_item.rtl == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
-            hb_shape(font, buffer.get(), features->get_features(), features->count());
+            hb_shape(font, buffer.get(), features.get_features(), features.count());
             hb_font_destroy(font);
 
             unsigned num_glyphs = hb_buffer_get_length(buffer.get());
