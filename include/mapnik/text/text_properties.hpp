@@ -49,33 +49,40 @@ namespace detail {
 
 struct evaluated_format_properties
 {
-    evaluated_format_properties() :
-      face_name(),
-      text_size(0.0),
-      character_spacing(0.0),
-      line_spacing(0.0),
-      text_opacity(1.0),
-      halo_opacity(1.0),
-      text_transform(NONE),
-      fill(0,0,0),
-      halo_fill(0,0,0),
-      halo_radius(0.0),
-      font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
-    std::string face_name;
+    std::string face_name = "";
     boost::optional<font_set> fontset;
-    double text_size;
-    double character_spacing;
-    double line_spacing;
-    double text_opacity;
-    double halo_opacity;
-    text_transform_e text_transform;
-    color fill;
-    color halo_fill;
-    double halo_radius;
-    font_feature_settings_ptr font_feature_settings;
+    double text_size = 0.0;
+    double character_spacing = 0.0;
+    double line_spacing = 0.0;
+    double text_opacity = 1.0;
+    double halo_opacity = 1.0;
+    text_transform_e text_transform = NONE;
+    color fill = color(0,0,0);
+    color halo_fill = color(255,255,255);
+    double halo_radius = 0.0;
+    font_feature_settings_ptr font_feature_settings = std::make_shared<mapnik::font_feature_settings>();
+};
+
+struct evaluated_text_properties
+{
+    label_placement_e label_placement = POINT_PLACEMENT;
+    double label_spacing = 0.0; // distance between repeated labels on a single geometry
+    double label_position_tolerance = 0.0; // distance the label can be moved on the line to fit, if 0 the default is used
+    bool avoid_edges = false;
+    double margin = 0.0;
+    double repeat_distance = 0.0;
+    double minimum_distance = 0.0;
+    double minimum_padding = 0.0;
+    double minimum_path_length = 0.0;
+    double max_char_angle_delta = 22.5 * M_PI/180.0;
+    bool allow_overlap = false;
+    bool largest_bbox_only = true; // Only consider geometry with largest bbox (polygons)
+    text_upright_e upright = UPRIGHT_AUTO;
 };
 
 }
+
+using evaluated_text_properties_ptr = std::unique_ptr<detail::evaluated_text_properties>;
 
 enum directions_e
 {
@@ -179,8 +186,8 @@ struct MAPNIK_DECL text_symbolizer_properties
 
     // Takes a feature and produces formatted text as output.
     // The output object has to be created by the caller and passed in for thread safety.
-    void process(text_layout &output, feature_impl const& feature, attributes const& vars);
-    void evaluate_text_properties(feature_impl const& feature, attributes const& attrs);
+    void process(text_layout & output, feature_impl const& feature, attributes const& vars) const;
+    evaluated_text_properties_ptr evaluate_text_properties(feature_impl const& feature, attributes const& attrs) const;
     // Sets new format tree.
     void set_format_tree(formatting::node_ptr tree);
     // Get a list of all expressions used in any placement.
@@ -188,23 +195,6 @@ struct MAPNIK_DECL text_symbolizer_properties
     void add_expressions(expression_set & output) const;
 
     // Per symbolizer options
-    label_placement_e label_placement;
-    // distance between repeated labels on a single geometry
-    double label_spacing;
-    // distance the label can be moved on the line to fit, if 0 the default is used
-    double label_position_tolerance;
-    bool avoid_edges;
-    double margin;
-    double repeat_distance;
-    double minimum_distance;
-    double minimum_padding;
-    double minimum_path_length;
-    double max_char_angle_delta;
-    bool allow_overlap;
-    // Only consider geometry with largest bbox (polygons)
-    bool largest_bbox_only;
-    text_upright_e upright;
-
     // Expressions
     text_properties_expressions expressions;
     // Default values for text layouts

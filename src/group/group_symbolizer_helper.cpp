@@ -95,7 +95,7 @@ bool group_symbolizer_helper::find_line_placements(T & path)
         pp.forward(spacing/2.0);
         do
         {
-            tolerance_iterator tolerance_offset(placement_->properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
+            tolerance_iterator tolerance_offset(text_props_->label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
@@ -146,16 +146,16 @@ bool group_symbolizer_helper::collision(box2d<double> const& box, value_unicode_
 {
     if (!detector_.extent().intersects(box)
             ||
-        (placement_->properties.avoid_edges && !query_extent_.contains(box))
+        (text_props_->avoid_edges && !query_extent_.contains(box))
             ||
-        (placement_->properties.minimum_padding > 0 &&
-         !query_extent_.contains(box + (scale_factor_ * placement_->properties.minimum_padding)))
+        (text_props_->minimum_padding > 0 &&
+         !query_extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
             ||
-        (!placement_->properties.allow_overlap &&
-            ((repeat_key.length() == 0 && !detector_.has_placement(box, placement_->properties.margin * scale_factor_))
+        (!text_props_->allow_overlap &&
+            ((repeat_key.length() == 0 && !detector_.has_placement(box, text_props_->margin * scale_factor_))
                 ||
-             (repeat_key.length() > 0  && !detector_.has_placement(box, placement_->properties.margin * scale_factor_,
-                                                                   repeat_key, placement_->properties.repeat_distance * scale_factor_))))
+             (repeat_key.length() > 0  && !detector_.has_placement(box, text_props_->margin * scale_factor_,
+                                                                   repeat_key, text_props_->repeat_distance * scale_factor_))))
         )
     {
         return true;
@@ -166,10 +166,10 @@ bool group_symbolizer_helper::collision(box2d<double> const& box, value_unicode_
 double group_symbolizer_helper::get_spacing(double path_length) const
 {
     int num_labels = 1;
-    if (placement_->properties.label_spacing > 0)
+    if (text_props_->label_spacing > 0)
     {
         num_labels = static_cast<int>(std::floor(
-            path_length / (placement_->properties.label_spacing * scale_factor_)));
+            path_length / (text_props_->label_spacing * scale_factor_)));
     }
     if (num_labels <= 0)
     {

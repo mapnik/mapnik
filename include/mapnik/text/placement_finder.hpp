@@ -85,6 +85,7 @@ private:
     DetectorType & detector_;
     box2d<double> const& extent_;
     text_placement_info const& info_;
+    evaluated_text_properties_ptr text_props_;
     layout_container layouts_;
 
     double scale_factor_;

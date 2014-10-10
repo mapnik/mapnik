@@ -97,6 +97,7 @@ protected:
     // Use point placement. Otherwise line placement is used.
     mutable bool point_placement_;
     text_placement_info_ptr placement_;
+    evaluated_text_properties_ptr text_props_;
 };
 
 // Helper object that does all the TextSymbolizer placement finding

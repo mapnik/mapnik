@@ -58,9 +58,9 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor))
+      placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
+      text_props_(placement_->properties.evaluate_text_properties(feature_,vars_))
 {
-    placement_->properties.evaluate_text_properties(feature_, vars_);
     initialize_geometries();
     if (!geometries_to_process_.size()) return; // FIXME - bad practise
     initialize_points();
@@ -78,8 +78,8 @@ struct largest_bbox_first
 
 void base_symbolizer_helper::initialize_geometries() const
 {
-    bool largest_box_only = placement_->properties.largest_bbox_only;
-    double minimum_path_length = placement_->properties.minimum_path_length;
+    bool largest_box_only = text_props_->largest_bbox_only;
+    double minimum_path_length = text_props_->minimum_path_length;
     for ( auto const& geom :  feature_.paths())
     {
         // don't bother with empty geometries
@@ -111,7 +111,7 @@ void base_symbolizer_helper::initialize_geometries() const
 
 void base_symbolizer_helper::initialize_points() const
 {
-    label_placement_enum how_placed = placement_->properties.label_placement;
+    label_placement_enum how_placed = text_props_->label_placement;
     if (how_placed == LINE_PLACEMENT)
     {
         point_placement_ = false;

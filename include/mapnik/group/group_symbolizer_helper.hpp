@@ -39,7 +39,7 @@ using DetectorType = label_collision_detector4;
 
 using pixel_position_list = std::list<pixel_position>;
 
-/** Helper object that does some of the GroupSymbolizer placement finding work. */
+// Helper object that does some of the GroupSymbolizer placement finding work.
 class group_symbolizer_helper : public base_symbolizer_helper
 {
 public:

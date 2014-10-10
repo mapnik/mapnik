@@ -51,13 +51,14 @@ placement_finder::placement_finder(feature_impl const& feature,
       attr_(attr),
       detector_(detector),
       extent_(extent),
-      info_(placement_info),
-      scale_factor_(scale_factor),
-      font_manager_(font_manager),
-      placements_(),
-      has_marker_(false),
-      marker_(),
-      marker_box_() {}
+    info_(placement_info),
+    text_props_(info_.properties.evaluate_text_properties(feature_,attr_)),
+    scale_factor_(scale_factor),
+    font_manager_(font_manager),
+    placements_(),
+    has_marker_(false),
+    marker_(),
+    marker_box_() {}
 
 bool placement_finder::next_position()
 {
@@ -66,6 +67,7 @@ bool placement_finder::next_position()
         text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
         layout->evaluate_properties(feature_, attr_);
         move_dx_ = layout->displacement().x;
+        text_props_ = info_.properties.evaluate_text_properties(feature_,attr_); // this call is needed (text-bug1533) ??
         info_.properties.process(*layout, feature_, attr_);
         layouts_.clear(); // FIXME !!!!
         layouts_.add(layout);
@@ -231,8 +233,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     // Only calculate new angle at the start of each cluster!
                     angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
-                    if ((info_.properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
-                            std::fabs(normalize_angle(angle-last_cluster_angle)) > info_.properties.max_char_angle_delta)
+                    if ((text_props_->max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
+                        std::fabs(normalize_angle(angle-last_cluster_angle)) > text_props_->max_char_angle_delta)
                     {
                         return false;
                     }
@@ -307,10 +309,10 @@ double placement_finder::normalize_angle(double angle)
 double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
-    if (info_.properties.label_spacing > 0)
+    if (text_props_->label_spacing > 0)
     {
         num_labels = static_cast<int>(std::floor(
-            path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
+                                          path_length / (text_props_->label_spacing * scale_factor_ + layout_width)));
     }
     if (num_labels <= 0)
     {
@@ -324,25 +326,25 @@ bool placement_finder::collision(const box2d<double> &box, const value_unicode_s
     double margin, repeat_distance;
     if (line_placement)
     {
-        margin = info_.properties.margin * scale_factor_;
-        repeat_distance = (info_.properties.repeat_distance != 0 ? info_.properties.repeat_distance : info_.properties.minimum_distance) * scale_factor_;
+        margin = text_props_->margin * scale_factor_;
+        repeat_distance = (text_props_->repeat_distance != 0 ? text_props_->repeat_distance : text_props_->minimum_distance) * scale_factor_;
     }
     else
     {
-        margin = (info_.properties.margin != 0 ? info_.properties.margin : info_.properties.minimum_distance) * scale_factor_;
-        repeat_distance = info_.properties.repeat_distance * scale_factor_;
+        margin = (text_props_->margin != 0 ? text_props_->margin : text_props_->minimum_distance) * scale_factor_;
+        repeat_distance = text_props_->repeat_distance * scale_factor_;
     }
     return !detector_.extent().intersects(box)
-               ||
-           (info_.properties.avoid_edges && !extent_.contains(box))
-               ||
-           (info_.properties.minimum_padding > 0 &&
-            !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
-               ||
-           (!info_.properties.allow_overlap &&
-               ((repeat_key.length() == 0 && !detector_.has_placement(box, margin))
-                   ||
-               (repeat_key.length() > 0 && !detector_.has_placement(box, margin, repeat_key, repeat_distance))));
+        ||
+        (text_props_->avoid_edges && !extent_.contains(box))
+        ||
+        (text_props_->minimum_padding > 0 &&
+         !extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
+        ||
+        (!text_props_->allow_overlap &&
+         ((repeat_key.length() == 0 && !detector_.has_placement(box, margin))
+          ||
+          (repeat_key.length() > 0 && !detector_.has_placement(box, margin, repeat_key, repeat_distance))));
 }
 
 void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement)
@@ -370,14 +372,14 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
 {
     /*
 
-          (0/ymax)           (width/ymax)
-               ***************
-               *             *
-          (0/0)*             *
-               *             *
-               ***************
-          (0/ymin)          (width/ymin)
-          Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
+      (0/ymax)           (width/ymax)
+      ***************
+      *             *
+      (0/0)*             *
+      *             *
+      ***************
+      (0/ymin)          (width/ymin)
+      Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
     */
     double width = layout.cluster_width(glyph.char_index);
     if (glyph.advance() <= 0) width = -width;
