@@ -14,6 +14,7 @@ class test : public benchmark::test_case
     mapnik::box2d<double> extent_;
     mapnik::value_integer width_;
     mapnik::value_integer height_;
+    double scale_factor_;
     std::string preview_;
 public:
     test(mapnik::parameters const& params)
@@ -22,6 +23,7 @@ public:
        extent_(),
        width_(*params.get<mapnik::value_integer>("width",256)),
        height_(*params.get<mapnik::value_integer>("height",256)),
+       scale_factor_(*params.get<mapnik::value_double>("scale_factor",1.0)),
        preview_(*params.get<std::string>("preview",""))
       {
         boost::optional<std::string> map = params.get<std::string>("map");
@@ -54,7 +56,7 @@ public:
             m.zoom_all();
         }
         mapnik::image_32 im(m.width(),m.height());
-        mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+        mapnik::agg_renderer<mapnik::image_32> ren(m,im,scale_factor_);
         ren.apply();
         if (!preview_.empty()) mapnik::save_to_file(im,preview_);
         return true;
@@ -71,7 +73,7 @@ public:
         for (unsigned i=0;i<iterations_;++i)
         {
             mapnik::image_32 im(m.width(),m.height());
-            mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+            mapnik::agg_renderer<mapnik::image_32> ren(m,im,scale_factor_);
             ren.apply();
         }
     }
