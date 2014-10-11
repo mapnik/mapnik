@@ -33,18 +33,15 @@ namespace mapnik
 
 font_face::font_face(FT_Face face)
     : face_(face),
-      glyph_info_cache_(),
-      char_height_(0.0) {}
+      glyph_info_cache_() {}
 
 bool font_face::set_character_sizes(double size)
 {
-    char_height_ = 0.0;
     return !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0);
 }
 
 bool font_face::set_unscaled_character_sizes()
 {
-    char_height_ = 0.0;
     return !FT_Set_Char_Size(face_,0,face_->units_per_EM,0,0);
 }
 
