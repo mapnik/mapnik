@@ -45,24 +45,9 @@ namespace mapnik
 struct glyph_t
 {
     FT_Glyph image;
-    detail::evaluated_format_properties const* properties;
-
-    glyph_t(FT_Glyph image_, detail::evaluated_format_properties const* properties_)
+    detail::evaluated_format_properties const& properties;
+    glyph_t(FT_Glyph image_, detail::evaluated_format_properties const& properties_)
         : image(image_), properties(properties_) {}
-
-    glyph_t( glyph_t && other) noexcept
-    : image(other.image),
-        properties(other.properties)
-    {
-        other.image = nullptr;
-        other.properties = nullptr;
-    }
-
-    glyph_t(glyph_t const& ) = delete;
-    glyph_t & operator=(glyph_t const&) = delete;
-
-    ~glyph_t () { FT_Done_Glyph(image);}
-
 };
 
 class text_renderer : private mapnik::noncopyable
