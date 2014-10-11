@@ -441,20 +441,22 @@ void cairo_context::add_text(glyph_positions const& pos,
     const double sx = base_point.x;
     const double sy = base_point.y;
 
+    for (auto const& glyph_pos : pos)
+    {
+        glyph_info const& glyph = glyph_pos.glyph;
+        glyph.face->set_character_sizes(glyph.format->text_size * scale_factor);
+    }
+
     //render halo
     double halo_radius = 0;
     set_operator(halo_comp_op);
     for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
-        face_set_ptr faces = font_manager.get_face_set(glyph.format->face_name, glyph.format->fontset);
         halo_radius = glyph.format->halo_radius * scale_factor;
         // make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
-
         double text_size = glyph.format->text_size * scale_factor;
-        faces->set_character_sizes(text_size);
-
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
@@ -475,11 +477,7 @@ void cairo_context::add_text(glyph_positions const& pos,
     for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
-        face_set_ptr faces = font_manager.get_face_set(glyph.format->face_name, glyph.format->fontset);
-
         double text_size = glyph.format->text_size * scale_factor;
-        faces->set_character_sizes(text_size);
-
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
