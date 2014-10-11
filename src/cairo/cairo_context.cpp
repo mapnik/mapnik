@@ -430,21 +430,21 @@ void cairo_context::glyph_path(unsigned long index, pixel_position const &pos)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_text(glyph_positions_ptr path,
+void cairo_context::add_text(glyph_positions const& pos,
                              cairo_face_manager & manager,
                              face_manager_freetype & font_manager,
                              composite_mode_e comp_op,
                              composite_mode_e halo_comp_op,
                              double scale_factor)
 {
-    pixel_position const& base_point = path->get_base_point();
+    pixel_position const& base_point = pos.get_base_point();
     const double sx = base_point.x;
     const double sy = base_point.y;
 
     //render halo
     double halo_radius = 0;
     set_operator(halo_comp_op);
-    for (auto const& glyph_pos : *path)
+    for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
         face_set_ptr faces = font_manager.get_face_set(glyph.format->face_name, glyph.format->fontset);
@@ -472,7 +472,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
         stroke();
     }
     set_operator(comp_op);
-    for (auto const& glyph_pos : *path)
+    for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
         face_set_ptr faces = font_manager.get_face_set(glyph.format->face_name, glyph.format->fontset);
