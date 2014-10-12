@@ -154,7 +154,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
             for (auto const& glyph : line)
             {
                 // place the character relative to the center of the string envelope
-                glyphs->push_back(glyph, (pixel_position(x, y).rotate(orientation)) + layout_offset, orientation);
+                glyphs->emplace_back(glyph, (pixel_position(x, y).rotate(orientation)) + layout_offset, orientation);
                 if (glyph.advance())
                 {
                     //Only advance if glyph is not part of a multiple glyph sequence
@@ -252,7 +252,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 box2d<double> bbox = get_bbox(layout, glyph, pos, rot);
                 if (collision(bbox, layouts_.text(), true)) return false;
                 bboxes.push_back(std::move(bbox));
-                glyphs->push_back(glyph, pos, rot);
+                glyphs->emplace_back(glyph, pos, rot);
             }
             // See comment above
             offset -= sign * line.height()/2;

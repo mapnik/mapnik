@@ -48,9 +48,9 @@ glyph_positions::const_iterator glyph_positions::end() const
     return data_.end();
 }
 
-void glyph_positions::push_back(glyph_info const& glyph, pixel_position offset, rotation const& rot)
+void glyph_positions::emplace_back(glyph_info const& glyph, pixel_position offset, rotation const& rot)
 {
-    data_.push_back(glyph_position(glyph, offset, rot));
+    data_.emplace_back(glyph, offset, rot);
 }
 
 void glyph_positions::reserve(unsigned count)

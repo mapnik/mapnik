@@ -72,7 +72,7 @@ public:
     const_iterator begin() const;
     const_iterator end() const;
 
-    void push_back(glyph_info const& glyph, pixel_position offset, rotation const& rot);
+    void emplace_back(glyph_info const& glyph, pixel_position offset, rotation const& rot);
     void reserve(unsigned count);
 
     pixel_position const& get_base_point() const;
