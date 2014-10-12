@@ -430,38 +430,33 @@ void cairo_context::glyph_path(unsigned long index, pixel_position const &pos)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_text(glyph_positions_ptr path,
+void cairo_context::add_text(glyph_positions const& pos,
                              cairo_face_manager & manager,
                              face_manager_freetype & font_manager,
                              composite_mode_e comp_op,
                              composite_mode_e halo_comp_op,
                              double scale_factor)
 {
-    pixel_position const& base_point = path->get_base_point();
+    pixel_position const& base_point = pos.get_base_point();
     const double sx = base_point.x;
     const double sy = base_point.y;
 
-    //render halo
-    double halo_radius = 0;
-    evaluated_format_properties_ptr format;
-    set_operator(halo_comp_op);
-    for (auto const& glyph_pos : *path)
+    for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
+        glyph.face->set_character_sizes(glyph.format->text_size * scale_factor);
+    }
 
-        if (glyph.format)
-        {
-            format = glyph.format;
-            // Settings have changed.
-            halo_radius = format->halo_radius * scale_factor;
-        }
+    //render halo
+    double halo_radius = 0;
+    set_operator(halo_comp_op);
+    for (auto const& glyph_pos : pos)
+    {
+        glyph_info const& glyph = glyph_pos.glyph;
+        halo_radius = glyph.format->halo_radius * scale_factor;
         // make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
-
-        face_set_ptr faces = font_manager.get_face_set(format->face_name, format->fontset);
-        double text_size = format->text_size * scale_factor;
-        faces->set_character_sizes(text_size);
-
+        double text_size = glyph.format->text_size * scale_factor;
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
@@ -475,23 +470,14 @@ void cairo_context::add_text(glyph_positions_ptr path,
         glyph_path(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
         set_line_width(2.0 * halo_radius);
         set_line_join(ROUND_JOIN);
-        set_color(format->halo_fill, format->halo_opacity);
+        set_color(glyph.format->halo_fill, glyph.format->halo_opacity);
         stroke();
     }
     set_operator(comp_op);
-    for (auto const& glyph_pos : *path)
+    for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
-
-        if (glyph.format)
-        {
-            format = glyph.format;
-        }
-
-        face_set_ptr faces = font_manager.get_face_set(format->face_name, format->fontset);
-        double text_size = format->text_size * scale_factor;
-        faces->set_character_sizes(text_size);
-
+        double text_size = glyph.format->text_size * scale_factor;
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
@@ -502,7 +488,7 @@ void cairo_context::add_text(glyph_positions_ptr path,
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
         pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
-        set_color(format->fill, format->text_opacity);
+        set_color(glyph.format->fill, glyph.format->text_opacity);
         show_glyph(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
     }
 

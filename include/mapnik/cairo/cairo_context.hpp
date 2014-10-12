@@ -319,7 +319,7 @@ public:
     void restore();
     void show_glyph(unsigned long index, pixel_position const& pos);
     void glyph_path(unsigned long index, pixel_position const& pos);
-    void add_text(glyph_positions_ptr pos,
+    void add_text(glyph_positions const& pos,
                   cairo_face_manager & manager,
                   face_manager_freetype & font_manager,
                   composite_mode_e comp_op = src_over,

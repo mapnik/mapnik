@@ -207,7 +207,7 @@ struct do_xml_attribute_cast<mapnik::font_feature_settings>
 {
     static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
     {
-        return font_feature_settings(source);
+        return mapnik::font_feature_settings(source);
     }
 };
 

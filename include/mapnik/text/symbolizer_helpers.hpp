@@ -71,8 +71,8 @@ public:
                            box2d<double> const& query_extent);
 
 protected:
-    void initialize_geometries();
-    void initialize_points();
+    void initialize_geometries() const;
+    void initialize_points() const;
 
     //Input
     symbolizer_base const& sym_;
@@ -87,17 +87,17 @@ protected:
     //Processing
     // Using list instead of vector, because we delete random elements and need iterators to stay valid.
     // Remaining geometries to be processed.
-    std::list<geometry_type*> geometries_to_process_;
+    mutable std::list<geometry_type*> geometries_to_process_;
     // Remaining points to be processed.
-    std::list<pixel_position> points_;
+    mutable std::list<pixel_position> points_;
     // Geometry currently being processed.
-    std::list<geometry_type*>::iterator geo_itr_;
+    mutable std::list<geometry_type*>::iterator geo_itr_;
     // Point currently being processed.
-    std::list<pixel_position>::iterator point_itr_;
+    mutable std::list<pixel_position>::iterator point_itr_;
     // Use point placement. Otherwise line placement is used.
-    bool point_placement_;
-
+    mutable bool point_placement_;
     text_placement_info_ptr placement_;
+    evaluated_text_properties_ptr text_props_;
 };
 
 // Helper object that does all the TextSymbolizer placement finding
@@ -135,17 +135,17 @@ public:
                            agg::trans_affine const&);
 
     // Return all placements.
-    placements_list const& get();
+    placements_list const& get() const;
 protected:
-    bool next_point_placement();
-    bool next_line_placement();
+    bool next_point_placement() const;
+    bool next_line_placement() const;
 
-    placement_finder finder_;
+    mutable placement_finder finder_;
 
     placement_finder_adapter<placement_finder> adapter_;
-    vertex_converter_type converter_;
+    mutable vertex_converter_type converter_;
     //ShieldSymbolizer only
-    void init_marker();
+    void init_marker() const;
 };
 
 } //namespace

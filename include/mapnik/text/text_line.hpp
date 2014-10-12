@@ -52,8 +52,6 @@ public:
     // Iterator beyond last glyph.
     const_iterator end() const;
 
-    // Width of all glyphs without character spacing.
-    double glyphs_width() const { return glyphs_width_; }
     // Width of all glyphs including character spacing.
     double width() const { return width_; }
     // Real line height. For first line: max_char_height(), for all others: line_height().
@@ -61,8 +59,10 @@ public:
 
     // Height of the tallest glyph in this line.
     double max_char_height() const { return max_char_height_; }
+
     // Called for each font/style to update the maximum height of this line.
     void update_max_char_height(double max_char_height);
+
     // Line height including line spacing.
     double line_height() const { return line_height_; }
 
@@ -77,21 +77,14 @@ public:
 
     // Number of glyphs.
     unsigned size() const;
-
-    unsigned space_count() const { return space_count_; }
-
-    void set_character_spacing(double character_spacing, double scale_factor);
-
 private:
     glyph_vector glyphs_;
     double line_height_; // Includes line spacing (returned by freetype)
-    double max_char_height_; // Height of 'X' character of the largest font in this run. //TODO: Initialize this!
+    double max_char_height_; // Max height of any glyphs in line - calculated by shaper
     double width_;
-    double glyphs_width_;
     unsigned first_char_;
     unsigned last_char_;
     bool first_line_;
-    unsigned space_count_;
 };
 
 } //namespace mapnik

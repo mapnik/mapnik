@@ -32,45 +32,20 @@ namespace mapnik
 {
 
 font_face::font_face(FT_Face face)
-    : face_(face),
-      glyph_info_cache_(),
-      char_height_(0.0) {}
-
-double font_face::get_char_height(double size) const
-{
-    if (char_height_ != 0.0) return char_height_;
-    glyph_info tmp;
-    tmp.glyph_index = FT_Get_Char_Index(face_, 'X');
-    if (glyph_dimensions(tmp))
-    {
-        tmp.scale_multiplier = size / face_->units_per_EM;
-        char_height_ = tmp.height();
-    }
-    return char_height_;
-}
+    : face_(face) {}
 
 bool font_face::set_character_sizes(double size)
 {
-    char_height_ = 0.0;
     return !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0);
 }
 
 bool font_face::set_unscaled_character_sizes()
 {
-    char_height_ = 0.0;
     return !FT_Set_Char_Size(face_,0,face_->units_per_EM,0,0);
 }
 
 bool font_face::glyph_dimensions(glyph_info & glyph) const
 {
-    // Check if glyph is already in cache
-    glyph_info_cache_type::const_iterator itr;
-    itr = glyph_info_cache_.find(glyph.glyph_index);
-    if (itr != glyph_info_cache_.end()) {
-        glyph = itr->second;
-        return true;
-    }
-
     FT_Vector pen;
     pen.x = 0;
     pen.y = 0;
@@ -94,7 +69,6 @@ bool font_face::glyph_dimensions(glyph_info & glyph) const
     glyph.unscaled_ymax = glyph_bbox.yMax;
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
-    glyph_info_cache_.emplace(glyph.glyph_index, glyph);
     return true;
 }
 

@@ -44,7 +44,7 @@ namespace mapnik
 struct icu_shaper
 {
 static void shape_text(text_line & line,
-                       text_itemizer const& itemizer,
+                       text_itemizer & itemizer,
                        std::map<unsigned,double> & width_map,
                        face_manager_freetype & font_manager,
                        double scale_factor )

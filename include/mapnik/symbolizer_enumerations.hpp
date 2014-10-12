@@ -158,7 +158,6 @@ enum horizontal_alignment_enum
     H_MIDDLE,
     H_RIGHT,
     H_AUTO,
-    H_ADJUST,
     horizontal_alignment_enum_MAX
 };
 

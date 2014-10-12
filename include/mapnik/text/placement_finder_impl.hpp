@@ -59,7 +59,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         }
         else
         {
-            if ((pp.length() < info_.properties.minimum_path_length * scale_factor_)
+            if ((pp.length() < text_props_->minimum_path_length * scale_factor_)
                 ||
                 (pp.length() <= 0.001) // Clipping removed whole geometry
                 ||
@@ -67,8 +67,6 @@ bool placement_finder::find_line_placements(T & path, bool points)
                 {
                     continue;
                 }
-
-            layouts_.adjust(pp.length(), scale_factor_);
         }
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
@@ -76,7 +74,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         //horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
 
         // halign == H_LEFT -> don't move
-        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO || horizontal_alignment_ == H_ADJUST)
+        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO)
         {
             if (!pp.forward(spacing / 2.0)) continue;
         }
@@ -89,14 +87,13 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         do
         {
-            tolerance_iterator tolerance_offset(info_.properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
+            tolerance_iterator tolerance_offset(text_props_->label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
                 if (pp.move(tolerance_offset.get())
-                    && (
-                    (points && find_point_placement(pp.current_position()))
-                    || (!points && single_line_placement(pp, info_.properties.upright))))
+                    && ((points && find_point_placement(pp.current_position()))
+                        || (!points && single_line_placement(pp, text_props_->upright))))
                 {
                     success = true;
                     break;

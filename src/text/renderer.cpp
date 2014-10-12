@@ -83,7 +83,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
         error = FT_Get_Glyph(face->glyph, &image);
         if (error) continue;
 
-        glyphs_.emplace_back(image, glyph.format.get());
+        glyphs_.emplace_back(image, *glyph.format);
     }
 }
 
@@ -158,12 +158,9 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
 
     for (auto const& glyph : glyphs_)
     {
-        if (glyph.properties)
-        {
-            halo_fill = glyph.properties->halo_fill.rgba();
-            halo_opacity = glyph.properties->halo_opacity;
-            halo_radius = glyph.properties->halo_radius * scale_factor_;
-        }
+        halo_fill = glyph.properties.halo_fill.rgba();
+        halo_opacity = glyph.properties.halo_opacity;
+        halo_radius = glyph.properties.halo_radius * scale_factor_;
         // make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
         FT_Glyph g;
@@ -210,11 +207,8 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     // render actual text
     for (auto & glyph : glyphs_)
     {
-        if (glyph.properties)
-        {
-            fill = glyph.properties->fill.rgba();
-            text_opacity = glyph.properties->text_opacity;
-        }
+        fill = glyph.properties.fill.rgba();
+        text_opacity = glyph.properties.text_opacity;
         FT_Glyph_Transform(glyph.image, &matrix, &start);
         error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
@@ -228,7 +222,9 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                              text_opacity,
                              comp_op_);
         }
+        FT_Done_Glyph(glyph.image);
     }
+
 }
 
 
@@ -255,10 +251,7 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
     halo_matrix.yx = halo_transform_.shy * 0x10000L;
     for (auto & glyph : glyphs_)
     {
-        if (glyph.properties)
-        {
-            halo_radius = glyph.properties->halo_radius * scale_factor_;
-        }
+        halo_radius = glyph.properties.halo_radius * scale_factor_;
         FT_Glyph_Transform(glyph.image, &halo_matrix, &start);
         error = FT_Glyph_To_Bitmap(&glyph.image, FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
@@ -271,6 +264,7 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
                            height - bit->top,
                            static_cast<int>(halo_radius));
         }
+        FT_Done_Glyph(glyph.image);
     }
 }
 

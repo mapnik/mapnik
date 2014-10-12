@@ -52,9 +52,9 @@ public:
     text_placement_info_list(text_placements_list const* parent, double scale_factor) :
         text_placement_info(parent, scale_factor),
         state(0), parent_(parent) {}
-    bool next();
+    bool next() const;
 private:
-    unsigned state;
+    mutable unsigned state;
     text_placements_list const* parent_;
 };
 
