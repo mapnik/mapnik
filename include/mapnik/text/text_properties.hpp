@@ -63,7 +63,7 @@ struct evaluated_format_properties
     font_feature_settings_ptr font_feature_settings = std::make_shared<mapnik::font_feature_settings>();
 };
 
-struct evaluated_text_properties
+struct evaluated_text_properties : noncopyable
 {
     label_placement_e label_placement = POINT_PLACEMENT;
     double label_spacing = 0.0; // distance between repeated labels on a single geometry
