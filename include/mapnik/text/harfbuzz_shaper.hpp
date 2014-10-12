@@ -68,8 +68,11 @@ static void shape_text(text_line & line,
     unsigned end = line.last_char();
     size_t length = end - start;
     if (!length) return;
-    line.reserve(length);
+
     std::list<text_item> const& list = itemizer.itemize(start, end);
+    if (list.empty()) return;
+
+    line.reserve(length);
 
     auto hb_buffer_deleter = [](hb_buffer_t * buffer) { hb_buffer_destroy(buffer);};
     const std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> buffer(hb_buffer_create(),hb_buffer_deleter);
