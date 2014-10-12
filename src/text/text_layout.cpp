@@ -31,6 +31,7 @@
 
 // ICU
 #include <unicode/brkiter.h>
+#include <algorithm>
 
 namespace mapnik
 {
@@ -487,6 +488,15 @@ double text_layout::jalign_offset(double line_width) const
     if (jalign_ == J_LEFT)   return -(width() / 2.0);
     if (jalign_ == J_RIGHT)  return (width() / 2.0) - line_width;
     return 0;
+}
+
+text_layout::const_iterator text_layout::longest_line() const
+{
+    return std::max_element(lines_.begin(), lines_.end(),
+        [](text_line const& line1, text_line const& line2)
+        {
+            return line1.glyphs_width() < line2.glyphs_width();
+        });
 }
 
 void layout_container::add(text_layout_ptr layout)
