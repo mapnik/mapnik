@@ -26,6 +26,7 @@
 //mapnik
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -36,18 +37,28 @@
 #include <unicode/unistr.h>
 #include <unicode/uscript.h>
 #include <unicode/ubidi.h>
+
 namespace mapnik
 {
 
-struct text_item
+struct text_item : noncopyable
 {
-    // First char (UTF16 offset)
-    unsigned start = 0u;
-    // Char _after_ the last char (UTF16 offset)
-    unsigned end = 0u;
-    UScriptCode script = USCRIPT_INVALID_CODE;
-    UBiDiDirection rtl = UBIDI_LTR;
-    evaluated_format_properties_ptr format;
+    text_item(unsigned s,
+              unsigned e,
+              UScriptCode sc,
+              UBiDiDirection d,
+              evaluated_format_properties_ptr f)
+      : start(s),
+        end(e),
+        script(sc),
+        dir(d),
+        format_(f) {}
+    text_item( text_item && ) = default;
+    unsigned start; // First char (UTF16 offset)
+    unsigned end; // Char _after_ the last char (UTF16 offset)
+    UScriptCode script;
+    UBiDiDirection dir;
+    evaluated_format_properties_ptr format_;
 };
 
 // This class splits text into parts which all have the same

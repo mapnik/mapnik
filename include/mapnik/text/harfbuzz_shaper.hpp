@@ -76,12 +76,12 @@ static void shape_text(text_line & line,
     hb_buffer_pre_allocate(buffer.get(), length);
     mapnik::value_unicode_string const& text = itemizer.text();
 
-    font_feature_settings_ptr features = list.front().format->font_feature_settings;
+    font_feature_settings_ptr features = list.front().format_->font_feature_settings;
 
     for (auto const& text_item : list)
     {
-        face_set_ptr face_set = font_manager.get_face_set(text_item.format->face_name, text_item.format->fontset);
-        double size = text_item.format->text_size * scale_factor;
+        face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
+        double size = text_item.format_->text_size * scale_factor;
         face_set->set_unscaled_character_sizes();
         std::size_t num_faces = face_set->size();
         std::size_t pos = 0;
@@ -90,7 +90,7 @@ static void shape_text(text_line & line,
             ++pos;
             hb_buffer_clear_contents(buffer.get());
             hb_buffer_add_utf16(buffer.get(), uchar_to_utf16(text.getBuffer()), text.length(), text_item.start, text_item.end - text_item.start);
-            hb_buffer_set_direction(buffer.get(), (text_item.rtl == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
+            hb_buffer_set_direction(buffer.get(), (text_item.dir == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
             hb_shape(font, buffer.get(), features->get_features(), features->count());
@@ -127,7 +127,7 @@ static void shape_text(text_line & line,
                 if (face->glyph_dimensions(g))
                 {
                     g.face = face;
-                    g.format = text_item.format;
+                    g.format = text_item.format_;
                     g.scale_multiplier = size / face->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
                     g.unscaled_advance = pos.x_advance;
