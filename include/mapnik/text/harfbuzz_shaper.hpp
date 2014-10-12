@@ -135,7 +135,7 @@ static void shape_text(text_line & line,
                     double tmp_height = g.height();
                     if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
                     width_map[char_index] += g.advance();
-                    line.add_glyph(g, scale_factor);
+                    line.add_glyph(std::move(g), scale_factor);
                 }
             }
             line.update_max_char_height(max_glyph_height);

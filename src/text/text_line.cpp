@@ -45,7 +45,7 @@ text_line::text_line( text_line && rhs)
       last_char_(std::move(rhs.last_char_)),
       first_line_(std::move(rhs.first_line_)) {}
 
-void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
+void text_line::add_glyph(glyph_info && glyph, double scale_factor_)
 {
     line_height_ = std::max(line_height_, glyph.line_height() + glyph.format->line_spacing);
     double advance = glyph.advance();
@@ -58,7 +58,7 @@ void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
         // Only add character spacing if the character is not a zero-width part of a cluster.
         width_ += advance + glyphs_.back().format->character_spacing  * scale_factor_;
     }
-    glyphs_.push_back(glyph);
+    glyphs_.emplace_back(std::move(glyph));
 }
 
 void text_line::reserve(glyph_vector::size_type length)

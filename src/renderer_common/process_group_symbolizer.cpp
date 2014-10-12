@@ -64,7 +64,8 @@ text_render_thunk::text_render_thunk(placements_list const& placements,
 
         for (glyph_position const& pos : *positions)
         {
-            glyph_vec.push_back(pos.glyph);
+            // TODO - could we store pointers to glyph_info instead to avoid copy?
+            glyph_vec.push_back(pos.glyph.clone());
             new_pos.emplace_back(glyph_vec.back(), pos.pos, pos.rot);
         }
 
