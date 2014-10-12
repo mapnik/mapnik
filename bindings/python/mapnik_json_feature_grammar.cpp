@@ -21,12 +21,8 @@
  *****************************************************************************/
 
 #include <mapnik/feature.hpp>
-#include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <mapnik/json/feature_grammar_impl.hpp>
-#include <mapnik/json/geometry_grammar_impl.hpp>
 #include <string>
 
 using iterator_type = std::string::const_iterator;
-template struct mapnik::wkt::wkt_collection_grammar<iterator_type>;
 template struct mapnik::json::feature_grammar<iterator_type,mapnik::feature_impl>;
-template struct mapnik::json::geometry_grammar<iterator_type>;
