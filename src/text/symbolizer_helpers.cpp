@@ -59,7 +59,7 @@ base_symbolizer_helper::base_symbolizer_helper(
       query_extent_(query_extent),
       scale_factor_(scale_factor),
       placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
-      text_props_(placement_->properties.evaluate_text_properties(feature_,vars_))
+      text_props_(evaluate_text_properties(placement_->properties,feature_,vars_))
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return; // FIXME - bad practise

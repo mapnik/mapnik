@@ -33,6 +33,7 @@
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/make_unique.hpp>
+
 // boost
 #include <boost/property_tree/ptree.hpp>
 
@@ -40,31 +41,32 @@ namespace mapnik
 {
 using boost::optional;
 
+
+evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_properties const& text_prop, feature_impl const& feature, attributes const& attrs)
+{
+    // evaluate text properties
+    evaluated_text_properties_ptr prop = std::make_unique<detail::evaluated_text_properties>();
+    prop->label_placement = util::apply_visitor(extract_value<label_placement_enum>(feature,attrs), text_prop.expressions.label_placement);
+    prop->label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.label_spacing);
+    prop->label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.label_position_tolerance);
+    prop->avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.avoid_edges);
+    prop->margin = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.margin);
+    prop->repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.repeat_distance);
+    prop->minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_distance);
+    prop->minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_padding);
+    prop->minimum_path_length = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_path_length);
+    prop->max_char_angle_delta = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.max_char_angle_delta) * M_PI/180;
+    prop->allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.allow_overlap);
+    prop->largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.largest_bbox_only);
+    prop->upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), text_prop.expressions.upright);
+    return prop;
+}
+
+
 text_symbolizer_properties::text_symbolizer_properties()
     : layout_defaults(),
       format_defaults(),
       tree_() {}
-
-
-evaluated_text_properties_ptr text_symbolizer_properties::evaluate_text_properties(feature_impl const& feature, attributes const& attrs) const
-{
-    // evaluate text properties
-    evaluated_text_properties_ptr prop = std::make_unique<detail::evaluated_text_properties>();
-    prop->label_placement = util::apply_visitor(extract_value<label_placement_enum>(feature,attrs), expressions.label_placement);
-    prop->label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
-    prop->label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
-    prop->avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
-    prop->margin = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.margin);
-    prop->repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.repeat_distance);
-    prop->minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
-    prop->minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
-    prop->minimum_path_length = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
-    prop->max_char_angle_delta = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.max_char_angle_delta) * M_PI/180;
-    prop->allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.allow_overlap);
-    prop->largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.largest_bbox_only);
-    prop->upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), expressions.upright);
-    return prop;
-}
 
 void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) const
 {

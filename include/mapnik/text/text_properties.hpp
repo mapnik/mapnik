@@ -196,11 +196,9 @@ struct MAPNIK_DECL text_symbolizer_properties
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
                 text_symbolizer_properties const& dfl) const;
-
     // Takes a feature and produces formatted text as output.
     // The output object has to be created by the caller and passed in for thread safety.
     void process(text_layout & output, feature_impl const& feature, attributes const& vars) const;
-    evaluated_text_properties_ptr evaluate_text_properties(feature_impl const& feature, attributes const& attrs) const;
     // Sets new format tree.
     void set_format_tree(formatting::node_ptr tree);
     // Get a list of all expressions used in any placement.
@@ -219,6 +217,8 @@ private:
     // A tree of formatting::nodes which contain text and formatting information.
     formatting::node_ptr tree_;
 };
+
+evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_properties const& text_prop, feature_impl const& feature, attributes const& attrs);
 
 } //ns mapnik
 

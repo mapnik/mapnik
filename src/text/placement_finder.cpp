@@ -52,7 +52,7 @@ placement_finder::placement_finder(feature_impl const& feature,
       detector_(detector),
       extent_(extent),
     info_(placement_info),
-    text_props_(info_.properties.evaluate_text_properties(feature_,attr_)),
+    text_props_(evaluate_text_properties(info_.properties,feature_,attr_)),
     scale_factor_(scale_factor),
     font_manager_(font_manager),
     placements_(),
@@ -67,7 +67,7 @@ bool placement_finder::next_position()
         text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
         layout->evaluate_properties(feature_, attr_);
         move_dx_ = layout->displacement().x;
-        text_props_ = info_.properties.evaluate_text_properties(feature_,attr_); // this call is needed (text-bug1533) ??
+        text_props_ = evaluate_text_properties(info_.properties,feature_,attr_); // this call is needed (text-bug1533) ??
         info_.properties.process(*layout, feature_, attr_);
         layouts_.clear(); // FIXME !!!!
         layouts_.add(layout);
