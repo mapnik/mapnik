@@ -32,8 +32,7 @@ namespace mapnik
 {
 
 font_face::font_face(FT_Face face)
-    : face_(face),
-      glyph_info_cache_() {}
+    : face_(face) {}
 
 bool font_face::set_character_sizes(double size)
 {
@@ -47,14 +46,6 @@ bool font_face::set_unscaled_character_sizes()
 
 bool font_face::glyph_dimensions(glyph_info & glyph) const
 {
-    // Check if glyph is already in cache
-    glyph_info_cache_type::const_iterator itr;
-    itr = glyph_info_cache_.find(glyph.glyph_index);
-    if (itr != glyph_info_cache_.end()) {
-        glyph = itr->second;
-        return true;
-    }
-
     FT_Vector pen;
     pen.x = 0;
     pen.y = 0;
@@ -78,7 +69,6 @@ bool font_face::glyph_dimensions(glyph_info & glyph) const
     glyph.unscaled_ymax = glyph_bbox.yMax;
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
-    glyph_info_cache_.emplace(glyph.glyph_index, glyph);
     return true;
 }
 
