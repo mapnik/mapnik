@@ -68,6 +68,7 @@ public:
     using const_iterator = std::vector<glyph_position>::const_iterator;
     glyph_positions();
 
+    std::size_t size() const { return data_.size(); };
     const_iterator begin() const;
     const_iterator end() const;
 

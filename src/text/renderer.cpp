@@ -59,6 +59,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
     FT_Vector pen;
     FT_Error  error;
 
+    glyphs_.reserve(positions.size());
     for (auto const& glyph_pos : positions)
     {
         glyph_info const& glyph = glyph_pos.glyph;
