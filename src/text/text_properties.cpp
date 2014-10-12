@@ -68,41 +68,14 @@ text_symbolizer_properties::text_symbolizer_properties()
       format_defaults(),
       tree_() {}
 
-void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) const
-{
-    output.clear();
-
-    if (tree_)
-    {
-        //evaluate format properties
-        evaluated_format_properties_ptr format = std::make_shared<detail::evaluated_format_properties>();
-        format->text_size = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
-        format->character_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);
-        format->line_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.line_spacing);
-        format->text_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
-        format->halo_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
-        format->halo_radius = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
-        format->fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
-        format->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
-        format->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), format_defaults.text_transform);
-        format->face_name = format_defaults.face_name;
-        format->fontset = format_defaults.fontset;
-
-        format->ff_settings = util::apply_visitor(extract_value<font_feature_settings>(feature,attrs), format_defaults.ff_settings);
-        // Turn off ligatures if character_spacing > 0.
-        if (format->character_spacing > .0 && format->ff_settings.count() == 0)
-        {
-            format->ff_settings.append(font_feature_liga_off);
-        }
-
-        tree_->apply(format, feature, attrs, output);
-    }
-    else MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
-}
-
 void text_symbolizer_properties::set_format_tree(formatting::node_ptr tree)
 {
     tree_ = tree;
+}
+
+formatting::node_ptr text_symbolizer_properties::format_tree() const
+{
+    return tree_;
 }
 
 void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)

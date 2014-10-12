@@ -64,19 +64,26 @@ bool placement_finder::next_position()
 {
     if (info_.next())
     {
-        text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
-        layout->evaluate_properties(feature_, attr_);
-        move_dx_ = layout->displacement().x;
-        // TODO: this call is needed (text-bug1533) ??
+        // parent layout, has top-level ownership of a new evaluated_format_properties_ptr (TODO is this good enough to stay in scope???)
+        // but does not take ownership of the text_symbolizer_properties (info_.properties)
+        text_layout_ptr layout = std::make_shared<text_layout>(font_manager_,
+                                                               feature_,
+                                                               attr_,
+                                                               scale_factor_,
+                                                               info_.properties,
+                                                               info_.properties.layout_defaults,
+                                                               info_.properties.format_tree());
+        // TODO: why is this call needed?
         // https://github.com/mapnik/mapnik/issues/2525
         text_props_ = evaluate_text_properties(info_.properties,feature_,attr_);
-        info_.properties.process(*layout, feature_, attr_);
         // Note: this clear call is needed when multiple placements are tried
         // like with placement-type="simple|list"
         if (!layouts_.empty()) layouts_.clear();
         // Note: multiple layouts_ may result from this add() call
         layouts_.add(layout);
         layouts_.layout();
+        // cache a few values for use elsewhere in placement finder
+        move_dx_ = layout->displacement().x;
         horizontal_alignment_ = layout->horizontal_alignment();
         return true;
     }

@@ -57,7 +57,13 @@ public:
     using const_iterator = line_vector::const_iterator;
     using child_iterator = text_layout_vector::const_iterator;
 
-    text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties);
+    text_layout(face_manager_freetype & font_manager,
+                feature_impl const& feature,
+                attributes const& attrs,
+                double scale_factor,
+                text_symbolizer_properties const& properties,
+                text_layout_properties const& layout_defaults,
+                formatting::node_ptr tree);
 
     // Adds a new text part. Call this function repeatedly to build the complete text.
     void add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format);
@@ -99,7 +105,8 @@ public:
     inline text_layout_vector const& get_child_layouts() const { return child_layout_list_; }
     inline face_manager_freetype & get_font_manager() const { return font_manager_; }
     inline double get_scale_factor() const { return scale_factor_; }
-    inline text_layout_properties const& get_layout_properties() const { return properties_; }
+    inline text_symbolizer_properties const& get_default_text_properties() const { return properties_; }
+    inline text_layout_properties const& get_layout_properties() const { return layout_properties_; }
 
     inline rotation const& orientation() const { return orientation_; }
     inline pixel_position const& displacement() const { return displacement_; }
@@ -107,8 +114,6 @@ public:
     inline horizontal_alignment_e horizontal_alignment() const { return halign_; }
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
-
-    void evaluate_properties(feature_impl const& feature, attributes const& attr);
 
 private:
     void break_line(std::pair<unsigned, unsigned> && line_limits);
@@ -118,11 +123,11 @@ private:
     void clear_cluster_widths(unsigned first, unsigned last);
     void init_auto_alignment();
 
-    //input
+    // input
     face_manager_freetype & font_manager_;
     double scale_factor_;
 
-    //processing
+    // processing
     text_itemizer itemizer_;
     // Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
     // note: this probably isn't the best solution. it would be better to have an object for each cluster, but
@@ -132,13 +137,19 @@ private:
     double height_;
     unsigned glyphs_count_;
 
-    //output
+    // output
     line_vector lines_;
 
-    //text layout properties
-    text_layout_properties properties_;
+    // layout properties (owned by text_layout)
+    text_layout_properties layout_properties_;
 
-    //alignments
+    // text symbolizer properties (owned by placement_finder's 'text_placement_info' (info_) which is owned by symbolizer_helper
+    text_symbolizer_properties const& properties_;
+
+    // format properties (owned by text_layout)
+    evaluated_format_properties_ptr format_;
+
+    // alignments
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
@@ -154,7 +165,7 @@ private:
     pixel_position displacement_ = {0,0};
     box2d<double> bounds_;
 
-    //children
+    // children
     text_layout_vector child_layout_list_;
 };
 

@@ -58,8 +58,8 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      placement_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
-      text_props_(evaluate_text_properties(placement_->properties,feature_,vars_))
+      info_ptr_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
+      text_props_(evaluate_text_properties(info_ptr_->properties,feature_,vars_))
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return; // FIXME - bad practise
@@ -183,7 +183,7 @@ text_symbolizer_helper::text_symbolizer_helper(
         DetectorT &detector, box2d<double> const& query_extent,
         agg::trans_affine const& affine_trans)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
+      finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
     adapter_(finder_,false),
     converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
@@ -275,7 +275,7 @@ text_symbolizer_helper::text_symbolizer_helper(
         view_transform const& t, FaceManagerT & font_manager,
         DetectorT & detector, box2d<double> const& query_extent, agg::trans_affine const& affine_trans)
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      finder_(feature, vars, detector, dims_, *placement_, font_manager, scale_factor),
+      finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
       adapter_(finder_,true),
       converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {

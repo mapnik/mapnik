@@ -96,7 +96,7 @@ protected:
     mutable std::list<pixel_position>::iterator point_itr_;
     // Use point placement. Otherwise line placement is used.
     mutable bool point_placement_;
-    text_placement_info_ptr placement_;
+    text_placement_info_ptr info_ptr_;
     evaluated_text_properties_ptr text_props_;
 };
 

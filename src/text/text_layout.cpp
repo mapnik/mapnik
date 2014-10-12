@@ -51,12 +51,52 @@ static void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_positi
     box.init(center.x - half_width, center.y - half_height, center.x + half_width, center.y + half_height);
 }
 
+pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
+{
+    switch (dir)
+    {
+    case EXACT_POSITION:
+        return pixel_position(dx,dy);
+        break;
+    case NORTH:
+        return pixel_position(0,-std::abs(dy));
+        break;
+    case EAST:
+        return pixel_position(std::abs(dx),0);
+        break;
+    case SOUTH:
+        return pixel_position(0,std::abs(dy));
+        break;
+    case WEST:
+        return pixel_position(-std::abs(dx),0);
+        break;
+    case NORTHEAST:
+        return pixel_position(std::abs(dx),-std::abs(dy));
+        break;
+    case SOUTHEAST:
+        return pixel_position(std::abs(dx),std::abs(dy));
+        break;
+    case NORTHWEST:
+        return pixel_position(-std::abs(dx),-std::abs(dy));
+        break;
+    case SOUTHWEST:
+        return pixel_position(-std::abs(dx),std::abs(dy));
+        break;
+    }
+}
+
 pixel_position pixel_position::rotate(rotation const& rot) const
 {
     return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
 }
 
-text_layout::text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties)
+text_layout::text_layout(face_manager_freetype & font_manager,
+                         feature_impl const& feature,
+                         attributes const& attrs,
+                         double scale_factor,
+                         text_symbolizer_properties const& properties,
+                         text_layout_properties const& layout_defaults,
+                         formatting::node_ptr tree)
     : font_manager_(font_manager),
       scale_factor_(scale_factor),
       itemizer_(),
@@ -65,7 +105,53 @@ text_layout::text_layout(face_manager_freetype & font_manager, double scale_fact
       height_(0.0),
       glyphs_count_(0),
       lines_(),
-      properties_(properties) {}
+      layout_properties_(layout_defaults),
+      properties_(properties),
+      format_(std::make_shared<detail::evaluated_format_properties>())
+    {
+        double dx = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.dx);
+        double dy = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.dy);
+        displacement_ = evaluate_displacement(dx,dy, layout_properties_.dir);
+        std::string wrap_str = util::apply_visitor(extract_value<std::string>(feature,attrs), layout_properties_.wrap_char);
+        if (!wrap_str.empty()) wrap_char_ = wrap_str[0];
+        wrap_width_ = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.wrap_width);
+        double angle = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.orientation);
+        orientation_.init(angle * M_PI/ 180.0);
+        wrap_before_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), layout_properties_.wrap_before);
+        repeat_wrap_char_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), layout_properties_.repeat_wrap_char);
+        rotate_displacement_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), layout_properties_.rotate_displacement);
+        valign_ = util::apply_visitor(extract_value<vertical_alignment_enum>(feature,attrs),layout_properties_.valign);
+        halign_ = util::apply_visitor(extract_value<horizontal_alignment_enum>(feature,attrs),layout_properties_.halign);
+        jalign_ = util::apply_visitor(extract_value<justify_alignment_enum>(feature,attrs),layout_properties_.jalign);
+
+        // Takes a feature and produces formatted text as output.
+        if (tree)
+        {
+            format_properties const& format_defaults = properties_.format_defaults;
+            format_->text_size = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
+            format_->character_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);
+            format_->line_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.line_spacing);
+            format_->text_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
+            format_->halo_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
+            format_->halo_radius = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
+            format_->fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
+            format_->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
+            format_->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), format_defaults.text_transform);
+            format_->face_name = format_defaults.face_name;
+            format_->fontset = format_defaults.fontset;
+            format_->ff_settings = util::apply_visitor(extract_value<font_feature_settings>(feature,attrs), format_defaults.ff_settings);
+            // Turn off ligatures if character_spacing > 0.
+            if (format_->character_spacing > .0 && format_->ff_settings.count() == 0)
+            {
+                format_->ff_settings.append(font_feature_liga_off);
+            }
+            tree->apply(format_, feature, attrs, *this);
+        }
+        else
+        {
+            MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
+        }
+    }
 
 void text_layout::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format)
 {
@@ -339,63 +425,6 @@ void text_layout::clear()
 void text_layout::shape_text(text_line & line)
 {
     harfbuzz_shaper::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
-}
-
-pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
-{
-    switch (dir)
-    {
-    case EXACT_POSITION:
-        return pixel_position(dx,dy);
-        break;
-    case NORTH:
-        return pixel_position(0,-std::abs(dy));
-        break;
-    case EAST:
-        return pixel_position(std::abs(dx),0);
-        break;
-    case SOUTH:
-        return pixel_position(0,std::abs(dy));
-        break;
-    case WEST:
-        return pixel_position(-std::abs(dx),0);
-        break;
-    case NORTHEAST:
-        return pixel_position(std::abs(dx),-std::abs(dy));
-        break;
-    case SOUTHEAST:
-        return pixel_position(std::abs(dx),std::abs(dy));
-        break;
-    case NORTHWEST:
-        return pixel_position(-std::abs(dx),-std::abs(dy));
-        break;
-    case SOUTHWEST:
-        return pixel_position(-std::abs(dx),std::abs(dy));
-        break;
-    }
-}
-
-void text_layout::evaluate_properties(feature_impl const& feature, attributes const& attrs)
-{
-    // dx,dy
-    double dx = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dx);
-    double dy = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.dy);
-    displacement_ = evaluate_displacement(dx,dy, properties_.dir);
-    std::string wrap_str = util::apply_visitor(extract_value<std::string>(feature,attrs), properties_.wrap_char);
-    if (!wrap_str.empty()) wrap_char_ = wrap_str[0];
-    wrap_width_ = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.wrap_width);
-
-    double angle = util::apply_visitor(extract_value<value_double>(feature,attrs), properties_.orientation);
-    orientation_.init(angle * M_PI/ 180.0);
-
-    wrap_before_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.wrap_before);
-    repeat_wrap_char_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.repeat_wrap_char);
-    rotate_displacement_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), properties_.rotate_displacement);
-
-    valign_ = util::apply_visitor(extract_value<vertical_alignment_enum>(feature,attrs),properties_.valign);
-    halign_ = util::apply_visitor(extract_value<horizontal_alignment_enum>(feature,attrs),properties_.halign);
-    jalign_ = util::apply_visitor(extract_value<justify_alignment_enum>(feature,attrs),properties_.jalign);
-
 }
 
 void text_layout::init_auto_alignment()

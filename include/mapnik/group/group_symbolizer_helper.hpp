@@ -75,7 +75,7 @@ public:
 
     inline text_symbolizer_properties const& get_properties() const
     {
-        return placement_->properties;
+        return info_ptr_->properties;
     }
 
     pixel_position_list const& get();
