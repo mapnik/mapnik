@@ -67,8 +67,6 @@ bool placement_finder::find_line_placements(T & path, bool points)
                 {
                     continue;
                 }
-
-            layouts_.adjust(pp.length(), scale_factor_);
         }
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
@@ -76,7 +74,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         //horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
 
         // halign == H_LEFT -> don't move
-        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO || horizontal_alignment_ == H_ADJUST)
+        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO)
         {
             if (!pp.forward(spacing / 2.0)) continue;
         }

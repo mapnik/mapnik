@@ -194,7 +194,6 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
         double offset = layout_displacement.y + 0.5 * sign * layout.height();
-        bool move_by_length = layout.horizontal_alignment() == H_ADJUST;
 
         for (auto const& line : layout)
         {
@@ -217,16 +216,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (move_by_length)
-                    {
-                        if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
-                            return false;
-                    }
-                    else
-                    {
-                        if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
-                            return false;
-                    }
+                    if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                        return false;
 
                     current_cluster = glyph.char_index;
                     last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
