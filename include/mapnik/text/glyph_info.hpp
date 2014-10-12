@@ -35,14 +35,12 @@ namespace mapnik
 class font_face;
 using face_ptr = std::shared_ptr<font_face>;
 
-using glyph_index_t = unsigned;
-
 struct glyph_info
 {
-    glyph_info()
-        : glyph_index(0),
+    glyph_info(unsigned g_index, unsigned c_index)
+        : glyph_index(g_index),
+          char_index(c_index),
           face(nullptr),
-          char_index(0),
           unscaled_ymin(0.0),
           unscaled_ymax(0.0),
           unscaled_advance(0.0),
@@ -50,10 +48,10 @@ struct glyph_info
           scale_multiplier(1.0),
           offset(),
           format() {}
-    glyph_index_t glyph_index;
-    face_ptr face;
+    unsigned glyph_index;
     // Position in the string of all characters i.e. before itemizing
     unsigned char_index;
+    face_ptr face;
     double unscaled_ymin;
     double unscaled_ymax;
     double unscaled_advance;

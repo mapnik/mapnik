@@ -120,21 +120,22 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                glyph_info tmp;
-                tmp.glyph_index = glyphs[i].codepoint;
-                if (face->glyph_dimensions(tmp))
+                auto const& pos = positions[i];
+                auto const& glyph = glyphs[i];
+                unsigned char_index = glyph.cluster;
+                glyph_info g(glyph.codepoint,char_index);
+                if (face->glyph_dimensions(g))
                 {
-                    tmp.char_index = glyphs[i].cluster;
-                    tmp.face = face;
-                    tmp.format = text_item.format;
-                    tmp.scale_multiplier = size / face->get_face()->units_per_EM;
-                    double tmp_height = tmp.height();
-                    if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
+                    g.face = face;
+                    g.format = text_item.format;
+                    g.scale_multiplier = size / face->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
-                    tmp.unscaled_advance = positions[i].x_advance;
-                    tmp.offset.set(positions[i].x_offset * tmp.scale_multiplier, positions[i].y_offset * tmp.scale_multiplier);
-                    width_map[glyphs[i].cluster] += tmp.advance();
-                    line.add_glyph(tmp, scale_factor);
+                    g.unscaled_advance = pos.x_advance;
+                    g.offset.set(pos.x_offset * g.scale_multiplier, pos.y_offset * g.scale_multiplier);
+                    double tmp_height = g.height();
+                    if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
+                    width_map[char_index] += g.advance();
+                    line.add_glyph(g, scale_factor);
                 }
             }
             line.update_max_char_height(max_glyph_height);
