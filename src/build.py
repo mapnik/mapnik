@@ -143,8 +143,6 @@ else: # unix, non-macos
 
 source = Split(
     """
-    marker_helpers.cpp
-    dasharray_parser.cpp
     expression_grammar.cpp
     fs.cpp
     request.cpp
@@ -167,6 +165,7 @@ source = Split(
     feature_kv_iterator.cpp
     feature_style_processor.cpp
     feature_type_style.cpp
+    dasharray_parser.cpp
     font_engine_freetype.cpp
     font_set.cpp
     function_call.cpp
@@ -180,6 +179,8 @@ source = Split(
     load_map.cpp
     memory.cpp
     palette.cpp
+    marker_helpers.cpp
+    transform_expression_grammar.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
