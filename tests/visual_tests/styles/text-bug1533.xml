@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
-<!-- Minimal testcase for bug #1523. -->
+<!-- Minimal testcase for bug #1533. -->
 <Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>My Style</StyleName>
