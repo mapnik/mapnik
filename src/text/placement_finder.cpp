@@ -28,7 +28,7 @@
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/text/vertex_cache.hpp>
 
 // agg
@@ -395,60 +395,6 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
     pixel_position pos2 = pos + pixel_position(0, glyph.offset.y).rotate(rot);
     bbox.move(pos2.x , -pos2.y);
     return bbox;
-}
-
-
-glyph_positions::glyph_positions()
-    : data_(),
-      base_point_(),
-      marker_(),
-      marker_pos_(),
-      bbox_() {}
-
-glyph_positions::const_iterator glyph_positions::begin() const
-{
-    return data_.begin();
-}
-
-glyph_positions::const_iterator glyph_positions::end() const
-{
-    return data_.end();
-}
-
-void glyph_positions::push_back(glyph_info const& glyph, pixel_position const offset, rotation const& rot)
-{
-    data_.push_back(glyph_position(glyph, offset, rot));
-}
-
-void glyph_positions::reserve(unsigned count)
-{
-    data_.reserve(count);
-}
-
-pixel_position const& glyph_positions::get_base_point() const
-{
-    return base_point_;
-}
-
-void glyph_positions::set_base_point(pixel_position const base_point)
-{
-    base_point_ = base_point;
-}
-
-void glyph_positions::set_marker(marker_info_ptr marker, pixel_position const& marker_pos)
-{
-    marker_ = marker;
-    marker_pos_ = marker_pos;
-}
-
-marker_info_ptr glyph_positions::marker() const
-{
-    return marker_;
-}
-
-pixel_position const& glyph_positions::marker_pos() const
-{
-    return marker_pos_;
 }
 
 }// ns mapnik

@@ -31,7 +31,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/symbolizer_base.hpp>

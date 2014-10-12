@@ -210,6 +210,7 @@ source = Split(
     text/itemizer.cpp
     text/scrptrun.cpp
     text/face.cpp
+    text/glyph_positions.cpp
     text/placement_finder.cpp
     text/properties_util.cpp
     text/renderer.cpp

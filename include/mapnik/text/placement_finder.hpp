@@ -27,7 +27,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/placements/base.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/text/rotation.hpp>
 #include <mapnik/noncopyable.hpp>
 

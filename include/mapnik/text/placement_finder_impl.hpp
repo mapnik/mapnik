@@ -27,7 +27,7 @@
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/text/vertex_cache.hpp>
 #include <mapnik/text/tolerance_iterator.hpp>
 
