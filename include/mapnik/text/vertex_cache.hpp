@@ -58,7 +58,7 @@ class MAPNIK_DECL vertex_cache : noncopyable
         segment_vector() : vector(), length(0.) {}
         void add_segment(double x, double y, double len) {
             if (len == 0. && !vector.empty()) return; //Don't add zero length segments
-            vector.push_back(segment(x, y, len));
+            vector.emplace_back(x, y, len);
             length += len;
         }
         using iterator = std::vector<segment>::iterator;
@@ -202,7 +202,7 @@ vertex_cache::vertex_cache(T & path)
         if (agg::is_move_to(cmd))
         {
             //Create new sub path
-            subpaths_.push_back(segment_vector());
+            subpaths_.emplace_back();
             current_subpath_ = subpaths_.end()-1;
             current_subpath_->add_segment(new_x, new_y, 0);
             first = false;
