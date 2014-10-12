@@ -70,9 +70,9 @@ struct property_serializer : public util::static_visitor<>
         node_.put("<xmlattr>." + name_, str);
     }
 
-    void operator() (font_feature_settings_ptr const& val) const
+    void operator() (font_feature_settings const& val) const
     {
-        std::string str = val->to_string();
+        std::string str = val.to_string();
         node_.put("<xmlattr>." + name_, str);
     }
 

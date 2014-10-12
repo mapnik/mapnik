@@ -49,18 +49,30 @@ namespace detail {
 
 struct evaluated_format_properties
 {
-    std::string face_name = "";
+    evaluated_format_properties() :
+      face_name(),
+      text_size(0.0),
+      character_spacing(0.0),
+      line_spacing(0.0),
+      text_opacity(1.0),
+      halo_opacity(1.0),
+      text_transform(NONE),
+      fill(0,0,0),
+      halo_fill(0,0,0),
+      halo_radius(0.0),
+      ff_settings() {}
+    std::string face_name;
     boost::optional<font_set> fontset;
-    double text_size = 0.0;
-    double character_spacing = 0.0;
-    double line_spacing = 0.0;
-    double text_opacity = 1.0;
-    double halo_opacity = 1.0;
-    text_transform_e text_transform = NONE;
-    color fill = color(0,0,0);
-    color halo_fill = color(255,255,255);
-    double halo_radius = 0.0;
-    font_feature_settings_ptr font_feature_settings = std::make_shared<mapnik::font_feature_settings>();
+    double text_size;
+    double character_spacing;
+    double line_spacing;
+    double text_opacity;
+    double halo_opacity;
+    text_transform_e text_transform;
+    color fill;
+    color halo_fill;
+    double halo_radius;
+    font_feature_settings ff_settings;
 };
 
 struct evaluated_text_properties : noncopyable
@@ -78,6 +90,7 @@ struct evaluated_text_properties : noncopyable
     bool allow_overlap = false;
     bool largest_bbox_only = true; // Only consider geometry with largest bbox (polygons)
     text_upright_e upright = UPRIGHT_AUTO;
+
 };
 
 }
@@ -120,7 +133,7 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type halo_fill;
     symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type text_transform;
-    symbolizer_base::value_type font_feature_settings;
+    symbolizer_base::value_type ff_settings;
 };
 
 

@@ -201,13 +201,13 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
     }
 };
 
-// specialization for mapnik::font_feature_settings_ptr
+// specialization for mapnik::font_feature_settings
 template <>
-struct do_xml_attribute_cast<mapnik::font_feature_settings_ptr>
+struct do_xml_attribute_cast<mapnik::font_feature_settings>
 {
-    static inline boost::optional<mapnik::font_feature_settings_ptr> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
+    static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
     {
-        return std::make_shared<font_feature_settings>(source);
+        return mapnik::font_feature_settings(source);
     }
 };
 
