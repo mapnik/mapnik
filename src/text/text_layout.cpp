@@ -87,16 +87,14 @@ void text_layout::layout()
     unsigned num_lines = itemizer_.num_lines();
     for (unsigned i = 0; i < num_lines; ++i)
     {
-        std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
-        text_line line(line_limits.first, line_limits.second);
-        //Break line if neccessary
+        // Break line if neccessary
         if (wrap_char_ != ' ')
         {
-            break_line(line, wrap_char_, wrap_width_ * scale_factor_, text_ratio_, wrap_before_, repeat_wrap_char_);
+            break_line(itemizer_.line(i));
         }
         else
         {
-            break_line(line, wrap_width_ * scale_factor_, text_ratio_, wrap_before_);
+            break_line_icu(itemizer_.line(i));
         }
     }
 
@@ -113,22 +111,24 @@ void text_layout::layout()
 // This makes line breaking easy. One word is added to the current line at a time. Once the line is too long
 // we either go back one step or insert the line break at the current position (depending on "wrap_before" setting).
 // At the end everything that is left over is added as the final line.
-void text_layout::break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before)
+void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
 {
+    text_line line(line_limits.first, line_limits.second);
     shape_text(line);
-    if (!wrap_width || line.width() < wrap_width)
-    {
-        add_line(line);
-        return;
 
+    double scaled_wrap_width = wrap_width_ * scale_factor_;
+    if (!scaled_wrap_width || line.width() < scaled_wrap_width)
+    {
+        add_line(std::move(line));
+        return;
     }
-    if (text_ratio)
+    if (text_ratio_)
     {
         double wrap_at;
         double string_width = line.width();
         double string_height = line.line_height();
-        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio && (string_width/i) > wrap_width; i += 1.0) ;
-        wrap_width = wrap_at;
+        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio_ && (string_width/i) > scaled_wrap_width; i += 1.0) ;
+        scaled_wrap_width = wrap_at;
     }
 
     mapnik::value_unicode_string const& text = itemizer_.text();
@@ -140,7 +140,7 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
     // https://github.com/mapnik/mapnik/issues/2072
     if (!U_SUCCESS(status))
     {
-        add_line(line);
+        add_line(std::move(line));
         MAPNIK_LOG_ERROR(text_layout) << " could not create BreakIterator: " << u_errorName(status);
         return;
     }
@@ -157,9 +157,9 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
         {
             current_line_length += width_itr->second;
         }
-        if (current_line_length <= wrap_width) continue;
+        if (current_line_length <= scaled_wrap_width) continue;
 
-        int break_position = wrap_before ? breakitr->preceding(i) : breakitr->following(i);
+        int break_position = wrap_before_ ? breakitr->preceding(i) : breakitr->following(i);
         // following() returns a break position after the last word. So DONE should only be returned
         // when calling preceding.
         if (break_position <= last_break_position || break_position == static_cast<int>(BreakIterator::DONE))
@@ -187,7 +187,7 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
         text_line new_line(last_break_position, break_position);
         clear_cluster_widths(last_break_position, break_position);
         shape_text(new_line);
-        add_line(new_line);
+        add_line(std::move(new_line));
         last_break_position = break_position;
         i = break_position - 1;
         current_line_length = 0;
@@ -195,14 +195,14 @@ void text_layout::break_line(text_line & line, double wrap_width, unsigned text_
     if (last_break_position == static_cast<int>(line.first_char()))
     {
         // No line breaks => no reshaping required
-        add_line(line);
+        add_line(std::move(line));
     }
     else if (last_break_position != static_cast<int>(line.last_char()))
     {
         text_line new_line(last_break_position, line.last_char());
         clear_cluster_widths(last_break_position, line.last_char());
         shape_text(new_line);
-        add_line(new_line);
+        add_line(std::move(new_line));
     }
 }
 
@@ -236,26 +236,27 @@ inline int adjust_last_break_position (int pos, bool repeat_wrap_char)
     else return pos;
 }
 
-void text_layout::break_line(text_line & line, char wrap_char, double wrap_width,
-                             unsigned text_ratio, bool wrap_before, bool repeat_wrap_char)
+void text_layout::break_line(std::pair<unsigned, unsigned> && line_limits)
 {
+    text_line line(line_limits.first, line_limits.second);
     shape_text(line);
-    if (!wrap_width || line.width() < wrap_width)
+    double scaled_wrap_width = wrap_width_ * scale_factor_;
+    if (!scaled_wrap_width || line.width() < scaled_wrap_width)
     {
-        add_line(line);
+        add_line(std::move(line));
         return;
 
     }
-    if (text_ratio)
+    if (text_ratio_)
     {
         double wrap_at;
         double string_width = line.width();
         double string_height = line.line_height();
-        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio && (string_width/i) > wrap_width; i += 1.0) ;
-        wrap_width = wrap_at;
+        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio_ && (string_width/i) > scaled_wrap_width; i += 1.0) ;
+        scaled_wrap_width = wrap_at;
     }
     mapnik::value_unicode_string const& text = itemizer_.text();
-    line_breaker breaker(text, wrap_char);
+    line_breaker breaker(text, wrap_char_);
     double current_line_length = 0;
     int last_break_position = static_cast<int>(line.first_char());
     for (unsigned i=line.first_char(); i < line.last_char(); ++i)
@@ -265,9 +266,9 @@ void text_layout::break_line(text_line & line, char wrap_char, double wrap_width
         {
             current_line_length += width_itr->second;
         }
-        if (current_line_length <= wrap_width) continue;
+        if (current_line_length <= scaled_wrap_width) continue;
 
-        int break_position = wrap_before ? breaker.preceding(i) : breaker.following(i);
+        int break_position = wrap_before_ ? breaker.preceding(i) : breaker.following(i);
         if (break_position <= last_break_position || break_position == static_cast<int>(BreakIterator::DONE))
         {
             break_position = breaker.following(i);
@@ -287,25 +288,25 @@ void text_layout::break_line(text_line & line, char wrap_char, double wrap_width
         text_line new_line(adjust_last_break_position(last_break_position, repeat_wrap_char_), break_position);
         clear_cluster_widths(adjust_last_break_position(last_break_position, repeat_wrap_char_), break_position);
         shape_text(new_line);
-        add_line(new_line);
+        add_line(std::move(new_line));
         last_break_position = break_position;
         i = break_position - 1;
         current_line_length = 0;
     }
     if (last_break_position == static_cast<int>(line.first_char()))
     {
-        add_line(line);
+        add_line(std::move(line));
     }
     else if (last_break_position != static_cast<int>(line.last_char()))
     {
         text_line new_line(adjust_last_break_position(last_break_position, repeat_wrap_char_), line.last_char());
         clear_cluster_widths(adjust_last_break_position(last_break_position, repeat_wrap_char_), line.last_char());
         shape_text(new_line);
-        add_line(new_line);
+        add_line(std::move(new_line));
     }
 }
 
-void text_layout::add_line(text_line & line)
+void text_layout::add_line(text_line && line)
 {
     if (lines_.empty())
     {
@@ -314,7 +315,7 @@ void text_layout::add_line(text_line & line)
     height_ += line.height();
     glyphs_count_ += line.size();
     width_ = std::max(width_, line.width());
-    lines_.push_back(line);
+    lines_.emplace_back(std::move(line));
 }
 
 void text_layout::clear_cluster_widths(unsigned first, unsigned last)

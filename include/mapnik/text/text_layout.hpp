@@ -111,12 +111,10 @@ public:
     void evaluate_properties(feature_impl const& feature, attributes const& attr);
 
 private:
-    void break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before);
-    void break_line(text_line & line, char wrap_char,
-                    double wrap_width, unsigned text_ratio,
-                    bool wrap_before, bool repeat_wrap_char);
+    void break_line(std::pair<unsigned, unsigned> && line_limits);
+    void break_line_icu(std::pair<unsigned, unsigned> && line_limits);
     void shape_text(text_line & line);
-    void add_line(text_line & line);
+    void add_line(text_line && line);
     void clear_cluster_widths(unsigned first, unsigned last);
     void init_auto_alignment();
 

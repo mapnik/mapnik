@@ -36,6 +36,15 @@ text_line::text_line(unsigned first_char, unsigned last_char)
       first_line_(false)
 {}
 
+text_line::text_line( text_line && rhs)
+    : glyphs_(std::move(rhs.glyphs_)),
+      line_height_(std::move(rhs.line_height_)),
+      max_char_height_(std::move(rhs.max_char_height_)),
+      width_(std::move(rhs.width_)),
+      first_char_(std::move(rhs.first_char_)),
+      last_char_(std::move(rhs.last_char_)),
+      first_line_(std::move(rhs.first_line_)) {}
+
 void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
 {
     line_height_ = std::max(line_height_, glyph.line_height() + glyph.format->line_spacing);
@@ -51,7 +60,6 @@ void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
     }
     glyphs_.push_back(glyph);
 }
-
 
 void text_line::reserve(glyph_vector::size_type length)
 {
