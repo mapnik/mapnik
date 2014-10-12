@@ -137,7 +137,7 @@ void base_symbolizer_helper::initialize_points() const
                 geom.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);
                 t_.forward(&label_x, &label_y);
-                points_.push_back(pixel_position(label_x, label_y));
+                points_.emplace_back(label_x, label_y);
             }
         }
         else
@@ -165,7 +165,7 @@ void base_symbolizer_helper::initialize_points() const
             {
                 prj_trans_.backward(label_x, label_y, z);
                 t_.forward(&label_x, &label_y);
-                points_.push_back(pixel_position(label_x, label_y));
+                points_.emplace_back(label_x, label_y);
             }
         }
     }
