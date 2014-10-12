@@ -172,6 +172,7 @@ public:
     void layout();
 
     inline size_t size() const { return layouts_.size(); }
+    inline bool empty() const { return layouts_.empty(); }
 
     inline text_layout_vector::const_iterator begin() const { return layouts_.begin(); }
     inline text_layout_vector::const_iterator end() const { return layouts_.end(); }

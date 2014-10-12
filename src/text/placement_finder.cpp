@@ -51,14 +51,14 @@ placement_finder::placement_finder(feature_impl const& feature,
       attr_(attr),
       detector_(detector),
       extent_(extent),
-    info_(placement_info),
-    text_props_(evaluate_text_properties(info_.properties,feature_,attr_)),
-    scale_factor_(scale_factor),
-    font_manager_(font_manager),
-    placements_(),
-    has_marker_(false),
-    marker_(),
-    marker_box_() {}
+      info_(placement_info),
+      text_props_(evaluate_text_properties(info_.properties,feature_,attr_)),
+      scale_factor_(scale_factor),
+      font_manager_(font_manager),
+      placements_(),
+      has_marker_(false),
+      marker_(),
+      marker_box_() {}
 
 bool placement_finder::next_position()
 {
@@ -67,9 +67,14 @@ bool placement_finder::next_position()
         text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
         layout->evaluate_properties(feature_, attr_);
         move_dx_ = layout->displacement().x;
-        text_props_ = evaluate_text_properties(info_.properties,feature_,attr_); // this call is needed (text-bug1533) ??
+        // TODO: this call is needed (text-bug1533) ??
+        // https://github.com/mapnik/mapnik/issues/2525
+        text_props_ = evaluate_text_properties(info_.properties,feature_,attr_);
         info_.properties.process(*layout, feature_, attr_);
-        layouts_.clear(); // FIXME !!!!
+        // Note: this clear call is needed when multiple placements are tried
+        // like with placement-type="simple|list"
+        if (!layouts_.empty()) layouts_.clear();
+        // Note: multiple layouts_ may result from this add() call
         layouts_.add(layout);
         layouts_.layout();
         horizontal_alignment_ = layout->horizontal_alignment();
