@@ -19,7 +19,7 @@ lat,long,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="2" placement="point" avoid-edges="false" minimum-distance="10" spacing="20" repeat-key="[name%]+'-'+[ref%]">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
+          <MarkersSymbolizer file="shape://ellipse" width="20" height="15"/>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="10">[name%]</TextSymbolizer>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="-10">[ref%]</TextSymbolizer>
         </GroupRule>
