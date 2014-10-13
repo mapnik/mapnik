@@ -64,7 +64,7 @@ pixel_position_list const& group_symbolizer_helper::get()
         for (auto const& geom : geometries_to_process_)
         {
             // TODO to support clipped geometries this needs to use
-            // vertext_converters
+            // vertex_converters
             using path_type = transform_path_adapter<view_transform,geometry_type>;
             path_type path(t_, *geom, prj_trans_);
             find_line_placements(path);

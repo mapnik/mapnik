@@ -37,7 +37,7 @@ text_itemizer::text_itemizer()
     forced_line_breaks_.push_back(0);
 }
 
-void text_itemizer::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format)
+void text_itemizer::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr const& format)
 {
     unsigned start = text_.length();
     text_ += str;

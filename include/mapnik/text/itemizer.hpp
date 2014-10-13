@@ -47,18 +47,23 @@ struct text_item : noncopyable
               unsigned e,
               UScriptCode sc,
               UBiDiDirection d,
-              evaluated_format_properties_ptr f)
+              evaluated_format_properties_ptr const& f)
       : start(s),
         end(e),
         script(sc),
         dir(d),
         format_(f) {}
-    text_item( text_item && ) = default;
+    text_item( text_item && rhs)
+      : start(std::move(rhs.start)),
+        end(std::move(rhs.end)),
+        script(std::move(rhs.script)),
+        dir(std::move(rhs.dir)),
+        format_(rhs.format_) {}
     unsigned start; // First char (UTF16 offset)
     unsigned end; // Char _after_ the last char (UTF16 offset)
     UScriptCode script;
     UBiDiDirection dir;
-    evaluated_format_properties_ptr format_;
+    evaluated_format_properties_ptr const& format_;
 };
 
 // This class splits text into parts which all have the same
@@ -70,7 +75,7 @@ class text_itemizer
 {
 public:
     text_itemizer();
-    void add_text(value_unicode_string const& str, evaluated_format_properties_ptr format);
+    void add_text(value_unicode_string const& str, evaluated_format_properties_ptr const& format);
     std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
     void clear();
     value_unicode_string const& text() const { return text_; }
@@ -79,15 +84,15 @@ public:
     std::pair<unsigned, unsigned> line(unsigned i) const;
     unsigned num_lines() const;
 private:
-    template<typename T> struct run
+    template<typename T> struct run : noncopyable
     {
         run(T const& data, unsigned start, unsigned end)
-            :  start(start), end(end), data(data){}
+            :  start(start), end(end), data(data) {}
         unsigned start;
         unsigned end;
         T data;
     };
-    using format_run_t = run<evaluated_format_properties_ptr>;
+    using format_run_t = run<evaluated_format_properties_ptr const&>;
     using direction_run_t = run<UBiDiDirection>;
     using script_run_t = run<UScriptCode>;
     using format_run_list = std::list<format_run_t>;

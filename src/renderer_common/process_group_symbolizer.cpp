@@ -24,6 +24,7 @@
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 #include <mapnik/text/glyph_info.hpp>
+#include <mapnik/make_unique.hpp>
 
 namespace mapnik {
 
@@ -35,44 +36,14 @@ point_render_thunk::point_render_thunk(pixel_position const& pos, marker const& 
 {}
 
 
-text_render_thunk::text_render_thunk(placements_list const& placements,
+text_render_thunk::text_render_thunk(helper_ptr && helper,
                                      double opacity, composite_mode_e comp_op,
                                      halo_rasterizer_enum halo_rasterizer)
-    : placements_(), glyphs_(std::make_shared<std::vector<glyph_info> >()),
-      opacity_(opacity), comp_op_(comp_op), halo_rasterizer_(halo_rasterizer)
-{
-    std::vector<glyph_info> & glyph_vec = *glyphs_;
-
-    size_t glyph_count = 0;
-    for (glyph_positions_ptr positions : placements)
-    {
-        glyph_count += std::distance(positions->begin(), positions->end());
-    }
-    glyph_vec.reserve(glyph_count);
-
-    for (glyph_positions_ptr positions : placements)
-    {
-        glyph_positions_ptr new_positions = std::make_shared<glyph_positions>();
-        new_positions->reserve(std::distance(positions->begin(), positions->end()));
-        glyph_positions & new_pos = *new_positions;
-
-        new_pos.set_base_point(positions->get_base_point());
-        if (positions->marker())
-        {
-            new_pos.set_marker(positions->marker(), positions->marker_pos());
-        }
-
-        for (glyph_position const& pos : *positions)
-        {
-            // TODO - could we store pointers to glyph_info instead to avoid copy?
-            glyph_vec.push_back(pos.glyph.clone());
-            new_pos.emplace_back(glyph_vec.back(), pos.pos, pos.rot);
-        }
-
-        placements_.push_back(new_positions);
-    }
-}
-
+    : helper_(std::move(helper)),
+      placements_(helper_->get()),
+      opacity_(opacity),
+      comp_op_(comp_op),
+      halo_rasterizer_(halo_rasterizer) {}
 
 render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
                                                render_thunk_list & thunks,
@@ -94,7 +65,7 @@ void render_thunk_extractor::operator()(point_symbolizer const& sym) const
         [&](pixel_position const& pos, marker const& marker,
             agg::trans_affine const& tr, double opacity) {
             point_render_thunk thunk(pos, marker, tr, opacity, comp_op);
-            thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
+            thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
         });
 
     update_box();
@@ -103,38 +74,37 @@ void render_thunk_extractor::operator()(point_symbolizer const& sym) const
 void render_thunk_extractor::operator()(text_symbolizer const& sym) const
 {
     box2d<double> clip_box = clipping_extent_;
-    text_symbolizer_helper helper(
+    helper_ptr helper = std::make_unique<text_symbolizer_helper>(
         sym, feature_, vars_, prj_trans_,
         common_.width_, common_.height_,
         common_.scale_factor_,
         common_.t_, common_.font_manager_, *common_.detector_,
         clip_box, agg::trans_affine());
 
-    extract_text_thunk(helper, sym);
+    extract_text_thunk(std::move(helper), sym);
 }
 
 void render_thunk_extractor::operator()(shield_symbolizer const& sym) const
 {
     box2d<double> clip_box = clipping_extent_;
-    text_symbolizer_helper helper(
+    helper_ptr helper = std::make_unique<text_symbolizer_helper>(
         sym, feature_, vars_, prj_trans_,
         common_.width_, common_.height_,
         common_.scale_factor_,
         common_.t_, common_.font_manager_, *common_.detector_,
         clip_box, agg::trans_affine());
 
-    extract_text_thunk(helper, sym);
+    extract_text_thunk(std::move(helper), sym);
 }
 
-void render_thunk_extractor::extract_text_thunk(text_symbolizer_helper & helper, text_symbolizer const& sym) const
+void render_thunk_extractor::extract_text_thunk(helper_ptr && helper, text_symbolizer const& sym) const
 {
     double opacity = get<double>(sym, keys::opacity, feature_, common_.vars_, 1.0);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, common_.vars_, src_over);
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature_, common_.vars_, HALO_RASTERIZER_FULL);
 
-    placements_list const& placements = helper.get();
-    text_render_thunk thunk(placements, opacity, comp_op, halo_rasterizer);
-    thunks_.push_back(std::make_shared<render_thunk>(thunk));
+    text_render_thunk thunk(std::move(helper), opacity, comp_op, halo_rasterizer);
+    thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
 
     update_box();
 }

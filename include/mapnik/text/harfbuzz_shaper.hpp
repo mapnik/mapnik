@@ -126,11 +126,10 @@ static void shape_text(text_line & line,
                 auto const& pos = positions[i];
                 auto const& glyph = glyphs[i];
                 unsigned char_index = glyph.cluster;
-                glyph_info g(glyph.codepoint,char_index);
+                glyph_info g(glyph.codepoint,char_index,text_item.format_);
                 if (face->glyph_dimensions(g))
                 {
                     g.face = face;
-                    g.format = text_item.format_;
                     g.scale_multiplier = size / face->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
                     g.unscaled_advance = pos.x_advance;

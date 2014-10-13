@@ -37,6 +37,7 @@
 
 //stl
 #include <vector>
+#include <deque>
 #include <memory>
 #include <map>
 #include <utility>
@@ -49,6 +50,12 @@ class text_layout;
 
 using text_layout_ptr = std::shared_ptr<text_layout>;
 using text_layout_vector = std::vector<text_layout_ptr>;
+// this is a std::deque to ensure pointers stay valid as a deque
+// "never invalidates pointers or references to the rest of the elements"
+// http://en.cppreference.com/w/cpp/container/deque
+// If this were a vector this test would crash:
+// python tests/visual_tests/test.py text-expressionformat-color
+using child_format_ptrs = std::deque<evaluated_format_properties_ptr>;
 
 class text_layout
 {
@@ -66,7 +73,7 @@ public:
                 formatting::node_ptr tree);
 
     // Adds a new text part. Call this function repeatedly to build the complete text.
-    void add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format);
+    void add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr const& format);
 
     // Returns the complete text stored in this layout.
     mapnik::value_unicode_string const& text() const;
@@ -114,6 +121,7 @@ public:
     inline horizontal_alignment_e horizontal_alignment() const { return halign_; }
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
+    evaluated_format_properties_ptr & new_child_format_ptr(evaluated_format_properties_ptr const& p);
 
 private:
     void break_line(std::pair<unsigned, unsigned> && line_limits);
@@ -167,6 +175,11 @@ private:
 
     // children
     text_layout_vector child_layout_list_;
+
+    // take ownership of evaluated_format_properties_ptr of any format children
+    // in order to keep them in scope
+    // NOTE: this must not be a std::vector - see note above about child_format_ptrs
+    child_format_ptrs format_ptrs_;
 };
 
 class layout_container

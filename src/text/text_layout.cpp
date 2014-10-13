@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
+#include <mapnik/make_unique.hpp>
 
 // ICU
 #include <unicode/brkiter.h>
@@ -107,7 +108,7 @@ text_layout::text_layout(face_manager_freetype & font_manager,
       lines_(),
       layout_properties_(layout_defaults),
       properties_(properties),
-      format_(std::make_shared<detail::evaluated_format_properties>())
+      format_(std::make_unique<detail::evaluated_format_properties>())
     {
         double dx = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.dx);
         double dy = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.dy);
@@ -153,7 +154,7 @@ text_layout::text_layout(face_manager_freetype & font_manager,
         }
     }
 
-void text_layout::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format)
+void text_layout::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr const& format)
 {
     itemizer_.add_text(str, format);
 }
@@ -162,6 +163,13 @@ void text_layout::add_child(text_layout_ptr const& child_layout)
 {
     child_layout_list_.push_back(child_layout);
 }
+
+evaluated_format_properties_ptr & text_layout::new_child_format_ptr(evaluated_format_properties_ptr const& p)
+{
+    format_ptrs_.emplace_back(std::make_unique<detail::evaluated_format_properties>(*p));
+    return format_ptrs_.back();
+}
+
 
 mapnik::value_unicode_string const& text_layout::text() const
 {

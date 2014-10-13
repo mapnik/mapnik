@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/formatting/format.hpp>
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
@@ -103,10 +104,10 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 }
 
 
-void format_node::apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& attrs, text_layout &output) const
+void format_node::apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& attrs, text_layout &output) const
 {
-    evaluated_format_properties_ptr new_properties = std::make_shared<detail::evaluated_format_properties>(*p);
 
+    evaluated_format_properties_ptr & new_properties = output.new_child_format_ptr(p);
     if (text_size) new_properties->text_size = util::apply_visitor(extract_value<value_double>(feature,attrs), *text_size);
     if (character_spacing) new_properties->character_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), *character_spacing);
     if (line_spacing) new_properties->line_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), *line_spacing);

@@ -97,7 +97,7 @@ struct virtual_renderer_common : private mapnik::noncopyable
 // stores all the arguments necessary to re-render this point
 // symbolizer at a later time.
 
-struct point_render_thunk
+struct point_render_thunk : noncopyable
 {
     pixel_position pos_;
     marker_ptr marker_;
@@ -108,22 +108,36 @@ struct point_render_thunk
     point_render_thunk(pixel_position const& pos, marker const& m,
                        agg::trans_affine const& tr, double opacity,
                        composite_mode_e comp_op);
+    point_render_thunk(point_render_thunk && rhs)
+      : pos_(std::move(rhs.pos_)),
+        marker_(std::move(rhs.marker_)),
+        tr_(std::move(rhs.tr_)),
+        opacity_(std::move(rhs.opacity_)),
+        comp_op_(std::move(rhs.comp_op_)) {}
 };
 
-struct text_render_thunk
+using helper_ptr = std::unique_ptr<text_symbolizer_helper>;
+
+struct text_render_thunk : noncopyable
 {
-    // need to keep these around, annoyingly, as the glyph_position
-    // struct keeps a pointer to the glyph_info, so we have to
-    // ensure the lifetime is the same.
-    placements_list placements_;
-    std::shared_ptr<std::vector<glyph_info> > glyphs_;
+    // helper is stored here in order
+    // to keep in scope the text rendering structures
+    helper_ptr helper_;
+    placements_list const& placements_;
     double opacity_;
     composite_mode_e comp_op_;
     halo_rasterizer_enum halo_rasterizer_;
 
-    text_render_thunk(placements_list const&    placements,
+    text_render_thunk(helper_ptr && helper,
                       double opacity, composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer);
+    text_render_thunk(text_render_thunk && rhs)
+      : helper_(std::move(rhs.helper_)),
+        placements_(std::move(rhs.placements_)),
+        opacity_(std::move(rhs.opacity_)),
+        comp_op_(std::move(rhs.comp_op_)),
+        halo_rasterizer_(std::move(rhs.halo_rasterizer_)) {}
+
 };
 
 // Variant type for render thunks to allow us to re-render them
@@ -131,7 +145,7 @@ struct text_render_thunk
 
 using render_thunk = util::variant<point_render_thunk,
                                    text_render_thunk>;
-using render_thunk_ptr = std::shared_ptr<render_thunk>;
+using render_thunk_ptr = std::unique_ptr<render_thunk>;
 using render_thunk_list = std::list<render_thunk_ptr>;
 
 // Base class for extracting the bounding boxes associated with placing
@@ -163,7 +177,7 @@ struct render_thunk_extractor : public util::static_visitor<>
     }
 
 private:
-    void extract_text_thunk(text_symbolizer_helper & helper, text_symbolizer const& sym) const;
+    void extract_text_thunk(helper_ptr && helper, text_symbolizer const& sym) const;
 
     box2d<double> & box_;
     render_thunk_list & thunks_;
