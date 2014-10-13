@@ -23,6 +23,9 @@
 #ifndef MAPNIK_FONT_FEATURE_SETTINGS_HPP
 #define MAPNIK_FONT_FEATURE_SETTINGS_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+
 // stl
 #include <vector>
 #include <memory>
@@ -35,7 +38,7 @@
 namespace mapnik
 {
 
-class font_feature_settings
+class MAPNIK_DECL font_feature_settings
 {
 public:
     using font_feature = hb_feature_t;
