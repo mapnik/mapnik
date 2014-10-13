@@ -49,18 +49,6 @@ namespace detail {
 
 struct evaluated_format_properties
 {
-    evaluated_format_properties() :
-      face_name(),
-      text_size(0.0),
-      character_spacing(0.0),
-      line_spacing(0.0),
-      text_opacity(1.0),
-      halo_opacity(1.0),
-      text_transform(NONE),
-      fill(0,0,0),
-      halo_fill(0,0,0),
-      halo_radius(0.0),
-      ff_settings() {}
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
@@ -77,20 +65,19 @@ struct evaluated_format_properties
 
 struct evaluated_text_properties : noncopyable
 {
-    label_placement_e label_placement = POINT_PLACEMENT;
-    double label_spacing = 0.0; // distance between repeated labels on a single geometry
-    double label_position_tolerance = 0.0; // distance the label can be moved on the line to fit, if 0 the default is used
-    bool avoid_edges = false;
-    double margin = 0.0;
-    double repeat_distance = 0.0;
-    double minimum_distance = 0.0;
-    double minimum_padding = 0.0;
-    double minimum_path_length = 0.0;
-    double max_char_angle_delta = 22.5 * M_PI/180.0;
-    bool allow_overlap = false;
-    bool largest_bbox_only = true; // Only consider geometry with largest bbox (polygons)
-    text_upright_e upright = UPRIGHT_AUTO;
-
+    label_placement_e label_placement;
+    double label_spacing;
+    double label_position_tolerance;
+    bool avoid_edges;
+    double margin;
+    double repeat_distance;
+    double minimum_distance;
+    double minimum_padding;
+    double minimum_path_length;
+    double max_char_angle_delta;
+    bool allow_overlap;
+    bool largest_bbox_only;
+    text_upright_e upright;
 };
 
 }
