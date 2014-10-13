@@ -35,6 +35,15 @@
 // harfbuzz
 #include <harfbuzz/hb.h>
 
+// EqualityComparable
+inline bool operator==(hb_feature_t const& lhs, hb_feature_t const& rhs)
+{
+    return (lhs.tag == rhs.tag
+            && lhs.value == rhs.value
+            && lhs.start == rhs.start
+            && lhs.end == rhs.end);
+}
+
 namespace mapnik
 {
 
@@ -72,11 +81,8 @@ operator << ( std::basic_ostream<charT, traits> & s, mapnik::font_feature_settin
 
 inline bool operator==(font_feature_settings const& lhs, font_feature_settings const& rhs)
 {
-    // FIXME not working
-    //(lhs.features() == rhs.features());
-    return true;
+    return (lhs.features() == rhs.features());
 }
-
 
 constexpr unsigned int font_feature_range_global_start = 0u;
 static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
