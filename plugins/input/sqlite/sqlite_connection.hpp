@@ -57,7 +57,12 @@ public:
         int mode = SQLITE_OPEN_READWRITE;
 #if SQLITE_VERSION_NUMBER >= 3006018
         // shared cache flag not available until >= 3.6.18
-        mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
+        // Don't use shared cache in SQLite prior to 3.7.15.
+        // https://github.com/mapnik/mapnik/issues/2483
+        if (sqlite3_libversion_number() >= 3007015)
+        {
+            mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
+        }
 #endif
         const int rc = sqlite3_open_v2 (file_.c_str(), &db_, mode, 0);
 #else
