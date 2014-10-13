@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/marker_helpers.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/renderer_common.hpp>
@@ -39,6 +40,9 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/graphics.hpp>
 
 // agg
 #include <agg_trans_affine.h>
@@ -49,9 +53,11 @@ class proj_transform;
 struct glyph_info;
 class text_symbolizer_helper;
 
+using svg::svg_path_adapter;
+using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
+
 struct virtual_renderer_common : private mapnik::noncopyable
 {
-
     virtual_renderer_common(renderer_common & common) :
         width_(common.width_),
         height_(common.height_),
@@ -110,6 +116,38 @@ struct point_render_thunk
                        composite_mode_e comp_op);
 };
 
+struct vector_marker_render_thunk
+{
+    svg_path_ptr src_;
+    svg_attribute_type attrs_;
+    agg::trans_affine tr_;
+    double opacity_;
+    composite_mode_e comp_op_;
+    bool snap_to_pixels_;
+
+    vector_marker_render_thunk(svg_path_ptr const& src,
+                               svg_attribute_type const& attrs,
+                               agg::trans_affine const& marker_trans,
+                               double opacity,
+                               composite_mode_e comp_op,
+                               bool snap_to_pixels);
+};
+
+struct raster_marker_render_thunk
+{
+    image_data_32 & src_;
+    agg::trans_affine tr_;
+    double opacity_;
+    composite_mode_e comp_op_;
+    bool snap_to_pixels_;
+
+    raster_marker_render_thunk(image_data_32 & src,
+                               agg::trans_affine const& marker_trans,
+                               double opacity,
+                               composite_mode_e comp_op,
+                               bool snap_to_pixels);
+};
+
 struct text_render_thunk
 {
     // need to keep these around, annoyingly, as the glyph_position
@@ -121,7 +159,7 @@ struct text_render_thunk
     composite_mode_e comp_op_;
     halo_rasterizer_enum halo_rasterizer_;
 
-    text_render_thunk(placements_list const&    placements,
+    text_render_thunk(placements_list const& placements,
                       double opacity, composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer);
 };
@@ -130,6 +168,8 @@ struct text_render_thunk
 // via a static visitor later.
 
 using render_thunk = util::variant<point_render_thunk,
+                                   vector_marker_render_thunk,
+                                   raster_marker_render_thunk,
                                    text_render_thunk>;
 using render_thunk_ptr = std::shared_ptr<render_thunk>;
 using render_thunk_list = std::list<render_thunk_ptr>;
@@ -151,6 +191,8 @@ struct render_thunk_extractor : public util::static_visitor<>
                            box2d<double> const& clipping_extent);
 
     void operator()(point_symbolizer const& sym) const;
+
+    void operator()(markers_symbolizer const& sym) const;
 
     void operator()(text_symbolizer const& sym) const;
 

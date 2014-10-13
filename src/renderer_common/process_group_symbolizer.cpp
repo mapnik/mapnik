@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
+#include <mapnik/renderer_common/process_markers_symbolizer.hpp>
 #include <mapnik/text/glyph_info.hpp>
 
 namespace mapnik {
@@ -34,6 +35,24 @@ point_render_thunk::point_render_thunk(pixel_position const& pos, marker const& 
       tr_(tr), opacity_(opacity), comp_op_(comp_op)
 {}
 
+vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
+                                                       svg_attribute_type const& attrs,
+                                                       agg::trans_affine const& marker_trans,
+                                                       double opacity,
+                                                       composite_mode_e comp_op,
+                                                       bool snap_to_pixels)
+    : src_(src), attrs_(attrs), tr_(marker_trans), opacity_(opacity),
+      comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
+{}
+
+raster_marker_render_thunk::raster_marker_render_thunk(image_data_32 & src,
+                                                       agg::trans_affine const& marker_trans,
+                                                       double opacity,
+                                                       composite_mode_e comp_op,
+                                                       bool snap_to_pixels)
+    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
+      snap_to_pixels_(snap_to_pixels)
+{}
 
 text_render_thunk::text_render_thunk(placements_list const& placements,
                                      double opacity, composite_mode_e comp_op,
@@ -72,6 +91,74 @@ text_render_thunk::text_render_thunk(placements_list const& placements,
     }
 }
 
+namespace detail {
+
+template <typename Detector, typename RendererContext>
+struct vector_marker_thunk_dispatch : public vector_markers_dispatch<Detector>
+{
+    vector_marker_thunk_dispatch(svg_path_ptr const& src,
+                                 svg_path_adapter & path,
+                                 svg_attribute_type const& attrs,
+                                 agg::trans_affine const& marker_trans,
+                                 symbolizer_base const& sym,
+                                 Detector & detector,
+                                 double scale_factor,
+                                 feature_impl & feature,
+                                 attributes const& vars,
+                                 bool snap_to_pixels,
+                                 RendererContext const& renderer_context)
+        : vector_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
+          attrs_(attrs), comp_op_(get<composite_mode_e>(sym, keys::comp_op, feature, vars, src_over)),
+          snap_to_pixels_(snap_to_pixels), thunks_(std::get<0>(renderer_context))
+    {}
+
+    ~vector_marker_thunk_dispatch() {}
+
+    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    {
+        vector_marker_render_thunk thunk(this->src_, this->attrs_, marker_tr, opacity, comp_op_, snap_to_pixels_);
+        thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
+    }
+
+private:
+    svg_attribute_type const& attrs_;
+    composite_mode_e comp_op_;
+    bool snap_to_pixels_;
+    render_thunk_list & thunks_;
+};
+
+template <typename Detector, typename RendererContext>
+struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
+{
+    raster_marker_thunk_dispatch(image_data_32 & src,
+                                 agg::trans_affine const& marker_trans,
+                                 symbolizer_base const& sym,
+                                 Detector & detector,
+                                 double scale_factor,
+                                 feature_impl & feature,
+                                 attributes const& vars,
+                                 RendererContext const& renderer_context,
+                                 bool snap_to_pixels = false)
+        : raster_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
+          comp_op_(get<composite_mode_e>(sym, keys::comp_op, feature, vars, src_over)),
+          snap_to_pixels_(snap_to_pixels), thunks_(std::get<0>(renderer_context))
+    {}
+
+    ~raster_marker_thunk_dispatch() {}
+
+    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    {
+        raster_marker_render_thunk thunk(this->src_, marker_tr, opacity, comp_op_, snap_to_pixels_);
+        thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
+    }
+
+private:
+    composite_mode_e comp_op_;
+    bool snap_to_pixels_;
+    render_thunk_list & thunks_;
+};
+
+}
 
 render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
                                                render_thunk_list & thunks,
@@ -95,6 +182,19 @@ void render_thunk_extractor::operator()(point_symbolizer const& sym) const
             point_render_thunk thunk(pos, marker, tr, opacity, comp_op);
             thunks_.push_back(std::make_shared<render_thunk>(std::move(thunk)));
         });
+
+    update_box();
+}
+
+void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
+{
+    auto renderer_context = std::tie(thunks_);
+    using context_type = decltype(renderer_context);
+    using vector_dispatch_type = detail::vector_marker_thunk_dispatch<label_collision_detector4, context_type>;
+    using raster_dispatch_type = detail::raster_marker_thunk_dispatch<label_collision_detector4, context_type>;
+
+    render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
+            sym, feature_, prj_trans_, common_, clipping_extent_, renderer_context);
 
     update_box();
 }
@@ -156,7 +256,6 @@ void render_thunk_extractor::update_box() const
 
     detector.clear();
 }
-
 
 geometry_type *origin_point(proj_transform const& prj_trans,
                             renderer_common const& common)
