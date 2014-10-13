@@ -30,8 +30,7 @@
 #include <vector>
 #include <memory>
 #include <limits>
-#include <sstream>
-
+#include <ostream>
 // harfbuzz
 #include <harfbuzz/hb.h>
 
@@ -73,7 +72,7 @@ private:
 
 template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
-operator << ( std::basic_ostream<charT, traits> & s, mapnik::font_feature_settings const& f )
+operator<< ( std::basic_ostream<charT, traits> & s, mapnik::font_feature_settings const& f )
 {
     s << f.to_string();
     return s;
