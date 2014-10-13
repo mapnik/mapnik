@@ -186,10 +186,15 @@ py_env.Append(LINKFLAGS=python_link_flag)
 py_env.AppendUnique(LIBS='mapnik_json_geometry_grammar')
 py_env.AppendUnique(LIBS='mapnik_json_feature_grammar')
 py_env.AppendUnique(LIBS='mapnik_json_generator_grammar')
+py_env.AppendUnique(LIBS='mapnik_wkt_generator_grammar')
+py_env.AppendUnique(LIBS='mapnik_wkt_grammar')
+
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LDMODULEPREFIX='', LDMODULESUFFIX='.so')
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 Depends(_mapnik, env.subst('../../src/json/libmapnik_json_geometry_grammar${LIBSUFFIX}'))
+Depends(_mapnik, env.subst('../../src/json/libmapnik_json_feature_grammar${LIBSUFFIX}'))
+Depends(_mapnik, env.subst('../../src/json/libmapnik_json_generator_grammar${LIBSUFFIX}'))
 
 if env['PLATFORM'] == 'SunOS' and env['PYTHON_IS_64BIT']:
     # http://mail.python.org/pipermail/python-dev/2006-August/068528.html
