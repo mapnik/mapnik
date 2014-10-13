@@ -1175,7 +1175,7 @@ if not preconfigured:
 
     # Set up for libraries and headers dependency checks
     env['CPPPATH'] = ['#include', '#']
-    env['LIBPATH'] = ['#src']
+    env['LIBPATH'] = ['#src','#src/json','#src/wkt']
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
@@ -1915,6 +1915,10 @@ if not HELP_REQUESTED:
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared':
         SConscript('deps/agg/build.py')
+
+    # Build spirit grammars
+    SConscript('src/json/build.py')
+    SConscript('src/wkt/build.py')
 
     # Build the core library
     SConscript('src/build.py')

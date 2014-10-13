@@ -43,9 +43,6 @@
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
-#include <mapnik/json/feature_collection_grammar_impl.hpp>
-#include <mapnik/json/feature_grammar_impl.hpp>
-#include <mapnik/json/geometry_grammar_impl.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 
