@@ -74,7 +74,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         //horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
 
         // halign == H_LEFT -> don't move
-        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO)
+        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO || horizontal_alignment_ == H_ADJUST)
         {
             if (!pp.forward(spacing / 2.0)) continue;
         }

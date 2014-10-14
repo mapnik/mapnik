@@ -206,16 +206,30 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
         double offset = layout_displacement.y + 0.5 * sign * layout.height();
+        double adjust_character_spacing = .0;
+        double layout_width = layout.width();
+        bool adjust = layout.horizontal_alignment() == H_ADJUST;
+
+        if (adjust)
+        {
+            text_layout::const_iterator longest_line = layout.longest_line();
+            if (longest_line != layout.end())
+            {
+                adjust_character_spacing = (pp.length() - longest_line->glyphs_width()) / longest_line->space_count();
+                layout_width = longest_line->glyphs_width() + longest_line->space_count() * adjust_character_spacing;
+            }
+        }
 
         for (auto const& line : layout)
         {
             // Only subtract half the line height here and half at the end because text is automatically
             // centered on the line
             offset -= sign * line.height()/2;
-            vertex_cache & off_pp = pp.get_offseted(offset, sign*layout.width());
+            vertex_cache & off_pp = pp.get_offseted(offset, sign * layout_width);
             vertex_cache::scoped_state off_state(off_pp); // TODO: Remove this when a clean implementation in vertex_cache::get_offseted is done
+            double line_width = adjust ? (line.glyphs_width() + line.space_count() * adjust_character_spacing) : line.width();
 
-            if (!off_pp.move(sign * layout.jalign_offset(line.width()) - align_offset.x)) return false;
+            if (!off_pp.move(sign * layout.jalign_offset(line_width) - align_offset.x)) return false;
 
             double last_cluster_angle = 999;
             int current_cluster = -1;
@@ -228,11 +242,19 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
-                        return false;
-
+                    if (adjust)
+                    {
+                        if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                            return false;
+                        last_glyph_spacing = adjust_character_spacing;
+                    }
+                    else
+                    {
+                        if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                            return false;
+                        last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
+                    }
                     current_cluster = glyph.char_index;
-                    last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                     // Only calculate new angle at the start of each cluster!
                     angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
@@ -312,7 +334,7 @@ double placement_finder::normalize_angle(double angle)
 double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
-    if (text_props_->label_spacing > 0)
+    if (horizontal_alignment_ != H_ADJUST && text_props_->label_spacing > 0)
     {
         num_labels = static_cast<int>(std::floor(
                                           path_length / (text_props_->label_spacing * scale_factor_ + layout_width)));

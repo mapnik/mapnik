@@ -123,6 +123,8 @@ public:
     double jalign_offset(double line_width) const;
     evaluated_format_properties_ptr & new_child_format_ptr(evaluated_format_properties_ptr const& p);
 
+    const_iterator longest_line() const;
+
 private:
     void break_line(std::pair<unsigned, unsigned> && line_limits);
     void break_line_icu(std::pair<unsigned, unsigned> && line_limits);
