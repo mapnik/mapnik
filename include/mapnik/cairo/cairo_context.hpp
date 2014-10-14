@@ -195,7 +195,7 @@ private:
 class cairo_gradient : private mapnik::noncopyable
 {
 public:
-    cairo_gradient(const mapnik::gradient &grad, double opacity=1.0)
+    cairo_gradient(mapnik::gradient const& grad, double opacity=1.0)
     {
         double x1,x2,y1,y2,rad;
         grad.get_control_points(x1,y1,x2,y2,rad);
@@ -203,7 +203,7 @@ public:
         {
             pattern_ = cairo_pattern_create_linear(x1, y1, x2, y2);
         }
-        else if (grad.get_gradient_type() == RADIAL)
+        else
         {
             pattern_ = cairo_pattern_create_radial(x1, y1, 0,  x2, y2, rad);
         }
