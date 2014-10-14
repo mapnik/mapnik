@@ -191,19 +191,11 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
         std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
         for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
         {
-    #if (BOOST_FILESYSTEM_VERSION == 3)
             std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
-    #else // v2
-            std::string file_name = mapnik::utf16_to_utf8(itr->wstring());
-    #endif
 #else
         for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
-#if (BOOST_FILESYSTEM_VERSION == 3)
             std::string file_name = itr->path().string();
-#else // v2
-            std::string file_name = itr->string();
-#endif
 #endif
             if (boost::filesystem::is_directory(*itr) && recurse)
             {
@@ -214,11 +206,7 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
             }
             else
             {
-#if (BOOST_FILESYSTEM_VERSION == 3)
                 std::string base_name = itr->path().filename().string();
-#else // v2
-                std::string base_name = itr->filename();
-#endif
                 if (!boost::algorithm::starts_with(base_name,".") &&
                     mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))

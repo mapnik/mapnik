@@ -58,11 +58,11 @@ Build system dependencies are:
 Mapnik Core depends on:
 
  * Boost
-    - >= 1.47 is required.
+    - >= 1.47 is required and >= 1.56 recommended
     - These libraries are used:
       - filesystem
       - system
-      - thread (if mapnik threadsafe support is required, default on)
+      - thread (for python bindings only)
       - regex (optionally built with icu regex support)
       - program_options (optionally for mapnik command line programs)
  * libicuuc >= 4.0 (ideally >= 4.2) - International Components for Unicode

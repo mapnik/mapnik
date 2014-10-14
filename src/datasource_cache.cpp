@@ -150,48 +150,61 @@ std::vector<std::string> datasource_cache::plugin_names()
     return names;
 }
 
-void datasource_cache::register_datasources(std::string const& str)
+bool datasource_cache::register_datasources(std::string const& dir, bool recurse)
 {
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
 #endif
-    if (!mapnik::util::exists(str))
+    if (!mapnik::util::exists(dir))
     {
-        return;
+        return false;
     }
-    plugin_directories_.insert(str);
-    if (!mapnik::util::is_directory(str))
+    plugin_directories_.insert(dir);
+    if (!mapnik::util::is_directory(dir))
     {
-        register_datasource(str);
+        return register_datasource(dir);
     }
-    else
+    bool success = false;
+    try
     {
         boost::filesystem::directory_iterator end_itr;
 #ifdef _WINDOWS
-        std::wstring wide_dir(mapnik::utf8_to_utf16(str));
+        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
         for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
-#else
-        for (boost::filesystem::directory_iterator itr(str); itr != end_itr; ++itr )
-#endif
         {
-
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            if (!boost::filesystem::is_directory(*itr) && is_input_plugin(itr->path().filename().string()))
-#else // v2
-            if (!boost::filesystem::is_directory(*itr) && is_input_plugin(itr->path().leaf()))
+            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
+#else
+        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
+        {
+            std::string file_name = itr->path().string();
 #endif
+            if (boost::filesystem::is_directory(*itr) && recurse)
             {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                if (register_datasource(itr->path().string()))
-#else // v2
-                if (register_datasource(itr->string()))
-#endif
+                if (register_datasources(file_name, true))
                 {
-                    registered_ = true;
+                    success = true;
+                }
+            }
+            else
+            {
+                std::string base_name = itr->path().filename().string();
+                if (!boost::algorithm::starts_with(base_name,".") &&
+                    mapnik::util::is_regular_file(file_name) &&
+                    is_input_plugin(file_name))
+                {
+                    if (register_datasource(file_name))
+                    {
+                        success = true;
+                    }
                 }
             }
         }
     }
+    catch (std::exception const& ex)
+    {
+        MAPNIK_LOG_ERROR(datasource_cache) << "register_datasources: " << ex.what();
+    }
+    return success;
 }
 
 bool datasource_cache::register_datasource(std::string const& filename)
