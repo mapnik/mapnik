@@ -141,9 +141,12 @@ struct scale_hsla : image_filter_base
 
 struct color_stop
 {
-    color_stop() {}
+    color_stop()
+        : color(),
+          offset(0.0) {}
     color_stop(mapnik::color const& c, double val = 0.0)
-        : color(c),offset(val) {}
+        : color(c),
+          offset(val) {}
     bool operator==(color_stop const& rhs) const { return color == rhs.color && offset == rhs.offset;}
     mapnik::color color;
     double offset;

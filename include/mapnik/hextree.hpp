@@ -58,12 +58,13 @@ class hextree : private mapnik::noncopyable
     struct node
     {
         node ()
-            : reds(0),
-              greens(0),
-              blues(0),
-              alphas(0),
+            : reds(0.0),
+              greens(0.0),
+              blues(0.0),
+              alphas(0.0),
               count(0),
               pixel_count(0),
+              reduce_cost(0.0),
               children_count(0)
         {
             std::memset(&children_[0],0,sizeof(children_));

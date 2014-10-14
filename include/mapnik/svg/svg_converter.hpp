@@ -50,7 +50,10 @@ public:
 
     svg_converter(VertexSource & source, AttributeSource & attributes)
         : source_(source),
-          attributes_(attributes) {}
+          attributes_(attributes),
+          attr_stack_(),
+          svg_width_(0.0),
+          svg_height_(0.0) {}
 
     void begin_path()
     {
