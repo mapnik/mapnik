@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include <mapnik/config.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
