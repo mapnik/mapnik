@@ -56,16 +56,37 @@
 #include <map>
 #include <deque>
 
+
+#if BOOST_VERSION >= 105600
+template <std::size_t Max, std::size_t Min>
+struct geojson_linear : boost::geometry::index::linear<Max,Min> {};
+
+namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree {
+
+template <std::size_t Max, std::size_t Min>
+struct options_type<geojson_linear<Max,Min> >
+{
+    using type = options<geojson_linear<Max, Min>,
+                         insert_default_tag,
+                         choose_by_content_diff_tag,
+                         split_default_tag,
+                         linear_tag,
+                         node_s_mem_static_tag>;
+};
+
+}}}}}
+
+#endif //BOOST_VERSION >= 105600
+
 class geojson_datasource : public mapnik::datasource
 {
 public:
-    using point_type = boost::geometry::model::d2::point_xy<double>;
+    using point_type = boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian>;
     using box_type = boost::geometry::model::box<point_type>;
 
 #if BOOST_VERSION >= 105600
     using item_type = std::pair<box_type,std::size_t>;
-    using linear_type = boost::geometry::index::linear<16,1>;
-    using spatial_index_type = boost::geometry::index::rtree<item_type,linear_type>;
+    using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
 #else
     using item_type = std::size_t;
     using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
