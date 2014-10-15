@@ -38,9 +38,9 @@ plugin_sources = Split(
 libraries = []
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append('mapnik_json_geometry_grammar')
-libraries.append('mapnik_json_feature_grammar')
 libraries.append('mapnik_json_feature_collection_grammar')
+libraries.append('mapnik_json_feature_grammar')
+libraries.append('mapnik_json_geometry_grammar')
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append(env['MAPNIK_NAME'])
