@@ -25,7 +25,6 @@
 
 #include <string>
 #include <sstream>
-#include <mapnik/debug.hpp>
 #include <boost/spirit/home/support/info.hpp>
 
 namespace mapnik { namespace json {
