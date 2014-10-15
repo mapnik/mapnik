@@ -23,5 +23,7 @@
 #include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <string>
 
+namespace mapnik { namespace wkt {
 using iterator_type = std::string::const_iterator;
-template struct mapnik::wkt::wkt_collection_grammar<iterator_type>;
+template struct wkt_collection_grammar<iterator_type>;
+}}
