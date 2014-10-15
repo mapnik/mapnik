@@ -32,7 +32,7 @@
 namespace mapnik  {
 
 template <typename Transform, typename Geometry>
-struct MAPNIK_DECL transform_path_adapter
+struct transform_path_adapter
 {
     // SFINAE value_type detector
     template <typename T>
