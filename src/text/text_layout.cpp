@@ -84,6 +84,8 @@ pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
     case SOUTHWEST:
         return pixel_position(-std::abs(dx),std::abs(dy));
         break;
+    default:
+        return pixel_position(dx,dy);
     }
 }
 
