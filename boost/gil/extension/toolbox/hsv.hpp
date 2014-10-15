@@ -14,7 +14,6 @@
 /// \author Christian Henning \n
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#include <boost/cast.hpp>
 #include <boost/gil/gil_all.hpp>
 
 namespace boost { namespace gil {
