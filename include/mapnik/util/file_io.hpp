@@ -55,6 +55,7 @@ public:
         {
             std::fseek(file_.get(), 0, SEEK_END);
             size_ = std::ftell(file_.get());
+            std::fseek(file_.get(), 0, SEEK_SET);
         }
      }
 
@@ -79,7 +80,7 @@ public:
         std::fseek(file_.get(), 0, SEEK_SET);
         data_type buffer(new char[size_]);
         std::fread(buffer.get(), size_, 1, file_.get());
-        return std::move(buffer);
+        return buffer;
     }
 private:
     file_ptr file_;
