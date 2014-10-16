@@ -34,7 +34,6 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/topojson_grammar.hpp>
-#include <mapnik/json/topojson_grammar_impl.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
