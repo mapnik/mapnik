@@ -289,7 +289,7 @@ files = {
     'marker-collide':{'sizes':[(512,512)]},
     'marker-recenter-collide':{'sizes':[(256,128)], 'bbox':mapnik.Box2d(-1,-0.5,1,0.5)},
     'postgis-inline':{'sizes':[(512,512)]},
-    'text-line-wrap':{'sizes':[(512,512)]},
+    'text-line-wrap':{'sizes':[(800,450)], 'bbox':mapnik.Box2d(0,0,16,9)},
     }
 
 class Reporting:
