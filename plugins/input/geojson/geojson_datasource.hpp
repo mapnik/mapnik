@@ -111,7 +111,7 @@ private:
     std::string inline_string_;
     mapnik::box2d<double> extent_;
     std::vector<mapnik::feature_ptr> features_;
-    spatial_index_type tree_;
+    std::unique_ptr<spatial_index_type> tree_;
 };
 
 
