@@ -218,49 +218,42 @@ struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
     }
 };
 
-template <typename T, typename Attributes>
-struct assign_value : util::static_visitor<> {};
-
-template <typename Attributes>
-struct assign_value<expression_ptr,Attributes> : util::static_visitor<>
+struct assign_value
 {
-    assign_value(symbolizer_base::value_type & val, expression_ptr const& expr, Attributes const& attributes)
-        : val_(val),
-          expr_(expr),
-          attributes_(attributes) {}
-
-    void operator() (color const& default_val) const
+    template<typename Attributes>
+    static void apply(symbolizer_base::value_type & val, expression_ptr const& expr, Attributes const& attributes, property_types target )
     {
-        // evaluate expression as a string then parse as css color
-        std::string str = util::apply_visitor(mapnik::evaluate_expression<mapnik::value,
-                                               Attributes>(attributes_),*expr_).to_string();
-        try { val_ = parse_color(str); }
-        catch (...) { val_ = default_val;}
-    }
 
-    void operator() (value_double default_val) const
-    {
-        val_ = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_double();
+        switch (target)
+        {
+        case property_types::target_color:
+        {
+            // evaluate expression as a string then parse as css color
+            std::string str = util::apply_visitor(mapnik::evaluate_expression<mapnik::value,
+                                               Attributes>(attributes),*expr).to_string();
+            try { val = parse_color(str); }
+            catch (...) { val = color(0,0,0);}
+            break;
+        }
+        case property_types::target_double:
+        {
+            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes),*expr).to_double();
+            break;
+        }
+        case property_types::target_integer:
+        {
+            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes),*expr).to_int();
+            break;
+        }
+        case property_types::target_bool:
+        {
+            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes),*expr).to_bool();
+            break;
+        }
+        default: // no-op
+            break;
+        }
     }
-
-    void operator() (value_integer default_val) const
-    {
-        val_ = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_int();
-    }
-
-    void operator() (value_bool default_val) const
-    {
-        val_ = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes_),*expr_).to_bool();
-    }
-
-    template <typename T>
-    void operator() (T const& default_val) const
-    {
-        // no-op
-    }
-    symbolizer_base::value_type & val_;
-    expression_ptr const& expr_;
-    Attributes const& attributes_;
 };
 
 }
@@ -290,11 +283,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
         void operator() (expression_ptr const& expr) const
         {
             auto const& meta = get_meta(prop_.first);
-            try {
-                util::apply_visitor(assign_value<expression_ptr,Attributes>(prop_.second, expr, attributes_), std::get<1>(meta));
-            } catch (std::exception const& ex) {
-                // no-op
-            }
+            assign_value::apply(prop_.second, expr, attributes_, std::get<2>(meta));
         }
 
         template <typename T>
