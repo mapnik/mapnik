@@ -143,7 +143,7 @@ public:
 
     void operator() ( mapnik::enumeration_wrapper const& e) const
     {
-        auto const& convert_fun_ptr(std::get<2>(meta_));
+        auto const& convert_fun_ptr(std::get<1>(meta_));
         if ( convert_fun_ptr )
         {
             node_.put("<xmlattr>." + std::string(std::get<0>(meta_)), convert_fun_ptr(e));

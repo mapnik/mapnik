@@ -31,17 +31,9 @@
 namespace mapnik {
 
 template <typename T, keys key>
-struct symbolizer_default
-{
-    using value_type = T;
-    static value_type value()
-    {
-        return value_type();
-    }
-};
+struct symbolizer_default {};
 
 // specializations for properties
-
 // gamma
 template <>
 struct symbolizer_default<value_double, keys::gamma>
@@ -79,7 +71,7 @@ struct symbolizer_default<value_double, keys::offset>
 
 // comp-op
 template <>
-struct symbolizer_default<composite_mode_e, keys::alignment>
+struct symbolizer_default<composite_mode_e, keys::comp_op>
 {
     static composite_mode_e value() { return src_over; }
 };
@@ -135,7 +127,7 @@ struct symbolizer_default<line_join_enum, keys::stroke_linejoin>
 
 // stroke-linecap
 template <>
-struct symbolizer_default<line_join_enum, keys::stroke_linecap>
+struct symbolizer_default<line_cap_enum, keys::stroke_linecap>
 {
     static line_cap_enum value() { return BUTT_CAP; }
 };
@@ -185,14 +177,14 @@ struct symbolizer_default<line_rasterizer_enum, keys::line_rasterizer>
 template <>
 struct symbolizer_default<value_double, keys::spacing>
 {
-    static value_double value() { return 0.0; }
+    static value_double value() { return 100.0; }
 };
 
 // max-error
 template <>
 struct symbolizer_default<value_double, keys::max_error>
 {
-    static value_double value() { return 0.0; }
+    static value_double value() { return 0.2; }
 };
 
 // allow-overlap
@@ -318,13 +310,25 @@ struct symbolizer_default<halo_rasterizer_enum, keys::halo_rasterizer>
 
 // placement (point-placement-type FIXME)
 template <>
-struct symbolizer_default<label_placement_enum, keys::point_placement_type>
+struct symbolizer_default<point_placement_enum, keys::point_placement_type>
 {
-    static label_placement_enum value() { return POINT_PLACEMENT; }
+    static point_placement_enum value() { return CENTROID_POINT_PLACEMENT; }
 };
 
-// placement
+// marker placement
+template <>
+struct symbolizer_default<marker_placement_enum, keys::markers_placement_type>
+{
+    static marker_placement_enum value() { return MARKER_POINT_PLACEMENT; }
+};
+
 // multi-policy
+template <>
+struct symbolizer_default<marker_multi_policy_enum, keys::markers_multipolicy>
+{
+    static marker_multi_policy_enum value() { return  MARKER_EACH_MULTI; }
+};
+
 // placement
 
 // colorizer
@@ -343,7 +347,14 @@ struct symbolizer_default<label_placement_enum, keys::point_placement_type>
 // justify-alignment
 // vertical-alignment
 // upright
+
 // avoid-edges
+template <>
+struct symbolizer_default<value_bool, keys::avoid_edges>
+{
+    static value_bool value() { return false; }
+};
+
 // font-feature-settings
 
 } // namespace mapnik

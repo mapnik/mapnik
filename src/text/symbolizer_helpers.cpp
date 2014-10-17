@@ -58,7 +58,7 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      info_ptr_(get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
+      info_ptr_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
       text_props_(evaluate_text_properties(info_ptr_->properties,feature_,vars_))
 {
     initialize_geometries();
@@ -189,9 +189,9 @@ text_symbolizer_helper::text_symbolizer_helper(
 {
 
     // setup vertex converter
-    bool clip = mapnik::get<bool>(sym_, keys::clip, feature_, vars_, false);
-    double simplify_tolerance = mapnik::get<double>(sym_, keys::simplify_tolerance, feature_, vars_, 0.0);
-    double smooth = mapnik::get<double>(sym_, keys::smooth, feature_, vars_, 0.0);
+    value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
+    value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
+    value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
 
     if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
     converter_.template set<transform_tag>(); //always transform
@@ -280,9 +280,9 @@ text_symbolizer_helper::text_symbolizer_helper(
       converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
    // setup vertex converter
-    bool clip = mapnik::get<bool>(sym_, keys::clip, feature_, vars_, false);
-    double simplify_tolerance = mapnik::get<double>(sym_, keys::simplify_tolerance, feature_, vars_, 0.0);
-    double smooth = mapnik::get<double>(sym_, keys::smooth, feature_, vars_, 0.0);
+    value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
+    value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
+    value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
 
     if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
     converter_.template set<transform_tag>(); //always transform
@@ -299,7 +299,7 @@ text_symbolizer_helper::text_symbolizer_helper(
 
 void text_symbolizer_helper::init_marker() const
 {
-    std::string filename = mapnik::get<std::string>(sym_, keys::file, feature_, vars_);
+    std::string filename = mapnik::get<std::string,keys::file>(sym_, feature_, vars_);
     if (filename.empty()) return;
     boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
     if (!marker) return;
@@ -323,9 +323,9 @@ void text_symbolizer_helper::init_marker() const
     box2d<double> bbox(px0, py0, px1, py1);
     bbox.expand_to_include(px2, py2);
     bbox.expand_to_include(px3, py3);
-    bool unlock_image = mapnik::get<value_bool>(sym_, keys::unlock_image, feature_, vars_, false);
-    double shield_dx = mapnik::get<value_double>(sym_, keys::shield_dx, feature_, vars_, 0.0);
-    double shield_dy = mapnik::get<value_double>(sym_, keys::shield_dy, feature_, vars_, 0.0);
+    value_bool unlock_image = mapnik::get<value_bool, keys::unlock_image>(sym_, feature_, vars_);
+    value_double shield_dx = mapnik::get<value_double, keys::shield_dx>(sym_, feature_, vars_);
+    value_double shield_dy = mapnik::get<value_double, keys::shield_dy>(sym_, feature_, vars_);
     pixel_position marker_displacement;
     marker_displacement.set(shield_dx,shield_dy);
     finder_.set_marker(std::make_shared<marker_info>(*marker, trans), bbox, unlock_image, marker_displacement);

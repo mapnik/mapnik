@@ -79,12 +79,12 @@ struct markers_dispatch : mapnik::noncopyable
     {
         marker_placement_enum placement_method = get<marker_placement_enum>(
             sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
-        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
+        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
+        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
+        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
+        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, vars_);
+        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
+        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
         coord2d center = bbox_.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine tr = recenter * marker_trans_;
@@ -145,12 +145,12 @@ struct raster_markers_dispatch : mapnik::noncopyable
     void add_path(T & path)
     {
         marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
-        double opacity = get<double>(sym_, keys::opacity, feature_, vars_,  1.0);
-        double spacing = get<double>(sym_, keys::spacing, feature_, vars_,  100.0);
-        double max_error = get<double>(sym_, keys::max_error, feature_, vars_,  0.2);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_,  false);
-        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_,  false);
+        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, vars_);
+        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
+        value_double max_error = get<value_double>(sym_, keys::max_error, feature_, vars_,  0.2); // overwrite default
+        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
+        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
+        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
         box2d<double> bbox_(0,0, src_.width(),src_.height());
         markers_placement_params params { bbox_, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, label_collision_detector4> placement_finder(

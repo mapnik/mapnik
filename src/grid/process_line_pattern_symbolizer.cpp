@@ -51,7 +51,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
     boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
     if (!mark) return;
@@ -65,10 +65,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
     if (!pat) return;
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;

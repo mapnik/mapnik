@@ -45,10 +45,10 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     using raster_dispatch_type = T1;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
-    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
-    double offset = get<value_double>(sym, keys::offset, feature, common.vars_, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common.vars_, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, false);
+    bool clip = get<value_bool, keys::clip>(sym, feature, common.vars_);
+    double offset = get<value_double, keys::offset>(sym, feature, common.vars_);
+    double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common.vars_);
+    double smooth = get<value_double, keys::smooth>(sym, feature, common.vars_);
 
     // https://github.com/mapnik/mapnik/issues/1316
     bool snap_to_pixels = !mapnik::marker_cache::instance().is_uri(filename);

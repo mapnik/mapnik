@@ -80,8 +80,8 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
+    double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);
+    gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym, feature, common_.vars_);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);

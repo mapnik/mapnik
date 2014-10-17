@@ -44,10 +44,10 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform) evaluate_transform(tr, feature, common.vars_, *transform, common.scale_factor_);
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common.vars_, false);
-    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common.vars_, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common.vars_, 0.0);
-    double opacity = get<value_double>(sym,keys::fill_opacity,feature,common.vars_, 1.0);
+    value_bool clip = get<value_bool,keys::clip>(sym, feature, common.vars_);
+    value_double simplify_tolerance = get<value_double,keys::simplify_tolerance>(sym, feature, common.vars_);
+    value_double smooth = get<value_double,keys::smooth>(sym, feature, common.vars_);
+    value_double opacity = get<value_double,keys::fill_opacity>(sym, feature, common.vars_);
 
     vertex_converter_type converter(clip_box, ras, sym, common.t_, prj_trans, tr,
                                     feature,common.vars_,common.scale_factor_);
@@ -66,7 +66,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
         }
     }
 
-    color const& fill = get<mapnik::color>(sym, keys::fill, feature, common.vars_, mapnik::color(128,128,128)); // gray
+    color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);
     fill_func(fill, opacity);
 }
 

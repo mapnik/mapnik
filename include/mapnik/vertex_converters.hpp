@@ -85,7 +85,7 @@ struct converter_traits<T,mapnik::smooth_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
-        geom.smooth_value(get<value_double>(args.sym, keys::smooth, args.feature, args.vars));
+        geom.smooth_value(get<value_double, keys::smooth>(args.sym, args.feature, args.vars));
     }
 };
 
@@ -98,8 +98,8 @@ struct converter_traits<T,mapnik::simplify_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
-        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<value_integer>(args.sym, keys::simplify_algorithm, args.feature, args.vars)));
-        geom.set_simplify_tolerance(get<value_double>(args.sym, keys::simplify_tolerance,args.feature, args.vars));
+        geom.set_simplify_algorithm(static_cast<simplify_algorithm_e>(get<simplify_algorithm_e,keys::simplify_algorithm>(args.sym, args.feature, args.vars)));
+        geom.set_simplify_tolerance(get<value_double,keys::simplify_tolerance>(args.sym,args.feature, args.vars));
     }
 };
 
@@ -145,7 +145,7 @@ struct converter_traits<T, mapnik::dash_tag>
 template <typename Symbolizer, typename PathType, typename Feature>
 void set_join_caps(Symbolizer const& sym, PathType & stroke, Feature const& feature, attributes const& vars)
 {
-    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
+    line_join_enum join = get<line_join_enum,keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
     case MITER_JOIN:
@@ -161,7 +161,7 @@ void set_join_caps(Symbolizer const& sym, PathType & stroke, Feature const& feat
         stroke.generator().line_join(agg::bevel_join);
     }
 
-    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
+    line_cap_enum cap = get<line_cap_enum,keys::stroke_linecap>(sym, feature, vars);
 
     switch (cap)
     {
@@ -189,10 +189,10 @@ struct converter_traits<T, mapnik::stroke_tag>
         auto const& feat = args.feature;
         auto const& vars = args.vars;
         set_join_caps(sym, geom, feat, vars);
-        double miterlimit = get<value_double>(sym, keys::stroke_miterlimit, feat, vars, 4.0);
+        double miterlimit = get<value_double,keys::stroke_miterlimit>(sym, feat, vars);
         geom.generator().miter_limit(miterlimit);
         double scale_factor = args.scale_factor;
-        double width = get<value_double>(sym, keys::stroke_width, feat, vars, 1.0);
+        double width = get<value_double,keys::stroke_width>(sym, feat, vars);
         geom.generator().width(width * scale_factor);
     }
 };
@@ -263,7 +263,7 @@ struct converter_traits<T,mapnik::offset_transform_tag>
         auto const& sym = args.sym;
         auto const& feat = args.feature;
         auto const& vars = args.vars;
-        double offset = get<value_double>(sym, keys::offset, feat, vars);
+        double offset = get<value_double, keys::offset>(sym, feat, vars);
         geom.set_offset(offset * args.scale_factor);
     }
 };

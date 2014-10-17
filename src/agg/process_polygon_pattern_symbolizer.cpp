@@ -59,7 +59,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
     boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
     if (!marker_ptr || !(*marker_ptr)) return;
@@ -86,8 +86,8 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(),
                               current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
-    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
+    value_double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);
+    gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym, feature, common_.vars_);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);
@@ -95,10 +95,10 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double opacity = get<double, keys::opacity>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
     box2d<double> clip_box = clipping_extent(common_);
 
@@ -121,7 +121,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         span_gen_type>;
 
     pixfmt_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
+    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
     ren_base renb(pixf);
 
     unsigned w=(*pat)->width();
@@ -130,7 +130,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
-    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
+    pattern_alignment_enum alignment = get<pattern_alignment_enum, keys::alignment>(sym, feature, common_.vars_);
     unsigned offset_x=0;
     unsigned offset_y=0;
 

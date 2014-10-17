@@ -151,7 +151,7 @@ public:
     std::string operator() ( mapnik::enumeration_wrapper const& e) const
     {
         std::stringstream ss;
-        auto const& convert_fun_ptr(std::get<2>(meta_));
+        auto const& convert_fun_ptr(std::get<1>(meta_));
         if ( convert_fun_ptr )
         {
             ss << convert_fun_ptr(e);
@@ -296,7 +296,7 @@ struct set_property_impl<Symbolizer, std::integral_constant<property_types, prop
 template <typename Symbolizer, typename T>
 inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
 {
-    switch (std::get<3>(get_meta(key)))
+    switch (std::get<2>(get_meta(key)))
     {
     case property_types::target_bool:
         set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >::apply(sym,key,val);
@@ -318,7 +318,7 @@ inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
 template <typename Symbolizer, typename T>
 inline void set_property_from_value(Symbolizer & sym, mapnik::keys key, T const& val)
 {
-    switch (std::get<3>(get_meta(key)))
+    switch (std::get<2>(get_meta(key)))
     {
     case property_types::target_bool:
         put(sym, key, val.to_bool());

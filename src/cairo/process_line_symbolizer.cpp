@@ -36,19 +36,20 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
-    double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
-    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
+    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
-    mapnik::color stroke = get<mapnik::color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0,0,0));
-    double stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
-    line_join_enum stroke_join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, common_.vars_, MITER_JOIN);
-    line_cap_enum stroke_cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, common_.vars_, BUTT_CAP);
+    color stroke = get<color, keys::stroke>(sym, feature, common_.vars_);
+    value_double stroke_opacity = get<value_double, keys::stroke_opacity>(sym, feature, common_.vars_);
+    line_join_enum stroke_join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, common_.vars_);
+    line_cap_enum stroke_cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, common_.vars_);
+    value_double miterlimit = get<value_double, keys::stroke_miterlimit>(sym, feature, common_.vars_);
+    value_double width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
+
     auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray, feature, common_.vars_);
-    double miterlimit = get<double>(sym, keys::stroke_miterlimit, feature, common_.vars_, 4.0);
-    double width = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
