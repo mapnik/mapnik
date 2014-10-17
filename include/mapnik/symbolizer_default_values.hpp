@@ -59,7 +59,7 @@ struct symbolizer_default<value_double, keys::opacity>
 template <>
 struct symbolizer_default<pattern_alignment_enum, keys::alignment>
 {
-    static pattern_alignment_enum value() { return LOCAL_ALIGNMENT; }
+    static pattern_alignment_enum value() { return GLOBAL_ALIGNMENT; }
 };
 
 // offset
