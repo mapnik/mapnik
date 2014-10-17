@@ -403,7 +403,7 @@ struct extract_raw_value : public util::static_visitor<T1>
 
 //
 
-using property_meta_type = std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types>;
+using property_meta_type = std::tuple<const char*, std::function<std::string(enumeration_wrapper)>, property_types>;
 MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
 MAPNIK_DECL mapnik::keys get_key(std::string const& name);
 
@@ -420,20 +420,8 @@ inline bool has_key(symbolizer_base const& sym, keys key)
     return (sym.properties.count(key) == 1);
 }
 
-template <typename T>
-T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
-{
-    using const_iterator = symbolizer_base::cont_type::const_iterator;
-    const_iterator itr = sym.properties.find(key);
-    if (itr != sym.properties.end())
-    {
-        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
-    }
-    return T();//mapnik::symbolizer_default<T,static_cast<std::underlying_type<keys>::type>(key)>::value;
-}
-
 template <typename T, keys key>
-T get_new(symbolizer_base const& sym, mapnik::feature_impl const& feature, attributes const& vars)
+T get(symbolizer_base const& sym, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
