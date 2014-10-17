@@ -116,6 +116,7 @@ files = {
     'geometry-transform-translate': {'sizes':[(200,200)]},
     'geometry-transform-translate-patterns': {'sizes':[(200,200)]},
     'geometry-transform-translate-patterns-svg': {'sizes':[(200,200)]},
+    'geometry-transform-scale': {'sizes': [(500, 500)]},
     'marker-interior-position': {'sizes':[(600,400)]},
     'marker-svg-opacity':{},
     'marker-svg-opacity2':{},
