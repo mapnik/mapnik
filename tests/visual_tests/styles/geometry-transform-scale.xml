@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>polygon</StyleName>
+        <StyleName>line</StyleName>
+        <StyleName>marker</StyleName>
+        <StyleName>text</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-1,-1,1,1</Parameter>
+            <Parameter name="inline">
+                wkt
+                "LINESTRING (-1 0, 0 1, 1 0, 0 -1, -1 0)"
+            </Parameter>
+        </Datasource>
+    </Layer>
+    <Style name="polygon">
+        <Rule>
+            <PolygonSymbolizer fill="#ec3" />
+            <PolygonSymbolizer fill="#ec3" geometry-transform="scale(0.5)" />
+        </Rule>
+    </Style>
+    <Style name="line">
+        <Rule>
+            <LineSymbolizer />
+            <LineSymbolizer geometry-transform="scale(0.5)" />
+        </Rule>
+    </Style>
+    <Style name="marker">
+        <Rule>
+            <MarkersSymbolizer placement="line" />
+            <MarkersSymbolizer placement="line" geometry-transform="scale(0.5)" />
+        </Rule>
+    </Style>
+    <Style name="text">
+        <Rule>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="12"
+                placement="line"
+                allow-overlap="true"
+                spacing="50"
+                >
+                "text"
+            </TextSymbolizer>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="12"
+                placement="line"
+                allow-overlap="true"
+                spacing="50"
+                geometry-transform="scale(0.5)"
+                >
+                "text"
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+</Map>
