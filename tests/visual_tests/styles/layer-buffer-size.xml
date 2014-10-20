@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white">
+
+    <Layer name="layer" buffer-size="400">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+                wkt
+                "LINESTRING(-8 0, 8 0)
+                "LINESTRING(0 -8, 0 8)
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <LineSymbolizer stroke-width="12" stroke="red"/>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="16"
+                placement="line"
+                character-spacing="20"
+                allow-overlap="true"
+                >
+                "Long text"
+            </TextSymbolizer>
+        </Rule>
+    </Style>
+
+</Map>

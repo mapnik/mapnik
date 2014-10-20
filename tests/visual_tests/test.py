@@ -298,6 +298,7 @@ files = {
     'simplify-visvalingam-whyatt': {'sizes': [(500, 1000)]},
     'simplify-douglas-peucker': {'sizes': [(500, 1000)]},
     'marker-line-placement-many-vertices': {'sizes': [(600, 400)]},
+    'layer-buffer-size': {'sizes': [(200, 200)], 'bbox': mapnik.Box2d(-1, -1, 1, 1)},
     }
 
 class Reporting:
