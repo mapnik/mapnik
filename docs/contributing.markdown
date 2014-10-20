@@ -119,6 +119,10 @@ which triggers locks
     void my_function(std::string const& val); // if std::string or user type, pass by const&
 
 
+#### When to use shared_ptr and unique_ptr
+
+Sparingly, always prefer passing objects as const& except where using share_ptr or unique_ptr express more clearly your intent. See http://herbsutter.com/2013/06/05/gotw-91-solution-smart-pointer-parameters/ for more details.
+
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
 Since Mapnik 3.0 use std::make_shared.
