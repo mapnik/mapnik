@@ -83,7 +83,7 @@ struct wkb_stream
 
     void write(char const* data, std::size_t size)
     {
-        std::memcpy(buffer_ + pos_, data, size);
+        std::copy(data, data + size, buffer_ + pos_);
         pos_ += size;
     }
 

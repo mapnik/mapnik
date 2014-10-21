@@ -31,8 +31,8 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 // stl
+#include <algorithm>
 #include <vector>
-#include <cstring>
 
 namespace mapnik
 {
@@ -52,7 +52,7 @@ class quad_tree : mapnik::noncopyable
         explicit node(box2d<double> const& ext)
             : extent_(ext)
         {
-            std::memset(children_,0,4*sizeof(node*));
+            std::fill(children_, children_ + 4, nullptr);
         }
 
         box2d<double> const& extent() const

@@ -29,10 +29,9 @@
 #include <mapnik/noncopyable.hpp>
 
 // stl
-#include <vector>
-#include <cstring>
-#include <deque>
 #include <algorithm>
+#include <vector>
+#include <deque>
 
 namespace mapnik {
 
@@ -63,7 +62,7 @@ class octree : private mapnik::noncopyable
                children_count(0),
                index(0)
         {
-            std::memset(&children_[0],0,sizeof(children_));
+            std::fill(children_,children_ + 8, nullptr);
         }
 
         ~node()

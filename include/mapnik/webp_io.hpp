@@ -37,6 +37,7 @@ extern "C"
 #pragma clang diagnostic pop
 
 // stl
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 
@@ -102,7 +103,7 @@ inline int import_image_data(T2 const& image,
         {
             typename T2::pixel_type const * row_from = image.getRow(y);
             image_data_32::pixel_type * row_to = im.getRow(y);
-            std::memcpy(row_to,row_from,stride);
+            std::copy(row_from, row_from + stride, row_to);
         }
         if (alpha)
         {
