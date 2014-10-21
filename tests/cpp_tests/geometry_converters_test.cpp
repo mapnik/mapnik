@@ -143,43 +143,52 @@ int main(int argc, char** argv)
 
     BOOST_TEST(set_working_dir(args));
 
-    // LineString/bbox clipping
+    try
     {
-        std::string wkt_in("LineString(0 0,200 200)");
-        boost::optional<std::string> result = linestring_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
-        BOOST_TEST(result);
-        BOOST_TEST_EQ(*result,std::string("LineString(50 50,150 150)"));
+        // LineString/bbox clipping
+        {
+            std::string wkt_in("LineString(0 0,200 200)");
+            boost::optional<std::string> result = linestring_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
+            BOOST_TEST(result);
+            BOOST_TEST_EQ(*result,std::string("LineString(50 50,150 150)"));
+        }
+        // Polygon/bbox clipping
+    #if 0
+        // these tests will fail
+        {
+            std::string wkt_in("Polygon((50 50,150 50,150 150,50 150,50 50))");
+            boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
+            BOOST_TEST(result);
+            BOOST_TEST_EQ(*result,std::string("Polygon((50 50,150 50,150 150,50 150,50 50))"));
+        }
+
+        {
+            std::string wkt_in("Polygon((60 60,140 60,140 160,60 140,60 60))");
+            boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
+            BOOST_TEST(result);
+            BOOST_TEST_EQ(*result,std::string("Polygon((60 60,140 60,140 160,60 140,60 60))"));
+        }
+
+        {
+            std::string wkt_in("Polygon((0 0,10 0,10 10,0 10,0 0))");
+            boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
+            BOOST_TEST(result);
+            BOOST_TEST_EQ(*result, std::string("GeometryCollection EMPTY"));
+        }
+        {
+            std::string wkt_in("Polygon((0 0,100 200,200 0,0 0 ))");
+            boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
+            BOOST_TEST(result);
+            BOOST_TEST_EQ(*result,std::string("Polygon((50 50,50 100,75 150,125 150,150 100,150 50,50 50))"));
+        }
+    #endif
     }
-    // Polygon/bbox clipping
-#if 0
-    // these tests will fail
+    catch (std::exception const & ex)
     {
-        std::string wkt_in("Polygon((50 50,150 50,150 150,50 150,50 50))");
-        boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
-        BOOST_TEST(result);
-        BOOST_TEST_EQ(*result,std::string("Polygon((50 50,150 50,150 150,50 150,50 50))"));
+        std::clog << ex.what() << "\n";
+        BOOST_TEST(false);
     }
 
-    {
-        std::string wkt_in("Polygon((60 60,140 60,140 160,60 140,60 60))");
-        boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
-        BOOST_TEST(result);
-        BOOST_TEST_EQ(*result,std::string("Polygon((60 60,140 60,140 160,60 140,60 60))"));
-    }
-
-    {
-        std::string wkt_in("Polygon((0 0,10 0,10 10,0 10,0 0))");
-        boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
-        BOOST_TEST(result);
-        BOOST_TEST_EQ(*result, std::string("GeometryCollection EMPTY"));
-    }
-    {
-        std::string wkt_in("Polygon((0 0,100 200,200 0,0 0 ))");
-        boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
-        BOOST_TEST(result);
-        BOOST_TEST_EQ(*result,std::string("Polygon((50 50,50 100,75 150,125 150,150 100,150 50,50 50))"));
-    }
-#endif
 
     if (!::boost::detail::test_errors())
     {

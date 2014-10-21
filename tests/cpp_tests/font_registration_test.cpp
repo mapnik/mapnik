@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception const & ex)
     {
-        std::clog << "C++ fonts registration problem: " << ex.what() << "\n";
+        std::clog << ex.what() << "\n";
         BOOST_TEST(false);
     }
 

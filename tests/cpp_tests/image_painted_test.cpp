@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception const & ex)
     {
-        std::clog << "C++ image painted problem: " << ex.what() << std::endl;
+        std::clog << ex.what() << std::endl;
         BOOST_TEST(false);
     }
 

@@ -144,63 +144,71 @@ int main(int argc, char** argv)
     using source_over_old_agg = agg::comp_op_rgba_src_over2<color, agg::order_rgba>;
     using source_over = agg::comp_op_rgba_src_over<color, agg::order_rgba>;
 
-    color white(255,255,255,255);
-    color black(0,0,0,255);
-
-    BOOST_TEST_EQ( to_string(blend<source_over>(white,white)), to_string(white) );
-    BOOST_TEST_EQ( to_string(blend<source_over>(white,black)), to_string(white) );
-    BOOST_TEST_EQ( to_string(blend<source_over>(black,white)), to_string(black) );
-
-    // https://github.com/mapnik/mapnik/issues/1452#issuecomment-8154646
-    color near_white(254,254,254,254); // Source
-    color near_trans(1,1,1,1); // Dest
-    color expected_color(252,252,252,255); // expected result
-    BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(near_white,near_trans)), to_string(color(252,252,252,254)) );
-    BOOST_TEST_EQ( to_string(blend<source_over>(near_white,near_trans)), to_string(expected_color) );
-    BOOST_TEST_EQ( to_string(normal_blend(near_white,near_trans)), to_string(expected_color) );
-
-    // using normal_blend as expected, compare a variety of other colors
-
+    try
     {
-        color source(128,128,128,255);
-        color dest(128,128,128,255);
-        unsigned cover = 128;
-        std::string expected_str = to_string(normal_blend(source,dest,cover));
-        BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
-        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
-    }
+        color white(255,255,255,255);
+        color black(0,0,0,255);
 
+        BOOST_TEST_EQ( to_string(blend<source_over>(white,white)), to_string(white) );
+        BOOST_TEST_EQ( to_string(blend<source_over>(white,black)), to_string(white) );
+        BOOST_TEST_EQ( to_string(blend<source_over>(black,white)), to_string(black) );
+
+        // https://github.com/mapnik/mapnik/issues/1452#issuecomment-8154646
+        color near_white(254,254,254,254); // Source
+        color near_trans(1,1,1,1); // Dest
+        color expected_color(252,252,252,255); // expected result
+        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(near_white,near_trans)), to_string(color(252,252,252,254)) );
+        BOOST_TEST_EQ( to_string(blend<source_over>(near_white,near_trans)), to_string(expected_color) );
+        BOOST_TEST_EQ( to_string(normal_blend(near_white,near_trans)), to_string(expected_color) );
+
+        // using normal_blend as expected, compare a variety of other colors
+
+        {
+            color source(128,128,128,255);
+            color dest(128,128,128,255);
+            unsigned cover = 128;
+            std::string expected_str = to_string(normal_blend(source,dest,cover));
+            BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
+            BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+        }
+
+        {
+            color source(128,128,128,255);
+            color dest(128,128,128,255);
+            unsigned cover = 245;
+            std::string expected_str = to_string(normal_blend(source,dest,cover));
+            BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
+            BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+        }
+
+        // commenting until I study these failures more (dane)
+        /*
+          {
+          // fails, why?
+          color source(127,127,127,127);
+          color   dest(127,127,127,127);
+          unsigned cover = 255;
+          std::string expected_str = to_string(normal_blend(source,dest,cover));
+          BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
+          BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+          }
+
+          {
+          // fails, why?
+          color source(128,128,128,128);
+          color   dest(128,128,128,128);
+          unsigned cover = 128;
+          std::string expected_str = to_string(normal_blend(source,dest,cover));
+          BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
+          BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+          }
+        */
+    }
+    catch (std::exception const & ex)
     {
-        color source(128,128,128,255);
-        color dest(128,128,128,255);
-        unsigned cover = 245;
-        std::string expected_str = to_string(normal_blend(source,dest,cover));
-        BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
-        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+        std::clog << ex.what() << "\n";
+        BOOST_TEST(false);
     }
-
-    // commenting until I study these failures more (dane)
-    /*
-      {
-      // fails, why?
-      color source(127,127,127,127);
-      color   dest(127,127,127,127);
-      unsigned cover = 255;
-      std::string expected_str = to_string(normal_blend(source,dest,cover));
-      BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
-      BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
-      }
-
-      {
-      // fails, why?
-      color source(128,128,128,128);
-      color   dest(128,128,128,128);
-      unsigned cover = 128;
-      std::string expected_str = to_string(normal_blend(source,dest,cover));
-      BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
-      BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
-      }
-    */
 
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";

@@ -295,7 +295,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception const & ex)
     {
-        std::clog << "C++ type conversions problem: " << ex.what() << "\n";
+        std::clog << ex.what() << "\n";
         BOOST_TEST(false);
     }
 
