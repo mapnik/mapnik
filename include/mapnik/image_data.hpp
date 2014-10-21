@@ -29,6 +29,7 @@
 // stl
 #include <cassert>
 #include <cstring>
+#include <algorithm>
 #include <stdexcept>
 
 namespace mapnik
@@ -52,7 +53,7 @@ public:
         {
             throw std::runtime_error("negative height not allowed for image_data");
         }
-        pData_ = (width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0;
+        pData_ = (width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width * height)):0;
         if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
     }
 
@@ -123,16 +124,9 @@ public:
     {
         return height_;
     }
-    inline void set(const T& t)
+    inline void set(T const& t)
     {
-        for (unsigned y = 0; y < height_; ++y)
-        {
-            T * row = getRow(y);
-            for (unsigned x = 0; x < width_; ++x)
-            {
-                row[x] = t;
-            }
-        }
+        std::fill(pData_, pData_ + width_ * height_, t);
     }
 
     inline const T* getData() const
@@ -147,12 +141,12 @@ public:
 
     inline const unsigned char* getBytes() const
     {
-        return (unsigned char*)pData_;
+        return reinterpret_cast<unsigned char*>(pData_);
     }
 
     inline unsigned char* getBytes()
     {
-        return (unsigned char*)pData_;
+        return reinterpret_cast<unsigned char*>(pData_);
     }
 
     inline const T* getRow(unsigned row) const
@@ -165,15 +159,15 @@ public:
         return pData_+row*width_;
     }
 
-    inline void setRow(unsigned row,const T* buf,unsigned size)
+    inline void setRow(unsigned row,const T* buf, unsigned size)
     {
         assert(row<height_);
         assert(size<=width_);
-        std::memcpy(pData_+row*width_,buf,size*sizeof(T));
+        std::memcpy(pData_ + row * width_, buf, size * sizeof(T));
     }
-    inline void setRow(unsigned row,unsigned x0,unsigned x1,const T* buf)
+    inline void setRow(unsigned row, unsigned x0, unsigned x1, T const* buf)
     {
-        std::memcpy(pData_+row*width_+x0,buf,(x1-x0)*sizeof(T));
+        std::memcpy(pData_+row * width_ + x0, buf, (x1 - x0) * sizeof(T));
     }
 
     inline ~ImageData()
