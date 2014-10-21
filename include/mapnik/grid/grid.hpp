@@ -50,7 +50,7 @@ class MAPNIK_DECL hit_grid
 {
 public:
     using value_type = T;
-    using data_type = mapnik::ImageData<value_type>;
+    using data_type = mapnik::image_data<value_type>;
     using lookup_type = std::string;
     // mapping between pixel id and key
     using feature_key_type = std::map<value_type, lookup_type>;

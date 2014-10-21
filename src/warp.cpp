@@ -61,8 +61,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     unsigned mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);
     unsigned mesh_ny = std::ceil(source.data_.height()/double(mesh_size) + 1);
 
-    ImageData<double> xs(mesh_nx, mesh_ny);
-    ImageData<double> ys(mesh_nx, mesh_ny);
+    image_data<double> xs(mesh_nx, mesh_ny);
+    image_data<double> ys(mesh_nx, mesh_ny);
 
     // Precalculate reprojected mesh
     for(unsigned j=0; j<mesh_ny; ++j)

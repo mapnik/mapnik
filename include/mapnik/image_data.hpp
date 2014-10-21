@@ -34,12 +34,12 @@
 namespace mapnik
 {
 template <typename T>
-class ImageData
+class image_data
 {
 public:
     using pixel_type = T;
 
-    ImageData(int width, int height)
+    image_data(int width, int height)
         : width_(static_cast<unsigned>(width)),
           height_(static_cast<unsigned>(height)),
           owns_data_(true)
@@ -56,7 +56,7 @@ public:
         if (pData_) std::fill(pData_, pData_ + width_ * height_, 0);
     }
 
-    ImageData(int width, int height, T * data)
+    image_data(int width, int height, T * data)
         : width_(static_cast<unsigned>(width)),
           height_(static_cast<unsigned>(height)),
           owns_data_(false),
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    ImageData(ImageData<T> const& rhs)
+    image_data(image_data<T> const& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
          owns_data_(true),
@@ -82,7 +82,7 @@ public:
         if (pData_) std::copy(rhs.pData_, rhs.pData_ + rhs.width_* rhs.height_, pData_);
     }
 
-    ImageData(ImageData<T> && rhs) noexcept
+    image_data(image_data<T> && rhs) noexcept
         : width_(rhs.width_),
           height_(rhs.height_),
           pData_(rhs.pData_)
@@ -92,13 +92,13 @@ public:
         rhs.pData_ = nullptr;
     }
 
-    ImageData<T>& operator=(ImageData<T> rhs)
+    image_data<T>& operator=(image_data<T> rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(ImageData<T> & rhs)
+    void swap(image_data<T> & rhs)
     {
         std::swap(width_, rhs.width_);
         std::swap(height_, rhs.height_);
@@ -169,7 +169,7 @@ public:
         std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
     }
 
-    inline ~ImageData()
+    inline ~image_data()
     {
         if (owns_data_)
         {
@@ -184,8 +184,8 @@ private:
     T *pData_;
 };
 
-using image_data_32 = ImageData<unsigned>;
-using image_data_8 = ImageData<byte> ;
+using image_data_32 = image_data<unsigned>;
+using image_data_8 = image_data<byte> ;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP
