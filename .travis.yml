@@ -45,7 +45,7 @@ script:
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
  - make
- - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
+ - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - source localize.sh && make grind
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
