@@ -41,7 +41,7 @@ namespace mapnik
 using expression_ptr = std::shared_ptr<expr_node>;
 using expression_set = std::set<expression_ptr>;
 
-MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding = "UTF8");
+MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);
 }
 
 #endif // MAPNIK_EXPRESSION_HPP

@@ -13,7 +13,7 @@ public:
        expr_("((([mapnik::geometry_type]=2) and ([oneway]=1)) and ([class]='path'))") {}
     bool validate() const
     {
-        mapnik::expression_ptr expr = mapnik::parse_expression(expr_,"utf-8");
+        mapnik::expression_ptr expr = mapnik::parse_expression(expr_);
         std::string result = mapnik::to_expression_string(*expr);
         bool ret = (result == expr_);
         if (!ret)
@@ -25,7 +25,7 @@ public:
     void operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
-             mapnik::expression_ptr expr = mapnik::parse_expression(expr_,"utf-8");
+             mapnik::expression_ptr expr = mapnik::parse_expression(expr_);
          }
     }
 };

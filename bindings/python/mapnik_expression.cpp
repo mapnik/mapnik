@@ -46,7 +46,7 @@ using mapnik::path_expression_ptr;
 // expression
 expression_ptr parse_expression_(std::string const& wkt)
 {
-    return parse_expression(wkt,"utf8");
+    return parse_expression(wkt);
 }
 
 std::string expression_to_string_(mapnik::expr_node const& expr)
