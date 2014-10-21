@@ -30,11 +30,13 @@
 #include <iomanip>
 
 // boost
-// fusion
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/fusion/include/adapt_adt.hpp>
-// spirit
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_adapt_adt_attributes.hpp>
+#pragma GCC diagnostic pop
 
 // agg
 #include "agg_trans_affine.h"

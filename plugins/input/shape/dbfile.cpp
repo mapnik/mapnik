@@ -29,11 +29,15 @@
 #include "dbfile.hpp"
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
+#pragma GCC diagnostic pop
 
 // stl
 #include <cstdint>

@@ -29,7 +29,10 @@
 #include <mapnik/util/path_iterator.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/support_container.hpp>
+#pragma GCC diagnostic pop
 
 namespace boost { namespace spirit { namespace traits {
 

@@ -30,8 +30,12 @@
 #include <mapnik/json/value_converters.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

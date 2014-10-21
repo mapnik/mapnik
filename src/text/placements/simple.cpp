@@ -27,10 +27,15 @@
 #include <mapnik/xml_node.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 #include <cmath>
 

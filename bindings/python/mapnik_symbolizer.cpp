@@ -22,18 +22,17 @@
 
 #include <mapnik/config.hpp>
 
-#include "boost_std_shared_shim.hpp" // FIXME - do we need it?
-// The functions in this file produce deprecation warnings.
-// But as shield symbolizer doesn't fully support more than one
-// placement from python yet these functions are actually the
-// correct ones.
-
-#define NO_DEPRECATION_WARNINGS
-
-
 // boost
+#include "boost_std_shared_shim.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#pragma GCC diagnostic pop
+
 // mapnik
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_hash.hpp>
@@ -131,10 +130,12 @@ boost::python::object __getitem__(mapnik::symbolizer_base const& sym, std::strin
     return boost::python::object();
 }
 
+/*
 std::string __str__(mapnik::symbolizer const& sym)
 {
     return mapnik::util::apply_visitor(mapnik::symbolizer_to_json(), sym);
 }
+*/
 
 std::string get_symbolizer_type(symbolizer const& sym)
 {
@@ -201,7 +202,7 @@ void export_symbolizer()
         .def("__setattr__",&__setitem__)
         .def("__getitem__",&__getitem__)
         .def("__getattr__",&__getitem__)
-        .def("__str__", &__str__)
+        //.def("__str__", &__str__)
         .def(self == self) // __eq__
         ;
 }

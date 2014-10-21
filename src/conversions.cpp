@@ -27,17 +27,20 @@
 #include <cstring>
 #include <algorithm>
 
-#include <boost/spirit/include/qi.hpp>
-
-#if _MSC_VER
-#define snprintf _snprintf
-#endif
-
 // karma is used by default
 #define MAPNIK_KARMA_TO_STRING
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <boost/spirit/include/qi.hpp>
 #ifdef MAPNIK_KARMA_TO_STRING
   #include <boost/spirit/include/karma.hpp>
+#endif
+#pragma GCC diagnostic pop
+
+#if _MSC_VER
+#define snprintf _snprintf
 #endif
 
 namespace mapnik {

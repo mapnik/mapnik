@@ -140,6 +140,8 @@ inline std::string symbolizer_name(symbolizer const& sym)
     return type;
 }
 
+// https://github.com/mapnik/mapnik/issues/2324
+/*
 
 template <typename Meta>
 class symbolizer_property_value_string : public util::static_visitor<std::string>
@@ -194,7 +196,7 @@ public:
         std::ostringstream ss;
         if (expr)
         {
-            ss << '\"' << "FIXME" /*mapnik::to_expression_string(*expr)*/ <<  '\"';
+            ss << '\"' << "FIXME" <<  '\"';
         }
         return ss.str();
     }
@@ -252,6 +254,8 @@ struct symbolizer_to_json : public util::static_visitor<std::string>
         return ss.str();
     }
 };
+
+*/
 
 namespace {
 

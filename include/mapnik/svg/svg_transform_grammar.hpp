@@ -29,12 +29,16 @@
 // agg
 #include <agg_trans_affine.h>
 
-// spirit
+// boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace svg {
 

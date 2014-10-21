@@ -25,7 +25,12 @@
 #include <mapnik/image_filter_grammar_impl.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <boost/spirit/include/karma.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

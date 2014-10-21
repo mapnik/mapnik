@@ -23,8 +23,15 @@
 #if defined(GRID_RENDERER)
 
 #include <mapnik/config.hpp>
+
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 #include <boost/python.hpp>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/map.hpp>

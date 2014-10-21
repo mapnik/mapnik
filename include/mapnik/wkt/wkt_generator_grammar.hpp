@@ -30,6 +30,9 @@
 #include <mapnik/util/container_adapter.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -38,6 +41,7 @@
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
+#pragma GCC diagnostic pop
 
 // stl
 #include <tuple>

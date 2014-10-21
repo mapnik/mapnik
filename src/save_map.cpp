@@ -46,8 +46,12 @@
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/util/variant.hpp>
+
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 #include <boost/optional.hpp>
 #include <boost/version.hpp>
 #include <boost/property_tree/ptree.hpp>

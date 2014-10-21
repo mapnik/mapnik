@@ -25,12 +25,17 @@
 #include <vector>
 #include <string>
 #include <mapnik/util/fs.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/program_options.hpp>
 #include "quadtree.hpp"
 #include "shapefile.hpp"
 #include "shape_io.hpp"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/program_options.hpp>
+#pragma GCC diagnostic pop
 
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO=0.55;

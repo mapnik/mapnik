@@ -61,11 +61,14 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 
 // agg
 #include "agg_trans_affine.h"

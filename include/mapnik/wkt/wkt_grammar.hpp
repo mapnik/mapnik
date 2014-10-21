@@ -23,9 +23,13 @@
 #ifndef MAPNIK_WKT_GRAMMAR_HPP
 #define MAPNIK_WKT_GRAMMAR_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/assert.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/geometry.hpp>

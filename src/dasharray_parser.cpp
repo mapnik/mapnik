@@ -22,11 +22,16 @@
 
 // mapnik
 #include <mapnik/util/dasharray_parser.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
