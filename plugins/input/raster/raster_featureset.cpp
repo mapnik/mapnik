@@ -30,8 +30,12 @@
 #include <mapnik/feature_factory.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/format.hpp>
+#pragma GCC diagnostic pop
 
 #include "raster_featureset.hpp"
 
