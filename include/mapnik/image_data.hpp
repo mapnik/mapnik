@@ -27,9 +27,8 @@
 #include <mapnik/global.hpp>
 
 // stl
-#include <cassert>
-#include <cstring>
 #include <algorithm>
+#include <cassert>
 #include <stdexcept>
 
 namespace mapnik
@@ -54,7 +53,7 @@ public:
             throw std::runtime_error("negative height not allowed for image_data");
         }
         pData_ = (width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width * height)):0;
-        if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
+        if (pData_) std::fill(pData_, pData_ + width_ * height_, 0);
     }
 
     ImageData(int width, int height, T * data)
@@ -78,9 +77,9 @@ public:
          height_(rhs.height_),
          owns_data_(true),
          pData_((rhs.width_!=0 && rhs.height_!=0)?
-                static_cast<T*>(::operator new(sizeof(T)*rhs.width_*rhs.height_)) :0)
+                static_cast<T*>(::operator new(sizeof(T) * rhs.width_ * rhs.height_)) : 0)
     {
-        if (pData_) std::memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
+        if (pData_) std::copy(rhs.pData_, rhs.pData_ + rhs.width_* rhs.height_, pData_);
     }
 
     ImageData(ImageData<T> && rhs) noexcept
@@ -159,15 +158,15 @@ public:
         return pData_+row*width_;
     }
 
-    inline void setRow(unsigned row,const T* buf, unsigned size)
+    inline void setRow(unsigned row, T const* buf, unsigned size)
     {
         assert(row<height_);
         assert(size<=width_);
-        std::memcpy(pData_ + row * width_, buf, size * sizeof(T));
+        std::copy(buf, buf + size, pData_ + row * width_);
     }
     inline void setRow(unsigned row, unsigned x0, unsigned x1, T const* buf)
     {
-        std::memcpy(pData_+row * width_ + x0, buf, (x1 - x0) * sizeof(T));
+        std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
     }
 
     inline ~ImageData()
