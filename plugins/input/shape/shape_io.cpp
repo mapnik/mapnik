@@ -174,7 +174,7 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
 
         double x = record.read_double();
         double y = record.read_double();
-        if (k > 0 && !hit_test_first(*poly, x, y, 0))
+        if (k > 0 && !hit_test_first(*poly, x, y))
         {
             geom.push_back(poly.release());
             poly.reset(new geometry_type(mapnik::geometry_type::types::Polygon));

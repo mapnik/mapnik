@@ -287,7 +287,7 @@ public:
     }
 
     template <typename T>
-    void operator () ( T const& val ) const {}
+    void operator () ( T const& ) const {}
 
 private:
     ptree & parent_node_;

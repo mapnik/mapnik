@@ -83,7 +83,7 @@ struct expression_attributes : util::static_visitor<void>
     }
 
     template <typename T>
-    void operator() (T const& val) const {}
+    void operator() (T const&) const {}
 
 private:
     Container& names_;
@@ -149,7 +149,7 @@ struct extract_attribute_names : util::static_visitor<void>
     }
 
     template <typename T>
-    void operator() (T const& val) const {}
+    void operator() (T const&) const {}
 
 private:
     Container& names_;

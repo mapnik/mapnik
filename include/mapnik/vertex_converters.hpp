@@ -310,7 +310,7 @@ template <typename Dispatcher>
 struct converters_helper<Dispatcher>
 {
     template <typename Converter>
-    static void set(Dispatcher & disp, int state) {}
+    static void set(Dispatcher &, int) {}
     template <typename Geometry>
     static void forward(Dispatcher & disp, Geometry & geom)
     {

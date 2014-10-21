@@ -394,7 +394,7 @@ struct extract_raw_value : public util::static_visitor<T1>
     }
 
     template <typename T2>
-    auto operator() (T2 const& val) const -> result_type
+    auto operator() (T2 const&) const -> result_type
     {
         return result_type();
     }
