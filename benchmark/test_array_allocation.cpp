@@ -77,6 +77,31 @@ public:
     }
 };
 
+class test1c : public benchmark::test_case
+{
+public:
+    uint32_t size_;
+    std::vector<uint8_t> array_;
+    test1c(mapnik::parameters const& params)
+     : test_case(params),
+       size_(*params.get<mapnik::value_integer>("size",256*256)),
+       array_(size_,0) { }
+    bool validate() const
+    {
+        return true;
+    }
+    void operator()() const
+    {
+         for (std::size_t i=0;i<iterations_;++i) {
+             uint8_t *data = static_cast<uint8_t *>(::operator new(sizeof(uint8_t) * size_));
+             std::fill(data,data + size_,0);
+             ensure_zero(data,size_);
+             ::operator delete(data);
+         }
+    }
+};
+
+
 class test2 : public benchmark::test_case
 {
 public:
@@ -307,11 +332,14 @@ int main(int argc, char** argv)
     {
         test1b test_runner(params);
         run(test_runner,"malloc/memset");
-
+    }
+    {
+        test1c test_runner(params);
+        run(test_runner,"operator new/std::fill");
     }
     {
         test2 test_runner(params);
-        run(test_runner,"new");
+        run(test_runner,"operator new/memcpy");
     }
     {
         test3 test_runner(params);
