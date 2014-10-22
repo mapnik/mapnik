@@ -6,7 +6,7 @@ compiler:
 
 env:
   matrix:
-   - DEBUG=True  ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
+   - DEBUG=False ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
    - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none  XMLPARSER="ptree"   DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
 
 # travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
