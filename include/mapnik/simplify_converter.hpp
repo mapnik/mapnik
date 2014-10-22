@@ -194,6 +194,9 @@ private:
         return previous_vertex_.cmd;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     unsigned output_vertex_distance(double* x, double* y) {
         if (status_ == closing) {
             status_ = end;
@@ -237,6 +240,7 @@ private:
         *y = vtx.y;
         return vtx.cmd;
     }
+#pragma GCC diagnostic pop
 
     template <typename Iterator>
     bool fit_sleeve(Iterator itr,Iterator end, vertex2d const& v)

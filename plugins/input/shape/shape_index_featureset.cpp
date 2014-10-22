@@ -28,10 +28,14 @@
 #include <mapnik/feature_factory.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/streams/bufferstream.hpp>
 #endif
+#pragma GCC diagnostic pop
 
 #include "shape_index_featureset.hpp"
 #include "shape_utils.hpp"

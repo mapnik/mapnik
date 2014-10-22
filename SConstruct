@@ -1736,11 +1736,14 @@ if not preconfigured:
         # c++11 support / https://github.com/mapnik/mapnik/issues/1683
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
         env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
-        #  - workaround boost gil channel_algorithm.hpp narrowing error
-        # TODO - remove when building against >= 1.55
-        # https://github.com/mapnik/mapnik/issues/1970
         if 'clang++' in env['CXX']:
+            env.Append(CXXFLAGS = '-Wno-unknown-pragmas')
+            #  - workaround boost gil channel_algorithm.hpp narrowing error
+            # TODO - remove when building against >= 1.55
+            # https://github.com/mapnik/mapnik/issues/1970
             env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+        if 'g++' in env['CXX']:
+            env.Append(CXXFLAGS = '-Wno-pragmas')
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1781,14 +1784,14 @@ if not preconfigured:
 
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
-        common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+        common_cxx_flags = '-Wall -Wsign-compare -Wextra %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if env['DEBUG']:
-            env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
+            env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:
             # TODO - add back -fvisibility-inlines-hidden
             # https://github.com/mapnik/mapnik/issues/1863
-            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -Wextra -Wno-unknown-pragmas' % (env['OPTIMIZATION']))
+            env.Append(CXXFLAGS = common_cxx_flags + '-O%s' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 

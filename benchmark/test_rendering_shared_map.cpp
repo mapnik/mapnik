@@ -17,8 +17,7 @@ template <typename Renderer> void process_layers(Renderer & ren,
                                             mapnik::request const& m_req,
                                             mapnik::projection const& map_proj,
                                             std::vector<mapnik::layer> const& layers,
-                                            double scale_denom,
-                                            mapnik::box2d<double> const& map_extent)
+                                            double scale_denom)
 {
     unsigned layers_size = layers.size();
     for (unsigned i=0; i < layers_size; ++i)
@@ -100,7 +99,7 @@ public:
         mapnik::agg_renderer<mapnik::image_32> ren(*m_,m_req,variables,im,scale_factor_);
         ren.start_map_processing(*m_);
         std::vector<mapnik::layer> const& layers = m_->layers();
-        process_layers(ren,m_req,map_proj,layers,scale_denom,extent_);
+        process_layers(ren,m_req,map_proj,layers,scale_denom);
         ren.end_map_processing(*m_);
         if (!preview_.empty()) {
             std::clog << "preview available at " << preview_ << "\n";
@@ -124,7 +123,7 @@ public:
                 mapnik::agg_renderer<mapnik::image_32> ren(*m_,m_req,variables,im,scale_factor_);
                 ren.start_map_processing(*m_);
                 std::vector<mapnik::layer> const& layers = m_->layers();
-                process_layers(ren,m_req,map_proj,layers,scale_denom,extent_);
+                process_layers(ren,m_req,map_proj,layers,scale_denom);
                 ren.end_map_processing(*m_);
             }            
         }
