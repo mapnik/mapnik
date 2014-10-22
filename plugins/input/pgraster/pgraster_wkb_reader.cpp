@@ -65,12 +65,14 @@ read_uint16(const uint8_t** from, uint8_t littleEndian) {
     return ret;
 }
 
+/*
 int16_t
 read_int16(const uint8_t** from, uint8_t littleEndian) {
     assert(NULL != from);
 
     return read_uint16(from, littleEndian);
 }
+*/
 
 double
 read_float64(const uint8_t** from, uint8_t littleEndian) {
