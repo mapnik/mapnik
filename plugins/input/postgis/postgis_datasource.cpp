@@ -36,9 +36,13 @@
 #include <mapnik/value_types.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <memory>

@@ -4,8 +4,12 @@
 #include <mapnik/util/trim.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <stdexcept>

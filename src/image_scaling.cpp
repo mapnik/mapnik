@@ -27,8 +27,12 @@
 //#include <mapnik/span_image_filter.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wredeclared-class-member"
 #include <boost/assign/list_of.hpp>
 #include <boost/bimap.hpp>
+#pragma GCC diagnostic pop
 
 // agg
 #include "agg_image_accessors.h"

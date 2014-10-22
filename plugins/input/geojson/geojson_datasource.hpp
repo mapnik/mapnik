@@ -35,8 +35,10 @@
 
 // boost
 #include <boost/optional.hpp>
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
@@ -47,7 +49,7 @@
 #else
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
 #endif
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
 // stl
 #include <memory>

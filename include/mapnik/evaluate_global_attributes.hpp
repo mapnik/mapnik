@@ -46,7 +46,7 @@ struct evaluate_expression : util::static_visitor<T>
     explicit evaluate_expression(Attributes const& attributes)
         : attributes_(attributes) {}
 
-    value_type operator() (attribute const& attr) const
+    value_type operator() (attribute const&) const
     {
         throw std::runtime_error("can't evaluate feature attributes in this context");
     }
@@ -61,7 +61,7 @@ struct evaluate_expression : util::static_visitor<T>
         return value_type();// throw?
     }
 
-    value_type operator() (geometry_type_attribute const& geom) const
+    value_type operator() (geometry_type_attribute const&) const
     {
         throw std::runtime_error("can't evaluate geometry_type attributes in this context");
     }
@@ -139,17 +139,17 @@ struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
 
     evaluate_expression(boost::none_t) {}
 
-    value_type operator() (attribute const& attr) const
+    value_type operator() (attribute const&) const
     {
         throw std::runtime_error("can't evaluate feature attributes in this context");
     }
 
-    value_type operator() (global_attribute const& attr) const
+    value_type operator() (global_attribute const&) const
     {
         throw std::runtime_error("can't evaluate feature attributes in this context");
     }
 
-    value_type operator() (geometry_type_attribute const& geom) const
+    value_type operator() (geometry_type_attribute const&) const
     {
         throw std::runtime_error("can't evaluate geometry_type attributes in this context");
     }
@@ -287,7 +287,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
         }
 
         template <typename T>
-        void operator() (T const& val) const
+        void operator() (T const&) const
         {
             // no-op
         }

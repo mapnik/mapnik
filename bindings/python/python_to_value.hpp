@@ -23,7 +23,12 @@
 #define MAPNIK_PYTHON_BINDING_PYTHON_TO_VALUE
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <boost/python.hpp>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/value.hpp>

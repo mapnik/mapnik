@@ -24,12 +24,17 @@
 
 #include <mapnik/config.hpp>
 
-#include "boost_std_shared_shim.hpp"
-
 // boost
+#include "boost_std_shared_shim.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/grid/grid.hpp>

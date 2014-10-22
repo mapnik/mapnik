@@ -22,7 +22,13 @@
 
 #include <mapnik/config.hpp>
 
+// boost
 #include "boost_std_shared_shim.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 #include "python_to_value.hpp"
 #include <boost/python/args.hpp>        // for keywords, arg, etc
 #include <boost/python/converter/from_python.hpp>
@@ -36,6 +42,7 @@
 #include <boost/python/object_core.hpp>  // for get_managed_object
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/to_python_converter.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <stdexcept>

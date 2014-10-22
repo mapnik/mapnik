@@ -7,8 +7,15 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
+#pragma GCC diagnostic pop
+
 #include <string>
 
 int main (int argc,char** argv)

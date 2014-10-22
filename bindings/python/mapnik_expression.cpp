@@ -21,15 +21,21 @@
  *****************************************************************************/
 
 #include <mapnik/config.hpp>
-#include "boost_std_shared_shim.hpp"
 #include "python_to_value.hpp"
 
 // boost
+#include "boost_std_shared_shim.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 #include <boost/python.hpp>
-#include <mapnik/util/variant.hpp>
 #include <boost/noncopyable.hpp>
+#pragma GCC diagnostic pop
 
 // mapnik
+#include <mapnik/util/variant.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>

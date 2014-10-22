@@ -25,7 +25,11 @@
 #include <mapnik/simplify.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string/replace.hpp>  // for replace
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

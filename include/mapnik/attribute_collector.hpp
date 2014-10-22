@@ -40,7 +40,10 @@
 #include <mapnik/util/variant.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string/replace.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <set>

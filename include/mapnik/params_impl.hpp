@@ -30,8 +30,12 @@
 #include <mapnik/util/conversions.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

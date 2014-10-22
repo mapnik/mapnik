@@ -30,13 +30,15 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
 
-// spirit2
+// boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_locals.hpp>
-// phoenix
 #include <boost/spirit/include/phoenix_function.hpp>
-// fusion
 #include <boost/fusion/adapted/struct.hpp>
+#pragma GCC diagnostic pop
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
                           (mapnik::unary_function_impl, fun)
