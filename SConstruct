@@ -1784,7 +1784,7 @@ if not preconfigured:
         common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unknown-pragmas '
+            common_cxx_flags += ' -Wno-unknown-pragmas -Wno-unsequenced '
         elif 'g++' in env['CXX']:
             common_cxx_flags += ' -Wno-pragmas '
 
