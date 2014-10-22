@@ -45,9 +45,9 @@ proj_transform::proj_transform(projection const& source,
       dest_(dest),
       is_source_longlat_(false),
       is_dest_longlat_(false),
+      is_source_equal_dest_(false),
       wgs84_to_merc_(false),
-      merc_to_wgs84_(false),
-      is_source_equal_dest_(false)
+      merc_to_wgs84_(false)
 {
     is_source_equal_dest_ = (source_ == dest_);
     if (!is_source_equal_dest_)
