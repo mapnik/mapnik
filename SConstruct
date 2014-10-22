@@ -1742,7 +1742,7 @@ if not preconfigured:
             # TODO - remove when building against >= 1.55
             # https://github.com/mapnik/mapnik/issues/1970
             env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
-        if 'g++' in env['CXX']:
+        elif 'g++' in env['CXX']:
             env.Append(CXXFLAGS = '-Wno-pragmas')
 
         # Enable logging in debug mode (always) and release mode (when specified)
