@@ -40,15 +40,15 @@ namespace mapnik {
 struct symbol_type_dispatch : public util::static_visitor<bool>
 {
     template <typename Symbolizer>
-    bool operator()(Symbolizer const& sym) const
+    bool operator()(Symbolizer const&) const
     {
         return false;
     }
-    bool operator()(line_symbolizer const& sym) const
+    bool operator()(line_symbolizer const&) const
     {
         return true;
     }
-    bool operator()(polygon_symbolizer const& sym) const
+    bool operator()(polygon_symbolizer const&) const
     {
         return true;
     }

@@ -82,42 +82,43 @@ public:
     /*!
      * @brief Overloads that process each kind of symbolizer individually.
      */
-    void process(point_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
     void process(line_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(line_pattern_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(polygon_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
-    void process(polygon_pattern_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(raster_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(shield_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(text_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(building_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(markers_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(debug_symbolizer const& /*sym*/,
-                 mapnik::feature_impl & /*feature*/,
-                 proj_transform const& /*prj_trans*/) {}
-    void process(group_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
+    // unimplemented
+    void process(point_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(line_pattern_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(polygon_pattern_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(raster_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(shield_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(text_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(building_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(markers_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(debug_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
+    void process(group_symbolizer const&,
+                 mapnik::feature_impl &,
+                 proj_transform const&) {}
 
     // Overload that process the whole set of symbolizers of a rule.
     // return true, meaning that this renderer can process multiple symbolizers.

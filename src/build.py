@@ -354,17 +354,8 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/svg_generator.cpp
     svg/output/svg_output_attributes.cpp
     svg/output/process_symbolizers.cpp
-    svg/output/process_building_symbolizer.cpp
-    svg/output/process_line_pattern_symbolizer.cpp
     svg/output/process_line_symbolizer.cpp
-    svg/output/process_markers_symbolizer.cpp
-    svg/output/process_point_symbolizer.cpp
-    svg/output/process_polygon_pattern_symbolizer.cpp
     svg/output/process_polygon_symbolizer.cpp
-    svg/output/process_raster_symbolizer.cpp
-    svg/output/process_shield_symbolizer.cpp
-    svg/output/process_text_symbolizer.cpp
-    svg/output/process_group_symbolizer.cpp
     """)
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')

@@ -120,7 +120,7 @@ struct collect_attributes_visitor : public mapnik::util::static_visitor<void>
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
       desc_(desc) {}
 
-    void operator() (mapnik::topojson::invalid const& g) {}
+    void operator() (mapnik::topojson::invalid const&) {}
 
     template <typename GeomType>
     void operator() (GeomType const& g)

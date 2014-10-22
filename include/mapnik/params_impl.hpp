@@ -94,7 +94,7 @@ struct extract_value<mapnik::value_double>
 template <>
 struct extract_value<mapnik::value_null>
 {
-    static inline boost::optional<mapnik::value_null> do_extract_from_string(std::string const& source)
+    static inline boost::optional<mapnik::value_null> do_extract_from_string(std::string const&)
     {
         return boost::optional<mapnik::value_null>(); // FIXME
     }

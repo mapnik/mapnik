@@ -186,7 +186,7 @@ namespace agg
         scanline32_bin() : m_max_len(0), m_last_x(0x7FFFFFF0) {}
 
         //--------------------------------------------------------------------
-        void reset(int min_x, int max_x)
+        void reset(int, int)
         {
             m_last_x = 0x7FFFFFF0;
             m_spans.remove_all();

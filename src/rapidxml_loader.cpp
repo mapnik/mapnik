@@ -39,20 +39,16 @@
 #include <fstream>
 
 namespace rapidxml = boost::property_tree::detail::rapidxml;
+
 namespace mapnik
 {
 class rapidxml_loader : mapnik::noncopyable
 {
 public:
-    rapidxml_loader(const char *encoding = nullptr) :
-        filename_()
-    {
+    rapidxml_loader() :
+        filename_() {}
 
-    }
-
-    ~rapidxml_loader()
-    {
-    }
+    ~rapidxml_loader() {}
 
     void load(std::string const& filename, xml_node & node)
     {

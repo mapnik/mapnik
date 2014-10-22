@@ -262,7 +262,7 @@ namespace {
 template <typename Symbolizer, typename T>
 struct set_property_impl
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer &, mapnik::keys, std::string const&)
     {
         std::cerr << "do nothing" << std::endl;
     }
@@ -280,7 +280,7 @@ struct set_property_impl<Symbolizer, std::integral_constant<property_types, prop
 template <typename Symbolizer>
 struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double> >
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer &, mapnik::keys, std::string const&)
     {
         std::cerr << " expects double" << std::endl;
     }
@@ -289,7 +289,7 @@ struct set_property_impl<Symbolizer, std::integral_constant<property_types, prop
 template <typename Symbolizer>
 struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer &, mapnik::keys, std::string const&)
     {
         std::cerr << " expects bool" << std::endl;
     }

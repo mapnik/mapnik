@@ -45,7 +45,7 @@
 #include <iostream>
 
 
-int main ( int argc , char** argv)
+int main ( int, char** )
 {
     using namespace mapnik;
     const std::string srs_lcc="+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 \
