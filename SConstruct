@@ -1737,13 +1737,10 @@ if not preconfigured:
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
         env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
         if 'clang++' in env['CXX']:
-            env.Append(CXXFLAGS = '-Wno-unknown-pragmas')
             #  - workaround boost gil channel_algorithm.hpp narrowing error
             # TODO - remove when building against >= 1.55
             # https://github.com/mapnik/mapnik/issues/1970
             env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
-        elif 'g++' in env['CXX']:
-            env.Append(CXXFLAGS = '-Wno-pragmas')
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1785,6 +1782,11 @@ if not preconfigured:
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
         common_cxx_flags = '-Wall -Wsign-compare -Wextra %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+
+        if 'clang++' in env['CXX']:
+            common_cxx_flags += ' -Wno-unknown-pragmas '
+        elif 'g++' in env['CXX']:
+            common_cxx_flags += ' -Wno-pragmas '
 
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
