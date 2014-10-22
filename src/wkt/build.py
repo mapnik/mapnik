@@ -26,5 +26,10 @@ Import('env')
 lib_env = env.Clone()
 if 'g++' in env['CXX']:
     lib_env.Append(CXXFLAGS='-fPIC')
-for file in glob('./' + '*.cpp'):
-    lib_env.StaticLibrary(file.replace('.cpp',''), file, LIBS=[])
+
+name = "mapnik-wkt"
+lib = lib_env.StaticLibrary(name, glob('./' + '*.cpp'), LIBS=[])
+target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], env.subst('${LIBPREFIX}%s${LIBSUFFIX}' % name))
+result = env.InstallAs(target=target, source=lib)
+env.Alias(target='install', source=result)
+env['create_uninstall_target'](env, target)

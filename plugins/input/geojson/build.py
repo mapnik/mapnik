@@ -38,9 +38,7 @@ plugin_sources = Split(
 libraries = []
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append('mapnik_json_feature_collection_grammar')
-libraries.append('mapnik_json_feature_grammar')
-libraries.append('mapnik_json_geometry_grammar')
+libraries.append('mapnik-json')
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append(env['MAPNIK_NAME'])
@@ -53,9 +51,7 @@ if env['PLUGIN_LINKING'] == 'shared':
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
-    Depends(TARGET, env.subst('../../../src/json/libmapnik_json_geometry_grammar${LIBSUFFIX}'))
-    Depends(TARGET, env.subst('../../../src/json/libmapnik_json_feature_grammar${LIBSUFFIX}'))
-    Depends(TARGET, env.subst('../../../src/json/libmapnik_json_feature_collection_grammar${LIBSUFFIX}'))
+    Depends(TARGET, env.subst('../../../src/json/libmapnik-json${LIBSUFFIX}'))
 
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
