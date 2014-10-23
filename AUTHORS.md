@@ -6,26 +6,37 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * AJ Ashton
 * Matt Amos
 * Lucio Asnaghi
+* Alexandre Bonnasseau
 * Justin Bronn
+* Joel Brown
 * Christopher Brown
 * Jon Burgess
+* Stephan Bösch-Plepelits
+* Manel Clos
 * Toby Collet
 * Robert Coup
 * Berteun Damman
-* Craig de Stigter 
+* Petr Dlouhy
+* Jiri Drbalek
 * Jean-Francois Doyon
 * David Eastcott
+* Seth Fitzsimmons
+* Sean Gillies
 * Krzysztof Godlewski
 * Beau Gunderson
 * John Hague
 * Dominic Hargreaves
+* Axel Haustant
 * Aubrey Holland
+* Jordan Hollinger
 * Tom Hughes
 * Konstantin Käfer
 * Mak Kolybabi
 * Peter Körner
 * Hermann Kraus
 * Stella Laurenzo
+* XinGang Li
+* lightmare
 * David Leaver
 * Carlos López
 * Dennis Luxen
@@ -33,12 +44,15 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Michal Migurski
 * Andrii Mishkovskyi
 * Ben Moores
+* Mike Morris
 * Dražen Odobašić
 * Cameron Patrick
+* Clint Pells
 * Igor Podolskiy
 * Reid Priedhorsky
 * Brian Quinion
 * Marcin Rudowski
+* Sandro Santilli
 * Christopher Schmidt
 * Andreas Schneider
 * Vincent Schut
@@ -49,9 +63,12 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Vince Spader
 * Philipp Spitzer
 * Dane Springmeyer
+* Craig de Stigter
 * Dave Stubbs
 * River Tarnell
+* Cezary Tarnowski
 * Oliver Tonnhofer
+* Jochen Topf
 * Alberto Valverde
 * Martijn van Oosterhout 
 * Andreas Volz
