@@ -20,9 +20,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# Import everything.  In this case this is safe, in more complex systems, you
-# will want to be more selective.
-
 import sys
 from os import path
 
@@ -33,11 +30,6 @@ except:
 installed successfully before running this script.\n\n'
     sys.exit(1)
 
-try:
-    import cairo
-    HAS_PYCAIRO_MODULE = True
-except ImportError:
-    HAS_PYCAIRO_MODULE = False
 
 # Instanciate a map, giving it a width and height. Remember: the word "map" is
 # reserved in Python! :)
@@ -372,50 +364,17 @@ if mapnik.has_webp():
 
 
 # Render cairo examples
-if HAS_PYCAIRO_MODULE and mapnik.has_pycairo():
-
-    svg_surface = cairo.SVGSurface('demo.svg', m.width,m.height)
-    mapnik.render(m, svg_surface)
-    svg_surface.finish()
-    images_.append('demo.svg')
-
-    pdf_surface = cairo.PDFSurface('demo.pdf', m.width,m.height)
-    mapnik.render(m, pdf_surface)
+if  mapnik.has_cairo():
+    mapnik.render_to_file(m,'demo.pdf')
     images_.append('demo.pdf')
-    pdf_surface.finish()
-
-    postscript_surface = cairo.PSSurface('demo.ps', m.width,m.height)
-    mapnik.render(m, postscript_surface)
+    mapnik.render_to_file(m,'demo.ps')
     images_.append('demo.ps')
-    postscript_surface.finish()
-
-    image_surface = cairo.ImageSurface(cairo.FORMAT_RGB24, m.width, m.height)
-    mapnik.render(m, image_surface)
-    image_surface.write_to_png('demo_cairo_rgb24.png')
-    images_.append('demo_cairo_argb24.png')
-    image_surface.finish()
-
-    image_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, m.width, m.height)
-    mapnik.render(m, image_surface)
-    image_surface.write_to_png('demo_cairo_argb32.png')
-    images_.append('demo_cairo_argb32.png')
-    image_surface.finish()
-
-else:
-    print '\n\nPycairo not available...',
-    if  mapnik.has_cairo():
-        print ' will render Cairo formats using alternative method'
-
-        mapnik.render_to_file(m,'demo.pdf')
-        images_.append('demo.pdf')
-        mapnik.render_to_file(m,'demo.ps')
-        images_.append('demo.ps')
-        mapnik.render_to_file(m,'demo.svg')
-        images_.append('demo.svg')
-        mapnik.render_to_file(m,'demo_cairo_rgb24.png','RGB24')
-        images_.append('demo_cairo_rgb.png')
-        mapnik.render_to_file(m,'demo_cairo_argb32.png','ARGB32')
-        images_.append('demo_cairo_argb.png')
+    mapnik.render_to_file(m,'demo.svg')
+    images_.append('demo.svg')
+    mapnik.render_to_file(m,'demo_cairo_rgb24.png','RGB24')
+    images_.append('demo_cairo_rgb.png')
+    mapnik.render_to_file(m,'demo_cairo_argb32.png','ARGB32')
+    images_.append('demo_cairo_argb.png')
 
 print "\n\n", len(images_), "maps have been rendered in the current directory:"
 
