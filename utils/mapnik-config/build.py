@@ -79,28 +79,21 @@ dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 # remove local agg from public linking
 dep_libs = dep_libs.replace('-lagg','')
 
-git_revision = 'unknown'
-git_describe = 'unknown'
-# special GIT_REVISION/GIT_DESCRIBE files present only for official releases
-# where the git directory metadata is stripped
-# more info: https://github.com/mapnik/mapnik/wiki/MapnikReleaseSteps
-revision_release_file = '../../GIT_REVISION'
-if os.path.exists(revision_release_file):
-    git_revision = open(revision_release_file,'r').read()
-else:
+git_revision = ''
+git_describe = ''
+
+try:
     git_cmd = "git rev-list --max-count=1 HEAD"
     stdin, stderr = Popen(git_cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
         git_revision = stdin.strip()
 
-describe_release_file = '../../GIT_DESCRIBE'
-if os.path.exists(describe_release_file):
-    git_describe = open(describe_release_file,'r').read()
-else:
     git_cmd = "git describe"
     stdin, stderr = Popen(git_cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
         git_describe = stdin.strip()
+except:
+    pass
 
 # for fonts and input plugins we should try
 # to store the relative path, if feasible
