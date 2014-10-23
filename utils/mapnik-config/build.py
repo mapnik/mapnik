@@ -79,8 +79,8 @@ dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 # remove local agg from public linking
 dep_libs = dep_libs.replace('-lagg','')
 
-git_revision = ''
-git_describe = ''
+git_revision = 'N/A'
+git_describe = config_env['MAPNIK_VERSION_STRING']
 
 try:
     git_cmd = "git rev-list --max-count=1 HEAD"
