@@ -27,14 +27,6 @@ utils/svg2png/svg2png
 utils/nik2img/nik2img
 demo/python/demo*
 demo/python/map.xml
-tests/cpp_tests/svg_renderer_tests/background_color_test
-tests/cpp_tests/svg_renderer_tests/combined_test
-tests/cpp_tests/svg_renderer_tests/compilation_test
-tests/cpp_tests/svg_renderer_tests/file_output_test
-tests/cpp_tests/svg_renderer_tests/file_output_test_case.svg
-tests/cpp_tests/svg_renderer_tests/path_element_test
-tests/cpp_tests/svg_renderer_tests/path_element_test_case_1.svg
-tests/cpp_tests/svg_renderer_tests/root_element_test
 tests/data/sqlite/*index
 demo/c++/cairo-demo.pdf
 demo/c++/cairo-demo.png
