@@ -848,26 +848,6 @@ return 0;
     context.Result(ret[0])
     return ret[1].strip()
 
-def GetMapnikLibVersion(context):
-    ret = context.TryRun("""
-
-#include <mapnik/version.hpp>
-#include <iostream>
-
-int main()
-{
-    std::cout << MAPNIK_VERSION_STRING << std::endl;
-    return 0;
-}
-
-""", '.cpp')
-    # hack to avoid printed output
-    context.did_show_result=1
-    context.Result(ret[0])
-    if not ret[1]:
-        return []
-    return ret[1].strip()
-
 def icu_at_least_four_two(context):
     ret = context.TryRun("""
 
@@ -1010,7 +990,6 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckBoost'            : CheckBoost,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
                'GetBoostLibVersion'    : GetBoostLibVersion,
-               'GetMapnikLibVersion'   : GetMapnikLibVersion,
                'parse_config'          : parse_config,
                'parse_pg_config'       : parse_pg_config,
                'ogr_enabled'           : ogr_enabled,
@@ -1022,6 +1001,23 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'supports_cxx11'        : supports_cxx11,
                }
 
+def GetMapnikLibVersion():
+    ver = []
+    is_pre = False
+    for line in open('include/mapnik/version.hpp').readlines():
+        if line.startswith('#define MAPNIK_MAJOR_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_MINOR_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_PATCH_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_VERSION_IS_RELEASE'):
+            if line.split(' ')[2].strip() == "0":
+                is_pre = True
+    version_string = ".".join(ver)
+    if is_pre:
+        version_string += '-pre'
+    return version_string
 
 if not preconfigured:
 
@@ -1655,15 +1651,7 @@ if not preconfigured:
 
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
-        abi = None
-        abi_fallback = "3.0.0-pre"
-        if not env['HOST']:
-            abi = conf.GetMapnikLibVersion()
-        if not abi:
-            if not env['HOST']:
-                color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
-            abi = abi_fallback
-
+        abi = GetMapnikLibVersion()
         abi_no_pre = abi.replace('-pre','').split('.')
         env['ABI_VERSION'] = abi_no_pre
         env['MAPNIK_VERSION_STRING'] = abi
