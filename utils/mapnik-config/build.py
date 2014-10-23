@@ -144,7 +144,7 @@ write_config(configuration,template,config_file)
 target_path = os.path.normpath(os.path.join(config_env['INSTALL_PREFIX'],'bin'))
 full_target = os.path.join(target_path,config_file)
 
-Depends(full_target, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
+Depends(full_target, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'install' in COMMAND_LINE_TARGETS:
     # we must add 'install' catch here because otherwise

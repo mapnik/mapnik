@@ -19,7 +19,7 @@ demo/viewer/viewer.ini
 tests/cpp_tests/font_registration_test
 tests/python_tests/raster_colorizer_test.png
 tests/python_tests/raster_colorizer_test_save.xml
-bin/mapnik-config
+utils/mapnik-config/mapnik-config
 utils/shapeindex/shapeindex
 utils/ogrindex/ogrindex
 utils/pgsql2sqlite/pgsql2sqlite

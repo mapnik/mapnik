@@ -2022,8 +2022,8 @@ if not HELP_REQUESTED:
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')
 
-    # install pkg-config script and mapnik-config script
-    SConscript('bin/build.py')
+    # install mapnik-config script
+    SConscript('utils/mapnik-config/build.py')
 
     # write the viewer.ini file
     SConscript('demo/viewer/build.py')
