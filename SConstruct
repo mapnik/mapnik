@@ -1174,7 +1174,7 @@ if not preconfigured:
             color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
 
     # Set up for libraries and headers dependency checks
-    env['CPPPATH'] = ['#include', '#']
+    env['CPPPATH'] = ['#include']
     env['LIBPATH'] = ['#src','#src/json','#src/wkt']
 
     # set any custom cxxflags and ldflags to come first
@@ -1488,7 +1488,6 @@ if not preconfigured:
             # re-append the local paths for mapnik sources to the beginning of the list
             # to make sure they come before any plugins that were 'prepended'
             env.PrependUnique(CPPPATH = '#include', delete_existing=True)
-            env.PrependUnique(CPPPATH = '#', delete_existing=True)
             env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
     if not env['HOST']:
