@@ -693,48 +693,6 @@ def rollback_option(context,variable):
         if item.key == variable:
             env[variable] = item.default
 
-def update_linux_project_files():
-    headers_content = []
-    source_content = []
-
-    directories = [
-        'include',
-        'src',
-        'bindings',
-        'boost',
-        'plugins',
-        'deps',
-    ]
-
-    def iterate_dirs(headers_content, source_content, d):
-        if not "uninstall-" in d:
-            for root, subFolders, files in os.walk(d):
-                for f in files:
-                    if f.endswith(".h") or f.endswith(".hpp"):
-                        headers_content.append("  ../%s \\" % os.path.join(root, f))
-                    if f.endswith(".cpp") or f.endswith(".c"):
-                        source_content.append("  ../%s \\" % os.path.join(root, f))
-                for sd in subFolders:
-                    headers_content, source_content = \
-                        iterate_dirs(headers_content, source_content, os.path.join(root, sd))
-        return headers_content, source_content
-
-    for d in directories:
-        headers_content, source_content = \
-            iterate_dirs(headers_content, source_content, d)
-
-    headers_content.sort()
-    headers_content = ['HEADERS += \\'] + headers_content + ['','']
-
-    source_content.sort()
-    source_content = ['SOURCES += \\'] + source_content + ['','']
-
-    files_name = os.path.join('.', 'workspace', 'All.files')
-    f = open(files_name, "w")
-    f.writelines([l + '\n' for l in headers_content])
-    f.writelines([l + '\n' for l in source_content])
-    f.close()
-
 def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
 
@@ -2038,7 +1996,3 @@ if not HELP_REQUESTED:
                 os.unlink(plugin_path)
         if os.path.exists('plugins/input/templates/hello.input'):
             os.unlink('plugins/input/templates/hello.input')
-
-    # update linux project files
-    if env['PLATFORM'] == 'Linux':
-        update_linux_project_files()
