@@ -114,7 +114,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         {
             if (size > 0)
             {
-                mapnik::raster_ptr rasterp = std::make_shared<mapnik::raster>(intersect, width, height);
+                mapnik::raster_ptr rasterp = std::make_shared<mapnik::raster>(intersect, width, height, 1.0);
                 mapnik::image_data_32 & image = rasterp->data_;
                 image.set(0xffffffff);
 
