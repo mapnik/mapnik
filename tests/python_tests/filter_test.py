@@ -441,5 +441,10 @@ def test_division_by_zero():
     f['b'] = 0
     eq_(expr.evaluate(f),None)
 
+@raises(RuntimeError)
+def test_invalid_syntax1():
+    expr = mapnik.Expression('abs()')
+
+
 if __name__ == "__main__":
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))
