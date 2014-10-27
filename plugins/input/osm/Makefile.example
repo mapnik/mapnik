@@ -1,9 +1,0 @@
-CXXFLAGS = `xml2-config --cflags` -I/usr/local/include/mapnik -I/usr/include/boost -I/usr/include/freetype2  -I/home/nick/mapnik-osm/agg/include  -g
-LDFLAGS = `xml2-config --libs` -L/usr/local/lib  
-LDFLAGS5 = `xml2-config --libs` -L/usr/local/lib -lmapnik 
-OBJ = test.o osm.o osmparser.o
-test: $(OBJ) 
-  g++ -o test $(OBJ) $(LDFLAGS) 
-render: render.o
-  g++ -o render render.o $(LDFLAGS5) 
-
