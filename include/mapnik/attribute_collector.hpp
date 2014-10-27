@@ -40,7 +40,10 @@
 #include <mapnik/util/variant.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string/replace.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <set>
@@ -83,7 +86,7 @@ struct expression_attributes : util::static_visitor<void>
     }
 
     template <typename T>
-    void operator() (T const& val) const {}
+    void operator() (T const&) const {}
 
 private:
     Container& names_;
@@ -149,7 +152,7 @@ struct extract_attribute_names : util::static_visitor<void>
     }
 
     template <typename T>
-    void operator() (T const& val) const {}
+    void operator() (T const&) const {}
 
 private:
     Container& names_;

@@ -35,8 +35,12 @@
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
+#pragma GCC diagnostic pop
 
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_basics.h"

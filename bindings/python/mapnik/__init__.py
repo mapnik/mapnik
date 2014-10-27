@@ -71,8 +71,6 @@ def bootstrap_env():
 bootstrap_env()
 
 from _mapnik import *
-from paths import inputpluginspath
-from paths import fontscollectionpath
 
 import printing
 printing.renderer = render
@@ -1054,6 +1052,7 @@ def register_plugins(path=None):
         if os.environ.has_key('MAPNIK_INPUT_PLUGINS_DIRECTORY'):
             path = os.environ.get('MAPNIK_INPUT_PLUGINS_DIRECTORY')
         else:
+            from paths import inputpluginspath
             path = inputpluginspath
     DatasourceCache.register_datasources(path)
 
@@ -1063,6 +1062,7 @@ def register_fonts(path=None,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb
        if os.environ.has_key('MAPNIK_FONT_DIRECTORY'):
            path = os.environ.get('MAPNIK_FONT_DIRECTORY')
        else:
+           from paths import fontscollectionpath
            path = fontscollectionpath
     for dirpath, _, filenames in os.walk(path):
         for filename in filenames:

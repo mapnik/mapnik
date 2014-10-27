@@ -143,8 +143,6 @@ else: # unix, non-macos
 
 source = Split(
     """
-    marker_helpers.cpp
-    dasharray_parser.cpp
     expression_grammar.cpp
     fs.cpp
     request.cpp
@@ -167,6 +165,7 @@ source = Split(
     feature_kv_iterator.cpp
     feature_style_processor.cpp
     feature_type_style.cpp
+    dasharray_parser.cpp
     font_engine_freetype.cpp
     font_set.cpp
     function_call.cpp
@@ -180,6 +179,8 @@ source = Split(
     load_map.cpp
     memory.cpp
     palette.cpp
+    marker_helpers.cpp
+    transform_expression_grammar.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
@@ -210,6 +211,7 @@ source = Split(
     text/itemizer.cpp
     text/scrptrun.cpp
     text/face.cpp
+    text/glyph_positions.cpp
     text/placement_finder.cpp
     text/properties_util.cpp
     text/renderer.cpp
@@ -352,17 +354,8 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/svg_generator.cpp
     svg/output/svg_output_attributes.cpp
     svg/output/process_symbolizers.cpp
-    svg/output/process_building_symbolizer.cpp
-    svg/output/process_line_pattern_symbolizer.cpp
     svg/output/process_line_symbolizer.cpp
-    svg/output/process_markers_symbolizer.cpp
-    svg/output/process_point_symbolizer.cpp
-    svg/output/process_polygon_pattern_symbolizer.cpp
     svg/output/process_polygon_symbolizer.cpp
-    svg/output/process_raster_symbolizer.cpp
-    svg/output/process_shield_symbolizer.cpp
-    svg/output/process_text_symbolizer.cpp
-    svg/output/process_group_symbolizer.cpp
     """)
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')

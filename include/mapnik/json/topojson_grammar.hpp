@@ -24,23 +24,25 @@
 #define MAPNIK_TOPOJSON_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/value.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/json/value_converters.hpp>
-#include <mapnik/util/variant.hpp>
+
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
 
 // stl
-#include <string>
+#include <vector>
 
 namespace mapnik { namespace topojson {
 
 namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
 namespace standard_wide = boost::spirit::standard_wide;
 using standard_wide::space_type;

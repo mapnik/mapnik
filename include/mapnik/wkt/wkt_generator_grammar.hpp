@@ -30,6 +30,9 @@
 #include <mapnik/util/container_adapter.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -37,11 +40,12 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
+#pragma GCC diagnostic pop
 
 // stl
 #include <tuple>
+#include <type_traits>
 
 namespace mapnik { namespace wkt {
 
@@ -53,8 +57,7 @@ namespace detail {
 template <typename Geometry>
 struct get_type
 {
-    template <typename T>
-    struct result { using type = int; };
+    using result_type = int;
 
     int operator() (Geometry const& geom) const
     {
@@ -62,31 +65,24 @@ struct get_type
     }
 };
 
-template <typename T>
+template <typename Geometry>
 struct get_first
 {
-    using geometry_type = T;
-
-    template <typename U>
-    struct result { using type  = const typename geometry_type::value_type; };
-
-    typename geometry_type::value_type const operator() (geometry_type const& geom) const
+    using result_type = const typename Geometry::value_type;
+    typename geometry_type::value_type const operator() (Geometry const& geom) const
     {
-        typename geometry_type::value_type coord;
+        typename Geometry::value_type coord;
         geom.rewind(0);
         std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
         return coord;
     }
 };
 
-template <typename T>
+template <typename GeometryContainer>
 struct multi_geometry_
 {
-    using geometry_container = T;
-
-    template <typename U>
-    struct result { using type = bool; };
-    bool operator() (geometry_container const& geom) const
+    using result_type = bool;
+    bool operator() (GeometryContainer const& geom) const
     {
         return geom.size() > 1 ? true : false;
     }
@@ -96,10 +92,7 @@ template <typename T>
 struct get_x
 {
     using value_type = T;
-
-    template <typename U>
-    struct result { using type = double; };
-
+    using result_type = double;
     double operator() (value_type const& val) const
     {
         return std::get<1>(val);
@@ -110,25 +103,18 @@ template <typename T>
 struct get_y
 {
     using value_type = T;
-
-    template <typename U>
-    struct result { using type = double; };
-
+    using result_type = double;
     double operator() (value_type const& val) const
     {
         return std::get<2>(val);
     }
 };
 
-template <typename T>
+template <typename GeometryContainer>
 struct multi_geometry_type
 {
-    using geometry_container = T;
-
-    template <typename U>
-    struct result { using type = std::tuple<unsigned,bool>; };
-
-    std::tuple<unsigned,bool> operator() (geometry_container const& geom) const;
+    using result_type = std::tuple<unsigned,bool>;
+    std::tuple<unsigned,bool> operator() (GeometryContainer const& geom) const;
 };
 
 
@@ -136,7 +122,7 @@ template <typename T>
 struct wkt_coordinate_policy : karma::real_policies<T>
 {
     using base_type = boost::spirit::karma::real_policies<T>;
-    static int floatfield(T n) { return base_type::fmtflags::fixed; }
+    static int floatfield(T) { return base_type::fmtflags::fixed; }
     static unsigned precision(T n)
     {
         if (n == 0.0) return 0;
@@ -167,7 +153,7 @@ struct wkt_generator :
     karma::grammar<OutputIterator, Geometry const& ()>
 {
     using geometry_type = Geometry;
-    using coord_type = typename boost::remove_pointer<typename geometry_type::value_type>::type;
+    using coord_type = typename std::remove_pointer<typename geometry_type::value_type>::type;
 
     wkt_generator(bool single = false);
     // rules
@@ -195,7 +181,7 @@ template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
         karma::grammar<OutputIterator, karma::locals< std::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
-    using geometry_type = typename boost::remove_pointer<typename GeometryContainer::value_type>::type;
+    using geometry_type = typename std::remove_pointer<typename GeometryContainer::value_type>::type;
 
     wkt_multi_generator();
     // rules

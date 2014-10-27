@@ -68,13 +68,13 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     using renderer_type = agg::renderer_outline_image<renderer_base, pattern_type>;
     using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
 
-    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
+    std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
     boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
     if (!marker_ptr || !(*marker_ptr)) return;
     boost::optional<image_ptr> pat;
     // TODO - re-implement at renderer level like polygon_pattern symbolizer
-    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
+    value_double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     if ((*marker_ptr)->is_bitmap())
     {
         pat = (*marker_ptr)->get_bitmap_data();
@@ -89,14 +89,14 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
+    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 

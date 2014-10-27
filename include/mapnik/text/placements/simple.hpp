@@ -39,7 +39,7 @@ public:
     text_placement_info_ptr get_placement_info(double scale_factor) const;
     void set_positions(std::string const& positions);
     std::string get_positions();
-    static text_placements_ptr from_xml(xml_node const &xml, fontset_map const & fontsets);
+    static text_placements_ptr from_xml(xml_node const &xml, fontset_map const & fontsets, bool is_shield);
 private:
     std::string positions_;
     std::vector<directions_e> direction_;
@@ -56,11 +56,11 @@ public:
                                double scale_factor)
         : text_placement_info(parent, scale_factor),
           state(0), position_state(0), parent_(parent) {}
-    bool next();
+    bool next() const;
 protected:
-    bool next_position_only();
-    unsigned state;
-    unsigned position_state;
+    bool next_position_only() const;
+    mutable unsigned state;
+    mutable unsigned position_state;
     text_placements_simple const* parent_;
 };
 

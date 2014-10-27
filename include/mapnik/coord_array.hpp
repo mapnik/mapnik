@@ -27,10 +27,11 @@
 #include <mapnik/coord.hpp>
 
 // stl
+#include <algorithm>
 #include <cassert>
-#include <cstring>
 
 namespace mapnik {
+
 template <typename T>
 class coord_array
 {
@@ -43,8 +44,9 @@ public:
 
     coord_array(coord_array const& rhs)
         : pt_(static_cast<coord_type*>(rhs.size_==0?0: ::operator new (sizeof(coord_type)*rhs.size_))),
-          size_(rhs.size_) {
-        std::memcpy(pt_,rhs.pt_,sizeof(coord_type)*rhs.size_);
+          size_(rhs.size_)
+    {
+        std::copy(rhs.pt_, rhs.pt_ + rhs.size_ , pt_);
     }
 
     ~coord_array()

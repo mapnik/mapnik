@@ -247,7 +247,7 @@ double path_length(PathType & path)
 }
 
 template <typename PathType>
-bool hit_test_first(PathType & path, double x, double y, double tol)
+bool hit_test_first(PathType & path, double x, double y)
 {
     bool inside=false;
     double x0 = 0;

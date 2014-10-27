@@ -29,7 +29,11 @@
 #include <mapnik/util/hsl.hpp>
 
 // boost GIL
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/gil/gil_all.hpp>
+#pragma GCC diagnostic pop
 
 // agg
 #include "agg_basics.h"

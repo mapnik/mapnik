@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Style name="My Style">
+      <Rule>
+        <!-- https://github.com/mapnik/mapnik/issues/2502 -->
+        <TextSymbolizer face-name="DejaVu Sans Book" placement-type="dummy">[name]</TextSymbolizer>
+      </Rule>
+  </Style>
+
+</Map>

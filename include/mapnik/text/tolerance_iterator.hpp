@@ -34,7 +34,7 @@ public:
     tolerance_iterator(double label_position_tolerance, double spacing)
         : tolerance_(label_position_tolerance > 0 ?
                         label_position_tolerance : spacing/2.0),
-          tolerance_delta_(std::max(1.0, tolerance_/100.0)),
+          linear_position_(1.0),
           value_(0),
           initialized_(false),
           values_tried_(0)
@@ -73,13 +73,14 @@ public:
         }
         if (value_ == 0)
         {
-            value_ = tolerance_delta_;
+            value_ = linear_position_;
             return true;
         }
         value_ = -value_;
         if (value_ > 0)
         {
-            value_ += tolerance_delta_;
+            value_ = std::pow(1.3, linear_position_) * linear_position_ / (4.0 * tolerance_) + linear_position_;
+            linear_position_ += 1.0;
         }
         if (value_ > tolerance_)
         {
@@ -89,7 +90,7 @@ public:
     }
 private:
     double tolerance_;
-    double tolerance_delta_;
+    double linear_position_;
     double value_;
     bool initialized_;
     unsigned values_tried_;

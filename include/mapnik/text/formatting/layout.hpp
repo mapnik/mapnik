@@ -35,7 +35,7 @@ class MAPNIK_DECL layout_node: public node
 public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
-    virtual void apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
+    virtual void apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
     virtual void add_expressions(expression_set &output) const;
     void set_child(node_ptr child);
     node_ptr get_child() const;

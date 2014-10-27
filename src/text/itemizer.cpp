@@ -37,7 +37,7 @@ text_itemizer::text_itemizer()
     forced_line_breaks_.push_back(0);
 }
 
-void text_itemizer::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format)
+void text_itemizer::add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr const& format)
 {
     unsigned start = text_.length();
     text_ += str;
@@ -177,21 +177,15 @@ void text_itemizer::create_item_list()
         {
             assert(script_itr != script_runs_.end());
             assert(format_itr != format_runs_.end());
-            text_item item;
-            item.start = position;
+            unsigned start = position;
             position = std::min(script_itr->end, std::min(format_itr->end, end));
-            item.end = position;
-            item.format = format_itr->data;
-            item.script = script_itr->data;
-            item.rtl = dir_run.data;
-
             if (dir_run.data == UBIDI_LTR)
             {
-                output_.push_back(item);
+                output_.emplace_back(start,position,script_itr->data,dir_run.data,format_itr->data);
             }
             else
             {
-                rtl_insertion_point = output_.insert(rtl_insertion_point, item);
+                rtl_insertion_point = output_.emplace(rtl_insertion_point,start,position,script_itr->data,dir_run.data,format_itr->data);
             }
             if (script_itr->end == position) ++script_itr;
             if (format_itr->end == position) ++format_itr;

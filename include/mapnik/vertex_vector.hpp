@@ -32,8 +32,8 @@
 #include <mapnik/noncopyable.hpp>
 
 // stl
+#include <algorithm>
 #include <tuple>
-#include <cstring>  // required for memcpy with linux/g++
 #include <cstdint>
 
 namespace mapnik
@@ -131,8 +131,8 @@ private:
             command_size** new_commands = (command_size**)(new_vertices + max_blocks_ + grow_by);
             if (vertices_)
             {
-                std::memcpy(new_vertices,vertices_,max_blocks_ * sizeof(coord_type*));
-                std::memcpy(new_commands,commands_,max_blocks_ * sizeof(command_size*));
+                std::copy(vertices_, vertices_ + max_blocks_, new_vertices);
+                std::copy(commands_, commands_ + max_blocks_, new_commands);
                 ::operator delete(vertices_);
             }
             vertices_ = new_vertices;

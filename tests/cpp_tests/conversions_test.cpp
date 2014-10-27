@@ -290,12 +290,12 @@ int main(int argc, char** argv)
         values_container vc;
         mapnik::value val2(1);
         vc[val2] = 1;
-        BOOST_TEST_EQ( vc[1], 1 );
+        BOOST_TEST_EQ( (int)vc[1], (int)1 );
 
     }
     catch (std::exception const & ex)
     {
-        std::clog << "C++ type conversions problem: " << ex.what() << "\n";
+        std::clog << ex.what() << "\n";
         BOOST_TEST(false);
     }
 

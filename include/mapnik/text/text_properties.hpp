@@ -23,18 +23,16 @@
 #define MAPNIK_TEXT_PROPERTIES_HPP
 
 // mapnik
-#include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/value.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/text/formatting/base.hpp>
-#include <mapnik/pixel_position.hpp>
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/text/font_feature_settings.hpp>
+
 // stl
 #include <map>
 
@@ -51,18 +49,6 @@ namespace detail {
 
 struct evaluated_format_properties
 {
-    evaluated_format_properties() :
-      face_name(),
-      text_size(0.0),
-      character_spacing(0.0),
-      line_spacing(0.0),
-      text_opacity(1.0),
-      halo_opacity(1.0),
-      text_transform(NONE),
-      fill(0,0,0),
-      halo_fill(0,0,0),
-      halo_radius(0.0),
-      font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
     std::string face_name;
     boost::optional<font_set> fontset;
     double text_size;
@@ -74,10 +60,29 @@ struct evaluated_format_properties
     color fill;
     color halo_fill;
     double halo_radius;
-    font_feature_settings_ptr font_feature_settings;
+    font_feature_settings ff_settings;
+};
+
+struct evaluated_text_properties : noncopyable
+{
+    label_placement_e label_placement;
+    double label_spacing;
+    double label_position_tolerance;
+    bool avoid_edges;
+    double margin;
+    double repeat_distance;
+    double minimum_distance;
+    double minimum_padding;
+    double minimum_path_length;
+    double max_char_angle_delta;
+    bool allow_overlap;
+    bool largest_bbox_only;
+    text_upright_e upright;
 };
 
 }
+
+using evaluated_text_properties_ptr = std::unique_ptr<detail::evaluated_text_properties>;
 
 enum directions_e
 {
@@ -97,9 +102,9 @@ using fontset_map = std::map<std::string, font_set>;
 struct MAPNIK_DECL format_properties
 {
     format_properties();
-    void from_xml(xml_node const& sym, fontset_map const& fontsets);
+    void from_xml(xml_node const& sym, fontset_map const& fontsets, bool is_shield);
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                format_properties const& dfl = format_properties()) const;
+                format_properties const& dfl) const;
     // collect expressions
     void add_expressions(expression_set & output) const;
 
@@ -115,8 +120,7 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type halo_fill;
     symbolizer_base::value_type halo_radius;
     symbolizer_base::value_type text_transform;
-    symbolizer_base::value_type font_feature_settings;
-
+    symbolizer_base::value_type ff_settings;
 };
 
 
@@ -129,7 +133,7 @@ struct MAPNIK_DECL text_layout_properties
     void from_xml(xml_node const &sym, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                text_layout_properties const& dfl = text_layout_properties()) const;
+                text_layout_properties const& dfl) const;
 
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
@@ -175,17 +179,10 @@ struct MAPNIK_DECL text_symbolizer_properties
     // Load only placement related values from XML ptree.
     void text_properties_from_xml(xml_node const& node);
     // Load all values from XML ptree.
-    void from_xml(xml_node const& node, fontset_map const& fontsets);
+    void from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield);
     // Save all values to XML ptree (but does not create a new parent node!).
     void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                text_symbolizer_properties const& dfl = text_symbolizer_properties()) const;
-
-    // Takes a feature and produces formatted text as output.
-    // The output object has to be created by the caller and passed in for thread safety.
-    void process(text_layout &output, feature_impl const& feature, attributes const& vars);
-    void evaluate_text_properties(feature_impl const& feature, attributes const& attrs);
-    // Automatically create processing instructions for a single expression.
-    void set_old_style_expression(expression_ptr expr);
+                text_symbolizer_properties const& dfl) const;
     // Sets new format tree.
     void set_format_tree(formatting::node_ptr tree);
     // Get format tree.
@@ -195,23 +192,6 @@ struct MAPNIK_DECL text_symbolizer_properties
     void add_expressions(expression_set & output) const;
 
     // Per symbolizer options
-    label_placement_e label_placement;
-    // distance between repeated labels on a single geometry
-    double label_spacing;
-    // distance the label can be moved on the line to fit, if 0 the default is used
-    double label_position_tolerance;
-    bool avoid_edges;
-    double margin;
-    double repeat_distance;
-    double minimum_distance;
-    double minimum_padding;
-    double minimum_path_length;
-    double max_char_angle_delta;
-    bool allow_overlap;
-    // Only consider geometry with largest bbox (polygons)
-    bool largest_bbox_only;
-    text_upright_e upright;
-
     // Expressions
     text_properties_expressions expressions;
     // Default values for text layouts
@@ -223,6 +203,8 @@ private:
     // A tree of formatting::nodes which contain text and formatting information.
     formatting::node_ptr tree_;
 };
+
+evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_properties const& text_prop, feature_impl const& feature, attributes const& attrs);
 
 } //ns mapnik
 

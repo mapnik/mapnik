@@ -29,6 +29,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/geometry_util.hpp>
+#include <mapnik/geometry_container.hpp>
 
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>

@@ -7,10 +7,15 @@
 #include <vector>
 
 // boost
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
+
 
 #include "python_utils.hpp"
 
@@ -103,8 +108,6 @@ mapnik::layer_descriptor python_datasource::get_descriptor() const
 
 mapnik::datasource::datasource_t python_datasource::type() const
 {
-    using return_type = boost::optional<mapnik::datasource::geometry_t>;
-
     try
     {
         ensure_gil lock;

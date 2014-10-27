@@ -24,22 +24,21 @@
 
 //mapnik
 #include <mapnik/text/symbolizer_helpers.hpp>
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/text/placement_finder.hpp>
-#include <mapnik/proj_transform.hpp>
-#include <mapnik/view_transform.hpp>
+#include <mapnik/text/placements/base.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/pixel_position.hpp>
 
 namespace mapnik {
 
 class label_collision_detector4;
+class feature_impl;
+class proj_transform;
+class view_transform;
 using DetectorType = label_collision_detector4;
 
 using pixel_position_list = std::list<pixel_position>;
 
-/** Helper object that does some of the GroupSymbolizer placement finding work. */
+// Helper object that does some of the GroupSymbolizer placement finding work.
 class group_symbolizer_helper : public base_symbolizer_helper
 {
 public:
@@ -74,9 +73,9 @@ public:
         box_elements_.clear();
     }
 
-    inline text_symbolizer_properties const& get_properties()
+    inline text_symbolizer_properties const& get_properties() const
     {
-        return placement_->properties;
+        return info_ptr_->properties;
     }
 
     pixel_position_list const& get();

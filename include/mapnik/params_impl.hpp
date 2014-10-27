@@ -30,8 +30,12 @@
 #include <mapnik/util/conversions.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>
@@ -90,7 +94,7 @@ struct extract_value<mapnik::value_double>
 template <>
 struct extract_value<mapnik::value_null>
 {
-    static inline boost::optional<mapnik::value_null> do_extract_from_string(std::string const& source)
+    static inline boost::optional<mapnik::value_null> do_extract_from_string(std::string const&)
     {
         return boost::optional<mapnik::value_null>(); // FIXME
     }

@@ -30,7 +30,8 @@ namespace mapnik
 {
 
 font_set::font_set(std::string const& name)
-    : name_(name) {}
+    : name_(name),
+      face_names_() {}
 
 // copy
 font_set::font_set(font_set const& rhs)
@@ -68,9 +69,9 @@ std::size_t font_set::size() const
     return face_names_.size();
 }
 
-void font_set::add_face_name(std::string face_name)
+void font_set::add_face_name(std::string const& face_name)
 {
-    face_names_.push_back(std::move(face_name));
+    face_names_.emplace_back(face_name);
 }
 
 void font_set::set_name(std::string const& name)

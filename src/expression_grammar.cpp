@@ -23,8 +23,6 @@
 // NOTE: we define this here in a cpp because def is needed twice:
 // once by src/expression.cpp and once by mapnik/transform_expression_grammar_impl.hpp
 #include <mapnik/expression_grammar_impl.hpp>
-#include <mapnik/transform_expression_grammar_impl.hpp>
 #include <string>
 
 template struct mapnik::expression_grammar<std::string::const_iterator>;
-template struct mapnik::transform_expression_grammar<std::string::const_iterator>;

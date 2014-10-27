@@ -2,12 +2,12 @@ language: cpp
 
 compiler:
  - clang
- #- gcc
+ - gcc
 
 env:
   matrix:
-   #- DEBUG=True  ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
-   - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none  XMLPARSER="ptree"   DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
+   - DEBUG=False ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
+   - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none  XMLPARSER="ptree"   DEMO=False BENCHMARK=True CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
 
 # travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
 # the below is thanks to https://github.com/CartoDB/Windshaft/blob/d82fe08b32fc7907bbe907ab290f8a082215ae26/.travis.yml#L1
@@ -42,10 +42,12 @@ before_script:
  - if [[ "${CXX}" == 'clang++' ]]; then export JOBS=4; export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
 
 script:
+ - rm -rf ./git
  - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
  - make
- - git clone https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
+ - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - source localize.sh && make grind
  - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
+ - if [[ ${BENCHMARK} != False ]]; then for i in $(ls tests/visual_tests/styles/*xml); do echo $i;./benchmark/out/test_rendering --name "text rendering" --map $i --width 1024 --height 1024 --iterations 2 --threads 5;done;fi

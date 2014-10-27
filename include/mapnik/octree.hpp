@@ -29,10 +29,9 @@
 #include <mapnik/noncopyable.hpp>
 
 // stl
-#include <vector>
-#include <cstring>
-#include <deque>
 #include <algorithm>
+#include <vector>
+#include <deque>
 
 namespace mapnik {
 
@@ -63,7 +62,7 @@ class octree : private mapnik::noncopyable
                children_count(0),
                index(0)
         {
-            std::memset(&children_[0],0,sizeof(children_));
+            std::fill(children_,children_ + 8, nullptr);
         }
 
         ~node()
@@ -208,9 +207,9 @@ public:
             return;
         }
 
-        double mean_r = static_cast<double>(r->reds / r->count_cum);
-        double mean_g = static_cast<double>(r->greens / r->count_cum);
-        double mean_b = static_cast<double>(r->blues / r->count_cum);
+        double mean_r = static_cast<double>(r->reds) / r->count_cum;
+        double mean_g = static_cast<double>(r->greens) / r->count_cum;
+        double mean_b = static_cast<double>(r->blues) / r->count_cum;
         for (unsigned idx=0; idx < 8; ++idx)
         {
             if (r->children_[idx] != 0)

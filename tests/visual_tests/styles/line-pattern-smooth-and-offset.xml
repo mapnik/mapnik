@@ -3,7 +3,7 @@
 
     <Style name="style">
         <Rule>
-            <LineSymbolizer stroke="yellow" stroke-width="6" offset="30" smooth="1" simplify="50000" simplify-algorithm="visvalingam-whyatt"/>
+            <LineSymbolizer stroke="yellow" stroke-width="6" offset="30" smooth="1" simplify="50000" simplify-algorithm="radial-distance"/>
             <LineSymbolizer stroke="orange" stroke-width="6" offset="20" smooth="1"/>
             <LineSymbolizer stroke="red" stroke-width="6" offset="10" smooth="1"/>
             <LineSymbolizer stroke="green" stroke-width="6" offset="0" smooth="1"/>
@@ -11,7 +11,7 @@
             <LineSymbolizer stroke="purple" stroke-width="6" offset="-20" smooth="1"/>
             <LinePatternSymbolizer file="../../data/svg/octocat.svg" opacity=".1" comp-op="multiply" transform="scale(.05)" offset="30" smooth="1"/>
             <LinePatternSymbolizer file="../../data/svg/octocat.svg" opacity=".1" comp-op="multiply" transform="scale(.05) rotate(90)" offset="-20" smooth="1"/>
-            <TextSymbolizer placement="line" size="14" simplify="50000" simplify-algorithm="visvalingam-whyatt" halo-radius="1" character-spacing="3" spacing="25" face-name="DejaVu Sans Book" dy="10" smooth="1">'offset • +10'</TextSymbolizer>
+            <TextSymbolizer placement="line" size="14" simplify="50000" simplify-algorithm="radial-distance" halo-radius="1" character-spacing="3" spacing="25" face-name="DejaVu Sans Book" dy="10" smooth="1">'offset • +10'</TextSymbolizer>
             <TextSymbolizer placement="line" size="14" halo-radius="1" character-spacing="3" spacing="25" face-name="DejaVu Sans Book" dy="-18" smooth="1">'offset • -18'</TextSymbolizer>
         </Rule>
     </Style>

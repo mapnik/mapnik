@@ -27,6 +27,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_container.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
+#include <mapnik/wkt/wkt_generator_grammar.hpp>
+#include <boost/spirit/include/karma.hpp>
 
 // stl
 #include <string>
@@ -42,6 +44,15 @@ inline bool from_wkt(std::string const& wkt, mapnik::geometry_container & paths)
     std::string::const_iterator last =  wkt.end();
     return qi::phrase_parse(first, last, g, space, paths);
 }
+
+inline bool to_wkt(mapnik::geometry_container const& paths, std::string& wkt)
+{
+    using sink_type = std::back_insert_iterator<std::string>;
+    static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    sink_type sink(wkt);
+    return boost::spirit::karma::generate(sink, generator, paths);
+}
+
 
 }
 

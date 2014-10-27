@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
     try
     {
-        datasource_cache::instance().register_datasources("plugins/input/");
+        datasource_cache::instance().register_datasources("plugins/input/csv.input");
 
         Map m(256, 256);
 
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception const & ex)
     {
-        std::clog << "C++ image painted problem: " << ex.what() << std::endl;
+        std::clog << ex.what() << std::endl;
         BOOST_TEST(false);
     }
 

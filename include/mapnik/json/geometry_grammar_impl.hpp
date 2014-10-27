@@ -84,8 +84,8 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     // give some rules names
     geometry.name("Geometry");
     geometry_collection.name("GeometryCollection");
-    geometry_type_dispatch.name("Geometry type");
-    coordinates.name("Coordinates");
+    geometry_type_dispatch.name("type");
+    coordinates.name("coordinates");
     // error handler
     on_error<fail>(start, error_handler(_1, _2, _3, _4));
 }

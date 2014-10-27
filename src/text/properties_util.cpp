@@ -66,13 +66,13 @@ struct property_serializer : public util::static_visitor<>
 
     void operator() (enumeration_wrapper const& val) const
     {
-        std::string str = std::get<2>(get_meta(get_key(name_)))(val);
+        std::string str = std::get<1>(get_meta(get_key(name_)))(val);
         node_.put("<xmlattr>." + name_, str);
     }
 
-    void operator() (font_feature_settings_ptr const& val) const
+    void operator() (font_feature_settings const& val) const
     {
-        std::string str = val->to_string();
+        std::string str = val.to_string();
         node_.put("<xmlattr>." + name_, str);
     }
 

@@ -92,7 +92,7 @@ struct vector_markers_rasterizer_dispatch : public vector_markers_dispatch<Detec
         ras_(std::get<1>(renderer_context)),
         snap_to_pixels_(snap_to_pixels)
     {
-        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, vars, src_over)));
+        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, vars)));
     }
 
     ~vector_markers_rasterizer_dispatch() {}
@@ -141,7 +141,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
         ras_(std::get<1>(renderer_context)),
         snap_to_pixels_(snap_to_pixels)
     {
-        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, vars, src_over)));
+        pixf_.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, vars)));
     }
 
     ~raster_markers_rasterizer_dispatch() {}
@@ -182,8 +182,8 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
+    double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);
+    gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym, feature, common_.vars_);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);

@@ -55,7 +55,7 @@ namespace mapnik {
 template <typename Symbolizer, typename Rasterizer, typename Feature>
 void set_join_caps_aa(Symbolizer const& sym, Rasterizer & ras, Feature & feature, attributes const& vars)
 {
-    line_join_enum join = get<line_join_enum>(sym, keys::stroke_linejoin, feature, vars, MITER_JOIN);
+    line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
     case MITER_JOIN:
@@ -71,7 +71,7 @@ void set_join_caps_aa(Symbolizer const& sym, Rasterizer & ras, Feature & feature
         ras.line_join(agg::outline_no_join);
     }
 
-    line_cap_enum cap = get<line_cap_enum>(sym, keys::stroke_linecap, feature, vars, BUTT_CAP);
+    line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
 
     switch (cap)
     {
@@ -92,14 +92,14 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                               proj_transform const& prj_trans)
 
 {
-    color const& col = get<color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0,0,0));
+    color const& col = get<color, keys::stroke>(sym, feature, common_.vars_);
     unsigned r=col.red();
     unsigned g=col.green();
     unsigned b=col.blue();
     unsigned a=col.alpha();
 
-    double gamma = get<value_double>(sym, keys::stroke_gamma, feature, common_.vars_, 1.0);
-    gamma_method_enum gamma_method = get<gamma_method_enum>(sym, keys::stroke_gamma_method, feature, common_.vars_, GAMMA_POWER);
+    double gamma = get<value_double, keys::stroke_gamma>(sym, feature, common_.vars_);
+    gamma_method_enum gamma_method = get<gamma_method_enum, keys::stroke_gamma_method>(sym, feature, common_.vars_);
     ras_ptr->reset();
 
     if (gamma != gamma_ || gamma_method != gamma_method_)
@@ -118,7 +118,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
+    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
     renderer_base renb(pixf);
 
     agg::trans_affine tr;
@@ -127,13 +127,13 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent(common_);
 
-    bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
-    double opacity = get<value_double>(sym,keys::stroke_opacity,feature, common_.vars_, 1.0);
-    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
-    line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum>(sym, keys::line_rasterizer, feature, common_.vars_, RASTERIZER_FULL);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
+    value_double opacity = get<value_double,keys::stroke_opacity>(sym,feature, common_.vars_);
+    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
+    line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {
         double padding = static_cast<double>(common_.query_extent_.width()/pixmap_.width());
@@ -201,7 +201,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         converter.set<affine_transform_tag>(); // optional affine transform
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-        if (has_key<dash_array>(sym, keys::stroke_dasharray))
+        if (has_key(sym, keys::stroke_dasharray))
             converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
 

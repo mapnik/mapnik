@@ -30,13 +30,15 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
 
-// spirit2
+// boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_locals.hpp>
-// phoenix
 #include <boost/spirit/include/phoenix_function.hpp>
-// fusion
 #include <boost/fusion/adapted/struct.hpp>
+#pragma GCC diagnostic pop
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
                           (mapnik::unary_function_impl, fun)
@@ -120,6 +122,30 @@ struct geometry_types : qi::symbols<char,mapnik::value_integer>
     }
 };
 
+struct boolean_constants :  qi::symbols<char,mapnik::value_bool>
+{
+    boolean_constants()
+    {
+        add
+            ("true", true)
+            ("false", false)
+            ;
+    }
+};
+
+struct floating_point_constants :  qi::symbols<char,mapnik::value_double>
+{
+    floating_point_constants()
+    {
+        add
+            ("pi", 3.1415926535897932384626433832795)
+            ("deg_to_rad",0.017453292519943295769236907684886)
+            ("rad_to_deg",57.295779513082320876798154814105)
+            ;
+    }
+};
+
+
 template <typename T>
 struct integer_parser
 {
@@ -177,8 +203,11 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
     geometry_types geom_type;
+    boolean_constants bool_const;
+    floating_point_constants float_const;
     unary_function_types unary_func_type;
     binary_function_types binary_func_type;
+
 };
 
 } // namespace

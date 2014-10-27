@@ -42,12 +42,12 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
-    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
-    double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
+    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
+    std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
+    value_double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
     if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
@@ -61,7 +61,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     unsigned offset_x=0;
     unsigned offset_y=0;
     box2d<double> const& clip_box = clipping_extent(common_);
-    pattern_alignment_enum alignment = get<pattern_alignment_enum>(sym, keys::alignment, feature, common_.vars_, GLOBAL_ALIGNMENT);
+    pattern_alignment_enum alignment = get<pattern_alignment_enum, keys::alignment>(sym, feature, common_.vars_);
     if (alignment == LOCAL_ALIGNMENT)
     {
         double x0 = 0.0;

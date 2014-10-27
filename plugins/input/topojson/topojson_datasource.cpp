@@ -34,9 +34,9 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/topojson_grammar.hpp>
-#include <mapnik/json/topojson_grammar_impl.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/util/file_io.hpp>
 #include <mapnik/make_unique.hpp>
 
 using mapnik::datasource;
@@ -120,7 +120,7 @@ struct collect_attributes_visitor : public mapnik::util::static_visitor<void>
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
       desc_(desc) {}
 
-    void operator() (mapnik::topojson::invalid const& g) {}
+    void operator() (mapnik::topojson::invalid const&) {}
 
     template <typename GeomType>
     void operator() (GeomType const& g)
@@ -170,21 +170,14 @@ topojson_datasource::topojson_datasource(parameters const& params)
     }
     else
     {
-#ifdef _WINDOWS
-        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(filename_).c_str(), L"rb"), fclose);
-#else
-        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(filename_.c_str(),"rb"), std::fclose);
-#endif
-        if (file == nullptr)
+        mapnik::util::file file(filename_);
+        if (!file.open())
         {
             throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
         }
-        std::fseek(file.get(), 0, SEEK_END);
-        std::size_t file_size = std::ftell(file.get());
-        std::fseek(file.get(), 0, SEEK_SET);
         std::string file_buffer;
-        file_buffer.resize(file_size);
-        std::fread(&file_buffer[0], file_size, 1, file.get());
+        file_buffer.resize(file.size());
+        std::fread(&file_buffer[0], file.size(), 1, file.get());
         parse_topojson(file_buffer);
     }
 }

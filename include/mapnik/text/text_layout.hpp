@@ -37,6 +37,7 @@
 
 //stl
 #include <vector>
+#include <deque>
 #include <memory>
 #include <map>
 #include <utility>
@@ -49,6 +50,12 @@ class text_layout;
 
 using text_layout_ptr = std::shared_ptr<text_layout>;
 using text_layout_vector = std::vector<text_layout_ptr>;
+// this is a std::deque to ensure pointers stay valid as a deque
+// "never invalidates pointers or references to the rest of the elements"
+// http://en.cppreference.com/w/cpp/container/deque
+// If this were a vector this test would crash:
+// python tests/visual_tests/test.py text-expressionformat-color
+using child_format_ptrs = std::deque<evaluated_format_properties_ptr>;
 
 class text_layout
 {
@@ -57,10 +64,16 @@ public:
     using const_iterator = line_vector::const_iterator;
     using child_iterator = text_layout_vector::const_iterator;
 
-    text_layout(face_manager_freetype & font_manager, double scale_factor, text_layout_properties const& properties);
+    text_layout(face_manager_freetype & font_manager,
+                feature_impl const& feature,
+                attributes const& attrs,
+                double scale_factor,
+                text_symbolizer_properties const& properties,
+                text_layout_properties const& layout_defaults,
+                formatting::node_ptr tree);
 
     // Adds a new text part. Call this function repeatedly to build the complete text.
-    void add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr format);
+    void add_text(mapnik::value_unicode_string const& str, evaluated_format_properties_ptr const& format);
 
     // Returns the complete text stored in this layout.
     mapnik::value_unicode_string const& text() const;
@@ -99,7 +112,8 @@ public:
     inline text_layout_vector const& get_child_layouts() const { return child_layout_list_; }
     inline face_manager_freetype & get_font_manager() const { return font_manager_; }
     inline double get_scale_factor() const { return scale_factor_; }
-    inline text_layout_properties const& get_layout_properties() const { return properties_; }
+    inline text_symbolizer_properties const& get_default_text_properties() const { return properties_; }
+    inline text_layout_properties const& get_layout_properties() const { return layout_properties_; }
 
     inline rotation const& orientation() const { return orientation_; }
     inline pixel_position const& displacement() const { return displacement_; }
@@ -107,28 +121,23 @@ public:
     inline horizontal_alignment_e horizontal_alignment() const { return halign_; }
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
+    evaluated_format_properties_ptr & new_child_format_ptr(evaluated_format_properties_ptr const& p);
 
-    void evaluate_properties(feature_impl const& feature, attributes const& attr);
-
-    text_line const& longest_line() const;
-
-    void set_character_spacing(double spacing, double scale_factor);
+    const_iterator longest_line() const;
 
 private:
-    void break_line(text_line & line, double wrap_width, unsigned text_ratio, bool wrap_before);
-    void break_line(text_line & line, char wrap_char,
-                    double wrap_width, unsigned text_ratio,
-                    bool wrap_before, bool repeat_wrap_char);
+    void break_line(std::pair<unsigned, unsigned> && line_limits);
+    void break_line_icu(std::pair<unsigned, unsigned> && line_limits);
     void shape_text(text_line & line);
-    void add_line(text_line & line);
+    void add_line(text_line && line);
     void clear_cluster_widths(unsigned first, unsigned last);
     void init_auto_alignment();
 
-    //input
+    // input
     face_manager_freetype & font_manager_;
     double scale_factor_;
 
-    //processing
+    // processing
     text_itemizer itemizer_;
     // Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
     // note: this probably isn't the best solution. it would be better to have an object for each cluster, but
@@ -138,13 +147,19 @@ private:
     double height_;
     unsigned glyphs_count_;
 
-    //output
+    // output
     line_vector lines_;
 
-    //text layout properties
-    text_layout_properties properties_;
+    // layout properties (owned by text_layout)
+    text_layout_properties layout_properties_;
 
-    //alignments
+    // text symbolizer properties (owned by placement_finder's 'text_placement_info' (info_) which is owned by symbolizer_helper
+    text_symbolizer_properties const& properties_;
+
+    // format properties (owned by text_layout)
+    evaluated_format_properties_ptr format_;
+
+    // alignments
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
@@ -160,8 +175,13 @@ private:
     pixel_position displacement_ = {0,0};
     box2d<double> bounds_;
 
-    //children
+    // children
     text_layout_vector child_layout_list_;
+
+    // take ownership of evaluated_format_properties_ptr of any format children
+    // in order to keep them in scope
+    // NOTE: this must not be a std::vector - see note above about child_format_ptrs
+    child_format_ptrs format_ptrs_;
 };
 
 class layout_container
@@ -176,6 +196,7 @@ public:
     void layout();
 
     inline size_t size() const { return layouts_.size(); }
+    inline bool empty() const { return layouts_.empty(); }
 
     inline text_layout_vector::const_iterator begin() const { return layouts_.begin(); }
     inline text_layout_vector::const_iterator end() const { return layouts_.end(); }
@@ -189,8 +210,6 @@ public:
 
     inline double width() const { return bounds_.width(); }
     inline double height() const { return bounds_.height(); }
-
-    void adjust(double width, double scale_factor);
 
 private:
     text_layout_vector layouts_;

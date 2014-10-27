@@ -291,18 +291,26 @@ bool Map::register_fonts(std::string const& dir, bool recurse)
 bool Map::load_fonts()
 {
     bool result = false;
-    for (auto const& kv : font_file_mapping_)
+    auto const& global_mapping = freetype_engine::get_mapping();
+    for (auto const& kv : font_file_mapping_) // for every face-name -> idx/filepath
     {
-        auto const& global_mapping = freetype_engine::get_mapping();
-        if ((global_mapping.find(kv.first) == global_mapping.end()) &&
-            (font_memory_cache_.find(kv.second.second) == font_memory_cache_.end()))
+       auto const& file_path = kv.second.second;
+        // do not attemp to re-cache in memory
+        if (font_memory_cache_.find(file_path) != font_memory_cache_.end())
         {
-            mapnik::util::file file(kv.second.second);
-            if (file.open())
-            {
-                auto item = font_memory_cache_.emplace(kv.second.second, std::make_pair(std::move(file.data()),file.size()));
-                if (item.second) result = true;
-            }
+            continue;
+        }
+        auto const& meta = global_mapping.find(kv.first);
+        // no need to cache if global mapping already has same font
+        if ((meta != global_mapping.end()) && (meta->second.second == file_path))
+        {
+            continue;
+        }
+        mapnik::util::file file(file_path);
+        if (file.open())
+        {
+            auto item = font_memory_cache_.emplace(file_path, std::make_pair(std::move(file.data()),file.size()));
+            if (item.second) result = true;
         }
     }
     return result;

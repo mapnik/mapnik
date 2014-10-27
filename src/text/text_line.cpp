@@ -38,7 +38,18 @@ text_line::text_line(unsigned first_char, unsigned last_char)
       space_count_(0)
 {}
 
-void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
+text_line::text_line(text_line && rhs)
+    : glyphs_(std::move(rhs.glyphs_)),
+      line_height_(std::move(rhs.line_height_)),
+      max_char_height_(std::move(rhs.max_char_height_)),
+      width_(std::move(rhs.width_)),
+      glyphs_width_(std::move(rhs.glyphs_width_)),
+      first_char_(std::move(rhs.first_char_)),
+      last_char_(std::move(rhs.last_char_)),
+      first_line_(std::move(rhs.first_line_)),
+      space_count_(std::move(rhs.space_count_)) {}
+
+void text_line::add_glyph(glyph_info && glyph, double scale_factor_)
 {
     line_height_ = std::max(line_height_, glyph.line_height() + glyph.format->line_spacing);
     double advance = glyph.advance();
@@ -55,9 +66,8 @@ void text_line::add_glyph(glyph_info const& glyph, double scale_factor_)
         glyphs_width_ += advance;
         space_count_++;
     }
-    glyphs_.push_back(glyph);
+    glyphs_.emplace_back(std::move(glyph));
 }
-
 
 void text_line::reserve(glyph_vector::size_type length)
 {
@@ -103,25 +113,6 @@ unsigned text_line::last_char() const
 unsigned text_line::size() const
 {
     return glyphs_.size();
-}
-
-void text_line::set_character_spacing(double character_spacing, double scale_factor)
-{
-    bool first = true;
-    for (auto const& glyph : glyphs_)
-    {
-        glyph.format->character_spacing = character_spacing;
-        double advance = glyph.advance();
-        if (first)
-        {
-            width_ = advance;
-            first = false;
-        }
-        else if (advance)
-        {
-            width_ += advance + character_spacing * scale_factor;
-        }
-    }
 }
 
 } // end namespace mapnik

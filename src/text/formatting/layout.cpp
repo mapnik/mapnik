@@ -83,9 +83,9 @@ node_ptr layout_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     return n;
 }
 
-void layout_node::apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout & output) const
+void layout_node::apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout & parent) const
 {
-    text_layout_properties new_properties(output.get_layout_properties());
+    text_layout_properties new_properties(parent.get_layout_properties());
     if (dx) new_properties.dx = *dx;
     if (dy) new_properties.dy = *dy;
     if (text_ratio) new_properties.text_ratio = *text_ratio;
@@ -100,9 +100,14 @@ void layout_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     if (jalign) new_properties.jalign = *jalign;
 
     // starting a new offset child with the new displacement value
-    text_layout_ptr child_layout = std::make_shared<text_layout>(output.get_font_manager(), output.get_scale_factor(), new_properties);
-    child_layout->evaluate_properties(feature,vars);
-
+    // we pass a null format tree since this is not the parent but a child
+    text_layout_ptr child_layout = std::make_shared<text_layout>(parent.get_font_manager(),
+                                                                 feature,
+                                                                 vars,
+                                                                 parent.get_scale_factor(),
+                                                                 parent.get_default_text_properties(),
+                                                                 new_properties,
+                                                                 formatting::node_ptr());
     // process contained format tree into the child node
     if (child_)
     {
@@ -112,7 +117,7 @@ void layout_node::apply(evaluated_format_properties_ptr p, feature_impl const& f
     {
         MAPNIK_LOG_WARN(format) << "Useless layout node: Contains no text";
     }
-    output.add_child(child_layout);
+    parent.add_child(child_layout);
 }
 
 void layout_node::set_child(node_ptr child)

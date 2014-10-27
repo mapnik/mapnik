@@ -20,6 +20,7 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/placements/dummy.hpp>
+#include <mapnik/text/formatting/text.hpp>
 #include <vector>
 #include <algorithm>
 #include <mapnik/make_unique.hpp>
@@ -74,7 +75,7 @@ int main(int argc, char** argv)
         placement_finder->defaults.format_defaults.text_size = 10.0;
         placement_finder->defaults.format_defaults.fill = mapnik::color(0,0,0);
         placement_finder->defaults.format_defaults.fontset = fontset;
-        placement_finder->defaults.set_old_style_expression(mapnik::parse_expression("[name]"));
+        placement_finder->defaults.set_format_tree(std::make_shared<mapnik::formatting::text_node>(mapnik::parse_expression("[name]")));
         mapnik::put<mapnik::text_placements_ptr>(text_sym, mapnik::keys::text_placements_, placement_finder);
         r.append(std::move(text_sym));
         the_style.add_rule(std::move(r));

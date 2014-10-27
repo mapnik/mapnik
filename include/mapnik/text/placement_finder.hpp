@@ -27,7 +27,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/placements/base.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/text/rotation.hpp>
 #include <mapnik/noncopyable.hpp>
 
@@ -49,7 +49,7 @@ public:
                      attributes const& attr,
                      DetectorType & detector,
                      box2d<double> const& extent,
-                     text_placement_info & placement_info,
+                     text_placement_info const& placement_info,
                      face_manager_freetype & font_manager,
                      double scale_factor);
 
@@ -84,7 +84,8 @@ private:
     attributes const& attr_;
     DetectorType & detector_;
     box2d<double> const& extent_;
-    text_placement_info & info_;
+    text_placement_info const& info_;
+    evaluated_text_properties_ptr text_props_;
     layout_container layouts_;
 
     double scale_factor_;

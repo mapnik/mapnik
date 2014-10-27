@@ -27,19 +27,19 @@
 #include <mapnik/global.hpp>
 
 // stl
+#include <algorithm>
 #include <cassert>
-#include <cstring>
 #include <stdexcept>
 
 namespace mapnik
 {
 template <typename T>
-class ImageData
+class image_data
 {
 public:
     using pixel_type = T;
 
-    ImageData(int width, int height)
+    image_data(int width, int height)
         : width_(static_cast<unsigned>(width)),
           height_(static_cast<unsigned>(height)),
           owns_data_(true)
@@ -52,11 +52,11 @@ public:
         {
             throw std::runtime_error("negative height not allowed for image_data");
         }
-        pData_ = (width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0;
-        if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
+        pData_ = (width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width * height)):0;
+        if (pData_) std::fill(pData_, pData_ + width_ * height_, 0);
     }
 
-    ImageData(int width, int height, T * data)
+    image_data(int width, int height, T * data)
         : width_(static_cast<unsigned>(width)),
           height_(static_cast<unsigned>(height)),
           owns_data_(false),
@@ -72,17 +72,17 @@ public:
         }
     }
 
-    ImageData(ImageData<T> const& rhs)
+    image_data(image_data<T> const& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
          owns_data_(true),
          pData_((rhs.width_!=0 && rhs.height_!=0)?
-                static_cast<T*>(::operator new(sizeof(T)*rhs.width_*rhs.height_)) :0)
+                static_cast<T*>(::operator new(sizeof(T) * rhs.width_ * rhs.height_)) : 0)
     {
-        if (pData_) std::memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
+        if (pData_) std::copy(rhs.pData_, rhs.pData_ + rhs.width_* rhs.height_, pData_);
     }
 
-    ImageData(ImageData<T> && rhs) noexcept
+    image_data(image_data<T> && rhs) noexcept
         : width_(rhs.width_),
           height_(rhs.height_),
           pData_(rhs.pData_)
@@ -92,13 +92,13 @@ public:
         rhs.pData_ = nullptr;
     }
 
-    ImageData<T>& operator=(ImageData<T> rhs)
+    image_data<T>& operator=(image_data<T> rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(ImageData<T> & rhs)
+    void swap(image_data<T> & rhs)
     {
         std::swap(width_, rhs.width_);
         std::swap(height_, rhs.height_);
@@ -123,16 +123,9 @@ public:
     {
         return height_;
     }
-    inline void set(const T& t)
+    inline void set(T const& t)
     {
-        for (unsigned y = 0; y < height_; ++y)
-        {
-            T * row = getRow(y);
-            for (unsigned x = 0; x < width_; ++x)
-            {
-                row[x] = t;
-            }
-        }
+        std::fill(pData_, pData_ + width_ * height_, t);
     }
 
     inline const T* getData() const
@@ -147,12 +140,12 @@ public:
 
     inline const unsigned char* getBytes() const
     {
-        return (unsigned char*)pData_;
+        return reinterpret_cast<unsigned char*>(pData_);
     }
 
     inline unsigned char* getBytes()
     {
-        return (unsigned char*)pData_;
+        return reinterpret_cast<unsigned char*>(pData_);
     }
 
     inline const T* getRow(unsigned row) const
@@ -165,18 +158,18 @@ public:
         return pData_+row*width_;
     }
 
-    inline void setRow(unsigned row,const T* buf,unsigned size)
+    inline void setRow(unsigned row, T const* buf, unsigned size)
     {
         assert(row<height_);
         assert(size<=width_);
-        std::memcpy(pData_+row*width_,buf,size*sizeof(T));
+        std::copy(buf, buf + size, pData_ + row * width_);
     }
-    inline void setRow(unsigned row,unsigned x0,unsigned x1,const T* buf)
+    inline void setRow(unsigned row, unsigned x0, unsigned x1, T const* buf)
     {
-        std::memcpy(pData_+row*width_+x0,buf,(x1-x0)*sizeof(T));
+        std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
     }
 
-    inline ~ImageData()
+    inline ~image_data()
     {
         if (owns_data_)
         {
@@ -191,8 +184,8 @@ private:
     T *pData_;
 };
 
-using image_data_32 = ImageData<unsigned>;
-using image_data_8 = ImageData<byte> ;
+using image_data_32 = image_data<unsigned>;
+using image_data_8 = image_data<byte> ;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP

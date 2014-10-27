@@ -80,18 +80,17 @@ struct vector_markers_dispatch : mapnik::noncopyable
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        double opacity = get<double>(sym_,keys::opacity, feature_, vars_, 1.0);
-        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        box2d<double> const& bbox = src_->bounding_box();
-        coord2d center = bbox.center();
+        marker_placement_enum placement_method = get<marker_placement_enum, keys::markers_placement_type>(sym_, feature_, vars_);
+        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
+        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
+        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
+        value_double opacity = get<value_double,keys::opacity>(sym_, feature_, vars_);
+        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
+        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
+        coord2d center = src_->bounding_box().center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine tr = recenter * marker_trans_;
-        markers_placement_params params { bbox, tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
+        markers_placement_params params { src_->bounding_box(), tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, Detector> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;
@@ -140,14 +139,14 @@ struct raster_markers_dispatch : mapnik::noncopyable
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum>(sym_, keys::markers_placement_type, feature_, vars_, MARKER_POINT_PLACEMENT);
-        bool allow_overlap = get<bool>(sym_, keys::allow_overlap, feature_, vars_, false);
-        bool avoid_edges = get<bool>(sym_, keys::avoid_edges, feature_, vars_, false);
-        double opacity = get<double>(sym_, keys::opacity, feature_, vars_, 1.0);
-        bool ignore_placement = get<bool>(sym_, keys::ignore_placement, feature_, vars_, false);
-        double spacing = get<double>(sym_, keys::spacing, feature_, vars_, 100.0);
-        double max_error = get<double>(sym_, keys::max_error, feature_, vars_, 0.2);
-        box2d<double> bbox(0,0, src_.width(), src_.height());
+        marker_placement_enum placement_method = get<marker_placement_enum, keys::markers_placement_type>(sym_, feature_, vars_);
+        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
+        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
+        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, vars_);
+        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
+        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
+        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
+        box2d<double> bbox(0,0, src_.width(),src_.height());
         markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
             placement_method, path, detector_, params);
@@ -199,8 +198,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
     }
     else if (geom_count > 1)
     {
-        marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum>(sym, keys::markers_multipolicy, feature, vars, MARKER_EACH_MULTI);
-        marker_placement_enum placement = get<marker_placement_enum>(sym, keys::markers_placement_type, feature, vars, MARKER_POINT_PLACEMENT);
+        marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
+        marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
 
         if (placement == MARKER_POINT_PLACEMENT &&
             multi_policy == MARKER_WHOLE_MULTI)

@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//#define BOOST_FILESYSTEM_VERSION 2
-
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/util/fs.hpp>
@@ -31,40 +29,6 @@
 
 // stl
 #include <stdexcept>
-
-#if (BOOST_FILESYSTEM_VERSION <= 2)
-
-
-namespace boost {
-namespace filesystem {
-path read_symlink(const path& p)
-{
-    path symlink_path;
-
-#ifdef BOOST_POSIX_API
-    for (std::size_t path_max = 64;; path_max *= 2)// loop 'til buffer is large enough
-    {
-        const std::unique_ptr<char[]> buf(new char[path_max]);
-        ssize_t result;
-        if ((result=::readlink(p.string().c_str(), buf.get(), path_max))== -1)
-        {
-            throw std::runtime_error("could not read symlink");
-        }
-        else
-        {
-            if(result != static_cast<ssize_t>(path_max))
-            {
-                symlink_path.assign(buf.get(), buf.get() + result);
-                break;
-            }
-        }
-    }
-#endif
-    return symlink_path;
-}
-}
-}
-#endif
 
 namespace mapnik {
 
@@ -130,31 +94,19 @@ namespace util {
         {
             absolute_path = boost::filesystem::read_symlink(absolute_path);
         }
-#if (BOOST_FILESYSTEM_VERSION == 3)
         return boost::filesystem::absolute(absolute_path.parent_path() / filepath).string();
-#else
-        return boost::filesystem::complete(absolute_path.branch_path() / filepath).normalize().string();
-#endif
     }
 
     std::string make_absolute(std::string const& filepath, std::string const& base)
     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
         // TODO - normalize is now deprecated, use make_preferred?
         return boost::filesystem::absolute(boost::filesystem::path(base)/filepath).string();
-#else // v2
-        return boost::filesystem::complete(boost::filesystem::path(base)/filepath).normalize().string();
-#endif
     }
 
     std::string dirname(std::string const& filepath)
     {
         boost::filesystem::path bp(filepath);
-#if (BOOST_FILESYSTEM_VERSION == 3)
         return bp.parent_path().string();
-#else // v2
-        return bp.branch_path().string();
-#endif
     }
 
 } // end namespace util

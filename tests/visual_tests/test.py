@@ -27,7 +27,7 @@ defaults = {
 
 cairo_threshold = 10
 agg_threshold = 0
-grid_threshold = 0
+grid_threshold = 5
 if 'Linux' == platform.uname()[0]:
     # we assume if linux then you are running packaged cairo
     # which is older than the 1.12.14 version we used on OS X
@@ -110,11 +110,14 @@ files = {
     'lines-multi-layout-shield': {'sizes': [(800,800)],'bbox':default_text_box},
     'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
     'collision': {'sizes':[(600,400)]},
+    'simple-shield': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'geometry-transform-translate': {'sizes':[(200,200)]},
     'geometry-transform-translate-patterns': {'sizes':[(200,200)]},
     'geometry-transform-translate-patterns-svg': {'sizes':[(200,200)]},
+    'geometry-transform-scale': {'sizes': [(500, 500)]},
+    'geometry-transform-scale-patterns': {'sizes': [(500, 500)]},
     'marker-interior-position': {'sizes':[(600,400)]},
     'marker-svg-opacity':{},
     'marker-svg-opacity2':{},
@@ -290,6 +293,7 @@ files = {
     'marker-recenter-collide':{'sizes':[(256,128)], 'bbox':mapnik.Box2d(-1,-0.5,1,0.5)},
     'postgis-inline':{'sizes':[(512,512)]},
     'text-line-wrap':{'sizes':[(512,512)]},
+    'text-data-binding': {'sizes': [(500, 500)]},
     }
 
 class Reporting:

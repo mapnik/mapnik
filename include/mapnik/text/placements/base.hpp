@@ -49,19 +49,19 @@ public:
     // If this functions returns false the placement data should be
     // considered invalid!
 
-    virtual bool next() = 0;
+    virtual bool next() const = 0;
     virtual ~text_placement_info() {}
 
     // Properties actually used by placement finder and renderer. Values in
     // here are modified each time next() is called.
-    text_symbolizer_properties properties;
+    mutable text_symbolizer_properties properties;
 
     // Scale factor used by the renderer.
     double scale_factor;
 
 };
 
-using text_placement_info_ptr = std::unique_ptr<text_placement_info>;
+using text_placement_info_ptr = std::shared_ptr<text_placement_info>;
 
 // This object handles the management of all TextSymbolizer properties. It can
 // be used as a base class for own objects which implement new processing

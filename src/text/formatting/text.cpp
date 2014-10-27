@@ -50,7 +50,7 @@ node_ptr text_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     return std::make_shared<text_node>(xml.get_value<expression_ptr>());
 }
 
-void text_node::apply(evaluated_format_properties_ptr p, feature_impl const& feature, attributes const& vars, text_layout &output) const
+void text_node::apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout &output) const
 {
     mapnik::value_unicode_string text_str = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *text_).to_unicode();
     if (p->text_transform == UPPERCASE)

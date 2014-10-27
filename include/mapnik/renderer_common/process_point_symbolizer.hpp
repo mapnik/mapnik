@@ -40,17 +40,17 @@ void render_point_symbolizer(point_symbolizer const &sym,
                              RendererType &common,
                              F render_marker)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature, common.vars_);
+    std::string filename = get<std::string,keys::file>(sym,feature, common.vars_);
     boost::optional<mapnik::marker_ptr> marker = filename.empty()
        ? std::make_shared<mapnik::marker>()
        : marker_cache::instance().find(filename, true);
 
     if (marker)
     {
-        double opacity = get<double>(sym,keys::opacity,feature, common.vars_, 1.0);
-        bool allow_overlap = get<bool>(sym, keys::allow_overlap, feature, common.vars_, false);
-        bool ignore_placement = get<bool>(sym, keys::ignore_placement, feature, common.vars_, false);
-        point_placement_enum placement= get<point_placement_enum>(sym, keys::point_placement_type, feature, common.vars_, CENTROID_POINT_PLACEMENT);
+        value_double opacity = get<value_double,keys::opacity>(sym, feature, common.vars_);
+        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, common.vars_);
+        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym, feature, common.vars_);
+        point_placement_enum placement= get<point_placement_enum, keys::point_placement_type>(sym, feature, common.vars_);
 
         box2d<double> const& bbox = (*marker)->bounding_box();
         coord2d center = bbox.center();

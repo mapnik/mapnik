@@ -32,6 +32,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/boolean.hpp>
+#include <mapnik/make_unique.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -40,75 +41,32 @@ namespace mapnik
 {
 using boost::optional;
 
+
+evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_properties const& text_prop, feature_impl const& feature, attributes const& attrs)
+{
+    // evaluate text properties
+    evaluated_text_properties_ptr prop = std::make_unique<detail::evaluated_text_properties>();
+    prop->label_placement = util::apply_visitor(extract_value<label_placement_enum>(feature,attrs), text_prop.expressions.label_placement);
+    prop->label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.label_spacing);
+    prop->label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.label_position_tolerance);
+    prop->avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.avoid_edges);
+    prop->margin = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.margin);
+    prop->repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.repeat_distance);
+    prop->minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_distance);
+    prop->minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_padding);
+    prop->minimum_path_length = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_path_length);
+    prop->max_char_angle_delta = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.max_char_angle_delta) * M_PI/180;
+    prop->allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.allow_overlap);
+    prop->largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.largest_bbox_only);
+    prop->upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), text_prop.expressions.upright);
+    return prop;
+}
+
+
 text_symbolizer_properties::text_symbolizer_properties()
-    : label_placement(POINT_PLACEMENT),
-      label_spacing(0.0),
-      label_position_tolerance(0.0),
-      avoid_edges(false),
-      margin(0.0),
-      repeat_distance(0.0),
-      minimum_distance(0.0),
-      minimum_padding(0.0),
-      minimum_path_length(0.0),
-      max_char_angle_delta(22.5 * M_PI/180.0),
-      allow_overlap(false),
-      largest_bbox_only(true),
-      upright(UPRIGHT_AUTO),
-      layout_defaults(),
+    : layout_defaults(),
       format_defaults(),
       tree_() {}
-
-
-void text_symbolizer_properties::evaluate_text_properties(feature_impl const& feature, attributes const& attrs)
-{
-    label_placement = util::apply_visitor(extract_value<label_placement_enum>(feature,attrs), expressions.label_placement);
-    label_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_spacing);
-    label_position_tolerance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.label_position_tolerance);
-    avoid_edges = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.avoid_edges);
-    margin = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.margin);
-    repeat_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.repeat_distance);
-    minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_distance);
-    minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_padding);
-    minimum_path_length = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.minimum_path_length);
-    max_char_angle_delta = util::apply_visitor(extract_value<value_double>(feature,attrs), expressions.max_char_angle_delta) * M_PI/180;
-    allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.allow_overlap);
-    largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), expressions.largest_bbox_only);
-    upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), expressions.upright);
-}
-
-void text_symbolizer_properties::process(text_layout & output, feature_impl const& feature, attributes const& attrs) //const
-{
-    output.clear();
-
-    if (tree_)
-    {
-        evaluate_text_properties(feature, attrs);
-        //evaluate format properties
-        evaluated_format_properties_ptr format = std::make_shared<detail::evaluated_format_properties>();
-
-        format->text_size = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_size);
-        format->character_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.character_spacing);
-        format->line_spacing = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.line_spacing);
-        format->text_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.text_opacity);
-        format->halo_opacity = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_opacity);
-        format->halo_radius = util::apply_visitor(extract_value<value_double>(feature,attrs), format_defaults.halo_radius);
-        format->fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.fill);
-        format->halo_fill = util::apply_visitor(extract_value<color>(feature,attrs), format_defaults.halo_fill);
-        format->text_transform = util::apply_visitor(extract_value<text_transform_enum>(feature,attrs), format_defaults.text_transform);
-        format->face_name = format_defaults.face_name;
-        format->fontset = format_defaults.fontset;
-
-        format->font_feature_settings = util::apply_visitor(extract_value<font_feature_settings_ptr>(feature,attrs), format_defaults.font_feature_settings);
-        // Turn off ligatures if character_spacing > 0.
-        if (format->character_spacing > .0 && format->font_feature_settings->count() == 0)
-        {
-            format->font_feature_settings->append(font_feature_liga_off);
-        }
-
-        tree_->apply(format, feature, attrs, output);
-    }
-    else MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
-}
 
 void text_symbolizer_properties::set_format_tree(formatting::node_ptr tree)
 {
@@ -150,18 +108,11 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
     set_property_from_xml<text_upright_e>(expressions.upright, "upright", node);
 }
 
-void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
+void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
 {
     text_properties_from_xml(node);
     layout_defaults.from_xml(node,fontsets);
-    optional<expression_ptr> name_ = node.get_opt_attr<expression_ptr>("name");
-    if (name_)
-    {
-        MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
-        set_old_style_expression(*name_);
-    }
-
-    format_defaults.from_xml(node, fontsets);
+    format_defaults.from_xml(node, fontsets, is_shield);
     formatting::node_ptr n(formatting::node::from_xml(node,fontsets));
     if (n) set_format_tree(n);
 }
@@ -250,11 +201,6 @@ void text_symbolizer_properties::add_expressions(expression_set & output) const
     if (tree_) tree_->add_expressions(output);
 }
 
-void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
-{
-    tree_ = std::make_shared<formatting::text_node>(expr);
-}
-
 text_layout_properties::text_layout_properties()
     : halign(enumeration_wrapper(H_AUTO)),
       jalign(enumeration_wrapper(J_AUTO)),
@@ -324,20 +270,28 @@ format_properties::format_properties()
       halo_fill(color(255,255,255)),
       halo_radius(0.0),
       text_transform(enumeration_wrapper(NONE)),
-      font_feature_settings(std::make_shared<mapnik::font_feature_settings>()) {}
+      ff_settings() {}
 
-void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
+void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
 {
     set_property_from_xml<double>(text_size, "size", node);
     set_property_from_xml<double>(character_spacing, "character-spacing", node);
     set_property_from_xml<double>(line_spacing, "line-spacing", node);
     set_property_from_xml<double>(halo_radius, "halo-radius", node);
-    set_property_from_xml<double>(text_opacity, "opacity", node);
+    // https://github.com/mapnik/mapnik/issues/2507
+    if (is_shield)
+    {
+        set_property_from_xml<double>(text_opacity, "text-opacity", node);
+    }
+    else
+    {
+        set_property_from_xml<double>(text_opacity, "opacity", node);
+    }
     set_property_from_xml<double>(halo_opacity, "halo-opacity", node);
     set_property_from_xml<color>(fill, "fill", node);
     set_property_from_xml<color>(halo_fill, "halo-fill", node);
     set_property_from_xml<text_transform_e>(text_transform,"text-transform", node);
-    set_property_from_xml<font_feature_settings_ptr>(font_feature_settings, "font-feature-settings", node);
+    set_property_from_xml<font_feature_settings>(ff_settings, "font-feature-settings", node);
 
     optional<std::string> face_name_ = node.get_opt_attr<std::string>("face-name");
     if (face_name_) face_name = *face_name_;
@@ -380,14 +334,19 @@ void format_properties::to_xml(boost::property_tree::ptree & node, bool explicit
     if (!(character_spacing == dfl.character_spacing) || explicit_defaults) serialize_property("character-spacing", character_spacing, node);
     if (!(line_spacing == dfl.line_spacing) || explicit_defaults) serialize_property("line-spacing", line_spacing, node);
     if (!(halo_radius == dfl.halo_radius) || explicit_defaults) serialize_property("halo-radius", halo_radius, node);
-    // for shield_symbolizer this is later overridden -- FIXME
-    if (!(text_opacity == dfl.text_opacity) || explicit_defaults) serialize_property("opacity", text_opacity, node);
+    // NOTE: this is dodgy: for text-symbolizer this should do the right thing
+    // but for shield_symbolizer it won't but 'opacity' should be overwritten by save_map later on
+    // since it is a property of the symbolizer_base rather than these properties
+    if (!(text_opacity == dfl.text_opacity) || explicit_defaults)
+    {
+        serialize_property("text-opacity", text_opacity, node);
+        serialize_property("opacity", text_opacity, node);
+    }
     if (!(halo_opacity == dfl.halo_opacity) || explicit_defaults) serialize_property("halo-opacity", halo_opacity, node);
-    //
     if (!(fill == dfl.fill) || explicit_defaults) serialize_property("fill", fill, node);
     if (!(halo_fill == dfl.halo_fill) || explicit_defaults) serialize_property("halo-fill", halo_fill, node);
     if (!(text_transform == dfl.text_transform) || explicit_defaults) serialize_property("text-transform", text_transform, node);
-    if (!(font_feature_settings == dfl.font_feature_settings) || explicit_defaults) serialize_property("font-feature-settings", font_feature_settings, node);
+    if (!(ff_settings == dfl.ff_settings) || explicit_defaults) serialize_property("font-feature-settings", ff_settings, node);
 }
 
 void format_properties::add_expressions(expression_set & output) const
@@ -401,7 +360,7 @@ void format_properties::add_expressions(expression_set & output) const
     if (is_expression(fill)) output.insert(util::get<expression_ptr>(fill));
     if (is_expression(halo_fill)) output.insert(util::get<expression_ptr>(halo_fill));
     if (is_expression(text_transform)) output.insert(util::get<expression_ptr>(text_transform));
-    if (is_expression(font_feature_settings)) output.insert(util::get<expression_ptr>(font_feature_settings));
+    if (is_expression(ff_settings)) output.insert(util::get<expression_ptr>(ff_settings));
 }
 
 

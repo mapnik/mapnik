@@ -94,7 +94,7 @@ using value_base_type = util::variant<value_bool,
                                       dash_array,
                                       raster_colorizer_ptr,
                                       group_symbolizer_properties_ptr,
-                                      font_feature_settings_ptr>;
+                                      font_feature_settings>;
 
 struct strict_value : value_base_type
 {

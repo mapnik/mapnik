@@ -8,7 +8,7 @@
             <LineSymbolizer stroke="red" stroke-width="6" offset="10" smooth="1"/>
             <LineSymbolizer stroke="green" stroke-width="6" offset="0" smooth="1"/>
             <LineSymbolizer stroke="blue" stroke-width="6" offset="-10" smooth="1"/>
-            <LineSymbolizer stroke="purple" stroke-width="6" offset="-20" smooth="1"/>
+            <LineSymbolizer stroke="purple" stroke-width="6" offset="-20" smooth="1" rasterizer="fast"/>
         </Rule>
     </Style>
 

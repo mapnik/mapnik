@@ -82,7 +82,7 @@ void svg_renderer<T>::start_map_processing(Map const& map)
 }
 
 template <typename T>
-void svg_renderer<T>::end_map_processing(Map const& map)
+void svg_renderer<T>::end_map_processing(Map const&)
 {
     // generate SVG root element closing tag.
     generator_.generate_closing_root();
@@ -90,7 +90,7 @@ void svg_renderer<T>::end_map_processing(Map const& map)
 }
 
 template <typename T>
-void svg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
+void svg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const&)
 {
     generator_.generate_opening_group(lay.name());
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: Start layer processing=" << lay.name();

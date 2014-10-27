@@ -45,10 +45,10 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
 {
     using path_type = transform_path_adapter<view_transform,geometry_type>;
     cairo_save_restore guard(context_);
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    mapnik::color fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
-    double opacity = get<double>(sym, keys::fill_opacity, feature, common_.vars_, 1.0);
-    double height = get<double>(sym, keys::height, feature, common_.vars_, 0.0);
+    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
+    mapnik::color fill = get<color, keys::fill>(sym, feature, common_.vars_);
+    value_double opacity = get<value_double, keys::fill_opacity>(sym, feature, common_.vars_);
+    value_double height = get<value_double, keys::height>(sym, feature, common_.vars_);
 
     context_.set_operator(comp_op);
 

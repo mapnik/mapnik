@@ -220,6 +220,7 @@ int main(int argc, char** argv)
     catch (std::exception const& ex)
     {
         std::cerr << ex.what() << "\n";
+        BOOST_TEST(false);
     }
 
     if (!::boost::detail::test_errors())

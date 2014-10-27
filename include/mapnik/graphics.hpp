@@ -32,8 +32,8 @@
 #include <mapnik/global.hpp>
 
 // stl
+#include <algorithm>
 #include <string>
-#include <cstring> // memset
 #include <memory>
 
 // boost
@@ -81,7 +81,7 @@ public:
 
     inline void clear()
     {
-        std::memset(data_.getData(),0,sizeof(mapnik::image_data_32::pixel_type)*data_.width()*data_.height());
+        std::fill(data_.getData(), data_.getData() + data_.width() * data_.height(), 0);
     }
 
     boost::optional<color> const& get_background() const;

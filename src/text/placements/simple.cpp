@@ -25,12 +25,17 @@
 #include <mapnik/text/placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/make_unique.hpp>
+
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 #include <cmath>
 
@@ -42,7 +47,7 @@ namespace phoenix = boost::phoenix;
 using phoenix::push_back;
 using phoenix::ref;
 
-bool text_placement_info_simple::next()
+bool text_placement_info_simple::next() const
 {
     while (true)
     {
@@ -61,7 +66,7 @@ bool text_placement_info_simple::next()
     return true;
 }
 
-bool text_placement_info_simple::next_position_only()
+bool text_placement_info_simple::next_position_only() const
 {
     if (position_state >= parent_->direction_.size()) return false;
     //directions_e dir = parent_->direction_[position_state];
@@ -72,7 +77,7 @@ bool text_placement_info_simple::next_position_only()
 
 text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor) const
 {
-    return std::make_unique<text_placement_info_simple>(this, scale_factor);
+    return std::make_shared<text_placement_info_simple>(this, scale_factor);
 }
 
 // Position string: [POS][SIZE]
@@ -141,11 +146,11 @@ std::string text_placements_simple::get_positions()
     return positions_; //TODO: Build string from data in direction_ and text_sizes_
 }
 
-text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontset_map const& fontsets)
+text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield)
 {
     text_placements_ptr ptr = std::make_shared<text_placements_simple>(
         xml.get_attr<std::string>("placements", "X"));
-    ptr->defaults.from_xml(xml, fontsets);
+    ptr->defaults.from_xml(xml, fontsets, is_shield);
     return ptr;
 }
 

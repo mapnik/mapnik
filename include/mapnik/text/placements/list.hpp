@@ -38,7 +38,7 @@ public:
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);
     unsigned size() const;
-    static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
+    static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
 private:
     std::vector<text_symbolizer_properties> list_;
     friend class text_placement_info_list;
@@ -52,9 +52,9 @@ public:
     text_placement_info_list(text_placements_list const* parent, double scale_factor) :
         text_placement_info(parent, scale_factor),
         state(0), parent_(parent) {}
-    bool next();
+    bool next() const;
 private:
-    unsigned state;
+    mutable unsigned state;
     text_placements_list const* parent_;
 };
 

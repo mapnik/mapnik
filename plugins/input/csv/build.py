@@ -37,6 +37,8 @@ plugin_sources = Split(
 libraries = []
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append(env['ICU_LIB_NAME'])
+libraries.append('mapnik-json')
+libraries.append('mapnik-wkt')
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append(env['MAPNIK_NAME'])
@@ -49,6 +51,8 @@ if env['PLUGIN_LINKING'] == 'shared':
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+    Depends(TARGET, env.subst('../../../src/json/libmapnik-json${LIBSUFFIX}'))
+    Depends(TARGET, env.subst('../../../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
 
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)

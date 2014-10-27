@@ -23,9 +23,13 @@
 #ifndef MAPNIK_CSV_UTILS_DATASOURCE_HPP
 #define MAPNIK_CSV_UTILS_DATASOURCE_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 
 #include <string>
-#include <boost/algorithm/string.hpp>
 #include <cstdio>
 
 namespace csv_utils

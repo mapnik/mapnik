@@ -41,12 +41,12 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string>(sym, keys::file, feature, common_.vars_);
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    bool clip = get<bool>(sym, keys::clip, feature, common_.vars_, false);
-    double offset = get<double>(sym, keys::offset, feature, common_.vars_, 0.0);
-    double simplify_tolerance = get<double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
-    double smooth = get<double>(sym, keys::smooth, feature, common_.vars_, 0.0);
+    std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
+    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
+    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
     boost::optional<marker_ptr> marker;
     if ( !filename.empty() )
@@ -63,7 +63,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     std::shared_ptr<cairo_pattern> pattern;
     image_ptr image = nullptr;
     // TODO - re-implement at renderer level like polygon_pattern symbolizer
-    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_,1.0);
+    double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     if ((*marker)->is_bitmap())
     {
         pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()), opacity);

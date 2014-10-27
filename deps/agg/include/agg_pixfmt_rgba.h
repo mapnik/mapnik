@@ -1445,6 +1445,7 @@ struct comp_op_rgba_grain_merge
 
 // grain extract (GIMP)
 // E = I - M + 128
+// FIXME: https://github.com/mapnik/mapnik/issues/2067
 template <typename ColorT, typename Order>
 struct comp_op_rgba_grain_extract
 {
@@ -1461,7 +1462,7 @@ struct comp_op_rgba_grain_extract
 
     static AGG_INLINE void blend_pix(value_type* p,
                                      unsigned sr, unsigned sg, unsigned sb,
-                                     unsigned sa, unsigned cover)
+                                     unsigned sa, unsigned /*cover*/)
     {
         calc_type da = (p[Order::A] * sa + 255) >> 8;
 

@@ -112,7 +112,7 @@ inline std::size_t hash_value(value_null const&)
 }
 
 template <typename TChar, typename TTraits>
-inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, value_null const& v)
+inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, value_null const&)
 {
     return out;
 }

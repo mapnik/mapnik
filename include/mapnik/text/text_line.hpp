@@ -24,6 +24,7 @@
 
 //stl
 #include <vector>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik
 {
@@ -34,7 +35,7 @@ struct glyph_info;
 // It can be used for rendering but no text processing (like line breaking)
 // should be done!
 
-class text_line
+class text_line : noncopyable
 {
 public:
     using glyph_vector = std::vector<glyph_info>;
@@ -42,8 +43,10 @@ public:
 
     text_line(unsigned first_char, unsigned last_char);
 
+    text_line( text_line && rhs);
+
     // Append glyph.
-    void add_glyph(glyph_info const& glyph, double scale_factor_);
+    void add_glyph(glyph_info && glyph, double scale_factor_);
 
     // Preallocate memory.
     void reserve(glyph_vector::size_type length);
@@ -52,17 +55,19 @@ public:
     // Iterator beyond last glyph.
     const_iterator end() const;
 
-    // Width of all glyphs without character spacing.
-    double glyphs_width() const { return glyphs_width_; }
     // Width of all glyphs including character spacing.
     double width() const { return width_; }
+    // Width of all glyphs without character spacing.
+    double glyphs_width() const { return glyphs_width_; }
     // Real line height. For first line: max_char_height(), for all others: line_height().
     double height() const;
 
     // Height of the tallest glyph in this line.
     double max_char_height() const { return max_char_height_; }
+
     // Called for each font/style to update the maximum height of this line.
     void update_max_char_height(double max_char_height);
+
     // Line height including line spacing.
     double line_height() const { return line_height_; }
 
@@ -80,12 +85,10 @@ public:
 
     unsigned space_count() const { return space_count_; }
 
-    void set_character_spacing(double character_spacing, double scale_factor);
-
 private:
     glyph_vector glyphs_;
     double line_height_; // Includes line spacing (returned by freetype)
-    double max_char_height_; // Height of 'X' character of the largest font in this run. //TODO: Initialize this!
+    double max_char_height_; // Max height of any glyphs in line - calculated by shaper
     double width_;
     double glyphs_width_;
     unsigned first_char_;

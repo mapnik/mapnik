@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE Map>
-<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+<Map background-color="steelblue" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>alpha</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
             <Parameter name="inline">
-            wkt
-            "LINESTRING(0 0, 10 2)"
+            wkt,halo-opacity,text-opacity,opacity
+            "LINESTRING(0 0, 10 2)",.1,.1,.1
             </Parameter>
         </Datasource>
     </Layer>
@@ -16,8 +14,8 @@
         <Datasource>
             <Parameter name="type">csv</Parameter>
             <Parameter name="inline">
-            wkt
-            "LINESTRING(0 2, 10 4)"
+            wkt,halo-opacity,text-opacity,opacity
+            "LINESTRING(0 2, 10 4)",1,1,1
             </Parameter>
         </Datasource>
     </Layer>
@@ -26,8 +24,8 @@
         <Datasource>
             <Parameter name="type">csv</Parameter>
             <Parameter name="inline">
-            wkt
-            "LINESTRING(0 4, 10 6)"
+            wkt,halo-opacity,text-opacity,opacity
+            "LINESTRING(0 4, 10 6)",1,1,1
             </Parameter>
         </Datasource>
     </Layer>
@@ -41,9 +39,25 @@
               halo-fill="white"
               halo-radius="2"
               spacing="1"
+              halo-opacity="[halo-opacity]"
+              text-opacity="[text-opacity]"
+              opacity="[opacity]"
               minimum-distance="20">
             'hi'
             </ShieldSymbolizer>
+            <TextSymbolizer
+              placement="line"
+              face-name="DejaVu Sans Book"
+              halo-fill="black"
+              fill="white"
+              size="20"
+              halo-radius="2"
+              halo-rasterizer="fast"
+              halo-opacity="[halo-opacity]"
+              opacity="[opacity]"
+              spacing="15">
+            'there'
+            </TextSymbolizer>
             <LineSymbolizer stroke-width="0.2" stroke="#ff0000" />
         </Rule>
     </Style>
@@ -55,6 +69,9 @@
               face-name="DejaVu Sans Book"
               halo-fill="white"
               halo-radius="2"
+              halo-opacity="[halo-opacity]"
+              text-opacity="[text-opacity]"
+              opacity="[opacity]"
               spacing="20">
             'hi'
             </ShieldSymbolizer>
@@ -70,6 +87,9 @@
               halo-fill="white"
               halo-radius="2"
               halo-rasterizer="fast"
+              halo-opacity="[halo-opacity]"
+              text-opacity="[text-opacity]"
+              opacity="[opacity]"
               spacing="15">
             'hi'
             </ShieldSymbolizer>

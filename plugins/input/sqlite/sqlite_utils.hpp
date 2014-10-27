@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -38,8 +39,11 @@
 #include <mapnik/util/fs.hpp>
 
 // boost
-#include <memory>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 
 // sqlite
 extern "C" {

@@ -42,10 +42,9 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/util/file_io.hpp>
+#include <mapnik/make_unique.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
-#include <mapnik/json/feature_collection_grammar_impl.hpp>
-#include <mapnik/json/feature_grammar_impl.hpp>
-#include <mapnik/json/geometry_grammar_impl.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 
@@ -101,11 +100,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
     inline_string_(),
     extent_(),
     features_(),
-#if BOOST_VERSION >= 105600
-    tree_()
-#else
-    tree_(16,1)
-#endif
+    tree_(nullptr)
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (inline_string)
@@ -129,21 +124,14 @@ geojson_datasource::geojson_datasource(parameters const& params)
     }
     else
     {
-#ifdef _WINDOWS
-        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(_wfopen(mapnik::utf8_to_utf16(filename_).c_str(), L"rb"), fclose);
-#else
-        std::unique_ptr<std::FILE, int (*)(std::FILE *)> file(std::fopen(filename_.c_str(),"rb"), std::fclose);
-#endif
-        if (file == nullptr)
+        mapnik::util::file file(filename_);
+        if (!file.open())
         {
-            throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
+            throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
         }
-        std::fseek(file.get(), 0, SEEK_END);
-        std::size_t file_size = std::ftell(file.get());
-        std::fseek(file.get(), 0, SEEK_SET);
         std::string file_buffer;
-        file_buffer.resize(file_size);
-        std::fread(&file_buffer[0], file_size, 1, file.get());
+        file_buffer.resize(file.size());
+        std::fread(&file_buffer[0], file.size(), 1, file.get());
         parse_geojson(file_buffer);
     }
 }
@@ -166,31 +154,48 @@ void geojson_datasource::parse_geojson(T const& buffer)
         else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
     }
 
+#if BOOST_VERSION >= 105600
+    using values_container = std::vector< std::pair<box_type, std::size_t> >;
+    values_container values;
+    values.reserve(features_.size());
+#else
+    tree_ = std::make_unique<spatial_index_type>(16, 4);
+#endif
+
     std::size_t geometry_index = 0;
     for (mapnik::feature_ptr const& f : features_)
     {
         mapnik::box2d<double> box = f->envelope();
-        if (geometry_index == 0)
+        if (box.valid())
         {
-            extent_ = box;
-            for ( auto const& kv : *f)
+            if (geometry_index == 0)
             {
-                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
-                                                                  mapnik::util::apply_visitor(attr_value_converter(),
-                                                                                              std::get<1>(kv))));
+                extent_ = box;
+                for ( auto const& kv : *f)
+                {
+                    desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
+                                                                      mapnik::util::apply_visitor(attr_value_converter(),
+                                                                                                  std::get<1>(kv))));
+                }
+            }
+            else
+            {
+                extent_.expand_to_include(box);
             }
         }
-        else
-        {
-            extent_.expand_to_include(box);
-        }
 #if BOOST_VERSION >= 105600
-        tree_.insert(std::make_pair(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index));
+        values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
 #else
-        tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
+        tree_->insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
 #endif
         ++geometry_index;
     }
+
+#if BOOST_VERSION >= 105600
+    // packing algorithm
+    tree_ = std::make_unique<spatial_index_type>(values);
+#endif
+
 }
 
 geojson_datasource::~geojson_datasource() { }
@@ -246,10 +251,16 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
 #if BOOST_VERSION >= 105600
         geojson_featureset::array_type index_array;
-        tree_.query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
-        return std::make_shared<geojson_featureset>(features_, std::move(index_array));
+        if (tree_)
+        {
+            tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+            return std::make_shared<geojson_featureset>(features_, std::move(index_array));
+        }
 #else
-        return std::make_shared<geojson_featureset>(features_, tree_.find(box));
+        if (tree_)
+        {
+            return std::make_shared<geojson_featureset>(features_, tree_->find(box));
+        }
 #endif
     }
     // otherwise return an empty featureset pointer

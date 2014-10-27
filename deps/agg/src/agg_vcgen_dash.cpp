@@ -54,7 +54,7 @@ void vcgen_dash::remove_all_dashes()
 //------------------------------------------------------------------------
 void vcgen_dash::add_dash(double dash_len, double gap_len)
 {
-    if(m_num_dashes < max_dashes)
+    if(m_num_dashes < max_dashes-1)
     {
         m_total_dash_len += dash_len + gap_len;
         m_dashes[m_num_dashes++] = dash_len;

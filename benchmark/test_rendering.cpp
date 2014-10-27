@@ -5,6 +5,7 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 #include <stdexcept>
 
 class test : public benchmark::test_case
@@ -13,6 +14,7 @@ class test : public benchmark::test_case
     mapnik::box2d<double> extent_;
     mapnik::value_integer width_;
     mapnik::value_integer height_;
+    double scale_factor_;
     std::string preview_;
 public:
     test(mapnik::parameters const& params)
@@ -21,6 +23,7 @@ public:
        extent_(),
        width_(*params.get<mapnik::value_integer>("width",256)),
        height_(*params.get<mapnik::value_integer>("height",256)),
+       scale_factor_(*params.get<mapnik::value_double>("scale_factor",1.0)),
        preview_(*params.get<std::string>("preview",""))
       {
         boost::optional<std::string> map = params.get<std::string>("map");
@@ -36,19 +39,24 @@ public:
             if (!extent_.from_string(*ext))
                 throw std::runtime_error("could not parse `extent` string" + *ext);
         }
+        /*
         else
         {
             throw std::runtime_error("please provide a --extent=<minx,miny,maxx,maxy> arg");
-        }
+        }*/
 
       }
     bool validate() const
     {
         mapnik::Map m(width_,height_);
         mapnik::load_map(m,xml_,true);
-        m.zoom_to_box(extent_);
+        if (extent_.valid()) {
+            m.zoom_to_box(extent_);
+        } else {
+            m.zoom_all();
+        }
         mapnik::image_32 im(m.width(),m.height());
-        mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+        mapnik::agg_renderer<mapnik::image_32> ren(m,im,scale_factor_);
         ren.apply();
         if (!preview_.empty()) mapnik::save_to_file(im,preview_);
         return true;
@@ -57,11 +65,15 @@ public:
     {
         mapnik::Map m(width_,height_);
         mapnik::load_map(m,xml_);
-        m.zoom_to_box(extent_);
+        if (extent_.valid()) {
+            m.zoom_to_box(extent_);
+        } else {
+            m.zoom_all();
+        }
         for (unsigned i=0;i<iterations_;++i)
         {
             mapnik::image_32 im(m.width(),m.height());
-            mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+            mapnik::agg_renderer<mapnik::image_32> ren(m,im,scale_factor_);
             ren.apply();
         }
     }
@@ -80,6 +92,7 @@ int main(int argc, char** argv)
             std::clog << "please provide a name for this test\n";
             return -1;
         }
+        mapnik::freetype_engine::register_fonts("./fonts/",true);
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         {
             test test_runner(params);

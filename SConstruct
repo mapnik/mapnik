@@ -693,48 +693,6 @@ def rollback_option(context,variable):
         if item.key == variable:
             env[variable] = item.default
 
-def update_linux_project_files():
-    headers_content = []
-    source_content = []
-
-    directories = [
-        'include',
-        'src',
-        'bindings',
-        'boost',
-        'plugins',
-        'deps',
-    ]
-
-    def iterate_dirs(headers_content, source_content, d):
-        if not "uninstall-" in d:
-            for root, subFolders, files in os.walk(d):
-                for f in files:
-                    if f.endswith(".h") or f.endswith(".hpp"):
-                        headers_content.append("  ../%s \\" % os.path.join(root, f))
-                    if f.endswith(".cpp") or f.endswith(".c"):
-                        source_content.append("  ../%s \\" % os.path.join(root, f))
-                for sd in subFolders:
-                    headers_content, source_content = \
-                        iterate_dirs(headers_content, source_content, os.path.join(root, sd))
-        return headers_content, source_content
-
-    for d in directories:
-        headers_content, source_content = \
-            iterate_dirs(headers_content, source_content, d)
-
-    headers_content.sort()
-    headers_content = ['HEADERS += \\'] + headers_content + ['','']
-
-    source_content.sort()
-    source_content = ['SOURCES += \\'] + source_content + ['','']
-
-    files_name = os.path.join('.', 'workspace', 'All.files')
-    f = open(files_name, "w")
-    f.writelines([l + '\n' for l in headers_content])
-    f.writelines([l + '\n' for l in source_content])
-    f.close()
-
 def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
 
@@ -890,26 +848,6 @@ return 0;
     context.Result(ret[0])
     return ret[1].strip()
 
-def GetMapnikLibVersion(context):
-    ret = context.TryRun("""
-
-#include <mapnik/version.hpp>
-#include <iostream>
-
-int main()
-{
-    std::cout << MAPNIK_VERSION_STRING << std::endl;
-    return 0;
-}
-
-""", '.cpp')
-    # hack to avoid printed output
-    context.did_show_result=1
-    context.Result(ret[0])
-    if not ret[1]:
-        return []
-    return ret[1].strip()
-
 def icu_at_least_four_two(context):
     ret = context.TryRun("""
 
@@ -998,10 +936,12 @@ int main()
     if (rc != SQLITE_OK)
     {
         printf("error 2: %s\\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
     }
     else
     {
         printf("yes, has rtree!\\n");
+        sqlite3_close(db);
         return 0;
     }
 
@@ -1050,7 +990,6 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckBoost'            : CheckBoost,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
                'GetBoostLibVersion'    : GetBoostLibVersion,
-               'GetMapnikLibVersion'   : GetMapnikLibVersion,
                'parse_config'          : parse_config,
                'parse_pg_config'       : parse_pg_config,
                'ogr_enabled'           : ogr_enabled,
@@ -1062,6 +1001,23 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'supports_cxx11'        : supports_cxx11,
                }
 
+def GetMapnikLibVersion():
+    ver = []
+    is_pre = False
+    for line in open('include/mapnik/version.hpp').readlines():
+        if line.startswith('#define MAPNIK_MAJOR_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_MINOR_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_PATCH_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_VERSION_IS_RELEASE'):
+            if line.split(' ')[2].strip() == "0":
+                is_pre = True
+    version_string = ".".join(ver)
+    if is_pre:
+        version_string += '-pre'
+    return version_string
 
 if not preconfigured:
 
@@ -1172,8 +1128,8 @@ if not preconfigured:
             color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
 
     # Set up for libraries and headers dependency checks
-    env['CPPPATH'] = ['#include', '#']
-    env['LIBPATH'] = ['#src']
+    env['CPPPATH'] = ['#include']
+    env['LIBPATH'] = ['#src','#src/json','#src/wkt']
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
@@ -1486,7 +1442,6 @@ if not preconfigured:
             # re-append the local paths for mapnik sources to the beginning of the list
             # to make sure they come before any plugins that were 'prepended'
             env.PrependUnique(CPPPATH = '#include', delete_existing=True)
-            env.PrependUnique(CPPPATH = '#', delete_existing=True)
             env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
     if not env['HOST']:
@@ -1696,15 +1651,7 @@ if not preconfigured:
 
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
-        abi = None
-        abi_fallback = "3.0.0-pre"
-        if not env['HOST']:
-            abi = conf.GetMapnikLibVersion()
-        if not abi:
-            if not env['HOST']:
-                color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
-            abi = abi_fallback
-
+        abi = GetMapnikLibVersion()
         abi_no_pre = abi.replace('-pre','').split('.')
         env['ABI_VERSION'] = abi_no_pre
         env['MAPNIK_VERSION_STRING'] = abi
@@ -1734,10 +1681,10 @@ if not preconfigured:
         # c++11 support / https://github.com/mapnik/mapnik/issues/1683
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
         env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
-        #  - workaround boost gil channel_algorithm.hpp narrowing error
-        # TODO - remove when building against >= 1.55
-        # https://github.com/mapnik/mapnik/issues/1970
         if 'clang++' in env['CXX']:
+            #  - workaround boost gil channel_algorithm.hpp narrowing error
+            # TODO - remove when building against >= 1.55
+            # https://github.com/mapnik/mapnik/issues/1970
             env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
 
         # Enable logging in debug mode (always) and release mode (when specified)
@@ -1778,15 +1725,20 @@ if not preconfigured:
             env.Append(CPPDEFINES = ndebug_defines)
 
         # Common flags for g++/clang++ CXX compiler.
-        # TODO: clean up code more to make -Wsign-conversion -Wconversion -Wshadow viable
+        # TODO: clean up code more to make -Wextra  -Wsign-conversion -Wconversion -Wshadow viable
         common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
+        if 'clang++' in env['CXX']:
+            common_cxx_flags += ' -Wno-unknown-pragmas -Wno-unsequenced '
+        elif 'g++' in env['CXX']:
+            common_cxx_flags += ' -Wno-pragmas '
+
         if env['DEBUG']:
-            env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
+            env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:
             # TODO - add back -fvisibility-inlines-hidden
             # https://github.com/mapnik/mapnik/issues/1863
-            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+            env.Append(CXXFLAGS = common_cxx_flags + '-O%s' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
@@ -1914,6 +1866,10 @@ if not HELP_REQUESTED:
     if env['RUNTIME_LINK'] == 'shared':
         SConscript('deps/agg/build.py')
 
+    # Build spirit grammars
+    SConscript('src/json/build.py')
+    SConscript('src/wkt/build.py')
+
     # Build the core library
     SConscript('src/build.py')
 
@@ -2011,8 +1967,8 @@ if not HELP_REQUESTED:
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')
 
-    # install pkg-config script and mapnik-config script
-    SConscript('bin/build.py')
+    # install mapnik-config script
+    SConscript('utils/mapnik-config/build.py')
 
     # write the viewer.ini file
     SConscript('demo/viewer/build.py')
@@ -2028,7 +1984,3 @@ if not HELP_REQUESTED:
                 os.unlink(plugin_path)
         if os.path.exists('plugins/input/templates/hello.input'):
             os.unlink('plugins/input/templates/hello.input')
-
-    # update linux project files
-    if env['PLATFORM'] == 'Linux':
-        update_linux_project_files()

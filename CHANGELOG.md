@@ -10,8 +10,9 @@ For a complete change history, see the git log.
 
 - Improved support for International Text (now uses harfbuzz library for text shaping)
 - Uses latest c++11 features for better performance (especially map loading)
-- Expressions everywhere: all symbolizer properties can now be data driven expression (which the exception of `face-name` and `fontset-name`).
+- Expressions everywhere: all symbolizer properties can now be data driven expressions (with the exception of `face-name` and `fontset-name` on the `TextSymbolizer`).
 - New functions supported in expressions: `exp`, `sin`, `cos`, `tan`, `atan`, `abs`.
+- New constants supported in expressions: `PI`, `DEG_TO_RAD`, `RAD_TO_DEG`
 - Pattern symbolizers now support SVG input and applying transformations on them dynamically
 - Experimental / interface may change: `@variables` can be passed to renderer and evaluated in expressions
 - Supports being built with clang++ using `-fvisibility=hidden -flto` for smaller binaries
@@ -21,7 +22,7 @@ For a complete change history, see the git log.
 geometry.
 - `TextSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
 - `ShieldSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
-
+- New GroupSymbolizer for applying multiple symbolizers in a single layout
 
 Released ...
 

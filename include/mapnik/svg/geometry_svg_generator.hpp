@@ -33,6 +33,9 @@
 #include <mapnik/util/container_adapter.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -41,6 +44,7 @@
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+#pragma GCC diagnostic pop
 
 
 // adapted to conform to the concepts
@@ -119,8 +123,8 @@ namespace mapnik { namespace svg {
     struct coordinate_policy : karma::real_policies<T>
     {
         using base_type = boost::spirit::karma::real_policies<T>;
-        static int floatfield(T n) { return base_type::fmtflags::fixed; }
-        static unsigned precision(T n) { return 4u ;}
+        static int floatfield(T) { return base_type::fmtflags::fixed; }
+        static unsigned precision(T) { return 4u ;}
     };
     }
 

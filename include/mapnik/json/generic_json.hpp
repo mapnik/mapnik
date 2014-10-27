@@ -26,8 +26,13 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/value_converters.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 

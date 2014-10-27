@@ -183,9 +183,14 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
         py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
 
 py_env.Append(LINKFLAGS=python_link_flag)
+py_env.AppendUnique(LIBS='mapnik-json')
+py_env.AppendUnique(LIBS='mapnik-wkt')
+
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LDMODULEPREFIX='', LDMODULESUFFIX='.so')
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+Depends(_mapnik, env.subst('../../src/json/libmapnik-json${LIBSUFFIX}'))
+Depends(_mapnik, env.subst('../../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
 
 if env['PLATFORM'] == 'SunOS' and env['PYTHON_IS_64BIT']:
     # http://mail.python.org/pipermail/python-dev/2006-August/068528.html

@@ -46,8 +46,12 @@
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/util/variant.hpp>
+
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 #include <boost/optional.hpp>
 #include <boost/version.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -63,7 +67,8 @@ using boost::optional;
 
 void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool explicit_defaults)
 {
-    p->defaults.to_xml(node, explicit_defaults);
+    text_symbolizer_properties dfl;
+    p->defaults.to_xml(node, explicit_defaults, dfl);
     // Known types:
     //   - text_placements_dummy: no handling required
     //   - text_placements_simple: positions string
@@ -142,7 +147,7 @@ public:
 
     void operator() ( mapnik::enumeration_wrapper const& e) const
     {
-        auto const& convert_fun_ptr(std::get<2>(meta_));
+        auto const& convert_fun_ptr(std::get<1>(meta_));
         if ( convert_fun_ptr )
         {
             node_.put("<xmlattr>." + std::string(std::get<0>(meta_)), convert_fun_ptr(e));
@@ -286,7 +291,7 @@ public:
     }
 
     template <typename T>
-    void operator () ( T const& val ) const {}
+    void operator () ( T const& ) const {}
 
 private:
     ptree & parent_node_;

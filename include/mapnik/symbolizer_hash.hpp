@@ -35,22 +35,27 @@ namespace mapnik {
 
 struct property_value_hash_visitor : util::static_visitor<std::size_t>
 {
-    std::size_t operator() (color val) const
+    std::size_t operator() (color const& val) const
     {
         return val.rgba();
     }
 
-    std::size_t operator() (transform_type const& val) const
+    std::size_t operator() (font_feature_settings const&) const
     {
         return 0; //FIXME
     }
 
-    std::size_t operator() (enumeration_wrapper const& val) const
+    std::size_t operator() (transform_type const&) const
     {
         return 0; //FIXME
     }
 
-    std::size_t operator() (dash_array const&  val) const
+    std::size_t operator() (enumeration_wrapper const&) const
+    {
+        return 0; //FIXME
+    }
+
+    std::size_t operator() (dash_array const&) const
     {
         return 0; //FIXME
     }

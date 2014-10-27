@@ -23,14 +23,14 @@
 //mapnik
 #include <mapnik/text/placements/list.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/make_unique.hpp>
+
 //boost
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
 {
 
-bool text_placement_info_list::next()
+bool text_placement_info_list::next() const
 {
     if (state == 0)
     {
@@ -67,7 +67,7 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 
 text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor) const
 {
-    return std::make_unique<text_placement_info_list>(this, scale_factor);
+    return std::make_shared<text_placement_info_list>(this, scale_factor);
 }
 
 text_placements_list::text_placements_list()
@@ -89,15 +89,15 @@ unsigned text_placements_list::size() const
 }
 
 
-text_placements_ptr text_placements_list::from_xml(xml_node const& node, fontset_map const& fontsets)
+text_placements_ptr text_placements_list::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
 {
     auto list = std::make_shared<text_placements_list>();
-    list->defaults.from_xml(node, fontsets);
+    list->defaults.from_xml(node, fontsets, is_shield);
     for( auto const& child : node)
     {
         if (child.is_text() || !child.is("Placement")) continue;
         text_symbolizer_properties & p = list->add();
-        p.from_xml(child, fontsets);
+        p.from_xml(child, fontsets, is_shield);
         //if (strict_ && !p.format.fontset.size())
         //    ensure_font_face(p.format.face_name);
     }

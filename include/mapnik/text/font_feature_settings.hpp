@@ -23,18 +23,30 @@
 #ifndef MAPNIK_FONT_FEATURE_SETTINGS_HPP
 #define MAPNIK_FONT_FEATURE_SETTINGS_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+
 // stl
 #include <vector>
 #include <memory>
 #include <limits>
-
+#include <ostream>
 // harfbuzz
 #include <harfbuzz/hb.h>
+
+// EqualityComparable
+inline bool operator==(hb_feature_t const& lhs, hb_feature_t const& rhs)
+{
+    return (lhs.tag == rhs.tag
+            && lhs.value == rhs.value
+            && lhs.start == rhs.start
+            && lhs.end == rhs.end);
+}
 
 namespace mapnik
 {
 
-class font_feature_settings
+class MAPNIK_DECL font_feature_settings
 {
 public:
     using font_feature = hb_feature_t;
@@ -52,12 +64,24 @@ public:
 
     const font_feature* get_features() const { return features_.data(); }
     feature_vector::size_type count() const { return features_.size(); }
+    feature_vector const& features() const { return features_; }
 
 private:
     feature_vector features_;
 };
 
-using font_feature_settings_ptr = std::shared_ptr<font_feature_settings>;
+template <typename charT, typename traits>
+std::basic_ostream<charT, traits> &
+operator<< ( std::basic_ostream<charT, traits> & s, mapnik::font_feature_settings const& f )
+{
+    s << f.to_string();
+    return s;
+}
+
+inline bool operator==(font_feature_settings const& lhs, font_feature_settings const& rhs)
+{
+    return (lhs.features() == rhs.features());
+}
 
 constexpr unsigned int font_feature_range_global_start = 0u;
 static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();

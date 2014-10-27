@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_attribute_cast.hpp>
@@ -76,7 +77,7 @@ DEFINE_NAME_TRAIT( mapnik::value_integer, "int" )
 DEFINE_NAME_TRAIT( std::string, "string" )
 DEFINE_NAME_TRAIT( color, "color" )
 DEFINE_NAME_TRAIT( expression_ptr, "expression_ptr" )
-DEFINE_NAME_TRAIT( font_feature_settings_ptr, "font-feature-settings" )
+DEFINE_NAME_TRAIT( font_feature_settings, "font-feature-settings" )
 
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
@@ -230,7 +231,11 @@ xml_node & xml_node::add_child(const char * name, unsigned line, bool is_text)
 
 void xml_node::add_attribute(const char * name, const char * value)
 {
-    attributes_.emplace(name,xml_attribute(value));
+    auto result = attributes_.emplace(name,xml_attribute(value));
+    if (!result.second)
+    {
+        MAPNIK_LOG_ERROR(xml_tree) << "ignoring duplicate attribute '" << name << "'";
+    }
 }
 
 xml_node::attribute_map const& xml_node::get_attributes() const
@@ -424,7 +429,7 @@ compile_get_opt_attr(justify_alignment_e);
 compile_get_opt_attr(text_upright_e);
 compile_get_opt_attr(halo_rasterizer_e);
 compile_get_opt_attr(expression_ptr);
-compile_get_opt_attr(font_feature_settings_ptr);
+compile_get_opt_attr(font_feature_settings);
 compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);

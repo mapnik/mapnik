@@ -156,7 +156,7 @@ struct feature_generator_grammar:
 
     feature_generator_grammar();
     karma::rule<OutputIterator, mapnik::feature_impl const&()> feature;
-    multi_geometry_generator_grammar<OutputIterator> geometry;
+    multi_geometry_generator_grammar<OutputIterator, mapnik::geometry_container> geometry;
     escaped_string<OutputIterator> escaped_string_;
     karma::rule<OutputIterator, mapnik::feature_impl const&()> properties;
     karma::rule<OutputIterator, pair_type()> pair;

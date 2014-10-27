@@ -33,7 +33,7 @@
 namespace mapnik
 {
 
-expression_ptr parse_expression(std::string const& str, std::string const& encoding)
+expression_ptr parse_expression(std::string const& str)
 {
     static const expression_grammar<std::string::const_iterator> g;
     boost::spirit::standard_wide::space_type space;

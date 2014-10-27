@@ -59,9 +59,10 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
     FT_Vector pen;
     FT_Error  error;
 
+    glyphs_.reserve(positions.size());
     for (auto const& glyph_pos : positions)
     {
-        glyph_info const& glyph = *(glyph_pos.glyph);
+        glyph_info const& glyph = glyph_pos.glyph;
         glyph.face->set_character_sizes(glyph.format->text_size * scale_factor_); //TODO: Optimize this?
 
         matrix.xx = static_cast<FT_Fixed>( glyph_pos.rot.cos * 0x10000L);
@@ -83,7 +84,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
         error = FT_Get_Glyph(face->glyph, &image);
         if (error) continue;
 
-        glyphs_.emplace_back(image, glyph.format.get());
+        glyphs_.emplace_back(image, *glyph.format);
     }
 }
 
@@ -135,9 +136,6 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     start.y += transform_.ty * 64;
     start_halo.x += halo_transform_.tx * 64;
     start_halo.y += halo_transform_.ty * 64;
-    //render halo
-    double halo_radius = 0;
-
 
     FT_Matrix halo_matrix;
     halo_matrix.xx = halo_transform_.sx  * 0x10000L;
@@ -151,16 +149,19 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     matrix.yy = transform_.sy  * 0x10000L;
     matrix.yx = transform_.shy * 0x10000L;
 
-    detail::evaluated_format_properties default_props;
-    detail::evaluated_format_properties const* format = &default_props;
+    // default formatting
+    double halo_radius = 0;
+    color black(0,0,0);
+    unsigned fill = black.rgba();
+    unsigned halo_fill = black.rgba();
+    double text_opacity = 1.0;
+    double halo_opacity = 1.0;
+
     for (auto const& glyph : glyphs_)
     {
-        if (glyph.properties)
-        {
-            format = glyph.properties;
-            // Settings have changed.
-            halo_radius = glyph.properties->halo_radius * scale_factor_;
-        }
+        halo_fill = glyph.properties.halo_fill.rgba();
+        halo_opacity = glyph.properties.halo_opacity;
+        halo_radius = glyph.properties.halo_radius * scale_factor_;
         // make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
         FT_Glyph g;
@@ -178,10 +179,10 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                     FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
                     composite_bitmap(pixmap_,
                                      &bit->bitmap,
-                                     format->halo_fill.rgba(),
+                                     halo_fill,
                                      bit->left,
                                      height - bit->top,
-                                     format->halo_opacity,
+                                     halo_opacity,
                                      halo_comp_op_);
                 }
             }
@@ -192,11 +193,11 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 {
                     FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
                     render_halo(&bit->bitmap,
-                                format->halo_fill.rgba(),
+                                halo_fill,
                                 bit->left,
                                 height - bit->top,
                                 halo_radius,
-                                format->halo_opacity,
+                                halo_opacity,
                                 halo_comp_op_);
                 }
             }
@@ -205,13 +206,10 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     }
 
     // render actual text
-    format = &default_props;
     for (auto & glyph : glyphs_)
     {
-        if (glyph.properties)
-        {
-            format = glyph.properties;
-        }
+        fill = glyph.properties.fill.rgba();
+        text_opacity = glyph.properties.text_opacity;
         FT_Glyph_Transform(glyph.image, &matrix, &start);
         error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
@@ -219,13 +217,15 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
             FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(glyph.image);
             composite_bitmap(pixmap_,
                              &bit->bitmap,
-                             format->fill.rgba(),
+                             fill,
                              bit->left,
                              height - bit->top,
-                             format->text_opacity,
+                             text_opacity,
                              comp_op_);
         }
+        FT_Done_Glyph(glyph.image);
     }
+
 }
 
 
@@ -252,10 +252,7 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
     halo_matrix.yx = halo_transform_.shy * 0x10000L;
     for (auto & glyph : glyphs_)
     {
-        if (glyph.properties)
-        {
-            halo_radius = glyph.properties->halo_radius * scale_factor_;
-        }
+        halo_radius = glyph.properties.halo_radius * scale_factor_;
         FT_Glyph_Transform(glyph.image, &halo_matrix, &start);
         error = FT_Glyph_To_Bitmap(&glyph.image, FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
@@ -268,6 +265,7 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
                            height - bit->top,
                            static_cast<int>(halo_radius));
         }
+        FT_Done_Glyph(glyph.image);
     }
 }
 

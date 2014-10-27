@@ -61,7 +61,6 @@ enum class keys : std::uint8_t
     shield_dx,
     shield_dy,
     unlock_image,
-    text_opacity,
     mode,
     scaling,
     filter_factor,
@@ -91,7 +90,7 @@ enum class keys : std::uint8_t
     vertical_alignment,
     upright,
     avoid_edges,
-    font_feature_settings,
+    ff_settings,
     MAX_SYMBOLIZER_KEY
 };
 

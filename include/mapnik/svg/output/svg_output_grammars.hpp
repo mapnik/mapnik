@@ -37,9 +37,13 @@ namespace mapnik { namespace svg {
 }}
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma_nonterminal.hpp>
 #include <boost/spirit/include/karma_rule.hpp>
 #include <boost/fusion/adapted/struct.hpp>
+#pragma GCC diagnostic pop
 
 /*!
  * mapnik::svg::path_output_attributes is adapted as a fusion sequence

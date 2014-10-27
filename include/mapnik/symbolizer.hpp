@@ -41,7 +41,7 @@
 #include <mapnik/text/font_feature_settings.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/variant.hpp>
-
+#include <mapnik/symbolizer_default_values.hpp>
 // stl
 #include <type_traits>
 #include <memory>
@@ -289,7 +289,6 @@ struct evaluate_expression_wrapper<mapnik::color>
     mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        // FIXME - throw instead?
         if (val.is_null()) return mapnik::color(255,192,203); // pink
         return mapnik::color(val.to_string());
     }
@@ -314,7 +313,6 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
     mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        // FIXME - throw?
         if (val.is_null()) return dash_array();
         dash_array dash;
         std::vector<double> buf;
@@ -327,17 +325,16 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
     }
 };
 
-// mapnik::font_feature_settings_ptr
+// mapnik::font_feature_settings
 template <>
-struct evaluate_expression_wrapper<mapnik::font_feature_settings_ptr>
+struct evaluate_expression_wrapper<mapnik::font_feature_settings>
 {
     template <typename T1, typename T2, typename T3>
-    mapnik::font_feature_settings_ptr operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    mapnik::font_feature_settings operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
-        // FIXME - throw instead?
-        if (val.is_null()) return std::make_shared<mapnik::font_feature_settings>();
-        return std::make_shared<mapnik::font_feature_settings>(val.to_string());
+        if (val.is_null()) return mapnik::font_feature_settings();
+        return mapnik::font_feature_settings(val.to_string());
     }
 };
 
@@ -397,12 +394,20 @@ struct extract_raw_value : public util::static_visitor<T1>
     }
 
     template <typename T2>
-    auto operator() (T2 const& val) const -> result_type
+    auto operator() (T2 const&) const -> result_type
     {
         return result_type();
     }
 };
 
+
+//
+
+using property_meta_type = std::tuple<const char*, std::function<std::string(enumeration_wrapper)>, property_types>;
+MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
+MAPNIK_DECL mapnik::keys get_key(std::string const& name);
+
+//
 template <typename T>
 void put(symbolizer_base & sym, keys key, T const& val)
 {
@@ -410,14 +415,13 @@ void put(symbolizer_base & sym, keys key, T const& val)
     detail::put_impl<T, enum_ >::apply(sym, key, val);
 }
 
-template <typename T>
-bool has_key(symbolizer_base const& sym, keys key)
+inline bool has_key(symbolizer_base const& sym, keys key)
 {
     return (sym.properties.count(key) == 1);
 }
 
-template <typename T>
-T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& _default_value = T())
+template <typename T, keys key>
+T get(symbolizer_base const& sym, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -425,8 +429,21 @@ T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature,
     {
         return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
     }
-    return _default_value;
+    return mapnik::symbolizer_default<T,key>::value();
 }
+
+template <typename T>
+T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& default_value)
+{
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
+    const_iterator itr = sym.properties.find(key);
+    if (itr != sym.properties.end())
+    {
+        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
+    }
+    return default_value;
+}
+
 
 template <typename T>
 boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
@@ -441,7 +458,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::fe
 }
 
 template <typename T>
-T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
+T get(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -449,7 +466,20 @@ T get(symbolizer_base const& sym, keys key, T const& _default_value = T())
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return _default_value;
+    return T();
+}
+
+
+template <typename T>
+T get(symbolizer_base const& sym, keys key, T const& default_value)
+{
+    using const_iterator = symbolizer_base::cont_type::const_iterator;
+    const_iterator itr = sym.properties.find(key);
+    if (itr != sym.properties.end())
+    {
+        return util::apply_visitor(extract_raw_value<T>(), itr->second);
+    }
+    return default_value;
 }
 
 template <typename T>
@@ -463,11 +493,6 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     }
     return boost::optional<T>();
 }
-
-using property_meta_type = std::tuple<const char*, mapnik::symbolizer_base::value_type, std::function<std::string(enumeration_wrapper)>, property_types>;
-MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
-MAPNIK_DECL mapnik::keys get_key(std::string const& name);
-
 
 }
 

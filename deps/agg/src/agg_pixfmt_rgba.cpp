@@ -1,8 +1,14 @@
+
 #include "agg_pixfmt_rgba.h"
+
+// boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/gil/gil_all.hpp>
 #include <boost/gil/extension/toolbox/hsv.hpp>
 #include <boost/gil/extension/toolbox/hsl.hpp>
-//#include <iostream>
+#pragma GCC diagnostic pop
 
 namespace agg
 {

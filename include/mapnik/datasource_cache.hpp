@@ -48,7 +48,7 @@ class MAPNIK_DECL datasource_cache
 public:
     std::vector<std::string> plugin_names();
     std::string plugin_directories();
-    void register_datasources(std::string const& path);
+    bool register_datasources(std::string const& path, bool recurse = false);
     bool register_datasource(std::string const& path);
     std::shared_ptr<datasource> create(parameters const& params);
 private:

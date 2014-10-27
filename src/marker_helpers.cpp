@@ -32,16 +32,16 @@ void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, a
 {
     double width = 0.0;
     double height = 0.0;
-    if (has_key<double>(sym,keys::width) && has_key<double>(sym,keys::height))
+    if (has_key(sym,keys::width) && has_key(sym,keys::height))
     {
         width = get<double>(sym, keys::width, feature, vars, 0.0);
         height = get<double>(sym, keys::height, feature, vars, 0.0);
     }
-    else if (has_key<double>(sym,keys::width))
+    else if (has_key(sym,keys::width))
     {
         width = height = get<double>(sym, keys::width, feature, vars, 0.0);
     }
-    else if (has_key<double>(sym,keys::height))
+    else if (has_key(sym,keys::height))
     {
         width = height = get<double>(sym, keys::height, feature, vars, 0.0);
     }

@@ -25,8 +25,14 @@
 
 // mapnik
 #include <mapnik/svg/output/svg_output_grammars.hpp>
+
+// boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/fusion/include/std_pair.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace svg {
 

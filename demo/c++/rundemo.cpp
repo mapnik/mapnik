@@ -28,6 +28,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/formatting/text.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -44,18 +45,16 @@
 #include <iostream>
 
 
-int main ( int argc , char** argv)
+int main ( int, char** )
 {
     using namespace mapnik;
-    const std::string srs_lcc="+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 \
-                           +datum=NAD83 +units=m +no_defs";
-    const std::string srs_merc="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 \
-                           +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over";
+    const std::string srs_lcc="+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs";
+    const std::string srs_merc="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over";
 
     try {
         std::cout << " running demo ... \n";
         datasource_cache::instance().register_datasources("plugins/input/");
-        freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.33/ttf/DejaVuSans.ttf");
+        freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.34/ttf/DejaVuSans.ttf");
 
         Map m(800,600);
         m.set_background(parse_color("white"));
@@ -215,7 +214,7 @@ int main ( int argc , char** argv)
                 placement_finder->defaults.format_defaults.fill = color(0,0,0);
                 placement_finder->defaults.format_defaults.halo_fill = color(255,255,200);
                 placement_finder->defaults.format_defaults.halo_radius = 1.0;
-                placement_finder->defaults.set_old_style_expression(parse_expression("[GEONAME]"));
+                placement_finder->defaults.set_format_tree(std::make_shared<mapnik::formatting::text_node>(parse_expression("[GEONAME]")));
                 put<text_placements_ptr>(text_sym, keys::text_placements_, placement_finder);
                 r.append(std::move(text_sym));
             }

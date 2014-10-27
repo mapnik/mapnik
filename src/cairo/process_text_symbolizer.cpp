@@ -36,8 +36,8 @@ class proj_transform;
 
 template <typename T>
 void cairo_renderer<T>::process(shield_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl & feature,
+                                proj_transform const& prj_trans)
 {
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
@@ -64,7 +64,7 @@ void cairo_renderer<T>::process(shield_symbolizer const& sym,
                           glyphs->marker()->transform,
                           opacity);
         }
-        context_.add_text(glyphs, face_manager_, common_.font_manager_, comp_op, halo_comp_op, common_.scale_factor_);
+        context_.add_text(*glyphs, face_manager_, common_.font_manager_, comp_op, halo_comp_op, common_.scale_factor_);
     }
 }
 
@@ -94,7 +94,7 @@ void cairo_renderer<T>::process(text_symbolizer const& sym,
     placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
     {
-        context_.add_text(glyphs, face_manager_, common_.font_manager_, comp_op, halo_comp_op, common_.scale_factor_);
+        context_.add_text(*glyphs, face_manager_, common_.font_manager_, comp_op, halo_comp_op, common_.scale_factor_);
     }
 }
 

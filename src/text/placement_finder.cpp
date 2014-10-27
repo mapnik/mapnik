@@ -28,7 +28,7 @@
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/text/vertex_cache.hpp>
 
 // agg
@@ -44,7 +44,7 @@ placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
                                    DetectorType &detector,
                                    box2d<double> const& extent,
-                                   text_placement_info & placement_info,
+                                   text_placement_info const& placement_info,
                                    face_manager_freetype & font_manager,
                                    double scale_factor)
     : feature_(feature),
@@ -52,6 +52,7 @@ placement_finder::placement_finder(feature_impl const& feature,
       detector_(detector),
       extent_(extent),
       info_(placement_info),
+      text_props_(evaluate_text_properties(info_.properties,feature_,attr_)),
       scale_factor_(scale_factor),
       font_manager_(font_manager),
       placements_(),
@@ -63,13 +64,26 @@ bool placement_finder::next_position()
 {
     if (info_.next())
     {
-        text_layout_ptr layout = std::make_shared<text_layout>(font_manager_, scale_factor_, info_.properties.layout_defaults);
-        layout->evaluate_properties(feature_, attr_);
-        move_dx_ = layout->displacement().x;
-        info_.properties.process(*layout, feature_, attr_);
-        layouts_.clear(); // FIXME !!!!
+        // parent layout, has top-level ownership of a new evaluated_format_properties_ptr (TODO is this good enough to stay in scope???)
+        // but does not take ownership of the text_symbolizer_properties (info_.properties)
+        text_layout_ptr layout = std::make_shared<text_layout>(font_manager_,
+                                                               feature_,
+                                                               attr_,
+                                                               scale_factor_,
+                                                               info_.properties,
+                                                               info_.properties.layout_defaults,
+                                                               info_.properties.format_tree());
+        // TODO: why is this call needed?
+        // https://github.com/mapnik/mapnik/issues/2525
+        text_props_ = evaluate_text_properties(info_.properties,feature_,attr_);
+        // Note: this clear call is needed when multiple placements are tried
+        // like with placement-type="simple|list"
+        if (!layouts_.empty()) layouts_.clear();
+        // Note: multiple layouts_ may result from this add() call
         layouts_.add(layout);
         layouts_.layout();
+        // cache a few values for use elsewhere in placement finder
+        move_dx_ = layout->displacement().x;
         horizontal_alignment_ = layout->horizontal_alignment();
         return true;
     }
@@ -147,7 +161,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
             for (auto const& glyph : line)
             {
                 // place the character relative to the center of the string envelope
-                glyphs->push_back(glyph, (pixel_position(x, y).rotate(orientation)) + layout_offset, orientation);
+                glyphs->emplace_back(glyph, (pixel_position(x, y).rotate(orientation)) + layout_offset, orientation);
                 if (glyph.advance())
                 {
                     //Only advance if glyph is not part of a multiple glyph sequence
@@ -192,17 +206,30 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
         double offset = layout_displacement.y + 0.5 * sign * layout.height();
-        bool move_by_length = layout.horizontal_alignment() == H_ADJUST;
+        double adjust_character_spacing = .0;
+        double layout_width = layout.width();
+        bool adjust = layout.horizontal_alignment() == H_ADJUST;
+
+        if (adjust)
+        {
+            text_layout::const_iterator longest_line = layout.longest_line();
+            if (longest_line != layout.end())
+            {
+                adjust_character_spacing = (pp.length() - longest_line->glyphs_width()) / longest_line->space_count();
+                layout_width = longest_line->glyphs_width() + longest_line->space_count() * adjust_character_spacing;
+            }
+        }
 
         for (auto const& line : layout)
         {
             // Only subtract half the line height here and half at the end because text is automatically
             // centered on the line
             offset -= sign * line.height()/2;
-            vertex_cache & off_pp = pp.get_offseted(offset, sign*layout.width());
+            vertex_cache & off_pp = pp.get_offseted(offset, sign * layout_width);
             vertex_cache::scoped_state off_state(off_pp); // TODO: Remove this when a clean implementation in vertex_cache::get_offseted is done
+            double line_width = adjust ? (line.glyphs_width() + line.space_count() * adjust_character_spacing) : line.width();
 
-            if (!off_pp.move(sign * layout.jalign_offset(line.width()) - align_offset.x)) return false;
+            if (!off_pp.move(sign * layout.jalign_offset(line_width) - align_offset.x)) return false;
 
             double last_cluster_angle = 999;
             int current_cluster = -1;
@@ -215,24 +242,24 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
                 {
-                    if (move_by_length)
+                    if (adjust)
                     {
                         if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
                             return false;
+                        last_glyph_spacing = adjust_character_spacing;
                     }
                     else
                     {
                         if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
                             return false;
+                        last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                     }
-
                     current_cluster = glyph.char_index;
-                    last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                     // Only calculate new angle at the start of each cluster!
                     angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
-                    if ((info_.properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
-                            std::fabs(normalize_angle(angle-last_cluster_angle)) > info_.properties.max_char_angle_delta)
+                    if ((text_props_->max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
+                        std::fabs(normalize_angle(angle-last_cluster_angle)) > text_props_->max_char_angle_delta)
                     {
                         return false;
                     }
@@ -254,7 +281,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 box2d<double> bbox = get_bbox(layout, glyph, pos, rot);
                 if (collision(bbox, layouts_.text(), true)) return false;
                 bboxes.push_back(std::move(bbox));
-                glyphs->push_back(glyph, pos, rot);
+                glyphs->emplace_back(glyph, pos, rot);
             }
             // See comment above
             offset -= sign * line.height()/2;
@@ -307,10 +334,10 @@ double placement_finder::normalize_angle(double angle)
 double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
-    if (info_.properties.label_spacing > 0)
+    if (horizontal_alignment_ != H_ADJUST && text_props_->label_spacing > 0)
     {
         num_labels = static_cast<int>(std::floor(
-            path_length / (info_.properties.label_spacing * scale_factor_ + layout_width)));
+                                          path_length / (text_props_->label_spacing * scale_factor_ + layout_width)));
     }
     if (num_labels <= 0)
     {
@@ -324,25 +351,25 @@ bool placement_finder::collision(const box2d<double> &box, const value_unicode_s
     double margin, repeat_distance;
     if (line_placement)
     {
-        margin = info_.properties.margin * scale_factor_;
-        repeat_distance = (info_.properties.repeat_distance != 0 ? info_.properties.repeat_distance : info_.properties.minimum_distance) * scale_factor_;
+        margin = text_props_->margin * scale_factor_;
+        repeat_distance = (text_props_->repeat_distance != 0 ? text_props_->repeat_distance : text_props_->minimum_distance) * scale_factor_;
     }
     else
     {
-        margin = (info_.properties.margin != 0 ? info_.properties.margin : info_.properties.minimum_distance) * scale_factor_;
-        repeat_distance = info_.properties.repeat_distance * scale_factor_;
+        margin = (text_props_->margin != 0 ? text_props_->margin : text_props_->minimum_distance) * scale_factor_;
+        repeat_distance = text_props_->repeat_distance * scale_factor_;
     }
     return !detector_.extent().intersects(box)
-               ||
-           (info_.properties.avoid_edges && !extent_.contains(box))
-               ||
-           (info_.properties.minimum_padding > 0 &&
-            !extent_.contains(box + (scale_factor_ * info_.properties.minimum_padding)))
-               ||
-           (!info_.properties.allow_overlap &&
-               ((repeat_key.length() == 0 && !detector_.has_placement(box, margin))
-                   ||
-               (repeat_key.length() > 0 && !detector_.has_placement(box, margin, repeat_key, repeat_distance))));
+        ||
+        (text_props_->avoid_edges && !extent_.contains(box))
+        ||
+        (text_props_->minimum_padding > 0 &&
+         !extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
+        ||
+        (!text_props_->allow_overlap &&
+         ((repeat_key.length() == 0 && !detector_.has_placement(box, margin))
+          ||
+          (repeat_key.length() > 0 && !detector_.has_placement(box, margin, repeat_key, repeat_distance))));
 }
 
 void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement)
@@ -370,14 +397,14 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
 {
     /*
 
-          (0/ymax)           (width/ymax)
-               ***************
-               *             *
-          (0/0)*             *
-               *             *
-               ***************
-          (0/ymin)          (width/ymin)
-          Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
+      (0/ymax)           (width/ymax)
+      ***************
+      *             *
+      (0/0)*             *
+      *             *
+      ***************
+      (0/ymin)          (width/ymin)
+      Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
     */
     double width = layout.cluster_width(glyph.char_index);
     if (glyph.advance() <= 0) width = -width;
@@ -397,60 +424,6 @@ box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info c
     pixel_position pos2 = pos + pixel_position(0, glyph.offset.y).rotate(rot);
     bbox.move(pos2.x , -pos2.y);
     return bbox;
-}
-
-
-glyph_positions::glyph_positions()
-    : data_(),
-      base_point_(),
-      marker_(),
-      marker_pos_(),
-      bbox_() {}
-
-glyph_positions::const_iterator glyph_positions::begin() const
-{
-    return data_.begin();
-}
-
-glyph_positions::const_iterator glyph_positions::end() const
-{
-    return data_.end();
-}
-
-void glyph_positions::push_back(glyph_info const& glyph, pixel_position const offset, rotation const& rot)
-{
-    data_.push_back(glyph_position(glyph, offset, rot));
-}
-
-void glyph_positions::reserve(unsigned count)
-{
-    data_.reserve(count);
-}
-
-pixel_position const& glyph_positions::get_base_point() const
-{
-    return base_point_;
-}
-
-void glyph_positions::set_base_point(pixel_position const base_point)
-{
-    base_point_ = base_point;
-}
-
-void glyph_positions::set_marker(marker_info_ptr marker, pixel_position const& marker_pos)
-{
-    marker_ = marker;
-    marker_pos_ = marker_pos;
-}
-
-marker_info_ptr glyph_positions::marker() const
-{
-    return marker_;
-}
-
-pixel_position const& glyph_positions::marker_pos() const
-{
-    return marker_pos_;
 }
 
 }// ns mapnik

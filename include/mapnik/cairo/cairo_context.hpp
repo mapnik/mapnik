@@ -31,7 +31,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
-#include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/symbolizer_base.hpp>
@@ -195,7 +195,7 @@ private:
 class cairo_gradient : private mapnik::noncopyable
 {
 public:
-    cairo_gradient(const mapnik::gradient &grad, double opacity=1.0)
+    cairo_gradient(mapnik::gradient const& grad, double opacity=1.0)
     {
         double x1,x2,y1,y2,rad;
         grad.get_control_points(x1,y1,x2,y2,rad);
@@ -203,7 +203,7 @@ public:
         {
             pattern_ = cairo_pattern_create_linear(x1, y1, x2, y2);
         }
-        else if (grad.get_gradient_type() == RADIAL)
+        else
         {
             pattern_ = cairo_pattern_create_radial(x1, y1, 0,  x2, y2, rad);
         }
@@ -319,7 +319,7 @@ public:
     void restore();
     void show_glyph(unsigned long index, pixel_position const& pos);
     void glyph_path(unsigned long index, pixel_position const& pos);
-    void add_text(glyph_positions_ptr pos,
+    void add_text(glyph_positions const& pos,
                   cairo_face_manager & manager,
                   face_manager_freetype & font_manager,
                   composite_mode_e comp_op = src_over,

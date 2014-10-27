@@ -140,6 +140,8 @@ inline std::string symbolizer_name(symbolizer const& sym)
     return type;
 }
 
+// https://github.com/mapnik/mapnik/issues/2324
+/*
 
 template <typename Meta>
 class symbolizer_property_value_string : public util::static_visitor<std::string>
@@ -151,7 +153,7 @@ public:
     std::string operator() ( mapnik::enumeration_wrapper const& e) const
     {
         std::stringstream ss;
-        auto const& convert_fun_ptr(std::get<2>(meta_));
+        auto const& convert_fun_ptr(std::get<1>(meta_));
         if ( convert_fun_ptr )
         {
             ss << convert_fun_ptr(e);
@@ -194,7 +196,7 @@ public:
         std::ostringstream ss;
         if (expr)
         {
-            ss << '\"' << "FIXME" /*mapnik::to_expression_string(*expr)*/ <<  '\"';
+            ss << '\"' << "FIXME" <<  '\"';
         }
         return ss.str();
     }
@@ -253,12 +255,14 @@ struct symbolizer_to_json : public util::static_visitor<std::string>
     }
 };
 
+*/
+
 namespace {
 
 template <typename Symbolizer, typename T>
 struct set_property_impl
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer &, mapnik::keys, std::string const&)
     {
         std::cerr << "do nothing" << std::endl;
     }
@@ -276,7 +280,7 @@ struct set_property_impl<Symbolizer, std::integral_constant<property_types, prop
 template <typename Symbolizer>
 struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double> >
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer &, mapnik::keys, std::string const&)
     {
         std::cerr << " expects double" << std::endl;
     }
@@ -285,7 +289,7 @@ struct set_property_impl<Symbolizer, std::integral_constant<property_types, prop
 template <typename Symbolizer>
 struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer &, mapnik::keys, std::string const&)
     {
         std::cerr << " expects bool" << std::endl;
     }
@@ -296,7 +300,7 @@ struct set_property_impl<Symbolizer, std::integral_constant<property_types, prop
 template <typename Symbolizer, typename T>
 inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
 {
-    switch (std::get<3>(get_meta(key)))
+    switch (std::get<2>(get_meta(key)))
     {
     case property_types::target_bool:
         set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >::apply(sym,key,val);
@@ -318,7 +322,7 @@ inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
 template <typename Symbolizer, typename T>
 inline void set_property_from_value(Symbolizer & sym, mapnik::keys key, T const& val)
 {
-    switch (std::get<3>(get_meta(key)))
+    switch (std::get<2>(get_meta(key)))
     {
     case property_types::target_bool:
         put(sym, key, val.to_bool());
