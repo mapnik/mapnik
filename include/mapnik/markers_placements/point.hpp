@@ -41,7 +41,7 @@ struct markers_placement_params
 };
 
 template <typename Locator, typename Detector>
-class markers_point_placement
+class markers_point_placement : noncopyable
 {
 public:
     markers_point_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
@@ -52,6 +52,14 @@ public:
     {
         rewind();
     }
+
+    markers_point_placement(markers_point_placement && rhs)
+        : locator_(rhs.locator_),
+          detector_(rhs.detector_),
+          params_(rhs.params_),
+          done_(rhs.done_)
+    {}
+
 
     // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
     void rewind()

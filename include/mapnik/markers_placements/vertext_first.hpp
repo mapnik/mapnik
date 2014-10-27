@@ -36,6 +36,10 @@ public:
     {
     }
 
+    markers_vertex_first_placement(markers_vertex_first_placement && rhs)
+        : markers_point_placement<Locator, Detector>(std::move(rhs))
+    {}
+
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
         if (this->done_)

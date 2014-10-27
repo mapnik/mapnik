@@ -32,7 +32,12 @@ class markers_vertex_last_placement : public markers_point_placement<Locator, De
 {
 public:
     markers_vertex_last_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
-        : markers_point_placement<Locator, Detector>(locator, detector, params) {}
+        : markers_point_placement<Locator, Detector>(locator, detector, params)
+    {}
+
+    markers_vertex_last_placement(markers_vertex_last_placement && rhs)
+        : markers_point_placement<Locator, Detector>(std::move(rhs))
+    {}
 
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {

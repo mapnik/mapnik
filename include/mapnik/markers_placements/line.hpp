@@ -52,6 +52,19 @@ public:
         rewind();
     }
 
+    markers_line_placement(markers_line_placement && rhs)
+        : markers_point_placement<Locator, Detector>(std::move(rhs)),
+          last_x(std::move(rhs.last_x)),
+          last_y(std::move(rhs.last_y)),
+          next_x(std::move(rhs.next_x)),
+          next_y(std::move(rhs.next_y)),
+          spacing_(std::move(rhs.spacing_)),
+          marker_width_(std::move(rhs.marker_width_)),
+          error_(std::move(rhs.error_)),
+          spacing_left_(std::move(rhs.spacing_left_)),
+          marker_nr_(std::move(rhs.marker_nr_))
+    {}
+
     void rewind()
     {
         this->locator_.rewind(0);
