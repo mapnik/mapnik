@@ -82,29 +82,37 @@ namespace mapnik {
                 continue;
             }
 
-            extract<std::string> ex0(obj);
-            if (ex0.check())
+            if (PyBool_Check(obj.ptr()))
             {
-                vars[key] = tr_.transcode(ex0().c_str());
-                continue;
+                extract<mapnik::value_bool> ex(obj);
+                if (ex.check())
+                {
+                    vars[key] = ex();
+                }
             }
-            extract<mapnik::value_integer> ex2(obj);
-            if (ex2.check())
+            else if (PyFloat_Check(obj.ptr()))
             {
-                vars[key] = ex2();
-                continue;
+                extract<mapnik::value_double> ex(obj);
+                if (ex.check())
+                {
+                    vars[key] = ex();
+                }
             }
-            extract<double> ex3(obj);
-            if (ex3.check())
+            else
             {
-                vars[key] = ex3();
-                continue;
-            }
-            extract<mapnik::value_bool> ex1(obj);
-            if (ex1.check())
-            {
-                vars[key] = ex1();
-                continue;
+                extract<mapnik::value_integer> ex(obj);
+                if (ex.check())
+                {
+                    vars[key] = ex();
+                }
+                else
+                {
+                    extract<std::string> ex0(obj);
+                    if (ex0.check())
+                    {
+                        vars[key] = tr_.transcode(ex0().c_str());
+                    }
+                }
             }
         }
         return vars;
