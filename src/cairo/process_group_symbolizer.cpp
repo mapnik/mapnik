@@ -59,13 +59,6 @@ struct thunk_renderer : public util::static_visitor<>
           common_(common), offset_(offset)
     {}
 
-    void operator()(point_render_thunk const &thunk) const
-    {
-        pixel_position new_pos(thunk.pos_.x + offset_.x, thunk.pos_.y + offset_.y);
-        ren_.render_marker(new_pos, *thunk.marker_, thunk.tr_, thunk.opacity_,
-                           thunk.comp_op_);
-    }
-
     void operator()(vector_marker_render_thunk const &thunk) const
     {
         cairo_save_restore guard(context_);

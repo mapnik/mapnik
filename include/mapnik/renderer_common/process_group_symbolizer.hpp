@@ -103,25 +103,6 @@ struct virtual_renderer_common : private mapnik::noncopyable
 // stores all the arguments necessary to re-render this point
 // symbolizer at a later time.
 
-struct point_render_thunk : noncopyable
-{
-    pixel_position pos_;
-    marker_ptr marker_;
-    agg::trans_affine tr_;
-    double opacity_;
-    composite_mode_e comp_op_;
-
-    point_render_thunk(pixel_position const& pos, marker const& m,
-                       agg::trans_affine const& tr, double opacity,
-                       composite_mode_e comp_op);
-    point_render_thunk(point_render_thunk && rhs)
-      : pos_(std::move(rhs.pos_)),
-        marker_(std::move(rhs.marker_)),
-        tr_(std::move(rhs.tr_)),
-        opacity_(std::move(rhs.opacity_)),
-        comp_op_(std::move(rhs.comp_op_)) {}
-};
-
 struct vector_marker_render_thunk
 {
     svg_path_ptr src_;
@@ -197,8 +178,7 @@ struct text_render_thunk : noncopyable
 // Variant type for render thunks to allow us to re-render them
 // via a static visitor later.
 
-using render_thunk = util::variant<point_render_thunk,
-                                   vector_marker_render_thunk,
+using render_thunk = util::variant<vector_marker_render_thunk,
                                    raster_marker_render_thunk,
                                    text_render_thunk>;
 using render_thunk_ptr = std::unique_ptr<render_thunk>;
@@ -219,8 +199,6 @@ struct render_thunk_extractor : public util::static_visitor<>
                            proj_transform const& prj_trans,
                            virtual_renderer_common & common,
                            box2d<double> const& clipping_extent);
-
-    void operator()(point_symbolizer const& sym) const;
 
     void operator()(markers_symbolizer const& sym) const;
 

@@ -74,12 +74,6 @@ struct thunk_renderer : public util::static_visitor<>
           common_(common), feature_(feature), offset_(offset)
     {}
 
-    void operator()(point_render_thunk const &thunk) const
-    {
-        ren_.render_marker(feature_, offset_ + thunk.pos_,
-                           *thunk.marker_, thunk.tr_, thunk.opacity_, thunk.comp_op_);
-    }
-
     void operator()(vector_marker_render_thunk const &thunk) const
     {
         using buf_type = grid_rendering_buffer;
