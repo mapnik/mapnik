@@ -289,7 +289,7 @@ struct evaluate_expression_wrapper<mapnik::color>
     mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        if (val.is_null()) return mapnik::color(255,192,203); // pink
+        if (val.is_null()) return mapnik::color(0,0,0,0); // transparent
         return mapnik::color(val.to_string());
     }
 };
@@ -400,14 +400,10 @@ struct extract_raw_value : public util::static_visitor<T1>
     }
 };
 
-
-//
-
 using property_meta_type = std::tuple<const char*, std::function<std::string(enumeration_wrapper)>, property_types>;
 MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
 MAPNIK_DECL mapnik::keys get_key(std::string const& name);
 
-//
 template <typename T>
 void put(symbolizer_base & sym, keys key, T const& val)
 {
