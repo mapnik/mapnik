@@ -432,7 +432,6 @@ void cairo_context::glyph_path(unsigned long index, pixel_position const &pos)
 
 void cairo_context::add_text(glyph_positions const& pos,
                              cairo_face_manager & manager,
-                             face_manager_freetype & font_manager,
                              composite_mode_e comp_op,
                              composite_mode_e halo_comp_op,
                              double scale_factor)

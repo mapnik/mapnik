@@ -80,7 +80,7 @@ struct thunk_renderer : public util::static_visitor<>
                                        glyphs->marker()->transform,
                                        thunk.opacity_, thunk.comp_op_);
                 }
-                context_.add_text(*glyphs, face_manager_, common_.font_manager_, src_over, src_over, common_.scale_factor_);
+                context_.add_text(*glyphs, face_manager_, src_over, src_over, common_.scale_factor_);
             });
     }
 
