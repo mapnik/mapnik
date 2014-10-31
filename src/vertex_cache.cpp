@@ -45,14 +45,12 @@ vertex_cache::vertex_cache(vertex_cache && rhs)
 
 double vertex_cache::current_segment_angle()
 {
-    return std::atan2(-(current_segment_->pos.y - segment_starting_point_.y),
-                   current_segment_->pos.x - segment_starting_point_.x);
+    return std::atan2(current_segment_->pos.y - segment_starting_point_.y,
+                      current_segment_->pos.x - segment_starting_point_.x);
 }
 
 double vertex_cache::angle(double width)
 {
-    // IMPORTANT NOTE: See note about coordinate systems in placement_finder::find_point_placement()
-    // for imformation about why the y axis is inverted!
     double tmp = width + position_in_segment_;
     if ((tmp <= current_segment_->length) && (tmp >= 0))
     {
@@ -68,8 +66,8 @@ double vertex_cache::angle(double width)
         if (move(width))
         {
             pixel_position const& old_pos = s.get_state().position();
-            return std::atan2(-(current_position_.y - old_pos.y),
-                           current_position_.x - old_pos.x);
+            return std::atan2(current_position_.y - old_pos.y,
+                              current_position_.x - old_pos.x);
         }
         else
         {
