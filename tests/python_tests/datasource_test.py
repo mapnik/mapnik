@@ -13,6 +13,33 @@ def test_that_datasources_exist():
     if len(mapnik.DatasourceCache.plugin_names()) == 0:
         print '***NOTICE*** - no datasource plugins have been loaded'
 
+# adapted from raster_symboliser_test#test_dataraster_query_point
+def test_vrt_referring_to_missing_files():
+    srs = '+init=epsg:32630'
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
+        lyr = mapnik.Layer('dataraster')
+        lyr.datasource = mapnik.Gdal(
+            file = '../data/raster/missing_raster.vrt',
+            band = 1,
+            )
+        lyr.srs = srs
+        _map = mapnik.Map(256, 256, srs)
+        _map.layers.append(lyr)
+
+        # center of extent of raster
+        x, y = 556113.0,4381428.0 # center of extent of raster
+
+        _map.zoom_all()
+
+        # Should RuntimeError here
+        try:
+            _map.query_point(0, x, y).features
+        except RuntimeError, e:
+            eq_("this_file_should_not_exist.tif' does not exist in the file system" in str(e), True)
+        else:
+            assert False
+
+
 def test_field_listing():
     if 'shape' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
