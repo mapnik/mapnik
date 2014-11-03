@@ -204,7 +204,7 @@ private:
             return SEG_CLOSE;
         }
 
-        vertex2d last(vertex2d::no_init);
+        vertex2d last;
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
@@ -217,7 +217,7 @@ private:
                     // continue
                 }
             } else if (vtx.cmd == SEG_CLOSE) {
-                if (last.cmd == vertex2d::no_init) {
+                if (last.cmd == SEG_END) {
                     // The previous vertex was already output in the previous call.
                     // We can now safely output SEG_CLOSE.
                     status_ = end;
