@@ -293,6 +293,7 @@ files = {
     'postgis-inline':{'sizes':[(512,512)]},
     'text-line-wrap':{'sizes':[(512,512)]},
     'text-data-binding': {'sizes': [(500, 500)]},
+    'simplify': {'sizes': [(2000, 2000)]},
     }
 
 class Reporting:

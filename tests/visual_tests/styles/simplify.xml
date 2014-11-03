@@ -1,0 +1,36 @@
+<Map background-color="white" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+    <Style name="lines">
+        <Rule>
+            <LineSymbolizer simplify-algorithm="[algorithm]" simplify="[simplify]" geometry-transform="scale(0.25) translate([tx], [ty])" />
+        </Rule>
+    </Style>
+    <Layer name="world" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+        <StyleName>lines</StyleName>
+        <Datasource>
+           <Parameter name="type">sqlite</Parameter>
+           <Parameter name="file">../../data/sqlite/world.sqlite</Parameter>
+           <Parameter name="use_spatial_index">true</Parameter>
+           <Parameter name="table">
+               (SELECT *, 'radial-distance' as algorithm,  10 as simplify,    0 as tx, 0 as ty FROM world_merc UNION ALL
+                SELECT *, 'radial-distance' as algorithm,  40 as simplify, 2000 as tx, 0 as ty FROM world_merc UNION ALL
+                SELECT *, 'radial-distance' as algorithm, 160 as simplify, 4000 as tx, 0 as ty FROM world_merc UNION ALL
+                SELECT *, 'radial-distance' as algorithm, 640 as simplify, 6000 as tx, 0 as ty FROM world_merc UNION ALL
+
+                SELECT *, 'zhao-saalfeld' as algorithm,  1 as simplify,    0 as tx, 2000 as ty FROM world_merc UNION ALL
+                SELECT *, 'zhao-saalfeld' as algorithm,  2 as simplify, 2000 as tx, 2000 as ty FROM world_merc UNION ALL
+                SELECT *, 'zhao-saalfeld' as algorithm,  4 as simplify, 4000 as tx, 2000 as ty FROM world_merc UNION ALL
+                SELECT *, 'zhao-saalfeld' as algorithm, 10 as simplify, 6000 as tx, 2000 as ty FROM world_merc UNION ALL
+
+                SELECT *, 'visvalingam-whyatt' as algorithm, 10 as simplify,    0 as tx, 4000 as ty FROM world_merc UNION ALL
+                SELECT *, 'visvalingam-whyatt' as algorithm, 20 as simplify, 2000 as tx, 4000 as ty FROM world_merc UNION ALL
+                SELECT *, 'visvalingam-whyatt' as algorithm, 40 as simplify, 4000 as tx, 4000 as ty FROM world_merc UNION ALL
+                SELECT *, 'visvalingam-whyatt' as algorithm, 80 as simplify, 6000 as tx, 4000 as ty FROM world_merc UNION ALL
+
+                SELECT *, 'douglas-peucker' as algorithm,  2 as simplify,    0 as tx, 6000 as ty FROM world_merc UNION ALL
+                SELECT *, 'douglas-peucker' as algorithm,  4 as simplify, 2000 as tx, 6000 as ty FROM world_merc UNION ALL
+                SELECT *, 'douglas-peucker' as algorithm,  8 as simplify, 4000 as tx, 6000 as ty FROM world_merc UNION ALL
+                SELECT *, 'douglas-peucker' as algorithm, 16 as simplify, 6000 as tx, 6000 as ty FROM world_merc)
+           </Parameter>
+        </Datasource>
+    </Layer>
+</Map>
