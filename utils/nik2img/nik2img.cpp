@@ -5,6 +5,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
@@ -27,6 +28,8 @@ int main (int argc,char** argv)
     int return_value = 0;
     std::string xml_file;
     std::string img_file;
+    double scale_factor = 1;
+    bool params_as_variables = false;
     mapnik::logger logger;
     logger.set_severity(mapnik::logger::error);
 
@@ -40,6 +43,8 @@ int main (int argc,char** argv)
             ("open","automatically open the file after rendering (os x only)")
             ("xml",po::value<std::string>(),"xml map to read")
             ("img",po::value<std::string>(),"image to render")
+            ("scale-factor",po::value<double>(),"scale factor for rendering")
+            ("variables","make map parameters available as render-time variables")
             ;
 
         po::positional_options_description p;
@@ -91,13 +96,47 @@ int main (int argc,char** argv)
             return -1;
         }
 
+        if (vm.count("scale-factor"))
+        {
+            scale_factor=vm["scale-factor"].as<double>();
+        }
+
+        if (vm.count("variables"))
+        {
+            params_as_variables = true;
+        }
+
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         mapnik::freetype_engine::register_fonts("./fonts",true);
         mapnik::Map map(600,400);
         mapnik::load_map(map,xml_file,true);
         map.zoom_all();
         mapnik::image_32 im(map.width(),map.height());
-        mapnik::agg_renderer<mapnik::image_32> ren(map,im);
+        mapnik::request req(map.width(),map.height(),map.get_current_extent());
+        req.set_buffer_size(map.buffer_size());
+        mapnik::attributes vars;
+        mapnik::transcoder tr("utf-8");
+        for (auto const& param : map.get_extra_parameters())
+        {
+            std::string const& name = param.first.substr(1);
+            if (!name.empty())
+            {
+                if (param.second.is<mapnik::value_integer>())
+                {
+                    vars[name] = param.second.get<mapnik::value_integer>();
+                }
+                else if (param.second.is<mapnik::value_double>())
+                {
+                    vars[name] = param.second.get<mapnik::value_double>();
+                }
+                else if (param.second.is<std::string>())
+                {
+                    vars[name] = tr.transcode(param.second.get<std::string>().c_str());
+                    std::clog << name << " " << param.second.get<std::string>() << "\n";
+                }
+            }
+        }
+        mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,im,scale_factor,0,0);
         ren.apply();
         mapnik::save_to_file(im,img_file);
         if (auto_open)
