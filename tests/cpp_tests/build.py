@@ -12,6 +12,8 @@ if not env['CPP_TESTS']:
 else:
     test_env['LIBS'] = [env['MAPNIK_NAME']]
     test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
+    test_env.AppendUnique(LIBS='mapnik-wkt')
+    test_env.AppendUnique(LIBS='mapnik-json')
     if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
         test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(CXXFLAGS='-g')
@@ -43,6 +45,8 @@ else:
                 source_files += glob.glob('../../plugins/input/csv/' + '*.cpp')
             test_program = test_env_local.Program(name, source=source_files)
             Depends(test_program, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+            Depends(test_program, env.subst('../../src/json/libmapnik-json${LIBSUFFIX}'))
+            Depends(test_program, env.subst('../../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
         # build locally if installing
         if 'install' in COMMAND_LINE_TARGETS:
             env.Alias('install',test_program)
