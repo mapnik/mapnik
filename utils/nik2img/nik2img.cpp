@@ -115,26 +115,29 @@ int main (int argc,char** argv)
         mapnik::request req(map.width(),map.height(),map.get_current_extent());
         req.set_buffer_size(map.buffer_size());
         mapnik::attributes vars;
-        mapnik::transcoder tr("utf-8");
-        for (auto const& param : map.get_extra_parameters())
+        if (params_as_variables)
         {
-            std::string const& name = param.first.substr(1);
-            if (!name.empty())
+            mapnik::transcoder tr("utf-8");
+            for (auto const& param : map.get_extra_parameters())
             {
-                if (param.second.is<mapnik::value_integer>())
+                std::string const& name = param.first.substr(1);
+                if (!name.empty())
                 {
-                    vars[name] = param.second.get<mapnik::value_integer>();
+                    if (param.second.is<mapnik::value_integer>())
+                    {
+                        vars[name] = param.second.get<mapnik::value_integer>();
+                    }
+                    else if (param.second.is<mapnik::value_double>())
+                    {
+                        vars[name] = param.second.get<mapnik::value_double>();
+                    }
+                    else if (param.second.is<std::string>())
+                    {
+                        vars[name] = tr.transcode(param.second.get<std::string>().c_str());
+                        std::clog << name << " " << param.second.get<std::string>() << "\n";
+                    }
                 }
-                else if (param.second.is<mapnik::value_double>())
-                {
-                    vars[name] = param.second.get<mapnik::value_double>();
-                }
-                else if (param.second.is<std::string>())
-                {
-                    vars[name] = tr.transcode(param.second.get<std::string>().c_str());
-                    std::clog << name << " " << param.second.get<std::string>() << "\n";
-                }
-            }
+            }            
         }
         mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,im,scale_factor,0,0);
         ren.apply();
