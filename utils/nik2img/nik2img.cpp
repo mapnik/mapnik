@@ -134,7 +134,6 @@ int main (int argc,char** argv)
                     else if (param.second.is<std::string>())
                     {
                         vars[name] = tr.transcode(param.second.get<std::string>().c_str());
-                        std::clog << name << " " << param.second.get<std::string>() << "\n";
                     }
                 }
             }            
