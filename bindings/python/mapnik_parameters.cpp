@@ -162,6 +162,11 @@ mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
     throw boost::python::error_already_set();
 }
 
+unsigned get_params_size(mapnik::parameters const& p)
+{
+    return p.size();
+}
+
 void add_parameter(mapnik::parameters & p, mapnik::parameter const& param)
 {
     p[param.first] = param.second;
@@ -227,7 +232,7 @@ void export_parameters()
         .def("get",get_params_by_key1)
         .def("__getitem__",get_params_by_key2)
         .def("__getitem__",get_params_by_index)
-        .def("__len__",&parameters::size)
+        .def("__len__",get_params_size)
         .def("append",add_parameter)
         .def("iteritems",iterator<parameters>())
         ;
