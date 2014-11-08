@@ -231,7 +231,7 @@ public:
 
     /*! \brief register fonts.
      */
-    bool register_fonts(std::string const& dir, bool recurse);
+    bool register_fonts(std::string const& dir, bool recurse = false);
 
     /*! \brief cache registered fonts.
      */
