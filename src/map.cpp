@@ -340,6 +340,9 @@ void Map::remove_all()
 {
     layers_.clear();
     styles_.clear();
+    fontsets_.clear();
+    font_file_mapping_.clear();
+    font_memory_cache_.clear();
 }
 
 layer const& Map::get_layer(size_t index) const
