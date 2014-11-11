@@ -97,6 +97,7 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     template <typename T> vertex_cache(T &path);
+    vertex_cache(vertex_cache && rhs);
 
     double length() const { return current_subpath_->length; }
 
