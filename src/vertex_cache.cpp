@@ -21,7 +21,7 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/text/vertex_cache.hpp>
+#include <mapnik/vertex_cache.hpp>
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/make_unique.hpp>
 

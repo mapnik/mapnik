@@ -29,7 +29,7 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/glyph_positions.hpp>
-#include <mapnik/text/vertex_cache.hpp>
+#include <mapnik/vertex_cache.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
