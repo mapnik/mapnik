@@ -243,6 +243,7 @@ source = Split(
 
 if env['PLUGIN_LINKING'] == 'static':
     hit = False
+    lib_env.AppendUnique(CPPPATH='../plugins/')
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS'] or not details['lib']:
