@@ -215,7 +215,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     s << "GDAL Plugin: " << band_ << " is an invalid band, dataset only has " << nbands_ << "bands";
                     throw datasource_exception(s.str());
                 }
-                float* imageData = (float*)image.getBytes();
+                float* imageData = reinterpret_cast<float*>(image.getBytes());
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
