@@ -56,16 +56,16 @@ int main(int argc, char** argv)
         BOOST_TEST( m.load_fonts() );
         BOOST_TEST( m.get_font_memory_cache().size() == 1 );
         BOOST_TEST( m.register_fonts(fontdir , true ) );
-        BOOST_TEST( m.get_font_file_mapping().size() == 22 );
+        BOOST_TEST( m.get_font_file_mapping().size() == 40 );
         BOOST_TEST( m.load_fonts() );
-        BOOST_TEST( m.get_font_memory_cache().size() == 22 );
+        BOOST_TEST( m.get_font_memory_cache().size() == 40 );
 
         // copy discards memory cache but not file mapping
         mapnik::Map m2(m);
         BOOST_TEST( m2.get_font_memory_cache().size() == 0 );
-        BOOST_TEST( m2.get_font_file_mapping().size() == 22 );
+        BOOST_TEST( m2.get_font_file_mapping().size() == 40 );
         BOOST_TEST( m2.load_fonts() );
-        BOOST_TEST( m2.get_font_memory_cache().size() == 22 );
+        BOOST_TEST( m2.get_font_memory_cache().size() == 40 );
 
         // test font-directory from XML
         mapnik::Map m3(1,1);
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
         // recurse to find all dejavu fonts
         BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir, true) );
         face_names = mapnik::freetype_engine::face_names();
-        BOOST_TEST( face_names.size() == 22 );
+        BOOST_TEST( face_names.size() == 40 );
 
         // we should have re-registered 'DejaVu Sans Mono Bold Oblique' again,
         // but now at a new path
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
         mapnik::Map m4(1,1);
         BOOST_TEST( m4.register_fonts(fontdir , true ) );
         BOOST_TEST( m4.get_font_memory_cache().size() == 0 );
-        BOOST_TEST( m4.get_font_file_mapping().size() == 22 );
+        BOOST_TEST( m4.get_font_file_mapping().size() == 40 );
         BOOST_TEST( !m4.load_fonts() );
         BOOST_TEST( m4.get_font_memory_cache().size() == 0 );
         BOOST_TEST( m4.register_fonts(dejavu_bold_oblique, false) );
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
         // https://github.com/mapnik/mapnik/issues/2274
         BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/NotoSans-Regular.ttc") );
         face_names = mapnik::freetype_engine::face_names();
-        BOOST_TEST( face_names.size() == 24 );
+        BOOST_TEST( face_names.size() == 42 );
 
         // now blindly register as many system fonts as possible
         // the goal here to make sure we don't crash
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
         // windows
         mapnik::freetype_engine::register_fonts("C:\\Windows\\Fonts", true);
         face_names = mapnik::freetype_engine::face_names();
-        BOOST_TEST( face_names.size() > 22 );
+        BOOST_TEST( face_names.size() > 40 );
     }
     catch (std::exception const & ex)
     {
