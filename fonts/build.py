@@ -29,6 +29,8 @@ if not env['SYSTEM_FONTS']:
     includes = glob.glob('*/*/*.ttf')
     # grab single unifont ttf (available at http://unifoundry.com/unifont.html)
     includes.extend(glob.glob('unifont*.ttf'))
+    # grab OpenType fonts by gluk (http://www.glukfonts.pl)
+    includes = glob.glob('glukfonts/*.otf')
     target_path = env['MAPNIK_FONTS_DEST']
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         env.Alias(target='install', source=env.Install(target_path, includes))
