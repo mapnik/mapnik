@@ -85,6 +85,21 @@ Mapnik is written in C++, and we try to follow general coding guidelines.
 
 If you see bits of code around that do not follow these please don't hesitate to flag the issue or correct it yourself.
 
+#### Prefix cmath functions with std::
+
+The avoids ambiguity and potential bugs of using old C library math directly.
+
+So always do `std::abs()` instead of `abs()`. Here is a script to fix your code in one fell swoop:
+
+
+```sh
+DIR=./bindings
+for i in {abs,fabs,tan,sin,cos,floor,ceil,atan2,acos,asin}; do
+    find $DIR -type f -name '*.cpp' -or -name '*.h' -or -name '*.hpp' | xargs perl -i -p -e "s/ $i\(/ std::$i\(/g;"
+    find $DIR -type f -name '*.cpp' -or -name '*.h' -or -name '*.hpp' | xargs perl -i -p -e "s/\($i\(/\(std::$i\(/g;"
+done
+```
+
 #### Avoid boost::lexical_cast
 
 It's slow both to compile and at runtime.
