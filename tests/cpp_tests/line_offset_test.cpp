@@ -1,6 +1,6 @@
 // mapnik
 #include <mapnik/coord.hpp>
-#include <mapnik/text/vertex_cache.hpp>
+#include <mapnik/vertex_cache.hpp>
 
 // boost
 #include <boost/detail/lightweight_test.hpp>

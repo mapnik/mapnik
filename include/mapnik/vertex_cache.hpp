@@ -97,12 +97,14 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     template <typename T> vertex_cache(T &path);
+    vertex_cache(vertex_cache && rhs);
 
     double length() const { return current_subpath_->length; }
 
 
     pixel_position const& current_position() const { return current_position_; }
     double angle(double width=0.);
+    double current_segment_angle();
     double linear_position() const { return position_; }
 
 
@@ -141,7 +143,6 @@ private:
     void rewind_subpath();
     bool next_segment();
     bool previous_segment();
-    double current_segment_angle();
     void find_line_circle_intersection(
         double cx, double cy, double radius,
         double x1, double y1, double x2, double y2,

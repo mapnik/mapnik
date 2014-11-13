@@ -29,7 +29,7 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/glyph_positions.hpp>
-#include <mapnik/text/vertex_cache.hpp>
+#include <mapnik/vertex_cache.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
@@ -328,7 +328,9 @@ double placement_finder::normalize_angle(double angle)
     {
         angle += 2.0 * M_PI;
     }
-    return angle;
+    // y axis is inverted.
+    // See note about coordinate systems in placement_finder::find_point_placement().
+    return -angle;
 }
 
 double placement_finder::get_spacing(double path_length, double layout_width) const
