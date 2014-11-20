@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ void agg_renderer<T0,T1>::process(point_symbolizer const& sym,
 
     render_point_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](pixel_position const& pos, marker const& marker, 
+        [&](pixel_position const& pos, marker const& marker,
             agg::trans_affine const& tr, double opacity) {
             render_marker(pos, marker, tr, opacity, comp_op);
         });

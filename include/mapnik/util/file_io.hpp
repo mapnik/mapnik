@@ -41,7 +41,7 @@ class file : public noncopyable
 public:
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
     using data_type = std::unique_ptr<char[]>;
-    
+
     explicit file(std::string const& filename)
 #ifdef _WINDOWS
      : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),

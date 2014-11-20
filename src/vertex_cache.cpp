@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,8 +38,8 @@ vertex_cache::vertex_cache(vertex_cache && rhs)
       offseted_lines_(std::move(rhs.offseted_lines_)),
       position_(std::move(rhs.position_))
 {
-    // The C++11 standard doesn't guarantee iterators are valid when container is moved. 
-    // We can create them from indexes but we don't need to. Just let them uninitialized. 
+    // The C++11 standard doesn't guarantee iterators are valid when container is moved.
+    // We can create them from indexes but we don't need to. Just let them uninitialized.
     initialized_ = false;
 }
 

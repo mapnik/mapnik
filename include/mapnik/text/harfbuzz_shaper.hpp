@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ namespace mapnik
 static inline hb_script_t _icu_script_to_script(UScriptCode script)
 {
     if (script == USCRIPT_INVALID_CODE) return HB_SCRIPT_INVALID;
-	return hb_script_from_string(uscript_getShortName(script), -1);
+        return hb_script_from_string(uscript_getShortName(script), -1);
 }
 
 static inline const uint16_t * uchar_to_utf16(const UChar* src)

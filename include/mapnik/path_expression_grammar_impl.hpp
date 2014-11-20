@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ path_expression_grammar<Iterator>::path_expression_grammar()
     qi::lexeme_type lexeme;
     using phoenix::push_back;
     using boost::phoenix::construct;
-    
+
     expr =
         * (
             str [ push_back(_val, _1)]
@@ -51,7 +51,7 @@ path_expression_grammar<Iterator>::path_expression_grammar()
             ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
             )
         ;
-    
+
     attr %= +(char_ - ']');
     str  %= lexeme[+(char_ -'[')];
 }

@@ -240,4 +240,3 @@ pgraster_featureset::~pgraster_featureset()
 {
     rs_->close();
 }
-
