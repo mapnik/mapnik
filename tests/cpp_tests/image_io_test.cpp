@@ -21,15 +21,7 @@ int main(int argc, char** argv)
     boost::optional<std::string> type;
     try
     {
-        mapnik::image_data_32 im(256,256);
-        mapnik::image_data_32::pixel_type * data = im.getData();
-        mapnik::image_data_32 * im_ptr = new mapnik::image_data_32(im.width(),im.height(),data);
-        mapnik::image_data_32::pixel_type * same_data = im_ptr->getData();
-        BOOST_TEST(data == same_data);
-        delete im_ptr;
-        BOOST_TEST(data == same_data);
         BOOST_TEST(set_working_dir(args));
-
 #if defined(HAVE_JPEG)
         should_throw = "./tests/cpp_tests/data/blank.jpg";
         BOOST_TEST( mapnik::util::exists( should_throw ) );
