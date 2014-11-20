@@ -387,6 +387,25 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(ds.fields(),['rowid', 'untyped'])
         eq_(ds.field_types(),['int', 'str'])
 
+    def test_db_with_one_untyped_column_using_subquery():
+        # form up an in-memory test db
+        wkb = '010100000000000000000000000000000000000000'
+        ds = mapnik.SQLite(file=':memory:',
+            table='(SELECT rowid, geometry, untyped FROM test1)',
+            initdb='''
+                create table test1 (geometry BLOB, untyped);
+                insert into test1 values (x'%s', 'untyped');
+            ''' % wkb,
+            extent='-180,-60,180,60',
+            use_spatial_index=False,
+            key_field='rowid'
+        )
+
+        # ensure the untyped column is found
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['rowid', 'untyped', 'rowid'])
+        eq_(ds.field_types(),['int', 'str', 'int'])
+
 
     def test_that_64bit_int_fields_work():
         ds = mapnik.SQLite(file='../data/sqlite/64bit_int.sqlite',
