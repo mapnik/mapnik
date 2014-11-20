@@ -39,45 +39,27 @@ class image_data
 public:
     using pixel_type = T;
 
-    image_data(int width, int height)
-        : width_(static_cast<unsigned>(width)),
-          height_(static_cast<unsigned>(height)),
+    image_data(std::size_t width, std::size_t height, bool initialize = true)
+        : width_(width),
+          height_(height),
+          pData_((width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width_ * height_)):0),
           owns_data_(true)
     {
-        if (width < 0)
-        {
-            throw std::runtime_error("negative width not allowed for image_data");
-        }
-        if (height < 0)
-        {
-            throw std::runtime_error("negative height not allowed for image_data");
-        }
-        pData_ = (width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width * height)):0;
-        if (pData_) std::fill(pData_, pData_ + width_ * height_, 0);
+        if (pData_ && initialize) std::fill(pData_, pData_ + width_ * height_, 0);
     }
 
-    image_data(int width, int height, T * data)
-        : width_(static_cast<unsigned>(width)),
-          height_(static_cast<unsigned>(height)),
+    image_data(std::size_t width, std::size_t height, T * data)
+        : width_(width),
+          height_(height),
           owns_data_(false),
-          pData_(data)
-    {
-        if (width < 0)
-        {
-            throw std::runtime_error("negative width not allowed for image_data");
-        }
-        if (height < 0)
-        {
-            throw std::runtime_error("negative height not allowed for image_data");
-        }
-    }
+          pData_(data) {}
 
     image_data(image_data<T> const& rhs)
-        :width_(rhs.width_),
-         height_(rhs.height_),
-         owns_data_(true),
-         pData_((rhs.width_!=0 && rhs.height_!=0)?
-                static_cast<T*>(::operator new(sizeof(T) * rhs.width_ * rhs.height_)) : 0)
+        : width_(rhs.width_),
+          height_(rhs.height_),
+          pData_((rhs.width_!=0 && rhs.height_!=0) ?
+                 static_cast<T*>(::operator new(sizeof(T) * rhs.width_ * rhs.height_)) : 0),
+          owns_data_(true)
     {
         if (pData_) std::copy(rhs.pData_, rhs.pData_ + rhs.width_* rhs.height_, pData_);
     }
@@ -105,21 +87,21 @@ public:
         std::swap(pData_, rhs.pData_);
     }
 
-    inline T& operator() (unsigned i,unsigned j)
+    inline T& operator() (std::size_t i, std::size_t j)
     {
         assert(i<width_ && j<height_);
-        return pData_[j*width_+i];
+        return pData_[j * width_ + i];
     }
-    inline const T& operator() (unsigned i,unsigned j) const
+    inline const T& operator() (std::size_t i,std::size_t j) const
     {
-        assert(i<width_ && j<height_);
-        return pData_[j*width_+i];
+        assert(i < width_ && j < height_);
+        return pData_[j * width_ + i];
     }
-    inline unsigned width() const
+    inline std::size_t width() const
     {
         return width_;
     }
-    inline unsigned height() const
+    inline std::size_t height() const
     {
         return height_;
     }
@@ -150,21 +132,21 @@ public:
 
     inline const T* getRow(unsigned row) const
     {
-        return pData_+row*width_;
+        return pData_ + row * width_;
     }
 
     inline T* getRow(unsigned row)
     {
-        return pData_+row*width_;
+        return pData_ + row * width_;
     }
 
-    inline void setRow(unsigned row, T const* buf, unsigned size)
+    inline void setRow(std::size_t row, T const* buf, std::size_t size)
     {
-        assert(row<height_);
-        assert(size<=width_);
+        assert(row < height_);
+        assert(size <= width_);
         std::copy(buf, buf + size, pData_ + row * width_);
     }
-    inline void setRow(unsigned row, unsigned x0, unsigned x1, T const* buf)
+    inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, T const* buf)
     {
         std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
     }
@@ -178,13 +160,13 @@ public:
     }
 
 private:
-    unsigned width_;
-    unsigned height_;
-    bool owns_data_;
+    std::size_t width_;
+    std::size_t height_;
     T *pData_;
+    bool owns_data_;
 };
 
-using image_data_32 = image_data<unsigned>;
+using image_data_32 = image_data<std::uint32_t>;
 using image_data_8 = image_data<byte> ;
 }
 

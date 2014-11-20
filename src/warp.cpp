@@ -58,16 +58,16 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     view_transform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
 
-    unsigned mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);
-    unsigned mesh_ny = std::ceil(source.data_.height()/double(mesh_size) + 1);
+    std::size_t mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);
+    std::size_t mesh_ny = std::ceil(source.data_.height()/double(mesh_size) + 1);
 
     image_data<double> xs(mesh_nx, mesh_ny);
     image_data<double> ys(mesh_nx, mesh_ny);
 
     // Precalculate reprojected mesh
-    for(unsigned j=0; j<mesh_ny; ++j)
+    for(std::size_t j = 0; j < mesh_ny; ++j)
     {
-        for (unsigned i=0; i<mesh_nx; ++i)
+        for (std::size_t i=0; i<mesh_nx; ++i)
         {
             xs(i,j) = std::min(i*mesh_size,source.data_.width());
             ys(i,j) = std::min(j*mesh_size,source.data_.height());
@@ -143,9 +143,9 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     }
 
     // Project mesh cells into target interpolating raster inside each one
-    for(unsigned j=0; j<mesh_ny-1; ++j)
+    for(std::size_t j = 0; j < mesh_ny - 1; ++j)
     {
-        for (unsigned i=0; i<mesh_nx-1; ++i)
+        for (std::size_t i = 0; i < mesh_nx - 1; ++i)
         {
             double polygon[8] = {xs(i,j), ys(i,j),
                                  xs(i+1,j), ys(i+1,j),
@@ -162,10 +162,10 @@ void reproject_and_scale_raster(raster & target, raster const& source,
             rasterizer.line_to_d(std::floor(polygon[4]), std::floor(polygon[5]));
             rasterizer.line_to_d(std::floor(polygon[6]), std::floor(polygon[7]));
 
-            unsigned x0 = i * mesh_size;
-            unsigned y0 = j * mesh_size;
-            unsigned x1 = (i+1) * mesh_size;
-            unsigned y1 = (j+1) * mesh_size;
+            std::size_t x0 = i * mesh_size;
+            std::size_t y0 = j * mesh_size;
+            std::size_t x1 = (i+1) * mesh_size;
+            std::size_t y1 = (j+1) * mesh_size;
             x1 = std::min(x1, source.data_.width());
             y1 = std::min(y1, source.data_.height());
             agg::trans_affine tr(polygon, x0, y0, x1, y1);
