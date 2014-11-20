@@ -45,7 +45,8 @@ image_32::image_32(int width,int height)
      painted_(false),
      premultiplied_(false) {}
 
-image_32::image_32(const image_32& rhs)
+
+image_32::image_32(image_32 const& rhs)
     :width_(rhs.width_),
      height_(rhs.height_),
      data_(rhs.data_),
