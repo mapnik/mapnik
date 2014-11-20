@@ -700,6 +700,7 @@ public:
                 {
                     // "Column Affinity" says default to "Numeric" but for now we pass..
                     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                    desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
 
 #ifdef MAPNIK_LOG
                     // Do not fail when we specify geometry_field in XML file
@@ -707,8 +708,9 @@ public:
                     {
                         MAPNIK_LOG_DEBUG(sqlite) << "Column '"
                                                  << std::string(fld_name)
-                                                 << "' unhandled due to unknown type: "
-                                                 << fld_type;
+                                                 << "' unhandled due to unknown type: '"
+                                                 << fld_type
+                                                 << "', using String";
                     }
 #endif
                 }
