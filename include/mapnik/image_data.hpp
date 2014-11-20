@@ -76,8 +76,7 @@ public:
         : width_(width),
           height_(height),
           buffer_(width_ * height_ * pixel_size),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          owns_data_(true)
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
     {
         if (pData_ && initialize) std::fill(pData_, pData_ + width_ * height_, 0);
     }
@@ -86,8 +85,8 @@ public:
         : width_(rhs.width_),
           height_(rhs.height_),
           buffer_(rhs.buffer_),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          owns_data_(true) {}
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+    {}
 
     image_data(image_data<pixel_type> && rhs) noexcept
         : width_(rhs.width_),
@@ -181,7 +180,6 @@ private:
     std::size_t height_;
     detail::buffer buffer_;
     pixel_type *pData_;
-    bool owns_data_;
 };
 
 using image_data_32 = image_data<std::uint32_t>;
