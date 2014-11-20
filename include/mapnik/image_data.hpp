@@ -25,74 +25,100 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-
 // stl
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
 
-namespace mapnik
+namespace mapnik {
+
+namespace detail {
+
+struct buffer
 {
+    explicit buffer(std::size_t size)
+        : size_(size),
+          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
+    {}
+
+    buffer(buffer && rhs) noexcept = default;
+    buffer(buffer const& rhs)
+        : size_(rhs.size_),
+          data_(rhs.data_)
+    {
+        if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
+    }
+
+    inline bool operator!() const { return (data_ == nullptr)? false : true; }
+    ~buffer()
+    {
+        ::operator delete(data_);
+    }
+
+    inline unsigned char* data() { return data_; }
+    inline unsigned char const* data() const { return data_; }
+    inline std::size_t size() const { return size_; }
+    std::size_t size_;
+    unsigned char* data_;
+
+};
+
+}
+
 template <typename T>
 class image_data
 {
 public:
     using pixel_type = T;
+    static constexpr std::size_t pixel_size = sizeof(pixel_type);
 
     image_data(std::size_t width, std::size_t height, bool initialize = true)
         : width_(width),
           height_(height),
-          pData_((width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width_ * height_)):0),
+          buffer_(width_ * height_ * pixel_size),
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
           owns_data_(true)
     {
         if (pData_ && initialize) std::fill(pData_, pData_ + width_ * height_, 0);
     }
 
-    image_data(std::size_t width, std::size_t height, T * data)
-        : width_(width),
-          height_(height),
-          owns_data_(false),
-          pData_(data) {}
-
-    image_data(image_data<T> const& rhs)
+    image_data(image_data<pixel_type> const& rhs)
         : width_(rhs.width_),
           height_(rhs.height_),
-          pData_((rhs.width_!=0 && rhs.height_!=0) ?
-                 static_cast<T*>(::operator new(sizeof(T) * rhs.width_ * rhs.height_)) : 0),
-          owns_data_(true)
-    {
-        if (pData_) std::copy(rhs.pData_, rhs.pData_ + rhs.width_* rhs.height_, pData_);
-    }
+          buffer_(rhs.buffer_),
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          owns_data_(true) {}
 
-    image_data(image_data<T> && rhs) noexcept
+    image_data(image_data<pixel_type> && rhs) noexcept
         : width_(rhs.width_),
-          height_(rhs.height_),
-          pData_(rhs.pData_)
+        height_(rhs.height_),
+        buffer_(std::move(rhs.buffer_)),
+        pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
     {
         rhs.width_ = 0;
         rhs.height_ = 0;
         rhs.pData_ = nullptr;
     }
 
-    image_data<T>& operator=(image_data<T> rhs)
+    image_data<pixel_type>& operator=(image_data<pixel_type> rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(image_data<T> & rhs)
+    void swap(image_data<pixel_type> & rhs)
     {
         std::swap(width_, rhs.width_);
         std::swap(height_, rhs.height_);
-        std::swap(pData_, rhs.pData_);
+        std::swap(buffer_, rhs.buffer_);
     }
 
-    inline T& operator() (std::size_t i, std::size_t j)
+    inline pixel_type& operator() (std::size_t i, std::size_t j)
     {
         assert(i<width_ && j<height_);
         return pData_[j * width_ + i];
     }
-    inline const T& operator() (std::size_t i,std::size_t j) const
+    inline const pixel_type& operator() (std::size_t i, std::size_t j) const
     {
         assert(i < width_ && j < height_);
         return pData_[j * width_ + i];
@@ -105,64 +131,56 @@ public:
     {
         return height_;
     }
-    inline void set(T const& t)
+    inline void set(pixel_type const& t)
     {
         std::fill(pData_, pData_ + width_ * height_, t);
     }
 
-    inline const T* getData() const
+    inline const pixel_type* getData() const
     {
         return pData_;
     }
 
-    inline T* getData()
+    inline pixel_type* getData()
     {
         return pData_;
     }
 
     inline const unsigned char* getBytes() const
     {
-        return reinterpret_cast<unsigned char*>(pData_);
+        return buffer_.data();
     }
 
     inline unsigned char* getBytes()
     {
-        return reinterpret_cast<unsigned char*>(pData_);
+        return buffer_.data();
     }
 
-    inline const T* getRow(unsigned row) const
+    inline const pixel_type* getRow(unsigned row) const
     {
         return pData_ + row * width_;
     }
 
-    inline T* getRow(unsigned row)
+    inline pixel_type* getRow(unsigned row)
     {
         return pData_ + row * width_;
     }
 
-    inline void setRow(std::size_t row, T const* buf, std::size_t size)
+    inline void setRow(std::size_t row, pixel_type const* buf, std::size_t size)
     {
         assert(row < height_);
         assert(size <= width_);
         std::copy(buf, buf + size, pData_ + row * width_);
     }
-    inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, T const* buf)
+    inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
     {
         std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
     }
-
-    inline ~image_data()
-    {
-        if (owns_data_)
-        {
-            ::operator delete(pData_),pData_=0;
-        }
-    }
-
 private:
     std::size_t width_;
     std::size_t height_;
-    T *pData_;
+    detail::buffer buffer_;
+    pixel_type *pData_;
     bool owns_data_;
 };
 
