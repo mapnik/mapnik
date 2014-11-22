@@ -127,7 +127,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         mapnik::util::file file(filename_);
         if (!file.open())
         {
-            throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
+            throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
         std::string file_buffer;
         file_buffer.resize(file.size());
