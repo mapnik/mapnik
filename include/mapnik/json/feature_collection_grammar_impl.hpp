@@ -34,8 +34,7 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename FeatureType>
 feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(mapnik::transcoder const& tr)
         : feature_collection_grammar::base_type(start,"start"),
-          feature_g(tr),
-          generate_id_(1)
+          feature_g(tr)
 {
         qi::lit_type lit;
         qi::eps_type eps;
@@ -46,12 +45,13 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
         qi::_val_type _val;
         qi::_r1_type _r1;
         qi::_r2_type _r2;
+        qi::_r3_type _r3;
         using phoenix::push_back;
         using phoenix::construct;
         using phoenix::new_;
         using phoenix::val;
 
-        start = feature_collection(_r1) | feature_from_geometry(_r1, _val) | feature(_r1, _val)
+        start = feature_collection(_r1) | feature_from_geometry(_r1, _val) | feature(_r1, _val, 1)
             ;
 
         feature_collection = lit('{') >> (type | features(_r1) | feature_g.json_.key_value) % lit(',') >> lit('}')
@@ -60,19 +60,19 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
         type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
             ;
 
-        features = lit("\"features\"")
+        features = lit("\"features\"")[_a = 1]
             >> lit(':')
             >> lit('[')
-            >> -(feature(_r1, _val) % lit(','))
+            >> -(feature(_r1, _val, _a) [_a +=1] % lit(','))
             >> lit(']')
             ;
 
-        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, generate_id_()))]
+        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r3))]
             >> feature_g(*_a)[push_back(_r2,_a)]
             ;
 
         feature_from_geometry =
-            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, generate_id_()))]
+            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, 1))]
             >> geometry_g(extract_geometry_(*_a)) [push_back(_r2, _a)]
             ;
 
