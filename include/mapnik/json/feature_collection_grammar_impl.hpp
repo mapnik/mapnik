@@ -67,8 +67,8 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
             >> lit(']')
             ;
 
-        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r3))]
-            >> feature_g(*_a)[push_back(_r2,_a)]
+        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
+            >> feature_g(*_a)[push_back(_r3,_a)]
             ;
 
         feature_from_geometry =
