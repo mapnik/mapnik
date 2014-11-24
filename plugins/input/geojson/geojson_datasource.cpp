@@ -147,7 +147,10 @@ void geojson_datasource::parse_geojson(T const& buffer)
 {
     boost::spirit::standard_wide::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)(boost::phoenix::ref(ctx)), space, features_);
+    std::size_t start_id = 1;
+    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)
+                                                  (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id)),
+                                                  space, features_);
     if (!result)
     {
         if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");

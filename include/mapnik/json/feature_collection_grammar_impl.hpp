@@ -51,19 +51,19 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
         using phoenix::new_;
         using phoenix::val;
 
-        start = feature_collection(_r1) | feature_from_geometry(_r1, _val) | feature(_r1, _val, 1)
+        start = feature_collection(_r1, _r2) | feature_from_geometry(_r1, _r2, _val) | feature(_r1,_val, _r2)
             ;
 
-        feature_collection = lit('{') >> (type | features(_r1) | feature_g.json_.key_value) % lit(',') >> lit('}')
+        feature_collection = lit('{') >> (type | features(_r1, _r2) | feature_g.json_.key_value) % lit(',') >> lit('}')
             ;
 
         type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
             ;
 
-        features = lit("\"features\"")[_a = 1]
+        features = lit("\"features\"")
             >> lit(':')
             >> lit('[')
-            >> -(feature(_r1, _val, _a) [_a +=1] % lit(','))
+            >> -(feature(_r1, _val, _r2) [_r2 +=1] % lit(','))
             >> lit(']')
             ;
 
@@ -72,8 +72,8 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
             ;
 
         feature_from_geometry =
-            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, 1))]
-            >> geometry_g(extract_geometry_(*_a)) [push_back(_r2, _a)]
+            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
+            >> geometry_g(extract_geometry_(*_a)) [push_back(_r3, _a)]
             ;
 
         start.name("start");
