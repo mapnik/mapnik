@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2013 Artem Pavlenko
+# Copyright (C) 2014 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# 
+#
 
 import os, re, sys, glob
 from subprocess import Popen, PIPE
@@ -65,10 +65,10 @@ if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
 
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
-    ##### Python linking on OS X is tricky ### 
+    ##### Python linking on OS X is tricky ###
     # Confounding problems are:
     # 1) likelyhood of multiple python installs of the same major.minor version
-    #  because apple supplies python built-in and many users may have installed 
+    #  because apple supplies python built-in and many users may have installed
     #  further versions using macports
     # 2) boost python directly links to a python version
     # 3) the below will directly link _mapnik.so to a python version
@@ -78,14 +78,14 @@ if env['PLATFORM'] == 'Darwin':
     # for now we offer control over method of direct linking...
     # The default below is to link against the python dylib in the form of
     #/path/to/Python.framework/Python instead of -lpython
-    
+
     # http://developer.apple.com/mac/library/DOCUMENTATION/Darwin/Reference/ManPages/man1/ld.1.html
-    
+
     if env['PYTHON_DYNAMIC_LOOKUP']:
         python_link_flag = '-undefined dynamic_lookup'
     elif env['FRAMEWORK_PYTHON']:
         if env['FRAMEWORK_SEARCH_PATH']:
-            # if the user has supplied a custom root path to search for 
+            # if the user has supplied a custom root path to search for
             # a given Python framework, then use that to direct the linker
             python_link_flag = '-F%s -framework Python -Z' % env['FRAMEWORK_SEARCH_PATH']
         else:
@@ -153,13 +153,13 @@ if 'install' in COMMAND_LINE_TARGETS:
     # install the core mapnik python files, including '__init__.py'
     init_files = glob.glob('mapnik/*.py')
     if 'mapnik/paths.py' in init_files:
-        init_files.remove('mapnik/paths.py') 
+        init_files.remove('mapnik/paths.py')
     init_module = env.Install(target_path, init_files)
     env.Alias(target='install', source=init_module)
     # install mapnik2 module which redirects to mapnik and issues DeprecatedWarning
     init_mapnik2 = env.Install(target_path_deprecated, 'mapnik2/__init__.py')
     env.Alias(target='install', source=init_mapnik2)
-      
+
     # fix perms and install the custom generated 'paths.py'
     targetp = os.path.join(target_path,'paths.py')
     env.Alias("install", targetp)
@@ -177,7 +177,7 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
         py_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
         if link_all_libs:
             py_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
-    
+
     if env['HAS_PYCAIRO']:
         py_env.ParseConfig('pkg-config --cflags pycairo')
         py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
@@ -208,4 +208,3 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
 
 env['create_uninstall_target'](env, target_path)
 env['create_uninstall_target'](env, target_path_deprecated)
-    

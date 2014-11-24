@@ -1,6 +1,6 @@
 #
 # This file is part of Mapnik (C++/Python mapping toolkit)
-# Copyright (C) 2009 Artem Pavlenko
+# Copyright (C) 2014 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
