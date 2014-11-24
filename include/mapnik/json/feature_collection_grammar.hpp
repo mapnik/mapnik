@@ -52,7 +52,7 @@ struct feature_collection_grammar :
     qi::rule<Iterator, std::vector<feature_ptr>(context_ptr const&, std::size_t&), space_type> feature_collection;
     qi::rule<Iterator, space_type> type;
     qi::rule<Iterator, std::vector<feature_ptr>(context_ptr const&, std::size_t&), space_type> features;
-    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::vector<feature_ptr>&, std::size_t), space_type> feature;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, std::vector<feature_ptr>&), space_type> feature;
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, std::vector<feature_ptr>&), space_type> feature_from_geometry;
 };
 

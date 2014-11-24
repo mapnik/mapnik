@@ -51,7 +51,7 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
         using phoenix::new_;
         using phoenix::val;
 
-        start = feature_collection(_r1, _r2) | feature_from_geometry(_r1, _r2, _val) | feature(_r1,_val, _r2)
+        start = feature_collection(_r1, _r2) | feature_from_geometry(_r1, _r2, _val) | feature(_r1, _r2, _val)
             ;
 
         feature_collection = lit('{') >> (type | features(_r1, _r2) | feature_g.json_.key_value) % lit(',') >> lit('}')
@@ -63,7 +63,7 @@ feature_collection_grammar<Iterator,FeatureType>::feature_collection_grammar(map
         features = lit("\"features\"")
             >> lit(':')
             >> lit('[')
-            >> -(feature(_r1, _val, _r2) [_r2 +=1] % lit(','))
+            >> -(feature(_r1, _r2, _val) [_r2 +=1] % lit(','))
             >> lit(']')
             ;
 
