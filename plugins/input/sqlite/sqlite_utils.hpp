@@ -684,8 +684,8 @@ public:
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
                 }
                 else if (boost::algorithm::contains(fld_type, "real") ||
-                         boost::algorithm::contains(fld_type, "float") ||
-                         boost::algorithm::contains(fld_type, "double"))
+                         boost::algorithm::contains(fld_type, "floa") ||
+                         boost::algorithm::contains(fld_type, "doub"))
                 {
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::Double));
                 }
@@ -700,6 +700,7 @@ public:
                 {
                     // "Column Affinity" says default to "Numeric" but for now we pass..
                     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
 
 #ifdef MAPNIK_LOG
