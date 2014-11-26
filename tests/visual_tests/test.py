@@ -192,7 +192,7 @@ files = {
     'text-vertical-alignment': {'sizes': [(800,800)], 'bbox': default_text_box},
     'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
     'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
-    'text-font-features': {'sizes': [(500, 500)]},
+    'text-font-features': {'sizes': [(1100, 1100)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'text-multi-layout-1': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'text-multi-layout-2': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
     'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
