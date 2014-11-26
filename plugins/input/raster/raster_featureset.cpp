@@ -28,6 +28,7 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/util/variant.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -113,9 +114,9 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                             rem.maxx() + x_off + width,
                                                             rem.maxy() + y_off + height);
                         intersect = t.backward(feature_raster_extent);
-
-                        mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, width, height, 1.0);
-                        reader->read(x_off, y_off, raster->data_);
+                        image_data_32 data(width,height);
+                        reader->read(x_off, y_off, data);
+                        mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, data, 1.0);
                         raster->premultiplied_alpha_ = reader->premultiplied_alpha();
                         feature->set_raster(raster);
                     }

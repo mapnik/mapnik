@@ -83,7 +83,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
 
     agg::rasterizer_scanline_aa<> rasterizer;
     agg::scanline_bin scanline;
-    agg::rendering_buffer buf((unsigned char*)target.data_.getData(),
+    agg::rendering_buffer buf(target.data_.getBytes(),
                               target.data_.width(),
                               target.data_.height(),
                               target.data_.width()*4);
@@ -91,7 +91,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     renderer_base rb(pixf);
     rasterizer.clip_box(0, 0, target.data_.width(), target.data_.height());
     agg::rendering_buffer buf_tile(
-        (unsigned char*)source.data_.getData(),
+        const_cast<unsigned char*>(source.data_.getBytes()),
         source.data_.width(),
         source.data_.height(),
         source.data_.width() * 4);

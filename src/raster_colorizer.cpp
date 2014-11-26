@@ -124,14 +124,14 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 
 void raster_colorizer::colorize(raster_ptr const& raster, feature_impl const& f) const
 {
-    unsigned *imageData = raster->data_.getData();
+    unsigned* imageData = reinterpret_cast<unsigned*>(raster->data_.getBytes());
 
     int len = raster->data_.width() * raster->data_.height();
     boost::optional<double> const& nodata = raster->nodata();
     for (int i=0; i<len; ++i)
     {
         // the GDAL plugin reads single bands as floats
-        float value = *reinterpret_cast<float *> (&imageData[i]);
+        float value = *reinterpret_cast<float*> (&imageData[i]);
         if (nodata && (std::fabs(value - *nodata) < epsilon_))
         {
             imageData[i] = 0;

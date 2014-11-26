@@ -86,7 +86,8 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
             {
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
-                raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
+                image_data_32 data(raster_width, raster_height);
+                raster target(target_ext, data, source->get_filter_factor());
                 unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, common.vars_, 16));
                 reproject_and_scale_raster(target,
                                            *source,
@@ -95,7 +96,10 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                                            offset_y,
                                            mesh_size,
                                            scaling_method);
-                composite(target.data_, comp_op, opacity, start_x, start_y);
+                if (target.data_.is<image_data_32>())
+                {
+                    composite(util::get<image_data_32>(target.data_), comp_op, opacity, start_x, start_y);
+                }
             }
             else
             {
@@ -107,20 +111,27 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                      (std::abs(start_x) <= eps) &&
                      (std::abs(start_y) <= eps) )
                 {
-                    composite(source->data_, comp_op, opacity, start_x, start_y);
+                    if (source->data_.is<image_data_32>())
+                    {
+                        composite(util::get<image_data_32>(source->data_), comp_op, opacity, start_x, start_y);
+                    }
                 }
                 else
                 {
-                    raster target(target_ext, raster_width, raster_height, source->get_filter_factor());
-                    scale_image_agg<image_data_32>(target.data_,
-                                                   source->data_,
-                                                   scaling_method,
-                                                   image_ratio_x,
-                                                   image_ratio_y,
-                                                   0.0,
-                                                   0.0,
-                                                   source->get_filter_factor());
-                    composite(target.data_, comp_op, opacity, start_x, start_y);
+                    if (source->data_.is<image_data_32>())
+                    {
+                        image_data_32 data(raster_width, raster_height);
+                        raster target(target_ext, data, source->get_filter_factor());
+                        scale_image_agg<image_data_32>(util::get<image_data_32>(target.data_),
+                            util::get<image_data_32>(source->data_),
+                            scaling_method,
+                            image_ratio_x,
+                            image_ratio_y,
+                            0.0,
+                            0.0,
+                            source->get_filter_factor());
+                        composite(util::get<image_data_32>(target.data_), comp_op, opacity, start_x, start_y);
+                    }
                 }
             }
         }

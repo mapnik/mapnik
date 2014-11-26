@@ -41,7 +41,14 @@ struct buffer
           data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
     {}
 
-    buffer(buffer && rhs) noexcept = default;
+    buffer(buffer && rhs) noexcept
+        : size_(std::move(rhs.size_)),
+          data_(std::move(rhs.data_))
+    {
+        rhs.size_ = 0;
+        rhs.data_ = nullptr;
+    }
+
     buffer(buffer const& rhs)
         : size_(rhs.size_),
           data_(rhs.data_)
@@ -184,6 +191,7 @@ private:
 
 using image_data_32 = image_data<std::uint32_t>;
 using image_data_8 = image_data<byte> ;
+using image_data_float32 = image_data<float>;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP
