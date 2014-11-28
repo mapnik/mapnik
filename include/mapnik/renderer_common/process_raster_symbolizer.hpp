@@ -100,6 +100,10 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                 {
                     composite(util::get<image_data_32>(target.data_), comp_op, opacity, start_x, start_y);
                 }
+                else
+                {
+                    std::cerr << "#1 source->data float32" << std::endl;
+                }
             }
             else
             {
@@ -115,6 +119,10 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     {
                         composite(util::get<image_data_32>(source->data_), comp_op, opacity, start_x, start_y);
                     }
+                    else
+                    {
+                        std::cerr << "#2 source->data float32" << std::endl;
+                    }
                 }
                 else
                 {
@@ -123,14 +131,30 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                         image_data_32 data(raster_width, raster_height);
                         raster target(target_ext, data, source->get_filter_factor());
                         scale_image_agg<image_data_32>(util::get<image_data_32>(target.data_),
-                            util::get<image_data_32>(source->data_),
-                            scaling_method,
-                            image_ratio_x,
-                            image_ratio_y,
-                            0.0,
-                            0.0,
-                            source->get_filter_factor());
+                                                       util::get<image_data_32>(source->data_),
+                                                       scaling_method,
+                                                       image_ratio_x,
+                                                       image_ratio_y,
+                                                       0.0,
+                                                       0.0,
+                                                       source->get_filter_factor());
                         composite(util::get<image_data_32>(target.data_), comp_op, opacity, start_x, start_y);
+                    }
+                    else if (source->data_.is<image_data_float32>())
+                    {
+                        std::cerr << "#3 source->data float32" << std::endl;
+                        image_data_float32 data(raster_width, raster_height);
+                        raster target(target_ext, data, source->get_filter_factor());
+                        //scale_image_agg<image_data_float32>(util::get<image_data_float32>(target.data_),
+                        //                                    util::get<image_data_float32>(source->data_),
+                        //                                    scaling_method,
+                        //                                    image_ratio_x,
+                        //                                    image_ratio_y,
+                        //                                    0.0,
+                        //                                    0.0,
+                        //                                    source->get_filter_factor());
+                        // composite is no-op
+
                     }
                 }
             }

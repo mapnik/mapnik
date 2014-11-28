@@ -94,15 +94,14 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
     return mode;
 }
 
-template <typename Image>
-void scale_image_agg(Image & target,
-                     Image const& source,
-                     scaling_method_e scaling_method,
-                     double image_ratio_x,
-                     double image_ratio_y,
-                     double x_off_f,
-                     double y_off_f,
-                     double filter_factor)
+template <> void scale_image_agg<image_data_32>(image_data_32 & target,
+                                                image_data_32 const& source,
+                                                scaling_method_e scaling_method,
+                                                double image_ratio_x,
+                                                double image_ratio_y,
+                                                double x_off_f,
+                                                double y_off_f,
+                                                double filter_factor)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
@@ -118,13 +117,13 @@ void scale_image_agg(Image & target,
     agg::image_filter_lut filter;
 
     // initialize source AGG buffer
-    agg::rendering_buffer rbuf_src((unsigned char*)source.getBytes(), source.width(), source.height(), source.width() * 4);
+    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()), source.width(), source.height(), source.width() * 4);
     pixfmt_pre pixf_src(rbuf_src);
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
     img_src_type img_src(pixf_src);
 
     // initialize destination AGG buffer (with transparency)
-    agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
+    agg::rendering_buffer rbuf_dst(target.getBytes(), target.width(), target.height(), target.width() * 4);
     pixfmt_pre pixf_dst(rbuf_dst);
     renderer_base_pre rb_dst_pre(pixf_dst);
 
