@@ -35,7 +35,7 @@
 
 namespace mapnik {
 
-enum well_known_srs_enum {
+enum well_known_srs_enum : std::uint8_t {
     WGS_84,
     G_MERC,
     well_known_srs_enum_MAX

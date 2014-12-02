@@ -100,7 +100,7 @@ public:
         pos_(0)
     {}
 
-    enum status
+    enum status : std::uint8_t
     {
         initial,
         process,

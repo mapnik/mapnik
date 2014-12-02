@@ -55,7 +55,7 @@ class raster;
 
 
 //! \brief Enumerates the modes of interpolation
-enum colorizer_mode_enum
+enum colorizer_mode_enum : std::uint8_t
 {
     COLORIZER_INHERIT = 0,    //!< The stop inherits the mode from the colorizer
     COLORIZER_LINEAR = 1,     //!< Linear interpolation between colors
