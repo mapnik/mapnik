@@ -28,7 +28,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
-// stl
+// std
 #include <cstdint>
 #include <string>
 

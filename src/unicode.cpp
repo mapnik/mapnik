@@ -24,9 +24,8 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 
-// stl
-#include <cstdlib>
-#include <string>
+// std
+#include <stdexcept>
 
 // icu
 #include <unicode/ucnv.h>
