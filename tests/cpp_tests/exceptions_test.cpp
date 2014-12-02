@@ -1,6 +1,7 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <mapnik/projection.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/graphics.hpp>
@@ -49,6 +50,13 @@ int main(int argc, char** argv)
         srs.init_proj4();
         // oddly init_proj4 does not throw with old proj/ubuntu precise
         //BOOST_TEST(false);
+    } catch (...) {
+        BOOST_TEST(true);
+    }
+
+    try {
+        mapnik::transcoder tr("bogus encoding");
+        BOOST_TEST(false);
     } catch (...) {
         BOOST_TEST(true);
     }

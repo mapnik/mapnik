@@ -34,13 +34,15 @@
 namespace mapnik {
 
 transcoder::transcoder (std::string const& encoding)
-    : ok_(false),
-      conv_(0)
+    : conv_(0)
 {
     UErrorCode err = U_ZERO_ERROR;
     conv_ = ucnv_open(encoding.c_str(),&err);
-    if (U_SUCCESS(err)) ok_ = true;
-    // TODO ??
+    if (!U_SUCCESS(err))
+    {
+        // NOT: conv_ should be null on error so no need to call ucnv_close
+        throw std::runtime_error(std::string("could not create converter for ") + encoding);
+    }
 }
 
 mapnik::value_unicode_string transcoder::transcode(const char* data, std::int32_t length) const
