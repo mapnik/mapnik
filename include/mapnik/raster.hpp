@@ -33,7 +33,7 @@
 
 namespace mapnik {
 
-using image_data_base = util::variant<image_data_32, image_data_8, image_data_float32>;
+using image_data_base = util::variant<image_data_32, image_data_8, image_data_16, image_data_float32>;
 
 namespace detail {
 

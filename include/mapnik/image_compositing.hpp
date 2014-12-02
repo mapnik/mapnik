@@ -90,13 +90,21 @@ MAPNIK_DECL void composite(T1 & dst, T2 & src,
                            int dy=0,
                            bool premultiply_src=false);
 
-extern template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & dst,
-                           mapnik::image_data_32 & src,
-                           composite_mode_e mode,
-                           float opacity,
-                           int dx,
-                           int dy,
-                           bool premultiply_src);
+//extern template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & dst,
+//                           mapnik::image_data_32 & src,
+//                           composite_mode_e mode,
+//                           float opacity,
+//                           int dx,
+//                           int dy,
+//                           bool premultiply_src);
+
+//extern template MAPNIK_DECL void composite<mapnik::image_data_float32,mapnik::image_data_float32>(mapnik::image_data_float32 & dst,
+//                           mapnik::image_data_float32 & src,
+//                           composite_mode_e mode,
+//                           float opacity,
+//                           int dx,
+//                           int dy,
+//                           bool premultiply_src);
 
 }
 #endif // MAPNIK_IMAGE_COMPOSITING_HPP

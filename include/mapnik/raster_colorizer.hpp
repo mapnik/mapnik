@@ -199,7 +199,7 @@ public:
     //! \brief Colorize a raster
     //!
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
-    void colorize(std::shared_ptr<raster> const& raster, feature_impl const& f) const;
+    void colorize(raster & ras, feature_impl const& f) const;
 
 
     //! \brief Perform the translation of input to output

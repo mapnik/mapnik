@@ -122,16 +122,16 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
     return true;
 }
 
-void raster_colorizer::colorize(raster_ptr const& raster, feature_impl const& f) const
+void raster_colorizer::colorize(raster & ras, feature_impl const& f) const
 {
-    unsigned* imageData = reinterpret_cast<unsigned*>(raster->data_.getBytes());
+    unsigned * imageData = reinterpret_cast<unsigned*>(ras.data_.getBytes());
 
-    int len = raster->data_.width() * raster->data_.height();
-    boost::optional<double> const& nodata = raster->nodata();
+    int len = ras.data_.width() * ras.data_.height();
+    boost::optional<double> const& nodata = ras.nodata();
     for (int i=0; i<len; ++i)
     {
         // the GDAL plugin reads single bands as floats
-        float value = *reinterpret_cast<float*> (&imageData[i]);
+        float value = *reinterpret_cast<float *> (&imageData[i]);
         if (nodata && (std::fabs(value - *nodata) < epsilon_))
         {
             imageData[i] = 0;
@@ -153,7 +153,7 @@ unsigned raster_colorizer::get_color(float value) const
     int stopCount = stops_.size();
 
     //use default color if no stops
-    if(stopCount == 0)
+    if (stopCount == 0)
     {
         return default_color_.rgba();
     }

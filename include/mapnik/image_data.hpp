@@ -190,7 +190,8 @@ private:
 };
 
 using image_data_32 = image_data<std::uint32_t>;
-using image_data_8 = image_data<byte> ;
+using image_data_8 = image_data<std::uint8_t> ;
+using image_data_16 = image_data<std::uint16_t>;
 using image_data_float32 = image_data<float>;
 }
 

@@ -746,6 +746,13 @@ struct gray32
     value_type v;
     value_type a;
 
+    enum base_scale_e
+    {
+        base_shift = 8,
+        base_scale = 1 << base_shift,
+        base_mask  = base_scale - 1,
+    };
+
     // Calculate grayscale value as per ITU-R BT.709.
     static value_type luminance(double r, double g, double b)
     {

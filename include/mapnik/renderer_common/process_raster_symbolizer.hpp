@@ -34,6 +34,10 @@
 // agg
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_pixfmt_gray.h"
+#include "agg_rasterizer_scanline_aa.h"
+#include "agg_scanline_u.h"
+#include "agg_renderer_scanline.h"
 
 namespace mapnik {
 
@@ -47,11 +51,6 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
     raster_ptr const& source = feature.get_raster();
     if (source)
     {
-        // If there's a colorizer defined, use it to color the raster in-place
-        raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym, keys::colorizer);
-        if (colorizer)
-            colorizer->colorize(source,feature);
-
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
         box2d<double> ext = common.t_.forward(target_ext);
@@ -129,8 +128,7 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     if (source->data_.is<image_data_32>())
                     {
                         image_data_32 data(raster_width, raster_height);
-                        raster target(target_ext, data, source->get_filter_factor());
-                        scale_image_agg<image_data_32>(util::get<image_data_32>(target.data_),
+                        scale_image_agg<image_data_32>(data,
                                                        util::get<image_data_32>(source->data_),
                                                        scaling_method,
                                                        image_ratio_x,
@@ -138,23 +136,37 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                                                        0.0,
                                                        0.0,
                                                        source->get_filter_factor());
-                        composite(util::get<image_data_32>(target.data_), comp_op, opacity, start_x, start_y);
+                        composite(data, comp_op, opacity, start_x, start_y);
                     }
                     else if (source->data_.is<image_data_float32>())
                     {
                         std::cerr << "#3 source->data float32" << std::endl;
-                        image_data_float32 data(raster_width, raster_height);
-                        raster target(target_ext, data, source->get_filter_factor());
-                        //scale_image_agg<image_data_float32>(util::get<image_data_float32>(target.data_),
-                        //                                    util::get<image_data_float32>(source->data_),
-                        //                                    scaling_method,
-                        //                                    image_ratio_x,
-                        //                                    image_ratio_y,
-                        //                                    0.0,
-                        //                                    0.0,
-                        //                                    source->get_filter_factor());
-                        // composite is no-op
+                        raster target(target_ext, image_data_float32(raster_width, raster_height), source->get_filter_factor());
+                        scale_image_agg<image_data_float32>(util::get<image_data_float32>(target.data_),
+                                                            util::get<image_data_float32>(source->data_),
+                                                            scaling_method,
+                                                            image_ratio_x,
+                                                            image_ratio_y,
+                                                            0.0,
+                                                            0.0,
+                                                            source->get_filter_factor());
 
+                        image_data_float32 & data = util::get<image_data_float32>(target.data_);
+                        image_data_32 dst(raster_width, raster_height);
+                        for (unsigned x = 0; x < dst.width(); ++x)
+                        {
+                            for (unsigned y = 0; y < dst.height(); ++y)
+                            {
+                                //std::cerr << data(x,y) << std::endl;
+                                unsigned val = unsigned(255*data(x,y)+0.5);
+                                dst(x,y) = color(val,val,val, unsigned(opacity*255+0.5)).rgba();
+                            }
+                        }
+                        raster out(target_ext, dst,source->get_filter_factor());
+                        // If there's a colorizer defined, use it to color the raster in-place
+                        raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym, keys::colorizer);
+                        if (colorizer) colorizer->colorize(out,feature);
+                        composite(util::get<image_data_32>(out.data_), comp_op, opacity, start_x, start_y);
                     }
                 }
             }
