@@ -28,7 +28,15 @@
 
 namespace mapnik {
 
-using image_data_base = util::variant<image_data_32, image_data_8, image_data_16, image_data_float32>;
+struct image_data_null
+{
+    unsigned char const* getBytes() const { return nullptr; }
+    unsigned char* getBytes() { return nullptr;}
+    std::size_t width() const { return 0; }
+    std::size_t height() const { return 0; }
+};
+
+using image_data_base = util::variant<image_data_null, image_data_32, image_data_8, image_data_16, image_data_float32>;
 
 namespace detail {
 
@@ -72,6 +80,8 @@ struct get_height_visitor : util::static_visitor<std::size_t>
 
 struct image_data_any : image_data_base
 {
+    image_data_any() = default;
+
     template <typename T>
     image_data_any(T && data) noexcept
         : image_data_base(std::move(data)) {}
