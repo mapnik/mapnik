@@ -44,6 +44,8 @@
 
 // stl
 #include <stdexcept>
+#include <algorithm>
+#include <limits>
 
 namespace mapnik
 {
@@ -430,6 +432,22 @@ void Map::set_buffer_size( int buffer_size)
 int Map::buffer_size() const
 {
     return buffer_size_;
+}
+
+int Map::max_buffer_size() const
+{
+    std::vector<layer>::const_iterator max_buff_layer = std::max_element(layers_.begin(), layers_.end(),
+        [](layer const& l1, layer const& l2)
+        {
+            int bs1 = l1.buffer_size() ? *l1.buffer_size() : std::numeric_limits<int>::min();
+            int bs2 = l2.buffer_size() ? *l2.buffer_size() : std::numeric_limits<int>::min();
+            return bs1 < bs2;
+        });
+    if (max_buff_layer == layers_.end() || !max_buff_layer->buffer_size() || *max_buff_layer->buffer_size() < buffer_size_)
+    {
+        return buffer_size_;
+    }
+    return *max_buff_layer->buffer_size();
 }
 
 boost::optional<color> const& Map::background() const

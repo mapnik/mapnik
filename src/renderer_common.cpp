@@ -50,8 +50,8 @@ renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned 
                      vars,
                      view_transform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
                      std::make_shared<label_collision_detector4>(
-                        box2d<double>(-m.buffer_size(), -m.buffer_size(),
-                                      m.width() + m.buffer_size() ,m.height() + m.buffer_size())))
+                        box2d<double>(-m.max_buffer_size(), -m.max_buffer_size(),
+                                      m.width() + m.max_buffer_size(), m.height() + m.max_buffer_size())))
 {}
 
 renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
