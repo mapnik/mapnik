@@ -153,11 +153,10 @@ int main(int argc, char** argv)
         BOOST_TEST_EQ( to_string(blend<source_over>(white,black)), to_string(white) );
         BOOST_TEST_EQ( to_string(blend<source_over>(black,white)), to_string(black) );
 
-        // https://github.com/mapnik/mapnik/issues/1452#issuecomment-8154646
         color near_white(254,254,254,254); // Source
         color near_trans(1,1,1,1); // Dest
-        color expected_color(252,252,252,255); // expected result
-        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(near_white,near_trans)), to_string(color(252,252,252,254)) );
+        color expected_color(253,253,253,255); // expected result
+        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(near_white,near_trans)), to_string(color(253,253,253,254)) );
         BOOST_TEST_EQ( to_string(blend<source_over>(near_white,near_trans)), to_string(expected_color) );
         BOOST_TEST_EQ( to_string(normal_blend(near_white,near_trans)), to_string(expected_color) );
 
