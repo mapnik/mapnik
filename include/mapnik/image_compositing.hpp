@@ -82,29 +82,18 @@ enum composite_mode_e
 MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op);
 
-template <typename T1, typename T2>
-MAPNIK_DECL void composite(T1 & dst, T2 & src,
+MAPNIK_DECL void composite(image_data_32 & dst, image_data_32 & src,
                            composite_mode_e mode,
                            float opacity=1,
                            int dx=0,
                            int dy=0,
                            bool premultiply_src=false);
 
-//extern template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & dst,
-//                           mapnik::image_data_32 & src,
-//                           composite_mode_e mode,
-//                           float opacity,
-//                           int dx,
-//                           int dy,
-//                           bool premultiply_src);
-
-//extern template MAPNIK_DECL void composite<mapnik::image_data_float32,mapnik::image_data_float32>(mapnik::image_data_float32 & dst,
-//                           mapnik::image_data_float32 & src,
-//                           composite_mode_e mode,
-//                           float opacity,
-//                           int dx,
-//                           int dy,
-//                           bool premultiply_src);
-
+MAPNIK_DECL void composite(image_data_float32 & dst, image_data_float32 & src,
+                           composite_mode_e mode,
+                           float opacity=1,
+                           int dx=0,
+                           int dy=0,
+                           bool premultiply_src=false);
 }
 #endif // MAPNIK_IMAGE_COMPOSITING_HPP

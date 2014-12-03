@@ -123,7 +123,6 @@ For example, if you generate some pattern with AGG (premultiplied) and would lik
 */
 
 
-template <>
 void composite(mapnik::image_data_32 & dst, mapnik::image_data_32 & src, composite_mode_e mode,
                float opacity,
                int dx,
@@ -148,7 +147,6 @@ void composite(mapnik::image_data_32 & dst, mapnik::image_data_32 & src, composi
     ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
 }
 
-template <>
 void composite(mapnik::image_data_float32 & dst, mapnik::image_data_float32 & src, composite_mode_e mode,
                float opacity,
                int dx,
@@ -173,13 +171,5 @@ void composite(mapnik::image_data_float32 & dst, mapnik::image_data_float32 & sr
     //ren.blend_from(pixf_mask,0,dx,dy,agg::cover_full);//unsigned(255*opacity));
     ren.copy_from(pixf_mask,0,dx,dy);//unsigned(255*opacity));
 }
-
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&,
-                                                                     mapnik::image_data_32&,
-                                                                     composite_mode_e,
-                                                                     float,
-                                                                     int,
-                                                                     int,
-                                                                     bool);
 
 }
