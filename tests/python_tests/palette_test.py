@@ -38,12 +38,16 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         palette = mapnik.Palette(act.read(),'act')
         # test saving directly to filesystem
         im.save('/tmp/mapnik-palette-test.png','png',palette)
+        expected = './images/support/mapnik-palette-test.png'
+        if os.environ.get('UPDATE'):
+            im.save(expected,"png",palette);
+
         # test saving to a string
         open('/tmp/mapnik-palette-test2.png','wb').write(im.tostring('png',palette));
         # compare the two methods
-        eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('/tmp/mapnik-palette-test2.png').tostring(),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','/tmp/mapnik-palette-test2.png'))
+        eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring('png32'),mapnik.Image.open('/tmp/mapnik-palette-test2.png').tostring('png32'),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','/tmp/mapnik-palette-test2.png'))
         # compare to expected
-        eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('./images/support/mapnik-palette-test.png').tostring(),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','./images/support/mapnik-palette-test.png'))
+        eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring('png32'),mapnik.Image.open(expected).tostring('png32'),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png',expected))
 
 if __name__ == "__main__":
     setup()
