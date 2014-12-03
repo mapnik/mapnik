@@ -264,7 +264,9 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
 template <typename T>
 image_data_any webp_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
 {
-    return image_data_any();
+    image_data_32 data(width,height);
+    read(x, y, data);
+    return image_data_any(std::move(data));
 }
 
 }
