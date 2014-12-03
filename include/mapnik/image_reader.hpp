@@ -24,7 +24,7 @@
 #define MAPNIK_IMAGE_READER_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image_data_any.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/factory.hpp>
@@ -55,11 +55,12 @@ public:
 
 struct MAPNIK_DECL image_reader : private mapnik::noncopyable
 {
-    virtual unsigned width() const=0;
-    virtual unsigned height() const=0;
-    virtual bool has_alpha() const=0;
-    virtual bool premultiplied_alpha() const=0;
-    virtual void read(unsigned x,unsigned y,image_data_32& image)=0;
+    virtual unsigned width() const = 0;
+    virtual unsigned height() const = 0;
+    virtual bool has_alpha() const = 0;
+    virtual bool premultiplied_alpha() const = 0;
+    virtual void read(unsigned x,unsigned y,image_data_32& image) = 0;
+
     virtual ~image_reader() {}
 };
 
@@ -69,7 +70,7 @@ bool register_image_reader(std::string const& type, image_reader* (* fun)(Args..
     return factory<image_reader,std::string, Args...>::instance().register_product(type, fun);
 }
 
-MAPNIK_DECL image_reader* get_image_reader(std::string const& file,std::string const& type);
+MAPNIK_DECL image_reader* get_image_reader(std::string const& file, std::string const& type);
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file);
 MAPNIK_DECL image_reader* get_image_reader(char const* data, size_t size);
 

@@ -25,84 +25,13 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image_data_any.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
  // boost
 #include <boost/optional.hpp>
 
 namespace mapnik {
-
-using image_data_base = util::variant<image_data_32, image_data_8, image_data_16, image_data_float32>;
-
-namespace detail {
-
-struct get_bytes_visitor : util::static_visitor<unsigned char*>
-{
-    template <typename T>
-    unsigned char* operator()(T & data)
-    {
-        return data.getBytes();
-    }
-};
-
-struct get_bytes_visitor_const : util::static_visitor<unsigned char const*>
-{
-    template <typename T>
-    unsigned char const* operator()(T const& data) const
-    {
-        return data.getBytes();
-    }
-};
-
-struct get_width_visitor : util::static_visitor<std::size_t>
-{
-    template <typename T>
-    std::size_t operator()(T const& data) const
-    {
-        return data.width();
-    }
-};
-
-struct get_height_visitor : util::static_visitor<std::size_t>
-{
-    template <typename T>
-    std::size_t operator()(T const& data) const
-    {
-        return data.height();
-    }
-};
-
-
-} // namespace detail
-
-struct image_data_any : image_data_base
-{
-    template <typename T>
-    image_data_any(T && data) noexcept
-        : image_data_base(std::move(data)) {}
-
-    unsigned char const* getBytes() const
-    {
-        return util::apply_visitor(detail::get_bytes_visitor_const(),*this);
-    }
-
-    unsigned char* getBytes()
-    {
-        return util::apply_visitor(detail::get_bytes_visitor(),*this);
-    }
-
-    std::size_t width() const
-    {
-        return util::apply_visitor(detail::get_width_visitor(),*this);
-    }
-
-    std::size_t height() const
-    {
-        return util::apply_visitor(detail::get_height_visitor(),*this);
-    }
-};
-
 
 class raster : private mapnik::noncopyable
 {
