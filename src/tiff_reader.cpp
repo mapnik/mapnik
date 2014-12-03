@@ -132,6 +132,10 @@ private:
     tiff_ptr tif_;
     bool premultiplied_alpha_;
     bool has_alpha_;
+    unsigned bps_;
+    unsigned photometric_;
+    unsigned bands_;
+
 public:
     enum TiffType {
         generic=1,
@@ -186,7 +190,10 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       tile_width_(0),
       tile_height_(0),
       premultiplied_alpha_(false),
-      has_alpha_(false)
+      has_alpha_(false),
+      bps_(0),
+      photometric_(0),
+      bands_(1)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
     init();
@@ -203,7 +210,10 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       tile_width_(0),
       tile_height_(0),
       premultiplied_alpha_(false),
-      has_alpha_(false)
+      has_alpha_(false),
+      bps_(0),
+      photometric_(0),
+      bands_(1)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
     stream_.seekg(0, std::ios::beg);
@@ -221,39 +231,51 @@ void tiff_reader<T>::init()
 
     if (!tif) throw image_reader_exception("Can't open tiff file");
 
-    char msg[1024];
+    TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bps_);
+    TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photometric_);
+    TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &bands_);
 
-    if (TIFFRGBAImageOK(tif,msg))
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_;
+
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
+    if (bps_ <= 8)
     {
-        TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
-        TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
-        if (TIFFIsTiled(tif))
+        char msg[1024];
+        if (TIFFRGBAImageOK(tif,msg))
         {
-            TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
-            TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
-            read_method_=tiled;
-        }
-        else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
-        {
-            read_method_=stripped;
-        }
-        //TIFFTAG_EXTRASAMPLES
-        uint16 extrasamples = 0;
-        uint16* sampleinfo = nullptr;
-        if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
-                              &extrasamples, &sampleinfo))
-        {
-            has_alpha_ = true;
-            if (extrasamples == 1 &&
-                sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+            if (TIFFIsTiled(tif))
             {
-                premultiplied_alpha_ = true;
+                TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
+                TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
+                MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
+                read_method_=tiled;
+            }
+            else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+            {
+                MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
+                read_method_=stripped;
+            }
+            //TIFFTAG_EXTRASAMPLES
+            uint16 extrasamples = 0;
+            uint16* sampleinfo = nullptr;
+            if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
+                                  &extrasamples, &sampleinfo))
+            {
+                has_alpha_ = true;
+                if (extrasamples == 1 &&
+                    sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+                {
+                    premultiplied_alpha_ = true;
+                }
             }
         }
-    }
-    else
-    {
-        throw image_reader_exception(msg);
+        else
+        {
+            MAPNIK_LOG_ERROR(tiff) << msg;
+        }
     }
 }
 
@@ -306,12 +328,12 @@ image_data_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsi
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_32&)
+void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_32& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
     {
-        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
+        MAPNIK_LOG_ERROR(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
     }
 }
 
@@ -343,7 +365,11 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
             for (int x=start_x;x<end_x;x+=tile_width_)
             {
 
-                if (!TIFFReadRGBATile(tif,x,y,buf)) break;
+                if (!TIFFReadRGBATile(tif,x,y,buf))
+                {
+                    MAPNIK_LOG_ERROR(tiff_reader) << "TIFFReadRGBATile failed";
+                    break;
+                }
 
                 tx0=std::max(x0,(unsigned)x);
                 tx1=std::min(width+x0,(unsigned)(x+tile_width_));
@@ -383,8 +409,11 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_32& image)
             ty0 = std::max(y0,y)-y;
             ty1 = std::min(height+y0,y+rows_per_strip_)-y;
 
-            if (!TIFFReadRGBAStrip(tif,y,buf)) break;
-
+            if (!TIFFReadRGBAStrip(tif,y,buf))
+            {
+                MAPNIK_LOG_ERROR(tiff_reader) << "TIFFReadRGBAStrip failed";
+                break;
+            }
             row=y+ty0-y0;
 
             int n0=laststrip ? 0:(rows_per_strip_-ty1);
