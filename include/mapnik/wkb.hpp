@@ -42,7 +42,7 @@ namespace mapnik
  * the Open Geospatial Consortium (OGC) and described in their Simple Feature
  * Access and Coordinate Transformation Service specifications.
  */
-enum wkbFormat
+enum wkbFormat : std::uint8_t
 {
     wkbAuto=1,
     wkbGeneric=2,

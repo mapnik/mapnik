@@ -28,7 +28,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
-// stl
+// std
 #include <cstdint>
 #include <string>
 
@@ -43,7 +43,6 @@ public:
     mapnik::value_unicode_string transcode(const char* data, std::int32_t length = -1) const;
     ~transcoder();
 private:
-    bool ok_;
     UConverter * conv_;
 };
 }

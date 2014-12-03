@@ -84,7 +84,7 @@ struct evaluated_text_properties : noncopyable
 
 using evaluated_text_properties_ptr = std::unique_ptr<detail::evaluated_text_properties>;
 
-enum directions_e
+enum directions_e : std::uint8_t
 {
     NORTH,
     EAST,

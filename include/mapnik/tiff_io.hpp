@@ -28,16 +28,9 @@
 
 extern "C"
 {
-#ifdef HAVE_GEOTIFF
-#include <xtiffio.h>
-#include <geotiffio.h>
-#define RealTIFFOpen XTIFFClientOpen
-#define RealTIFFClose XTIFFClose
-#else
 #include <tiffio.h>
 #define RealTIFFOpen TIFFClientOpen
 #define RealTIFFClose TIFFClose
-#endif
 }
 
 namespace mapnik {
@@ -206,30 +199,6 @@ void save_as_tiff(T1 & file, T2 const& image)
     //  TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
     //  TIFFSetField(output, TIFFTAG_COLORMAP, r, g, b);
 
-#ifdef HAVE_GEOTIFF
-    GTIF* geotiff = GTIFNew(output);
-    if (! geotiff)
-    {
-        // throw ?
-    }
-
-    GTIFKeySet(geotiff, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
-    GTIFKeySet(geotiff, GTRasterTypeGeoKey, TYPE_SHORT, 1, RasterPixelIsPoint);
-    GTIFKeySet(geotiff, GeographicTypeGeoKey, TYPE_SHORT, 1, 4326); // parameter needed !
-    GTIFKeySet(geotiff, GeogAngularUnitsGeoKey, TYPE_SHORT, 1, Angular_Degree);
-    GTIFKeySet(geotiff, GeogLinearUnitsGeoKey, TYPE_SHORT, 1, Linear_Meter);
-
-    double lowerLeftLon = 130.0f; // parameter needed !
-    double upperRightLat = 32.0; // parameter needed !
-    double tiepoints[] = { 0.0, 0.0, 0.0, lowerLeftLon, upperRightLat, 0.0 };
-    TIFFSetField(output, TIFFTAG_GEOTIEPOINTS, sizeof(tiepoints)/sizeof(double), tiepoints);
-
-    double pixelScaleX = 0.0001; // parameter needed !
-    double pixelScaleY = 0.0001; // parameter needed !
-    double pixscale[] = { pixelScaleX, pixelScaleY, 0.0 };
-    TIFFSetField(output, TIFFTAG_GEOPIXELSCALE, sizeof(pixscale)/sizeof(double), pixscale);
-#endif
-
     int next_scanline = 0;
     unsigned char* row = reinterpret_cast<unsigned char*>(::operator new(scanline_size));
 
@@ -249,11 +218,6 @@ void save_as_tiff(T1 & file, T2 const& image)
     }
 
     ::operator delete(row);
-
-#ifdef HAVE_GEOTIFF
-    GTIFWriteKeys(geotiff);
-    GTIFFree(geotiff);
-#endif
 
     RealTIFFClose(output);
 }

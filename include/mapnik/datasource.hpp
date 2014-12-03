@@ -66,12 +66,12 @@ private:
 class MAPNIK_DECL datasource : private mapnik::noncopyable
 {
 public:
-    enum datasource_t {
+    enum datasource_t : std::uint8_t {
         Vector,
         Raster
     };
 
-    enum geometry_t {
+    enum geometry_t : std::uint8_t {
         Point = 1,
         LineString = 2,
         Polygon = 3,
