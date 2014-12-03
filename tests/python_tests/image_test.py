@@ -29,7 +29,7 @@ def test_image_premultiply():
 
 def test_tiff_round_trip():
     filepath = '/tmp/mapnik-tiff-io.tiff'
-    im = mapnik.Image(255,267)
+    im = mapnik.Image(256,256)
     im.background = mapnik.Color('rgba(1,2,3,.5)')
     im.save(filepath,'tiff')
     im2 = mapnik.Image.open(filepath)

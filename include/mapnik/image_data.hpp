@@ -137,6 +137,14 @@ public:
     {
         return height_;
     }
+    inline unsigned getSize() const
+    {
+        return height_ * width_ * pixel_size; 
+    }
+    inline unsigned getRowSize() const
+    {
+        return width_ * pixel_size;
+    }
     inline void set(pixel_type const& t)
     {
         std::fill(pData_, pData_ + width_ * height_, t);

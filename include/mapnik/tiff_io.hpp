@@ -25,6 +25,8 @@
 
 #include <mapnik/global.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_data_any.hpp>
+#include <mapnik/util/variant.hpp>
 
 extern "C"
 {
@@ -154,13 +156,62 @@ static int tiff_dummy_map_proc(thandle_t , tdata_t*, toff_t* )
     return 0;
 }
 
+struct tag_setter : public mapnik::util::static_visitor<>
+{
+    tag_setter(TIFF * output)
+        : output_(output) {}
+
+    template <typename T>
+    void operator() (T const&) const
+    {
+        // Assume this would be null type
+        throw ImageWriterException("Could not write TIFF - unknown image type provided");
+    }
+
+    inline void operator() (image_data_32 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+    }
+    inline void operator() (image_data_float32 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+        
+    }
+    inline void operator() (image_data_16 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
+        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+    }
+    inline void operator() (image_data_8 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
+        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+    }
+    inline void operator() (image_data_null const&) const
+    {
+        // Assume this would be null type
+        throw ImageWriterException("Could not write TIFF - Null image provided");
+    }
+
+    private:
+        TIFF * output_;
+};
+
 template <typename T1, typename T2>
 void save_as_tiff(T1 & file, T2 const& image)
 {
     const int width = image.width();
     const int height = image.height();
-    const int scanline_size = sizeof(unsigned char) * width * 3;
-
 
     TIFF* output = RealTIFFOpen("mapnik_tiff_stream",
                                 "wm",
@@ -176,16 +227,58 @@ void save_as_tiff(T1 & file, T2 const& image)
     {
         throw ImageWriterException("Could not write TIFF");
     }
-
+    
+    // Set some constent tiff information that doesn't vary based on type of data
+    // or image size
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(output, TIFFTAG_IMAGELENGTH, height);
-    TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
     TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
-    TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 3);
-    TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
+    TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 1);
+    
+    // Set the compression for the TIFF
+    //TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
+    TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
+    // Set the zip level for the compression
+    // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
+    // Changes the time spent trying to compress
+    TIFFSetField(output, TIFFTAG_ZIPQUALITY, 4);
+    
+    // Set tags that vary based on the type of data being provided.
+    tag_setter set(output);
+    set(image);
+    //util::apply_visitor(set, image);
+    
+    // If the image is greater then 8MB uncompressed, then lets use scanline rather then
+    // tile.
+    if (image.getSize() < 8 * 32 * 1024 * 1024)
+    {
+        // Process Scanline`
+        TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
+        int next_scanline = 0;
+        
+        //typename T2::pixel_type * row = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getRowSize()));
+
+        while (next_scanline < height)
+        {
+            //memcpy(row, image.getRow(next_scanline), image.getRowSize());
+            typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
+            TIFFWriteScanline(output, row, next_scanline, 0);
+            ++next_scanline;
+        }
+        //::operator delete(row);
+    }
+    else
+    {
+        TIFFSetField(output, TIFFTAG_TILEWIDTH, width);
+        TIFFSetField(output, TIFFTAG_TILELENGTH, height);
+        // Process as tiles
+        //typename T2::pixel_type * image_data = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getSize()));
+        //memcpy(image_data, image.getData(), image.getSize());
+        typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
+        TIFFWriteTile(output, image_data, 0, 0, 0, 0);
+        //::operator delete(image_data);
+    }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
 
@@ -198,26 +291,6 @@ void save_as_tiff(T1 & file, T2 const& image)
     //  }
     //  TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
     //  TIFFSetField(output, TIFFTAG_COLORMAP, r, g, b);
-
-    int next_scanline = 0;
-    unsigned char* row = reinterpret_cast<unsigned char*>(::operator new(scanline_size));
-
-    while (next_scanline < height)
-    {
-        const unsigned* imageRow = image.getRow(next_scanline);
-
-        for (int i = 0, index = 0; i < width; ++i)
-        {
-            row[index++] = (imageRow[i]) & 0xff;
-            row[index++] = (imageRow[i] >> 8) & 0xff;
-            row[index++] = (imageRow[i] >> 16) & 0xff;
-        }
-
-        TIFFWriteScanline(output, row, next_scanline, 0);
-        ++next_scanline;
-    }
-
-    ::operator delete(row);
 
     RealTIFFClose(output);
 }
