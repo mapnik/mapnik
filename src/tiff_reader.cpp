@@ -141,11 +141,12 @@ public:
     explicit tiff_reader(std::string const& file_name);
     tiff_reader(char const* data, std::size_t size);
     virtual ~tiff_reader();
-    unsigned width() const;
-    unsigned height() const;
-    inline bool has_alpha() const { return has_alpha_; }
-    bool premultiplied_alpha() const;
-    void read(unsigned x,unsigned y,image_data_32& image);
+    unsigned width() const final;
+    unsigned height() const final;
+    inline bool has_alpha() const final { return has_alpha_; }
+    bool premultiplied_alpha() const final;
+    void read(unsigned x,unsigned y,image_data_32& image) final;
+    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
@@ -294,6 +295,12 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_32& image)
     {
         read_generic(x,y,image);
     }
+}
+
+template <typename T>
+image_data_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+{
+    return image_data_any();
 }
 
 template <typename T>
