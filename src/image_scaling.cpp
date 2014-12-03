@@ -302,6 +302,101 @@ void scale_image_agg<image_data_float32>(image_data_float32 & target,
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
+template <>
+void scale_image_agg<image_data_16>(image_data_16 & target,
+                                    image_data_16 const& source,
+                                    scaling_method_e scaling_method,
+                                    double image_ratio_x,
+                                    double image_ratio_y,
+                                    double x_off_f,
+                                    double y_off_f,
+                                    double filter_factor)
+{
+    using pixfmt_pre = agg::pixfmt_gray16_pre;
+    using renderer_base_pre = agg::renderer_base<pixfmt_pre>;
+
+    // define some stuff we'll use soon
+    agg::rasterizer_scanline_aa<> ras;
+    agg::scanline_u8 sl;
+    agg::span_allocator<agg::gray16> sa;
+    agg::image_filter_lut filter;
+
+    // initialize source AGG buffer
+    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()), source.width(), source.height(), source.width() * 2);
+    pixfmt_pre pixf_src(rbuf_src);
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    img_src_type img_src(pixf_src);
+
+    // initialize destination AGG buffer (with transparency)
+    agg::rendering_buffer rbuf_dst(target.getBytes(), target.width(), target.height(), target.width() * 2);
+    pixfmt_pre pixf_dst(rbuf_dst);
+    renderer_base_pre rb_dst_pre(pixf_dst);
+
+    // create a scaling matrix
+    agg::trans_affine img_mtx;
+    img_mtx /= agg::trans_affine_scaling(image_ratio_x, image_ratio_y);
+
+    // create a linear interpolator for our scaling matrix
+    using interpolator_type = agg::span_interpolator_linear<>;
+    interpolator_type interpolator(img_mtx);
+
+    // draw an anticlockwise polygon to render our image into
+    double scaled_width = target.width();
+    double scaled_height = target.height();
+    ras.reset();
+    ras.move_to_d(x_off_f,                y_off_f);
+    ras.line_to_d(x_off_f + scaled_width, y_off_f);
+    ras.line_to_d(x_off_f + scaled_width, y_off_f + scaled_height);
+    ras.line_to_d(x_off_f,                y_off_f + scaled_height);
+
+    switch(scaling_method)
+    {
+    case SCALING_NEAR:
+    {
+        using span_gen_type = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
+        span_gen_type sg(img_src, interpolator);
+        agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
+        return;
+    }
+    case SCALING_BILINEAR:
+        filter.calculate(agg::image_filter_bilinear(), true); break;
+    case SCALING_BICUBIC:
+        filter.calculate(agg::image_filter_bicubic(), true); break;
+    case SCALING_SPLINE16:
+        filter.calculate(agg::image_filter_spline16(), true); break;
+    case SCALING_SPLINE36:
+        filter.calculate(agg::image_filter_spline36(), true); break;
+    case SCALING_HANNING:
+        filter.calculate(agg::image_filter_hanning(), true); break;
+    case SCALING_HAMMING:
+        filter.calculate(agg::image_filter_hamming(), true); break;
+    case SCALING_HERMITE:
+        filter.calculate(agg::image_filter_hermite(), true); break;
+    case SCALING_KAISER:
+        filter.calculate(agg::image_filter_kaiser(), true); break;
+    case SCALING_QUADRIC:
+        filter.calculate(agg::image_filter_quadric(), true); break;
+    case SCALING_CATROM:
+        filter.calculate(agg::image_filter_catrom(), true); break;
+    case SCALING_GAUSSIAN:
+        filter.calculate(agg::image_filter_gaussian(), true); break;
+    case SCALING_BESSEL:
+        filter.calculate(agg::image_filter_bessel(), true); break;
+    case SCALING_MITCHELL:
+        filter.calculate(agg::image_filter_mitchell(), true); break;
+    case SCALING_SINC:
+        filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
+    case SCALING_LANCZOS:
+        filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
+    case SCALING_BLACKMAN:
+        filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
+    }
+    using span_gen_type = agg::span_image_resample_gray_affine<img_src_type>;
+    span_gen_type sg(img_src, interpolator, filter);
+    agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
+}
+
+
 //template void scale_image_agg<image_data_32>(image_data_32& target,
 //                                             const image_data_32& source,
 //                                             scaling_method_e scaling_method,

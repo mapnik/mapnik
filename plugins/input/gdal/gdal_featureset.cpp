@@ -204,8 +204,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
             if (band_ > 0) // we are querying a single band
             {
-                mapnik::image_data_float32 image(im_width, im_height);
-                image.set(std::numeric_limits<float>::max());
+                mapnik::image_data_16 image(im_width, im_height);
+                image.set(std::numeric_limits<std::int16_t>::max());
                 if (band_ > nbands_)
                 {
                     std::ostringstream s;
@@ -217,8 +217,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
                                                  image.getData(), image.width(), image.height(),
-                                                 GDT_Float32, 0, 0);
-                if (raster_io_error == CE_Failure) {
+                                                 GDT_Int16, 0, 0);
+                if (raster_io_error == CE_Failure)
+                {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
                 mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, image, filter_factor);

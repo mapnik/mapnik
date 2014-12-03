@@ -72,7 +72,8 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                 if (*is_premultiplied) premultiply_source = false;
                 else premultiply_source = true;
             }
-            if (premultiply_source)
+            // only premuiltiply rgba8 images
+            if (premultiply_source && source->data_.is<image_data_32>())
             {
                 agg::rendering_buffer buffer(source->data_.getBytes(),
                                              source->data_.width(),
@@ -141,32 +142,25 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     else if (source->data_.is<image_data_float32>())
                     {
                         std::cerr << "#3 source->data float32" << std::endl;
-                        raster target(target_ext, image_data_float32(raster_width, raster_height), source->get_filter_factor());
-                        scale_image_agg<image_data_float32>(util::get<image_data_float32>(target.data_),
-                                                            util::get<image_data_float32>(source->data_),
-                                                            scaling_method,
-                                                            image_ratio_x,
-                                                            image_ratio_y,
-                                                            0.0,
-                                                            0.0,
-                                                            source->get_filter_factor());
-
-                        image_data_float32 & data = util::get<image_data_float32>(target.data_);
+                    }
+                    else if (source->data_.is<image_data_16>())
+                    {
+                        std::cerr << "#3 source->data int16" << std::endl;
+                        raster target(target_ext, image_data_16(raster_width, raster_height), source->get_filter_factor());
+                        scale_image_agg<image_data_16>(util::get<image_data_16>(target.data_),
+                                                       util::get<image_data_16>(source->data_),
+                                                       scaling_method,
+                                                       image_ratio_x,
+                                                       image_ratio_y,
+                                                       0.0,
+                                                       0.0,
+                                                       source->get_filter_factor());
+                        image_data_16 & data = util::get<image_data_16>(target.data_);
                         image_data_32 dst(raster_width, raster_height);
-                        for (unsigned x = 0; x < dst.width(); ++x)
-                        {
-                            for (unsigned y = 0; y < dst.height(); ++y)
-                            {
-                                //std::cerr << data(x,y) << std::endl;
-                                unsigned val = unsigned(255*data(x,y)+0.5);
-                                dst(x,y) = color(val,val,val, unsigned(opacity*255+0.5)).rgba();
-                            }
-                        }
-                        raster out(target_ext, dst,source->get_filter_factor());
-                        // If there's a colorizer defined, use it to color the raster in-place
                         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym, keys::colorizer);
-                        if (colorizer) colorizer->colorize(out,feature);
-                        composite(util::get<image_data_32>(out.data_), comp_op, opacity, start_x, start_y);
+                        if (colorizer) colorizer->colorize(dst, data,source->nodata(),feature);
+                        composite(dst, comp_op, opacity, start_x, start_y);
+
                     }
                 }
             }

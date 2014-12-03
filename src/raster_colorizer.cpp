@@ -124,14 +124,13 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 
 void raster_colorizer::colorize(raster & ras, feature_impl const& f) const
 {
-    unsigned * imageData = reinterpret_cast<unsigned*>(ras.data_.getBytes());
-
+    std::int16_t * imageData = reinterpret_cast<std::int16_t*>(ras.data_.getBytes());
     int len = ras.data_.width() * ras.data_.height();
     boost::optional<double> const& nodata = ras.nodata();
     for (int i=0; i<len; ++i)
     {
         // the GDAL plugin reads single bands as floats
-        float value = *reinterpret_cast<float *> (&imageData[i]);
+        std::int16_t value = imageData[i];
         if (nodata && (std::fabs(value - *nodata) < epsilon_))
         {
             imageData[i] = 0;
@@ -139,6 +138,27 @@ void raster_colorizer::colorize(raster & ras, feature_impl const& f) const
         else
         {
             imageData[i] = get_color(value);
+        }
+    }
+}
+
+void raster_colorizer::colorize(image_data_32 & out, image_data_16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const
+{
+    // TODO: assuming in/out have the same width/height for now
+    std::uint32_t * out_data = out.getData();
+    std::int16_t const* in_data = in.getData();
+    int len = out.width() * out.height();
+    for (int i=0; i<len; ++i)
+    {
+        // the GDAL plugin reads single bands as floats
+        std::int16_t value = in_data[i];
+        if (nodata && (std::fabs(value - *nodata) < epsilon_))
+        {
+            out_data[i] = 0;
+        }
+        else
+        {
+            out_data[i] = get_color(value);
         }
     }
 }

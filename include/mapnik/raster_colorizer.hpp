@@ -40,7 +40,9 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/enumeration.hpp>
-
+#include <mapnik/image_data.hpp>
+ // boost
+#include <boost/optional.hpp>
 // boost
 #include <memory>
 
@@ -201,6 +203,8 @@ public:
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
     void colorize(raster & ras, feature_impl const& f) const;
 
+    //
+    void colorize(image_data_32 & out, image_data_16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!
