@@ -123,13 +123,6 @@ public:
           filter_factor_(filter_factor),
           premultiplied_alpha_(premultiplied_alpha) {}
 
-    raster(box2d<double> const& ext, image_data_32 && data,
-           double filter_factor, bool premultiplied_alpha = false)
-        : ext_(ext),
-          data_(std::move(data)),
-          filter_factor_(filter_factor),
-          premultiplied_alpha_(premultiplied_alpha) {}
-
     void set_nodata(double nodata)
     {
         nodata_ = nodata;
