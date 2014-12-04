@@ -145,9 +145,8 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     }
                     else if (source->data_.is<image_data_16>())
                     {
-                        std::cerr << "#3 source->data int16" << std::endl;
-                        raster target(target_ext, image_data_16(raster_width, raster_height), source->get_filter_factor());
-                        scale_image_agg<image_data_16>(util::get<image_data_16>(target.data_),
+                        image_data_16 scaled(raster_width, raster_height);
+                        scale_image_agg<image_data_16>(scaled,
                                                        util::get<image_data_16>(source->data_),
                                                        scaling_method,
                                                        image_ratio_x,
@@ -155,10 +154,9 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                                                        0.0,
                                                        0.0,
                                                        source->get_filter_factor());
-                        image_data_16 & data = util::get<image_data_16>(target.data_);
                         image_data_32 dst(raster_width, raster_height);
                         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym, keys::colorizer);
-                        if (colorizer) colorizer->colorize(dst, data,source->nodata(),feature);
+                        if (colorizer) colorizer->colorize(dst, scaled, source->nodata(), feature);
                         composite(dst, comp_op, opacity, start_x, start_y);
 
                     }
