@@ -30,7 +30,7 @@ def test_tiff_round_trip_scanline():
     filepath = '/tmp/mapnik-tiff-io-scanline.tiff'
     im = mapnik.Image(255,267)
     im.background = mapnik.Color('rgba(1,2,3,.5)')
-    im.save(filepath,'tiff:zlevel=0:scanline=1:compression=lzw')
+    im.save(filepath,'tiff:scanline=1')
     im2 = mapnik.Image.open(filepath)
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
