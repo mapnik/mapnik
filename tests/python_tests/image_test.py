@@ -7,8 +7,6 @@ from timeit import Timer, time
 from nose.tools import *
 from utilities import execution_path, run_all
 
-mapnik.logger.set_severity(mapnik.severity_type.Debug)
-
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
