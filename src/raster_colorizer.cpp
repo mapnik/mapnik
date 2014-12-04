@@ -154,7 +154,7 @@ void raster_colorizer::colorize(image_data_32 & out, image_data_16 const& in, bo
         std::int16_t value = in_data[i];
         if (nodata && (std::fabs(value - *nodata) < epsilon_))
         {
-            out_data[i] = 0;
+            out_data[i] = 0; // rgba(0,0,0,0)
         }
         else
         {
