@@ -51,7 +51,7 @@ struct buffer
 
     buffer(buffer const& rhs)
         : size_(rhs.size_),
-          data_(rhs.data_)
+          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
     {
         if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
     }
