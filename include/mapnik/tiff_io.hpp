@@ -156,10 +156,23 @@ static int tiff_dummy_map_proc(thandle_t , tdata_t*, toff_t* )
     return 0;
 }
 
+struct tiff_config
+{
+    tiff_config()
+        : compression(COMPRESSION_ADOBE_DEFLATE),
+        zlevel(4),
+        scanline(false) {}
+
+    int compression;
+    int zlevel;
+    bool scanline;
+};
+
 struct tag_setter : public mapnik::util::static_visitor<>
 {
-    tag_setter(TIFF * output)
-        : output_(output) {}
+    tag_setter(TIFF * output, tiff_config & config)
+        : output_(output),
+          config_(config) {}
 
     template <typename T>
     void operator() (T const&) const
@@ -174,28 +187,56 @@ struct tag_setter : public mapnik::util::static_visitor<>
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
-        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+        uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+        TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        if (config_.compression == COMPRESSION_DEFLATE 
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+    
+        }
     }
     inline void operator() (image_data_gray32f const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
-        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE 
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+        }
     }
     inline void operator() (image_data_gray16 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
-        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE 
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+    
+        }
     }
     inline void operator() (image_data_gray8 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
-        TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE 
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+    
+        }
     }
     inline void operator() (image_data_null const&) const
     {
@@ -205,10 +246,29 @@ struct tag_setter : public mapnik::util::static_visitor<>
 
     private:
         TIFF * output_;
+        tiff_config config_;
 };
 
+void set_tiff_config(TIFF* output, tiff_config & config)
+{
+    // Set some constent tiff information that doesn't vary based on type of data
+    // or image size
+    TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    
+    // Set the compression for the TIFF
+    TIFFSetField(output, TIFFTAG_COMPRESSION, config.compression);
+    
+    if (COMPRESSION_ADOBE_DEFLATE == config.compression || COMPRESSION_DEFLATE == config.compression)
+    { 
+        // Set the zip level for the compression
+        // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
+        // Changes the time spent trying to compress
+        TIFFSetField(output, TIFFTAG_ZIPQUALITY, config.zlevel);
+    }
+}
+
 template <typename T1, typename T2>
-void save_as_tiff(T1 & file, T2 const& image)
+void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
 {
     const int width = image.width();
     const int height = image.height();
@@ -228,43 +288,39 @@ void save_as_tiff(T1 & file, T2 const& image)
         throw ImageWriterException("Could not write TIFF");
     }
 
-    // Set some constent tiff information that doesn't vary based on type of data
-    // or image size
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(output, TIFFTAG_IMAGELENGTH, height);
     TIFFSetField(output, TIFFTAG_IMAGEDEPTH, 1);
-    TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
-    // Set the compression for the TIFF
-    //TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
-    TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
+    set_tiff_config(output, config);
     
-    // Set the zip level for the compression
-    // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
-    // Changes the time spent trying to compress
-    TIFFSetField(output, TIFFTAG_ZIPQUALITY, 4);
-
     // Set tags that vary based on the type of data being provided.
-    tag_setter set(output);
+    tag_setter set(output, config);
     set(image);
     //util::apply_visitor(set, image);
 
     // If the image is greater then 8MB uncompressed, then lets use scanline rather then
     // tile. TIFF also requires that all TIFFTAG_TILEWIDTH and TIFF_TILELENGTH all be
     // a multiple of 16, if they are not we will use scanline.
-    if (image.getSize() > 8 * 32 * 1024 * 1024 || width % 16 != 0 || height % 16 != 0)
+    if (image.getSize() > 8 * 32 * 1024 * 1024 
+            || width % 16 != 0 
+            || height % 16 != 0
+            || config.scanline)
     {
         // Process Scanline
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
+        typename T2::pixel_type * row = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getRowSize()));
 
         while (next_scanline < height)
         {
-            typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
+            memcpy(row, image.getRow(next_scanline), image.getRowSize());
+            //typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
             TIFFWriteScanline(output, row, next_scanline, 0);
             ++next_scanline;
         }
+        ::operator delete(row);
     }
     else
     {
@@ -272,8 +328,11 @@ void save_as_tiff(T1 & file, T2 const& image)
         TIFFSetField(output, TIFFTAG_TILELENGTH, height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         // Process as tiles
-        typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
+        typename T2::pixel_type * image_data = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getSize()));
+        memcpy(image_data, image.getData(), image.getSize());
+        //typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
         TIFFWriteTile(output, image_data, 0, 0, 0, 0);
+        ::operator delete(image_data);
     }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette

@@ -255,6 +255,82 @@ void handle_png_options(std::string const& type,
 }
 #endif
 
+#if defined(HAVE_TIFF)
+void handle_tiff_options(std::string const& type,
+                        tiff_config & config)
+{
+    if (type == "tiff")
+    {
+        return;
+    }
+    if (type.length() > 4)
+    {
+        boost::char_separator<char> sep(":");
+        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+        for (auto const& t : tokens)
+        {
+            if (t == "tiff")
+            {
+                continue;
+            }
+            else if (boost::algorithm::starts_with(t, "compression="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (val == "deflate")
+                    {
+                        config.compression = COMPRESSION_DEFLATE;
+                    }
+                    else if (val == "adobedeflate")
+                    {
+                        config.compression = COMPRESSION_ADOBE_DEFLATE;
+                    }
+                    else if (val == "lzw")
+                    {
+                        config.compression = COMPRESSION_LZW;
+                    }
+                    else if (val == "none")
+                    {   
+                        config.compression = COMPRESSION_NONE;
+                    }
+                    else
+                    {
+                        throw ImageWriterException("invalid tiff compression: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "zlevel="))
+            {
+                std::string val = t.substr(7);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
+                    {
+                        throw ImageWriterException("invalid tiff zlevel: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "scanline="))
+            {
+                std::string val = t.substr(9);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2bool(val,config.scanline))
+                    {
+                        throw ImageWriterException("invalid tiff scanline: '" + val + "'");
+                    }
+                }
+            }
+            else
+            {
+                throw ImageWriterException("unhandled tiff option: " + t);
+            }
+        }
+    }
+}
+#endif
+
 #if defined(HAVE_WEBP)
 void handle_webp_options(std::string const& type,
                         WebPConfig & config,
@@ -621,7 +697,9 @@ void save_to_stream(T const& image,
         else if (boost::algorithm::starts_with(t, "tif"))
         {
 #if defined(HAVE_TIFF)
-            save_as_tiff(stream, image);
+            tiff_config config;
+            handle_tiff_options(t, config);
+            save_as_tiff(stream, image, config);
 #else
             throw ImageWriterException("tiff output is not enabled in your build of Mapnik");
 #endif

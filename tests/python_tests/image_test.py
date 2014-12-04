@@ -27,10 +27,10 @@ def test_image_premultiply():
     #im = mapnik.Image(-40,40)
 
 def test_tiff_round_trip_scanline():
-    filepath = '/tmp/mapnik-tiff-io.tiff'
+    filepath = '/tmp/mapnik-tiff-io-scanline.tiff'
     im = mapnik.Image(255,267)
     im.background = mapnik.Color('rgba(1,2,3,.5)')
-    im.save(filepath,'tiff')
+    im.save(filepath,'tiff:zlevel=0:scanline=1:compression=lzw')
     im2 = mapnik.Image.open(filepath)
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
@@ -38,7 +38,7 @@ def test_tiff_round_trip_scanline():
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
 
 def test_tiff_round_trip_tiled():
-    filepath = '/tmp/mapnik-tiff-io.tiff'
+    filepath = '/tmp/mapnik-tiff-io-tiled.tiff'
     im = mapnik.Image(256,256)
     im.background = mapnik.Color('rgba(1,2,3,.5)')
     im.save(filepath,'tiff')
