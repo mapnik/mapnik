@@ -142,7 +142,7 @@ void raster_colorizer::colorize(raster & ras, feature_impl const& f) const
     }
 }
 
-void raster_colorizer::colorize(image_data_32 & out, image_data_16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const
+void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const
 {
     // TODO: assuming in/out have the same width/height for now
     std::uint32_t * out_data = out.getData();

@@ -97,8 +97,8 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
 }
 
 template <>
-void scale_image_agg<image_data_32>(image_data_32 & target,
-                                    image_data_32 const& source,
+void scale_image_agg<image_data_rgba8>(image_data_rgba8 & target,
+                                    image_data_rgba8 const& source,
                                     scaling_method_e scaling_method,
                                     double image_ratio_x,
                                     double image_ratio_y,
@@ -209,8 +209,8 @@ void scale_image_agg<image_data_32>(image_data_32 & target,
 
 
 template <>
-void scale_image_agg<image_data_float32>(image_data_float32 & target,
-                                    image_data_float32 const& source,
+void scale_image_agg<image_data_gray32f>(image_data_gray32f & target,
+                                    image_data_gray32f const& source,
                                     scaling_method_e scaling_method,
                                     double image_ratio_x,
                                     double image_ratio_y,
@@ -303,8 +303,8 @@ void scale_image_agg<image_data_float32>(image_data_float32 & target,
 }
 
 template <>
-void scale_image_agg<image_data_16>(image_data_16 & target,
-                                    image_data_16 const& source,
+void scale_image_agg<image_data_gray16>(image_data_gray16 & target,
+                                    image_data_gray16 const& source,
                                     scaling_method_e scaling_method,
                                     double image_ratio_x,
                                     double image_ratio_y,
@@ -397,8 +397,8 @@ void scale_image_agg<image_data_16>(image_data_16 & target,
 }
 
 
-//template void scale_image_agg<image_data_32>(image_data_32& target,
-//                                             const image_data_32& source,
+//template void scale_image_agg<image_data_rgba8>(image_data_rgba8& target,
+//                                             const image_data_rgba8& source,
 //                                             scaling_method_e scaling_method,
 //                                             double image_ratio_x,
 //                                             double image_ratio_y,

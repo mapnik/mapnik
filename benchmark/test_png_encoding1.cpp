@@ -4,7 +4,7 @@
 
 class test : public benchmark::test_case
 {
-    mapnik::image_data_32 im_;
+    mapnik::image_data_rgba8 im_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params),

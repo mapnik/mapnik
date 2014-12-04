@@ -204,7 +204,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
             if (band_ > 0) // we are querying a single band
             {
-                mapnik::image_data_16 image(im_width, im_height);
+                mapnik::image_data_gray16 image(im_width, im_height);
                 image.set(std::numeric_limits<std::int16_t>::max());
                 if (band_ > nbands_)
                 {
@@ -227,7 +227,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             }
             else // working with all bands
             {
-                mapnik::image_data_32 image(im_width, im_height);
+                mapnik::image_data_rgba8 image(im_width, im_height);
                 image.set(std::numeric_limits<std::uint32_t>::max());
                 for (int i = 0; i < nbands_; ++i)
                 {

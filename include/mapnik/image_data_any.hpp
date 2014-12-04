@@ -36,7 +36,7 @@ struct image_data_null
     std::size_t height() const { return 0; }
 };
 
-using image_data_base = util::variant<image_data_null, image_data_32, image_data_8, image_data_16, image_data_float32>;
+using image_data_base = util::variant<image_data_null, image_data_rgba8, image_data_gray8, image_data_gray16, image_data_gray32f>;
 
 namespace detail {
 

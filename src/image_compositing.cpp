@@ -123,7 +123,7 @@ For example, if you generate some pattern with AGG (premultiplied) and would lik
 */
 
 
-void composite(mapnik::image_data_32 & dst, mapnik::image_data_32 & src, composite_mode_e mode,
+void composite(mapnik::image_data_rgba8 & dst, mapnik::image_data_rgba8 & src, composite_mode_e mode,
                float opacity,
                int dx,
                int dy,
@@ -147,7 +147,7 @@ void composite(mapnik::image_data_32 & dst, mapnik::image_data_32 & src, composi
     ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
 }
 
-void composite(mapnik::image_data_float32 & dst, mapnik::image_data_float32 & src, composite_mode_e mode,
+void composite(mapnik::image_data_gray32f & dst, mapnik::image_data_gray32f & src, composite_mode_e mode,
                float opacity,
                int dx,
                int dy,

@@ -183,7 +183,7 @@ mapnik::raster_ptr read_data_band(mapnik::box2d<double> const& bbox,
                     uint16_t width, uint16_t height,
                     bool hasnodata, T reader)
 {
-  mapnik::image_data_float32 image(width, height);
+  mapnik::image_data_gray32f image(width, height);
   //image.set(std::numeric_limits<float>::max());
   // Start with plain white (ABGR or RGBA depending on endiannes)
   // TODO: set to transparent instead?
@@ -271,7 +271,7 @@ mapnik::raster_ptr read_grayscale_band(mapnik::box2d<double> const& bbox,
                          uint16_t width, uint16_t height,
                          bool hasnodata, T reader)
 {
-  mapnik::image_data_32 image(width,height);
+  mapnik::image_data_rgba8 image(width,height);
   // Start with plain white (ABGR or RGBA depending on endiannes)
   // TODO: set to transparent instead?
   image.set(0xffffffff);
@@ -352,7 +352,7 @@ mapnik::raster_ptr pgraster_wkb_reader::read_grayscale(mapnik::box2d<double> con
 mapnik::raster_ptr pgraster_wkb_reader::read_rgba(mapnik::box2d<double> const& bbox,
                                                   uint16_t width, uint16_t height)
 {
-  mapnik::image_data_32 image(width, height);
+  mapnik::image_data_rgba8 image(width, height);
   // Start with plain white (ABGR or RGBA depending on endiannes)
   image.set(0xffffffff);
 

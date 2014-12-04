@@ -168,29 +168,29 @@ struct tag_setter : public mapnik::util::static_visitor<>
         throw ImageWriterException("Could not write TIFF - unknown image type provided");
     }
 
-    inline void operator() (image_data_32 const&) const
+    inline void operator() (image_data_rgba8 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
         TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
     }
-    inline void operator() (image_data_float32 const&) const
+    inline void operator() (image_data_gray32f const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
         TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
-        
+
     }
-    inline void operator() (image_data_16 const&) const
+    inline void operator() (image_data_gray16 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
         TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
     }
-    inline void operator() (image_data_8 const&) const
+    inline void operator() (image_data_gray8 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
@@ -227,14 +227,14 @@ void save_as_tiff(T1 & file, T2 const& image)
     {
         throw ImageWriterException("Could not write TIFF");
     }
-    
+
     // Set some constent tiff information that doesn't vary based on type of data
     // or image size
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(output, TIFFTAG_IMAGELENGTH, height);
     TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 1);
-    
+
     // Set the compression for the TIFF
     //TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
     TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
@@ -242,12 +242,12 @@ void save_as_tiff(T1 & file, T2 const& image)
     // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
     // Changes the time spent trying to compress
     TIFFSetField(output, TIFFTAG_ZIPQUALITY, 4);
-    
+
     // Set tags that vary based on the type of data being provided.
     tag_setter set(output);
     set(image);
     //util::apply_visitor(set, image);
-    
+
     // If the image is greater then 8MB uncompressed, then lets use scanline rather then
     // tile.
     if (image.getSize() < 8 * 32 * 1024 * 1024)
@@ -256,7 +256,7 @@ void save_as_tiff(T1 & file, T2 const& image)
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
-        
+
         //typename T2::pixel_type * row = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getRowSize()));
 
         while (next_scanline < height)

@@ -139,7 +139,7 @@ public:
     }
     inline unsigned getSize() const
     {
-        return height_ * width_ * pixel_size; 
+        return height_ * width_ * pixel_size;
     }
     inline unsigned getRowSize() const
     {
@@ -197,10 +197,10 @@ private:
     pixel_type *pData_;
 };
 
-using image_data_32 = image_data<std::uint32_t>;
-using image_data_8 = image_data<std::uint8_t> ;
-using image_data_16 = image_data<std::int16_t>;
-using image_data_float32 = image_data<float>;
+using image_data_rgba8 = image_data<std::uint32_t>;
+using image_data_gray8 = image_data<std::uint8_t> ;
+using image_data_gray16 = image_data<std::int16_t>;
+using image_data_gray32f = image_data<float>;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP

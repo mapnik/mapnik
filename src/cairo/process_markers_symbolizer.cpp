@@ -124,7 +124,7 @@ struct markers_dispatch : mapnik::noncopyable
 template <typename RendererContext, typename Detector>
 struct raster_markers_dispatch : mapnik::noncopyable
 {
-    raster_markers_dispatch(mapnik::image_data_32 & src,
+    raster_markers_dispatch(mapnik::image_data_rgba8 & src,
                        agg::trans_affine const& marker_trans,
                        markers_symbolizer const& sym,
                        Detector & detector,
@@ -165,7 +165,7 @@ struct raster_markers_dispatch : mapnik::noncopyable
         }
     }
 
-    image_data_32 & src_;
+    image_data_rgba8 & src_;
     Detector & detector_;
     markers_symbolizer const& sym_;
     agg::trans_affine const& marker_trans_;

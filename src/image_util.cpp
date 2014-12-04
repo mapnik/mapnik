@@ -769,62 +769,62 @@ void save_to_cairo_file(mapnik::Map const& map,
 
 #endif
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&);
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&,
                                           rgba_palette const& palette);
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&);
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           rgba_palette const& palette);
 
-template std::string save_to_string<image_data_32>(image_data_32 const&,
+template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&);
 
-template std::string save_to_string<image_data_32>(image_data_32 const&,
+template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&,
                                                    rgba_palette const& palette);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         std::string const&);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
-template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&);
 
-template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&,
                                                                  rgba_palette const& palette);
 
 void save_to_file(image_32 const& image,std::string const& file)
 {
-    save_to_file<image_data_32>(image.data(), file);
+    save_to_file<image_data_rgba8>(image.data(), file);
 }
 
 void save_to_file (image_32 const& image,
                    std::string const& file,
                    std::string const& type)
 {
-    save_to_file<image_data_32>(image.data(), file, type);
+    save_to_file<image_data_rgba8>(image.data(), file, type);
 }
 
 void save_to_file (image_32 const& image,
@@ -832,20 +832,20 @@ void save_to_file (image_32 const& image,
                    std::string const& type,
                    rgba_palette const& palette)
 {
-    save_to_file<image_data_32>(image.data(), file, type, palette);
+    save_to_file<image_data_rgba8>(image.data(), file, type, palette);
 }
 
 std::string save_to_string(image_32 const& image,
                            std::string const& type)
 {
-    return save_to_string<image_data_32>(image.data(), type);
+    return save_to_string<image_data_rgba8>(image.data(), type);
 }
 
 std::string save_to_string(image_32 const& image,
                            std::string const& type,
                            rgba_palette const& palette)
 {
-    return save_to_string<image_data_32>(image.data(), type, palette);
+    return save_to_string<image_data_rgba8>(image.data(), type, palette);
 }
 
 }

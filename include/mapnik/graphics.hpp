@@ -53,7 +53,7 @@ private:
     unsigned width_;
     unsigned height_;
     boost::optional<color> background_;
-    image_data_32 data_;
+    image_data_rgba8 data_;
     bool painted_;
     bool premultiplied_;
 public:
@@ -98,12 +98,12 @@ public:
 
     void set_alpha(float opacity);
 
-    inline const image_data_32& data() const
+    inline const image_data_rgba8& data() const
     {
         return data_;
     }
 
-    inline image_data_32& data()
+    inline image_data_rgba8& data()
     {
         return data_;
     }
@@ -118,9 +118,9 @@ public:
         return data_.getBytes();
     }
 
-    inline image_view<image_data_32> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
+    inline image_view<image_data_rgba8> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
     {
-        return image_view<image_data_32>(x,y,w,h,data_);
+        return image_view<image_data_rgba8>(x,y,w,h,data_);
     }
 
 private:
@@ -151,7 +151,7 @@ public:
         return height_;
     }
 
-    inline void set_rectangle(int x0,int y0,image_data_32 const& data)
+    inline void set_rectangle(int x0,int y0,image_data_rgba8 const& data)
     {
         box2d<int> ext0(0,0,width_,height_);
         box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());
@@ -175,7 +175,7 @@ public:
         }
     }
 
-    inline void set_rectangle_alpha(int x0,int y0,const image_data_32& data)
+    inline void set_rectangle_alpha(int x0,int y0,const image_data_rgba8& data)
     {
         box2d<int> ext0(0,0,width_,height_);
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
@@ -219,7 +219,7 @@ public:
         }
     }
 
-    inline void set_rectangle_alpha2(image_data_32 const& data, unsigned x0, unsigned y0, float opacity)
+    inline void set_rectangle_alpha2(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
         box2d<int> ext0(0,0,width_,height_);
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
@@ -267,7 +267,7 @@ public:
     }
 
     template <typename MergeMethod>
-        inline void merge_rectangle(image_data_32 const& data, unsigned x0, unsigned y0, float opacity)
+        inline void merge_rectangle(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
         box2d<int> ext0(0,0,width_,height_);
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());

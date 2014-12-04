@@ -149,15 +149,15 @@ public:
     unsigned height() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     bool premultiplied_alpha() const final;
-    void read(unsigned x,unsigned y,image_data_32& image) final;
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
     image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
     void init();
-    void read_generic(unsigned x,unsigned y,image_data_32& image);
-    void read_stripped(unsigned x,unsigned y,image_data_32& image);
-    void read_tiled(unsigned x,unsigned y,image_data_32& image);
+    void read_generic(unsigned x,unsigned y,image_data_rgba8& image);
+    void read_stripped(unsigned x,unsigned y,image_data_rgba8& image);
+    void read_tiled(unsigned x,unsigned y,image_data_rgba8& image);
     TIFF* open(std::istream & input);
 };
 
@@ -303,7 +303,7 @@ bool tiff_reader<T>::premultiplied_alpha() const
 }
 
 template <typename T>
-void tiff_reader<T>::read(unsigned x,unsigned y,image_data_32& image)
+void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
 {
     if (read_method_==stripped)
     {
@@ -322,13 +322,13 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_32& image)
 template <typename T>
 image_data_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
 {
-    image_data_32 data(width,height);
+    image_data_rgba8 data(width,height);
     read(x, y, data);
     return image_data_any(std::move(data));
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_32& image)
+void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
@@ -338,7 +338,7 @@ void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_32& image)
 }
 
 template <typename T>
-void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
+void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
@@ -386,7 +386,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
 }
 
 template <typename T>
-void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_32& image)
+void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)

@@ -80,7 +80,7 @@ public:
     unsigned height() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     bool premultiplied_alpha() const final { return false; } //http://www.libpng.org/pub/png/spec/1.1/PNG-Rationale.html
-    void read(unsigned x,unsigned y,image_data_32& image) final;
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
     image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
@@ -220,7 +220,7 @@ unsigned png_reader<T>::height() const
 }
 
 template <typename T>
-void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
+void png_reader<T>::read(unsigned x0, unsigned y0,image_data_rgba8& image)
 {
     stream_.clear();
     stream_.seekg(0, std::ios_base::beg);
@@ -306,7 +306,7 @@ void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
 template <typename T>
 image_data_any png_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
 {
-    image_data_32 data(width,height);
+    image_data_rgba8 data(width,height);
     read(x, y, data);
     return image_data_any(std::move(data));
 }

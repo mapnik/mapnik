@@ -204,7 +204,7 @@ public:
     void colorize(raster & ras, feature_impl const& f) const;
 
     //
-    void colorize(image_data_32 & out, image_data_16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
+    void colorize(image_data_rgba8 & out, image_data_gray16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!

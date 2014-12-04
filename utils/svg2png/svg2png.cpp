@@ -182,7 +182,7 @@ int main (int argc,char** argv)
 
             boost::algorithm::ireplace_last(svg_name,".svg",".png");
             im.demultiply();
-            mapnik::save_to_file<mapnik::image_data_32>(im.data(),svg_name,"png");
+            mapnik::save_to_file<mapnik::image_data_rgba8>(im.data(),svg_name,"png");
             if (auto_open)
             {
                 std::ostringstream s;

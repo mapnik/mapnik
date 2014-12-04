@@ -82,14 +82,14 @@ enum composite_mode_e
 MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op);
 
-MAPNIK_DECL void composite(image_data_32 & dst, image_data_32 & src,
+MAPNIK_DECL void composite(image_data_rgba8 & dst, image_data_rgba8 & src,
                            composite_mode_e mode,
                            float opacity=1,
                            int dx=0,
                            int dy=0,
                            bool premultiply_src=false);
 
-MAPNIK_DECL void composite(image_data_float32 & dst, image_data_float32 & src,
+MAPNIK_DECL void composite(image_data_gray32f & dst, image_data_gray32f & src,
                            composite_mode_e mode,
                            float opacity=1,
                            int dx=0,

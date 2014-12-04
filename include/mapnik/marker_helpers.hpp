@@ -169,7 +169,7 @@ struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
-    raster_markers_rasterizer_dispatch(image_data_32 const& src,
+    raster_markers_rasterizer_dispatch(image_data_rgba8 const& src,
                                        agg::trans_affine const& marker_trans,
                                        symbolizer_base const& sym,
                                        Detector & detector,
@@ -300,7 +300,7 @@ private:
     pixfmt_comp_type pixf_;
     renderer_base renb_;
     RasterizerType & ras_;
-    image_data_32 const& src_;
+    image_data_rgba8 const& src_;
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;
