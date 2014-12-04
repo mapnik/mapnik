@@ -7,6 +7,7 @@ from timeit import Timer, time
 from nose.tools import *
 from utilities import execution_path, run_all
 
+mapnik.logger.set_severity(mapnik.severity_type.Debug)
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -27,7 +28,18 @@ def test_image_premultiply():
 #def test_negative_image_dimensions():
     #im = mapnik.Image(-40,40)
 
-def test_tiff_round_trip():
+def test_tiff_round_trip_scanline():
+    filepath = '/tmp/mapnik-tiff-io.tiff'
+    im = mapnik.Image(255,267)
+    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.save(filepath,'tiff')
+    im2 = mapnik.Image.open(filepath)
+    eq_(im.width(),im2.width())
+    eq_(im.height(),im2.height())
+    eq_(len(im.tostring()),len(im2.tostring()))
+    eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+
+def test_tiff_round_trip_tiled():
     filepath = '/tmp/mapnik-tiff-io.tiff'
     im = mapnik.Image(256,256)
     im.background = mapnik.Color('rgba(1,2,3,.5)')

@@ -172,7 +172,8 @@ struct tag_setter : public mapnik::util::static_visitor<>
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
         TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
     }
     inline void operator() (image_data_gray32f const&) const
@@ -181,7 +182,6 @@ struct tag_setter : public mapnik::util::static_visitor<>
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
         TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
-
     }
     inline void operator() (image_data_gray16 const&) const
     {
@@ -232,12 +232,13 @@ void save_as_tiff(T1 & file, T2 const& image)
     // or image size
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(output, TIFFTAG_IMAGELENGTH, height);
+    TIFFSetField(output, TIFFTAG_IMAGEDEPTH, 1);
     TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 1);
 
     // Set the compression for the TIFF
     //TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
     TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
+    
     // Set the zip level for the compression
     // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
     // Changes the time spent trying to compress
@@ -249,35 +250,30 @@ void save_as_tiff(T1 & file, T2 const& image)
     //util::apply_visitor(set, image);
 
     // If the image is greater then 8MB uncompressed, then lets use scanline rather then
-    // tile.
-    if (image.getSize() < 8 * 32 * 1024 * 1024)
+    // tile. TIFF also requires that all TIFFTAG_TILEWIDTH and TIFF_TILELENGTH all be
+    // a multiple of 16, if they are not we will use scanline.
+    if (image.getSize() > 8 * 32 * 1024 * 1024 || width % 16 != 0 || height % 16 != 0)
     {
-        // Process Scanline`
+        // Process Scanline
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
 
-        //typename T2::pixel_type * row = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getRowSize()));
-
         while (next_scanline < height)
         {
-            //memcpy(row, image.getRow(next_scanline), image.getRowSize());
             typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
             TIFFWriteScanline(output, row, next_scanline, 0);
             ++next_scanline;
         }
-        //::operator delete(row);
     }
     else
     {
         TIFFSetField(output, TIFFTAG_TILEWIDTH, width);
         TIFFSetField(output, TIFFTAG_TILELENGTH, height);
+        TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         // Process as tiles
-        //typename T2::pixel_type * image_data = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getSize()));
-        //memcpy(image_data, image.getData(), image.getSize());
         typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
         TIFFWriteTile(output, image_data, 0, 0, 0, 0);
-        //::operator delete(image_data);
     }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
