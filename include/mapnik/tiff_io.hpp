@@ -251,7 +251,7 @@ struct tag_setter : public mapnik::util::static_visitor<>
 
 void set_tiff_config(TIFF* output, tiff_config & config)
 {
-    // Set some constent tiff information that doesn't vary based on type of data
+    // Set some constant tiff information that doesn't vary based on type of data
     // or image size
     TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     
