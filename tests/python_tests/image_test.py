@@ -20,11 +20,10 @@ def test_image_premultiply():
     im.demultiply()
     eq_(im.premultiplied(),False)
 
-# Disabled for now since this breaks hard if run against
-# a mapnik version that does not have the fix
-#@raises(RuntimeError)
-#def test_negative_image_dimensions():
-    #im = mapnik.Image(-40,40)
+@raises(RuntimeError)
+def test_negative_image_dimensions():
+    # TODO - this may have regressed in https://github.com/mapnik/mapnik/commit/4f3521ac24b61fc8ae8fd344a16dc3a5fdf15af7
+    im = mapnik.Image(-40,40)
 
 def test_tiff_round_trip_scanline():
     filepath = '/tmp/mapnik-tiff-io-scanline.tiff'
@@ -32,10 +31,15 @@ def test_tiff_round_trip_scanline():
     im.background = mapnik.Color('rgba(1,2,3,.5)')
     im.save(filepath,'tiff:scanline=1')
     im2 = mapnik.Image.open(filepath)
+    im3 = mapnik.Image.fromstring(open(filepath,'r').read())
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
+    eq_(im.width(),im3.width())
+    eq_(im.height(),im3.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    eq_(len(im.tostring()),len(im3.tostring()))
+    eq_(len(im.tostring('tiff')),len(im3.tostring('tiff')))
 
 def test_tiff_round_trip_tiled():
     filepath = '/tmp/mapnik-tiff-io-tiled.tiff'
@@ -43,10 +47,15 @@ def test_tiff_round_trip_tiled():
     im.background = mapnik.Color('rgba(1,2,3,.5)')
     im.save(filepath,'tiff')
     im2 = mapnik.Image.open(filepath)
+    im3 = mapnik.Image.fromstring(open(filepath,'r').read())
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
+    eq_(im.width(),im3.width())
+    eq_(im.height(),im3.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    eq_(len(im.tostring()),len(im3.tostring()))
+    eq_(len(im.tostring('tiff')),len(im3.tostring('tiff')))
 
 def test_jpeg_round_trip():
     filepath = '/tmp/mapnik-jpeg-io.jpeg'
@@ -54,10 +63,15 @@ def test_jpeg_round_trip():
     im.background = mapnik.Color('rgba(1,2,3,.5)')
     im.save(filepath,'jpeg')
     im2 = mapnik.Image.open(filepath)
+    im3 = mapnik.Image.fromstring(open(filepath,'r').read())
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
+    eq_(im.width(),im3.width())
+    eq_(im.height(),im3.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('jpeg')),len(im2.tostring('jpeg')))
+    eq_(len(im.tostring()),len(im3.tostring()))
+    eq_(len(im.tostring('jpeg')),len(im3.tostring('jpeg')))
 
 def test_png_round_trip():
     filepath = '/tmp/mapnik-png-io.png'
@@ -65,11 +79,17 @@ def test_png_round_trip():
     im.background = mapnik.Color('rgba(1,2,3,.5)')
     im.save(filepath,'png')
     im2 = mapnik.Image.open(filepath)
+    im3 = mapnik.Image.fromstring(open(filepath,'r').read())
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
+    eq_(im.width(),im3.width())
+    eq_(im.height(),im3.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('png')),len(im2.tostring('png')))
     eq_(len(im.tostring('png8')),len(im2.tostring('png8')))
+    eq_(len(im.tostring()),len(im3.tostring()))
+    eq_(len(im.tostring('png')),len(im3.tostring('png')))
+    eq_(len(im.tostring('png8')),len(im3.tostring('png8')))
 
 def test_image_open_from_string():
     filepath = '../data/images/dummy.png'
