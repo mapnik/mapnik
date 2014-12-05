@@ -1725,8 +1725,8 @@ if not preconfigured:
             env.Append(CPPDEFINES = ndebug_defines)
 
         # Common flags for g++/clang++ CXX compiler.
-        # TODO: clean up code more to make -Wextra  -Wsign-conversion -Wconversion -Wshadow viable
-        common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+        # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion -Wshadow viable
+        common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
             common_cxx_flags += ' -Wno-unknown-pragmas -Wno-unsequenced '
