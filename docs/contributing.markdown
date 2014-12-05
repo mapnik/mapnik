@@ -133,6 +133,9 @@ which triggers locks
 
     void my_function(std::string const& val); // if std::string or user type, pass by const&
 
+#### Use unique_ptr instead of new/delete
+
+#### Use std::copy instead of memcpy
 
 #### When to use shared_ptr and unique_ptr
 
