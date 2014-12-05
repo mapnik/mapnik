@@ -158,6 +158,8 @@ private:
     void read_generic(unsigned x,unsigned y,image_data_rgba8& image);
     void read_stripped(unsigned x,unsigned y,image_data_rgba8& image);
     void read_tiled(unsigned x,unsigned y,image_data_rgba8& image);
+    template <typename ImageData>
+    image_data_any read_any_gray(unsigned x, unsigned y, unsigned width, unsigned height);
     TIFF* open(std::istream & input);
 };
 
@@ -241,41 +243,41 @@ void tiff_reader<T>::init()
 
     TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
     TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
-    if (bps_ <= 8)
+
+
+    char msg[1024];
+    if (TIFFRGBAImageOK(tif,msg))
     {
-        char msg[1024];
-        if (TIFFRGBAImageOK(tif,msg))
+        if (TIFFIsTiled(tif))
         {
-            if (TIFFIsTiled(tif))
+            TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
+            TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
+            std::cerr << tile_width_ << ":" << tile_height_ << std::endl;
+            //MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
+            read_method_ = tiled;
+        }
+        else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+        {
+            //MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
+            read_method_ = stripped;
+        }
+        //TIFFTAG_EXTRASAMPLES
+        uint16 extrasamples = 0;
+        uint16* sampleinfo = nullptr;
+        if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
+                         &extrasamples, &sampleinfo))
+        {
+            has_alpha_ = true;
+            if (extrasamples == 1 &&
+                sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
             {
-                TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
-                TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
-                MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
-                read_method_=tiled;
-            }
-            else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
-            {
-                MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
-                read_method_=stripped;
-            }
-            //TIFFTAG_EXTRASAMPLES
-            uint16 extrasamples = 0;
-            uint16* sampleinfo = nullptr;
-            if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
-                                  &extrasamples, &sampleinfo))
-            {
-                has_alpha_ = true;
-                if (extrasamples == 1 &&
-                    sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
-                {
-                    premultiplied_alpha_ = true;
-                }
+                premultiplied_alpha_ = true;
             }
         }
-        else
-        {
-            MAPNIK_LOG_ERROR(tiff) << msg;
-        }
+    }
+    else
+    {
+        MAPNIK_LOG_ERROR(tiff) << msg;
     }
 }
 
@@ -320,11 +322,151 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
 }
 
 template <typename T>
-image_data_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+template <typename ImageData>
+image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width, unsigned height)
 {
-    image_data_rgba8 data(width,height);
-    read(x, y, data);
-    return image_data_any(std::move(data));
+    using image_data_type = ImageData;
+    using pixel_type = typename image_data_type::pixel_type;
+    TIFF* tif = open(stream_);
+    if (tif)
+    {
+        image_data_type data(width, height);
+        std::size_t block_size = rows_per_strip_ > 0 ? rows_per_strip_ : tile_height_ ;
+        std::ptrdiff_t start_y = y0 - y0 % block_size;
+        std::ptrdiff_t end_y = std::min(y0 + height, (unsigned)height_);
+        std::ptrdiff_t start_x = x0;
+        std::ptrdiff_t end_x = std::min(x0 + width, (unsigned)width_);
+        std::size_t element_size = sizeof(pixel_type);
+        std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
+        std::cerr << "size_to_allocate=" << size_to_allocate << std::endl;
+        std::cerr << "w="<<  width_ << " h=" << height_ << std::endl;
+        std::cerr << x0 << "," << y0 << "," << width << "," << height << std::endl;
+        const std::unique_ptr<pixel_type[]> scanline(new pixel_type[size_to_allocate]);
+        for  (std::size_t y = start_y; y < end_y; ++y)
+        {
+            if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+            {
+                pixel_type * row = data.getRow(y - y0);
+                std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+            }
+        }
+        return image_data_any(std::move(data));
+    }
+    return image_data_any();
+}
+
+
+namespace detail {
+
+struct rgb8
+{
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
+};
+
+struct rgb8_to_rgba8
+{
+    std::uint32_t operator() (rgb8 const& in) const
+    {
+        return ((255 << 24) | (in.r) | (in.g << 8) | (in.b << 16));
+    }
+};
+}
+
+template <typename T>
+image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigned height)
+{
+    switch (photometric_)
+    {
+    case PHOTOMETRIC_MINISBLACK:
+    {
+        switch (bps_)
+        {
+        case 8:
+        {
+            std::cerr << "PHOTOMETRIC_MINISBLACK bps=8" << bps_ << std::endl;
+            return read_any_gray<image_data_gray8>(x0, y0, width, height);
+        }
+        case 16:
+        {
+            std::cerr << "PHOTOMETRIC_MINISBLACK bps=16" << std::endl;
+            return read_any_gray<image_data_gray16>(x0, y0, width, height);
+        }
+        case 32:
+        {
+            std::cerr << "PHOTOMETRIC_MINISBLACK bps=32 float" << std::endl;
+            return read_any_gray<image_data_gray32f>(x0, y0, width, height);
+        }
+        }
+    }
+    case  PHOTOMETRIC_RGB:
+    {
+        switch (bps_)
+        {
+        case 8:
+        {
+            std::cerr << "PHOTOMETRIC_RGB bps=8 rows_per_strip=" << rows_per_strip_ << std::endl;
+            TIFF* tif = open(stream_);
+            if (tif)
+            {
+                image_data_rgba8 data(width, height);
+                std::size_t element_size = sizeof(detail::rgb8);
+                std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
+                const std::unique_ptr<detail::rgb8[]> scanline(new detail::rgb8[size_to_allocate]);
+                std::ptrdiff_t start_y = y0 - y0 % rows_per_strip_;
+                std::ptrdiff_t end_y = std::min(y0 + height, (unsigned)height_);
+                std::ptrdiff_t start_x = x0;
+                std::ptrdiff_t end_x = std::min(x0 + width, (unsigned)width_);
+                for  (std::size_t y = start_y; y < end_y; ++y)
+                {
+                    if (-1 != TIFFReadScanline(tif, scanline.get(), y))
+                    {
+                        if (y >= y0)
+                        {
+                            image_data_rgba8::pixel_type * row = data.getRow(y - y0);
+                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, detail::rgb8_to_rgba8());
+                        }
+                    }
+                }
+                return image_data_any(std::move(data));
+            }
+            return image_data_any();
+        }
+        case 16:
+        {
+            std::cerr << "PHOTOMETRIC_RGB bps=16" << std::endl;
+            image_data_rgba8 data(width,height);
+            read(x0, y0, data);
+            return image_data_any(std::move(data));
+        }
+        case 32:
+        {
+            std::cerr << "PHOTOMETRIC_RGB bps=32" << std::endl;
+            image_data_rgba8 data(width,height);
+            read(x0, y0, data);
+            return image_data_any(std::move(data));
+        }
+        }
+    }
+    default:
+    {
+        //PHOTOMETRIC_PALETTE = 3;
+        //PHOTOMETRIC_MASK = 4;
+        //PHOTOMETRIC_SEPARATED = 5;
+        //PHOTOMETRIC_YCBCR = 6;
+        //PHOTOMETRIC_CIELAB = 8;
+        //PHOTOMETRIC_ICCLAB = 9;
+        //PHOTOMETRIC_ITULAB = 10;
+        //PHOTOMETRIC_LOGL = 32844;
+        //PHOTOMETRIC_LOGLUV = 32845;
+        std::cerr << photometric_ << " bps=" << bps_ << std::endl;
+        image_data_rgba8 data(width,height);
+        read(x0, y0, data);
+        return image_data_any(std::move(data));
+    }
+    }
+    return image_data_any();
 }
 
 template <typename T>
