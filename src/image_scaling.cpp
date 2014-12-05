@@ -96,8 +96,7 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
     return mode;
 }
 
-template <>
-void scale_image_agg<image_data_rgba8>(image_data_rgba8 & target,
+void scale_image_agg(image_data_rgba8 & target,
                                     image_data_rgba8 const& source,
                                     scaling_method_e scaling_method,
                                     double image_ratio_x,
@@ -207,9 +206,7 @@ void scale_image_agg<image_data_rgba8>(image_data_rgba8 & target,
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
-
-template <>
-void scale_image_agg<image_data_gray32f>(image_data_gray32f & target,
+void scale_image_agg(image_data_gray32f & target,
                                     image_data_gray32f const& source,
                                     scaling_method_e scaling_method,
                                     double image_ratio_x,
@@ -302,8 +299,7 @@ void scale_image_agg<image_data_gray32f>(image_data_gray32f & target,
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
-template <>
-void scale_image_agg<image_data_gray16>(image_data_gray16 & target,
+void scale_image_agg(image_data_gray16 & target,
                                     image_data_gray16 const& source,
                                     scaling_method_e scaling_method,
                                     double image_ratio_x,
@@ -395,15 +391,5 @@ void scale_image_agg<image_data_gray16>(image_data_gray16 & target,
     span_gen_type sg(img_src, interpolator, filter);
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
-
-
-//template void scale_image_agg<image_data_rgba8>(image_data_rgba8& target,
-//                                             const image_data_rgba8& source,
-//                                             scaling_method_e scaling_method,
-//                                             double image_ratio_x,
-//                                             double image_ratio_y,
-//                                             double x_off_f,
-//                                             double y_off_f,
-//                                             double filter_factor);
 
 }

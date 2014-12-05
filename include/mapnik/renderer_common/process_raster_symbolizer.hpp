@@ -129,7 +129,7 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     if (source->data_.is<image_data_rgba8>())
                     {
                         image_data_rgba8 data(raster_width, raster_height);
-                        scale_image_agg<image_data_rgba8>(data,
+                        scale_image_agg(data,
                                                        util::get<image_data_rgba8>(source->data_),
                                                        scaling_method,
                                                        image_ratio_x,
@@ -146,7 +146,7 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     else if (source->data_.is<image_data_gray16>())
                     {
                         image_data_gray16 scaled(raster_width, raster_height);
-                        scale_image_agg<image_data_gray16>(scaled,
+                        scale_image_agg(scaled,
                                                        util::get<image_data_gray16>(source->data_),
                                                        scaling_method,
                                                        image_ratio_x,
