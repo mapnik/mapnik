@@ -333,9 +333,9 @@ image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned 
         image_data_type data(width, height);
         std::size_t block_size = rows_per_strip_ > 0 ? rows_per_strip_ : tile_height_ ;
         std::ptrdiff_t start_y = y0 - y0 % block_size;
-        std::ptrdiff_t end_y = std::min(y0 + height, (unsigned)height_);
+        std::ptrdiff_t end_y = std::min(y0 + height, static_cast<unsigned>(height_));
         std::ptrdiff_t start_x = x0;
-        std::ptrdiff_t end_x = std::min(x0 + width, (unsigned)width_);
+        std::ptrdiff_t end_x = std::min(x0 + width, static_cast<unsigned>(width_));
         std::size_t element_size = sizeof(pixel_type);
         std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
         std::cerr << "size_to_allocate=" << size_to_allocate << std::endl;
@@ -415,9 +415,9 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
                 std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
                 const std::unique_ptr<detail::rgb8[]> scanline(new detail::rgb8[size_to_allocate]);
                 std::ptrdiff_t start_y = y0 - y0 % rows_per_strip_;
-                std::ptrdiff_t end_y = std::min(y0 + height, (unsigned)height_);
+                std::ptrdiff_t end_y = std::min(y0 + height, static_cast<unsigned>(height_));
                 std::ptrdiff_t start_x = x0;
-                std::ptrdiff_t end_x = std::min(x0 + width, (unsigned)width_);
+                std::ptrdiff_t end_x = std::min(x0 + width, static_cast<unsigned>(width_));
                 for  (std::size_t y = start_y; y < end_y; ++y)
                 {
                     if (-1 != TIFFReadScanline(tif, scanline.get(), y))
@@ -485,7 +485,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_rgba8& image)
     TIFF* tif = open(stream_);
     if (tif)
     {
-        uint32* buf = (uint32*)_TIFFmalloc(tile_width_*tile_height_*sizeof(uint32));
+        std::unique_ptr<uint32[]> buf(new uint32_t[tile_width_*tile_height_]);
         int width=image.width();
         int height=image.height();
 
@@ -498,8 +498,8 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_rgba8& image)
 
         for (int y=start_y;y<end_y;y+=tile_height_)
         {
-            ty0 = std::max(y0,(unsigned)y) - y;
-            ty1 = std::min(height+y0,(unsigned)(y+tile_height_)) - y;
+            ty0 = std::max(y0,static_cast<unsigned>(y)) - y;
+            ty1 = std::min(height+y0,static_cast<unsigned>(y+tile_height_)) - y;
 
             int n0=tile_height_-ty1;
             int n1=tile_height_-ty0-1;
@@ -507,23 +507,22 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_rgba8& image)
             for (int x=start_x;x<end_x;x+=tile_width_)
             {
 
-                if (!TIFFReadRGBATile(tif,x,y,buf))
+                if (!TIFFReadRGBATile(tif,x,y,buf.get()))
                 {
                     MAPNIK_LOG_ERROR(tiff_reader) << "TIFFReadRGBATile failed";
                     break;
                 }
 
-                tx0=std::max(x0,(unsigned)x);
-                tx1=std::min(width+x0,(unsigned)(x+tile_width_));
+                tx0=std::max(x0,static_cast<unsigned>(x));
+                tx1=std::min(width+x0,static_cast<unsigned>(x+tile_width_));
                 row=y+ty0-y0;
                 for (int n=n1;n>=n0;--n)
                 {
-                    image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*tile_width_+tx0-x]);
+                    image.setRow(row,tx0-x0,tx1-x0,static_cast<const unsigned*>(&buf[n*tile_width_+tx0-x]));
                     ++row;
                 }
             }
         }
-        _TIFFfree(buf);
     }
 }
 
@@ -533,25 +532,24 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
     TIFF* tif = open(stream_);
     if (tif)
     {
-        uint32* buf = (uint32*)_TIFFmalloc(width_*rows_per_strip_*sizeof(uint32));
-
+        std::unique_ptr<uint32[]> buf(new uint32_t[width_*rows_per_strip_]);
         int width=image.width();
         int height=image.height();
 
         unsigned start_y=(y0/rows_per_strip_)*rows_per_strip_;
         unsigned end_y=((y0+height)/rows_per_strip_+1)*rows_per_strip_;
-        bool laststrip=((unsigned)end_y > height_)?true:false;
+        bool laststrip=(static_cast<unsigned>(end_y) > height_)?true:false;
         int row,tx0,tx1,ty0,ty1;
 
         tx0=x0;
-        tx1=std::min(width+x0,(unsigned)width_);
+        tx1=std::min(width+x0,static_cast<unsigned>(width_));
 
         for (unsigned y=start_y; y < end_y; y+=rows_per_strip_)
         {
             ty0 = std::max(y0,y)-y;
             ty1 = std::min(height+y0,y+rows_per_strip_)-y;
 
-            if (!TIFFReadRGBAStrip(tif,y,buf))
+            if (!TIFFReadRGBAStrip(tif,y,buf.get()))
             {
                 MAPNIK_LOG_ERROR(tiff_reader) << "TIFFReadRGBAStrip failed";
                 break;
@@ -562,11 +560,10 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
             int n1=laststrip ? (ty1-ty0-1):(rows_per_strip_-ty0-1);
             for (int n=n1;n>=n0;--n)
             {
-                image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*width_+tx0]);
+                image.setRow(row,tx0-x0,tx1-x0,static_cast<const unsigned*>(&buf[n*width_+tx0]));
                 ++row;
             }
         }
-        _TIFFfree(buf);
     }
 }
 
