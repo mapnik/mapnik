@@ -298,6 +298,7 @@ files = {
     'simplify-visvalingam-whyatt': {'sizes': [(500, 1000)]},
     'simplify-douglas-peucker': {'sizes': [(500, 1000)]},
     'marker-line-placement-many-vertices': {'sizes': [(600, 400)]},
+    'text-iconic-font': {'sizes': [(1000, 1000)]},
     }
 
 class Reporting:
