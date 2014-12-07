@@ -159,6 +159,26 @@ if mapnik.has_png():
         eq_(len(im.tostring('png8:t=0')) == len(im_in.tostring('png8')), True)
         eq_(len(im.tostring('png8:t=0:m=o')) == len(im_in.tostring('png8:m=o')), True)
 
+    def test_2px_regression_hextree():
+        im = mapnik.Image.open('./images/support/encoding-opts/png8-2px.A.png')
+        expected = './images/support/encoding-opts/png8-2px.png'
+
+        t0 = tmp_dir + 'png-encoding-2px.result-hextree.png'
+        im.save(t0, 'png8:m=h')
+        eq_(mapnik.Image.open(t0).tostring(),
+            mapnik.Image.open(expected).tostring(),
+            '%s (actual) not == to %s (expected)' % (t0, expected))
+
+    def test_2px_regression_octree():
+        im = mapnik.Image.open('./images/support/encoding-opts/png8-2px.A.png')
+        expected = './images/support/encoding-opts/png8-2px.png'
+        t0 = tmp_dir + 'png-encoding-2px.result-octree.png'
+        im.save(t0, 'png8:m=o')
+        eq_(mapnik.Image.open(t0).tostring(),
+            mapnik.Image.open(expected).tostring(),
+            '%s (actual) not == to %s (expected)' % (t0, expected))
+
+
 if __name__ == "__main__":
     setup()
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))
