@@ -22,6 +22,8 @@ def test_tiff_rgba8_compare():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    # should not be a blank image
+    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray8_compare():
     filepath1 = '../data/tiff/ndvi_256x256_gray8_striped.tif'
@@ -33,6 +35,8 @@ def test_tiff_gray8_compare():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    # should not be a blank image
+    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray16_compare():
     filepath1 = '../data/tiff/ndvi_256x256_gray16_striped.tif'
@@ -44,6 +48,8 @@ def test_tiff_gray16_compare():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    # should not be a blank image
+    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray32f_compare():
     filepath1 = '../data/tiff/ndvi_256x256_gray32f_striped.tif'
@@ -55,6 +61,8 @@ def test_tiff_gray32f_compare():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    # should not be a blank image
+    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 if __name__ == "__main__":
     setup()
