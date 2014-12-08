@@ -12,6 +12,19 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_tiff_rgb8_compare():
+    filepath1 = '../data/tiff/ndvi_256x256_rgb8_striped.tif'
+    filepath2 = '/tmp/mapnik-tiff-rgb8.tiff'
+    im = mapnik.Image.open(filepath1)
+    im.save(filepath2,'tiff')
+    im2 = mapnik.Image.open(filepath2)
+    eq_(im.width(),im2.width())
+    eq_(im.height(),im2.height())
+    eq_(len(im.tostring()),len(im2.tostring()))
+    eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+    # should not be a blank image
+    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
+
 def test_tiff_rgba8_compare():
     filepath1 = '../data/tiff/ndvi_256x256_rgba8_striped.tif'
     filepath2 = '/tmp/mapnik-tiff-rgba8.tiff'
