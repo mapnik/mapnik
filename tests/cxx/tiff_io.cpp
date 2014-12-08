@@ -31,6 +31,15 @@ std::unique_ptr<mapnik::image_reader> open(std::string const& filename)
     REQUIRE( reader->has_alpha() == false ); \
     REQUIRE( reader->premultiplied_alpha() == false ); \
 
+#define TIFF_ASSERT_SIZE( data,reader ) \
+    REQUIRE( data.width() == reader->width() ); \
+    REQUIRE( data.height() == reader->height() ); \
+
+#define TIFF_READ_ONE_PIXEL \
+    mapnik::image_data_any subimage = reader->read(1, 1, 1, 1); \
+    REQUIRE( subimage.width() == 1 ); \
+    REQUIRE( subimage.height() == 1 ); \
+
 TEST_CASE("tiff io") {
 
 SECTION("rgba8 striped") {
@@ -42,7 +51,9 @@ SECTION("rgba8 striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("rgba8 tiled") {
@@ -54,7 +65,9 @@ SECTION("rgba8 tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("rgb8 striped") {
@@ -66,7 +79,9 @@ SECTION("rgb8 striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("rgb8 tiled") {
@@ -78,7 +93,9 @@ SECTION("rgb8 tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("gray8 striped") {
@@ -90,7 +107,9 @@ SECTION("gray8 striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray8>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("gray8 tiled") {
@@ -102,7 +121,9 @@ SECTION("gray8 tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray8>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("gray16 striped") {
@@ -114,7 +135,9 @@ SECTION("gray16 striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray16>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("gray16 tiled") {
@@ -126,7 +149,9 @@ SECTION("gray16 tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray16>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("gray32f striped") {
@@ -138,7 +163,9 @@ SECTION("gray32f striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray32f>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 SECTION("gray32f tiled") {
@@ -150,7 +177,9 @@ SECTION("gray32f tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray32f>() == true );
+    TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA
+    TIFF_READ_ONE_PIXEL
 }
 
 }
