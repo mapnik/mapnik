@@ -155,6 +155,8 @@ public:
     // methods specific to tiff reader
     std::size_t bits_per_sample() const { return bps_; }
     bool is_tiled() const { return is_tiled_; }
+    unsigned tile_width() const { return tile_width_; }
+    unsigned tile_height() const { return tile_height_; }
 private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
@@ -263,21 +265,22 @@ void tiff_reader<T>::init()
 
     is_tiled_ = TIFFIsTiled(tif);
 
+    if (is_tiled_)
+    {
+        TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
+        TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
+        MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
+        read_method_ = tiled;
+    }
+    else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+    {
+        MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
+        read_method_ = stripped;
+    }
+
     char msg[1024];
     if (TIFFRGBAImageOK(tif,msg))
     {
-        if (is_tiled_)
-        {
-            TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
-            TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
-            MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
-            read_method_ = tiled;
-        }
-        else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
-        {
-            MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
-            read_method_ = stripped;
-        }
         //TIFFTAG_EXTRASAMPLES
         uint16 extrasamples = 0;
         uint16* sampleinfo = nullptr;
@@ -291,10 +294,6 @@ void tiff_reader<T>::init()
                 premultiplied_alpha_ = true;
             }
         }
-    }
-    else
-    {
-        MAPNIK_LOG_ERROR(tiff) << msg;
     }
 }
 
