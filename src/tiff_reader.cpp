@@ -401,7 +401,7 @@ struct tiff_reader_traits
 {
     using image_data_type = T;
     using pixel_type = typename image_data_type::pixel_type;
-    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size)
+    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size, bool has_alpha)
     {
         return (TIFFReadTile(tif, buf, x, y, 0, 0) != -1);
         //return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, TIFFTileSize(tif)) != -1);
@@ -413,13 +413,21 @@ template <>
 struct tiff_reader_traits<image_data_rgba8>
 {
     using pixel_type = std::uint32_t;
-    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size)
+    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size, bool has_alpha)
     {
-        std::unique_ptr<rgb8[]> rgb_buf(new rgb8[tile_size]);
-        if (TIFFReadTile(tif, rgb_buf.get(), x, y, 0, 0) != -1)
+        if (has_alpha)
         {
-            std::transform(rgb_buf.get(), rgb_buf.get() + tile_size, buf, detail::rgb8_to_rgba8());
-            return true;
+            return (TIFFReadTile(tif, buf, x, y, 0, 0) != -1);
+        }
+        else
+        {
+            // unpack rgb to rgba
+            std::unique_ptr<rgb8[]> rgb_buf(new rgb8[tile_size]);
+            if (TIFFReadTile(tif, rgb_buf.get(), x, y, 0, 0) != -1)
+            {
+                std::transform(rgb_buf.get(), rgb_buf.get() + tile_size, buf, detail::rgb8_to_rgba8());
+                return true;
+            }
         }
         return false;
     }
@@ -558,7 +566,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
 
             for (int x = start_x; x < end_x; x += tile_width_)
             {
-                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_ * tile_height_))
+                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_ * tile_height_, has_alpha_))
                 {
                     MAPNIK_LOG_ERROR(tiff_reader) << "read_tile(...) failed";
                     break;
