@@ -13,7 +13,7 @@ def setup():
     os.chdir(execution_path('.'))
 
 def test_tiff_rgba8_compare():
-    filepath1 = '../data/images/24989_rgb_uint8.tif'
+    filepath1 = '../data/tiff/ndvi_256x256_rgba8_striped.tif'
     filepath2 = '/tmp/mapnik-tiff-rgba8.tiff'
     im = mapnik.Image.open(filepath1)
     im.save(filepath2,'tiff')
@@ -23,9 +23,9 @@ def test_tiff_rgba8_compare():
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
 
-def test_tiff_uint8_compare():
-    filepath1 = '../data/images/24989_ndvi_uint8.tif'
-    filepath2 = '/tmp/mapnik-tiff-uint8.tiff'
+def test_tiff_gray8_compare():
+    filepath1 = '../data/tiff/ndvi_256x256_gray8_striped.tif'
+    filepath2 = '/tmp/mapnik-tiff-gray8.tiff'
     im = mapnik.Image.open(filepath1)
     im.save(filepath2,'tiff')
     im2 = mapnik.Image.open(filepath2)
@@ -34,9 +34,9 @@ def test_tiff_uint8_compare():
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
 
-def test_tiff_uint16_compare():
-    filepath1 = '../data/images/24989_ndvi_uint16.tif'
-    filepath2 = '/tmp/mapnik-tiff-uint16.tiff'
+def test_tiff_gray16_compare():
+    filepath1 = '../data/tiff/ndvi_256x256_gray16_striped.tif'
+    filepath2 = '/tmp/mapnik-tiff-gray16.tiff'
     im = mapnik.Image.open(filepath1)
     im.save(filepath2,'tiff')
     im2 = mapnik.Image.open(filepath2)
@@ -45,9 +45,9 @@ def test_tiff_uint16_compare():
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
 
-def test_tiff_float32_compare():
-    filepath1 = '../data/images/24989_ndvi_float32.tif'
-    filepath2 = '/tmp/mapnik-tiff-float32.tiff'
+def test_tiff_gray32f_compare():
+    filepath1 = '../data/tiff/ndvi_256x256_gray32f_striped.tif'
+    filepath2 = '/tmp/mapnik-tiff-gray32f.tiff'
     im = mapnik.Image.open(filepath1)
     im.save(filepath2,'tiff')
     im2 = mapnik.Image.open(filepath2)
@@ -55,6 +55,7 @@ def test_tiff_float32_compare():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+
 if __name__ == "__main__":
     setup()
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

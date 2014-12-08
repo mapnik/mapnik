@@ -135,6 +135,7 @@ private:
     unsigned bps_;
     unsigned photometric_;
     unsigned bands_;
+    bool is_tiled_;
 
 public:
     enum TiffType {
@@ -151,6 +152,9 @@ public:
     bool premultiplied_alpha() const final;
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
     image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
+    // methods specific to tiff reader
+    std::size_t bits_per_sample() const { return bps_; }
+    bool is_tiled() const { return is_tiled_; }
 private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
@@ -199,7 +203,8 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       has_alpha_(false),
       bps_(0),
       photometric_(0),
-      bands_(1)
+      bands_(1),
+      is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
     init();
@@ -219,7 +224,8 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       has_alpha_(false),
       bps_(0),
       photometric_(0),
-      bands_(1)
+      bands_(1),
+      is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
     stream_.seekg(0, std::ios::beg);
@@ -255,10 +261,12 @@ void tiff_reader<T>::init()
     }
     MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation;
 
+    is_tiled_ = TIFFIsTiled(tif);
+
     char msg[1024];
-    if (true)//TIFFRGBAImageOK(tif,msg))
+    if (TIFFRGBAImageOK(tif,msg))
     {
-        if (TIFFIsTiled(tif))
+        if (is_tiled_)
         {
             TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
             TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
@@ -517,7 +525,7 @@ void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_rgba8& image)
     TIFF* tif = open(stream_);
     if (tif)
     {
-        MAPNIK_LOG_ERROR(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
+        throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
     }
 }
 

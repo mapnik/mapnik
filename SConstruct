@@ -1963,6 +1963,7 @@ if not HELP_REQUESTED:
 
     # build C++ tests
     SConscript('tests/cpp_tests/build.py')
+    SConscript('tests/cxx/build.py')
 
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')
