@@ -153,7 +153,8 @@ public:
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
     image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
-    std::size_t bits_per_sample() const { return bps_; }
+    unsigned bits_per_sample() const { return bps_; }
+    unsigned photometric() const { return photometric_; }
     bool is_tiled() const { return is_tiled_; }
     unsigned tile_width() const { return tile_width_; }
     unsigned tile_height() const { return tile_height_; }

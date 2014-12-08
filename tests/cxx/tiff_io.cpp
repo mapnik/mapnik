@@ -48,6 +48,7 @@ SECTION("rgba8 tiled") {
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     TIFF_ASSERT_ALPHA
 }
 
@@ -57,6 +58,7 @@ SECTION("rgb8 striped") {
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -66,6 +68,7 @@ SECTION("rgb8 tiled") {
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -75,6 +78,7 @@ SECTION("gray8 striped") {
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -84,6 +88,7 @@ SECTION("gray8 tiled") {
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -93,6 +98,7 @@ SECTION("gray16 striped") {
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -102,6 +108,7 @@ SECTION("gray16 tiled") {
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -111,6 +118,7 @@ SECTION("gray32f striped") {
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -120,6 +128,7 @@ SECTION("gray32f tiled") {
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
     TIFF_ASSERT_NO_ALPHA
 }
 
