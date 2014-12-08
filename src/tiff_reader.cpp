@@ -256,7 +256,7 @@ void tiff_reader<T>::init()
     MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation;
 
     char msg[1024];
-    if (TIFFRGBAImageOK(tif,msg))
+    if (true)//TIFFRGBAImageOK(tif,msg))
     {
         if (TIFFIsTiled(tif))
         {
@@ -394,21 +394,28 @@ struct tiff_reader_traits
 {
     using image_data_type = T;
     using pixel_type = typename image_data_type::pixel_type;
-    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf)
+    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size)
     {
         return (TIFFReadTile(tif, buf, x, y, 0, 0) != -1);
+        //return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, TIFFTileSize(tif)) != -1);
     }
 };
 
-// specialization for RGB images
+// specialization for RGB images - TODO: move allocation out to avoid allocating rgb buffer per tile
 template <>
 struct tiff_reader_traits<image_data_rgba8>
 {
     using pixel_type = std::uint32_t;
-    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf)
+    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size)
     {
-        return (TIFFReadRGBATile(tif, x, y, buf) != -1);
-}
+        std::unique_ptr<rgb8[]> rgb_buf(new rgb8[tile_size]);
+        if (TIFFReadTile(tif, rgb_buf.get(), x, y, 0, 0) != -1)
+        {
+            std::transform(rgb_buf.get(), rgb_buf.get() + tile_size, buf, detail::rgb8_to_rgba8());
+            return true;
+        }
+        return false;
+    }
 };
 
 }
@@ -539,15 +546,12 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
             ty0 = std::max(y0, static_cast<unsigned>(y)) - y;
             ty1 = std::min(height + y0, static_cast<unsigned>(y + tile_height_)) - y;
 
-            //int n0 = tile_height_ - ty1;
-            //int n1 = tile_height_ - ty0 - 1;
-
             int n0 = ty0;
             int n1 = ty1;
 
             for (int x = start_x; x < end_x; x += tile_width_)
             {
-                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get()))
+                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_ * tile_height_))
                 {
                     MAPNIK_LOG_ERROR(tiff_reader) << "read_tile(...) failed";
                     break;
@@ -555,10 +559,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
                 tx0 = std::max(x0, static_cast<unsigned>(x));
                 tx1 = std::min(width + x0, static_cast<unsigned>(x + tile_width_));
                 row = y + ty0 - y0;
-                //for (int n = n1; n >= n0; --n, ++row)
-                //{
-                //    image.setRow(row, tx0 - x0, tx1 - x0, &buf[n * tile_width_ + tx0 - x]);
-                //}
+
                 for (int n = n0; n < n1; ++n, ++row)
                 {
                     image.setRow(row, tx0 - x0, tx1 - x0, &buf[n * tile_width_ + tx0 - x]);
@@ -567,6 +568,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
         }
     }
 }
+
 
 template <typename T>
 void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& image)
