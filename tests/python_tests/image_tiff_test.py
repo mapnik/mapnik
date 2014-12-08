@@ -46,7 +46,7 @@ def test_tiff_uint16_compare():
     eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
 
 def test_tiff_float32_compare():
-    filepath1 = '../data/images/24989_ndvi.tif'
+    filepath1 = '../data/images/24989_ndvi_float32.tif'
     filepath2 = '/tmp/mapnik-tiff-float32.tiff'
     im = mapnik.Image.open(filepath1)
     im.save(filepath2,'tiff')
