@@ -39,6 +39,9 @@ SECTION("rgba8 striped") {
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
+    REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_ALPHA
 }
 
@@ -49,6 +52,8 @@ SECTION("rgba8 tiled") {
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_ALPHA
 }
 
@@ -59,6 +64,8 @@ SECTION("rgb8 striped") {
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -69,6 +76,8 @@ SECTION("rgb8 tiled") {
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -79,6 +88,8 @@ SECTION("gray8 striped") {
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_gray8>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -89,6 +100,8 @@ SECTION("gray8 tiled") {
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_gray8>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -99,6 +112,8 @@ SECTION("gray16 striped") {
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_gray16>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -109,6 +124,8 @@ SECTION("gray16 tiled") {
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_gray16>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -119,6 +136,8 @@ SECTION("gray32f striped") {
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_gray32f>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
@@ -129,6 +148,8 @@ SECTION("gray32f tiled") {
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
+    REQUIRE( data.is<mapnik::image_data_gray32f>() == true );
     TIFF_ASSERT_NO_ALPHA
 }
 
