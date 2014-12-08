@@ -278,21 +278,16 @@ void tiff_reader<T>::init()
         read_method_ = stripped;
     }
 
-    char msg[1024];
-    if (TIFFRGBAImageOK(tif,msg))
+    uint16 extrasamples = 0;
+    uint16* sampleinfo = nullptr;
+    if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
+                     &extrasamples, &sampleinfo))
     {
-        //TIFFTAG_EXTRASAMPLES
-        uint16 extrasamples = 0;
-        uint16* sampleinfo = nullptr;
-        if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
-                         &extrasamples, &sampleinfo))
+        has_alpha_ = true;
+        if (extrasamples == 1 &&
+            sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
         {
-            has_alpha_ = true;
-            if (extrasamples == 1 &&
-                sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
-            {
-                premultiplied_alpha_ = true;
-            }
+            premultiplied_alpha_ = true;
         }
     }
 }
