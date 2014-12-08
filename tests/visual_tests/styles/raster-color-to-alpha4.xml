@@ -14,13 +14,23 @@
       </RasterSymbolizer>
     </Rule>
   </Style>
-
+<!--
+Upper Left  (  -14637.000, 4859678.000)
+Lower Left  (  -14637.000, 3903178.000)
+Upper Right ( 1126863.000, 4859678.000)
+Lower Right ( 1126863.000, 3903178.000)
+-->
   <Layer name="dataraster" srs="+init=epsg:32630">
       <StyleName>DISCRETE RAINBOW</StyleName>
       <Datasource>
           <Parameter name="file">../../data/raster/dataraster.tif</Parameter>
-          <Parameter name="type">gdal</Parameter>
+          <Parameter name="type">raster</Parameter>
+          <Parameter name="lox">-14637</Parameter>
+          <Parameter name="loy">3903178</Parameter>
+          <Parameter name="hix">1126863</Parameter>
+          <Parameter name="hiy">4859678</Parameter>
           <Parameter name="band">1</Parameter>
+          <!--Parameter name="tile_size">256</Parameter-->
       </Datasource>
   </Layer>
 
