@@ -123,21 +123,21 @@ class tiff_reader : public image_reader
 private:
     source_type source_;
     input_stream stream_;
+    tiff_ptr tif_;
     int read_method_;
-    std::size_t width_;
-    std::size_t height_;
     int rows_per_strip_;
     int tile_width_;
     int tile_height_;
-    tiff_ptr tif_;
-    bool premultiplied_alpha_;
-    bool has_alpha_;
+    std::size_t width_;
+    std::size_t height_;
     unsigned bps_;
     unsigned photometric_;
     unsigned bands_;
-    bool is_tiled_;
     unsigned planar_config_;
     unsigned compression_;
+    bool premultiplied_alpha_;
+    bool has_alpha_;
+    bool is_tiled_;
 
 public:
     enum TiffType {
@@ -201,20 +201,21 @@ template <typename T>
 tiff_reader<T>::tiff_reader(std::string const& file_name)
     : source_(file_name, std::ios_base::in | std::ios_base::binary),
       stream_(source_),
+      tif_(nullptr),
       read_method_(generic),
-      width_(0),
-      height_(0),
       rows_per_strip_(0),
       tile_width_(0),
       tile_height_(0),
-      premultiplied_alpha_(false),
-      has_alpha_(false),
+      width_(0),
+      height_(0),
       bps_(0),
       photometric_(0),
       bands_(1),
-      is_tiled_(false),
       planar_config_(PLANARCONFIG_CONTIG),
-      compression_(COMPRESSION_NONE)
+      compression_(COMPRESSION_NONE),
+      premultiplied_alpha_(false),
+      has_alpha_(false),
+      is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
     init();
@@ -224,20 +225,21 @@ template <typename T>
 tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
     : source_(data, size),
       stream_(source_),
+      tif_(nullptr),
       read_method_(generic),
-      width_(0),
-      height_(0),
       rows_per_strip_(0),
       tile_width_(0),
       tile_height_(0),
-      premultiplied_alpha_(false),
-      has_alpha_(false),
+      width_(0),
+      height_(0),
       bps_(0),
       photometric_(0),
       bands_(1),
-      is_tiled_(false),
       planar_config_(PLANARCONFIG_CONTIG),
-      compression_(COMPRESSION_NONE)
+      compression_(COMPRESSION_NONE),
+      premultiplied_alpha_(false),
+      has_alpha_(false),
+      is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
     stream_.seekg(0, std::ios::beg);
