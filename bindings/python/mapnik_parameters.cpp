@@ -196,6 +196,12 @@ std::shared_ptr<mapnik::parameter> create_parameter(mapnik::value_unicode_string
     return std::make_shared<mapnik::parameter>(key_utf8,value);
 }
 
+bool contains(mapnik::parameters const& p, std::string const& key)
+{
+    parameters::const_iterator pos = p.find(key);
+    return pos != p.end();
+}
+
 // needed for Python_Unicode to std::string (utf8) conversion
 
 std::shared_ptr<mapnik::parameter> create_parameter_from_string(mapnik::value_unicode_string const& key, mapnik::value_unicode_string const& ustr)
@@ -233,6 +239,7 @@ void export_parameters()
         .def("__getitem__",get_params_by_key2)
         .def("__getitem__",get_params_by_index)
         .def("__len__",get_params_size)
+        .def("__contains__",contains)
         .def("append",add_parameter)
         .def("iteritems",iterator<parameters>())
         ;
