@@ -41,10 +41,17 @@ struct buffer
           data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
     {}
 
-    buffer(buffer && rhs) noexcept = default;
+    buffer(buffer && rhs) noexcept
+        : size_(std::move(rhs.size_)),
+          data_(std::move(rhs.data_))
+    {
+        rhs.size_ = 0;
+        rhs.data_ = nullptr;
+    }
+
     buffer(buffer const& rhs)
         : size_(rhs.size_),
-          data_(rhs.data_)
+          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
     {
         if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
     }
@@ -62,6 +69,7 @@ struct buffer
     unsigned char* data_;
 
 };
+
 
 }
 
@@ -173,7 +181,9 @@ public:
     }
     inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
     {
-        std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
+        assert(row < height_);
+        assert ((x1 - x0) <= width_ );
+        std::copy(buf, buf + (x1 - x0), pData_ + row * width_ + x0);
     }
 private:
     std::size_t width_;
