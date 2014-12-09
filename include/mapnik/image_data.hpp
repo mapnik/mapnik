@@ -188,7 +188,9 @@ public:
     }
     inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
     {
-        std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
+        assert(row < height_);
+        assert ((x1 - x0) <= width_ );
+        std::copy(buf, buf + (x1 - x0), pData_ + row * width_ + x0);
     }
 private:
     std::size_t width_;
