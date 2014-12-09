@@ -37,7 +37,7 @@ extern "C"
 
 namespace mapnik {
 
-static tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
+static inline tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
 {
     std::ostream* out = reinterpret_cast<std::ostream*>(fd);
     std::ios::pos_type pos = out->tellp();
@@ -56,7 +56,7 @@ static tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
     }
 }
 
-static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
+static inline toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
 {
     std::ostream* out = reinterpret_cast<std::ostream*>(fd);
 
@@ -125,14 +125,14 @@ static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
     return static_cast<toff_t>(out->tellp());
 }
 
-static int tiff_close_proc(thandle_t fd)
+static inline int tiff_close_proc(thandle_t fd)
 {
     std::ostream* out = (std::ostream*)fd;
     out->flush();
     return 0;
 }
 
-static toff_t tiff_size_proc(thandle_t fd)
+static inline toff_t tiff_size_proc(thandle_t fd)
 {
     std::ostream* out = reinterpret_cast<std::ostream*>(fd);
     std::ios::pos_type pos = out->tellp();
@@ -142,16 +142,14 @@ static toff_t tiff_size_proc(thandle_t fd)
     return static_cast<toff_t>(len);
 }
 
-static tsize_t tiff_dummy_read_proc(thandle_t , tdata_t , tsize_t)
+static inline tsize_t tiff_dummy_read_proc(thandle_t , tdata_t , tsize_t)
 {
     return 0;
 }
 
-static void tiff_dummy_unmap_proc(thandle_t , tdata_t , toff_t)
-{
-}
+static inline void tiff_dummy_unmap_proc(thandle_t , tdata_t , toff_t) {}
 
-static int tiff_dummy_map_proc(thandle_t , tdata_t*, toff_t* )
+static inline int tiff_dummy_map_proc(thandle_t , tdata_t*, toff_t* )
 {
     return 0;
 }
@@ -189,12 +187,12 @@ struct tag_setter : public mapnik::util::static_visitor<>
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
         uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
         TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
-        if (config_.compression == COMPRESSION_DEFLATE 
+        if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
                 || config_.compression == COMPRESSION_LZW)
         {
             TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
-    
+
         }
     }
     inline void operator() (image_data_gray32f const&) const
@@ -203,7 +201,7 @@ struct tag_setter : public mapnik::util::static_visitor<>
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
-        if (config_.compression == COMPRESSION_DEFLATE 
+        if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
                 || config_.compression == COMPRESSION_LZW)
         {
@@ -216,12 +214,12 @@ struct tag_setter : public mapnik::util::static_visitor<>
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
-        if (config_.compression == COMPRESSION_DEFLATE 
+        if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
                 || config_.compression == COMPRESSION_LZW)
         {
             TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
-    
+
         }
     }
     inline void operator() (image_data_gray8 const&) const
@@ -230,12 +228,12 @@ struct tag_setter : public mapnik::util::static_visitor<>
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
-        if (config_.compression == COMPRESSION_DEFLATE 
+        if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
                 || config_.compression == COMPRESSION_LZW)
         {
             TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
-    
+
         }
     }
     inline void operator() (image_data_null const&) const
@@ -254,12 +252,12 @@ void set_tiff_config(TIFF* output, tiff_config & config)
     // Set some constant tiff information that doesn't vary based on type of data
     // or image size
     TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    
+
     // Set the compression for the TIFF
     TIFFSetField(output, TIFFTAG_COMPRESSION, config.compression);
-    
+
     if (COMPRESSION_ADOBE_DEFLATE == config.compression || COMPRESSION_DEFLATE == config.compression)
-    { 
+    {
         // Set the zip level for the compression
         // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
         // Changes the time spent trying to compress
@@ -293,7 +291,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     TIFFSetField(output, TIFFTAG_IMAGEDEPTH, 1);
 
     set_tiff_config(output, config);
-    
+
     // Set tags that vary based on the type of data being provided.
     tag_setter set(output, config);
     set(image);
@@ -302,8 +300,8 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     // If the image is greater then 8MB uncompressed, then lets use scanline rather then
     // tile. TIFF also requires that all TIFFTAG_TILEWIDTH and TIFF_TILELENGTH all be
     // a multiple of 16, if they are not we will use scanline.
-    if (image.getSize() > 8 * 32 * 1024 * 1024 
-            || width % 16 != 0 
+    if (image.getSize() > 8 * 32 * 1024 * 1024
+            || width % 16 != 0
             || height % 16 != 0
             || config.scanline)
     {
