@@ -662,7 +662,7 @@ TIFF* tiff_reader<T>::open(std::istream & input)
 {
     if (!tif_)
     {
-        tif_ = tiff_ptr(TIFFClientOpen("tiff_input_stream", "rm",
+        tif_ = tiff_ptr(TIFFClientOpen("tiff_input_stream", "rcm",
                                        reinterpret_cast<thandle_t>(&input),
                                        impl::tiff_read_proc,
                                        impl::tiff_write_proc,
