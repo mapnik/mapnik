@@ -309,16 +309,11 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
-        typename T2::pixel_type * row = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getRowSize()));
-
         while (next_scanline < height)
         {
-            memcpy(row, image.getRow(next_scanline), image.getRowSize());
-            //typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
-            TIFFWriteScanline(output, row, next_scanline, 0);
+            TIFFWriteScanline(output, const_cast<typename T2::pixel_type*>(image.getRow(next_scanline)), next_scanline, 0);
             ++next_scanline;
         }
-        ::operator delete(row);
     }
     else
     {
@@ -326,11 +321,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_TILELENGTH, height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         // Process as tiles
-        typename T2::pixel_type * image_data = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getSize()));
-        memcpy(image_data, image.getData(), image.getSize());
-        //typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
-        TIFFWriteTile(output, image_data, 0, 0, 0, 0);
-        ::operator delete(image_data);
+        TIFFWriteTile(output, const_cast<typename T2::pixel_type*>(image.getData()), 0, 0, 0, 0);
     }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
