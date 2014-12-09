@@ -288,15 +288,15 @@ void tiff_reader<T>::init()
     {
         TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
         TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
-        MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
+        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is tiled";
         read_method_ = tiled;
     }
-    else if (rows_per_strip_ > 0)
+    else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
     {
-        MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
+        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is stripped";
         read_method_ = stripped;
     }
-
+    //TIFFTAG_EXTRASAMPLES
     uint16 extrasamples = 0;
     uint16* sampleinfo = nullptr;
     if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
@@ -309,7 +309,6 @@ void tiff_reader<T>::init()
             premultiplied_alpha_ = true;
         }
     }
-
     if (!is_tiled_ &&
         compression_ == COMPRESSION_NONE &&
         planar_config_ == PLANARCONFIG_CONTIG)
@@ -360,7 +359,7 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
     }
     else if (read_method_==tiled)
     {
-        read_tiled<image_data_rgba8>(x,y,image);
+        read_tiled(x,y,image);
     }
     else
     {
@@ -372,7 +371,6 @@ template <typename T>
 template <typename ImageData>
 image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width, unsigned height)
 {
-
     using image_data_type = ImageData;
     using pixel_type = typename image_data_type::pixel_type;
     if (read_method_ == tiled)
@@ -432,33 +430,29 @@ struct tiff_reader_traits
 {
     using image_data_type = T;
     using pixel_type = typename image_data_type::pixel_type;
-    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size, bool has_alpha)
+    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
-        return (TIFFReadTile(tif, buf, x, y, 0, 0) != -1);
-        //return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, TIFFTileSize(tif)) != -1);
+        return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, tile_width * tile_height * sizeof(pixel_type)) != -1);
     }
 };
 
-// specialization for RGB images - TODO: move allocation out to avoid allocating rgb buffer per tile
+// default specialization that expands into RGBA
 template <>
 struct tiff_reader_traits<image_data_rgba8>
 {
     using pixel_type = std::uint32_t;
-    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_size, bool has_alpha)
+    static bool read_tile(TIFF * tif, unsigned x0, unsigned y0, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
-        if (has_alpha)
+        if (TIFFReadRGBATile(tif, x0, y0, buf) != -1)
         {
-            return (TIFFReadTile(tif, buf, x, y, 0, 0) != -1);
-        }
-        else
-        {
-            // unpack rgb to rgba
-            std::unique_ptr<rgb8[]> rgb_buf(new rgb8[tile_size]);
-            if (TIFFReadTile(tif, rgb_buf.get(), x, y, 0, 0) != -1)
+            for (int y = 0; y < tile_height/2 ;++y)
             {
-                std::transform(rgb_buf.get(), rgb_buf.get() + tile_size, buf, detail::rgb8_to_rgba8());
-                return true;
+                for (int x = 0; x < tile_width; ++x)
+                {
+                    std::swap(buf[y * tile_width + x], buf[x + (tile_height - y - 1) * tile_width]);
+                }
             }
+            return true;
         }
         return false;
     }
@@ -472,6 +466,7 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
     switch (photometric_)
     {
     case PHOTOMETRIC_MINISBLACK:
+    case PHOTOMETRIC_MINISWHITE:
     {
         switch (bps_)
         {
@@ -579,36 +574,31 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
         std::unique_ptr<pixel_type[]> buf(new pixel_type[tile_width_*tile_height_]);
         int width = image.width();
         int height = image.height();
-
-        int start_y=(y0 / tile_height_) * tile_height_;
-        int end_y=((y0 + height) / tile_height_ + 1) * tile_height_;
-
-        int start_x=(x0 / tile_width_) * tile_width_;
-        int end_x=((x0 + width) / tile_width_ + 1) * tile_width_;
-        int row, tx0, tx1, ty0, ty1;
+        int start_y = (y0 / tile_height_) * tile_height_;
+        int end_y = ((y0 + height) / tile_height_ + 1) * tile_height_;
+        int start_x = (x0 / tile_width_) * tile_width_;
+        int end_x = ((x0 + width) / tile_width_ + 1) * tile_width_;
+        end_y = std::min(end_y, int(height_));
+        end_x = std::min(end_x, int(width_));
 
         for (int y = start_y; y < end_y; y += tile_height_)
         {
-            ty0 = std::max(y0, static_cast<unsigned>(y)) - y;
-            ty1 = std::min(height + y0, static_cast<unsigned>(y + tile_height_)) - y;
-
-            int n0 = ty0;
-            int n1 = ty1;
+            int ty0 = std::max(y0, static_cast<unsigned>(y)) - y;
+            int ty1 = std::min(height + y0, static_cast<unsigned>(y + tile_height_)) - y;
 
             for (int x = start_x; x < end_x; x += tile_width_)
             {
-                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_ * tile_height_, has_alpha_))
+                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_, tile_height_))
                 {
                     std::clog << "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
                     break;
                 }
-                tx0 = std::max(x0, static_cast<unsigned>(x));
-                tx1 = std::min(width + x0, static_cast<unsigned>(x + tile_width_));
-                row = y + ty0 - y0;
-
-                for (int n = n0; n < n1; ++n, ++row)
+                int tx0 = std::max(x0, static_cast<unsigned>(x));
+                int tx1 = std::min(width + x0, static_cast<unsigned>(x + tile_width_));
+                int row = y + ty0 - y0;
+                for (int ty = ty0; ty < ty1; ++ty, ++row)
                 {
-                    image.setRow(row, tx0 - x0, tx1 - x0, &buf[n * tile_width_ + tx0 - x]);
+                    image.setRow(row, tx0 - x0, tx1 - x0, &buf[ty * tile_width_ + tx0 - x]);
                 }
             }
         }
