@@ -564,7 +564,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
             {
                 if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_ * tile_height_, has_alpha_))
                 {
-                    MAPNIK_LOG_ERROR(tiff_reader) << "read_tile(...) failed";
+                    std::clog << "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
                     break;
                 }
                 tx0 = std::max(x0, static_cast<unsigned>(x));
@@ -606,7 +606,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
 
             if (!TIFFReadRGBAStrip(tif,y,buf.get()))
             {
-                MAPNIK_LOG_ERROR(tiff_reader) << "TIFFReadRGBAStrip failed";
+                std::clog << "TIFFReadRGBAStrip failed";
                 break;
             }
             row=y+ty0-y0;
