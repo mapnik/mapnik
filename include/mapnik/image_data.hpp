@@ -56,6 +56,18 @@ struct buffer
         if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
     }
 
+    buffer& operator=(buffer rhs)
+    {
+        swap(rhs);
+        return *this;
+    }
+
+    void swap(buffer & rhs)
+    {
+        std::swap(size_, rhs.size_);
+        std::swap(data_, rhs.data_);
+    }
+
     inline bool operator!() const { return (data_ == nullptr)? false : true; }
     ~buffer()
     {
@@ -69,6 +81,7 @@ struct buffer
     unsigned char* data_;
 
 };
+
 
 }
 
