@@ -136,6 +136,8 @@ private:
     unsigned photometric_;
     unsigned bands_;
     bool is_tiled_;
+    unsigned planar_config_;
+    unsigned compression_;
 
 public:
     enum TiffType {
@@ -158,6 +160,9 @@ public:
     bool is_tiled() const { return is_tiled_; }
     unsigned tile_width() const { return tile_width_; }
     unsigned tile_height() const { return tile_height_; }
+    unsigned rows_per_strip() const { return rows_per_strip_; }
+    unsigned planar_config() const { return planar_config_; }
+    unsigned compression() const { return compression_; }
 private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
@@ -207,7 +212,9 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       bps_(0),
       photometric_(0),
       bands_(1),
-      is_tiled_(false)
+      is_tiled_(false),
+      planar_config_(PLANARCONFIG_CONTIG),
+      compression_(COMPRESSION_NONE)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
     init();
@@ -228,7 +235,9 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       bps_(0),
       photometric_(0),
       bands_(1),
-      is_tiled_(false)
+      is_tiled_(false),
+      planar_config_(PLANARCONFIG_CONTIG),
+      compression_(COMPRESSION_NONE)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
     stream_.seekg(0, std::ios::beg);
@@ -257,6 +266,15 @@ void tiff_reader<T>::init()
     TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
     TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
 
+    if (width_ > 10000 || height_ > 10000)
+    {
+        throw image_reader_exception("Can't allocate tiff > 10000x10000");
+    }
+
+    TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar_config_);
+    TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression_ );
+    TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_);
+
     std::uint16_t orientation;
     if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &orientation) == 0)
     {
@@ -273,7 +291,7 @@ void tiff_reader<T>::init()
         MAPNIK_LOG_DEBUG(tiff_reader) << "reading tiled tiff";
         read_method_ = tiled;
     }
-    else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+    else if (rows_per_strip_ > 0)
     {
         MAPNIK_LOG_DEBUG(tiff_reader) << "reading striped tiff";
         read_method_ = stripped;
@@ -289,6 +307,23 @@ void tiff_reader<T>::init()
             sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
         {
             premultiplied_alpha_ = true;
+        }
+    }
+
+    if (!is_tiled_ &&
+        compression_ == COMPRESSION_NONE &&
+        planar_config_ == PLANARCONFIG_CONTIG)
+    {
+        if (height_ > 128 * 1024 * 1024)
+        {
+            std::size_t line_size = (bands_ * width_ * bps_ + 7) / 8;
+            std::size_t default_strip_height = 8192 / line_size;
+            if (default_strip_height == 0) default_strip_height = 1;
+            std::size_t num_strips = height_ / default_strip_height;
+            if (num_strips > 128 * 1024 * 1024)
+            {
+                throw image_reader_exception("Can't allocate tiff");
+            }
         }
     }
 }
@@ -606,7 +641,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
 
             if (!TIFFReadRGBAStrip(tif,y,buf.get()))
             {
-                std::clog << "TIFFReadRGBAStrip failed";
+                std::clog << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
             }
             row=y+ty0-y0;

@@ -10,6 +10,7 @@
     mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename); \
     REQUIRE( tiff_reader.width() == 256 ); \
     REQUIRE( tiff_reader.height() == 256 ); \
+    REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG ); \
     std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,"tiff")); \
     REQUIRE( reader->width() == 256 ); \
     REQUIRE( reader->height() == 256 ); \
@@ -54,11 +55,13 @@ TEST_CASE("tiff io") {
 
 SECTION("rgba8 striped") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_rgba8_striped.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 1 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_ADOBE_DEFLATE );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -68,11 +71,13 @@ SECTION("rgba8 striped") {
 
 SECTION("rgba8 tiled") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_rgba8_tiled.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -82,11 +87,13 @@ SECTION("rgba8 tiled") {
 
 SECTION("rgb8 striped") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_rgb8_striped.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 10 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_NONE );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -96,11 +103,13 @@ SECTION("rgb8 striped") {
 
 SECTION("rgb8 tiled") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_rgb8_tiled.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -110,11 +119,13 @@ SECTION("rgb8 tiled") {
 
 SECTION("gray8 striped") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_gray8_striped.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 32 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_NONE );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -124,11 +135,13 @@ SECTION("gray8 striped") {
 
 SECTION("gray8 tiled") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_gray8_tiled.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -138,11 +151,13 @@ SECTION("gray8 tiled") {
 
 SECTION("gray16 striped") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_gray16_striped.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 16 );
     REQUIRE( tiff_reader.bits_per_sample() == 16 );
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_NONE );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray16>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -152,11 +167,13 @@ SECTION("gray16 striped") {
 
 SECTION("gray16 tiled") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_gray16_tiled.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 16 );
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray16>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -166,11 +183,13 @@ SECTION("gray16 tiled") {
 
 SECTION("gray32f striped") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_gray32f_striped.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 8 );
     REQUIRE( tiff_reader.bits_per_sample() == 32 );
     REQUIRE( tiff_reader.is_tiled() == false );
     REQUIRE( tiff_reader.tile_width() == 0 );
     REQUIRE( tiff_reader.tile_height() == 0 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_NONE );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray32f>() == true );
     TIFF_ASSERT_SIZE( data,reader );
@@ -180,11 +199,13 @@ SECTION("gray32f striped") {
 
 SECTION("gray32f tiled") {
     TIFF_ASSERT("./tests/data/tiff/ndvi_256x256_gray32f_tiled.tif")
+    REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 32 );
     REQUIRE( tiff_reader.is_tiled() == true );
     REQUIRE( tiff_reader.tile_width() == 256 );
     REQUIRE( tiff_reader.tile_height() == 256 );
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_MINISBLACK );
+    REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_data_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_data_gray32f>() == true );
     TIFF_ASSERT_SIZE( data,reader );
