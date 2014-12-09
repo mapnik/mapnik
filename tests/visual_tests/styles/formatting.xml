@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=latlong +datum=WGS84">
+  <Parameters>
+    <Parameter name="sizes">256,256</Parameter>
+    <Parameter name="status">off</Parameter>
+  </Parameters>
 
   <Layer name="layer" srs="+proj=latlong +datum=WGS84">
     <StyleName>My Style</StyleName>

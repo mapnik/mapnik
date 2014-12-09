@@ -3,7 +3,10 @@
      background-image-opacity="0.8"
      background-image-comp-op="screen"
      background-image="../data/pattern.png">
-  
+  <Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+  </Parameters>
+
   <Style name="markers">
     <Rule>
       <MarkersSymbolizer
@@ -34,7 +37,7 @@ x,y
       </Parameter>
     </Datasource>
   </Layer>
-  
+
   <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>points</StyleName>
     <Datasource>
@@ -47,16 +50,16 @@ x,y
       </Parameter>
     </Datasource>
   </Layer>
-  
+
   <!-- points to frame data view -->
-  
+
   <Style name="frame">
     <Rule>
       <PointSymbolizer />
       <DebugSymbolizer />
     </Rule>
   </Style>
-  
+
   <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>frame</StyleName>
     <Datasource>

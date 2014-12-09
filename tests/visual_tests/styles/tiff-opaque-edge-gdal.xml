@@ -1,4 +1,7 @@
 <Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="white">
+  <Parameters>
+    <Parameter name="sizes">256,256; 969,793</Parameter>
+  </Parameters>
 
 <Style name="test">
   <Rule>

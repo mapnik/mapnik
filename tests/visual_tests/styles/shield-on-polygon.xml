@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map[]>
 <Map srs="+init=epsg:4326" background-color="#b8dee6">
+  <Parameters>
+    <Parameter name="sizes">600,400</Parameter>
+  </Parameters>
 
 <Parameters>
   <Parameter name="bounds">-180,-85.05112877980659,180,85.05112877980659</Parameter>

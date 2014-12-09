@@ -1,5 +1,8 @@
 <!DOCTYPE Map>
 <Map background-color="white" srs="+init=epsg:4326" minimum-version="0.7.2">
+    <Parameters>
+        <Parameter name="sizes">600,400; 400,600; 257,256</Parameter>
+    </Parameters>
     <Style name="1">
         <Rule>
             <LineSymbolizer stroke-width=".2" stroke="grey"/>

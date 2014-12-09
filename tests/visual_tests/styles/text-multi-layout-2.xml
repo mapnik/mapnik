@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
-    
+  <Parameters>
+    <Parameter name="sizes">512, 512</Parameter>
+  </Parameters>
+
   <Layer name="layer1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>points</StyleName>
     <Datasource>
       <Parameter name="type">csv</Parameter>
+      <Parameter name="extent">-1,-1,1,1</Parameter>
       <Parameter name="inline">
 lat,long
 0,0
       </Parameter>
     </Datasource>
   </Layer>
-  
+
   <Style name="points">
     <Rule>
       <PointSymbolizer allow-overlap="true" ignore-placement="true" file="../../data/raster/white-alpha.png"/>

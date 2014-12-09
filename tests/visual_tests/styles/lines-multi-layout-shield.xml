@@ -2,6 +2,10 @@
 <!DOCTYPE Map>
 <!-- Upright test -->
 <Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Parameters>
+        <Parameter name="sizes">800, 800</Parameter>
+        <Parameter name="bbox">-0.05, -0.01, 0.95, 0.01</Parameter>
+    </Parameters>
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>lines</StyleName>

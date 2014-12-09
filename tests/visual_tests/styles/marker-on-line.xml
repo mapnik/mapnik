@@ -1,4 +1,7 @@
 <Map>
+  <Parameters>
+     <Parameter name="sizes">600,400</Parameter>
+  </Parameters>
 <Style name="line" filter-mode="first" >
   <Rule>
     <LineSymbolizer stroke="#000000" />
@@ -15,6 +18,7 @@
     <StyleName>point-placement</StyleName>
     <Datasource>
        <Parameter name="type">csv</Parameter>
+       <Parameter name="extent">-10, 0, 15, 20</Parameter>
        <Parameter name="file">../data/marker-on-line.csv</Parameter>
        <Parameter name="separator">|</Parameter>
     </Datasource>

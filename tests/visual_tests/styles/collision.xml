@@ -1,4 +1,7 @@
 <Map>
+  <Parameters>
+    <Parameter name="sizes">600,400</Parameter>
+  </Parameters>
 
   <Style name="line">
     <Rule>

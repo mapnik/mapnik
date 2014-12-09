@@ -3,6 +3,9 @@
   background-image-opacity=".8"
   background-image-comp-op="screen"
   background-image="../data/pattern.png">
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
 
     <Style name="ellipse">
         <Rule>
@@ -50,5 +53,5 @@ x,y
             </Parameter>
         </Datasource>
     </Layer>
-    
+
 </Map>

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">200, 200</Parameter>
+    </Parameters>
 
     <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-0.05, -0.01, 0.95, 0.01</Parameter>
             <Parameter name="file">../data/points.csv</Parameter>
         </Datasource>
     </Layer>
@@ -17,7 +21,7 @@
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="-30" dy="-30" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="0" dy="-30" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="30" dy="-30" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
-            
+
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="30" dy="0" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="-30" dy="0" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
 

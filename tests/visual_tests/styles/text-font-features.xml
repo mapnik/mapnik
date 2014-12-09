@@ -5,6 +5,9 @@
     <!ENTITY size2 "14">
 ]>
 <Map background-color="white" font-directory="../fonts/glukfonts">
+    <Parameters>
+        <Parameter name="sizes">1100, 1100</Parameter>
+    </Parameters>
     <Layer name="layer">
         <StyleName>My Style</StyleName>
         <Datasource>

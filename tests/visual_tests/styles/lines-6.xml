@@ -3,6 +3,10 @@
 <!-- complex script on line test -->
 <Map background-color="white" srs="+proj=latlong +datum=WGS84"
      font-directory="../fonts/KhmerOS/">
+     <Parameters>
+         <Parameter name="sizes">800, 800; 600, 600; 400, 400; 200, 200</Parameter>
+         <Parameter name="bbox">-0.05, -0.01, 0.95, 0.01</Parameter>
+     </Parameters>
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>lines</StyleName>

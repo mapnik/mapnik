@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="rgb(255,100,100)">
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
     <Style name="road">
         <Rule>
             <LineSymbolizer stroke="rgb(255,255,255)" />

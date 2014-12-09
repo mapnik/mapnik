@@ -4,6 +4,9 @@
     background-image-opacity=".5"
     background-image-comp-op="soft-light"
     srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
     <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>My Style</StyleName>
         <Datasource>

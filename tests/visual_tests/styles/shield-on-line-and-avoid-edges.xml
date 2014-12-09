@@ -1,4 +1,7 @@
 <Map>
+  <Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+  </Parameters>
 <Style name="line" filter-mode="first" >
   <Rule>
     <LineSymbolizer stroke="#000000" />

@@ -2,11 +2,15 @@
 <!-- Without unlock-image, with shield-dx -->
 <!DOCTYPE Map>
 <Map background-color="green" srs="+proj=latlong +datum=WGS84" minimum-version="2.0.0">
+    <Parameters>
+        <Parameter name="sizes">490, 100; 495, 100; 497, 100; 498, 100; 499, 100; 500, 100; 501, 100; 502, 100; 505, 100; 510, 100</Parameter>
+    </Parameters>
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-0.05, -0.01, 0.95, 0.01</Parameter>
             <Parameter name="file">../data/points.csv</Parameter>
         </Datasource>
     </Layer>
