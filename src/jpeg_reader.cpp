@@ -83,6 +83,7 @@ public:
     ~jpeg_reader();
     unsigned width() const final;
     unsigned height() const final;
+    box2d<double> bounding_box() const final;
     inline bool has_alpha() const final { return false; }
     inline bool premultiplied_alpha() const final { return true; }
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
@@ -256,6 +257,12 @@ template <typename T>
 unsigned jpeg_reader<T>::height() const
 {
     return height_;
+}
+
+template <typename T>
+box2d<double> jpeg_reader<T>::bounding_box() const
+{
+    return box2d<double>(0, 0, width_, height_);
 }
 
 template <typename T>

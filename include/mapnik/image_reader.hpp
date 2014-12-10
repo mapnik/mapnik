@@ -28,6 +28,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/factory.hpp>
+#include <mapnik/box2d.hpp>
 // boost
 #include <boost/optional.hpp>
 // stl
@@ -59,6 +60,7 @@ struct MAPNIK_DECL image_reader : private mapnik::noncopyable
     virtual unsigned height() const = 0;
     virtual bool has_alpha() const = 0;
     virtual bool premultiplied_alpha() const = 0;
+    virtual box2d<double> bounding_box() const = 0;
     virtual void read(unsigned x,unsigned y,image_data_rgba8& image) = 0;
     virtual image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) = 0;
     virtual ~image_reader() {}

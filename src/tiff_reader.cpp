@@ -150,6 +150,7 @@ public:
     virtual ~tiff_reader();
     unsigned width() const final;
     unsigned height() const final;
+    box2d<double> bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     bool premultiplied_alpha() const final;
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
@@ -344,6 +345,12 @@ template <typename T>
 unsigned tiff_reader<T>::height() const
 {
     return height_;
+}
+
+template <typename T>
+box2d<double> tiff_reader<T>::bounding_box() const
+{
+    return box2d<double>(0, 0, width_, height_);
 }
 
 template <typename T>
