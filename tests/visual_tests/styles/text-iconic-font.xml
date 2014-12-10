@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" font-directory="../fonts/Awesome">
+    <Parameters>
+        <Parameter name="sizes">1000, 1000</Parameter>
+    </Parameters>
     <Layer name="layer">
         <StyleName>My Style</StyleName>
         <Datasource>

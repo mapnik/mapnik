@@ -2,13 +2,16 @@
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=latlong +datum=WGS84"
      font-directory="../fonts/KhmerOS/">
+    <Parameters>
+        <Parameter name="sizes">800, 200</Parameter>
+    </Parameters>
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
             <StyleName>My Style</StyleName>
             <Datasource>
                 <Parameter name="type">csv</Parameter>
-                <Parameter name="file">../data/points.csv</Parameter>
                 <Parameter name="extent">-0.05, -0.01, 0.95, 0.01</Parameter>
+                <Parameter name="file">../data/points.csv</Parameter>
             </Datasource>
     </Layer>
 

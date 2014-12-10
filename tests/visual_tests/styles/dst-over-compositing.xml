@@ -1,6 +1,9 @@
 <Map 
   background-color="#808080"
   srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
 
     <Style name="My Style" comp-op="src-over">
         <Rule>

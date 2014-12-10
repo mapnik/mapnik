@@ -4,6 +4,9 @@
   background-image-opacity=".5"
   background-image-comp-op="soft-light"
   >
+    <Parameters>
+        <Parameter name="sizes">512, 512</Parameter>
+    </Parameters>
     <Style name="ellipse">
         <Rule>
             <BuildingSymbolizer fill="white" fill-opacity=".5" />
@@ -17,5 +20,4 @@
             <Parameter name="file">../data/marker-multi-policy.csv</Parameter>
         </Datasource>
     </Layer>
-    
 </Map>

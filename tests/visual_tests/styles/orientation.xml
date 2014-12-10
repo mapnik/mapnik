@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Parameters>
+        <Parameter name="sizes">800, 200</Parameter>
+    </Parameters>
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-0.05, -0.01, 0.95, 0.01</Parameter>
             <Parameter name="file">../data/points.csv</Parameter>
         </Datasource>
     </Layer>
@@ -14,7 +18,7 @@
         <Rule>
             <Filter>[nr] = 1</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45">"XYZ"</TextSymbolizer>
-            <PointSymbolizer allow-overlap="true"/> 
+            <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 2</Filter>

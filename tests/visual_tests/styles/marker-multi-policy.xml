@@ -1,4 +1,7 @@
 <Map maximum-extent="0,0,190,180">
+  <Parameters>
+     <Parameter name="sizes">600,400</Parameter>
+  </Parameters>
 <Style name="each">
   <Rule>
     <Filter>[i] = 1</Filter>
