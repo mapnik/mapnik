@@ -268,6 +268,8 @@ void set_tiff_config(TIFF* output, tiff_config & config)
 template <typename T1, typename T2>
 void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
 {
+    using pixel_type = typename T2::pixel_type;
+
     const int width = image.width();
     const int height = image.height();
 
@@ -309,16 +311,14 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
-        typename T2::pixel_type * row = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getRowSize()));
-
+        std::unique_ptr<pixel_type[]> row (new pixel_type[image.getRowSize()]);
         while (next_scanline < height)
         {
-            memcpy(row, image.getRow(next_scanline), image.getRowSize());
+            memcpy(row.get(), image.getRow(next_scanline), image.getRowSize());
             //typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
-            TIFFWriteScanline(output, row, next_scanline, 0);
+            TIFFWriteScanline(output, row.get(), next_scanline, 0);
             ++next_scanline;
         }
-        ::operator delete(row);
     }
     else
     {
@@ -326,11 +326,10 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_TILELENGTH, height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         // Process as tiles
-        typename T2::pixel_type * image_data = reinterpret_cast<typename T2::pixel_type*>(::operator new(image.getSize()));
-        memcpy(image_data, image.getData(), image.getSize());
+        std::unique_ptr<pixel_type[]> image_data (new pixel_type[image.getSize()]);
+        memcpy(image_data.get(), image.getData(), image.getSize());
         //typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
-        TIFFWriteTile(output, image_data, 0, 0, 0, 0);
-        ::operator delete(image_data);
+        TIFFWriteTile(output, image_data.get(), 0, 0, 0, 0);
     }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
