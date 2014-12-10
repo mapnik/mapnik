@@ -122,7 +122,7 @@ public:
     ~webp_reader();
     unsigned width() const final;
     unsigned height() const final;
-    box2d<double> bounding_box() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     bool premultiplied_alpha() const final { return false; }
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
@@ -231,9 +231,9 @@ unsigned webp_reader<T>::height() const
 }
 
 template <typename T>
-box2d<double> webp_reader<T>::bounding_box() const
+boost::optional<box2d<double> > webp_reader<T>::bounding_box() const
 {
-    return box2d<double>(0, 0, width_, height_);
+    return boost::optional<box2d<double> >();
 }
 
 template <typename T>

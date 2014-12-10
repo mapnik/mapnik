@@ -130,6 +130,7 @@ private:
     int tile_height_;
     std::size_t width_;
     std::size_t height_;
+    boost::optional<box2d<double> > bbox_;
     unsigned bps_;
     unsigned photometric_;
     unsigned bands_;
@@ -150,7 +151,7 @@ public:
     virtual ~tiff_reader();
     unsigned width() const final;
     unsigned height() const final;
-    box2d<double> bounding_box() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     bool premultiplied_alpha() const final;
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
@@ -312,6 +313,28 @@ void tiff_reader<T>::init()
             premultiplied_alpha_ = true;
         }
     }
+    // Try extracting bounding box from geoTIFF tags
+    {
+        uint16 count = 0;
+        double *pixelscale;
+        double *tilepoint;
+        if (TIFFGetField(tif, 33550, &count, &pixelscale) == 1 && count == 3
+            && TIFFGetField(tif, 33922 , &count,  &tilepoint) == 1 && count == 6)
+        {
+            MAPNIK_LOG_DEBUG(tiff_reader) << "PixelScale:" << pixelscale[0] << "," << pixelscale[1] << "," <<  pixelscale[2];
+            MAPNIK_LOG_DEBUG(tiff_reader) << "TilePoint:" << tilepoint[0] << "," << tilepoint[1] << "," << tilepoint[2];
+            MAPNIK_LOG_DEBUG(tiff_reader) << "          " << tilepoint[3] << "," << tilepoint[4] << "," << tilepoint[5];
+
+            // assuming upper-left
+            double lox = tilepoint[3];
+            double loy = tilepoint[4];
+            double hix = lox + pixelscale[0] * width_;
+            double hiy = loy + pixelscale[1] * height_;
+            bbox_.reset(box2d<double>(lox, loy, hix, hiy));
+            MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_;
+        }
+
+    }
     if (!is_tiled_ &&
         compression_ == COMPRESSION_NONE &&
         planar_config_ == PLANARCONFIG_CONTIG)
@@ -348,9 +371,9 @@ unsigned tiff_reader<T>::height() const
 }
 
 template <typename T>
-box2d<double> tiff_reader<T>::bounding_box() const
+boost::optional<box2d<double> > tiff_reader<T>::bounding_box() const
 {
-    return box2d<double>(0, 0, width_, height_);
+    return bbox_;
 }
 
 template <typename T>
