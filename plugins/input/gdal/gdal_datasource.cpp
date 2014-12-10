@@ -104,7 +104,20 @@ gdal_datasource::gdal_datasource(parameters const& params)
     shared_dataset_ = *params.get<mapnik::boolean_type>("shared", false);
     band_ = *params.get<mapnik::value_integer>("band", -1);
 
-    GDALDataset *dataset = open_dataset();
+    // Initialize with pre-created datasource
+    // Datasource addressed is passed as base 10 string that is at least 64 bits (unsigned long long)
+    // For example: p["datasource"]= std::to_string((unsigned long long) GDALDataset*);
+    boost::optional<std::string> datasource = params.get<std::string>("datasource");
+
+    GDALDataset *dataset;
+    if(datasource)
+    {
+        dataset = (GDALDataset*) std::stoull(*datasource);
+    }
+    else
+    {
+        dataset = open_dataset();
+    }
 
     nbands_ = dataset->GetRasterCount();
     width_ = dataset->GetRasterXSize();

@@ -94,6 +94,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
+
     if (!string) string  = params.get<std::string>("inline");
     if (! file && ! string)
     {
@@ -117,6 +118,16 @@ void ogr_datasource::init(mapnik::parameters const& params)
         }
     }
 
+    // Initialize with pre-created datasource
+    // Datasource addressed is passed as base 10 string that is at least 64 bits (unsigned long long)
+    // For example: p["datasource"]= std::to_string((unsigned long long) gdal_dataset_type);
+    boost::optional<std::string> datasource = params.get<std::string>("datasource");
+
+    if(datasource)
+    {
+        dataset_ = (gdal_dataset_type) std::stoull(*datasource);
+    }
+
     std::string driver = *params.get<std::string>("driver","");
 
     if (! driver.empty())
@@ -124,23 +135,32 @@ void ogr_datasource::init(mapnik::parameters const& params)
 #if GDAL_VERSION_MAJOR >= 2
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
         const char* papszAllowedDrivers[] = { driver.c_str(), nullptr };
-        dataset_ = reinterpret_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers, nullptr, nullptr));
+        if(!dataset_)
+        {
+            dataset_ = reinterpret_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers, nullptr, nullptr));
+        }
 #else
         OGRSFDriver * ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
         if (ogr_driver && ogr_driver != nullptr)
         {
-            dataset_ = ogr_driver->Open((dataset_name_).c_str(), false);
+            if(!dataset_)
+            {
+                dataset_ = ogr_driver->Open((dataset_name_).c_str(), false);
+            }
         }
 #endif
     }
     else
     {
-        // open ogr driver
+        if(!dataset_)
+        {
+            // open ogr driver
 #if GDAL_VERSION_MAJOR >= 2
-        dataset_ = reinterpret_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), false, nullptr));
+            dataset_ = reinterpret_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), false, nullptr));
 #else
-        dataset_ = OGRSFDriverRegistrar::Open(dataset_name_.c_str(), false);
+            dataset_ = OGRSFDriverRegistrar::Open(dataset_name_.c_str(), false);
 #endif
+        }
     }
 
     if (! dataset_)
