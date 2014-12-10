@@ -311,10 +311,10 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
-        std::unique_ptr<pixel_type[]> row (new pixel_type[image.getRowSize()]);
+        std::unique_ptr<pixel_type[]> row (new pixel_type[image.width()]);
         while (next_scanline < height)
         {
-            memcpy(row.get(), image.getRow(next_scanline), image.getRowSize());
+            std::copy(image.getRow(next_scanline), image.getRow(next_scanline) + image.width(), row.get());
             //typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
             TIFFWriteScanline(output, row.get(), next_scanline, 0);
             ++next_scanline;
@@ -326,10 +326,12 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_TILELENGTH, height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         // Process as tiles
-        std::unique_ptr<pixel_type[]> image_data (new pixel_type[image.getSize()]);
-        memcpy(image_data.get(), image.getData(), image.getSize());
+        std::size_t tile_size = width * height;
+        pixel_type const * image_data_in = image.getData();
+        std::unique_ptr<pixel_type[]> image_data_out (new pixel_type[tile_size]);
+        std::copy(image_data_in, image_data_in + tile_size, image_data_out.get());
         //typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
-        TIFFWriteTile(output, image_data.get(), 0, 0, 0, 0);
+        TIFFWriteTile(output, image_data_out.get(), 0, 0, 0, 0);
     }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
