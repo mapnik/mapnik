@@ -60,42 +60,13 @@ enum scaling_method_e
 MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
 
-MAPNIK_DECL void scale_image_agg(image_data_gray8 & target,
-                      image_data_gray8 const& source,
-                      scaling_method_e scaling_method,
-                      double image_ratio_x,
-                      double image_ratio_y,
-                      double x_off_f,
-                      double y_off_f,
-                      double filter_factor);
-
-MAPNIK_DECL void scale_image_agg(image_data_gray32f & target,
-                      image_data_gray32f const& source,
-                      scaling_method_e scaling_method,
-                      double image_ratio_x,
-                      double image_ratio_y,
-                      double x_off_f,
-                      double y_off_f,
-                      double filter_factor);
-
-MAPNIK_DECL void scale_image_agg(image_data_gray16 & target,
-                      image_data_gray16 const& source,
-                      scaling_method_e scaling_method,
-                      double image_ratio_x,
-                      double image_ratio_y,
-                      double x_off_f,
-                      double y_off_f,
-                      double filter_factor);
-
-MAPNIK_DECL void scale_image_agg(image_data_rgba8 & target,
-                      image_data_rgba8 const& source,
-                      scaling_method_e scaling_method,
-                      double image_ratio_x,
-                      double image_ratio_y,
-                      double x_off_f,
-                      double y_off_f,
-                      double filter_factor);
-
-
+template <typename T> MAPNIK_DECL void scale_image_agg(T & target, T const& source,
+                                                       scaling_method_e scaling_method,
+                                                       double image_ratio_x,
+                                                       double image_ratio_y,
+                                                       double x_off_f,
+                                                       double y_off_f,
+                                                       double filter_factor);
 }
+
 #endif // MAPNIK_IMAGE_SCALING_HPP
