@@ -650,7 +650,6 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
 
         unsigned start_y=(y0/rows_per_strip_)*rows_per_strip_;
         unsigned end_y=((y0+height)/rows_per_strip_+1)*rows_per_strip_;
-        std::min(end_y, (unsigned)height_);
         bool laststrip=(static_cast<unsigned>(end_y) > height_)?true:false;
         int row,tx0,tx1,ty0,ty1;
 
@@ -673,7 +672,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
             int n1=laststrip ? (ty1-ty0-1):(rows_per_strip_-ty0-1);
             for (int n=n1;n>=n0;--n)
             {
-                image.setRow(row,tx0-x0,tx1-x0,static_cast<const unsigned*>(&buf[n*width_+tx0]));
+                image.setRow(row,tx0-x0,tx1-x0,&buf[n*width_+tx0]);
                 ++row;
             }
         }
