@@ -41,11 +41,78 @@
 
 namespace mapnik {
 
+namespace detail {
+
 template <typename F>
-void render_raster_symbolizer(raster_symbolizer const &sym,
-                              mapnik::feature_impl &feature,
-                              proj_transform const &prj_trans,
-                              renderer_common &common,
+struct image_data_dispatcher :  util::static_visitor<void>
+{
+    using composite_function = F;
+    image_data_dispatcher(int start_x, int start_y,
+                          int width, int height,
+                          double scale_x, double scale_y,
+                          scaling_method_e method, double filter_factor,
+                          double opacity, composite_mode_e comp_op,
+                          raster_symbolizer const& sym, feature_impl const& feature, F & composite)
+        : start_x_(start_x),
+          start_y_(start_y),
+          width_(width),
+          height_(height),
+          scale_x_(scale_x),
+          scale_y_(scale_y),
+          method_(method),
+          filter_factor_(filter_factor),
+        opacity_(opacity),
+        comp_op_(comp_op),
+        sym_(sym),
+        feature_(feature),
+        composite_(composite) {}
+
+    void operator() (image_data_null const& data_in) const
+    {
+        //no-op
+    }
+    void operator() (image_data_rgba8 const& data_in) const
+    {
+        image_data_rgba8 data_out(width_, height_);
+        scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
+        composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
+    }
+
+    template <typename T>
+    void operator() (T const& data_in) const
+    {
+        using image_data_type = T;
+        image_data_type data_out(width_, height_);
+        scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
+        image_data_rgba8 dst(width_, height_);
+        raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
+        boost::optional<double> nodata(-999);
+        if (colorizer) colorizer->colorize(dst, data_out, nodata, feature_);
+        composite_(dst, comp_op_, opacity_, start_x_, start_y_);
+    }
+private:
+    int start_x_;
+    int start_y_;
+    int width_;
+    int height_;
+    double scale_x_;
+    double scale_y_;
+    scaling_method_e method_;
+    double filter_factor_;
+    double opacity_;
+    composite_mode_e comp_op_;
+    raster_symbolizer const& sym_;
+    feature_impl const& feature_;
+    composite_function & composite_;
+};
+
+}
+
+template <typename F>
+void render_raster_symbolizer(raster_symbolizer const& sym,
+                              mapnik::feature_impl& feature,
+                              proj_transform const& prj_trans,
+                              renderer_common& common,
                               F composite)
 {
     raster_ptr const& source = feature.get_raster();
@@ -100,10 +167,6 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                 {
                     composite(util::get<image_data_rgba8>(target.data_), comp_op, opacity, start_x, start_y);
                 }
-                else
-                {
-                    std::cerr << "#1 source->data float32" << std::endl;
-                }
             }
             else
             {
@@ -119,47 +182,14 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
                     {
                         composite(util::get<image_data_rgba8>(source->data_), comp_op, opacity, start_x, start_y);
                     }
-                    else
-                    {
-                        std::cerr << "#2 source->data float32" << std::endl;
-                    }
                 }
                 else
                 {
-                    if (source->data_.is<image_data_rgba8>())
-                    {
-                        image_data_rgba8 data(raster_width, raster_height);
-                        scale_image_agg(data,
-                                                       util::get<image_data_rgba8>(source->data_),
-                                                       scaling_method,
-                                                       image_ratio_x,
-                                                       image_ratio_y,
-                                                       0.0,
-                                                       0.0,
-                                                       source->get_filter_factor());
-                        composite(data, comp_op, opacity, start_x, start_y);
-                    }
-                    else if (source->data_.is<image_data_gray32f>())
-                    {
-                        std::cerr << "#3 source->data float32" << std::endl;
-                    }
-                    else if (source->data_.is<image_data_gray16>())
-                    {
-                        image_data_gray16 scaled(raster_width, raster_height);
-                        scale_image_agg(scaled,
-                                                       util::get<image_data_gray16>(source->data_),
-                                                       scaling_method,
-                                                       image_ratio_x,
-                                                       image_ratio_y,
-                                                       0.0,
-                                                       0.0,
-                                                       source->get_filter_factor());
-                        image_data_rgba8 dst(raster_width, raster_height);
-                        raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym, keys::colorizer);
-                        if (colorizer) colorizer->colorize(dst, scaled, source->nodata(), feature);
-                        composite(dst, comp_op, opacity, start_x, start_y);
-
-                    }
+                    detail::image_data_dispatcher<F> dispatcher(start_x, start_y, raster_width, raster_height,
+                                                                image_ratio_x, image_ratio_y,
+                                                                scaling_method, source->get_filter_factor(),
+                                                                opacity, comp_op, sym, feature, composite);
+                    util::apply_visitor(dispatcher, source->data_);
                 }
             }
         }
