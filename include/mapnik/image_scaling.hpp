@@ -60,8 +60,8 @@ enum scaling_method_e
 MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
 
-MAPNIK_DECL void scale_image_agg(image_data_rgba8 & target,
-                      image_data_rgba8 const& source,
+MAPNIK_DECL void scale_image_agg(image_data_gray8 & target,
+                      image_data_gray8 const& source,
                       scaling_method_e scaling_method,
                       double image_ratio_x,
                       double image_ratio_y,
