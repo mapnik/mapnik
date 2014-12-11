@@ -97,13 +97,13 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
 }
 
 void scale_image_agg(image_data_rgba8 & target,
-                                    image_data_rgba8 const& source,
-                                    scaling_method_e scaling_method,
-                                    double image_ratio_x,
-                                    double image_ratio_y,
-                                    double x_off_f,
-                                    double y_off_f,
-                                    double filter_factor)
+                     image_data_rgba8 const& source,
+                     scaling_method_e scaling_method,
+                     double image_ratio_x,
+                     double image_ratio_y,
+                     double x_off_f,
+                     double y_off_f,
+                     double filter_factor)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
