@@ -122,36 +122,20 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
     return true;
 }
 
-void raster_colorizer::colorize(raster & ras, feature_impl const& f) const
+template <typename T>
+void raster_colorizer::colorize(image_data_rgba8 & out, T const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const
 {
-    std::int16_t * imageData = reinterpret_cast<std::int16_t*>(ras.data_.getBytes());
-    int len = ras.data_.width() * ras.data_.height();
-    boost::optional<double> const& nodata = ras.nodata();
-    for (int i=0; i<len; ++i)
-    {
-        // the GDAL plugin reads single bands as floats
-        std::int16_t value = imageData[i];
-        if (nodata && (std::fabs(value - *nodata) < epsilon_))
-        {
-            imageData[i] = 0;
-        }
-        else
-        {
-            imageData[i] = get_color(value);
-        }
-    }
-}
-
-void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray16 const& in, boost::optional<double>const& nodata, feature_impl const& f) const
-{
+    using image_data_type = T;
+    using pixel_type = typename image_data_type::pixel_type;
     // TODO: assuming in/out have the same width/height for now
     std::uint32_t * out_data = out.getData();
-    std::int16_t const* in_data = in.getData();
+    pixel_type const* in_data = in.getData();
     int len = out.width() * out.height();
     for (int i=0; i<len; ++i)
     {
-        // the GDAL plugin reads single bands as floats
-        std::int16_t value = in_data[i];
+        pixel_type value = in_data[i];
         if (nodata && (std::fabs(value - *nodata) < epsilon_))
         {
             out_data[i] = 0; // rgba(0,0,0,0)
@@ -301,5 +285,15 @@ unsigned raster_colorizer::get_color(float value) const
     return outputColor.rgba();
 }
 
+
+template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray8 const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const;
+template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray16 const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const;
+template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray32f const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
 
 }
