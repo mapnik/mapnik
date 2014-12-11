@@ -206,14 +206,26 @@ void scale_image_agg(image_data_rgba8 & target,
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
+void scale_image_agg(image_data_gray8 & target,
+                     image_data_gray8 const& source,
+                     scaling_method_e scaling_method,
+                     double image_ratio_x,
+                     double image_ratio_y,
+                     double x_off_f,
+                     double y_off_f,
+                     double filter_factor)
+{
+    // TODO
+}
+
 void scale_image_agg(image_data_gray32f & target,
-                                    image_data_gray32f const& source,
-                                    scaling_method_e scaling_method,
-                                    double image_ratio_x,
-                                    double image_ratio_y,
-                                    double x_off_f,
-                                    double y_off_f,
-                                    double filter_factor)
+                     image_data_gray32f const& source,
+                     scaling_method_e scaling_method,
+                     double image_ratio_x,
+                     double image_ratio_y,
+                     double x_off_f,
+                     double y_off_f,
+                     double filter_factor)
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using renderer_base_pre = agg::renderer_base<pixfmt_pre>;
@@ -300,13 +312,13 @@ void scale_image_agg(image_data_gray32f & target,
 }
 
 void scale_image_agg(image_data_gray16 & target,
-                                    image_data_gray16 const& source,
-                                    scaling_method_e scaling_method,
-                                    double image_ratio_x,
-                                    double image_ratio_y,
-                                    double x_off_f,
-                                    double y_off_f,
-                                    double filter_factor)
+                     image_data_gray16 const& source,
+                     scaling_method_e scaling_method,
+                     double image_ratio_x,
+                     double image_ratio_y,
+                     double x_off_f,
+                     double y_off_f,
+                     double filter_factor)
 {
     using pixfmt_pre = agg::pixfmt_gray16_pre;
     using renderer_base_pre = agg::renderer_base<pixfmt_pre>;
