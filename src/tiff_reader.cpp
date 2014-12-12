@@ -329,7 +329,7 @@ void tiff_reader<T>::init()
             double lox = tilepoint[3];
             double loy = tilepoint[4];
             double hix = lox + pixelscale[0] * width_;
-            double hiy = loy + pixelscale[1] * height_;
+            double hiy = loy - pixelscale[1] * height_;
             bbox_.reset(box2d<double>(lox, loy, hix, hiy));
             MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_;
         }
