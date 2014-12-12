@@ -22,11 +22,12 @@ public:
         }
         return ret;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              mapnik::expression_ptr expr = mapnik::parse_expression(expr_);
          }
+         return true;
     }
 };
 

@@ -18,13 +18,14 @@ public:
         if (result != 123456789) return false;
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
         for (std::size_t i=0;i<iterations_;++i) {
             mapnik::value_integer result = 0;
             mapnik::util::string2int(value_,result);
             mapnik::util::string2int(value_.data(),value_.data()+value_.size(),result);
         }
+        return true;
     }
 };
 

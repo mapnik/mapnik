@@ -16,13 +16,14 @@ public:
         mapnik::util::string2bool(value_,result);
         return (result == true);
     }
-    void operator()() const
+    bool operator()() const
     {
         for (std::size_t i=0;i<iterations_;++i) {
             bool result = false;
             mapnik::util::string2bool(value_,result);
             mapnik::util::string2bool(value_.data(),value_.data()+value_.size(),result);
         }
+        return true;
     }
 };
 

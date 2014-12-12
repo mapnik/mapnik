@@ -14,13 +14,14 @@ public:
         mapnik::util::to_string(s,value_);
         return (s == "-0.1234");
     }
-    void operator()() const
+    bool operator()() const
     {
         std::string out;
         for (std::size_t i=0;i<iterations_;++i) {
             out.clear();
             mapnik::util::to_string(out,value_);
         }
+        return true;
     }
 };
 

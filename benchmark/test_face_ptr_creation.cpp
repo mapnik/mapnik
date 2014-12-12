@@ -26,7 +26,7 @@ public:
         }
         return count == expected_count;
     }
-    void operator()() const
+    bool operator()() const
     {
         std::size_t expected_count = mapnik::freetype_engine::face_names().size();
         for (unsigned i=0;i<iterations_;++i)
@@ -49,6 +49,7 @@ public:
                 std::clog << "warning: face creation not working as expected\n";
             }
         }
+        return true;
     }
 };
 

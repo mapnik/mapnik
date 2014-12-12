@@ -12,7 +12,7 @@ public:
     {
         return mapnik::freetype_engine::register_fonts("./fonts", true);
     }
-    void operator()() const
+    bool operator()() const
     {
         unsigned long count = 0;
         for (unsigned i=0;i<iterations_;++i)
@@ -20,6 +20,7 @@ public:
             mapnik::freetype_engine::register_fonts("./fonts", true);
             count++;
         }
+        return true;
     }
 };
 
