@@ -188,9 +188,19 @@ public:
         return pData_ + row * width_;
     }
 
+    inline const pixel_type* getRow(unsigned row, std::size_t x0) const
+    {
+        return pData_ + row * width_ + x0;
+    }
+
     inline pixel_type* getRow(unsigned row)
     {
         return pData_ + row * width_;
+    }
+
+    inline pixel_type* getRow(unsigned row, std::size_t x0)
+    {
+        return pData_ + row * width_ + x0;
     }
 
     inline void setRow(std::size_t row, pixel_type const* buf, std::size_t size)

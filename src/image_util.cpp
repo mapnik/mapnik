@@ -300,6 +300,29 @@ void handle_tiff_options(std::string const& type,
                     }
                 }
             }
+            else if (boost::algorithm::starts_with(t, "method="))
+            {
+                std::string val = t.substr(7);
+                if (!val.empty())
+                {
+                    if (val == "scanline")
+                    {
+                        config.method = TIFF_WRITE_SCANLINE;
+                    }
+                    else if (val == "strip" || val == "stripped")
+                    {
+                        config.method = TIFF_WRITE_STRIPPED;
+                    }
+                    else if (val == "tiled")
+                    {
+                        config.method = TIFF_WRITE_TILED;
+                    }
+                    else
+                    {
+                        throw ImageWriterException("invalid tiff method: '" + val + "'");
+                    }
+                }
+            }
             else if (boost::algorithm::starts_with(t, "zlevel="))
             {
                 std::string val = t.substr(7);
@@ -311,14 +334,36 @@ void handle_tiff_options(std::string const& type,
                     }
                 }
             }
-            else if (boost::algorithm::starts_with(t, "scanline="))
+            else if (boost::algorithm::starts_with(t, "tile_height="))
             {
-                std::string val = t.substr(9);
+                std::string val = t.substr(12);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2bool(val,config.scanline))
+                    if (!mapnik::util::string2int(val,config.tile_height) || config.tile_height < 0 )
                     {
-                        throw ImageWriterException("invalid tiff scanline: '" + val + "'");
+                        throw ImageWriterException("invalid tiff tile_height: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "tile_width="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.tile_width) || config.tile_width < 0 )
+                    {
+                        throw ImageWriterException("invalid tiff tile_width: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "rows_per_strip="))
+            {
+                std::string val = t.substr(15);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.rows_per_strip) || config.rows_per_strip < 0 )
+                    {
+                        throw ImageWriterException("invalid tiff rows_per_strip: '" + val + "'");
                     }
                 }
             }

@@ -35,6 +35,12 @@ extern "C"
 #define RealTIFFClose TIFFClose
 }
 
+#define TIFF_WRITE_SCANLINE 0
+#define TIFF_WRITE_STRIPPED 1
+#define TIFF_WRITE_TILED 2
+
+#include <iostream>
+
 namespace mapnik {
 
 static inline tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
@@ -159,11 +165,18 @@ struct tiff_config
     tiff_config()
         : compression(COMPRESSION_ADOBE_DEFLATE),
         zlevel(4),
-        scanline(false) {}
+        tile_width(0),
+        tile_height(0),
+        rows_per_strip(0),
+        method(TIFF_WRITE_STRIPPED) {}
 
     int compression;
     int zlevel;
-    bool scanline;
+    int tile_width; // Tile width of zero means tile the width of the image
+    int tile_height; // Tile height of zero means tile the height of the image
+    int rows_per_strip;
+    int method; // The method to use to write the TIFF.
+
 };
 
 struct tag_setter : public mapnik::util::static_visitor<>
@@ -181,11 +194,13 @@ struct tag_setter : public mapnik::util::static_visitor<>
 
     inline void operator() (image_data_rgba8 const&) const
     {
+        std::cout << "Save as RGBA" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
-        uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+        //uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+        uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
         TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
         if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
@@ -197,6 +212,7 @@ struct tag_setter : public mapnik::util::static_visitor<>
     }
     inline void operator() (image_data_gray32f const&) const
     {
+        std::cout << "Save as 32F" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
@@ -210,6 +226,7 @@ struct tag_setter : public mapnik::util::static_visitor<>
     }
     inline void operator() (image_data_gray16 const&) const
     {
+        std::cout << "Save as Gray 16" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
@@ -224,6 +241,7 @@ struct tag_setter : public mapnik::util::static_visitor<>
     }
     inline void operator() (image_data_gray8 const&) const
     {
+        std::cout << "Save as Gray 8" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
@@ -256,7 +274,9 @@ void set_tiff_config(TIFF* output, tiff_config & config)
     // Set the compression for the TIFF
     TIFFSetField(output, TIFFTAG_COMPRESSION, config.compression);
 
-    if (COMPRESSION_ADOBE_DEFLATE == config.compression || COMPRESSION_DEFLATE == config.compression)
+    if (COMPRESSION_ADOBE_DEFLATE == config.compression 
+        || COMPRESSION_DEFLATE == config.compression
+        || COMPRESSION_LZW == config.compression)
     {
         // Set the zip level for the compression
         // http://en.wikipedia.org/wiki/DEFLATE#Encoder.2Fcompressor
@@ -291,7 +311,6 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(output, TIFFTAG_IMAGELENGTH, height);
     TIFFSetField(output, TIFFTAG_IMAGEDEPTH, 1);
-
     set_tiff_config(output, config);
 
     // Set tags that vary based on the type of data being provided.
@@ -299,39 +318,98 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     set(image);
     //util::apply_visitor(set, image);
 
-    // If the image is greater then 8MB uncompressed, then lets use scanline rather then
-    // tile. TIFF also requires that all TIFFTAG_TILEWIDTH and TIFF_TILELENGTH all be
-    // a multiple of 16, if they are not we will use scanline.
-    if (image.getSize() > 8 * 32 * 1024 * 1024
-            || width % 16 != 0
-            || height % 16 != 0
-            || config.scanline)
+    // Use specific types of writing methods.
+    if (TIFF_WRITE_SCANLINE == config.method)
     {
         // Process Scanline
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, 1);
 
         int next_scanline = 0;
-        std::unique_ptr<pixel_type[]> row (new pixel_type[image.width()]);
+        std::unique_ptr<pixel_type[]> row (new pixel_type[width]);
         while (next_scanline < height)
         {
-            std::copy(image.getRow(next_scanline), image.getRow(next_scanline) + image.width(), row.get());
-            //typename T2::pixel_type * row = const_cast<typename T2::pixel_type *>(image.getRow(next_scanline));
+            std::copy(image.getRow(next_scanline), image.getRow(next_scanline) + width, row.get());
             TIFFWriteScanline(output, row.get(), next_scanline, 0);
             ++next_scanline;
         }
     }
-    else
+    else if (TIFF_WRITE_STRIPPED == config.method)
     {
-        TIFFSetField(output, TIFFTAG_TILEWIDTH, width);
-        TIFFSetField(output, TIFFTAG_TILELENGTH, height);
+        std::size_t rows_per_strip = config.rows_per_strip;
+        if (0 == rows_per_strip) 
+        {
+            rows_per_strip = height;
+        }
+        TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, rows_per_strip);
+        std::size_t strip_size = width * rows_per_strip;
+        std::unique_ptr<pixel_type[]> strip_buffer(new pixel_type[strip_size]);
+        int end_y=(height/rows_per_strip+1)*rows_per_strip;
+
+        for (int y=0; y < end_y; y+=rows_per_strip)
+        {
+            int ty1 = std::min(height, static_cast<int>(y + rows_per_strip)) - y;
+            int row = y;
+            for (int ty = 0; ty < ty1; ++ty, ++row)
+            {
+                std::copy(image.getRow(row), image.getRow(row) + width, strip_buffer.get() + ty * width);
+            }
+            if (TIFFWriteEncodedStrip(output, TIFFComputeStrip(output, y, 0), strip_buffer.get(), strip_size * sizeof(pixel_type)) == -1)
+            {
+                throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
+            }
+        }
+    }
+    else if (TIFF_WRITE_TILED == config.method)
+    {
+        int tile_width = config.tile_width;
+        int tile_height = config.tile_height;
+        
+        if (0 == tile_height) 
+        {
+            tile_height = height;
+            if (height % 16 > 0)
+            {
+                tile_height = height + 16 - (height % 16);
+            }
+        }
+        if (0 == tile_width)
+        {
+            tile_width = width;
+            if (width % 16 > 0)
+            {
+                tile_width = width + 16 - (width % 16);
+            }
+        }
+        TIFFSetField(output, TIFFTAG_TILEWIDTH, tile_width);
+        TIFFSetField(output, TIFFTAG_TILELENGTH, tile_height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
-        // Process as tiles
-        std::size_t tile_size = width * height;
-        pixel_type const * image_data_in = image.getData();
+        std::size_t tile_size = tile_width * tile_height;
         std::unique_ptr<pixel_type[]> image_data_out (new pixel_type[tile_size]);
-        std::copy(image_data_in, image_data_in + tile_size, image_data_out.get());
-        //typename T2::pixel_type * image_data = const_cast<typename T2::pixel_type *>(image.getData());
-        TIFFWriteTile(output, image_data_out.get(), 0, 0, 0, 0);
+        int end_y = (height / tile_height + 1) * tile_height;
+        int end_x = (width / tile_width + 1) * tile_width;
+        end_y = std::min(end_y, height);
+        end_x = std::min(end_x, width);
+        
+        for (int y = 0; y < end_y; y += tile_height)
+        {
+            int ty1 = std::min(height, y + tile_height) - y;
+
+            for (int x = 0; x < end_x; x += tile_width)
+            {
+                // Prefill the entire array with zeros.
+                std::fill(image_data_out.get(), image_data_out.get() + tile_size, 0);
+                int tx1 = std::min(width, x + tile_width);
+                int row = y;
+                for (int ty = 0; ty < ty1; ++ty, ++row)
+                {
+                    std::copy(image.getRow(row, x), image.getRow(row, tx1), image_data_out.get() + ty * tile_width);
+                }
+                if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_data_out.get(), tile_size * sizeof(pixel_type)) == -1)
+                {
+                    throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
+                }
+            }
+        }
     }
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette

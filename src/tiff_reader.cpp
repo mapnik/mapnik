@@ -477,12 +477,9 @@ struct tiff_reader_traits<image_data_rgba8>
     {
         if (TIFFReadRGBATile(tif, x0, y0, buf) != -1)
         {
-            for (int y = 0; y < tile_height/2 ;++y)
+            for (unsigned y = 0; y < tile_height/2; ++y)
             {
-                for (int x = 0; x < tile_width; ++x)
-                {
-                    std::swap(buf[y * tile_width + x], buf[x + (tile_height - y - 1) * tile_width]);
-                }
+                std::swap_ranges(buf + y * tile_width, buf + (y + 1) * tile_width, buf + (tile_height - y - 1) * tile_width);
             }
             return true;
         }

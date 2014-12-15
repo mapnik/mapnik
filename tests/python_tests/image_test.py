@@ -25,38 +25,6 @@ def test_negative_image_dimensions():
     # TODO - this may have regressed in https://github.com/mapnik/mapnik/commit/4f3521ac24b61fc8ae8fd344a16dc3a5fdf15af7
     im = mapnik.Image(-40,40)
 
-def test_tiff_round_trip_scanline():
-    filepath = '/tmp/mapnik-tiff-io-scanline.tiff'
-    im = mapnik.Image(255,267)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
-    im.save(filepath,'tiff:scanline=1')
-    im2 = mapnik.Image.open(filepath)
-    im3 = mapnik.Image.fromstring(open(filepath,'r').read())
-    eq_(im.width(),im2.width())
-    eq_(im.height(),im2.height())
-    eq_(im.width(),im3.width())
-    eq_(im.height(),im3.height())
-    eq_(len(im.tostring()),len(im2.tostring()))
-    eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
-    eq_(len(im.tostring()),len(im3.tostring()))
-    eq_(len(im.tostring('tiff')),len(im3.tostring('tiff')))
-
-def test_tiff_round_trip_tiled():
-    filepath = '/tmp/mapnik-tiff-io-tiled.tiff'
-    im = mapnik.Image(256,256)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
-    im.save(filepath,'tiff')
-    im2 = mapnik.Image.open(filepath)
-    im3 = mapnik.Image.fromstring(open(filepath,'r').read())
-    eq_(im.width(),im2.width())
-    eq_(im.height(),im2.height())
-    eq_(im.width(),im3.width())
-    eq_(im.height(),im3.height())
-    eq_(len(im.tostring()),len(im2.tostring()))
-    eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
-    eq_(len(im.tostring()),len(im3.tostring()))
-    eq_(len(im.tostring('tiff')),len(im3.tostring('tiff')))
-
 def test_jpeg_round_trip():
     filepath = '/tmp/mapnik-jpeg-io.jpeg'
     im = mapnik.Image(255,267)

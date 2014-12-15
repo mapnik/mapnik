@@ -99,6 +99,11 @@ public:
     {
         return data_.getRow(row + y_) + x_;
     }
+    
+    inline const pixel_type* getRow(unsigned row, std::size_t x0) const
+    {
+        return data_.getRow(row + y_, x0) + x_;
+    }
 
     inline const unsigned char* getBytes() const
     {
