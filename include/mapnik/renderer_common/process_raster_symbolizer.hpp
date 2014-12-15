@@ -154,7 +154,7 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
                 image_data_rgba8 data(raster_width, raster_height);
-                raster target(target_ext, data, source->get_filter_factor());
+                raster target(target_ext, std::move(data), source->get_filter_factor());
                 unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, common.vars_, 16));
                 reproject_and_scale_raster(target,
                                            *source,
