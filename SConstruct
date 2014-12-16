@@ -438,6 +438,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_CAIRO',
+        'MAPNIK_HAS_DLFCN',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
         'PYTHON_IS_64BIT',
@@ -865,6 +866,24 @@ int main()
         rm_path(item,'CPPPATH',context.env)
     return ret
 
+def CheckHasDlfcn(context, silent=False):
+    if not silent:
+        context.Message('Checking for dlfcn.h support ... ')
+    ret = context.TryCompile("""
+
+#include <dlfcn.h>
+
+int main()
+{
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    context.Result(ret)
+    return ret
+
 def GetBoostLibVersion(context):
     ret = context.TryRun("""
 
@@ -1019,6 +1038,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
+               'CheckHasDlfcn'         : CheckHasDlfcn,
                'GetBoostLibVersion'    : GetBoostLibVersion,
                'GetMapnikLibVersion'   : GetMapnikLibVersion,
                'parse_config'          : parse_config,
@@ -1205,6 +1225,11 @@ if not preconfigured:
         ['z', 'zlib.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
     ]
+
+    if conf.CheckHasDlfcn():
+        env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
+    else:
+        env['SKIPPED_DEPS'].extend(['dlfcn'])
 
     OPTIONAL_LIBSHEADERS = []
 
@@ -1685,14 +1710,18 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
-        boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-        if boost_version_from_header > 53 or 'c++11' in env['CUSTOM_CXXFLAGS']:
+        if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+            boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+            if boost_version_from_header > 53 or 'c++11' in env['CUSTOM_CXXFLAGS']:
+                env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
+                #  - workaround boost gil channel_algorithm.hpp narrowing error
+                # TODO - remove when building against >= 1.55
+                # https://github.com/mapnik/mapnik/issues/1970
+                if 'clang++' in env['CXX']:
+                    env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+        else:
             env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
-            #  - workaround boost gil channel_algorithm.hpp narrowing error
-            # TODO - remove when building against >= 1.55
-            # https://github.com/mapnik/mapnik/issues/1970
-            if 'clang++' in env['CXX']:
-                env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+            env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
