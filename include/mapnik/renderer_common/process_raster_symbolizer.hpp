@@ -202,22 +202,25 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
             scaling_method_e scaling_method = get<scaling_method_e>(sym, keys::scaling, feature, common.vars_, SCALING_NEAR);
             composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common.vars_, src_over);
             double opacity = get<double>(sym,keys::opacity,feature, common.vars_, 1.0);
-            bool premultiply_source = !source->premultiplied_alpha_;
-            auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
-            if (is_premultiplied)
+            // only premultiply rgba8 images
+            if (source->data_.is<image_data_rgba8>())
             {
-                if (*is_premultiplied) premultiply_source = false;
-                else premultiply_source = true;
-            }
-            // only premuiltiply rgba8 images
-            if (premultiply_source && source->data_.is<image_data_rgba8>())
-            {
-                agg::rendering_buffer buffer(source->data_.getBytes(),
-                                             source->data_.width(),
-                                             source->data_.height(),
-                                             source->data_.width() * 4);
-                agg::pixfmt_rgba32 pixf(buffer);
-                pixf.premultiply();
+                bool premultiply_source = !source->premultiplied_alpha_;
+                auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
+                if (is_premultiplied)
+                {
+                    if (*is_premultiplied) premultiply_source = false;
+                    else premultiply_source = true;
+                }
+                if (premultiply_source)
+                {
+                    agg::rendering_buffer buffer(source->data_.getBytes(),
+                                                 source->data_.width(),
+                                                 source->data_.height(),
+                                                 source->data_.width() * 4);
+                    agg::pixfmt_rgba32 pixf(buffer);
+                    pixf.premultiply();
+                }
             }
 
             if (!prj_trans.equal())
