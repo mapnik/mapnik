@@ -123,7 +123,8 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     agg::image_filter_lut filter;
 
     // initialize source AGG buffer
-    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()), source.width(), source.height(), source.width() * pixel_size);
+    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()),
+                                   source.width(), source.height(), source.width() * pixel_size);
     pixfmt_pre pixf_src(rbuf_src);
 
     img_src_type img_src(pixf_src);
@@ -150,64 +151,20 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     ras.line_to_d(x_off_f + scaled_width, y_off_f + scaled_height);
     ras.line_to_d(x_off_f,                y_off_f + scaled_height);
 
-    switch(scaling_method)
-    {
-    case SCALING_NEAR:
+    detail::set_scaling_method(filter, scaling_method, filter_factor);
+
+    if (scaling_method == SCALING_NEAR)
     {
         using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_filter;
         span_gen_type sg(img_src, interpolator);
         agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
-        return;
     }
-    case SCALING_BILINEAR:
-        filter.calculate(agg::image_filter_bilinear(), true); break;
-    case SCALING_BICUBIC:
-        filter.calculate(agg::image_filter_bicubic(), true); break;
-    case SCALING_SPLINE16:
-        filter.calculate(agg::image_filter_spline16(), true); break;
-    case SCALING_SPLINE36:
-        filter.calculate(agg::image_filter_spline36(), true); break;
-    case SCALING_HANNING:
-        filter.calculate(agg::image_filter_hanning(), true); break;
-    case SCALING_HAMMING:
-        filter.calculate(agg::image_filter_hamming(), true); break;
-    case SCALING_HERMITE:
-        filter.calculate(agg::image_filter_hermite(), true); break;
-    case SCALING_KAISER:
-        filter.calculate(agg::image_filter_kaiser(), true); break;
-    case SCALING_QUADRIC:
-        filter.calculate(agg::image_filter_quadric(), true); break;
-    case SCALING_CATROM:
-        filter.calculate(agg::image_filter_catrom(), true); break;
-    case SCALING_GAUSSIAN:
-        filter.calculate(agg::image_filter_gaussian(), true); break;
-    case SCALING_BESSEL:
-        filter.calculate(agg::image_filter_bessel(), true); break;
-    case SCALING_MITCHELL:
-        filter.calculate(agg::image_filter_mitchell(), true); break;
-    case SCALING_SINC:
-        filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
-    case SCALING_LANCZOS:
-        filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
-    case SCALING_BLACKMAN:
-        filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
+    else
+    {
+        using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_resample_affine;
+        span_gen_type sg(img_src, interpolator, filter);
+        agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
     }
-    // details on various resampling considerations
-    // http://old.nabble.com/Re%3A-Newbie---texture-p5057255.html
-
-    // high quality resampler
-    using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_resample_affine;
-
-    // faster, lower quality
-    //using span_gen_type = agg::span_image_filter_rgba<img_src_type,interpolator_type>;
-
-    // local, modified agg::span_image_resample_rgba_affine
-    // dating back to when we were not handling alpha correctly
-    // and this file helped work around symptoms
-    // https://github.com/mapnik/mapnik/issues/1489
-    //using span_gen_type = mapnik::span_image_resample_rgba_affine<img_src_type>;
-    span_gen_type sg(img_src, interpolator, filter);
-    agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 
 }
 

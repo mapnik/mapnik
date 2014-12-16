@@ -23,9 +23,16 @@
 #ifndef MAPNIK_IMAGE_SCALING_TRAITS_HPP
 #define MAPNIK_IMAGE_SCALING_TRAITS_HPP
 
-namespace mapnik  {
+// agg
+#include "agg_image_accessors.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_pixfmt_gray.h"
+#include "agg_span_allocator.h"
+#include "agg_span_image_filter_gray.h"
+#include "agg_span_image_filter_rgba.h"
+#include "agg_span_interpolator_linear.h"
 
-namespace detail {
+namespace mapnik  { namespace detail {
 
 template <typename T>
 struct agg_scaling_traits  {};
@@ -74,6 +81,49 @@ struct agg_scaling_traits<image_data_gray32f>
     using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
     using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
 };
+
+template <typename Filter>
+void set_scaling_method(Filter & filter, scaling_method_e scaling_method, double filter_factor)
+{
+    switch(scaling_method)
+    {
+    case SCALING_NEAR: break;
+    case SCALING_BILINEAR:
+        filter.calculate(agg::image_filter_bilinear(), true); break;
+    case SCALING_BICUBIC:
+        filter.calculate(agg::image_filter_bicubic(), true); break;
+    case SCALING_SPLINE16:
+        filter.calculate(agg::image_filter_spline16(), true); break;
+    case SCALING_SPLINE36:
+        filter.calculate(agg::image_filter_spline36(), true); break;
+    case SCALING_HANNING:
+        filter.calculate(agg::image_filter_hanning(), true); break;
+    case SCALING_HAMMING:
+        filter.calculate(agg::image_filter_hamming(), true); break;
+    case SCALING_HERMITE:
+        filter.calculate(agg::image_filter_hermite(), true); break;
+    case SCALING_KAISER:
+        filter.calculate(agg::image_filter_kaiser(), true); break;
+    case SCALING_QUADRIC:
+        filter.calculate(agg::image_filter_quadric(), true); break;
+    case SCALING_CATROM:
+        filter.calculate(agg::image_filter_catrom(), true); break;
+    case SCALING_GAUSSIAN:
+        filter.calculate(agg::image_filter_gaussian(), true); break;
+    case SCALING_BESSEL:
+        filter.calculate(agg::image_filter_bessel(), true); break;
+    case SCALING_MITCHELL:
+        filter.calculate(agg::image_filter_mitchell(), true); break;
+    case SCALING_SINC:
+        filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
+    case SCALING_LANCZOS:
+        filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
+    case SCALING_BLACKMAN:
+        filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
+    default:
+        break;
+    }
+}
 
 }
 
