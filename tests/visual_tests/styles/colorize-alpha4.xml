@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map[]>
 <Map>
+  <Parameters>
+    <Parameter name="sizes">256,256</Parameter>
+    <Parameter name="status">off</Parameter>
+  </Parameters>
 
   <Style name="countries">
     <Rule>

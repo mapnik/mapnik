@@ -1,5 +1,8 @@
 <!DOCTYPE Map>
 <Map background-color="#b5d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="0.7.2">
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
     <Style name="1">
         <Rule>
             <TextSymbolizer
@@ -12,7 +15,7 @@
                 wrap-character="[wrap-character]"
                 halo-radius="1">[label]</TextSymbolizer>
             <PointSymbolizer allow-overlap="true" />
-        </Rule>        
+        </Rule>
     </Style>
 
     <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
@@ -22,10 +25,10 @@
 
             {
                 "type": "FeatureCollection",
-                            
+
                 "features": [
-                
-                    { "type": "Feature", 
+
+                    { "type": "Feature",
                         "properties": {
                             "label": "this,that",
                             "wrap-character":",",
@@ -33,7 +36,7 @@
                         },
                         "geometry"  : { "type": "Point", "coordinates": [ 2.5, 2.5 ] }
                     },
-                    { "type": "Feature", 
+                    { "type": "Feature",
                         "properties": {
                             "label": "this-that",
                             "wrap-character":"-",
@@ -43,7 +46,7 @@
                     }
                 ]
             }
-            
+
             </Parameter>
             <Parameter name="type">geojson</Parameter>
         </Datasource>

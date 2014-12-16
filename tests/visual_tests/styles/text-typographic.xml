@@ -1,4 +1,7 @@
 <Map>
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
     <Style name="lines" filter-mode="first">
         <Rule>
             <Filter>[id]=1</Filter>

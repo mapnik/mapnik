@@ -1,6 +1,9 @@
 <Map
     background-color="#000"
     srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">300,300</Parameter>
+    </Parameters>
 
     <Style name="polygon">
         <Rule>

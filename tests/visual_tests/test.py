@@ -9,6 +9,7 @@ import shutil
 import os.path
 from compare import compare, compare_grids
 import platform
+import glob
 
 try:
     import json
@@ -18,6 +19,7 @@ except ImportError:
 visual_output_dir = "/tmp/mapnik-visual-images"
 
 defaults = {
+    'status': True,
     'sizes': [(500, 100)],
     'scales':[1.0,2.0],
     'agg': True,
@@ -76,230 +78,7 @@ renderers = [
     }
 ]
 
-sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),
-    (300, 100), (250, 100), (150, 100), (100, 100)]
-
-sizes_few_square = [(800, 800), (600, 600), (400, 400), (200, 200)]
-sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
-    (499, 100), (500, 100), (501, 100), (502, 100), (505, 100), (510, 100)]
-
-default_text_box = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
-large_text_box = mapnik.Box2d(-0.5, -0.5, 0.5, 0.5)
-
-merc_z1_bboxes = {
-  '0,0':mapnik.Box2d(-20037508.342,0,0,20037508.342), # upper left
-  '1,0':mapnik.Box2d(0,0,20037508.342,20037508.342), # upper right
-  '0,1':mapnik.Box2d(-20037508.342,-20037508.342,0,0), # lower left
-  '1,1':mapnik.Box2d(0,-20037508.342,20037508.342,0) # lower right
-}
-
 dirname = os.path.dirname(__file__)
-
-files = {
-    'list': {'sizes': sizes_many_in_big_range,'bbox':default_text_box},
-    'simple': {'sizes': sizes_many_in_big_range,'bbox':default_text_box},
-    'lines-1': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'lines-2': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'lines-3': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'lines-4': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'lines-5': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'lines-6': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'lines-7': {'sizes': sizes_few_square,'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
-    'lines-multi-layout-1': {'sizes': [(800,800)],'bbox':default_text_box},
-    'lines-multi-layout-2': {'sizes': [(800,800)],'bbox':mapnik.Box2d(-1.2, -1.2, 1.2, 1.2)},
-    'lines-multi-layout-shield': {'sizes': [(800,800)],'bbox':default_text_box},
-    'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
-    'collision': {'sizes':[(600,400)]},
-    'simple-shield': {'sizes':[(600,400)]},
-    'shield-on-polygon': {'sizes':[(600,400)]},
-    'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
-    'geometry-transform-translate': {'sizes':[(200,200)]},
-    'geometry-transform-translate-patterns': {'sizes':[(200,200)]},
-    'geometry-transform-translate-patterns-svg': {'sizes':[(200,200)]},
-    'geometry-transform-scale': {'sizes': [(500, 500)]},
-    'geometry-transform-scale-patterns': {'sizes': [(500, 500)]},
-    'marker-interior-position': {'sizes':[(600,400)]},
-    'marker-svg-opacity':{},
-    'marker-svg-opacity2':{},
-    'marker-svg-empty-g-element':{},
-    'marker-multi-policy': {'sizes':[(600,400)]},
-    'marker-on-line': {'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
-    'marker-on-line-and-line-placement': {'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
-    'marker-on-line-spacing-eq-width': {'sizes':[(600,400)]},
-    'marker-on-line-spacing-eq-width-overlap': {'sizes':[(600,400)]},
-    'marker_line_placement_on_points':{},
-    'marker-on-line-and-vertex-first-placement':{'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
-    'marker-on-line-and-vertex-last-placement':{'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(-1, -1, 11, 4)},
-    'marker-with-background-image-linear-comp-op': {},
-    'marker-with-background-image': {'sizes':[(600,400),(400,600),(257,256)]},
-    'marker-with-background-image-and-hsla-transform': {'sizes':[(600,400),(400,600),(257,256)]},
-    'marker-on-hex-grid': {'sizes':[(600,400),(400,600),(257,256)]},
-    'whole-centroid': {'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
-    'text-halo-rasterizer': {'sizes':[(600,400)]},
-    'text-halo-transform': {'sizes':[(600,400)]},
-    'text-ttc-font': {'sizes':[(600,400)]},
-    'simple-E': {'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
-    'simple-NE': {'bbox':default_text_box},
-    'simple-NW': {'bbox':default_text_box},
-    'simple-N': {'bbox':default_text_box},
-    'simple-SE': {'bbox':default_text_box},
-    'simple-SW': {'bbox':default_text_box},
-    'simple-S': {'bbox':default_text_box},
-    'simple-W': {'bbox':default_text_box},
-    'formatting-1': {'bbox':default_text_box},
-    'formatting-2': {'bbox':default_text_box},
-    'formatting-3': {'bbox':default_text_box},
-    'formatting-4': {'bbox':default_text_box},
-    'formatting-5': {'bbox':default_text_box},
-    'formatting-6': {'bbox':default_text_box},
-    'formatting-7': {'bbox':default_text_box},
-    'formatting-8': {'bbox':default_text_box},
-    'formatting-expr-alignment': {'bbox':large_text_box, 'sizes': [(500, 500)]},
-    'expressionformat': {'bbox':default_text_box},
-    'shieldsymbolizer-1': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
-    'shieldsymbolizer-2': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
-    'shieldsymbolizer-3': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
-    'shieldsymbolizer-4': {'sizes': sizes_many_in_small_range,'bbox':default_text_box},
-    'orientation': {'sizes': [(800, 200)], 'bbox': default_text_box},
-    'harfbuzz': {'sizes': [(800, 200)], 'bbox': default_text_box},
-    'hb-fontsets': {'sizes': [(800, 200)], 'bbox': default_text_box},
-    'khmer': {'sizes': [(800, 200)], 'bbox': default_text_box},
-    'charspacing': {'sizes': [(200, 400)], 'bbox': default_text_box},
-    'charspacing-lines': {'sizes': [(300, 300)], 'bbox': default_text_box},
-    'line_break': {'sizes': [(800, 800)], 'bbox': default_text_box},
-    'rtl-point': {'sizes': [(200, 200)],'bbox':default_text_box},
-    'jalign-auto': {'sizes': [(200, 200)],'bbox':default_text_box},
-    'line-offset': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
-    'repeat-labels-1': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
-    'repeat-labels-2': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
-    'repeat-labels-3': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
-    'repeat-labels-4': {'sizes': [(750,250)],'bbox':mapnik.Box2d(-12, -4, 12, 4)},
-    'text-bug1532': {'sizes': [(600, 165)]},
-    'text-bug1533': {'sizes': [(600, 600)]},
-    'text-bug1820-1': {'sizes': [(600, 300)], 'bbox': default_text_box},
-    'text-bug1820+0': {'sizes': [(600, 300)], 'bbox': default_text_box},
-    'text-bug1820+1': {'sizes': [(600, 300)], 'bbox': default_text_box},
-    'text-bug2037': {'sizes': [(800, 300)], 'bbox': default_text_box},
-    'text-expressionformat-color': {'sizes': [(800, 100)], 'bbox': default_text_box},
-    'text-halign': {'sizes': [(800,800)], 'bbox': default_text_box},
-    'text-halign-adjust': {'sizes': [(800,800)], 'bbox': default_text_box},
-    'text-halign-adjust-multiline': {'sizes': [(800,800)], 'bbox': default_text_box},
-    'text-vertical-alignment': {'sizes': [(800,800)], 'bbox': default_text_box},
-    'text-malayalam': {'sizes': [(800, 100)], 'bbox': default_text_box},
-    'text-bengali': {'sizes': [(800, 100)], 'bbox': default_text_box},
-    'text-font-features': {'sizes': [(1100, 1100)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
-    'text-multi-layout-1': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
-    'text-multi-layout-2': {'sizes': [(512,512)], 'bbox':mapnik.Box2d(-1, -1, 1, 1)},
-    'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
-    'tiff-alpha-gdal': {'sizes':[(600,400)]},
-    'tiff-alpha-broken-assoc-alpha-gdal': {'sizes':[(600,400)]},
-    'tiff-alpha-gradient-gdal': {'sizes':[(600,400)]},
-    'tiff-nodata-edge-gdal': {'sizes':[(600,400),(969,793)]},
-    'tiff-opaque-edge-gdal': {'sizes':[(256,256),(969,793)]},
-    'tiff-opaque-edge-gdal2': {'sizes':[(600,400),(969,793)]},
-    'tiff-opaque-edge-raster2': {'sizes':[(600,400),(969,793)]},
-    'tiff-resampling': {'sizes':[(600,400)]},
-    'gdal-filter-factor': {'sizes':[(600,400)]},
-    # https://github.com/mapnik/mapnik/issues/1622
-    'tiff-edge-alignment-gdal1': {'sizes':[(256,256),(255,257)],
-        'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
-    },
-    'tiff-edge-alignment-gdal2': {'sizes':[(256,256),(255,257)],
-        'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
-    },
-    'tiff-reprojection-1': {'sizes':[(250,250)]},
-    # https://github.com/mapnik/mapnik/issues/1520
-    # commented because these are not critical failures
-    #'tiff-alpha-raster': {'sizes':[(600,400)]},
-    #'tiff-alpha-broken-assoc-alpha-raster': {'sizes':[(600,400)]},
-    #'tiff-nodata-edge-raster': {'sizes':[(600,400)]},
-    #'tiff-opaque-edge-raster': {'sizes':[(256,256)]},
-    # https://github.com/mapnik/mapnik/issues/2438
-    #'tiff-reprojection-2': {'sizes':[(250,250)]},
-    'road-casings-grouped-rendering': {'sizes':[(600,600)],
-        'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
-    },
-    'road-casings-non-grouped-rendering': {'sizes':[(600,600)],
-        'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
-    },
-    'style-level-compositing-tiled-0,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,0']},
-    'style-level-compositing-tiled-1,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,0']},
-    'style-level-compositing-tiled-0,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,1']},
-    'style-level-compositing-tiled-1,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,1']},
-    'marker-path-expression':{},
-    'map-background-image-compositing':{'sizes':[(512,512)]},
-    'building-symbolizer-opacity':{'sizes':[(512,512)]},
-    'line-pattern-symbolizer-opacity':{'sizes':[(512,512)]},
-    'dst-over-compositing':{'sizes':[(512,512)]},
-    'tiff_colortable':{'sizes':[(256,256)]},
-    'tiff_colortable_custom_nodata':{'sizes':[(256,256)]},
-    'vrt_colortable':{'sizes':[(256,256)]},
-    'raster_colorizer':{'sizes':[(512,512)]},
-    'raster_symbolizer':{'sizes':[(512,512)]},
-    'raster-color-to-alpha1':{'sizes':[(512,512)]},
-    'raster-color-to-alpha2':{'sizes':[(512,512)]},
-    'raster-color-to-alpha3':{'sizes':[(512,512)]},
-    'raster-color-to-alpha4':{'sizes':[(512,512)]},
-    'raster-color-to-alpha5':{'sizes':[(512,512)]},
-    'colorize-alpha1':{'sizes':[(512,512)]},
-    'colorize-alpha2':{'sizes':[(512,512)]},
-    'colorize-alpha3':{'sizes':[(512,512)]},
-    'image-filters-galore':{'sizes':[(512,512)]},
-    'image-filters-multi-blur':{'sizes':[(512,512)]},
-    'image-filters-multi-blur-inflate':{'sizes':[(512,512)]},
-    'line-opacity-multi-render':{'sizes':[(512,512)]},
-    'tiff-nodata-rgb':{'sizes':[(512,512)]},
-    'tiff-nodata-rgba':{'sizes':[(512,512)]},
-    'tiff-nodata-tolerance':{'sizes':[(512,512)]},
-    'tiff-nodata-edge-rgba':{'sizes':[(512,512)]},
-    'marker-vs-point':{'sizes':[(512,512)]},
-    'line-symbolizer-expressions':{'sizes':[(256,256)]},
-    'line-symbolizer-expressions-all':{'sizes':[(256,256)]},
-    'point-symbolizer-expressions':{'sizes':[(256,256)]},
-    'point-symbolizer-expressions-all':{'sizes':[(256,256)]},
-    'point-symbolizer-overlap-placement-expr': {'bbox':large_text_box, 'sizes': [(500, 500)]},
-    'text-allow-overlap-expr': {'bbox':large_text_box, 'sizes': [(500, 500)]},
-    'marker-symbolizer-expressions-all':{'sizes':[(256,256)]},
-    'polygon-symbolizer-expressions':{'sizes':[(256,256)]},
-    'polygon-symbolizer-expressions-all':{'sizes':[(256,256)]},
-    'polygon-winding-order': {'sizes':[(300,300)]},
-    'group-symbolizer-1':{'sizes':[(512,512)]},
-    'group-symbolizer-2':{'sizes':[(512,512)]},
-    'group-symbolizer-3':{'sizes':[(512,256)]},
-    'group-symbolizer-line-1':{'sizes':[(512,512)]},
-    'group-symbolizer-line-2':{'sizes':[(512,512)]},
-    'text-charplacement':{'sizes':[(512,512)]},
-    'text-displacement':{'sizes':[(512,512)]},
-    'text-overlap':{'sizes':[(512,512)]},
-    'text-spacing':{'sizes':[(512,512)]},
-    'text-halo-opacity':{'sizes':[(512,512)]},
-    # https://github.com/mapnik/mapnik/issues/2202
-    'line-smooth-and-offset':{'sizes':[(512,512)]},
-    'line-pattern-smooth-and-offset':{'sizes':[(512,512)]},
-    'halo-comp-op-on-satellite':{'sizes':[(450,450)]},
-    'marker-whole-multi-polygon':{'sizes':[(512,512)]},
-    'shield-on-line-and-avoid-edges':{'sizes':[(512,512)]},
-    'marker-on-line-and-avoid-edges':{'sizes':[(512,512)]},
-    'text-typographic':{'sizes':[(512,512)]},
-    'functional-expressions':{'sizes':[(256,256)], 'bbox':mapnik.Box2d(-10,-10,10,10)},
-    'functional-expressions-length':{'sizes':[(512,512)], 'bbox':mapnik.Box2d(-15,-15,15,15)},
-    'marker-collide':{'sizes':[(512,512)]},
-    'marker-recenter-collide':{'sizes':[(256,128)], 'bbox':mapnik.Box2d(-1,-0.5,1,0.5)},
-    'postgis-inline':{'sizes':[(512,512)]},
-    'text-line-wrap':{'sizes':[(512,512)]},
-    'text-data-binding': {'sizes': [(500, 500)]},
-    'simplify-radial-distance': {'sizes': [(500, 1000)]},
-    'simplify-zhao-saalfeld': {'sizes': [(500, 1000)]},
-    'simplify-visvalingam-whyatt': {'sizes': [(500, 1000)]},
-    'simplify-douglas-peucker': {'sizes': [(500, 1000)]},
-    'marker-line-placement-many-vertices': {'sizes': [(600, 400)]},
-    'text-iconic-font': {'sizes': [(1000, 1000)]},
-    }
 
 class Reporting:
     DIFF = 1
@@ -423,16 +202,14 @@ class Reporting:
             print 'View failures by opening %s' % failures_realpath
         return 1
 
-def render(filename,config, width, height, bbox, scale_factor, reporting):
-    m = mapnik.Map(width, height)
-    postfix = "%s-%d-%d-%s" % (filename, width, height, scale_factor)
+def render(filename, config, scale_factor, reporting):
+    m = mapnik.Map(*config['sizes'][0])
 
     try:
-        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), True)
-        if bbox is not None:
-            m.zoom_to_box(bbox)
-        else:
-            m.zoom_all()
+        mapnik.load_map(m, os.path.join(dirname, "styles", filename), True)
+
+        if not (m.parameters['status'] if ('status' in m.parameters) else config['status']):
+            return
     except Exception, e:
         if 'Could not create datasource' in str(e) \
            or 'Bad connection' in str(e):
@@ -440,26 +217,41 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
         reporting.other_error(filename, repr(e))
         return m
 
-    for renderer in renderers:
-        if config.get(renderer['name'], True):
-            expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
-                (postfix, renderer['name'], renderer['filetype']))
-            actual = os.path.join(visual_output_dir, '%s-%s.%s' %
-                (postfix, renderer['name'], renderer['filetype']))
-            if not quiet:
-                print "\"%s\" with %s..." % (postfix, renderer['name']),
-            try:
-                renderer['render'](m, actual, scale_factor)
-                if not os.path.exists(expected):
-                    reporting.not_found(actual, expected)
-                else:
-                    diff = renderer['compare'](actual, expected)
-                    if diff > renderer['threshold']:
-                        reporting.result_fail(actual, expected, diff)
+    sizes = config['sizes'];
+    if 'sizes' in m.parameters:
+        sizes = [[int(i) for i in size.split(',')] for size in m.parameters['sizes'].split(';')]
+
+    for size in sizes:
+        m.width, m.height = size
+
+        if 'bbox' in m.parameters:
+            bbox = mapnik.Box2d.from_string(str(m.parameters['bbox']))
+            m.zoom_to_box(bbox)
+        else:
+            m.zoom_all()
+
+        name = filename[0:-4]
+        postfix = "%s-%d-%d-%s" % (name, m.width, m.height, scale_factor)
+        for renderer in renderers:
+            if config.get(renderer['name'], True):
+                expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
+                    (postfix, renderer['name'], renderer['filetype']))
+                actual = os.path.join(visual_output_dir, '%s-%s.%s' %
+                    (postfix, renderer['name'], renderer['filetype']))
+                if not quiet:
+                    print "\"%s\" with %s..." % (postfix, renderer['name']),
+                try:
+                    renderer['render'](m, actual, scale_factor)
+                    if not os.path.exists(expected):
+                        reporting.not_found(actual, expected)
                     else:
-                        reporting.result_pass(actual, expected, diff)
-            except Exception, e:
-                reporting.other_error(expected, repr(e))
+                        diff = renderer['compare'](actual, expected)
+                        if diff > renderer['threshold']:
+                            reporting.result_fail(actual, expected, diff)
+                        else:
+                            reporting.result_pass(actual, expected, diff)
+                except Exception, e:
+                    reporting.other_error(expected, repr(e))
     return m
 
 if __name__ == "__main__":
@@ -475,15 +267,11 @@ if __name__ == "__main__":
     else:
        overwrite_failures = False
 
-    select_files = {}
+    files = None
     if len(sys.argv) > 1:
-        for name in sys.argv[1:]:
-            if name in files:
-                select_files[name]=files[name]
-            else:
-                select_files[name]={}
-    if len(select_files) > 0:
-        files = select_files
+        files = [name + ".xml" for name in sys.argv[1:]]
+    else:
+        files = [os.path.basename(file) for file in glob.glob(os.path.join(dirname, "styles/*.xml"))]
 
     if not os.path.exists(visual_output_dir):
         os.makedirs(visual_output_dir)
@@ -492,17 +280,9 @@ if __name__ == "__main__":
     try:
         for filename in files:
             config = dict(defaults)
-            config.update(files[filename])
-            for size in config['sizes']:
-                for scale_factor in config['scales']:
-                    m = render(filename,
-                               config,
-                               size[0],
-                               size[1],
-                               config.get('bbox'),
-                               scale_factor,
-                               reporting)
-            #mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
+            for scale_factor in config['scales']:
+                m = render(filename, config, scale_factor, reporting)
+                #mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
     except KeyboardInterrupt:
         pass
     sys.exit(reporting.summary())

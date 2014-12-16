@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <Parameters>
+    <Parameter name="sizes">500, 500</Parameter>
+  </Parameters>
   <FontSet name="book">
     <Font face-name="DejaVu Sans Book"/>
   </FontSet>
@@ -9,6 +12,7 @@
     <StyleName>My Style</StyleName>
     <Datasource>
       <Parameter name="type">csv</Parameter>
+      <Parameter name="extent">-0.5, -0.5, 0.5, 0.5</Parameter>
 <Parameter name="inline">
 lat,long,overlap,placement
  0.33,-0.36,noexpr-true,noexpr-false

@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-    
+    <Parameters>
+        <Parameter name="sizes">750,250</Parameter>
+    </Parameters>
+
     <Style name="line">
         <Rule>
             <LineSymbolizer stroke-width="8" stroke="orange"/>
         </Rule>
     </Style>
-    
+
     <Style name="marker">
         <Rule>
             <Filter>[type] = 'poi'</Filter>
             <MarkersSymbolizer />
         </Rule>
     </Style>
-    
+
     <Style name="shield">
         <Rule>
             <Filter>[type] = 'motorway'</Filter>
@@ -36,6 +39,7 @@
         <StyleName>text</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-12, -4, 12, 4</Parameter>
             <Parameter name="file">../data/repeat-labels.csv</Parameter>
         </Datasource>
     </Layer>

@@ -1,7 +1,10 @@
 <Map
     background-color="#eee"
     srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-    
+    <Parameters>
+        <Parameter name="sizes">600,400</Parameter>
+    </Parameters>
+
     <Style name="poly">
         <Rule>
             <PolygonSymbolizer />
@@ -10,7 +13,7 @@
             <DebugSymbolizer />
         </Rule>
     </Style>
-    
+
     <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>poly</StyleName>
         <Datasource>

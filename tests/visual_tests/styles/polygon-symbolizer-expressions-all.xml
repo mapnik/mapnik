@@ -1,6 +1,9 @@
 <Map
     background-color="#eee"
     srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">256,256</Parameter>
+    </Parameters>
 
     <Style name="bug">
         <Rule>

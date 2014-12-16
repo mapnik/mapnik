@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map[]>
 <Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+  <Parameters>
+    <Parameter name="sizes">450,450</Parameter>
+  </Parameters>
 
 <Style name="raster">
   <Rule>

@@ -1,4 +1,7 @@
 <Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="steelblue">
+  <Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+  </Parameters>
 <Style name="heat">
   <Rule>
     <RasterSymbolizer opacity="1" scaling="bilinear"/>
