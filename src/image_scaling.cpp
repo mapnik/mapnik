@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_scaling.hpp>
+#include <mapnik/image_scaling_traits.hpp>
 // does not handle alpha correctly
 //#include <mapnik/span_image_filter.hpp>
 
@@ -97,57 +98,6 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
 }
 
 
-namespace detail {
-
-template <typename T>
-struct agg_scaling_traits  {};
-
-template <>
-struct agg_scaling_traits<image_data_rgba8>
-{
-    using pixfmt_pre = agg::pixfmt_rgba32_pre;
-    using color_type = agg::rgba8;
-    using interpolator_type = agg::span_interpolator_linear<>;
-    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_rgba_nn<img_src_type,interpolator_type>;
-    using span_image_resample_affine = agg::span_image_resample_rgba_affine<img_src_type>;
-
-};
-
-template <>
-struct agg_scaling_traits<image_data_gray8>
-{
-    using pixfmt_pre = agg::pixfmt_gray8_pre;
-    using color_type = agg::gray8;
-    using interpolator_type = agg::span_interpolator_linear<>;
-    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
-    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
-};
-
-template <>
-struct agg_scaling_traits<image_data_gray16>
-{
-    using pixfmt_pre = agg::pixfmt_gray16_pre;
-    using color_type = agg::gray16;
-    using interpolator_type = agg::span_interpolator_linear<>;
-    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
-    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
-};
-
-template <>
-struct agg_scaling_traits<image_data_gray32f>
-{
-    using pixfmt_pre = agg::pixfmt_gray32_pre;
-    using color_type = agg::gray32;
-    using interpolator_type = agg::span_interpolator_linear<>;
-    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
-    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
-};
-
-}
 template <typename T>
 void scale_image_agg(T & target, T const& source, scaling_method_e scaling_method,
                      double image_ratio_x, double image_ratio_y, double x_off_f, double y_off_f,
