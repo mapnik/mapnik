@@ -87,7 +87,6 @@ void set_scaling_method(Filter & filter, scaling_method_e scaling_method, double
 {
     switch(scaling_method)
     {
-    case SCALING_NEAR: break;
     case SCALING_BILINEAR:
         filter.calculate(agg::image_filter_bilinear(), true); break;
     case SCALING_BICUBIC:
