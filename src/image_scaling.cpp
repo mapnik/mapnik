@@ -114,6 +114,7 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     using img_src_type = typename detail::agg_scaling_traits<image_data_type>::img_src_type;
     using interpolator_type = typename detail::agg_scaling_traits<image_data_type>::interpolator_type;
     using renderer_base_pre = agg::renderer_base<pixfmt_pre>;
+    constexpr std::size_t pixel_size = sizeof(pixel_size);
 
     // define some stuff we'll use soon
     agg::rasterizer_scanline_aa<> ras;
@@ -122,13 +123,13 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     agg::image_filter_lut filter;
 
     // initialize source AGG buffer
-    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()), source.width(), source.height(), source.width() * sizeof(pixel_type));
+    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()), source.width(), source.height(), source.width() * pixel_size);
     pixfmt_pre pixf_src(rbuf_src);
 
     img_src_type img_src(pixf_src);
 
     // initialize destination AGG buffer (with transparency)
-    agg::rendering_buffer rbuf_dst(target.getBytes(), target.width(), target.height(), target.width() * sizeof(pixel_type));
+    agg::rendering_buffer rbuf_dst(target.getBytes(), target.width(), target.height(), target.width() * pixel_size);
     pixfmt_pre pixf_dst(rbuf_dst);
     renderer_base_pre rb_dst_pre(pixf_dst);
 
