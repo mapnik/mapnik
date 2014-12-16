@@ -1,6 +1,7 @@
 #include "bench_framework.hpp"
 #include <cstring>
 #include <cstdlib>
+#include <deque>
 #include <stdexcept>
 #include <array>
 #include <valarray>
@@ -196,6 +197,33 @@ public:
     }
 };
 
+class test3d : public benchmark::test_case
+{
+public:
+    uint32_t size_;
+    std::vector<uint8_t> array_;
+    test3d(mapnik::parameters const& params)
+     : test_case(params),
+       size_(*params.get<mapnik::value_integer>("size",256*256)),
+       array_(size_,0) { }
+    bool validate() const
+    {
+        return true;
+    }
+    bool operator()() const
+    {
+         for (std::size_t i=0;i<iterations_;++i) {
+             std::deque<uint8_t> data(size_);
+             for (std::size_t i=0;i<size_;++i) {
+                 if (data[i] != 0) {
+                     throw std::runtime_error("found non zero value");
+                 }
+             }
+         }
+         return true;
+    }
+};
+
 class test4 : public benchmark::test_case
 {
 public:
@@ -352,6 +380,10 @@ int main(int argc, char** argv)
     {
         test3c test_runner(params);
         run(test_runner,"vector/assign");
+    }
+    {
+        test3d test_runner(params);
+        run(test_runner,"deque(N)");
     }
     {
         test5 test_runner(params);
