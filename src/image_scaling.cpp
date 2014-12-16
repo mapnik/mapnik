@@ -114,13 +114,12 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     using img_src_type = typename detail::agg_scaling_traits<image_data_type>::img_src_type;
     using interpolator_type = typename detail::agg_scaling_traits<image_data_type>::interpolator_type;
     using renderer_base_pre = agg::renderer_base<pixfmt_pre>;
-    constexpr std::size_t pixel_size = sizeof(pixel_size);
+    constexpr std::size_t pixel_size = sizeof(pixel_type);
 
     // define some stuff we'll use soon
     agg::rasterizer_scanline_aa<> ras;
     agg::scanline_u8 sl;
     agg::span_allocator<color_type> sa;
-    agg::image_filter_lut filter;
 
     // initialize source AGG buffer
     agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()),
@@ -139,9 +138,7 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     img_mtx /= agg::trans_affine_scaling(image_ratio_x, image_ratio_y);
 
     // create a linear interpolator for our scaling matrix
-
     interpolator_type interpolator(img_mtx);
-
     // draw an anticlockwise polygon to render our image into
     double scaled_width = target.width();
     double scaled_height = target.height();
@@ -150,8 +147,6 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     ras.line_to_d(x_off_f + scaled_width, y_off_f);
     ras.line_to_d(x_off_f + scaled_width, y_off_f + scaled_height);
     ras.line_to_d(x_off_f,                y_off_f + scaled_height);
-
-    detail::set_scaling_method(filter, scaling_method, filter_factor);
 
     if (scaling_method == SCALING_NEAR)
     {
@@ -162,6 +157,8 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     else
     {
         using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_resample_affine;
+        agg::image_filter_lut filter;
+        detail::set_scaling_method(filter, scaling_method, filter_factor);
         span_gen_type sg(img_src, interpolator, filter);
         agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
     }
