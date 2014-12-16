@@ -194,7 +194,6 @@ struct tag_setter : public mapnik::util::static_visitor<>
 
     inline void operator() (image_data_rgba8 const&) const
     {
-        std::cout << "Save as RGBA" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
@@ -212,7 +211,6 @@ struct tag_setter : public mapnik::util::static_visitor<>
     }
     inline void operator() (image_data_gray32f const&) const
     {
-        std::cout << "Save as 32F" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
@@ -226,7 +224,6 @@ struct tag_setter : public mapnik::util::static_visitor<>
     }
     inline void operator() (image_data_gray16 const&) const
     {
-        std::cout << "Save as Gray 16" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
@@ -241,7 +238,6 @@ struct tag_setter : public mapnik::util::static_visitor<>
     }
     inline void operator() (image_data_gray8 const&) const
     {
-        std::cout << "Save as Gray 8" << std::endl;
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
