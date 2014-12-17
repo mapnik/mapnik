@@ -124,7 +124,7 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 
 template <typename T>
 void raster_colorizer::colorize(image_data_rgba8 & out, T const& in,
-                                boost::optional<double>const& nodata,
+                                boost::optional<double> const& nodata,
                                 feature_impl const& f) const
 {
     using image_data_type = T;
