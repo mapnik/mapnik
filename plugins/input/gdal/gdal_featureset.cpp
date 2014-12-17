@@ -201,7 +201,6 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         {
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
-
             if (band_ > 0) // we are querying a single band
             {
                 mapnik::image_data_gray16 image(im_width, im_height);
@@ -223,6 +222,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
                 mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, image, filter_factor);
+                // set nodata value to be used in raster colorizer
+                if (nodata_value_) raster->set_nodata(*nodata_value_);
+                else raster->set_nodata(raster_nodata);
                 feature->set_raster(raster);
             }
             else // working with all bands
