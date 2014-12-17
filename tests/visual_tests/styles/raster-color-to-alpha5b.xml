@@ -1,10 +1,9 @@
-<Map background-color="white" srs="+init=epsg:32630">
-
+<Map background-color="white" srs="+init=epsg:32630" minimum-version="0.7.2">
   <Parameters>
     <Parameter name="sizes">512,512</Parameter>
   </Parameters>
 
-  <Style name="DISCRETE RAINBOW" direct-image-filters="color-to-alpha(white)" image-filters="color-to-alpha(yellow),color-to-alpha(blue)">
+  <Style name="DISCRETE RAINBOW" image-filters="color-to-alpha(black)">
     <Rule>
       <RasterSymbolizer>
         <RasterColorizer default-mode="discrete" default-color="white">
@@ -23,7 +22,7 @@
       <StyleName>DISCRETE RAINBOW</StyleName>
       <Datasource>
           <Parameter name="file">../../data/raster/dataraster.tif</Parameter>
-          <Parameter name="type">gdal</Parameter>
+          <Parameter name="type">raster</Parameter>
           <Parameter name="band">1</Parameter>
       </Datasource>
   </Layer>
