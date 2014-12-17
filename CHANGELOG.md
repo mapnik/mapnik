@@ -8,6 +8,7 @@ For a complete change history, see the git log.
 
 ## 3.0.0
 
+- Added new and experimental `dot` symbolizer for fast rendering of points
 - Improved support for International Text (now uses harfbuzz library for text shaping)
 - Uses latest c++11 features for better performance (especially map loading)
 - Expressions everywhere: all symbolizer properties can now be data driven expressions (with the exception of `face-name` and `fontset-name` on the `TextSymbolizer`).

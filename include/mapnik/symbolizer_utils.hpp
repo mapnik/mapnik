@@ -120,6 +120,12 @@ struct symbolizer_traits<debug_symbolizer>
     static char const* name() { return "DebugSymbolizer";}
 };
 
+template<>
+struct symbolizer_traits<dot_symbolizer>
+{
+    static char const* name() { return "DotSymbolizer";}
+};
+
 // symbolizer name impl
 namespace detail {
 

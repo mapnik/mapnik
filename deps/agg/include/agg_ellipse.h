@@ -48,6 +48,7 @@ namespace agg
         void approximation_scale(double scale);
         void rewind(unsigned path_id);
         unsigned vertex(double* x, double* y);
+        unsigned num_steps() { return m_num; }
 
     private:
         void calc_num_steps();

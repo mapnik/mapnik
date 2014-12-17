@@ -301,6 +301,7 @@ for cpp in enabled_imaging_libraries:
 source += Split(
     """
     agg/agg_renderer.cpp
+    agg/process_dot_symbolizer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_line_symbolizer.cpp
     agg/process_line_pattern_symbolizer.cpp
