@@ -138,6 +138,7 @@ struct image_data_warp_dispatcher :  util::static_visitor<void>
     void operator() (image_data_rgba8 const& data_in) const
     {
         image_data_rgba8 data_out(width_, height_);
+        if (nodata_) data_out.set(*nodata_);
         warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
     }
@@ -147,6 +148,7 @@ struct image_data_warp_dispatcher :  util::static_visitor<void>
     {
         using image_data_type = T;
         image_data_type data_out(width_, height_);
+        if (nodata_) data_out.set(*nodata_);
         warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         image_data_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
