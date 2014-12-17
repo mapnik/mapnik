@@ -52,7 +52,7 @@ struct image_data_dispatcher :  util::static_visitor<void>
                           double scale_x, double scale_y,
                           scaling_method_e method, double filter_factor,
                           double opacity, composite_mode_e comp_op,
-                          raster_symbolizer const& sym, feature_impl const& feature, F & composite)
+                          raster_symbolizer const& sym, feature_impl const& feature, F & composite, boost::optional<double> const& nodata)
         : start_x_(start_x),
           start_y_(start_y),
           width_(width),
@@ -65,12 +65,10 @@ struct image_data_dispatcher :  util::static_visitor<void>
         comp_op_(comp_op),
         sym_(sym),
         feature_(feature),
-        composite_(composite) {}
+        composite_(composite),
+        nodata_(nodata) {}
 
-    void operator() (image_data_null const& data_in) const
-    {
-        //no-op
-    }
+    void operator() (image_data_null const& data_in) const {}  //no-op
     void operator() (image_data_rgba8 const& data_in) const
     {
         image_data_rgba8 data_out(width_, height_);
@@ -86,8 +84,7 @@ struct image_data_dispatcher :  util::static_visitor<void>
         scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
         image_data_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
-        boost::optional<double> nodata(-999);
-        if (colorizer) colorizer->colorize(dst, data_out, nodata, feature_);
+        if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
         composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
@@ -104,6 +101,77 @@ private:
     raster_symbolizer const& sym_;
     feature_impl const& feature_;
     composite_function & composite_;
+    boost::optional<double> const& nodata_;
+};
+
+template <typename F>
+struct image_data_warp_dispatcher :  util::static_visitor<void>
+{
+    using composite_function = F;
+    image_data_warp_dispatcher(proj_transform const& prj_trans,
+                               int start_x, int start_y, int width, int height,
+                               box2d<double> const& target_ext, box2d<double> const& source_ext,
+                               double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method,
+                               double filter_factor, double opacity, composite_mode_e comp_op,
+                               raster_symbolizer const& sym, feature_impl const& feature, F & composite, boost::optional<double> const& nodata)
+        : prj_trans_(prj_trans),
+        start_x_(start_x),
+        start_y_(start_y),
+        width_(width),
+        height_(height),
+        target_ext_(target_ext),
+        source_ext_(source_ext),
+        offset_x_(offset_x),
+        offset_y_(offset_y),
+        mesh_size_(mesh_size),
+        scaling_method_(scaling_method),
+        filter_factor_(filter_factor),
+        opacity_(opacity),
+        comp_op_(comp_op),
+        sym_(sym),
+        feature_(feature),
+        composite_(composite),
+        nodata_(nodata) {}
+
+    void operator() (image_data_null const& data_in) const {} //no-op
+
+    void operator() (image_data_rgba8 const& data_in) const
+    {
+        image_data_rgba8 data_out(width_, height_);
+        warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
+        composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
+    }
+
+    template <typename T>
+    void operator() (T const& data_in) const
+    {
+        using image_data_type = T;
+        image_data_type data_out(width_, height_);
+        warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
+        image_data_rgba8 dst(width_, height_);
+        raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
+        if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        composite_(dst, comp_op_, opacity_, start_x_, start_y_);
+    }
+private:
+    proj_transform const& prj_trans_;
+    int start_x_;
+    int start_y_;
+    int width_;
+    int height_;
+    box2d<double> const& target_ext_;
+    box2d<double> const& source_ext_;
+    double offset_x_;
+    double offset_y_;
+    unsigned mesh_size_;
+    scaling_method_e scaling_method_;
+    double filter_factor_;
+    double opacity_;
+    composite_mode_e comp_op_;
+    raster_symbolizer const& sym_;
+    feature_impl const& feature_;
+    composite_function & composite_;
+    boost::optional<double> const& nodata_;
 };
 
 }
@@ -149,24 +217,17 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
                 agg::pixfmt_rgba32 pixf(buffer);
                 pixf.premultiply();
             }
+
             if (!prj_trans.equal())
             {
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
-                image_data_rgba8 data(raster_width, raster_height);
-                raster target(target_ext, std::move(data), source->get_filter_factor());
                 unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, common.vars_, 16));
-                reproject_and_scale_raster(target,
-                                           *source,
-                                           prj_trans,
-                                           offset_x,
-                                           offset_y,
-                                           mesh_size,
-                                           scaling_method);
-                if (target.data_.is<image_data_rgba8>())
-                {
-                    composite(util::get<image_data_rgba8>(target.data_), comp_op, opacity, start_x, start_y);
-                }
+                detail::image_data_warp_dispatcher<F> dispatcher(prj_trans, start_x, start_y, raster_width, raster_height,
+                                                                 target_ext, source->ext_, offset_x, offset_y, mesh_size,
+                                                                 scaling_method, source->get_filter_factor(),
+                                                                 opacity, comp_op, sym, feature, composite, source->nodata());
+                util::apply_visitor(dispatcher, source->data_);
             }
             else
             {
@@ -188,7 +249,7 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
                     detail::image_data_dispatcher<F> dispatcher(start_x, start_y, raster_width, raster_height,
                                                                 image_ratio_x, image_ratio_y,
                                                                 scaling_method, source->get_filter_factor(),
-                                                                opacity, comp_op, sym, feature, composite);
+                                                                opacity, comp_op, sym, feature, composite, source->nodata());
                     util::apply_visitor(dispatcher, source->data_);
                 }
             }
