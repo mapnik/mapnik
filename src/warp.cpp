@@ -48,10 +48,8 @@
 
 namespace mapnik {
 
-namespace  detail {
-
 template <typename T>
-void warp_image (T & target, T const& source, proj_transform const& prj_trans,
+MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& prj_trans,
                  box2d<double> const& target_ext, box2d<double> const& source_ext,
                  double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method, double filter_factor)
 {
@@ -148,7 +146,7 @@ void warp_image (T & target, T const& source, proj_transform const& prj_trans,
                 {
                     using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_resample_affine;
                     agg::image_filter_lut filter;
-                    set_scaling_method(filter, scaling_method, filter_factor);
+                    detail::set_scaling_method(filter, scaling_method, filter_factor);
                     span_gen_type sg(ia, interpolator, filter);
                     agg::render_scanlines_bin(rasterizer, scanline, rb, sa, sg);
                 }
@@ -157,6 +155,8 @@ void warp_image (T & target, T const& source, proj_transform const& prj_trans,
         }
     }
 }
+
+namespace detail {
 
 struct warp_image_visitor : util::static_visitor<void>
 {
@@ -182,8 +182,8 @@ struct warp_image_visitor : util::static_visitor<void>
         if (target_raster_.data_.template is<image_data_type>())
         {
             image_data_type & target = util::get<image_data_type>(target_raster_.data_);
-            detail::warp_image (target, source, prj_trans_, target_raster_.ext_, source_ext_,
-                                offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
+            warp_image (target, source, prj_trans_, target_raster_.ext_, source_ext_,
+                        offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         }
     }
 
@@ -209,5 +209,18 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                                       scaling_method, source.get_filter_factor());
     util::apply_visitor(warper, source.data_);
 }
+
+template MAPNIK_DECL void warp_image (image_data_rgba8&, image_data_rgba8 const&, proj_transform const&,
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+
+template MAPNIK_DECL void warp_image (image_data_gray8&, image_data_gray8 const&, proj_transform const&,
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+
+template MAPNIK_DECL void warp_image (image_data_gray16&, image_data_gray16 const&, proj_transform const&,
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+
+template MAPNIK_DECL void warp_image (image_data_gray32f&, image_data_gray32f const&, proj_transform const&,
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+
 
 }// namespace mapnik
