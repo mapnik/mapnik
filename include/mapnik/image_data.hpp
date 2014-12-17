@@ -109,7 +109,7 @@ public:
     {}
 
     image_data(image_data<pixel_type> && rhs) noexcept
-    :   width_(std::move(rhs.width_)),
+        : width_(std::move(rhs.width_)),
         height_(std::move(rhs.height_)),
         buffer_(std::move(rhs.buffer_)),
         pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
