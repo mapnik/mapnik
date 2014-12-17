@@ -42,9 +42,9 @@ extern "C"
 
 namespace mapnik { namespace impl {
 
-static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
+static toff_t tiff_seek_proc(thandle_t handle, toff_t off, int whence)
 {
-    std::istream* in = reinterpret_cast<std::istream*>(fd);
+    std::istream* in = reinterpret_cast<std::istream*>(handle);
 
     switch(whence)
     {
@@ -66,9 +66,9 @@ static int tiff_close_proc(thandle_t)
     return 0;
 }
 
-static toff_t tiff_size_proc(thandle_t fd)
+static toff_t tiff_size_proc(thandle_t handle)
 {
-    std::istream* in = reinterpret_cast<std::istream*>(fd);
+    std::istream* in = reinterpret_cast<std::istream*>(handle);
     std::ios::pos_type pos = in->tellg();
     in->seekg(0, std::ios::end);
     std::ios::pos_type len = in->tellg();
@@ -76,9 +76,9 @@ static toff_t tiff_size_proc(thandle_t fd)
     return static_cast<toff_t>(len);
 }
 
-static tsize_t tiff_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
+static tsize_t tiff_read_proc(thandle_t handle, tdata_t buf, tsize_t size)
 {
-    std::istream * in = reinterpret_cast<std::istream*>(fd);
+    std::istream * in = reinterpret_cast<std::istream*>(handle);
     std::streamsize request_size = size;
     if (static_cast<tsize_t>(request_size) != size)
         return static_cast<tsize_t>(-1);
@@ -244,6 +244,7 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
+    stream_.rdbuf()->pubsetbuf(0, 0);
     stream_.seekg(0, std::ios::beg);
     init();
 }
@@ -641,7 +642,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
     TIFF* tif = open(stream_);
     if (tif)
     {
-        std::unique_ptr<uint32[]> buf(new uint32_t[width_*rows_per_strip_]);
+        image_data_rgba8 strip(width_,rows_per_strip_,false);
         int width=image.width();
         int height=image.height();
 
@@ -658,7 +659,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
             ty0 = std::max(y0,y)-y;
             ty1 = std::min(height+y0,y+rows_per_strip_)-y;
 
-            if (!TIFFReadRGBAStrip(tif,y,buf.get()))
+            if (!TIFFReadRGBAStrip(tif,y,strip.getData()))
             {
                 std::clog << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
@@ -669,7 +670,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& ima
             int n1=laststrip ? (ty1-ty0-1):(rows_per_strip_-ty0-1);
             for (int n=n1;n>=n0;--n)
             {
-                image.setRow(row,tx0-x0,tx1-x0,&buf[n*width_+tx0]);
+                image.setRow(row,tx0-x0,tx1-x0,&strip.getData()[n*width_+tx0]);
                 ++row;
             }
         }
