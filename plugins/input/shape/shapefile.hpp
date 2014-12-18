@@ -96,6 +96,11 @@ struct shape_record
         return data;
     }
 
+    size_t position() const
+    {
+        return pos;
+    }
+
     void skip(unsigned n)
     {
         pos += n;
