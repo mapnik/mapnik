@@ -146,14 +146,6 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
     }
 }
 
-namespace detail {
-
-struct point
-{
-    double x;
-    double y;
-};
-
 template <typename T>
 bool is_clockwise(T const& points, int start, int end)
 {
@@ -163,12 +155,10 @@ bool is_clockwise(T const& points, int start, int end)
     {
         auto const& p0 = points[start + i];
         auto const& p1 = points[start + (i + 1) % num_points];
-        area += p0.x * p1.y - p0.y * p1.x;
+        area += std::get<0>(p0) * std::get<1>(p1) - std::get<1>(p0) * std::get<0>(p1);
     }
     return ( area < 0.0) ? true : false;
 }
-
-} // ns detail
 
 void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_container & geom)
 {
@@ -176,13 +166,22 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
     int num_points = record.read_ndr_integer();
     std::vector<int> parts(num_parts);
 
+    using points_cont = std::vector<std::tuple<double,double> >;
+    points_cont points;
+    points.reserve(num_points);
+
     for (int i = 0; i < num_parts; ++i)
     {
         parts[i] = record.read_ndr_integer();
     }
 
-    detail::point const* points = reinterpret_cast<detail::point const*>(record.get_data() + record.position());
-    record.skip(2 * sizeof(double) * num_points);
+    for (int k = 0; k < num_points; ++k)
+    {
+        double x = record.read_double();
+        double y = record.read_double();
+        points.emplace_back(x,y);
+    }
+
     std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
     for (int k = 0; k < num_parts; ++k)
     {
@@ -191,16 +190,20 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
         if (k == num_parts - 1) end = num_points;
         else end = parts[k + 1];
         auto const& pt = points[start];
-        if ( k > 0 && detail::is_clockwise(points, start, end))
+        double x = std::get<0>(pt);
+        double y = std::get<1>(pt);
+        if ( k > 0 && is_clockwise(points, start, end))
         {
             geom.push_back(poly.release());
             poly.reset(new geometry_type(mapnik::geometry_type::types::Polygon));
         }
-        poly->move_to(pt.x, pt.y);
+        poly->move_to(x, y);
         for (int j = start + 1; j < end; ++j)
         {
             auto const& pt = points[j];
-            poly->line_to(pt.x, pt.y);
+            x = std::get<0>(pt);
+            y = std::get<1>(pt);
+            poly->line_to(x, y);
         }
         poly->close_path();
     }
