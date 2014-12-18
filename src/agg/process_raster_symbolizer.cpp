@@ -43,6 +43,8 @@
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 
+#define MAX_SIZE 1024*1024
+
 
 namespace mapnik {
 
@@ -69,7 +71,9 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         int end_y = static_cast<int>(std::floor(ext.maxy()+.5));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
-        if (raster_width > 0 && raster_height > 0)
+        int raster_size = raster_width * raster_height;
+
+        if (raster_width > 0 && raster_height > 0  && raster_size > 0 && raster_size <= MAX_SIZE)
         {
             scaling_method_e scaling_method = sym.get_scaling_method();
             double filter_radius = sym.calculate_filter_factor();
