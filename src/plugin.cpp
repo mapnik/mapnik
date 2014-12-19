@@ -58,7 +58,7 @@ PluginInfo::PluginInfo(std::string const& filename,
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
           if (module_ && module_->dl)
           {
-                name_func* name = reinterpret_cast<name_func*>(dlsym(module_->dl, library_name.c_str()));
+                name_func name = reinterpret_cast<name_func>(dlsym(module_->dl, library_name.c_str()));
                 if (name) name_ = name();
           }
 #else
