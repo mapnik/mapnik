@@ -30,9 +30,11 @@
   #define dlsym GetProcAddress
   #define dlclose FreeLibrary
   #define dlerror GetLastError
+  #define MAPNIK_SUPPORTS_DLOPEN
 #else
   #ifdef MAPNIK_HAS_DLCFN
     #include <dlfcn.h>
+    #define MAPNIK_SUPPORTS_DLOPEN
   #endif
   #define handle void *
 #endif
@@ -77,17 +79,17 @@ PluginInfo::~PluginInfo()
 {
     if (module_)
     {
-#ifdef MAPNIK_HAS_DLCFN
+#ifdef MAPNIK_SUPPORTS_DLOPEN
         if (module_->dl) dlclose(module_->dl),module_->dl=0;
-        delete module_;
 #endif
+        delete module_;
     }
 }
 
 
 void * PluginInfo::get_symbol(std::string const& sym_name) const
 {
-#ifdef MAPNIK_HAS_DLCFN
+#ifdef MAPNIK_SUPPORTS_DLOPEN
     return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
 #else
     return NULL;
@@ -101,7 +103,9 @@ std::string const& PluginInfo::name() const
 
 bool PluginInfo::valid() const
 {
+#ifdef MAPNIK_SUPPORTS_DLOPEN
     if (module_ && module_->dl && !name_.empty()) return true;
+#endif
     return false;
 }
 
