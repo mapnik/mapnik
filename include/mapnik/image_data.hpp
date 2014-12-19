@@ -82,40 +82,66 @@ struct buffer
 
 };
 
+template <std::size_t max_size>
+struct image_dimensions
+{
+    image_dimensions(int width, int height)
+        : width_(width),
+          height_(height)
+    {
+        if (width < 0 || width > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
+        if (height < 0 || height > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
+    }
+
+    image_dimensions(image_dimensions const& other) = default;
+    image_dimensions(image_dimensions && other) = default;
+    image_dimensions& operator= (image_dimensions rhs)
+    {
+        std::swap(width_, rhs.width_);
+        std::swap(height_, rhs.height_);
+        return *this;
+    }
+    std::size_t width() const
+    {
+        return width_;
+    }
+    std::size_t height() const
+    {
+        return height_;
+    }
+    std::size_t width_;
+    std::size_t height_;
+};
 
 }
 
-template <typename T>
+template <typename T, std::size_t max_size = 65535>
 class image_data
 {
 public:
     using pixel_type = T;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 
-    image_data(std::size_t width, std::size_t height, bool initialize = true)
-        : width_(width),
-          height_(height),
-          buffer_(width_ * height_ * pixel_size),
+    image_data(int width, int height, bool initialize = true)
+        : dimensions_(width, height),
+          buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
     {
-        if (pData_ && initialize) std::fill(pData_, pData_ + width_ * height_, 0);
+        if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
 
     image_data(image_data<pixel_type> const& rhs)
-        : width_(rhs.width_),
-          height_(rhs.height_),
+        : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
     {}
 
     image_data(image_data<pixel_type> && rhs) noexcept
-        : width_(std::move(rhs.width_)),
-        height_(std::move(rhs.height_)),
+        : dimensions_(std::move(rhs.dimensions_)),
         buffer_(std::move(rhs.buffer_)),
         pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
     {
-        rhs.width_ = 0;
-        rhs.height_ = 0;
+        rhs.dimensions_ = { 0, 0 };
         rhs.pData_ = nullptr;
     }
 
@@ -127,40 +153,39 @@ public:
 
     void swap(image_data<pixel_type> & rhs)
     {
-        std::swap(width_, rhs.width_);
-        std::swap(height_, rhs.height_);
+        std::swap(dimensions_, rhs.dimensions_);
         std::swap(buffer_, rhs.buffer_);
     }
 
     inline pixel_type& operator() (std::size_t i, std::size_t j)
     {
-        assert(i<width_ && j<height_);
-        return pData_[j * width_ + i];
+        assert(i < dimensions_.width() && j < dimensions_.height());
+        return pData_[j * dimensions_.width() + i];
     }
     inline const pixel_type& operator() (std::size_t i, std::size_t j) const
     {
-        assert(i < width_ && j < height_);
-        return pData_[j * width_ + i];
+        assert(i < dimensions_.width() && j < dimensions_.height());
+        return pData_[j * dimensions_.width() + i];
     }
     inline std::size_t width() const
     {
-        return width_;
+        return dimensions_.width();
     }
     inline std::size_t height() const
     {
-        return height_;
+        return dimensions_.height();
     }
     inline unsigned getSize() const
     {
-        return height_ * width_ * pixel_size;
+        return dimensions_.height() * dimensions_.width() * pixel_size;
     }
     inline unsigned getRowSize() const
     {
-        return width_ * pixel_size;
+        return dimensions_.width() * pixel_size;
     }
     inline void set(pixel_type const& t)
     {
-        std::fill(pData_, pData_ + width_ * height_, t);
+        std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), t);
     }
 
     inline const pixel_type* getData() const
@@ -183,41 +208,41 @@ public:
         return buffer_.data();
     }
 
-    inline const pixel_type* getRow(unsigned row) const
+    inline const pixel_type* getRow(std::size_t row) const
     {
-        return pData_ + row * width_;
+        return pData_ + row * dimensions_.width();
     }
 
-    inline const pixel_type* getRow(unsigned row, std::size_t x0) const
+    inline const pixel_type* getRow(std::size_t row, std::size_t x0) const
     {
-        return pData_ + row * width_ + x0;
+        return pData_ + row * dimensions_.width() + x0;
     }
 
-    inline pixel_type* getRow(unsigned row)
+    inline pixel_type* getRow(std::size_t row)
     {
-        return pData_ + row * width_;
+        return pData_ + row * dimensions_.width();
     }
 
-    inline pixel_type* getRow(unsigned row, std::size_t x0)
+    inline pixel_type* getRow(std::size_t row, std::size_t x0)
     {
-        return pData_ + row * width_ + x0;
+        return pData_ + row * dimensions_.width() + x0;
     }
 
     inline void setRow(std::size_t row, pixel_type const* buf, std::size_t size)
     {
-        assert(row < height_);
-        assert(size <= width_);
-        std::copy(buf, buf + size, pData_ + row * width_);
+        assert(row < dimensions_.height());
+        assert(size <= dimensions_.width());
+        std::copy(buf, buf + size, pData_ + row * dimensions_.width());
     }
     inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
     {
-        assert(row < height_);
-        assert ((x1 - x0) <= width_ );
-        std::copy(buf, buf + (x1 - x0), pData_ + row * width_ + x0);
+        assert(row < dimensions_.height());
+        assert ((x1 - x0) <= dimensions_.width() );
+        std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
     }
+
 private:
-    std::size_t width_;
-    std::size_t height_;
+    detail::image_dimensions<max_size> dimensions_;
     detail::buffer buffer_;
     pixel_type *pData_;
 };
