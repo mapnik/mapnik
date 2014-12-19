@@ -60,25 +60,14 @@ enum scaling_method_e
 MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
 
-template <typename Image>
-MAPNIK_DECL void scale_image_agg(Image & target,
-                      Image const& source,
-                      scaling_method_e scaling_method,
-                      double image_ratio_x,
-                      double image_ratio_y,
-                      double x_off_f,
-                      double y_off_f,
-                      double filter_factor);
-
-extern template MAPNIK_DECL void scale_image_agg<mapnik::image_data_32>(
-                      mapnik::image_data_32 & target,
-                      mapnik::image_data_32 const& source,
-                      scaling_method_e scaling_method,
-                      double image_ratio_x,
-                      double image_ratio_y,
-                      double x_off_f,
-                      double y_off_f,
-                      double filter_radius);
-
+template <typename T>
+MAPNIK_DECL void scale_image_agg(T & target, T const& source,
+                                 scaling_method_e scaling_method,
+                                 double image_ratio_x,
+                                 double image_ratio_y,
+                                 double x_off_f,
+                                 double y_off_f,
+                                 double filter_factor);
 }
+
 #endif // MAPNIK_IMAGE_SCALING_HPP

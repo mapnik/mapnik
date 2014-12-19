@@ -150,6 +150,14 @@ public:
     {
         return height_;
     }
+    inline unsigned getSize() const
+    {
+        return height_ * width_ * pixel_size;
+    }
+    inline unsigned getRowSize() const
+    {
+        return width_ * pixel_size;
+    }
     inline void set(pixel_type const& t)
     {
         std::fill(pData_, pData_ + width_ * height_, t);
@@ -180,9 +188,19 @@ public:
         return pData_ + row * width_;
     }
 
+    inline const pixel_type* getRow(unsigned row, std::size_t x0) const
+    {
+        return pData_ + row * width_ + x0;
+    }
+
     inline pixel_type* getRow(unsigned row)
     {
         return pData_ + row * width_;
+    }
+
+    inline pixel_type* getRow(unsigned row, std::size_t x0)
+    {
+        return pData_ + row * width_ + x0;
     }
 
     inline void setRow(std::size_t row, pixel_type const* buf, std::size_t size)
@@ -204,8 +222,10 @@ private:
     pixel_type *pData_;
 };
 
-using image_data_32 = image_data<std::uint32_t>;
-using image_data_8 = image_data<byte> ;
+using image_data_rgba8 = image_data<std::uint32_t>;
+using image_data_gray8 = image_data<std::uint8_t> ;
+using image_data_gray16 = image_data<std::int16_t>;
+using image_data_gray32f = image_data<float>;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP

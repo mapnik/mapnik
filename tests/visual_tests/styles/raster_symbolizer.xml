@@ -16,8 +16,8 @@
 
   <Style name="ramped">
     <Rule>
-      <RasterSymbolizer>
-        <RasterColorizer default-mode="linear" default-color="#000000">
+      <RasterSymbolizer scaling="near" opacity="1">
+        <RasterColorizer default-mode="linear" default-color="#00000000">
           <stop value="0" color="red"/>
           <stop value="26" color="green"/>
          </RasterColorizer>

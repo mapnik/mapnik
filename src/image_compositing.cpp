@@ -38,7 +38,9 @@
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_pixfmt_gray.h"
 #include "agg_color_rgba.h"
+
 
 namespace mapnik
 {
@@ -120,9 +122,8 @@ For example, if you generate some pattern with AGG (premultiplied) and would lik
 
 */
 
-
-template <typename T1, typename T2>
-void composite(T1 & dst, T2 & src, composite_mode_e mode,
+template <>
+MAPNIK_DECL void composite(image_data_rgba8 & dst, image_data_rgba8 & src, composite_mode_e mode,
                float opacity,
                int dx,
                int dy,
@@ -146,12 +147,23 @@ void composite(T1 & dst, T2 & src, composite_mode_e mode,
     ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
 }
 
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&,
-                                                                     mapnik::image_data_32&,
-                                                                     composite_mode_e,
-                                                                     float,
-                                                                     int,
-                                                                     int,
-                                                                     bool);
+template <>
+MAPNIK_DECL void composite(image_data_gray32f & dst, image_data_gray32f & src, composite_mode_e mode,
+               float opacity,
+               int dx,
+               int dy,
+               bool premultiply_src)
+{
+    using pixfmt_type = agg::pixfmt_gray32;
+    using renderer_type = agg::renderer_base<pixfmt_type>;
+
+    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width());
+    agg::rendering_buffer src_buffer(src.getBytes(),src.width(),src.height(),src.width());
+    pixfmt_type pixf(dst_buffer);
+
+    agg::pixfmt_gray32 pixf_mask(src_buffer);
+    renderer_type ren(pixf);
+    ren.copy_from(pixf_mask,0,dx,dy);;
+}
 
 }

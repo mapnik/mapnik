@@ -41,7 +41,7 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              // NOTE: sizeof(uint8_t) == 1
@@ -50,6 +50,7 @@ public:
              ensure_zero(data,size_);
              free(data);
          }
+         return true;
     }
 };
 
@@ -66,7 +67,7 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              // NOTE: sizeof(uint8_t) == 1
@@ -75,6 +76,7 @@ public:
              ensure_zero(data,size_);
              free(data);
          }
+         return true;
     }
 };
 
@@ -91,7 +93,7 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              uint8_t *data = static_cast<uint8_t *>(::operator new(sizeof(uint8_t) * size_));
@@ -99,6 +101,7 @@ public:
              ensure_zero(data,size_);
              ::operator delete(data);
          }
+         return true;
     }
 };
 
@@ -116,7 +119,7 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              uint8_t * data = static_cast<uint8_t*>(::operator new(sizeof(uint8_t)*size_));
@@ -124,6 +127,7 @@ public:
              ensure_zero(data,size_);
              ::operator delete(data),data=0;
          }
+         return true;
     }
 };
 
@@ -140,12 +144,13 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              std::vector<uint8_t> data(size_);
              ensure_zero(&data[0],data.size());
          }
+         return true;
     }
 };
 
@@ -163,13 +168,14 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              std::vector<uint8_t> data(0);
              data.resize(size_,0);
              ensure_zero(&data[0],data.size());
          }
+         return true;
     }
 };
 
@@ -187,13 +193,41 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              std::vector<uint8_t> data(0);
              data.assign(size_,0);
              ensure_zero(&data[0],data.size());
          }
+         return true;
+    }
+};
+
+class test3d : public benchmark::test_case
+{
+public:
+    uint32_t size_;
+    std::vector<uint8_t> array_;
+    test3d(mapnik::parameters const& params)
+     : test_case(params),
+       size_(*params.get<mapnik::value_integer>("size",256*256)),
+       array_(size_,0) { }
+    bool validate() const
+    {
+        return true;
+    }
+    bool operator()() const
+    {
+         for (std::size_t i=0;i<iterations_;++i) {
+             std::deque<uint8_t> data(size_);
+             for (std::size_t i=0;i<size_;++i) {
+                 if (data[i] != 0) {
+                     throw std::runtime_error("found non zero value");
+                 }
+             }
+         }
+         return true;
     }
 };
 
@@ -237,13 +271,14 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              uint8_t *data = (uint8_t *)calloc(size_,sizeof(uint8_t));
              ensure_zero(data,size_);
              free(data);
          }
+         return true;
     }
 };
 
@@ -260,12 +295,13 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              std::string data(array_.begin(),array_.end());
              ensure_zero((uint8_t *)&data[0],size_);
          }
+         return true;
     }
 };
 
@@ -282,12 +318,13 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              std::string data(&array_[0],array_.size());
              ensure_zero((uint8_t *)&data[0],size_);
          }
+         return true;
     }
 };
 
@@ -309,12 +346,13 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              std::valarray<uint8_t> data(static_cast<uint8_t>(0),static_cast<size_t>(size_));
              ensure_zero(&data[0],size_);
          }
+         return true;
     }
 };
 
@@ -335,12 +373,13 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          for (std::size_t i=0;i<iterations_;++i) {
              boost::container::static_vector<uint8_t,256*256> data(size_,0);
              ensure_zero(&data[0],size_);
          }
+         return true;
     }
 };
 #endif

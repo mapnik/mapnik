@@ -58,11 +58,17 @@ public:
         mapnik::image_32 im(m.width(),m.height());
         mapnik::agg_renderer<mapnik::image_32> ren(m,im,scale_factor_);
         ren.apply();
-        if (!preview_.empty()) mapnik::save_to_file(im,preview_);
+        if (!preview_.empty()) {
+            std::clog << "preview available at " << preview_ << "\n";
+            mapnik::save_to_file(im,preview_);
+        }
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
+        if (!preview_.empty()) {
+            return false;
+        }
         mapnik::Map m(width_,height_);
         mapnik::load_map(m,xml_);
         if (extent_.valid()) {
@@ -76,6 +82,7 @@ public:
             mapnik::agg_renderer<mapnik::image_32> ren(m,im,scale_factor_);
             ren.apply();
         }
+        return true;
     }
 };
 

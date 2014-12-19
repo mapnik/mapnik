@@ -361,11 +361,11 @@ const mz_uint8 PNGWriter::IEND_tpl[] = {
     'I', 'E', 'N', 'D'      // "IEND"
 };
 
-template void PNGWriter::writeIDAT<image_data_8>(image_data_8 const& image);
-template void PNGWriter::writeIDAT<image_view<image_data_8> >(image_view<image_data_8> const& image);
-template void PNGWriter::writeIDAT<image_data_32>(image_data_32 const& image);
-template void PNGWriter::writeIDAT<image_view<image_data_32> >(image_view<image_data_32> const& image);
-template void PNGWriter::writeIDATStripAlpha<image_data_32>(image_data_32 const& image);
-template void PNGWriter::writeIDATStripAlpha<image_view<image_data_32> >(image_view<image_data_32> const& image);
+template void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
+template void PNGWriter::writeIDAT<image_view<image_data_gray8> >(image_view<image_data_gray8> const& image);
+template void PNGWriter::writeIDAT<image_data_rgba8>(image_data_rgba8 const& image);
+template void PNGWriter::writeIDAT<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
+template void PNGWriter::writeIDATStripAlpha<image_data_rgba8>(image_data_rgba8 const& image);
+template void PNGWriter::writeIDATStripAlpha<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
 
 }}

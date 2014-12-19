@@ -19,11 +19,12 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         actual = '/tmp/mapnik-marker-ellipse-render1.png'
         expected = 'images/support/mapnik-marker-ellipse-render1.png'
         im.save(actual,'png32')
+        if os.environ.get('UPDATE'):
+            im.save(expected,'png32')
         expected_im = mapnik.Image.open(expected)
         eq_(im.tostring('png32'),expected_im.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
 
     def test_marker_ellipse_render2():
-        # currently crashes https://github.com/mapnik/mapnik/issues/1365
         m = mapnik.Map(256,256)
         mapnik.load_map(m,'../data/good_maps/marker_ellipse_transform2.xml')
         m.zoom_all()
@@ -32,6 +33,8 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         actual = '/tmp/mapnik-marker-ellipse-render2.png'
         expected = 'images/support/mapnik-marker-ellipse-render2.png'
         im.save(actual,'png32')
+        if os.environ.get('UPDATE'):
+            im.save(expected,'png32')
         expected_im = mapnik.Image.open(expected)
         eq_(im.tostring('png32'),expected_im.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
 

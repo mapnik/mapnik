@@ -1,4 +1,5 @@
-<Map background-color="white" srs="+init=epsg:32630" minimum-version="0.7.2">
+<Map background-color="white" srs="+init=epsg:32630">
+
   <Parameters>
     <Parameter name="sizes">512,512</Parameter>
   </Parameters>

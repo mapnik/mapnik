@@ -14,7 +14,7 @@ public:
         s << value_;
         return (s.str() == "-0.1234");
     }
-    void operator()() const
+    bool operator()() const
     {
         std::string out;
         for (std::size_t i=0;i<iterations_;++i) {
@@ -22,6 +22,7 @@ public:
             s << value_;
             out = s.str();
         }
+        return true;
     }
 };
 

@@ -18,13 +18,14 @@ public:
         if (result != 1.23456789) return false;
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
         for (std::size_t i=0;i<iterations_;++i) {
             double result = 0;
             mapnik::util::string2double(value_,result);
             mapnik::util::string2double(value_.data(),value_.data()+value_.size(),result);
         }
+        return true;
     }
 };
 

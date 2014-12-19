@@ -52,7 +52,7 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
 {
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](image_data_32 & target, composite_mode_e comp_op, double opacity,
+        [&](image_data_rgba8 & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
             composite(current_buffer_->data(), target,
                       comp_op, opacity, start_x, start_y, false);

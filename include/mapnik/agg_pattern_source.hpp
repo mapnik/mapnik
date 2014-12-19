@@ -36,7 +36,7 @@ namespace mapnik
 class pattern_source : private mapnik::noncopyable
 {
 public:
-    pattern_source(image_data_32 const& pattern, double opacity = 1.0)
+    pattern_source(image_data_rgba8 const& pattern, double opacity = 1.0)
         : pattern_(pattern),
           opacity_(opacity) {}
 
@@ -57,7 +57,7 @@ public:
                           static_cast<unsigned>(((c >> 24) & 0xff) * opacity_));
     }
 private:
-    image_data_32 const& pattern_;
+    image_data_rgba8 const& pattern_;
     double opacity_;
 };
 }

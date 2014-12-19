@@ -30,7 +30,8 @@ class image_view
 {
 public:
     using pixel_type = typename T::pixel_type;
-
+    static constexpr std::size_t pixel_size = sizeof(pixel_type);
+    
     image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data)
         : x_(x),
           y_(y),
@@ -84,9 +85,24 @@ public:
         return height_;
     }
 
+    inline unsigned getSize() const
+    {
+        return height_ * width_ * pixel_size;
+    }
+
+    inline unsigned getRowSize() const
+    {
+        return width_ * pixel_size;
+    }
+
     inline const pixel_type* getRow(unsigned row) const
     {
         return data_.getRow(row + y_) + x_;
+    }
+    
+    inline const pixel_type* getRow(unsigned row, std::size_t x0) const
+    {
+        return data_.getRow(row + y_, x0) + x_;
     }
 
     inline const unsigned char* getBytes() const
@@ -101,6 +117,15 @@ public:
     {
         return data_;
     }
+    inline pixel_type* getData()
+    {
+        return data_.getData();
+    }
+    inline const pixel_type* getData() const
+    {
+        return data_.getData();
+    }
+    
 
 private:
     unsigned x_;

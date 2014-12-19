@@ -42,18 +42,18 @@
 #include <mapnik/image_view.hpp>
 #include <sstream>
 
-using mapnik::image_data_32;
+using mapnik::image_data_rgba8;
 using mapnik::image_view;
 using mapnik::save_to_file;
 
 // output 'raw' pixels
-PyObject* view_tostring1(image_view<image_data_32> const& view)
+PyObject* view_tostring1(image_view<image_data_rgba8> const& view)
 {
     std::ostringstream ss(std::ios::out|std::ios::binary);
     for (unsigned i=0;i<view.height();i++)
     {
         ss.write(reinterpret_cast<const char*>(view.getRow(i)),
-                 view.width() * sizeof(image_view<image_data_32>::pixel_type));
+                 view.width() * sizeof(image_view<image_data_rgba8>::pixel_type));
     }
     return
 #if PY_VERSION_HEX >= 0x03000000
@@ -65,7 +65,7 @@ PyObject* view_tostring1(image_view<image_data_32> const& view)
 }
 
 // encode (png,jpeg)
-PyObject* view_tostring2(image_view<image_data_32> const & view, std::string const& format)
+PyObject* view_tostring2(image_view<image_data_rgba8> const & view, std::string const& format)
 {
     std::string s = save_to_string(view, format);
     return
@@ -77,7 +77,7 @@ PyObject* view_tostring2(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
-PyObject* view_tostring3(image_view<image_data_32> const & view, std::string const& format, mapnik::rgba_palette const& pal)
+PyObject* view_tostring3(image_view<image_data_rgba8> const & view, std::string const& format, mapnik::rgba_palette const& pal)
 {
     std::string s = save_to_string(view, format, pal);
     return
@@ -89,15 +89,15 @@ PyObject* view_tostring3(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
-bool is_solid(image_view<image_data_32> const& view)
+bool is_solid(image_view<image_data_rgba8> const& view)
 {
     if (view.width() > 0 && view.height() > 0)
     {
-        mapnik::image_view<image_data_32>::pixel_type const* first_row = view.getRow(0);
-        mapnik::image_view<image_data_32>::pixel_type const first_pixel = first_row[0];
+        mapnik::image_view<image_data_rgba8>::pixel_type const* first_row = view.getRow(0);
+        mapnik::image_view<image_data_rgba8>::pixel_type const first_pixel = first_row[0];
         for (unsigned y = 0; y < view.height(); ++y)
         {
-            mapnik::image_view<image_data_32>::pixel_type const * row = view.getRow(y);
+            mapnik::image_view<image_data_rgba8>::pixel_type const * row = view.getRow(y);
             for (unsigned x = 0; x < view.width(); ++x)
             {
                 if (first_pixel != row[x])
@@ -110,20 +110,20 @@ bool is_solid(image_view<image_data_32> const& view)
     return true;
 }
 
-void save_view1(image_view<image_data_32> const& view,
+void save_view1(image_view<image_data_rgba8> const& view,
                 std::string const& filename)
 {
     save_to_file(view,filename);
 }
 
-void save_view2(image_view<image_data_32> const& view,
+void save_view2(image_view<image_data_rgba8> const& view,
                 std::string const& filename,
                 std::string const& type)
 {
     save_to_file(view,filename,type);
 }
 
-void save_view3(image_view<image_data_32> const& view,
+void save_view3(image_view<image_data_rgba8> const& view,
                 std::string const& filename,
                 std::string const& type,
                 mapnik::rgba_palette const& pal)
@@ -135,9 +135,9 @@ void save_view3(image_view<image_data_32> const& view,
 void export_image_view()
 {
     using namespace boost::python;
-    class_<image_view<image_data_32> >("ImageView","A view into an image.",no_init)
-        .def("width",&image_view<image_data_32>::width)
-        .def("height",&image_view<image_data_32>::height)
+    class_<image_view<image_data_rgba8> >("ImageView","A view into an image.",no_init)
+        .def("width",&image_view<image_data_rgba8>::width)
+        .def("height",&image_view<image_data_rgba8>::height)
         .def("is_solid",&is_solid)
         .def("tostring",&view_tostring1)
         .def("tostring",&view_tostring2)

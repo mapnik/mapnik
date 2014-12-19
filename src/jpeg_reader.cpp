@@ -81,11 +81,13 @@ public:
     explicit jpeg_reader(std::string const& file_name);
     explicit jpeg_reader(char const* data, size_t size);
     ~jpeg_reader();
-    unsigned width() const;
-    unsigned height() const;
-    inline bool has_alpha() const { return false; }
-    inline bool premultiplied_alpha() const { return true; }
-    void read(unsigned x,unsigned y,image_data_32& image);
+    unsigned width() const final;
+    unsigned height() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
+    inline bool has_alpha() const final { return false; }
+    inline bool premultiplied_alpha() const final { return true; }
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
     static void on_error(j_common_ptr cinfo);
@@ -258,7 +260,13 @@ unsigned jpeg_reader<T>::height() const
 }
 
 template <typename T>
-void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_data_32& image)
+boost::optional<box2d<double> > jpeg_reader<T>::bounding_box() const
+{
+    return boost::optional<box2d<double> >();
+}
+
+template <typename T>
+void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_data_rgba8& image)
 {
     stream_.clear();
     stream_.seekg(0, std::ios_base::beg);
@@ -310,6 +318,14 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_data_32& image)
         ++row;
     }
     jpeg_finish_decompress(&cinfo);
+}
+
+template <typename T>
+image_data_any jpeg_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+{
+    image_data_rgba8 data(width,height);
+    read(x, y, data);
+    return image_data_any(std::move(data));
 }
 
 }

@@ -120,11 +120,13 @@ public:
     explicit webp_reader(char const* data, std::size_t size);
     explicit webp_reader(std::string const& filename);
     ~webp_reader();
-    unsigned width() const;
-    unsigned height() const;
-    inline bool has_alpha() const { return has_alpha_; }
-    bool premultiplied_alpha() const { return false; }
-    void read(unsigned x,unsigned y,image_data_32& image);
+    unsigned width() const final;
+    unsigned height() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
+    inline bool has_alpha() const final { return has_alpha_; }
+    bool premultiplied_alpha() const final { return false; }
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
 };
@@ -229,7 +231,13 @@ unsigned webp_reader<T>::height() const
 }
 
 template <typename T>
-void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
+boost::optional<box2d<double> > webp_reader<T>::bounding_box() const
+{
+    return boost::optional<box2d<double> >();
+}
+
+template <typename T>
+void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_rgba8& image)
 {
     WebPDecoderConfig config;
     config_guard guard(config);
@@ -258,6 +266,14 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
     {
         throw image_reader_exception("WEBP reader: WebPDecode failed");
     }
+}
+
+template <typename T>
+image_data_any webp_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+{
+    image_data_rgba8 data(width,height);
+    read(x, y, data);
+    return image_data_any(std::move(data));
 }
 
 }
