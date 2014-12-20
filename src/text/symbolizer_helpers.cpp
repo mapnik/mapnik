@@ -58,7 +58,7 @@ base_symbolizer_helper::base_symbolizer_helper(
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       scale_factor_(scale_factor),
-      info_ptr_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor)),
+      info_ptr_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)->get_placement_info(scale_factor,feature_,vars_)),
       text_props_(evaluate_text_properties(info_ptr_->properties,feature_,vars_))
 {
     initialize_geometries();

@@ -17,7 +17,7 @@
     <Style name="My Style">
     <Rule>
       <PointSymbolizer clip="false" />
-      <TextSymbolizer clip="false" face-name="DejaVu Sans Book" size="16" placement="point" dx="5" dy="16" placement-type="simple" placements="N,S,E,W,SW,10,5">[name]</TextSymbolizer>
+      <TextSymbolizer clip="false" face-name="DejaVu Sans Book" size="16" placement="point" dx="5" dy="16" placement-type="simple" placements="[placements]">[name]</TextSymbolizer>
     </Rule>
   </Style>
 
