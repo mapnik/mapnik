@@ -82,9 +82,7 @@ namespace karma = boost::spirit::karma;
 
 struct get_id
 {
-    template <typename T>
-    struct result { using type =  int; };
-
+    using result_type = int;
     int operator() (mapnik::feature_impl const& f) const
     {
         return f.id();
