@@ -89,14 +89,15 @@ struct get_id
     }
 };
 
-template <typename OutputIterator>
+
+template <typename OutputIterator, typename FeatureType>
 struct feature_generator_grammar :
-        karma::grammar<OutputIterator, mapnik::feature_impl const&()>
+        karma::grammar<OutputIterator, FeatureType const&()>
 {
     feature_generator_grammar();
-    karma::rule<OutputIterator, mapnik::feature_impl const&()> feature;
+    karma::rule<OutputIterator, FeatureType const&()> feature;
     multi_geometry_generator_grammar<OutputIterator, mapnik::geometry_container> geometry;
-    properties_generator_grammar<OutputIterator, mapnik::feature_impl> properties;
+    properties_generator_grammar<OutputIterator, FeatureType> properties;
     boost::phoenix::function<get_id> id_;
 };
 

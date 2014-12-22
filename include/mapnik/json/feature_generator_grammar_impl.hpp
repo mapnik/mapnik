@@ -29,8 +29,8 @@
 
 namespace mapnik { namespace json {
 
-template <typename OutputIterator>
-feature_generator_grammar<OutputIterator>::feature_generator_grammar()
+template <typename OutputIterator, typename FeatureType>
+feature_generator_grammar<OutputIterator, FeatureType>::feature_generator_grammar()
   : feature_generator_grammar::base_type(feature)
 {
     boost::spirit::karma::lit_type lit;
