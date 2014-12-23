@@ -80,10 +80,12 @@ namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
 
+template <typename T>
 struct get_id
 {
+    using feature_type = T;
     using result_type = int;
-    int operator() (mapnik::feature_impl const& f) const
+    int operator() (feature_type const& f) const
     {
         return f.id();
     }
@@ -98,7 +100,7 @@ struct feature_generator_grammar :
     karma::rule<OutputIterator, FeatureType const&()> feature;
     multi_geometry_generator_grammar<OutputIterator, mapnik::geometry_container> geometry;
     properties_generator_grammar<OutputIterator, FeatureType> properties;
-    boost::phoenix::function<get_id> id_;
+    boost::phoenix::function<get_id<FeatureType> > id_;
 };
 
 }}
