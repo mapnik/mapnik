@@ -60,17 +60,6 @@ struct extract_string
     }
 };
 
-struct utf8
-{
-    using result_type = std::string;
-    std::string operator() (mapnik::value_unicode_string const& ustr) const
-    {
-        std::string result;
-        to_utf8(ustr,result);
-        return result;
-    }
-};
-
 template <typename OutputIterator, typename KeyValueStore>
 struct properties_generator_grammar : karma::grammar<OutputIterator, KeyValueStore const&()>
 
@@ -86,7 +75,6 @@ struct properties_generator_grammar : karma::grammar<OutputIterator, KeyValueSto
     escaped_string<OutputIterator> escaped_string_;
     typename karma::int_generator<mapnik::value_integer,10, false> int__;
     boost::phoenix::function<extract_string> extract_string_;
-    boost::phoenix::function<utf8> utf8_;
     std::string quote_;
 };
 
