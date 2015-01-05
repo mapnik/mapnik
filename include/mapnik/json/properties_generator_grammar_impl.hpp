@@ -33,24 +33,19 @@ escaped_string<OutputIterator>::escaped_string()
 {
     karma::lit_type lit;
     karma::_r1_type _r1;
-    karma::hex_type hex;
-    karma::right_align_type right_align;
-    karma::print_type kprint;
-
+    karma::char_type char_;
     esc_char.add
-        ('"', "\\\"")
-        ('\\', "\\\\")
+        ('\a', "\\a")
         ('\b', "\\b")
         ('\f', "\\f")
         ('\n', "\\n")
         ('\r', "\\r")
         ('\t', "\\t")
+        ('\v', "\\v")
+        ('"', "\\\"")
         ;
-
-    esc_str =   lit(_r1)
-        << *(esc_char
-             | kprint
-             | "\\u" << right_align(4,lit('0'))[hex])
+    esc_str = lit(_r1)
+        << *(esc_char | char_)
         <<  lit(_r1)
         ;
 }
