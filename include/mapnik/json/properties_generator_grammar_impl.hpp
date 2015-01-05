@@ -35,14 +35,15 @@ escaped_string<OutputIterator>::escaped_string()
     karma::_r1_type _r1;
     karma::char_type char_;
     esc_char.add
-        ('\a', "\\a")
+        ('\a', "\\u0007")
         ('\b', "\\b")
         ('\f', "\\f")
         ('\n', "\\n")
         ('\r', "\\r")
         ('\t', "\\t")
-        ('\v', "\\v")
+        ('\v', "\\u000b")
         ('"', "\\\"")
+        ('\\', "\\\\")
         ;
     esc_str = lit(_r1)
         << *(esc_char | char_)
