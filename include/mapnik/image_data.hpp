@@ -89,8 +89,8 @@ struct image_dimensions
         : width_(width),
           height_(height)
     {
-        if (width < 0 || width > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
-        if (height < 0 || height > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
+        if (width < 0 || static_cast<std::size_t>(width) > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
+        if (height < 0 || static_cast<std::size_t>(height) > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
     }
 
     image_dimensions(image_dimensions const& other) = default;
