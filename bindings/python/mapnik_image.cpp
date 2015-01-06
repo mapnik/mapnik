@@ -37,6 +37,7 @@
 // mapnik
 #include <mapnik/graphics.hpp>
 #include <mapnik/palette.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -48,6 +49,8 @@
 #include <cairo.h>
 #endif
 
+using mapnik::image;
+using mapnik::image_data_any;
 using mapnik::image_32;
 using mapnik::image_reader;
 using mapnik::get_image_reader;
@@ -222,6 +225,21 @@ std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 }
 #endif
 
+// ============ image any
+std::shared_ptr<image> read_from_file_impl(std::string const& filename)
+{
+    std::shared_ptr<image> img(new image);
+    std::unique_ptr<image_reader> reader(get_image_reader(filename));
+    if (reader)
+    {
+        unsigned w = reader->width();
+        unsigned h = reader->height();
+        img->set_data(reader->read(0, 0, w, h));
+    }
+    return img;
+}
+// =========================
+
 void export_image()
 {
     using namespace boost::python;
@@ -265,7 +283,15 @@ void export_image()
         .value("divide", mapnik::divide)
         ;
 
-    class_<image_32,std::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
+    class_<image, std::shared_ptr<image>, boost::noncopyable > ("ImageAny", "This class represents an any Image object", no_init)
+        .def("width",&image::width)
+        .def("height",&image::height)
+        .def("open", &read_from_file_impl)
+        .staticmethod("open")
+        .def("save",&image::save_to_file)
+        ;
+
+    class_<image_32,std::shared_ptr<image_32>, boost::noncopyable >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
         .def("width",&image_32::width)
         .def("height",&image_32::height)
         .def("view",&image_32::get_view)
