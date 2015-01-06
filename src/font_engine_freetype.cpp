@@ -35,7 +35,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 #pragma GCC diagnostic pop
 
@@ -189,18 +188,9 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
     bool success = false;
     try
     {
-        boost::filesystem::directory_iterator end_itr;
-#ifdef _WINDOWS
-        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
-        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        for (std::string const& file_name : mapnik::util::list_directory(dir))
         {
-            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
-#else
-        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
-        {
-            std::string file_name = itr->path().string();
-#endif
-            if (boost::filesystem::is_directory(*itr) && recurse)
+            if (mapnik::util::is_directory(file_name) && recurse)
             {
                 if (register_fonts_impl(file_name, library, font_file_mapping, true))
                 {
@@ -209,7 +199,7 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
             }
             else
             {
-                std::string base_name = itr->path().filename().string();
+                std::string base_name = mapnik::util::basename(file_name);
                 if (!boost::algorithm::starts_with(base_name,".") &&
                     mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))

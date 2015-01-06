@@ -28,6 +28,7 @@
 
 // stl
 #include <string>
+#include <vector>
 
 namespace mapnik { namespace util {
 
@@ -39,6 +40,8 @@ MAPNIK_DECL bool is_relative(std::string const& value);
 MAPNIK_DECL std::string make_relative(std::string const& filepath, std::string const& base);
 MAPNIK_DECL std::string make_absolute(std::string const& filepath, std::string const& base);
 MAPNIK_DECL std::string dirname(std::string const& value);
+MAPNIK_DECL std::string basename(std::string const& value);
+MAPNIK_DECL std::vector<std::string> list_directory(std::string const& value);
 
 }}
 
