@@ -109,7 +109,7 @@ public:
     {
         return data_.getBytes();
     }
-
+    
     inline T const& data() const
     {
         return data_;

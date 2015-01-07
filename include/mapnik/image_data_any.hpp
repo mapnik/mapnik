@@ -24,6 +24,8 @@
 #define MAPNIK_IMAGE_DATA_ANY_HPP
 
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_view.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/util/variant.hpp>
 
 namespace mapnik {
@@ -36,7 +38,16 @@ struct image_data_null
     std::size_t height() const { return 0; }
 };
 
-using image_data_base = util::variant<image_data_null, image_data_rgba8, image_data_gray8, image_data_gray16, image_data_gray32f>;
+using image_data_base = util::variant<image_data_null, 
+                                      image_data_rgba8, 
+                                      image_data_gray8, 
+                                      image_data_gray16, 
+                                      image_data_gray32f,
+                                      image_32,
+                                      image_view<image_data_rgba8>,
+                                      image_view<image_data_gray8>,
+                                      image_view<image_data_gray16>,
+                                      image_view<image_data_gray32f>>;
 
 namespace detail {
 
