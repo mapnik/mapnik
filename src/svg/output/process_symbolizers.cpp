@@ -37,7 +37,7 @@
 
 namespace mapnik {
 
-struct symbol_type_dispatch : public util::static_visitor<bool>
+struct symbol_type_dispatch
 {
     template <typename Symbolizer>
     bool operator()(Symbolizer const&) const

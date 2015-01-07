@@ -51,7 +51,7 @@ BOOST_GEOMETRY_REGISTER_LINESTRING(std::vector<mapnik::topojson::coordinate>)
 namespace mapnik { namespace topojson {
 
 struct attribute_value_visitor
-    :  mapnik::util::static_visitor<mapnik::value>
+
 {
 public:
     attribute_value_visitor(mapnik::transcoder const& tr)
@@ -84,7 +84,7 @@ void assign_properties(mapnik::feature_impl & feature, T const& geom, mapnik::tr
 }
 
 template <typename Context>
-struct feature_generator : public mapnik::util::static_visitor<mapnik::feature_ptr>
+struct feature_generator
 {
     feature_generator(Context & ctx,  mapnik::transcoder const& tr, topology const& topo, std::size_t feature_id)
         : ctx_(ctx),

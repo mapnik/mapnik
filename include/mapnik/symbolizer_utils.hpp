@@ -129,7 +129,7 @@ struct symbolizer_traits<dot_symbolizer>
 // symbolizer name impl
 namespace detail {
 
-struct symbolizer_name_impl : public util::static_visitor<std::string>
+struct symbolizer_name_impl
 {
 public:
     template <typename Symbolizer>
@@ -150,7 +150,7 @@ inline std::string symbolizer_name(symbolizer const& sym)
 /*
 
 template <typename Meta>
-class symbolizer_property_value_string : public util::static_visitor<std::string>
+class symbolizer_property_value_string
 {
 public:
     symbolizer_property_value_string (Meta const& meta)
@@ -237,7 +237,7 @@ private:
     Meta const& meta_;
 };
 
-struct symbolizer_to_json : public util::static_visitor<std::string>
+struct symbolizer_to_json
 {
     using result_type = std::string;
 

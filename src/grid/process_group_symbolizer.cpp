@@ -53,7 +53,7 @@ namespace mapnik {
  * in the detector from the placement_finder.
  */
 template <typename T0>
-struct thunk_renderer : public util::static_visitor<>
+struct thunk_renderer
 {
     using renderer_type = grid_renderer<T0>;
     using buffer_type = typename renderer_type::buffer_type;

@@ -46,7 +46,7 @@ namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
 class attribute_value_visitor
-    : public mapnik::util::static_visitor<mapnik::value>
+
 {
 public:
     attribute_value_visitor(mapnik::transcoder const& tr)

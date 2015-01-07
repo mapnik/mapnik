@@ -44,7 +44,7 @@ public:
                                             markers_vertex_first_placement<Locator, Detector>,
                                             markers_vertex_last_placement<Locator, Detector>>;
 
-    class get_point_visitor : public util::static_visitor<bool>
+    class get_point_visitor
     {
     public:
         get_point_visitor(double &x, double &y, double &angle, bool ignore_placement)

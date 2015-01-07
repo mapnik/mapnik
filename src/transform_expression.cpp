@@ -30,7 +30,7 @@
 namespace mapnik {
 
 struct transform_node_to_expression_string
-    : public util::static_visitor<void>
+
 {
     std::ostringstream& os_;
 

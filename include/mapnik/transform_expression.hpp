@@ -192,7 +192,7 @@ inline void clear(transform_node& val)
 
 namespace  {
 
-struct is_null_transform_node : public mapnik::util::static_visitor<bool>
+struct is_null_transform_node
 {
     bool operator() (value const& val) const
     {

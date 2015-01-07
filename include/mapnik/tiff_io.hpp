@@ -179,7 +179,7 @@ struct tiff_config
 
 };
 
-struct tag_setter : public mapnik::util::static_visitor<>
+struct tag_setter
 {
     tag_setter(TIFF * output, tiff_config & config)
         : output_(output),
@@ -270,7 +270,7 @@ void set_tiff_config(TIFF* output, tiff_config & config)
     // Set the compression for the TIFF
     TIFFSetField(output, TIFFTAG_COMPRESSION, config.compression);
 
-    if (COMPRESSION_ADOBE_DEFLATE == config.compression 
+    if (COMPRESSION_ADOBE_DEFLATE == config.compression
         || COMPRESSION_DEFLATE == config.compression
         || COMPRESSION_LZW == config.compression)
     {
@@ -332,7 +332,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     else if (TIFF_WRITE_STRIPPED == config.method)
     {
         std::size_t rows_per_strip = config.rows_per_strip;
-        if (0 == rows_per_strip) 
+        if (0 == rows_per_strip)
         {
             rows_per_strip = height;
         }
@@ -359,8 +359,8 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     {
         int tile_width = config.tile_width;
         int tile_height = config.tile_height;
-        
-        if (0 == tile_height) 
+
+        if (0 == tile_height)
         {
             tile_height = height;
             if (height % 16 > 0)
@@ -385,7 +385,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         int end_x = (width / tile_width + 1) * tile_width;
         end_y = std::min(end_y, height);
         end_x = std::min(end_x, width);
-        
+
         for (int y = 0; y < end_y; y += tile_height)
         {
             int ty1 = std::min(height, y + tile_height) - y;

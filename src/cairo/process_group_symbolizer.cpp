@@ -43,7 +43,7 @@ namespace {
 // to render it, and the boxes themselves should already be
 // in the detector from the placement_finder.
 template <typename T>
-struct thunk_renderer : public util::static_visitor<>
+struct thunk_renderer
 {
     using renderer_type = cairo_renderer<T>;
 

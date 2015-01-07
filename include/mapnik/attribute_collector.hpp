@@ -52,7 +52,7 @@
 namespace mapnik {
 
 template <typename Container>
-struct expression_attributes : util::static_visitor<void>
+struct expression_attributes
 {
     explicit expression_attributes(Container& names)
         : names_(names) {}
@@ -107,7 +107,7 @@ public:
 };
 
 template <typename Container>
-struct extract_attribute_names : util::static_visitor<void>
+struct extract_attribute_names
 {
     explicit extract_attribute_names(Container& names)
         : names_(names),
@@ -159,7 +159,7 @@ private:
     expression_attributes<std::set<std::string> > f_attr_;
 };
 
-struct symbolizer_attributes : public util::static_visitor<>
+struct symbolizer_attributes
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)

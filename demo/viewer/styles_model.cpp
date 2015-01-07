@@ -122,7 +122,7 @@ private:
 };
 
 
-struct symbolizer_info : public mapnik::util::static_visitor<QString>
+struct symbolizer_info
 {
     QString operator() (mapnik::point_symbolizer const& sym) const
     {
@@ -185,7 +185,7 @@ struct symbolizer_info : public mapnik::util::static_visitor<QString>
     }
 };
 
-struct symbolizer_icon : public mapnik::util::static_visitor<QIcon>
+struct symbolizer_icon
 {
     QIcon operator() (mapnik::polygon_symbolizer const& sym) const
     {

@@ -31,7 +31,7 @@
 
 namespace boost { namespace python {
 
-    struct value_converter : public mapnik::util::static_visitor<PyObject*>
+    struct value_converter
     {
         PyObject * operator() (mapnik::value_integer val) const
         {
