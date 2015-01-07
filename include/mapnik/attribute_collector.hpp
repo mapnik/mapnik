@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/transform_processor.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
@@ -92,7 +92,7 @@ private:
     Container& names_;
 };
 
-class group_attribute_collector : public mapnik::noncopyable
+class group_attribute_collector : public util::noncopyable
 {
 private:
     std::set<std::string>& names_;
@@ -209,7 +209,7 @@ private:
 };
 
 
-class attribute_collector : public mapnik::noncopyable
+class attribute_collector : public util::noncopyable
 {
 private:
     std::set<std::string> & names_;

@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_container.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
 {
@@ -49,7 +49,7 @@ enum wkbFormat : std::uint8_t
     wkbSpatiaLite=3
 };
 
-class MAPNIK_DECL geometry_utils : private mapnik::noncopyable
+class MAPNIK_DECL geometry_utils : private util::noncopyable
 {
 public:
 

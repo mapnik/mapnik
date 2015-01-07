@@ -25,14 +25,14 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik {
 
 class projection;
 template <typename T> class box2d;
 
-class MAPNIK_DECL proj_transform : private mapnik::noncopyable
+class MAPNIK_DECL proj_transform : private util::noncopyable
 {
 public:
     proj_transform(projection const& source,

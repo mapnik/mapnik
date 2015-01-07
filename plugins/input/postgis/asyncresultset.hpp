@@ -34,7 +34,7 @@
 class postgis_processor_context;
 using postgis_processor_context_ptr = std::shared_ptr<postgis_processor_context>;
 
-class AsyncResultSet : public IResultSet, private mapnik::noncopyable
+class AsyncResultSet : public IResultSet, private mapnik::util::noncopyable
 {
 public:
     AsyncResultSet(postgis_processor_context_ptr const& ctx,

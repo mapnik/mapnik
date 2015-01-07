@@ -26,7 +26,7 @@
 //mapnik
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/value_types.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -41,7 +41,7 @@
 namespace mapnik
 {
 
-struct text_item : noncopyable
+struct text_item : util::noncopyable
 {
     text_item(unsigned s,
               unsigned e,
@@ -84,7 +84,7 @@ public:
     std::pair<unsigned, unsigned> line(unsigned i) const;
     unsigned num_lines() const;
 private:
-    template<typename T> struct run : noncopyable
+    template<typename T> struct run : util::noncopyable
     {
         run(T const& data, unsigned start, unsigned end)
             :  start(start), end(end), data(data) {}

@@ -42,7 +42,7 @@
 namespace mapnik {
 
 template <typename RendererBase, typename RendererType, typename Detector, typename RendererContext>
-struct raster_markers_rasterizer_dispatch_grid : mapnik::noncopyable
+struct raster_markers_rasterizer_dispatch_grid : util::noncopyable
 {
     using pixfmt_type = typename RendererBase::pixfmt_type;
     using color_type = typename RendererBase::pixfmt_type::color_type;
@@ -143,7 +143,7 @@ private:
 
 
 template <typename SvgRenderer, typename Detector, typename RendererContext>
-struct vector_markers_rasterizer_dispatch_grid : mapnik::noncopyable
+struct vector_markers_rasterizer_dispatch_grid : util::noncopyable
 {
     using renderer_base = typename SvgRenderer::renderer_base        ;
     using vertex_source_type = typename SvgRenderer::vertex_source_type   ;

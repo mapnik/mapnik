@@ -20,10 +20,10 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_NONCOPYABLE_HPP
-#define MAPNIK_NONCOPYABLE_HPP
+#ifndef MAPNIK_UTIL_NONCOPYABLE_HPP
+#define MAPNIK_UTIL_NONCOPYABLE_HPP
 
-namespace mapnik {
+namespace mapnik { namespace util {
 
 namespace non_copyable_
 {
@@ -40,6 +40,6 @@ protected:
 
 using noncopyable = non_copyable_::noncopyable;
 
-} // namespace mapnik
+}}
 
-#endif  // MAPNIK_NONCOPYABLE_HPP
+#endif  // MAPNIK_UTIL_NONCOPYABLE_HPP

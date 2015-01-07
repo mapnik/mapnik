@@ -35,7 +35,7 @@ namespace mapnik
 {
 
 template <typename Locator, typename Detector>
-class markers_placement_finder : mapnik::noncopyable
+class markers_placement_finder : util::noncopyable
 {
 public:
     using markers_placement = util::variant<markers_point_placement<Locator, Detector>,

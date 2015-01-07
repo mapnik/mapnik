@@ -26,14 +26,14 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/image_data_any.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
  // boost
 #include <boost/optional.hpp>
 
 namespace mapnik {
 
-class raster : private mapnik::noncopyable
+class raster : private util::noncopyable
 {
 public:
     box2d<double> ext_;

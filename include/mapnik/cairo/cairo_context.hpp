@@ -33,7 +33,7 @@
 #include <mapnik/gradient.hpp>
 #include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 
@@ -75,7 +75,7 @@ void check_object_status_and_throw_exception(T const& object)
     check_status_and_throw_exception(object.get_status());
 }
 
-class cairo_face : private mapnik::noncopyable
+class cairo_face : private util::noncopyable
 {
 public:
     cairo_face(std::shared_ptr<font_library> const& library, face_ptr const& face);
@@ -106,7 +106,7 @@ private:
 
 using cairo_face_ptr = std::shared_ptr<cairo_face>;
 
-class cairo_face_manager : private mapnik::noncopyable
+class cairo_face_manager : private util::noncopyable
 {
 public:
     cairo_face_manager(std::shared_ptr<font_library> library);
@@ -118,7 +118,7 @@ private:
     cairo_face_cache cache_;
 };
 
-class cairo_pattern : private mapnik::noncopyable
+class cairo_pattern : private util::noncopyable
 {
 public:
     explicit cairo_pattern(image_data_rgba8 const& data, double opacity = 1.0)
@@ -192,7 +192,7 @@ private:
 };
 
 
-class cairo_gradient : private mapnik::noncopyable
+class cairo_gradient : private util::noncopyable
 {
 public:
     cairo_gradient(mapnik::gradient const& grad, double opacity=1.0)
@@ -276,7 +276,7 @@ inline cairo_ptr create_context(cairo_surface_ptr const& surface)
     return cairo_ptr(cairo_create(&*surface),cairo_closer());
 }
 
-class cairo_context : private mapnik::noncopyable
+class cairo_context : private util::noncopyable
 {
 public:
 

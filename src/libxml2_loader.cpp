@@ -27,7 +27,7 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
 
 // libxml
@@ -43,7 +43,7 @@
 
 namespace mapnik
 {
-class libxml2_loader : mapnik::noncopyable
+class libxml2_loader : util::noncopyable
 {
 public:
     libxml2_loader(const char *encoding = nullptr, int options = DEFAULT_OPTIONS, const char *url = nullptr) :

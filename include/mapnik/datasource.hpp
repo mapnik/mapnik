@@ -30,7 +30,7 @@
 #include <mapnik/query.hpp>
 #include <mapnik/featureset.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
 
 // boost
@@ -63,7 +63,7 @@ private:
     std::string message_;
 };
 
-class MAPNIK_DECL datasource : private mapnik::noncopyable
+class MAPNIK_DECL datasource : private util::noncopyable
 {
 public:
     enum datasource_t : std::uint8_t {

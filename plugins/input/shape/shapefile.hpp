@@ -38,7 +38,7 @@
 #include <mapnik/mapped_memory_cache.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #endif
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
@@ -131,7 +131,7 @@ struct shape_record
     }
 };
 
-class shape_file : mapnik::noncopyable
+class shape_file : mapnik::util::noncopyable
 {
 public:
 

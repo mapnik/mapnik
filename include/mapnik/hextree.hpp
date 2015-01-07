@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <algorithm>
@@ -52,7 +52,7 @@ struct RGBAPolicy
 };
 
 template <typename T, typename InsertPolicy = RGBAPolicy >
-class hextree : private mapnik::noncopyable
+class hextree : private util::noncopyable
 {
     struct node
     {

@@ -38,7 +38,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include <agg_trans_affine.h>
@@ -49,7 +49,7 @@ class proj_transform;
 struct glyph_info;
 class text_symbolizer_helper;
 
-struct virtual_renderer_common : private mapnik::noncopyable
+struct virtual_renderer_common : private util::noncopyable
 {
 
     virtual_renderer_common(renderer_common & common) :
@@ -97,7 +97,7 @@ struct virtual_renderer_common : private mapnik::noncopyable
 // stores all the arguments necessary to re-render this point
 // symbolizer at a later time.
 
-struct point_render_thunk : noncopyable
+struct point_render_thunk : util::noncopyable
 {
     pixel_position pos_;
     marker_ptr marker_;
@@ -118,7 +118,7 @@ struct point_render_thunk : noncopyable
 
 using helper_ptr = std::unique_ptr<text_symbolizer_helper>;
 
-struct text_render_thunk : noncopyable
+struct text_render_thunk : util::noncopyable
 {
     // helper is stored here in order
     // to keep in scope the text rendering structures

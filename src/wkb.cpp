@@ -28,14 +28,14 @@
 #include <mapnik/coord_array.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
 {
 
 using CoordinateArray = coord_array<coord2d>;
 
-struct wkb_reader : mapnik::noncopyable
+struct wkb_reader : util::noncopyable
 {
 private:
     enum wkbByteOrder {

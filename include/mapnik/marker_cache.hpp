@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // boost
 #include <boost/unordered_map.hpp>
@@ -43,7 +43,7 @@ using marker_ptr = std::shared_ptr<marker>;
 
 class MAPNIK_DECL marker_cache :
         public singleton <marker_cache, CreateUsingNew>,
-        private mapnik::noncopyable
+        private util::noncopyable
 {
     friend class CreateUsingNew<marker_cache>;
 private:

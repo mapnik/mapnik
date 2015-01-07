@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 #define USE_DENSE_HASH_MAP
 
@@ -103,7 +103,7 @@ struct MAPNIK_DECL rgba
 };
 
 
-class MAPNIK_DECL rgba_palette : private mapnik::noncopyable {
+class MAPNIK_DECL rgba_palette : private util::noncopyable {
 public:
     enum palette_type { PALETTE_RGBA = 0, PALETTE_RGB = 1, PALETTE_ACT = 2 };
 

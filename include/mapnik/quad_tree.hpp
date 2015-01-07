@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -41,7 +41,7 @@
 namespace mapnik
 {
 template <typename T>
-class quad_tree : mapnik::noncopyable
+class quad_tree : util::noncopyable
 {
     struct node
     {

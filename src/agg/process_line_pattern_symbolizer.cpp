@@ -31,7 +31,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>

@@ -27,7 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/text/font_library.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <memory>
@@ -100,7 +100,7 @@ private:
     static font_memory_cache_type global_memory_fonts_;
 };
 
-class MAPNIK_DECL face_manager : private mapnik::noncopyable
+class MAPNIK_DECL face_manager : private util::noncopyable
 {
     using face_ptr_cache_type = std::map<std::string, face_ptr>;
 

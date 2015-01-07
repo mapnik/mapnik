@@ -28,7 +28,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // boost
 #include <memory>
@@ -43,7 +43,7 @@ extern "C" {
 #include <sqlite3.h>
 }
 
-class prepared_index_statement : mapnik::noncopyable
+class prepared_index_statement : mapnik::util::noncopyable
 {
 
 public:

@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/image_data_any.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/factory.hpp>
 #include <mapnik/box2d.hpp>
 // boost
@@ -54,7 +54,7 @@ public:
     }
 };
 
-struct MAPNIK_DECL image_reader : private mapnik::noncopyable
+struct MAPNIK_DECL image_reader : private util::noncopyable
 {
     virtual unsigned width() const = 0;
     virtual unsigned height() const = 0;

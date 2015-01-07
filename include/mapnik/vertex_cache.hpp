@@ -26,7 +26,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -43,7 +43,7 @@ class vertex_cache;
 using vertex_cache_ptr = std::unique_ptr<vertex_cache>;
 
 // Caches all path points and their lengths. Allows easy moving in both directions.
-class MAPNIK_DECL vertex_cache : noncopyable
+class MAPNIK_DECL vertex_cache : util::noncopyable
 {
     struct segment
     {
@@ -81,7 +81,7 @@ public:
         pixel_position const& position() const { return current_position; }
     };
 
-    class scoped_state : noncopyable
+    class scoped_state : util::noncopyable
     {
     public:
         scoped_state(vertex_cache &pp) : pp_(pp), state_(pp.save_state()), restored_(false) {}
