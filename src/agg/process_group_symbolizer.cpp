@@ -43,7 +43,7 @@ namespace mapnik {
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.
  */
-struct thunk_renderer : public util::static_visitor<>
+struct thunk_renderer
 {
     using renderer_type = agg_renderer<image_32>;
     using buffer_type = renderer_type::buffer_type;

@@ -154,7 +154,7 @@ using render_thunk_list = std::list<render_thunk_ptr>;
 // The bounding boxes can be used for layout, and the thunks are
 // used to re-render at locations according to the group layout.
 
-struct render_thunk_extractor : public util::static_visitor<>
+struct render_thunk_extractor
 {
     render_thunk_extractor(box2d<double> & box,
                            render_thunk_list & thunks,

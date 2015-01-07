@@ -339,7 +339,7 @@ struct evaluate_expression_wrapper<mapnik::font_feature_settings>
 };
 
 template <typename T>
-struct extract_value : public util::static_visitor<T>
+struct extract_value
 {
     using result_type = T;
 
@@ -379,7 +379,7 @@ struct extract_value : public util::static_visitor<T>
 };
 
 template <typename T1>
-struct extract_raw_value : public util::static_visitor<T1>
+struct extract_raw_value
 {
     using result_type = T1;
 

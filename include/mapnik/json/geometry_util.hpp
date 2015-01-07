@@ -31,7 +31,7 @@ namespace mapnik { namespace json {
 
 // geometries
 template <typename Path>
-struct create_point : util::static_visitor<>
+struct create_point
 {
     explicit create_point(Path & path)
         : path_(path) {}
@@ -49,7 +49,7 @@ struct create_point : util::static_visitor<>
 };
 
 template <typename Path>
-struct create_linestring : util::static_visitor<>
+struct create_linestring
 {
     explicit create_linestring(Path & path)
         : path_(path) {}
@@ -77,7 +77,7 @@ struct create_linestring : util::static_visitor<>
 };
 
 template <typename Path>
-struct create_polygon : util::static_visitor<>
+struct create_polygon
 {
     explicit create_polygon(Path & path)
         : path_(path) {}
@@ -111,7 +111,7 @@ struct create_polygon : util::static_visitor<>
 // multi-geometries
 
 template <typename Path>
-struct create_multipoint : util::static_visitor<>
+struct create_multipoint
 {
     explicit create_multipoint(Path & path)
         : path_(path) {}
@@ -133,7 +133,7 @@ struct create_multipoint : util::static_visitor<>
 };
 
 template <typename Path>
-struct create_multilinestring : util::static_visitor<>
+struct create_multilinestring
 {
     explicit create_multilinestring(Path & path)
         : path_(path) {}
@@ -163,7 +163,7 @@ struct create_multilinestring : util::static_visitor<>
 };
 
 template <typename Path>
-struct create_multipolygon : util::static_visitor<>
+struct create_multipolygon
 {
     explicit create_multipolygon(Path & path)
         : path_(path) {}

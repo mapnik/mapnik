@@ -52,7 +52,7 @@ image image::read_from_file(std::string const& filename)
 
 namespace detail {
 
-struct save_to_file_visitor : mapnik::util::static_visitor<>
+struct save_to_file_visitor
 {
     save_to_file_visitor(std::string const& filename, std::string const& format)
         : filename_(filename),

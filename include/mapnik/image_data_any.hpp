@@ -40,7 +40,7 @@ using image_data_base = util::variant<image_data_null, image_data_rgba8, image_d
 
 namespace detail {
 
-struct get_bytes_visitor : util::static_visitor<unsigned char*>
+struct get_bytes_visitor
 {
     template <typename T>
     unsigned char* operator()(T & data)
@@ -49,7 +49,7 @@ struct get_bytes_visitor : util::static_visitor<unsigned char*>
     }
 };
 
-struct get_bytes_visitor_const : util::static_visitor<unsigned char const*>
+struct get_bytes_visitor_const
 {
     template <typename T>
     unsigned char const* operator()(T const& data) const
@@ -58,7 +58,7 @@ struct get_bytes_visitor_const : util::static_visitor<unsigned char const*>
     }
 };
 
-struct get_width_visitor : util::static_visitor<std::size_t>
+struct get_width_visitor
 {
     template <typename T>
     std::size_t operator()(T const& data) const
@@ -67,7 +67,7 @@ struct get_width_visitor : util::static_visitor<std::size_t>
     }
 };
 
-struct get_height_visitor : util::static_visitor<std::size_t>
+struct get_height_visitor
 {
     template <typename T>
     std::size_t operator()(T const& data) const

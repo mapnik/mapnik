@@ -53,7 +53,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(geojson_datasource)
 
-struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttributeType>
+struct attr_value_converter
 {
     mapnik::eAttributeType operator() (mapnik::value_integer) const
     {

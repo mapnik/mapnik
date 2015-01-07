@@ -35,12 +35,12 @@ namespace mapnik
 {
 
 template <typename T0, typename T1, typename T2>
-struct evaluate : util::static_visitor<T1>
+struct evaluate
 {
     using feature_type = T0;
     using value_type = T1;
     using variable_type = T2;
-
+    using result_type = T1; //  we need this because automatic result_type deduction fails
     explicit evaluate(feature_type const& f, variable_type const& v)
         : feature_(f),
           vars_(v) {}

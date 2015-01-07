@@ -33,7 +33,7 @@
 namespace mapnik
 {
 
-struct expression_string : util::static_visitor<void>
+struct expression_string
 {
     explicit expression_string(std::string & str)
         : str_(str) {}

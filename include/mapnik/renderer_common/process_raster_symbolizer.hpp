@@ -44,7 +44,7 @@ namespace mapnik {
 namespace detail {
 
 template <typename F>
-struct image_data_dispatcher :  util::static_visitor<void>
+struct image_data_dispatcher
 {
     using composite_function = F;
     image_data_dispatcher(int start_x, int start_y,
@@ -105,7 +105,7 @@ private:
 };
 
 template <typename F>
-struct image_data_warp_dispatcher :  util::static_visitor<void>
+struct image_data_warp_dispatcher
 {
     using composite_function = F;
     image_data_warp_dispatcher(proj_transform const& prj_trans,

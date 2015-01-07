@@ -30,7 +30,7 @@
 
 namespace mapnik { namespace topojson {
 
-struct bounding_box_visitor : public mapnik::util::static_visitor<box2d<double> >
+struct bounding_box_visitor
 {
     bounding_box_visitor(topology const& topo)
         : topo_(topo) {}

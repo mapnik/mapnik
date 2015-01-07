@@ -31,7 +31,7 @@ namespace mapnik
 {
 
 // This visitor will process offsets for the given layout
-struct process_layout : public util::static_visitor<>
+struct process_layout
 {
     // The vector containing the existing, centered item bounding boxes
     vector<bound_box> const& member_boxes_;

@@ -77,7 +77,7 @@ namespace mapnik {  namespace sqlite {
 
     class prepared_statement : mapnik::noncopyable
     {
-        struct binder : public mapnik::util::static_visitor<bool>
+        struct binder
         {
             binder(sqlite3_stmt * stmt, unsigned index)
                 : stmt_(stmt), index_(index) {}

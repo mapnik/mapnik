@@ -169,7 +169,7 @@ text_placements_simple::text_placements_simple(symbolizer_base::value_type const
    positions_(positions) { }
 
 namespace detail {
-    struct serialize_positions : public util::static_visitor<std::string>
+    struct serialize_positions
     {
         serialize_positions() {}
 

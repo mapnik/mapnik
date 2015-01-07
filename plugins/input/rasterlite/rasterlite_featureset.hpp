@@ -35,7 +35,7 @@ using rasterlite_query = mapnik::util::variant<mapnik::query,mapnik::coord2d>;
 
 class rasterlite_featureset : public mapnik::Featureset
 {
-    struct query_dispatch : public mapnik::util::static_visitor<mapnik::feature_ptr>
+    struct query_dispatch
     {
         query_dispatch( rasterlite_featureset & featureset)
             : featureset_(featureset) {}

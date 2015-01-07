@@ -44,7 +44,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(topojson_datasource)
 
-struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttributeType>
+struct attr_value_converter
 {
     mapnik::eAttributeType operator() (mapnik::value_integer /*val*/) const
     {
@@ -82,7 +82,7 @@ struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttri
     }
 };
 
-struct geometry_type_visitor : public mapnik::util::static_visitor<int>
+struct geometry_type_visitor
 {
     int operator() (mapnik::topojson::point const&) const
     {
@@ -114,7 +114,7 @@ struct geometry_type_visitor : public mapnik::util::static_visitor<int>
     }
 };
 
-struct collect_attributes_visitor : public mapnik::util::static_visitor<void>
+struct collect_attributes_visitor
 {
     mapnik::layer_descriptor & desc_;
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
