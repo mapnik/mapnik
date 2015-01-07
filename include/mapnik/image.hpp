@@ -23,7 +23,6 @@
 #ifndef MAPNIK_IMAGE_HPP
 #define MAPNIK_IMAGE_HPP
 
-#include <mapnik/noncopyable.hpp>
 #include <mapnik/image_data_any.hpp>
 
 namespace mapnik {

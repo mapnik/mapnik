@@ -261,7 +261,7 @@ struct tag_setter
         tiff_config config_;
 };
 
-void set_tiff_config(TIFF* output, tiff_config & config)
+inline void set_tiff_config(TIFF* output, tiff_config & config)
 {
     // Set some constant tiff information that doesn't vary based on type of data
     // or image size

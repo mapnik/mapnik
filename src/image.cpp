@@ -23,6 +23,9 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/tiff_io.hpp>
+
+#include <fstream>
 
 namespace mapnik {
 
@@ -63,8 +66,29 @@ struct save_to_file_visitor
         save_to_file(data,filename_, format_);
     }
 
+    void operator() (image_data_gray16 const& data) const
+    {
+        if (format_ == "tiff") // only TIFF supported
+        {
+            std::ofstream file (filename_.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
+            if (file)
+            {
+                tiff_config config;
+                save_as_tiff(file, data, config);
+            }
+            else throw ImageWriterException("Could not write file to " + filename_ );
+        }
+        else
+        {
+            throw std::runtime_error("Error: saving gray16 image as " + format_  + " is not supported");
+        }
+    }
+
     template <typename T>
-    void operator() (T const& data) const {}
+    void operator() (T const& data) const
+    {
+        throw std::runtime_error("Error: saving " + std::string(typeid(data).name()) + " as " + format_  + " is not supported");
+    }
 
     std::string const& filename_;
     std::string const& format_;
