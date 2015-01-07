@@ -24,6 +24,8 @@
 #define MAPNIK_IMAGE_DATA_ANY_HPP
 
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_view.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/util/variant.hpp>
 
 namespace mapnik {
@@ -36,18 +38,27 @@ struct image_data_null
     std::size_t height() const { return 0; }
 };
 
-using image_data_base = util::variant<image_data_null, image_data_rgba8, image_data_gray8, image_data_gray16, image_data_gray32f>;
+using image_data_base = util::variant<image_data_null, 
+                                      image_data_rgba8, 
+                                      image_data_gray8, 
+                                      image_data_gray16, 
+                                      image_data_gray32f,
+                                      image_32,
+                                      image_view<image_data_rgba8>,
+                                      image_view<image_data_gray8>,
+                                      image_view<image_data_gray16>,
+                                      image_view<image_data_gray32f>>;
 
 namespace detail {
 
-struct get_bytes_visitor : util::static_visitor<unsigned char*>
+/*struct get_bytes_visitor : util::static_visitor<unsigned char*>
 {
     template <typename T>
     unsigned char* operator()(T & data)
     {
         return data.getBytes();
     }
-};
+};*/
 
 struct get_bytes_visitor_const : util::static_visitor<unsigned char const*>
 {
@@ -91,10 +102,10 @@ struct image_data_any : image_data_base
         return util::apply_visitor(detail::get_bytes_visitor_const(),*this);
     }
 
-    unsigned char* getBytes()
+    /*unsigned char* getBytes()
     {
         return util::apply_visitor(detail::get_bytes_visitor(),*this);
-    }
+    }*/
 
     std::size_t width() const
     {

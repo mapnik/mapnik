@@ -528,23 +528,6 @@ void handle_webp_options(std::string const& type,
 }
 #endif
 
-template <typename T>
-void save_to_stream(image_view<T> const& image,
-                    std::ostream & stream,
-                    std::string const& type,
-                    rgba_palette_ptr const& palette)
-{
-    save_to_stream(image.data(), stream, type, palette);
-}
-
-void save_to_stream(image_32 const& image,
-                    std::ostream & stream,
-                    std::string const& type,
-                    rgba_palette_ptr const& palette)
-{
-    save_to_stream(image.data(), stream, type, palette);
-}
-
 void save_to_stream(image_data_any const& image,
                     std::ostream & stream,
                     std::string const& type,
@@ -569,21 +552,6 @@ void save_to_stream(image_data_any const& image,
         else throw ImageWriterException("unknown file type: " + type);
     }
     else throw ImageWriterException("Could not write to empty stream" );
-}
-
-template <typename T>
-void save_to_stream(image_view<T> const& image,
-                    std::ostream & stream,
-                    std::string const& type)
-{
-    save_to_stream(image.data(), stream, type);
-}
-
-void save_to_stream(image_32 const& image,
-                    std::ostream & stream,
-                    std::string const& type)
-{
-    save_to_stream(image.data(), stream, type);
 }
 
 void save_to_stream(image_data_any const& image,
