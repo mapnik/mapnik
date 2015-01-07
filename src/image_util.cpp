@@ -20,18 +20,7 @@
  *
  *****************************************************************************/
 
-#if defined(HAVE_PNG)
-extern "C"
-{
-#include <png.h>
-}
-#endif
-
 // mapnik
-#if defined(HAVE_PNG)
-#include <mapnik/png_io.hpp>
-#endif
-
 #if defined(HAVE_TIFF)
 #include <mapnik/tiff_io.hpp>
 #endif
@@ -45,6 +34,7 @@ extern "C"
 #endif
 
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_util_png.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
@@ -52,6 +42,7 @@ extern "C"
 #include <mapnik/palette.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/variant.hpp>
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo/cairo_renderer.hpp>
@@ -84,7 +75,7 @@ namespace mapnik
 template <typename T>
 std::string save_to_string(T const& image,
                            std::string const& type,
-                           rgba_palette const& palette)
+                           rgba_palette_ptr const& palette)
 {
     std::ostringstream ss(std::ios::out|std::ios::binary);
     save_to_stream(image, ss, type, palette);
@@ -104,7 +95,7 @@ template <typename T>
 void save_to_file(T const& image,
                   std::string const& filename,
                   std::string const& type,
-                  rgba_palette const& palette)
+                  rgba_palette_ptr const& palette)
 {
     std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
     if (file)
@@ -126,134 +117,6 @@ void save_to_file(T const& image,
     }
     else throw ImageWriterException("Could not write file to " + filename );
 }
-
-#if defined(HAVE_PNG)
-
-void handle_png_options(std::string const& type,
-                        png_options & opts)
-{
-    if (type == "png" || type == "png24" || type == "png32")
-    {
-        opts.paletted = false;
-        return;
-    }
-    else if (type == "png8" || type == "png256")
-    {
-        opts.paletted = true;
-        return;
-    }
-    boost::char_separator<char> sep(":");
-    boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-    bool set_colors = false;
-    bool set_gamma = false;
-    for (std::string const& t : tokens)
-    {
-        if (t == "png8" || t == "png256")
-        {
-            opts.paletted = true;
-        }
-        else if (t == "png" || t == "png24" || t == "png32")
-        {
-            opts.paletted = false;
-        }
-        else if (t == "m=o")
-        {
-            opts.use_hextree = false;
-        }
-        else if (t == "m=h")
-        {
-            opts.use_hextree = true;
-        }
-        else if (t == "e=miniz")
-        {
-            opts.use_miniz = true;
-        }
-        else if (boost::algorithm::starts_with(t, "c="))
-        {
-            set_colors = true;
-            if (!mapnik::util::string2int(t.substr(2),opts.colors) || opts.colors < 1 || opts.colors > 256)
-            {
-                throw ImageWriterException("invalid color parameter: " + t.substr(2));
-            }
-        }
-        else if (boost::algorithm::starts_with(t, "t="))
-        {
-            if (!mapnik::util::string2int(t.substr(2),opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
-            {
-                throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
-            }
-        }
-        else if (boost::algorithm::starts_with(t, "g="))
-        {
-            set_gamma = true;
-            if (!mapnik::util::string2double(t.substr(2),opts.gamma) || opts.gamma < 0)
-            {
-                throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
-            }
-        }
-        else if (boost::algorithm::starts_with(t, "z="))
-        {
-            /*
-              #define Z_NO_COMPRESSION         0
-              #define Z_BEST_SPEED             1
-              #define Z_BEST_COMPRESSION       9
-              #define Z_DEFAULT_COMPRESSION  (-1)
-            */
-            if (!mapnik::util::string2int(t.substr(2),opts.compression)
-                || opts.compression < Z_DEFAULT_COMPRESSION
-                || opts.compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
-            {
-                throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
-            }
-        }
-        else if (boost::algorithm::starts_with(t, "s="))
-        {
-            std::string s = t.substr(2);
-            if (s == "default")
-            {
-                opts.strategy = Z_DEFAULT_STRATEGY;
-            }
-            else if (s == "filtered")
-            {
-                opts.strategy = Z_FILTERED;
-            }
-            else if (s == "huff")
-            {
-                opts.strategy = Z_HUFFMAN_ONLY;
-            }
-            else if (s == "rle")
-            {
-                opts.strategy = Z_RLE;
-            }
-            else if (s == "fixed")
-            {
-                opts.strategy = Z_FIXED;
-            }
-            else
-            {
-                throw ImageWriterException("invalid compression strategy parameter: " + s);
-            }
-        }
-        else
-        {
-            throw ImageWriterException("unhandled png option: " + t);
-        }
-    }
-    // validation
-    if (!opts.paletted && set_colors)
-    {
-        throw ImageWriterException("invalid color parameter: unavailable for true color (non-paletted) images");
-    }
-    if (!opts.paletted && set_gamma)
-    {
-        throw ImageWriterException("invalid gamma parameter: unavailable for true color (non-paletted) images");
-    }
-    if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
-    {
-        throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
-    }
-}
-#endif
 
 #if defined(HAVE_TIFF)
 void handle_tiff_options(std::string const& type,
@@ -666,10 +529,26 @@ void handle_webp_options(std::string const& type,
 #endif
 
 template <typename T>
-void save_to_stream(T const& image,
+void save_to_stream(image_view<T> const& image,
                     std::ostream & stream,
                     std::string const& type,
-                    rgba_palette const& palette)
+                    rgba_palette_ptr const& palette)
+{
+    save_to_stream(image.data(), stream, type, palette);
+}
+
+void save_to_stream(image_32 const& image,
+                    std::ostream & stream,
+                    std::string const& type,
+                    rgba_palette_ptr const& palette)
+{
+    save_to_stream(image.data(), stream, type, palette);
+}
+
+void save_to_stream(image_data_any const& image,
+                    std::ostream & stream,
+                    std::string const& type,
+                    rgba_palette_ptr const& palette)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -677,20 +556,7 @@ void save_to_stream(T const& image,
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
-#if defined(HAVE_PNG)
-            if (palette.valid())
-            {
-                png_options opts;
-                handle_png_options(t,opts);
-                save_as_png8_pal(stream, image, palette, opts);
-            }
-            else
-            {
-                save_to_stream(image,stream,type);
-            }
-#else
-            throw ImageWriterException("png output is not enabled in your build of Mapnik");
-#endif
+            mapnik::util::apply_visitor(png_saver(stream, t, palette), image);
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
@@ -705,9 +571,22 @@ void save_to_stream(T const& image,
     else throw ImageWriterException("Could not write to empty stream" );
 }
 
-
 template <typename T>
-void save_to_stream(T const& image,
+void save_to_stream(image_view<T> const& image,
+                    std::ostream & stream,
+                    std::string const& type)
+{
+    save_to_stream(image.data(), stream, type);
+}
+
+void save_to_stream(image_32 const& image,
+                    std::ostream & stream,
+                    std::string const& type)
+{
+    save_to_stream(image.data(), stream, type);
+}
+
+void save_to_stream(image_data_any const& image,
                     std::ostream & stream,
                     std::string const& type)
 {
@@ -717,27 +596,7 @@ void save_to_stream(T const& image,
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
-#if defined(HAVE_PNG)
-            png_options opts;
-            handle_png_options(t,opts);
-            if (opts.paletted)
-            {
-                if (opts.use_hextree)
-                {
-                    save_as_png8_hex(stream, image, opts);
-                }
-                else
-                {
-                    save_as_png8_oct(stream, image, opts);
-                }
-            }
-            else
-            {
-                save_as_png(stream, image, opts);
-            }
-#else
-            throw ImageWriterException("png output is not enabled in your build of Mapnik");
-#endif
+            mapnik::util::apply_visitor(png_saver(stream, t), image);
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
@@ -800,7 +659,7 @@ void save_to_file(T const& image, std::string const& filename)
 }
 
 template <typename T>
-void save_to_file(T const& image, std::string const& filename, rgba_palette const& palette)
+void save_to_file(T const& image, std::string const& filename, rgba_palette_ptr const& palette)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
@@ -899,21 +758,21 @@ template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
 template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&,
-                                          rgba_palette const& palette);
+                                          rgba_palette_ptr const& palette);
 
 template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&);
 
 template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
-                                          rgba_palette const& palette);
+                                          rgba_palette_ptr const& palette);
 
 template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&);
 
 template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&,
-                                                   rgba_palette const& palette);
+                                                   rgba_palette_ptr const& palette);
 
 template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
@@ -922,21 +781,21 @@ template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data
 template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         std::string const&,
-                                                        rgba_palette const& palette);
+                                                        rgba_palette_ptr const& palette);
 
 template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&);
 
 template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
-                                                        rgba_palette const& palette);
+                                                        rgba_palette_ptr const& palette);
 
 template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&);
 
 template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&,
-                                                                 rgba_palette const& palette);
+                                                                 rgba_palette_ptr const& palette);
 
 void save_to_file(image_32 const& image,std::string const& file)
 {
@@ -953,7 +812,7 @@ void save_to_file (image_32 const& image,
 void save_to_file (image_32 const& image,
                    std::string const& file,
                    std::string const& type,
-                   rgba_palette const& palette)
+                   rgba_palette_ptr const& palette)
 {
     save_to_file<image_data_rgba8>(image.data(), file, type, palette);
 }
@@ -966,7 +825,7 @@ std::string save_to_string(image_32 const& image,
 
 std::string save_to_string(image_32 const& image,
                            std::string const& type,
-                           rgba_palette const& palette)
+                           rgba_palette_ptr const& palette)
 {
     return save_to_string<image_data_rgba8>(image.data(), type, palette);
 }

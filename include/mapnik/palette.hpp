@@ -130,6 +130,8 @@ private:
     std::vector<unsigned> alpha_pal_;
 };
 
+typedef std::shared_ptr<rgba_palette> rgba_palette_ptr;
+
 } // namespace mapnik
 
 #endif // MAPNIK_PALETTE_HPP

@@ -607,7 +607,7 @@ void save_as_png8(T1 & file,
             mapnik::image_data_gray8::pixel_type  * row_out = reduced_image.getRow(y);
             for (unsigned x = 0; x < width; ++x)
             {
-                row_out[x] = tree.quantize(row[x]);
+                row_out[x] = tree->quantize(row[x]);
             }
         }
         save_as_png(file, palette, reduced_image, width, height, 8, alphaTable, opts);
@@ -635,7 +635,7 @@ void save_as_png8(T1 & file,
             for (unsigned x = 0; x < width; ++x)
             {
 
-                index = tree.quantize(row[x]);
+                index = tree->quantize(row[x]);
                 if (x%2 == 0)
                 {
                     index = index<<4;
@@ -657,14 +657,14 @@ void save_as_png8_hex(T1 & file,
     if (width + height > 3) // at least 3 pixels (hextree implementation requirement)
     {
         // structure for color quantization
-        hextree<mapnik::rgba> tree(opts.colors);
+        std::shared_ptr<hextree<mapnik::rgba>> tree = std::make_shared<hextree<mapnik::rgba>>(opts.colors);
         if (opts.trans_mode >= 0)
         {
-            tree.setTransMode(opts.trans_mode);
+            tree->setTransMode(opts.trans_mode);
         }
         if (opts.gamma > 0)
         {
-            tree.setGamma(opts.gamma);
+            tree->setGamma(opts.gamma);
         }
 
         for (unsigned y = 0; y < height; ++y)
@@ -673,13 +673,13 @@ void save_as_png8_hex(T1 & file,
             for (unsigned x = 0; x < width; ++x)
             {
                 unsigned val = row[x];
-                tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)));
+                tree->insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)));
             }
         }
 
         //transparency values per palette index
         std::vector<mapnik::rgba> pal;
-        tree.create_palette(pal);
+        tree->create_palette(pal);
         std::vector<mapnik::rgb> palette;
         std::vector<unsigned> alphaTable;
         for (unsigned i=0; i<pal.size(); ++i)
@@ -687,7 +687,7 @@ void save_as_png8_hex(T1 & file,
             palette.push_back(rgb(pal[i].r, pal[i].g, pal[i].b));
             alphaTable.push_back(pal[i].a);
         }
-        save_as_png8<T1, T2, hextree<mapnik::rgba> >(file, image, tree, palette, alphaTable, opts);
+        save_as_png8<T1, T2, std::shared_ptr<hextree<mapnik::rgba>> >(file, image, tree, palette, alphaTable, opts);
     }
     else
     {
@@ -698,10 +698,10 @@ void save_as_png8_hex(T1 & file,
 template <typename T1, typename T2>
 void save_as_png8_pal(T1 & file,
                       T2 const& image,
-                      rgba_palette const& pal,
+                      rgba_palette_ptr const& pal,
                       png_options const& opts)
 {
-    save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alphaTable(), opts);
+    save_as_png8<T1, T2, rgba_palette_ptr>(file, image, pal, pal->palette(), pal->alphaTable(), opts);
 }
 
 }
