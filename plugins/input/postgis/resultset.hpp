@@ -45,7 +45,7 @@ public:
     virtual const char* getValue(const char* name) const = 0;
 };
 
-class ResultSet : public IResultSet, private mapnik::noncopyable
+class ResultSet : public IResultSet, private mapnik::util::noncopyable
 {
 public:
     ResultSet(PGresult *res)

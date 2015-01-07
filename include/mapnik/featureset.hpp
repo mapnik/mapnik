@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // boost
 #include <memory>
@@ -35,7 +35,7 @@ namespace mapnik {
 class feature_impl;
 using feature_ptr = std::shared_ptr<feature_impl>;
 
-struct MAPNIK_DECL Featureset : private mapnik::noncopyable
+struct MAPNIK_DECL Featureset : private util::noncopyable
 {
     virtual feature_ptr next() = 0;
     virtual ~Featureset() {}

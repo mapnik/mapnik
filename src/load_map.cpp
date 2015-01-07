@@ -50,7 +50,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/projection.hpp>
@@ -84,7 +84,7 @@ constexpr unsigned name2int(const char *str, int off = 0)
     return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ str[off];
 }
 
-class map_parser : mapnik::noncopyable
+class map_parser : util::noncopyable
 {
 public:
     map_parser(Map & map, bool strict, std::string const& filename = "") :

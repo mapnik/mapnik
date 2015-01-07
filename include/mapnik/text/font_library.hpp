@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <memory>
@@ -35,7 +35,7 @@ struct FT_MemoryRec_;
 
 namespace mapnik {
 
-class MAPNIK_DECL font_library : public noncopyable
+class MAPNIK_DECL font_library : public util::noncopyable
 {
 public:
     explicit font_library();

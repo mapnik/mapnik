@@ -24,7 +24,7 @@
 #define MAPNIK_PLUGIN_HPP
 
 // mapnik
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -35,7 +35,7 @@ namespace mapnik
 //  Opaque structure for handle
 using mapnik_lib_t = struct _mapnik_lib_t;
 
-class PluginInfo : mapnik::noncopyable
+class PluginInfo : util::noncopyable
 {
 public:
     using name_func = const char* (*) ();

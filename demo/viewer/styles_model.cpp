@@ -22,7 +22,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/expression_string.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -35,7 +35,7 @@
 #include <QPainter>
 #include <QPixmap>
 
-class node : private mapnik::noncopyable
+class node : private util::noncopyable
 {
     struct node_base
     {

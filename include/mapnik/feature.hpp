@@ -31,7 +31,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_container.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <memory>
@@ -49,7 +49,7 @@ class feature_impl;
 using raster_ptr = std::shared_ptr<raster>;
 
 template <typename T>
-class context : private mapnik::noncopyable
+class context : private util::noncopyable
 
 {
     friend class feature_impl;
@@ -90,7 +90,7 @@ using context_ptr = std::shared_ptr<context_type>;
 
 static const value default_feature_value;
 
-class MAPNIK_DECL feature_impl : private mapnik::noncopyable
+class MAPNIK_DECL feature_impl : private util::noncopyable
 {
     friend class feature_kv_iterator;
 public:

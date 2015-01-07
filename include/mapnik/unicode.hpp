@@ -25,7 +25,7 @@
 
 //mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
 // std
@@ -36,7 +36,7 @@ struct UConverter;
 
 namespace mapnik {
 
-class MAPNIK_DECL transcoder : private mapnik::noncopyable
+class MAPNIK_DECL transcoder : private util::noncopyable
 {
 public:
     explicit transcoder (std::string const& encoding);

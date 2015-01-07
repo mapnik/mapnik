@@ -28,7 +28,7 @@
 #include "connection.hpp"
 #include "resultset.hpp"
 
-class CursorResultSet : public IResultSet, private mapnik::noncopyable
+class CursorResultSet : public IResultSet, private mapnik::util::noncopyable
 {
 public:
     CursorResultSet(std::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)

@@ -23,12 +23,12 @@
 #ifndef MAPNIK_GRID_RASTERIZER_HPP
 #define MAPNIK_GRID_RASTERIZER_HPP
 
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include "agg_rasterizer_scanline_aa.h"
 
 namespace mapnik {
 
-struct grid_rasterizer :  agg::rasterizer_scanline_aa<>, mapnik::noncopyable {};
+struct grid_rasterizer :  agg::rasterizer_scanline_aa<>, util::noncopyable {};
 
 }
 

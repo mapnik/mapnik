@@ -29,7 +29,7 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/text/rotation.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
 {
@@ -42,7 +42,7 @@ class vertex_cache;
 class text_placement_info;
 struct glyph_info;
 
-class placement_finder : mapnik::noncopyable
+class placement_finder : util::noncopyable
 {
 public:
     placement_finder(feature_impl const& feature,

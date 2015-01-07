@@ -28,7 +28,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/cairo/cairo_context.hpp>
 #include <mapnik/renderer_common.hpp>
@@ -67,7 +67,7 @@ struct cairo_save_restore
 
 template <typename T>
 class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
-                                   private mapnik::noncopyable
+                                   private util::noncopyable
 {
 public:
     using processor_impl_type = cairo_renderer<T>;

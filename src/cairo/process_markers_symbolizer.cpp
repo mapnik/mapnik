@@ -27,7 +27,7 @@
 #include <mapnik/cairo/cairo_render_vector.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/marker.hpp>
@@ -48,7 +48,7 @@ namespace svg { struct path_attributes; }
 namespace detail {
 
 template <typename RendererContext, typename SvgPath, typename Attributes, typename Detector>
-struct markers_dispatch : mapnik::noncopyable
+struct markers_dispatch : util::noncopyable
 {
     markers_dispatch(SvgPath & marker,
                      Attributes const& attributes,
@@ -122,7 +122,7 @@ struct markers_dispatch : mapnik::noncopyable
 };
 
 template <typename RendererContext, typename Detector>
-struct raster_markers_dispatch : mapnik::noncopyable
+struct raster_markers_dispatch : util::noncopyable
 {
     raster_markers_dispatch(mapnik::image_data_rgba8 & src,
                        agg::trans_affine const& marker_trans,

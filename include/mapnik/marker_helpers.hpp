@@ -69,7 +69,7 @@ struct clip_poly_tag;
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
 template <typename SvgRenderer, typename Detector, typename RendererContext>
-struct vector_markers_rasterizer_dispatch : mapnik::noncopyable
+struct vector_markers_rasterizer_dispatch : util::noncopyable
 {
     using renderer_base = typename SvgRenderer::renderer_base        ;
     using vertex_source_type = typename SvgRenderer::vertex_source_type   ;
@@ -157,7 +157,7 @@ private:
 };
 
 template <typename Detector,typename RendererContext>
-struct raster_markers_rasterizer_dispatch : mapnik::noncopyable
+struct raster_markers_rasterizer_dispatch : util::noncopyable
 {
     using BufferType = typename std::remove_reference<typename std::tuple_element<0,RendererContext>::type>::type;
     using RasterizerType = typename std::tuple_element<1,RendererContext>::type;

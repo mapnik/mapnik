@@ -24,14 +24,14 @@
 #define MAPNIK_AGG_RASTERIZER_HPP
 
 // mapnik
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 
 namespace mapnik {
 
-struct rasterizer :  agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>, mapnik::noncopyable {};
+struct rasterizer :  agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>, util::noncopyable {};
 
 }
 

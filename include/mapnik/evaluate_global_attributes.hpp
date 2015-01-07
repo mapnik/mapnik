@@ -30,7 +30,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 
@@ -271,7 +271,7 @@ std::tuple<T,bool> pre_evaluate_expression (expression_ptr const& expr)
     }
 }
 
-struct evaluate_global_attributes : mapnik::noncopyable
+struct evaluate_global_attributes : util::noncopyable
 {
     template <typename Attributes>
     struct evaluator

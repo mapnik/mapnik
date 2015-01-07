@@ -24,7 +24,7 @@
 
 //stl
 #include <vector>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
 {
@@ -35,7 +35,7 @@ struct glyph_info;
 // It can be used for rendering but no text processing (like line breaking)
 // should be done!
 
-class text_line : noncopyable
+class text_line : util::noncopyable
 {
 public:
     using glyph_vector = std::vector<glyph_info>;

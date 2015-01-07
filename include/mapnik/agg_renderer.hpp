@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/noncopyable.hpp>       // for noncopyable
+#include <mapnik/util/noncopyable.hpp>       // for noncopyable
 #include <mapnik/rule.hpp>              // for rule, symbolizers
 #include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/color.hpp>     // for color
@@ -60,7 +60,7 @@ namespace mapnik {
 
 template <typename T0, typename T1=label_collision_detector4>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0> >,
-                                 private mapnik::noncopyable
+                                 private util::noncopyable
 {
 
 public:

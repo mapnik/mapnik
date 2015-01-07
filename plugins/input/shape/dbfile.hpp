@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/unicode.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <mapnik/mapped_memory_cache.hpp>
@@ -52,7 +52,7 @@ struct field_descriptor
 };
 
 
-class dbf_file : private mapnik::noncopyable
+class dbf_file : private mapnik::util::noncopyable
 {
 private:
     int num_records_;

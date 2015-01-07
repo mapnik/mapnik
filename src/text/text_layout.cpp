@@ -303,7 +303,7 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
     }
 }
 
-struct line_breaker : mapnik::noncopyable
+struct line_breaker : util::noncopyable
 {
     line_breaker(value_unicode_string const& ustr, char  wrap_char)
         : ustr_(ustr),

@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/image_data.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_color_rgba.h"
@@ -33,7 +33,7 @@
 namespace mapnik
 {
 
-class pattern_source : private mapnik::noncopyable
+class pattern_source : private util::noncopyable
 {
 public:
     pattern_source(image_data_rgba8 const& pattern, double opacity = 1.0)

@@ -40,7 +40,7 @@ struct attribute;
 // This placement has first to be tested by placement_finder to verify it
 // can actually be used.
 
-class MAPNIK_DECL text_placement_info : mapnik::noncopyable
+class MAPNIK_DECL text_placement_info : util::noncopyable
 {
 public:
     // Constructor. Takes the parent text_placements object as a parameter

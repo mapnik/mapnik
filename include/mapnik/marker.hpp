@@ -28,7 +28,7 @@
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_array.h"
@@ -50,7 +50,7 @@ using image_ptr = std::shared_ptr<image_data_rgba8>;
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
  */
-class marker: private mapnik::noncopyable
+class marker: private util::noncopyable
 {
 public:
     marker()

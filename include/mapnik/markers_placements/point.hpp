@@ -41,7 +41,7 @@ struct markers_placement_params
 };
 
 template <typename Locator, typename Detector>
-class markers_point_placement : noncopyable
+class markers_point_placement : util::noncopyable
 {
 public:
     markers_point_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
