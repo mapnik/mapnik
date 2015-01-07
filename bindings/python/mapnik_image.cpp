@@ -228,7 +228,7 @@ std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 // ============ image any
 std::shared_ptr<image> read_from_file_impl(std::string const& filename)
 {
-    std::shared_ptr<image> img(new image);
+    std::shared_ptr<image> img = std::make_shared<image>();
     std::unique_ptr<image_reader> reader(get_image_reader(filename));
     if (reader)
     {
