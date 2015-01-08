@@ -49,7 +49,6 @@ using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 class MAPNIK_DECL image_32
 {
-    using pixel_type = typename image_data_rgba8::pixel_type;
 private:
     unsigned width_;
     unsigned height_;
@@ -58,6 +57,7 @@ private:
     bool painted_;
     bool premultiplied_;
 public:
+    using pixel_type = typename image_data_rgba8::pixel_type;
     image_32(int width,int height);
     image_32(image_32 const& rhs);
 #ifdef HAVE_CAIRO
@@ -113,12 +113,18 @@ public:
     {
         return data_.getBytes();
     }
+
     inline const unsigned char* getBytes() const
     {
         return data_.getBytes();
     }
 
     inline unsigned char* raw_data()
+    {
+        return data_.getBytes();
+    }
+
+    inline unsigned char* getBytes()
     {
         return data_.getBytes();
     }

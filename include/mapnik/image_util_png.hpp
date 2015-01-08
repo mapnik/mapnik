@@ -38,9 +38,9 @@ struct png_saver : public mapnik::util::static_visitor<>
     template <typename T>
     void operator() (T const&) const;
   private:
-    std::ostream _stream;
-    std::string _t;
-    rgba_palette_ptr _pal; 
+    std::ostream & stream_;
+    std::string const& t_;
+    rgba_palette_ptr const& pal_; 
 };
 
 } // end ns

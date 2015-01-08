@@ -528,8 +528,7 @@ void handle_webp_options(std::string const& type,
 }
 #endif
 
-template <typename T>
-void save_to_stream(T const& image,
+void save_to_stream(image_data_any const& image,
                     std::ostream & stream,
                     std::string const& type,
                     rgba_palette_ptr const& palette)
@@ -556,8 +555,7 @@ void save_to_stream(T const& image,
     else throw ImageWriterException("Could not write to empty stream" );
 }
 
-template <typename T>
-void save_to_stream(T const& image,
+void save_to_stream(image_data_any const& image,
                     std::ostream & stream,
                     std::string const& type)
 {

@@ -110,6 +110,11 @@ public:
         return data_.getBytes();
     }
     
+    inline unsigned char* getBytes()
+    {
+        return const_cast<unsigned char*>(data_.getBytes());
+    }
+    
     inline T const& data() const
     {
         return data_;
