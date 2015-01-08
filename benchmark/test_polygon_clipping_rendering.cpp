@@ -25,7 +25,7 @@ public:
         mapnik::image_32 im(m.width(),m.height());
         mapnik::agg_renderer<mapnik::image_32> ren(m,im);
         ren.apply();
-        //mapnik::save_to_file(im,"test.png");
+        //mapnik::save_to_file(im.data(),"test.png");
         return true;
     }
     bool operator()() const

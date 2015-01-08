@@ -140,7 +140,7 @@ int main (int argc,char** argv)
         }
         mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,im,scale_factor,0,0);
         ren.apply();
-        mapnik::save_to_file(im,img_file);
+        mapnik::save_to_file(im.data(),img_file);
         if (auto_open)
         {
             std::ostringstream s;

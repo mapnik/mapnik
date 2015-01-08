@@ -54,7 +54,7 @@ void render(mapnik::geometry_type & geom,
     ras.add_path(path);
     agg::scanline_u8 sl;
     agg::render_scanlines(ras, sl, ren);
-    mapnik::save_to_file(im,name);
+    mapnik::save_to_file(im.data(),name);
     geom.rewind(0);
 }
 

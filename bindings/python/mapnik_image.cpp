@@ -99,17 +99,17 @@ PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba
 
 void save_to_file1(mapnik::image_32 const& im, std::string const& filename)
 {
-    save_to_file(im,filename);
+    save_to_file(im.data(),filename);
 }
 
 void save_to_file2(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
 {
-    save_to_file(im,filename,type);
+    save_to_file(im.data(),filename,type);
 }
 
 void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
 {
-    save_to_file(im,filename,type,pal);
+    save_to_file(im.data(),filename,type,pal);
 }
 
 bool painted(mapnik::image_32 const& im)

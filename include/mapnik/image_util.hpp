@@ -45,7 +45,6 @@ namespace mapnik {
 // fwd declares
 class Map;
 class rgba_palette;
-class image_32;
 
 class ImageWriterException : public std::exception
 {
@@ -210,44 +209,6 @@ void add_border(T & image)
     }
 }
 
-
-
-/////////// save_to_file //////////////////////////////////////////////////
-
-MAPNIK_DECL void save_to_file(image_32 const& image,
-                              std::string const& file);
-
-MAPNIK_DECL void save_to_file (image_32 const& image,
-                               std::string const& file,
-                               std::string const& type);
-
-MAPNIK_DECL void save_to_file (image_32 const& image,
-                               std::string const& file,
-                               std::string const& type,
-                               rgba_palette const& palette);
-
-///////////////////////////////////////////////////////////////////////////
-
-
-MAPNIK_DECL std::string save_to_string(image_32 const& image,
-                                       std::string const& type);
-
-MAPNIK_DECL std::string save_to_string(image_32 const& image,
-                                       std::string const& type,
-                                       rgba_palette const& palette);
-
-///////////////////////////////////////////////////////////////////////////
-
-MAPNIK_DECL void save_to_stream(image_32 const& image,
-                                std::ostream & stream,
-                                std::string const& type,
-                                rgba_palette const& palette);
-
-MAPNIK_DECL void save_to_stream(image_32 const& image,
-                                std::ostream & stream,
-                                std::string const& type);
-
-///////////////////////////////////////////////////////////////////////////
 
 extern template MAPNIK_DECL void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                                       std::string const&,
