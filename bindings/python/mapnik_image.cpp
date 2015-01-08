@@ -83,7 +83,7 @@ PyObject* tostring2(image_32 const & im, std::string const& format)
         (s.data(),s.size());
 }
 
-PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette_ptr const& pal)
+PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette const& pal)
 {
     std::string s = save_to_string(im, format, pal);
     return
@@ -106,7 +106,7 @@ void save_to_file2(mapnik::image_32 const& im, std::string const& filename, std:
     save_to_file(im,filename,type);
 }
 
-void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette_ptr const& pal)
+void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
 {
     save_to_file(im,filename,type,pal);
 }

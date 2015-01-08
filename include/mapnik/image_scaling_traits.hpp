@@ -23,9 +23,6 @@
 #ifndef MAPNIK_IMAGE_SCALING_TRAITS_HPP
 #define MAPNIK_IMAGE_SCALING_TRAITS_HPP
 
-// mapnik
-#include <mapnik/graphics.hpp>
-
 // agg
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
@@ -42,18 +39,6 @@ struct agg_scaling_traits  {};
 
 template <>
 struct agg_scaling_traits<image_data_rgba8>
-{
-    using pixfmt_pre = agg::pixfmt_rgba32_pre;
-    using color_type = agg::rgba8;
-    using interpolator_type = agg::span_interpolator_linear<>;
-    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_rgba_nn<img_src_type,interpolator_type>;
-    using span_image_resample_affine = agg::span_image_resample_rgba_affine<img_src_type>;
-
-};
-
-template <>
-struct agg_scaling_traits<image_32>
 {
     using pixfmt_pre = agg::pixfmt_rgba32_pre;
     using color_type = agg::rgba8;

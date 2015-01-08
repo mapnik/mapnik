@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_UTIL_PNG_HPP
-#define MAPNIK_IMAGE_UTIL_PNG_HPP
+#ifndef MAPNIK_IMAGE_UTIL_TIFF_HPP
+#define MAPNIK_IMAGE_UTIL_TIFF_HPP
 
 // mapnik
 #include <mapnik/util/variant.hpp>
@@ -32,20 +32,9 @@
 
 namespace mapnik {
 
-struct png_saver_pal : public mapnik::util::static_visitor<> 
+struct tiff_saver : public mapnik::util::static_visitor<> 
 {
-    png_saver_pal(std::ostream &, std::string &, rgba_palette const&);
-    template <typename T>
-    void operator() (T const&) const;
-  private:
-    std::ostream & stream_;
-    std::string const& t_;
-    rgba_palette const& pal_; 
-};
-
-struct png_saver : public mapnik::util::static_visitor<> 
-{
-    png_saver(std::ostream &, std::string &);
+    tiff_saver(std::ostream &, std::string &);
     template <typename T>
     void operator() (T const&) const;
   private:
@@ -55,4 +44,4 @@ struct png_saver : public mapnik::util::static_visitor<>
 
 } // end ns
 
-#endif // MAPNIK_IMAGE_UTIL_PNG_HPP
+#endif // MAPNIK_IMAGE_UTIL_TIFF_HPP

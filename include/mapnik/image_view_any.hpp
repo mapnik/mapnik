@@ -20,39 +20,60 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_UTIL_PNG_HPP
-#define MAPNIK_IMAGE_UTIL_PNG_HPP
+#ifndef MAPNIK_IMAGE_VIEW_ANY_HPP
+#define MAPNIK_IMAGE_VIEW_ANY_HPP
 
-// mapnik
+#include <mapnik/image_view.hpp>
 #include <mapnik/util/variant.hpp>
-
-// stl
-#include <string>
-#include <iostream>
 
 namespace mapnik {
 
-struct png_saver_pal : public mapnik::util::static_visitor<> 
+using image_view_base = util::variant<image_view_rgba8,
+                                      image_view_gray8,
+                                      image_view_gray16,
+                                      image_view_gray32f>;
+
+namespace detail {
+
+struct get_view_width_visitor
 {
-    png_saver_pal(std::ostream &, std::string &, rgba_palette const&);
     template <typename T>
-    void operator() (T const&) const;
-  private:
-    std::ostream & stream_;
-    std::string const& t_;
-    rgba_palette const& pal_; 
+    std::size_t operator()(T const& data) const
+    {
+        return data.width();
+    }
 };
 
-struct png_saver : public mapnik::util::static_visitor<> 
+struct get_view_height_visitor
 {
-    png_saver(std::ostream &, std::string &);
     template <typename T>
-    void operator() (T const&) const;
-  private:
-    std::ostream & stream_;
-    std::string const& t_;
+    std::size_t operator()(T const& data) const
+    {
+        return data.height();
+    }
 };
 
-} // end ns
+} // namespace detail
 
-#endif // MAPNIK_IMAGE_UTIL_PNG_HPP
+struct image_view_any : image_view_base
+{
+    image_view_any() = default;
+
+    template <typename T>
+    image_view_any(T && data) noexcept
+        : image_view_base(std::move(data)) {}
+
+    std::size_t width() const
+    {
+        return util::apply_visitor(detail::get_view_width_visitor(),*this);
+    }
+
+    std::size_t height() const
+    {
+        return util::apply_visitor(detail::get_view_height_visitor(),*this);
+    }
+};
+
+}
+
+#endif // MAPNIK_IMAGE_VIEW_ANY_HPP

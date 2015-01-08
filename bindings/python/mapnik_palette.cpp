@@ -55,7 +55,7 @@ void export_palette ()
 {
     using namespace boost::python;
 
-    class_<std::shared_ptr<mapnik::rgba_palette>,
+    class_<mapnik::rgba_palette,
         std::shared_ptr<mapnik::rgba_palette>,
         boost::noncopyable >("Palette",no_init)
         //, init<std::string,std::string>(
