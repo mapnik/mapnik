@@ -39,74 +39,24 @@
 namespace mapnik
 {
 image_32::image_32(int width,int height)
-    :width_(width),
-     height_(height),
-     data_(width,height),
+   : data_(width,height),
      painted_(false),
      premultiplied_(false) {}
 
 
 image_32::image_32(image_32 const& rhs)
-    :width_(rhs.width_),
-     height_(rhs.height_),
-     data_(rhs.data_),
+   : data_(rhs.data_),
      painted_(rhs.painted_),
      premultiplied_(rhs.premultiplied_) {}
-
-#ifdef HAVE_CAIRO
-image_32::image_32(cairo_surface_ptr const& surface)
-    :width_(cairo_image_surface_get_width(&*surface)),
-     height_(cairo_image_surface_get_height(&*surface)),
-     data_(width_, height_),
-     premultiplied_(false)
-{
-    painted_ = true;
-    if ( cairo_image_surface_get_format(&*surface) != CAIRO_FORMAT_ARGB32)
-    {
-        MAPNIK_LOG_WARN(graphics) << "Unable to convert this Cairo format";
-        throw;
-    }
-
-    int stride = cairo_image_surface_get_stride(&*surface) / 4;
-
-    const std::unique_ptr<unsigned int[]> out_row(new unsigned int[width_]);
-    const unsigned int *in_row = (const unsigned int *)cairo_image_surface_get_data(&*surface);
-
-    for (unsigned int row = 0; row < height_; row++, in_row += stride)
-    {
-        for (unsigned int column = 0; column < width_; column++)
-        {
-            unsigned int in = in_row[column];
-            unsigned int a = (in >> 24) & 0xff;
-            unsigned int r = (in >> 16) & 0xff;
-            unsigned int g = (in >> 8) & 0xff;
-            unsigned int b = (in >> 0) & 0xff;
-
-#define DE_ALPHA(x) do {                        \
-                if (a == 0) x = 0;              \
-                else x = x * 255 / a;           \
-                if (x > 255) x = 255;           \
-            } while(0)
-
-            DE_ALPHA(r);
-            DE_ALPHA(g);
-            DE_ALPHA(b);
-
-            out_row[column] = color(r, g, b, a).rgba();
-        }
-        data_.setRow(row, out_row.get(), width_);
-    }
-}
-#endif
 
 image_32::~image_32() {}
 
 void image_32::set_grayscale_to_alpha()
 {
-    for (unsigned int y = 0; y < height_; ++y)
+    for (unsigned int y = 0; y < data_.height(); ++y)
     {
         unsigned int* row_from = data_.getRow(y);
-        for (unsigned int x = 0; x < width_; ++x)
+        for (unsigned int x = 0; x < data_.width(); ++x)
         {
             unsigned rgba = row_from[x];
             unsigned r = rgba & 0xff;
@@ -123,10 +73,10 @@ void image_32::set_grayscale_to_alpha()
 
 void image_32::set_color_to_alpha(const color& c)
 {
-    for (unsigned y = 0; y < height_; ++y)
+    for (unsigned y = 0; y < data_.height(); ++y)
     {
         unsigned int* row_from = data_.getRow(y);
-        for (unsigned x = 0; x < width_; ++x)
+        for (unsigned x = 0; x < data_.width(); ++x)
         {
             unsigned rgba = row_from[x];
             unsigned r = rgba & 0xff;
@@ -142,10 +92,10 @@ void image_32::set_color_to_alpha(const color& c)
 
 void image_32::set_alpha(float opacity)
 {
-    for (unsigned int y = 0; y < height_; ++y)
+    for (unsigned int y = 0; y < data_.height(); ++y)
     {
         unsigned int* row_to =  data_.getRow(y);
-        for (unsigned int x = 0; x < width_; ++x)
+        for (unsigned int x = 0; x < data_.width(); ++x)
         {
             unsigned rgba = row_to[x];
             unsigned a0 = (rgba >> 24) & 0xff;
@@ -175,7 +125,7 @@ boost::optional<color> const& image_32::get_background() const
 
 void image_32::premultiply()
 {
-    agg::rendering_buffer buffer(data_.getBytes(),width_,height_,width_ * 4);
+    agg::rendering_buffer buffer(data_.getBytes(),data_.width(),data_.height(),data_.width() * 4);
     agg::pixfmt_rgba32 pixf(buffer);
     pixf.premultiply();
     premultiplied_ = true;
@@ -183,7 +133,7 @@ void image_32::premultiply()
 
 void image_32::demultiply()
 {
-    agg::rendering_buffer buffer(data_.getBytes(),width_,height_,width_ * 4);
+    agg::rendering_buffer buffer(data_.getBytes(),data_.width(),data_.height(),data_.width() * 4);
     agg::pixfmt_rgba32_pre pixf(buffer);
     pixf.demultiply();
     premultiplied_ = false;

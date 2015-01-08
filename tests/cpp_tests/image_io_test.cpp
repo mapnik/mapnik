@@ -7,6 +7,10 @@
 #include <mapnik/util/fs.hpp>
 #include <vector>
 #include <algorithm>
+#if defined(HAVE_CAIRO)
+#include <mapnik/cairo/cairo_context.hpp>
+#include <mapnik/cairo/cairo_image_util.hpp>
+#endif
 
 #include "utils.hpp"
 
@@ -59,6 +63,18 @@ int main(int argc, char** argv)
     {
         BOOST_TEST( true ); // should hit bad alloc here
     }
+
+#if defined(HAVE_CAIRO)
+        mapnik::cairo_surface_ptr image_surface(
+            cairo_image_surface_create(CAIRO_FORMAT_ARGB32,256,257),
+            mapnik::cairo_surface_closer());
+        mapnik::image_data_rgba8 im_data(cairo_image_surface_get_width(&*image_surface), cairo_image_surface_get_height(&*image_surface));
+        im_data.set(1);
+        BOOST_TEST( (unsigned)im_data(0,0) == unsigned(1) );
+        // Should set back to fully transparent
+        mapnik::cairo_image_to_rgba8(im_data, image_surface);
+        BOOST_TEST( (unsigned)im_data(0,0) == unsigned(0) );
+#endif
 
 #if defined(HAVE_PNG)
         should_throw = "./tests/cpp_tests/data/blank.png";

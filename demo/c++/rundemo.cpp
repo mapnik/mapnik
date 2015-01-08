@@ -40,6 +40,7 @@
 
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
+#include <mapnik/cairo/cairo_image_util.hpp>
 #endif
 
 #include <iostream>
@@ -352,8 +353,9 @@ int main ( int, char** )
         cairo_surface_write_to_png(&*image_surface, "cairo-demo.png");
         // but we can also benefit from quantization by converting
         // to a mapnik image object and then saving that
-        image_32 im(image_surface);
-        save_to_file(im, "cairo-demo256.png","png8");
+        mapnik::image_data_rgba8 im_data(cairo_image_surface_get_width(&*image_surface), cairo_image_surface_get_height(&*image_surface));
+        cairo_image_to_rgba8(im_data, image_surface);
+        save_to_file(im_data, "cairo-demo256.png","png8");
         cairo_surface_finish(&*image_surface);
 
         std::cout << "Three maps have been rendered using Cairo in the current directory:\n"
