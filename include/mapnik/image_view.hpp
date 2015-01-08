@@ -109,18 +109,12 @@ public:
     {
         return data_.getBytes();
     }
-    inline T& data()
-    {
-        return data_;
-    }
+
     inline T const& data() const
     {
         return data_;
     }
-    inline pixel_type* getData()
-    {
-        return data_.getData();
-    }
+
     inline const pixel_type* getData() const
     {
         return data_.getData();
