@@ -538,9 +538,8 @@ void save_to_stream(image_data_any const& image,
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
-        {   
-            png_saver visitor(stream, t, palette);
-            mapnik::util::apply_visitor(visitor, image);
+        {
+            mapnik::util::apply_visitor(png_saver(stream, t, palette), image);
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
