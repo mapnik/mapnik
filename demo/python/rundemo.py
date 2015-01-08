@@ -23,13 +23,7 @@
 import sys
 from os import path
 
-try:
-    import mapnik
-except:
-    print '\n\nThe mapnik library and python bindings must have been compiled and \
-installed successfully before running this script.\n\n'
-    sys.exit(1)
-
+import mapnik
 
 # Instanciate a map, giving it a width and height. Remember: the word "map" is
 # reserved in Python! :)
