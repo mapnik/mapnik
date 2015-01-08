@@ -387,7 +387,7 @@ void render_to_file1(mapnik::Map const& map,
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image,filename,format);
+        mapnik::save_to_file(image.data(),filename,format);
     }
 }
 
@@ -406,7 +406,7 @@ void render_to_file2(mapnik::Map const& map,std::string const& filename)
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image,filename);
+        mapnik::save_to_file(image.data(),filename);
     }
 }
 
@@ -444,7 +444,7 @@ void render_to_file3(mapnik::Map const& map,
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
-        mapnik::save_to_file(image,filename,format);
+        mapnik::save_to_file(image.data(),filename,format);
     }
 }
 

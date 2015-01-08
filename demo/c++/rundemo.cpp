@@ -310,21 +310,21 @@ int main ( int, char** )
         ren.apply();
         std::string msg("These maps have been rendered using AGG in the current directory:\n");
 #ifdef HAVE_JPEG
-        save_to_file(buf,"demo.jpg","jpeg");
+        save_to_file(buf.data(),"demo.jpg","jpeg");
         msg += "- demo.jpg\n";
 #endif
 #ifdef HAVE_PNG
-        save_to_file(buf,"demo.png","png");
-        save_to_file(buf,"demo256.png","png8");
+        save_to_file(buf.data(),"demo.png","png");
+        save_to_file(buf.data(),"demo256.png","png8");
         msg += "- demo.png\n";
         msg += "- demo256.png\n";
 #endif
 #ifdef HAVE_TIFF
-        save_to_file(buf,"demo.tif","tiff");
+        save_to_file(buf.data(),"demo.tif","tiff");
         msg += "- demo.tif\n";
 #endif
 #ifdef HAVE_WEBP
-        save_to_file(buf,"demo.webp","webp");
+        save_to_file(buf.data(),"demo.webp","webp");
         msg += "- demo.webp\n";
 #endif
         msg += "Have a look!\n";
