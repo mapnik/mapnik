@@ -176,6 +176,11 @@ void handle_png_options(std::string const& type,
 png_saver::png_saver(std::ostream & stream, std::string const& t, rgba_palette_ptr const& pal):
     _stream(stream), _t(t), _pal(pal) {}
 
+void png_saver::operator() (image_data_null const& image) const
+{
+    throw ImageWriterException("null images not supported");
+}
+
 void png_saver::operator() (image_data_rgba8 const& image) const
 {
 #if defined(HAVE_PNG)

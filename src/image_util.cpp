@@ -528,7 +528,8 @@ void handle_webp_options(std::string const& type,
 }
 #endif
 
-void save_to_stream(image_data_any const& image,
+template <typename T>
+void save_to_stream(T const& image,
                     std::ostream & stream,
                     std::string const& type,
                     rgba_palette_ptr const& palette)
@@ -538,8 +539,9 @@ void save_to_stream(image_data_any const& image,
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
-        {
-            mapnik::util::apply_visitor(png_saver(stream, t, palette), image);
+        {   
+            png_saver visitor(stream, t, palette);
+            mapnik::util::apply_visitor(visitor, image);
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
@@ -554,7 +556,8 @@ void save_to_stream(image_data_any const& image,
     else throw ImageWriterException("Could not write to empty stream" );
 }
 
-void save_to_stream(image_data_any const& image,
+template <typename T>
+void save_to_stream(T const& image,
                     std::ostream & stream,
                     std::string const& type)
 {

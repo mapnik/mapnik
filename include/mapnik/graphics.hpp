@@ -49,6 +49,7 @@ using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 class MAPNIK_DECL image_32
 {
+    using pixel_type = typename image_data_rgba8::pixel_type;
 private:
     unsigned width_;
     unsigned height_;
