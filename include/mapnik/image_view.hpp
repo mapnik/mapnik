@@ -105,21 +105,10 @@ public:
         return data_.getRow(row + y_, x0) + x_;
     }
 
-    inline const unsigned char* getBytes() const
-    {
-        return data_.getBytes();
-    }
-
     inline T const& data() const
     {
         return data_;
     }
-
-    inline const pixel_type* getData() const
-    {
-        return data_.getData();
-    }
-    
 
 private:
     unsigned x_;
