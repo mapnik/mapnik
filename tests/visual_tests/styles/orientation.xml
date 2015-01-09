@@ -17,12 +17,12 @@
     <Style name="My Style">
         <Rule>
             <Filter>[nr] = 1</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="rad_to_deg*0.7853981633974483">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 2</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180/pi*1.5707963267948966">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
