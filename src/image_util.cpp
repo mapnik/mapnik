@@ -27,8 +27,6 @@
 #include <mapnik/image_util_tiff.hpp>
 #include <mapnik/image_util_webp.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/image_data_any.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
@@ -326,38 +324,5 @@ template std::string save_to_string<image_view<image_data_rgba8> > (image_view<i
 template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&,
                                                                  rgba_palette const& palette);
-
-void save_to_file(image_32 const& image,std::string const& file)
-{
-    save_to_file<image_data_rgba8>(image.data(), file);
-}
-
-void save_to_file (image_32 const& image,
-                   std::string const& file,
-                   std::string const& type)
-{
-    save_to_file<image_data_rgba8>(image.data(), file, type);
-}
-
-void save_to_file (image_32 const& image,
-                   std::string const& file,
-                   std::string const& type,
-                   rgba_palette const& palette)
-{
-    save_to_file<image_data_rgba8>(image.data(), file, type, palette);
-}
-
-std::string save_to_string(image_32 const& image,
-                           std::string const& type)
-{
-    return save_to_string<image_data_rgba8>(image.data(), type);
-}
-
-std::string save_to_string(image_32 const& image,
-                           std::string const& type,
-                           rgba_palette const& palette)
-{
-    return save_to_string<image_data_rgba8>(image.data(), type, palette);
-}
 
 }

@@ -44,6 +44,7 @@
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <mapnik/cairo/cairo_context.hpp>
+#include <mapnik/cairo/cairo_image_util.hpp>
 #include <pycairo.h>
 #include <cairo.h>
 #endif
@@ -98,17 +99,17 @@ PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba
 
 void save_to_file1(mapnik::image_32 const& im, std::string const& filename)
 {
-    save_to_file(im,filename);
+    save_to_file(im.data(),filename);
 }
 
 void save_to_file2(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
 {
-    save_to_file(im,filename,type);
+    save_to_file(im.data(),filename,type);
 }
 
 void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
 {
-    save_to_file(im,filename,type,pal);
+    save_to_file(im.data(),filename,type,pal);
 }
 
 bool painted(mapnik::image_32 const& im)
@@ -217,7 +218,8 @@ void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, fl
 std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 {
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(surface);
+    std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
+    cairo_image_to_rgba8(image_ptr->data(), image_surface);
     return image_ptr;
 }
 #endif

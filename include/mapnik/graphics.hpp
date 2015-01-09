@@ -39,30 +39,20 @@
 // boost
 #include <boost/optional/optional.hpp>
 
-struct _cairo_surface;
-typedef struct _cairo_surface cairo_surface_t;
-
 namespace mapnik
 {
-
-using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 class MAPNIK_DECL image_32
 {
 private:
-    unsigned width_;
-    unsigned height_;
-    boost::optional<color> background_;
     image_data_rgba8 data_;
+    boost::optional<color> background_;
     bool painted_;
     bool premultiplied_;
 public:
     using pixel_type = typename image_data_rgba8::pixel_type;
     image_32(int width,int height);
     image_32(image_32 const& rhs);
-#ifdef HAVE_CAIRO
-    explicit image_32(cairo_surface_ptr const& surface);
-#endif
     ~image_32();
 
     void painted(bool painted)
@@ -138,7 +128,7 @@ private:
 
     inline bool checkBounds(int x, int y) const
     {
-        return (x >= 0 && x < static_cast<int>(width_) && y >= 0 && y < static_cast<int>(height_));
+        return (x >= 0 && x < static_cast<int>(data_.width()) && y >= 0 && y < static_cast<int>(data_.height()));
     }
 
 public:
@@ -154,17 +144,17 @@ public:
 
     inline unsigned width() const
     {
-        return width_;
+        return data_.width();
     }
 
     inline unsigned height() const
     {
-        return height_;
+        return data_.height();
     }
 
     inline void set_rectangle(int x0,int y0,image_data_rgba8 const& data)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());
 
         if (ext0.intersects(ext1))
@@ -188,7 +178,7 @@ public:
 
     inline void set_rectangle_alpha(int x0,int y0,const image_data_rgba8& data)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 
         if (ext0.intersects(ext1))
@@ -232,7 +222,7 @@ public:
 
     inline void set_rectangle_alpha2(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 
         if (ext0.intersects(ext1))
@@ -280,7 +270,7 @@ public:
     template <typename MergeMethod>
         inline void merge_rectangle(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 
         if (ext0.intersects(ext1))
