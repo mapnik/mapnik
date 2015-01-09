@@ -173,6 +173,7 @@ source = Split(
     graphics.cpp
     parse_path.cpp
     image_reader.cpp
+    cairo_io.cpp
     image_util.cpp
     image_util_jpeg.cpp
     image_util_png.cpp

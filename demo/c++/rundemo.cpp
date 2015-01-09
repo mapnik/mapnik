@@ -37,6 +37,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/cairo_io.hpp>
 
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>

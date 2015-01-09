@@ -34,20 +34,6 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
 
-#ifdef HAVE_CAIRO
-#include <mapnik/cairo/cairo_renderer.hpp>
-#include <cairo.h>
-#ifdef CAIRO_HAS_PDF_SURFACE
-#include <cairo-pdf.h>
-#endif
-#ifdef CAIRO_HAS_PS_SURFACE
-#include <cairo-ps.h>
-#endif
-#ifdef CAIRO_HAS_SVG_SURFACE
-#include <cairo-svg.h>
-#endif
-#endif
-
 // boost
 #include <boost/tokenizer.hpp>
 
@@ -60,7 +46,6 @@
 
 namespace mapnik
 {
-
 
 template <typename T>
 std::string save_to_string(T const& image,
@@ -197,88 +182,6 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
     else throw ImageWriterException("Could not write file to " + filename );
 }
 
-#if defined(HAVE_CAIRO)
-// TODO - move to separate cairo_io.hpp
-void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor, double scale_denominator)
-{
-    boost::optional<std::string> type = type_from_filename(filename);
-    if (type)
-    {
-        save_to_cairo_file(map,filename,*type,scale_factor,scale_denominator);
-    }
-    else throw ImageWriterException("Could not write file to " + filename );
-}
-
-void save_to_cairo_file(mapnik::Map const& map,
-                        std::string const& filename,
-                        std::string const& type,
-                        double scale_factor,
-                        double scale_denominator)
-{
-    std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
-    if (file)
-    {
-        cairo_surface_ptr surface;
-        unsigned width = map.width();
-        unsigned height = map.height();
-        if (type == "pdf")
-        {
-#ifdef CAIRO_HAS_PDF_SURFACE
-            surface = cairo_surface_ptr(cairo_pdf_surface_create(filename.c_str(),width,height),cairo_surface_closer());
-#else
-            throw ImageWriterException("PDFSurface not supported in the cairo backend");
-#endif
-        }
-#ifdef CAIRO_HAS_SVG_SURFACE
-        else if (type == "svg")
-        {
-            surface = cairo_surface_ptr(cairo_svg_surface_create(filename.c_str(),width,height),cairo_surface_closer());
-        }
-#endif
-#ifdef CAIRO_HAS_PS_SURFACE
-        else if (type == "ps")
-        {
-            surface = cairo_surface_ptr(cairo_ps_surface_create(filename.c_str(),width,height),cairo_surface_closer());
-        }
-#endif
-#ifdef CAIRO_HAS_IMAGE_SURFACE
-        else if (type == "ARGB32")
-        {
-            surface = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,width,height),cairo_surface_closer());
-        }
-        else if (type == "RGB24")
-        {
-            surface = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height),cairo_surface_closer());
-        }
-#endif
-        else
-        {
-            throw ImageWriterException("unknown file type: " + type);
-        }
-
-        //cairo_t * ctx = cairo_create(surface);
-
-        // TODO - expose as user option
-        /*
-          if (type == "ARGB32" || type == "RGB24")
-          {
-          context->set_antialias(Cairo::ANTIALIAS_NONE);
-          }
-        */
-
-        mapnik::cairo_renderer<cairo_ptr> ren(map, create_context(surface), scale_factor);
-        ren.apply(scale_denominator);
-
-        if (type == "ARGB32" || type == "RGB24")
-        {
-            cairo_surface_write_to_png(&*surface, filename.c_str());
-        }
-        cairo_surface_finish(&*surface);
-    }
-}
-
-#endif
-
 template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&);
@@ -302,26 +205,26 @@ template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&,
                                                    rgba_palette const& palette);
 
-template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
+template void save_to_file<image_view_rgba8> (image_view_rgba8 const&,
                                                         std::string const&,
                                                         std::string const&);
 
-template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
+template void save_to_file<image_view_rgba8> (image_view_rgba8 const&,
                                                         std::string const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
-template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
+template void save_to_file<image_view_rgba8> (image_view_rgba8 const&,
                                                         std::string const&);
 
-template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
+template void save_to_file<image_view_rgba8> (image_view_rgba8 const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
-template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
+template std::string save_to_string<image_view_rgba8> (image_view_rgba8 const&,
                                                                  std::string const&);
 
-template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
+template std::string save_to_string<image_view_rgba8> (image_view_rgba8 const&,
                                                                  std::string const&,
                                                                  rgba_palette const& palette);
 

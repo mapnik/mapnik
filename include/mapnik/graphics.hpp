@@ -119,9 +119,9 @@ public:
         return data_.getBytes();
     }
 
-    inline image_view<image_data_rgba8> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
+    inline image_view_rgba8 get_view(unsigned x,unsigned y, unsigned w,unsigned h)
     {
-        return image_view<image_data_rgba8>(x,y,w,h,data_);
+        return image_view_rgba8(x,y,w,h,data_);
     }
 
 private:

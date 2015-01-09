@@ -62,18 +62,6 @@ public:
     }
 };
 
-#if defined(HAVE_CAIRO)
-MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
-                                    std::string const& filename,
-                                    double scale_factor=1.0,
-                                    double scale_denominator=0.0);
-MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
-                                    std::string const& filename,
-                                    std::string const& type,
-                                    double scale_factor=1.0,
-                                    double scale_denominator=0.0);
-#endif
-
 template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
                               std::string const& filename,

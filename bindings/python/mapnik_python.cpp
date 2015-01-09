@@ -137,6 +137,7 @@ void clear_cache()
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+#include <mapnik/cairo_io.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <boost/python/type_id.hpp>
 #include <boost/python/converter/registry.hpp>
