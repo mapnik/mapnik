@@ -607,7 +607,7 @@ void save_as_png8(T1 & file,
             mapnik::image_data_gray8::pixel_type  * row_out = reduced_image.getRow(y);
             for (unsigned x = 0; x < width; ++x)
             {
-                row_out[x] = tree->quantize(row[x]);
+                row_out[x] = tree.quantize(row[x]);
             }
         }
         save_as_png(file, palette, reduced_image, width, height, 8, alphaTable, opts);
@@ -635,7 +635,7 @@ void save_as_png8(T1 & file,
             for (unsigned x = 0; x < width; ++x)
             {
 
-                index = tree->quantize(row[x]);
+                index = tree.quantize(row[x]);
                 if (x%2 == 0)
                 {
                     index = index<<4;

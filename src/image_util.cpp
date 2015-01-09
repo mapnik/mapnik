@@ -110,8 +110,8 @@ void save_to_file(T const& image,
     else throw ImageWriterException("Could not write file to " + filename );
 }
 
-template <>
-void save_to_stream<image_data_any>(image_data_any const& image,
+template <typename T>
+void save_to_stream(T const& image,
                     std::ostream & stream,
                     std::string const& type,
                     rgba_palette const& palette)
@@ -122,7 +122,9 @@ void save_to_stream<image_data_any>(image_data_any const& image,
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
-            mapnik::util::apply_visitor(png_saver_pal(stream, t, palette), image);
+            png_saver_pal visitor(stream, t, palette);
+            visitor(image);
+            //mapnik::util::apply_visitor(visitor, image);
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
@@ -137,7 +139,8 @@ void save_to_stream<image_data_any>(image_data_any const& image,
     else throw ImageWriterException("Could not write to empty stream" );
 }
 
-void save_to_stream(image_data_any const& image,
+template <typename T>
+void save_to_stream(T const& image,
                     std::ostream & stream,
                     std::string const& type)
 {
@@ -147,19 +150,27 @@ void save_to_stream(image_data_any const& image,
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
-            util::apply_visitor(png_saver(stream, t), image);
+            png_saver visitor(stream, t);
+            visitor(image);
+            //util::apply_visitor(visitor, image);
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
-            util::apply_visitor(tiff_saver(stream, t), image);
+            tiff_saver visitor(stream, t);  
+            visitor(image);
+            //util::apply_visitor(visitor, image);
         }
         else if (boost::algorithm::starts_with(t, "jpeg"))
         {
-            util::apply_visitor(jpeg_saver(stream, t), image);
+            jpeg_saver visitor(stream, t);
+            visitor(image);
+            //util::apply_visitor(visitor, image);
         }
         else if (boost::algorithm::starts_with(t, "webp"))
         {
-            util::apply_visitor(webp_saver(stream, t), image);
+            webp_saver visitor(stream, t);
+            visitor(image);
+            //util::apply_visitor(visitor, image);
         }
         else throw ImageWriterException("unknown file type: " + type);
     }

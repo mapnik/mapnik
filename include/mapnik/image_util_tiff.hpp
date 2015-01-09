@@ -23,18 +23,15 @@
 #ifndef MAPNIK_IMAGE_UTIL_TIFF_HPP
 #define MAPNIK_IMAGE_UTIL_TIFF_HPP
 
-// mapnik
-#include <mapnik/util/variant.hpp>
-
 // stl
 #include <string>
 #include <iostream>
 
 namespace mapnik {
 
-struct tiff_saver : public mapnik::util::static_visitor<> 
+struct tiff_saver
 {
-    tiff_saver(std::ostream &, std::string &);
+    tiff_saver(std::ostream &, std::string const&);
     template <typename T>
     void operator() (T const&) const;
   private:

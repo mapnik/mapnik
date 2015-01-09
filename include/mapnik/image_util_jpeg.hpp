@@ -23,18 +23,15 @@
 #ifndef MAPNIK_IMAGE_UTIL_JPEG_HPP
 #define MAPNIK_IMAGE_UTIL_JPEG_HPP
 
-// mapnik
-#include <mapnik/util/variant.hpp>
-
 // stl
 #include <string>
 #include <iostream>
 
 namespace mapnik {
 
-struct jpeg_saver : public mapnik::util::static_visitor<> 
+struct jpeg_saver
 {
-    jpeg_saver(std::ostream &, std::string &);
+    jpeg_saver(std::ostream &, std::string const&);
     template <typename T>
     void operator() (T const&) const;
   private:

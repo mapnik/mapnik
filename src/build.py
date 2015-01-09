@@ -174,6 +174,10 @@ source = Split(
     parse_path.cpp
     image_reader.cpp
     image_util.cpp
+    image_util_jpeg.cpp
+    image_util_png.cpp
+    image_util_tiff.cpp
+    image_util_webp.cpp
     layer.cpp
     map.cpp
     load_map.cpp

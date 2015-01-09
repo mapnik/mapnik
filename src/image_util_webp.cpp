@@ -25,8 +25,12 @@
 #include <mapnik/webp_io.hpp>
 #endif
 
+#include <mapnik/image_util.hpp>
 #include <mapnik/image_util_webp.hpp>
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_view.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/tokenizer.hpp>
@@ -330,13 +334,14 @@ void handle_webp_options(std::string const& type,
 webp_saver::webp_saver(std::ostream & stream, std::string const& t):
     stream_(stream), t_(t) {}
 
-void webp_saver::operator() (image_data_null const& image) const
+template<>
+void webp_saver::operator()<image_data_null> (image_data_null const& image) const
 {
     throw ImageWriterException("null images not supported");
 }
 
 template <typename T>
-void webp_saver::operator() (T const& image) const
+void process_rgba8_webp(T const& image, std::string const& t, std::ostream & stream)
 {
 #if defined(HAVE_WEBP)
     WebPConfig config;
@@ -352,6 +357,24 @@ void webp_saver::operator() (T const& image) const
 #else
     throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif
+}
+
+template <>
+void webp_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
+{
+    process_rgba8_webp(image, t_, stream_);
+}
+
+template <>
+void webp_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
+{
+    process_rgba8_webp(image, t_, stream_);
+}
+
+template <typename T>
+void webp_saver::operator() (T const& image) const
+{
+    throw ImageWriterException("Mapnik does not support webp grayscale images");
 }
 
 template void webp_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const;

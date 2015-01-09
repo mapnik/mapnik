@@ -32,8 +32,12 @@ extern "C"
 #include <mapnik/png_io.hpp>
 #endif
 
+#include <mapnik/image_util.hpp>
 #include <mapnik/image_util_png.hpp>
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_view.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/tokenizer.hpp>
@@ -179,37 +183,47 @@ png_saver::png_saver(std::ostream & stream, std::string const& t):
 png_saver_pal::png_saver_pal(std::ostream & stream, std::string const& t, rgba_palette const& pal):
     stream_(stream), t_(t), pal_(pal) {}
 
-void png_saver::operator() (image_data_null const& image) const
+template<>
+void png_saver::operator()<image_data_null> (image_data_null const& image) const
 {
-    throw ImageWriterException("null images not supported");
+    throw ImageWriterException("null images not supported for png");
+}
+
+template<>
+void png_saver_pal::operator()<image_data_null> (image_data_null const& image) const
+{
+    throw ImageWriterException("null images not supported for png");
 }
 
 template <typename T>
-void process_rgb8_png_pal(T const& image)
+void process_rgba8_png_pal(T const& image, 
+                          std::string const& t,
+                          std::ostream & stream,
+                          rgba_palette const& pal)
 {
 #if defined(HAVE_PNG)
     png_options opts;
-    handle_png_options(t_, opts);
-    if (pal_ && pal_->valid())
+    handle_png_options(t, opts);
+    if (pal.valid())
     {
         png_options opts;
         handle_png_options(t,opts);
-        save_as_png8_pal(stream, image, pal_, opts);
+        save_as_png8_pal(stream, image, pal, opts);
     }
     else if (opts.paletted)
     {
         if (opts.use_hextree)
         {
-            save_as_png8_hex(stream_, image, opts);
+            save_as_png8_hex(stream, image, opts);
         }
         else
         {
-            save_as_png8_oct(stream_, image, opts);
+            save_as_png8_oct(stream, image, opts);
         }
     }
     else
     {
-        save_as_png(stream_, image, opts);
+        save_as_png(stream, image, opts);
     }
 #else
     throw ImageWriterException("png output is not enabled in your build of Mapnik");
@@ -217,87 +231,94 @@ void process_rgb8_png_pal(T const& image)
 }
 
 template <typename T>
-void process_rgb8_png(T const& image)
+void process_rgba8_png(T const& image, 
+                          std::string const& t,
+                          std::ostream & stream)
 {
 #if defined(HAVE_PNG)
     png_options opts;
-    handle_png_options(t_, opts);
+    handle_png_options(t, opts);
     if (opts.paletted)
     {
         if (opts.use_hextree)
         {
-            save_as_png8_hex(stream_, image, opts);
+            save_as_png8_hex(stream, image, opts);
         }
         else
         {
-            save_as_png8_oct(stream_, image, opts);
+            save_as_png8_oct(stream, image, opts);
         }
     }
     else
     {
-        save_as_png(stream_, image, opts);
+        save_as_png(stream, image, opts);
     }
 #else
     throw ImageWriterException("png output is not enabled in your build of Mapnik");
 #endif
 }
 
-void png_saver_pal::operator() (image_data_rgba8 const& image) const
+template<>
+void png_saver_pal::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
 {
-    process_rgb8_png(image);
+    process_rgba8_png_pal(image, t_, stream_, pal_);
 }
 
-void png_saver_pal::operator() (image_view<image_data_rgba8> const& image) const
+template<>
+void png_saver_pal::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
 {
-    process_rgb8_png(image);
+    process_rgba8_png_pal(image, t_, stream_, pal_);
 }
 
-void png_saver::operator() (image_data_rgba8 const& image) const
+template<>
+void png_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
 {
-    process_rgb8_png(image);
+    process_rgba8_png(image, t_, stream_);
 }
 
-void png_saver::operator() (image_view<image_data_rgba8> const& image) const
+template<>
+void png_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
 {
-    process_rgb8_png(image);
+    process_rgba8_png(image, t_, stream_);
 }
 
 template <typename T>
 void png_saver::operator() (T const& image) const
 {
 #if defined(HAVE_PNG)
-    png_options opts;
-    handle_png_options(t_, opts);
-    save_as_png(stream_, image, opts);
+    throw ImageWriterException("Mapnik does not support grayscale images for png");
+    //png_options opts;
+    //handle_png_options(t_, opts);
+    //save_as_png(stream_, image, opts);
 #else
     throw ImageWriterException("png output is not enabled in your build of Mapnik");
 #endif
 }
-
-template void png_saver::operator()<image_data_gray8> (image_data_gray8 const& image) const;
-template void png_saver::operator()<image_data_gray16> (image_data_gray16 const& image) const;
-template void png_saver::operator()<image_data_gray32f> (image_data_gray32f const& image) const;
-template void png_saver::operator()<image_view<image_data_gray8>> (image_view<image_data_gray8> const& image) const;
-template void png_saver::operator()<image_view<image_data_gray16>> (image_view<image_data_gray16> const& image) const;
-template void png_saver::operator()<image_view<image_data_gray32f>> (image_view<image_data_gray32f> const& image) const;
 
 template <typename T>
 void png_saver_pal::operator() (T const& image) const
 {
 #if defined(HAVE_PNG)
-    png_options opts;
-    handle_png_options(t_, opts);
-    save_as_png(stream_, image, opts);
+    throw ImageWriterException("Mapnik does not support grayscale images for png");
+    //png_options opts;
+    //handle_png_options(t_, opts);
+    //save_as_png(stream_, image, opts);
 #else
     throw ImageWriterException("png output is not enabled in your build of Mapnik");
 #endif
 }
 
-template void png_saver_pal::operator()<image_data_gray8> (image_data_gray8 const& image) const;
-template void png_saver_pal::operator()<image_data_gray16> (image_data_gray16 const& image) const;
-template void png_saver_pal::operator()<image_data_gray32f> (image_data_gray32f const& image) const;
-template void png_saver_pal::operator()<image_view<image_data_gray8>> (image_view<image_data_gray8> const& image) const;
-template void png_saver_pal::operator()<image_view<image_data_gray16>> (image_view<image_data_gray16> const& image) const;
-template void png_saver_pal::operator()<image_view<image_data_gray32f>> (image_view<image_data_gray32f> const& image) const;
+template void png_saver::operator() (image_data_gray8 const& image) const;
+template void png_saver::operator() (image_data_gray16 const& image) const;
+template void png_saver::operator() (image_data_gray32f const& image) const;
+template void png_saver::operator() (image_view_gray8 const& image) const;
+template void png_saver::operator() (image_view_gray16 const& image) const;
+template void png_saver::operator() (image_view_gray32f const& image) const;
+template void png_saver_pal::operator() (image_data_gray8 const& image) const;
+template void png_saver_pal::operator() (image_data_gray16 const& image) const;
+template void png_saver_pal::operator() (image_data_gray32f const& image) const;
+template void png_saver_pal::operator() (image_view_gray8 const& image) const;
+template void png_saver_pal::operator() (image_view_gray16 const& image) const;
+template void png_saver_pal::operator() (image_view_gray32f const& image) const;
 
 } // end ns

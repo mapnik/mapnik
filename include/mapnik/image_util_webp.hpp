@@ -23,18 +23,15 @@
 #ifndef MAPNIK_IMAGE_UTIL_WEBP_HPP
 #define MAPNIK_IMAGE_UTIL_WEBP_HPP
 
-// mapnik
-#include <mapnik/util/variant.hpp>
-
 // stl
 #include <string>
 #include <iostream>
 
 namespace mapnik {
 
-struct webp_saver : public mapnik::util::static_visitor<> 
+struct webp_saver
 {
-    webp_saver(std::ostream &, std::string &);
+    webp_saver(std::ostream &, std::string const&);
     template <typename T>
     void operator() (T const&) const;
   private:

@@ -25,8 +25,12 @@
 #include <mapnik/jpeg_io.hpp>
 #endif
 
+#include <mapnik/image_util.hpp>
 #include <mapnik/image_util_jpeg.hpp>
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_view.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/tokenizer.hpp>
@@ -41,13 +45,8 @@ namespace mapnik
 jpeg_saver::jpeg_saver(std::ostream & stream, std::string const& t):
     stream_(stream), t_(t) {}
 
-void jpeg_saver::operator() (image_data_null const& image) const
-{
-    throw ImageWriterException("null images not supported");
-}
-
 template <typename T>
-void jpeg_saver::operator() (T const& image) const
+void process_rgba8_jpeg(T const& image, std::string const& t, std::ostream & stream)
 {
 #if defined(HAVE_JPEG)
     int quality = 85;
@@ -65,13 +64,29 @@ void jpeg_saver::operator() (T const& image) const
 #endif
 }
 
-template void jpeg_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const;
-template void jpeg_saver::operator()<image_data_gray8> (image_data_gray8 const& image) const;
-template void jpeg_saver::operator()<image_data_gray16> (image_data_gray16 const& image) const;
-template void jpeg_saver::operator()<image_data_gray32f> (image_data_gray32f const& image) const;
-template void jpeg_saver::operator()<image_view<image_data_rgba8>> (image_view<image_data_rgba8> const& image) const;
-template void jpeg_saver::operator()<image_view<image_data_gray8>> (image_view<image_data_gray8> const& image) const;
-template void jpeg_saver::operator()<image_view<image_data_gray16>> (image_view<image_data_gray16> const& image) const;
-template void jpeg_saver::operator()<image_view<image_data_gray32f>> (image_view<image_data_gray32f> const& image) const;
+template<>
+void jpeg_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
+{
+    process_rgba8_jpeg(image, t_, stream_);
+}
+
+template<>
+void jpeg_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
+{
+    process_rgba8_jpeg(image, t_, stream_);
+}
+
+template <typename T>
+void jpeg_saver::operator() (T const& image) const
+{
+    throw ImageWriterException("Mapnik does not support jpeg grayscale images");
+}
+
+template void jpeg_saver::operator() (image_data_gray8 const& image) const;
+template void jpeg_saver::operator() (image_data_gray16 const& image) const;
+template void jpeg_saver::operator() (image_data_gray32f const& image) const;
+template void jpeg_saver::operator() (image_view_gray8 const& image) const;
+template void jpeg_saver::operator() (image_view_gray16 const& image) const;
+template void jpeg_saver::operator() (image_view_gray32f const& image) const;
 
 } // end ns
