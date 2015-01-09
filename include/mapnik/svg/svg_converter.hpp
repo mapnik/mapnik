@@ -255,11 +255,13 @@ public:
     }
     void fill_none()
     {
+        cur_attr().fill_none = true;
         cur_attr().fill_flag = false;
     }
 
     void stroke_none()
     {
+        cur_attr().stroke_none = true;
         cur_attr().stroke_flag = false;
     }
 

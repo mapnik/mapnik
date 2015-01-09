@@ -76,41 +76,50 @@ bool push_explicit_style(svg_attribute_type const& src,
         bool success = false;
         for(unsigned i = 0; i < src.size(); ++i)
         {
-            success = true;
             dst.push_back(src[i]);
             mapnik::svg::path_attributes & attr = dst.last();
-            if (stroke_width)
+            if (!attr.visibility_flag)
+                continue;
+            success = true;
+
+            if (!attr.stroke_none)
             {
-                attr.stroke_width = *stroke_width;
-                attr.stroke_flag = true;
+                if (stroke_width)
+                {
+                    attr.stroke_width = *stroke_width;
+                    attr.stroke_flag = true;
+                }
+                if (stroke_color)
+                {
+                    color const& s_color = *stroke_color;
+                    attr.stroke_color = agg::rgba(s_color.red()/255.0,
+                                                  s_color.green()/255.0,
+                                                  s_color.blue()/255.0,
+                                                  s_color.alpha()/255.0);
+                    attr.stroke_flag = true;
+                }
+                if (stroke_opacity)
+                {
+                    attr.stroke_opacity = *stroke_opacity;
+                    attr.stroke_flag = true;
+                }
             }
-            if (stroke_color)
+            if (!attr.fill_none)
             {
-                color const& s_color = *stroke_color;
-                attr.stroke_color = agg::rgba(s_color.red()/255.0,
-                                              s_color.green()/255.0,
-                                              s_color.blue()/255.0,
-                                              s_color.alpha()/255.0);
-                attr.stroke_flag = true;
-            }
-            if (stroke_opacity)
-            {
-                attr.stroke_opacity = *stroke_opacity;
-                attr.stroke_flag = true;
-            }
-            if (fill_color)
-            {
-                color const& f_color = *fill_color;
-                attr.fill_color = agg::rgba(f_color.red()/255.0,
-                                            f_color.green()/255.0,
-                                            f_color.blue()/255.0,
-                                            f_color.alpha()/255.0);
-                attr.fill_flag = true;
-            }
-            if (fill_opacity)
-            {
-                attr.fill_opacity = *fill_opacity;
-                attr.fill_flag = true;
+                if (fill_color)
+                {
+                    color const& f_color = *fill_color;
+                    attr.fill_color = agg::rgba(f_color.red()/255.0,
+                                                f_color.green()/255.0,
+                                                f_color.blue()/255.0,
+                                                f_color.alpha()/255.0);
+                    attr.fill_flag = true;
+                }
+                if (fill_opacity)
+                {
+                    attr.fill_opacity = *fill_opacity;
+                    attr.fill_flag = true;
+                }
             }
         }
         return success;
