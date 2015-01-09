@@ -9,7 +9,7 @@
 </Style>
 <Style name="point-placement" filter-mode="first" >
   <Rule>
-    <MarkersSymbolizer placement="point" marker-type="ellipse" fill="blue" />
+    <MarkersSymbolizer placement="point" file="shape://ellipse" fill="blue" />
     <DebugSymbolizer />
   </Rule>
 </Style>

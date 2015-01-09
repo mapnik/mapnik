@@ -11,7 +11,7 @@
     </Style>
     <Style name="markers">
         <Rule>
-            <MarkersSymbolizer marker-type="ellipse" placement="[placement]" />
+            <MarkersSymbolizer file="shape://ellipse" placement="[placement]" />
             <DebugSymbolizer />
         </Rule>
     </Style>

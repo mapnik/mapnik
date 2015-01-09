@@ -4,15 +4,15 @@
     <Style name="1">
         <Rule>
           <Filter>[id]=1</Filter>
-          <MarkersSymbolizer fill="darkgreen" opacity=".7" width="15" height="10" stroke="green" stroke-width="7" stroke-opacity=".2" placement="line" marker-type="ellipse"/>
+          <MarkersSymbolizer fill="darkgreen" opacity=".7" width="15" height="10" stroke="green" stroke-width="7" stroke-opacity=".2" placement="line" file="shape://ellipse"/>
         </Rule>
         <Rule>
           <Filter>[id]=2</Filter>
-             <MarkersSymbolizer fill="darkorange" opacity=".7" width="20" height="10" stroke="orange" stroke-width="7" stroke-opacity=".2" placement="line" marker-type="ellipse"/>
+             <MarkersSymbolizer fill="darkorange" opacity=".7" width="20" height="10" stroke="orange" stroke-width="7" stroke-opacity=".2" placement="line" file="shape://ellipse"/>
         </Rule>
         <Rule>
           <Filter>[id]=3</Filter>
-             <MarkersSymbolizer fill="darkred" opacity=".7" width="20" height="10" stroke="orange" stroke-width="7" stroke-opacity=".2" placement="line" marker-type="ellipse"/>
+             <MarkersSymbolizer fill="darkred" opacity=".7" width="20" height="10" stroke="orange" stroke-width="7" stroke-opacity=".2" placement="line" file="shape://ellipse"/>
         </Rule>
     </Style>
     <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
