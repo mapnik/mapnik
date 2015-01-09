@@ -40,10 +40,10 @@ def test_broken_files():
 def test_can_parse_xml_with_deprecated_properties():
     default_logging_severity = mapnik.logger.get_severity()
     mapnik.logger.set_severity(mapnik.severity_type.None)
-    broken_files = glob.glob("../data/deprecated_maps/*.xml")
+    files_with_deprecated_props = glob.glob("../data/deprecated_maps/*.xml")
 
     failures = [];
-    for filename in broken_files:
+    for filename in files_with_deprecated_props:
         try:
             m = mapnik.Map(512, 512)
             strict = True
