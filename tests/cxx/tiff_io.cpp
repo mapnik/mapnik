@@ -1,8 +1,12 @@
+
+#if defined(HAVE_TIFF)
+
 #include "catch.hpp"
 
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/file_io.hpp>
+
 #include <mapnik/tiff_io.hpp>
 #include "../../src/tiff_reader.cpp"
 
@@ -274,3 +278,5 @@ SECTION("gray32f tiled") {
 }
 
 }
+
+#endif
