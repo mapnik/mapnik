@@ -50,7 +50,9 @@ struct path_attributes
     agg::line_join_e  line_join;
     agg::line_cap_e   line_cap;
     bool         fill_flag;
+    bool         fill_none;
     bool         stroke_flag;
+    bool         stroke_none;
     bool         even_odd_flag;
     bool         visibility_flag;
     bool         display_flag;
@@ -71,7 +73,9 @@ struct path_attributes
         line_join(agg::miter_join),
         line_cap(agg::butt_cap),
         fill_flag(true),
+        fill_none(false),
         stroke_flag(false),
+        stroke_none(false),
         even_odd_flag(false),
         visibility_flag(true),
         display_flag(true)
@@ -94,7 +98,9 @@ struct path_attributes
           line_join(attr.line_join),
           line_cap(attr.line_cap),
           fill_flag(attr.fill_flag),
+          fill_none(attr.fill_none),
           stroke_flag(attr.stroke_flag),
+          stroke_none(attr.stroke_none),
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
           display_flag(attr.display_flag)
@@ -115,7 +121,9 @@ struct path_attributes
           line_join(attr.line_join),
           line_cap(attr.line_cap),
           fill_flag(attr.fill_flag),
+          fill_none(attr.fill_none),
           stroke_flag(attr.stroke_flag),
+          stroke_none(attr.stroke_none),
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
           display_flag(attr.display_flag)
