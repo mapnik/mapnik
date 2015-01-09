@@ -219,7 +219,7 @@ std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 {
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
     std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
-    cairo_image_to_rgba8(image_ptr->data(), image_surface);
+    cairo_image_to_rgba8(image_ptr->data(), surface);
     return image_ptr;
 }
 #endif
