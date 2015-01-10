@@ -123,7 +123,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
             }
             else
             {
-                MAPNIK_LOG_DEBUG(rasterlite) << "Rasterlite Plugin: Error " << rasterliteGetLastError (dataset_);
+                MAPNIK_LOG_ERROR(rasterlite) << "Rasterlite Plugin: Error " << rasterliteGetLastError (dataset_);
             }
         }
 
