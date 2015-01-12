@@ -114,13 +114,6 @@ void save_as_png(T const& image,
                  std::string const& filename,
                  rgba_palette const& palette);
 
-#if defined(HAVE_JPEG)
-template <typename T>
-void save_as_jpeg(std::string const& filename,
-                  int quality,
-                  T const& image);
-#endif
-
 inline bool is_png(std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".png"));
