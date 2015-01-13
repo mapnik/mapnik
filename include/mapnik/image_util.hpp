@@ -119,9 +119,7 @@ template <typename T>
 MAPNIK_DECL void set_premultiplied_alpha(T & image, bool status);
 
 template <typename T>
-void save_as_png(T const& image,
-                 std::string const& filename,
-                 rgba_palette const& palette);
+MAPNIK_DECL bool is_solid (T const& image);
 
 inline bool is_png(std::string const& filename)
 {

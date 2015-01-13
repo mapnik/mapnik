@@ -89,23 +89,7 @@ PyObject* view_tostring3(image_view_rgba8 const & view, std::string const& forma
 
 bool is_solid(image_view_rgba8 const& view)
 {
-    if (view.width() > 0 && view.height() > 0)
-    {
-        mapnik::image_view_rgba8::pixel_type const* first_row = view.getRow(0);
-        mapnik::image_view_rgba8::pixel_type const first_pixel = first_row[0];
-        for (unsigned y = 0; y < view.height(); ++y)
-        {
-            mapnik::image_view_rgba8::pixel_type const * row = view.getRow(y);
-            for (unsigned x = 0; x < view.width(); ++x)
-            {
-                if (first_pixel != row[x])
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
+    mapnik::is_solid(view);
 }
 
 void save_view1(image_view_rgba8 const& view,
