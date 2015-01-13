@@ -77,3 +77,4 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Rich Wareham
 * Nick Whitelegg
 * Leslie Wu
+* Blake Thompson
