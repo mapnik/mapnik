@@ -182,6 +182,67 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
     else throw ImageWriterException("Could not write file to " + filename );
 }
 
+namespace detail {
+
+struct is_solid_visitor
+{
+    template <typename T>
+    bool operator() (T const & data)
+    {
+        using pixel_type = typename T::pixel_type;
+        if (data.width() > 0 && data.height() > 0)
+        {
+            pixel_type const* first_row = data.getRow(0);
+            pixel_type const first_pixel = first_row[0];
+            for (unsigned y = 0; y < data.height(); ++y)
+            {
+                pixel_type const * row = data.getRow(y);
+                for (unsigned x = 0; x < data.width(); ++x)
+                {
+                    if (first_pixel != row[x])
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
+
+template bool is_solid_visitor::operator()<image_data_rgba8> (image_data_rgba8 const& data);
+template bool is_solid_visitor::operator()<image_data_gray8> (image_data_gray8 const& data);
+template bool is_solid_visitor::operator()<image_data_gray16> (image_data_gray16 const& data);
+template bool is_solid_visitor::operator()<image_data_gray32f> (image_data_gray32f const& data);
+template bool is_solid_visitor::operator()<image_view_rgba8> (image_view_rgba8 const& data);
+template bool is_solid_visitor::operator()<image_view_gray8> (image_view_gray8 const& data);
+template bool is_solid_visitor::operator()<image_view_gray16> (image_view_gray16 const& data);
+template bool is_solid_visitor::operator()<image_view_gray32f> (image_view_gray32f const& data);
+
+} // end detail ns
+
+template <typename T>
+bool is_solid(T const& image)
+{
+    return util::apply_visitor(detail::is_solid_visitor(), image);
+}
+
+// Temporary until image_data_rgba8 is removed from passing
+template <>
+bool is_solid<image_data_rgba8>(image_data_rgba8 const& image)
+{
+    detail::is_solid_visitor visitor;
+    return visitor(image);
+}
+
+// Temporary until image_view_rgba8 is removed from passing
+template <>
+bool is_solid<image_view_rgba8>(image_view_rgba8 const& image)
+{
+    detail::is_solid_visitor visitor;
+    return visitor(image);
+}
+
 template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&);
