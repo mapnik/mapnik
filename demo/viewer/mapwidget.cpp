@@ -32,6 +32,7 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/timer.hpp>
+#include <mapnik/cairo/cairo_image_util.hpp>
 
 #ifdef HAVE_CAIRO
 // cairo
@@ -539,7 +540,9 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
         mapnik::cairo_renderer<mapnik::cairo_ptr> renderer(map, cairo, scaling_factor);
         renderer.apply();
     }
-    image_32 buf(image_surface);
+    mapnik::image_data_rgba8 data(map.width(), map.height());
+    mapnik::cairo_image_to_rgba8(data, image_surface);
+    image_32 buf(std::move(data));
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());
 #endif
