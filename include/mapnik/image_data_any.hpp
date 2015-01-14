@@ -35,6 +35,7 @@ struct image_data_null
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
     bool get_premultiplied() const { return false; }
+    void set_premultiplied(bool) const {}
 };
 
 using image_data_base = util::variant<image_data_null, 

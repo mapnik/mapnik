@@ -205,6 +205,11 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
             // only premultiply rgba8 images
             if (source->data_.is<image_data_rgba8>())
             {
+                auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
+                if (is_premultiplied && *is_premultiplied)
+                {
+                    mapnik::set_premultiplied_alpha(source->data_, true);
+                }
                 mapnik::premultiply_alpha(source->data_);
             }
 

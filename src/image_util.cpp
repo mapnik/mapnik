@@ -444,10 +444,24 @@ void demultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
     }
 }
 
+struct set_premultiplied_visitor
+{
+    set_premultiplied_visitor(bool status)
+        : status_(status) {}
+
+    template <typename T>
+    void operator() (T & data) 
+    {
+        data.set_premultiplied(status_);
+    }
+  private:
+    bool status_;
+};
+
 } // end detail ns
 
 template <typename T>
-void premultiply_alpha(T & image)
+MAPNIK_DECL void premultiply_alpha(T & image)
 {
     util::apply_visitor(detail::premultiply_visitor(), image);
 }
@@ -456,14 +470,14 @@ template void premultiply_alpha<image_data_any> (image_data_any &);
 
 // Temporary, can be removed once image_view_any and image_data_any are the only ones passed
 template <>
-void premultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
+MAPNIK_DECL void premultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
 {
     detail::premultiply_visitor visit;
     visit(image);
 }
 
 template <typename T>
-void demultiply_alpha(T & image)
+MAPNIK_DECL void demultiply_alpha(T & image)
 {
     util::apply_visitor(detail::demultiply_visitor(), image);
 }
@@ -472,9 +486,25 @@ template void demultiply_alpha<image_data_any> (image_data_any &);
 
 // Temporary, can be removed once image_view_any and image_data_any are the only ones passed
 template <>
-void demultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
+MAPNIK_DECL void demultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
 {
     detail::demultiply_visitor visit;
+    visit(image);
+}
+
+template <typename T>
+MAPNIK_DECL void set_premultiplied_alpha(T & image, bool status)
+{
+    util::apply_visitor(detail::set_premultiplied_visitor(status), image);
+}
+
+template void set_premultiplied_alpha<image_data_any> (image_data_any &, bool);
+
+// Temporary, can be removed once image_view_any and image_data_any are the only ones passed
+template <>
+MAPNIK_DECL void set_premultiplied_alpha<image_data_rgba8>(image_data_rgba8 & image, bool status)
+{
+    detail::set_premultiplied_visitor visit(status);
     visit(image);
 }
 

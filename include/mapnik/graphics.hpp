@@ -94,17 +94,7 @@ public:
         return data_.getBytes();
     }
 
-    inline const unsigned char* getBytes() const
-    {
-        return data_.getBytes();
-    }
-
     inline unsigned char* raw_data()
-    {
-        return data_.getBytes();
-    }
-
-    inline unsigned char* getBytes()
     {
         return data_.getBytes();
     }
