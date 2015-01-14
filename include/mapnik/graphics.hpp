@@ -52,6 +52,7 @@ public:
     using pixel_type = typename image_data_rgba8::pixel_type;
     image_32(int width,int height);
     image_32(image_32 const& rhs);
+    image_32(image_data_rgba8 && data);
     ~image_32();
 
     void painted(bool painted)

@@ -35,7 +35,7 @@
 #include <QPainter>
 #include <QPixmap>
 
-class node : private util::noncopyable
+class node : private mapnik::util::noncopyable
 {
     struct node_base
     {
