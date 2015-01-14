@@ -160,6 +160,7 @@ static const char * text_transform_strings[] = {
     "uppercase",
     "lowercase",
     "capitalize",
+    "reverse",
     ""
 };
 

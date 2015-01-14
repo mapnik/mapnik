@@ -49,6 +49,11 @@ image_32::image_32(image_32 const& rhs)
      painted_(rhs.painted_),
      premultiplied_(rhs.premultiplied_) {}
 
+image_32::image_32(image_data_rgba8 && data)
+    : data_(std::move(data)),
+      painted_(false),
+      premultiplied_(false) {}
+
 image_32::~image_32() {}
 
 void image_32::set_grayscale_to_alpha()

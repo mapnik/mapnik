@@ -125,6 +125,7 @@ enum text_transform_enum : std::uint8_t
     UPPERCASE,
     LOWERCASE,
     CAPITALIZE,
+    REVERSE,
     text_transform_enum_MAX
 };
 
