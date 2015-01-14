@@ -24,6 +24,7 @@
 #define MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/image_util.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -204,22 +205,7 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
             // only premultiply rgba8 images
             if (source->data_.is<image_data_rgba8>())
             {
-                bool premultiply_source = !source->premultiplied_alpha_;
-                auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
-                if (is_premultiplied)
-                {
-                    if (*is_premultiplied) premultiply_source = false;
-                    else premultiply_source = true;
-                }
-                if (premultiply_source)
-                {
-                    agg::rendering_buffer buffer(source->data_.getBytes(),
-                                                 source->data_.width(),
-                                                 source->data_.height(),
-                                                 source->data_.width() * 4);
-                    agg::pixfmt_rgba32 pixf(buffer);
-                    pixf.premultiply();
-                }
+                mapnik::premultiply_alpha(source->data_);
             }
 
             if (!prj_trans.equal())

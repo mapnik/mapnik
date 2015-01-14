@@ -34,6 +34,7 @@ struct image_data_null
     unsigned char* getBytes() { return nullptr;}
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
+    bool get_premultiplied() const { return false; }
 };
 
 using image_data_base = util::variant<image_data_null, 
@@ -80,6 +81,14 @@ struct get_height_visitor
     }
 };
 
+struct get_premultiplied_visitor
+{
+    template <typename T>
+    bool operator()(T const& data) const
+    {
+        return data.get_premultiplied();
+    }
+};
 } // namespace detail
 
 struct image_data_any : image_data_base
@@ -108,6 +117,11 @@ struct image_data_any : image_data_base
     std::size_t height() const
     {
         return util::apply_visitor(detail::get_height_visitor(),*this);
+    }
+
+    bool get_premultiplied() const
+    {
+        return util::apply_visitor(detail::get_premultiplied_visitor(),*this);
     }
 };
 

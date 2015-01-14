@@ -48,7 +48,6 @@ private:
     image_data_rgba8 data_;
     boost::optional<color> background_;
     bool painted_;
-    bool premultiplied_;
 public:
     using pixel_type = typename image_data_rgba8::pixel_type;
     image_32(int width,int height);
@@ -65,11 +64,6 @@ public:
         return painted_;
     }
 
-    bool premultiplied() const
-    {
-        return premultiplied_;
-    }
-
     inline void clear()
     {
         std::fill(data_.getData(), data_.getData() + data_.width() * data_.height(), 0);
@@ -78,10 +72,6 @@ public:
     boost::optional<color> const& get_background() const;
 
     void set_background(const color& c);
-
-    void premultiply();
-
-    void demultiply();
 
     void set_grayscale_to_alpha();
 

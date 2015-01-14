@@ -76,6 +76,12 @@ void jpeg_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) co
     process_rgba8_jpeg(image, t_, stream_);
 }
 
+template<>
+void jpeg_saver::operator()<image_data_null> (image_data_null const& image) const
+{
+    throw ImageWriterException("Can not save a null image to jpeg");
+}
+
 template <typename T>
 void jpeg_saver::operator() (T const& image) const
 {

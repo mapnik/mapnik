@@ -145,7 +145,7 @@ void agg_renderer<T0,T1>::setup(Map const &m)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        composite(pixmap_.data(),*bg_image, m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h, false);
+                        composite(pixmap_.data(),*bg_image, m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h);
                     }
                 }
             }
@@ -285,14 +285,14 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
             composite(pixmap_.data(), current_buffer_->data(),
                       *st.comp_op(), st.get_opacity(),
                       -common_.t_.offset(),
-                      -common_.t_.offset(), false);
+                      -common_.t_.offset());
         }
         else if (blend_from || st.get_opacity() < 1.0)
         {
             composite(pixmap_.data(), current_buffer_->data(),
                       src_over, st.get_opacity(),
                       -common_.t_.offset(),
-                      -common_.t_.offset(), false);
+                      -common_.t_.offset());
         }
     }
     // apply any 'direct' image filters
@@ -376,8 +376,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
             composite(current_buffer_->data(), **marker.get_bitmap_data(),
                       comp_op, opacity,
                       std::floor(pos.x - cx + .5),
-                      std::floor(pos.y - cy + .5),
-                      false);
+                      std::floor(pos.y - cy + .5));
         }
         else
         {

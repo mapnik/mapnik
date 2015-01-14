@@ -210,14 +210,13 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    mapnik::image_ptr image(std::make_shared<mapnik::image_data_rgba8>(width,height));
-                    reader->read(0,0,*image);
-                    if (!reader->premultiplied_alpha())
+                    image_data_any im = reader->read(0,0,width,height);
+                    if (!im.is<image_data_rgba8>()) 
                     {
-                        agg::rendering_buffer buffer(image->getBytes(),image->width(),image->height(),image->width() * 4);
-                        agg::pixfmt_rgba32 pixf(buffer);
-                        pixf.premultiply();
+                        throw std::runtime_error("Error: Only image_data_rgba8 types are supported currenctly by markers");
                     }
+                    mapnik::premultiply_alpha(im);
+                    mapnik::image_ptr image(std::make_shared<mapnik::image_data_rgba8>(std::move(util::get<image_data_rgba8>(im))));
                     marker_ptr mark(std::make_shared<marker>(image));
                     result.reset(mark);
                     if (update_cache)
