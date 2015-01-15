@@ -52,54 +52,10 @@ image image::read_from_file(std::string const& filename)
         return image();
     }
 }
-/*
-namespace detail {
-
-struct save_to_file_visitor
-{
-    save_to_file_visitor(std::string const& filename, std::string const& format)
-        : filename_(filename),
-          format_(format) {}
-
-    void operator() (image_data_rgba8 const& data) const
-    {
-        save_to_file(data,filename_, format_);
-    }
-
-    void operator() (image_data_gray16 const& data) const
-    {
-        if (format_ == "tiff") // only TIFF supported
-        {
-            std::ofstream file (filename_.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
-            if (file)
-            {
-                tiff_config config;
-                save_as_tiff(file, data, config);
-            }
-            else throw ImageWriterException("Could not write file to " + filename_ );
-        }
-        else
-        {
-            throw std::runtime_error("Error: saving gray16 image as " + format_  + " is not supported");
-        }
-    }
-
-    template <typename T>
-    void operator() (T const& data) const
-    {
-        throw std::runtime_error("Error: saving " + std::string(typeid(data).name()) + " as " + format_  + " is not supported");
-    }
-
-    std::string const& filename_;
-    std::string const& format_;
-};
-
-}*/
 
 void image::save_to_file(std::string const& filename, std::string const& format)
 {
     mapnik::save_to_file(data_, filename, format);
-    //util::apply_visitor(detail::save_to_file_visitor(filename, format), data_);
 }
 
 }
