@@ -41,7 +41,7 @@ lat,long,name1,ref1,name2,ref2,margin
       <GroupSymbolizer start-column="1" num-columns="2" placement="point" avoid-edges="false" margin="[margin]">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
+          <MarkersSymbolizer file="../../data/svg/rect.svg"/>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="10">[name%]</TextSymbolizer>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="-10">[ref%]</TextSymbolizer>
         </GroupRule>
