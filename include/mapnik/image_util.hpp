@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/util/variant.hpp>
 
 // boost
 #pragma GCC diagnostic push
