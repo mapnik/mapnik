@@ -189,9 +189,11 @@ std::shared_ptr<image_32> frombuffer(PyObject * obj)
 }
 
 
-void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float opacity)
+void blend (image_32 & im, unsigned x, unsigned y, image_32 & im2, float opacity)
 {
-    im.set_rectangle_alpha2(im2.data(),x,y,opacity);
+    mapnik::premultiply_alpha(im.data());
+    mapnik::premultiply_alpha(im2.data());
+    mapnik::composite(im.data(),im2.data(),mapnik::src_over,opacity,x,y);
 }
 
 bool premultiplied(image_32 &im)
