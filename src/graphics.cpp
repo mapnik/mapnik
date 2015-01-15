@@ -92,28 +92,6 @@ void image_32::set_color_to_alpha(const color& c)
     }
 }
 
-void image_32::set_alpha(float opacity)
-{
-    for (unsigned int y = 0; y < data_.height(); ++y)
-    {
-        unsigned int* row_to =  data_.getRow(y);
-        for (unsigned int x = 0; x < data_.width(); ++x)
-        {
-            unsigned rgba = row_to[x];
-            unsigned a0 = (rgba >> 24) & 0xff;
-            unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
-            //unsigned a1 = opacity;
-            if (a0 == a1) continue;
-
-            unsigned r = rgba & 0xff;
-            unsigned g = (rgba >> 8 ) & 0xff;
-            unsigned b = (rgba >> 16) & 0xff;
-
-            row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
-        }
-    }
-}
-
 void image_32::set_background(const color& c)
 {
     background_=c;

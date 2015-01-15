@@ -15,9 +15,17 @@ def setup():
 def test_image_premultiply():
     im = mapnik.Image(256,256)
     eq_(im.premultiplied(),False)
-    im.premultiply()
+    # Premultiply should return true that it worked
+    eq_(im.premultiply(), True)
     eq_(im.premultiplied(),True)
-    im.demultiply()
+    # Premultipling again should return false as nothing should happen
+    eq_(im.premultiply(), False)
+    eq_(im.premultiplied(),True)
+    # Demultiply should return true that it worked
+    eq_(im.demultiply(), True)
+    eq_(im.premultiplied(),False)
+    # Demultiply again should not work and return false as it did nothing
+    eq_(im.demultiply(), False)
     eq_(im.premultiplied(),False)
 
 @raises(RuntimeError)
