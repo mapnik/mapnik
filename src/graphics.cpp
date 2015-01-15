@@ -49,8 +49,7 @@ image_32::image_32(image_32 const& rhs)
 
 image_32::image_32(image_data_rgba8 && data)
     : data_(std::move(data)),
-      painted_(false),
-      premultiplied_(false) {}
+      painted_(false) {}
 
 image_32::~image_32() {}
 

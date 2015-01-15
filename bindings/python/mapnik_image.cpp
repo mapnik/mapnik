@@ -228,6 +228,8 @@ void demultiply(image_32 & im)
 
 void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
 {
+    mapnik::premultiply_alpha(dst.data());
+    mapnik::premultiply_alpha(src.data());
     mapnik::composite(dst.data(),src.data(),mode,opacity,0,0);
 }
 

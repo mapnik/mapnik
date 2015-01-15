@@ -54,6 +54,8 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
         sym, feature, prj_trans, common_,
         [&](image_data_rgba8 & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
+            premultiply_alpha(target);
+            premultiply_alpha(current_buffer_->data());
             composite(current_buffer_->data(), target,
                       comp_op, opacity, start_x, start_y);
         }
