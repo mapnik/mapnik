@@ -28,6 +28,7 @@
 #include <mapnik/image_util_webp.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_data_any.hpp>
+#include <mapnik/image_view_any.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
@@ -434,6 +435,12 @@ template bool is_solid_visitor::operator()<image_view_gray8> (image_view_gray8 c
 template bool is_solid_visitor::operator()<image_view_gray16> (image_view_gray16 const& data);
 template bool is_solid_visitor::operator()<image_view_gray32f> (image_view_gray32f const& data);
 
+template<>
+bool is_solid_visitor::operator()<image_data_null> (image_data_null const&)
+{
+    return true;
+}
+
 } // end detail ns
 
 template <typename T>
@@ -441,6 +448,9 @@ MAPNIK_DECL bool is_solid(T const& image)
 {
     return util::apply_visitor(detail::is_solid_visitor(), image);
 }
+
+template bool is_solid<image_data_any> (image_data_any const&);
+template bool is_solid<image_view_any> (image_view_any const&);
 
 // Temporary until image_data_rgba8 is removed from passing
 template <>
