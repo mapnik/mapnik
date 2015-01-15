@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/util/variant.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -109,8 +110,57 @@ MAPNIK_DECL void save_to_stream
     std::string const& type
 );
 
+namespace detail {
+
+struct is_solid_visitor
+{
+    template <typename T>
+    inline bool operator() (T const & data)
+    {
+        using pixel_type = typename T::pixel_type;
+        if (data.width() > 0 && data.height() > 0)
+        {
+            pixel_type const* first_row = data.getRow(0);
+            pixel_type const first_pixel = first_row[0];
+            for (unsigned y = 0; y < data.height(); ++y)
+            {
+                pixel_type const * row = data.getRow(y);
+                for (unsigned x = 0; x < data.width(); ++x)
+                {
+                    if (first_pixel != row[x])
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
+
+}
 template <typename T>
-MAPNIK_DECL bool is_solid (T const& image);
+inline bool is_solid (T const& image)
+{
+    return util::apply_visitor(detail::is_solid_visitor(), image);
+}
+
+// Temporary until image_data_rgba8 is removed from passing
+template <>
+inline bool is_solid<image_data_rgba8>(image_data_rgba8 const& image)
+{
+    detail::is_solid_visitor visitor;
+    return visitor(image);
+}
+
+// Temporary until image_view_rgba8 is removed from passing
+template <>
+inline bool is_solid<image_view_rgba8>(image_view_rgba8 const& image)
+{
+    detail::is_solid_visitor visitor;
+    return visitor(image);
+}
+
 
 inline bool is_png(std::string const& filename)
 {
