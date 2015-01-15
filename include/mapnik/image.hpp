@@ -27,7 +27,7 @@
 
 namespace mapnik {
 
-class image
+class MAPNIK_DECL image
 {
 public:
     image() = default;

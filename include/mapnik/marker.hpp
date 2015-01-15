@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -56,7 +57,7 @@ public:
     marker()
     {
         // create default OGC 4x4 black pixel
-        bitmap_data_ = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_rgba8>(4,4));
+        bitmap_data_ = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_rgba8>(4,4,true,true));
         (*bitmap_data_)->set(0xff000000);
     }
 

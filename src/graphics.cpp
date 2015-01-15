@@ -40,19 +40,16 @@ namespace mapnik
 {
 image_32::image_32(int width,int height)
    : data_(width,height),
-     painted_(false),
-     premultiplied_(false) {}
+     painted_(false) {}
 
 
 image_32::image_32(image_32 const& rhs)
    : data_(rhs.data_),
-     painted_(rhs.painted_),
-     premultiplied_(rhs.premultiplied_) {}
+     painted_(rhs.painted_) {}
 
 image_32::image_32(image_data_rgba8 && data)
     : data_(std::move(data)),
-      painted_(false),
-      premultiplied_(false) {}
+      painted_(false) {}
 
 image_32::~image_32() {}
 
@@ -126,22 +123,6 @@ void image_32::set_background(const color& c)
 boost::optional<color> const& image_32::get_background() const
 {
     return background_;
-}
-
-void image_32::premultiply()
-{
-    agg::rendering_buffer buffer(data_.getBytes(),data_.width(),data_.height(),data_.width() * 4);
-    agg::pixfmt_rgba32 pixf(buffer);
-    pixf.premultiply();
-    premultiplied_ = true;
-}
-
-void image_32::demultiply()
-{
-    agg::rendering_buffer buffer(data_.getBytes(),data_.width(),data_.height(),data_.width() * 4);
-    agg::pixfmt_rgba32_pre pixf(buffer);
-    pixf.demultiply();
-    premultiplied_ = false;
 }
 
 void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)

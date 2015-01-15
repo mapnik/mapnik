@@ -24,6 +24,7 @@
 #define MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/image_util.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -71,7 +72,7 @@ struct image_data_dispatcher
     void operator() (image_data_null const& data_in) const {}  //no-op
     void operator() (image_data_rgba8 const& data_in) const
     {
-        image_data_rgba8 data_out(width_, height_);
+        image_data_rgba8 data_out(width_, height_, true, true);
         scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
         composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
     }
@@ -85,6 +86,7 @@ struct image_data_dispatcher
         image_data_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
         if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        premultiply_alpha(dst);
         composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
@@ -137,7 +139,7 @@ struct image_data_warp_dispatcher
 
     void operator() (image_data_rgba8 const& data_in) const
     {
-        image_data_rgba8 data_out(width_, height_);
+        image_data_rgba8 data_out(width_, height_, true, true);
         warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
     }
@@ -152,6 +154,7 @@ struct image_data_warp_dispatcher
         image_data_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
         if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        premultiply_alpha(dst);
         composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
@@ -204,22 +207,12 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
             // only premultiply rgba8 images
             if (source->data_.is<image_data_rgba8>())
             {
-                bool premultiply_source = !source->premultiplied_alpha_;
                 auto is_premultiplied = get_optional<bool>(sym, keys::premultiplied, feature, common.vars_);
-                if (is_premultiplied)
+                if (is_premultiplied && *is_premultiplied)
                 {
-                    if (*is_premultiplied) premultiply_source = false;
-                    else premultiply_source = true;
+                    mapnik::set_premultiplied_alpha(source->data_, true);
                 }
-                if (premultiply_source)
-                {
-                    agg::rendering_buffer buffer(source->data_.getBytes(),
-                                                 source->data_.width(),
-                                                 source->data_.height(),
-                                                 source->data_.width() * 4);
-                    agg::pixfmt_rgba32 pixf(buffer);
-                    pixf.premultiply();
-                }
+                mapnik::premultiply_alpha(source->data_);
             }
 
             if (!prj_trans.equal())

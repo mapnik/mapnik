@@ -153,7 +153,6 @@ public:
     unsigned height() const final;
     boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
-    bool premultiplied_alpha() const final;
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
     image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
@@ -378,12 +377,6 @@ boost::optional<box2d<double> > tiff_reader<T>::bounding_box() const
 }
 
 template <typename T>
-bool tiff_reader<T>::premultiplied_alpha() const
-{
-    return premultiplied_alpha_;
-}
-
-template <typename T>
 void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
 {
     if (read_method_==stripped)
@@ -525,7 +518,7 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
             TIFF* tif = open(stream_);
             if (tif)
             {
-                image_data_rgba8 data(width, height);
+                image_data_rgba8 data(width, height, true, premultiplied_alpha_);
                 std::size_t element_size = sizeof(detail::rgb8);
                 std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
                 const std::unique_ptr<detail::rgb8[]> scanline(new detail::rgb8[size_to_allocate]);
@@ -550,13 +543,13 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
         }
         case 16:
         {
-            image_data_rgba8 data(width,height);
+            image_data_rgba8 data(width,height,true,premultiplied_alpha_);
             read(x0, y0, data);
             return image_data_any(std::move(data));
         }
         case 32:
         {
-            image_data_rgba8 data(width,height);
+            image_data_rgba8 data(width,height,true,premultiplied_alpha_);
             read(x0, y0, data);
             return image_data_any(std::move(data));
         }
@@ -574,7 +567,7 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
         //PHOTOMETRIC_ITULAB = 10;
         //PHOTOMETRIC_LOGL = 32844;
         //PHOTOMETRIC_LOGLUV = 32845;
-        image_data_rgba8 data(width,height);
+        image_data_rgba8 data(width,height, true, premultiplied_alpha_);
         read(x0, y0, data);
         return image_data_any(std::move(data));
     }

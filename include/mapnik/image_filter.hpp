@@ -391,11 +391,11 @@ template <typename Src, typename Filter>
 void apply_filter(Src & src, Filter const& filter)
 {
     {
-        src.demultiply();
+        demultiply_alpha(src.data());
         double_buffer<Src> tb(src);
         apply_convolution_3x3(tb.src_view, tb.dst_view, filter);
     } // ensure ~double_buffer() is called before premultiplying
-    src.premultiply();
+    premultiply_alpha(src.data());
 }
 
 template <typename Src>

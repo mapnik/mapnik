@@ -211,9 +211,26 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
     im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
+bool premultiplied(image_32 &im)
+{
+    return im.data().get_premultiplied();
+}
+
+void premultiply(image_32 & im)
+{
+    mapnik::premultiply_alpha(im.data());
+}
+
+void demultiply(image_32 & im)
+{
+    mapnik::demultiply_alpha(im.data());
+}
+
 void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
 {
-    mapnik::composite(dst.data(),src.data(),mode,opacity,0,0,false);
+    mapnik::premultiply_alpha(dst.data());
+    mapnik::premultiply_alpha(src.data());
+    mapnik::composite(dst.data(),src.data(),mode,opacity,0,0);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -311,9 +328,9 @@ void export_image()
            arg("mode")=mapnik::src_over,
            arg("opacity")=1.0f
          ))
-        .def("premultiplied",&image_32::premultiplied)
-        .def("premultiply",&image_32::premultiply)
-        .def("demultiply",&image_32::demultiply)
+        .def("premultiplied",&premultiplied)
+        .def("premultiply",&premultiply)
+        .def("demultiply",&demultiply)
         .def("set_pixel",&set_pixel)
         .def("get_pixel",&get_pixel)
         .def("clear",&image_32::clear)

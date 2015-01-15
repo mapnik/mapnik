@@ -52,7 +52,7 @@ image image::read_from_file(std::string const& filename)
         return image();
     }
 }
-
+/*
 namespace detail {
 
 struct save_to_file_visitor
@@ -94,11 +94,12 @@ struct save_to_file_visitor
     std::string const& format_;
 };
 
-}
+}*/
 
 void image::save_to_file(std::string const& filename, std::string const& format)
 {
-    util::apply_visitor(detail::save_to_file_visitor(filename, format), data_);
+    mapnik::save_to_file(data_, filename, format);
+    //util::apply_visitor(detail::save_to_file_visitor(filename, format), data_);
 }
 
 }

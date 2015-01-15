@@ -181,7 +181,7 @@ int main (int argc,char** argv)
             svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 
             boost::algorithm::ireplace_last(svg_name,".svg",".png");
-            im.demultiply();
+            demultiply_alpha(im.data());
             mapnik::save_to_file<mapnik::image_data_rgba8>(im.data(),svg_name,"png");
             if (auto_open)
             {

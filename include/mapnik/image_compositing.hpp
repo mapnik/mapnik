@@ -87,8 +87,7 @@ MAPNIK_DECL void composite(T & dst, T const& src,
                            composite_mode_e mode,
                            float opacity=1,
                            int dx=0,
-                           int dy=0,
-                           bool premultiply_src=false);
+                           int dy=0);
 
 }
 #endif // MAPNIK_IMAGE_COMPOSITING_HPP

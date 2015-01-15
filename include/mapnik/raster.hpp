@@ -39,18 +39,15 @@ public:
     box2d<double> ext_;
     image_data_any data_;
     double filter_factor_;
-    bool premultiplied_alpha_;
     boost::optional<double> nodata_;
 
     template <typename ImageData>
     raster(box2d<double> const& ext,
            ImageData && data,
-           double filter_factor,
-           bool premultiplied_alpha = false)
+           double filter_factor)
         : ext_(ext),
           data_(std::move(data)),
-          filter_factor_(filter_factor),
-          premultiplied_alpha_(premultiplied_alpha) {}
+          filter_factor_(filter_factor) {}
 
     void set_nodata(double nodata)
     {

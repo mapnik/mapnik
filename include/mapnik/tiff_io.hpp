@@ -192,15 +192,22 @@ struct tag_setter
         throw ImageWriterException("Could not write TIFF - unknown image type provided");
     }
 
-    inline void operator() (image_data_rgba8 const&) const
+    inline void operator() (image_data_rgba8 const& data) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
-        //uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
-        uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
-        TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        if (data.get_premultiplied()) 
+        {
+            uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
+            TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        }
+        else
+        {
+            uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+            TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        }
         if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
                 || config_.compression == COMPRESSION_LZW)

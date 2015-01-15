@@ -122,10 +122,11 @@ public:
     using pixel_type = T;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 
-    image_data(int width, int height, bool initialize = true)
+    image_data(int width, int height, bool initialize = true, bool premultiplied = false)
         : dimensions_(width, height),
           buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          premultiplied_alpha_(premultiplied)
     {
         if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
@@ -133,13 +134,15 @@ public:
     image_data(image_data<pixel_type> const& rhs)
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          premultiplied_alpha_(rhs.premultiplied_alpha_)
     {}
 
     image_data(image_data<pixel_type> && rhs) noexcept
         : dimensions_(std::move(rhs.dimensions_)),
-        buffer_(std::move(rhs.buffer_)),
-        pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+          buffer_(std::move(rhs.buffer_)),
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          premultiplied_alpha_(std::move(rhs.premultiplied_alpha_))
     {
         rhs.dimensions_ = { 0, 0 };
         rhs.pData_ = nullptr;
@@ -241,10 +244,21 @@ public:
         std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
     }
 
+    inline bool get_premultiplied() const
+    {
+        return premultiplied_alpha_;
+    }
+
+    inline void set_premultiplied(bool set)
+    {
+        premultiplied_alpha_ = set;
+    }
+
 private:
     detail::image_dimensions<max_size> dimensions_;
     detail::buffer buffer_;
     pixel_type *pData_;
+    bool premultiplied_alpha_;
 };
 
 using image_data_rgba8 = image_data<std::uint32_t>;
