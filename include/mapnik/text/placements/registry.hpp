@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/text/placements/base.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -39,7 +39,7 @@ namespace placements
 using from_xml_function_ptr = text_placements_ptr (*) (xml_node const&, fontset_map const&, bool) ;
 
 class registry : public singleton<registry, CreateStatic>,
-                 private mapnik::noncopyable
+                 private util::noncopyable
 {
 public:
     registry();

@@ -2,6 +2,9 @@
 <!-- Without unlock-image -->
 <!DOCTYPE Map>
 <Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
+  <Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+  </Parameters>
 
   <Layer name="obstacle" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>obstacle</StyleName>

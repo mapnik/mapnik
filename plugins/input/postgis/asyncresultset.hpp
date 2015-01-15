@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
-  * Copyright (C) 2013 Artem Pavlenko
+  * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@
 class postgis_processor_context;
 using postgis_processor_context_ptr = std::shared_ptr<postgis_processor_context>;
 
-class AsyncResultSet : public IResultSet, private mapnik::noncopyable
+class AsyncResultSet : public IResultSet, private mapnik::util::noncopyable
 {
 public:
     AsyncResultSet(postgis_processor_context_ptr const& ctx,

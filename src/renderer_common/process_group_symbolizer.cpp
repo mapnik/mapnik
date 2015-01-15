@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
       comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
 {}
 
-raster_marker_render_thunk::raster_marker_render_thunk(image_data_32 & src,
+raster_marker_render_thunk::raster_marker_render_thunk(image_data_rgba8 & src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -97,7 +97,7 @@ private:
 template <typename Detector, typename RendererContext>
 struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 {
-    raster_marker_thunk_dispatch(image_data_32 & src,
+    raster_marker_thunk_dispatch(image_data_rgba8 & src,
                                  agg::trans_affine const& marker_trans,
                                  symbolizer_base const& sym,
                                  Detector & detector,

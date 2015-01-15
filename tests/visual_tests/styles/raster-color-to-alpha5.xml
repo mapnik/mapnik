@@ -1,4 +1,7 @@
 <Map background-color="white" srs="+init=epsg:32630" minimum-version="0.7.2">
+  <Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+  </Parameters>
 
   <Style name="DISCRETE RAINBOW" image-filters="color-to-alpha(black)">
     <Rule>

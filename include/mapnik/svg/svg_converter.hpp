@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_path_storage.h"
@@ -44,7 +44,7 @@ namespace mapnik {
 namespace svg {
 
 template <typename VertexSource, typename AttributeSource>
-class svg_converter : mapnik::noncopyable
+class svg_converter : util::noncopyable
 {
 public:
 
@@ -255,11 +255,13 @@ public:
     }
     void fill_none()
     {
+        cur_attr().fill_none = true;
         cur_attr().fill_flag = false;
     }
 
     void stroke_none()
     {
+        cur_attr().stroke_none = true;
         cur_attr().stroke_flag = false;
     }
 

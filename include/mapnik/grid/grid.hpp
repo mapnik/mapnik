@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -195,7 +195,7 @@ public:
         return height_;
     }
 
-    inline void set_rectangle(value_type id,image_data_32 const& data,int x0,int y0)
+    inline void set_rectangle(value_type id,image_data_rgba8 const& data,int x0,int y0)
     {
         box2d<int> ext0(0,0,width_,height_);
         box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());

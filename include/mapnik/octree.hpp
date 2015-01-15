@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <algorithm>
@@ -49,7 +49,7 @@ struct RGBPolicy
 };
 
 template <typename T, typename InsertPolicy = RGBPolicy >
-class octree : private mapnik::noncopyable
+class octree : private util::noncopyable
 {
     struct node
     {

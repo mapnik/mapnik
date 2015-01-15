@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define MAPNIK_SVG_PATH_ADAPTER_HPP
 
 // mapnik
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/box2d.hpp>
 // agg
 #include "agg_math.h"
@@ -40,7 +40,7 @@ namespace svg {
 
 using namespace agg;
 
-template<class VertexContainer> class path_adapter : mapnik::noncopyable
+template<class VertexContainer> class path_adapter : util::noncopyable
 {
 public:
     using container_type = VertexContainer           ;
@@ -838,7 +838,7 @@ void path_adapter<VC>::translate_all_paths(double dx, double dy)
 }
 
 
-template<class Container> class vertex_stl_adapter : mapnik::noncopyable
+template<class Container> class vertex_stl_adapter : util::noncopyable
 {
 public:
 

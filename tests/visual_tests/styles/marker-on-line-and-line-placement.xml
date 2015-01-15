@@ -1,4 +1,7 @@
 <Map>
+  <Parameters>
+     <Parameter name="sizes">600,400</Parameter>
+  </Parameters>
 <Style name="line" filter-mode="first" >
   <Rule>
     <LineSymbolizer stroke="red"/>
@@ -9,11 +12,11 @@
 </Style>
 <Style name="point-placement" filter-mode="first" >
   <Rule>
-    <MarkersSymbolizer stroke-width="0" allow-overlap="true" placement="line" marker-type="ellipse" fill="red" />
-    <MarkersSymbolizer stroke-width="0" offset="-10" transform="translate(0,-10)" allow-overlap="true" placement="line" marker-type="ellipse" fill="darkred" />
-    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth=".5" transform="translate(10,10) translate(-10,-10)" placement="line" marker-type="ellipse" fill="blue" />
-    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth="1" placement="line" marker-type="ellipse" fill="orange" />
-    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth="1" geometry-transform="translate(10,10)" placement="line" marker-type="ellipse" fill="darkgreen" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" placement="line" file="shape://ellipse" fill="red" />
+    <MarkersSymbolizer stroke-width="0" offset="-10" transform="translate(0,-10)" allow-overlap="true" placement="line" file="shape://ellipse" fill="darkred" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth=".5" transform="translate(10,10) translate(-10,-10)" placement="line" file="shape://ellipse" fill="blue" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth="1" placement="line" file="shape://ellipse" fill="orange" />
+    <MarkersSymbolizer stroke-width="0" allow-overlap="true" smooth="1" geometry-transform="translate(10,10)" placement="line" file="shape://ellipse" fill="darkgreen" />
   </Rule>
 </Style>
 <Layer name="carto_tests">
@@ -21,6 +24,7 @@
     <StyleName>point-placement</StyleName>
     <Datasource>
        <Parameter name="type">csv</Parameter>
+       <Parameter name="extent">-10, 0, 15, 20</Parameter>
        <Parameter name="file">../data/marker-on-line.csv</Parameter>
        <Parameter name="separator">|</Parameter>
     </Datasource>

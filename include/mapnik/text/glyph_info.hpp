@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 //mapnik
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 #include <memory>
 #include <cmath>
@@ -36,7 +36,7 @@ namespace mapnik
 class font_face;
 using face_ptr = std::shared_ptr<font_face>;
 
-struct glyph_info : noncopyable
+struct glyph_info : util::noncopyable
 {
     glyph_info(unsigned g_index,
                unsigned c_index,

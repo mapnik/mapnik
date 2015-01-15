@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/make_unique.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 //#include <mapnik/config.hpp>
 
 // stl
@@ -36,12 +36,12 @@
 
 namespace mapnik { namespace util {
 
-class file : public noncopyable
+class file : public util::noncopyable
 {
 public:
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
     using data_type = std::unique_ptr<char[]>;
-    
+
     explicit file(std::string const& filename)
 #ifdef _WINDOWS
      : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),

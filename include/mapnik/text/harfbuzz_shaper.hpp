@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ namespace mapnik
 static inline hb_script_t _icu_script_to_script(UScriptCode script)
 {
     if (script == USCRIPT_INVALID_CODE) return HB_SCRIPT_INVALID;
-	return hb_script_from_string(uscript_getShortName(script), -1);
+        return hb_script_from_string(uscript_getShortName(script), -1);
 }
 
 static inline const uint16_t * uchar_to_utf16(const UChar* src)
@@ -70,7 +70,6 @@ static void shape_text(text_line & line,
     if (!length) return;
 
     std::list<text_item> const& list = itemizer.itemize(start, end);
-    if (list.empty()) return;
 
     line.reserve(length);
 
@@ -79,8 +78,6 @@ static void shape_text(text_line & line,
     hb_buffer_pre_allocate(buffer.get(), length);
     mapnik::value_unicode_string const& text = itemizer.text();
 
-    font_feature_settings const& ff_settings = list.front().format_->ff_settings;
-
     for (auto const& text_item : list)
     {
         face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
@@ -88,6 +85,7 @@ static void shape_text(text_line & line,
         face_set->set_unscaled_character_sizes();
         std::size_t num_faces = face_set->size();
         std::size_t pos = 0;
+        font_feature_settings const& ff_settings = text_item.format_->ff_settings;
         for (auto const& face : *face_set)
         {
             ++pos;

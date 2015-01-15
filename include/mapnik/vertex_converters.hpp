@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,7 @@
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/simplify_converter.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer_keys.hpp>
@@ -319,7 +319,7 @@ struct converters_helper<Dispatcher>
 };
 
 template <typename Args, typename... ConverterTypes>
-struct dispatcher : mapnik::noncopyable
+struct dispatcher : util::noncopyable
 {
     using this_type = dispatcher;
     using args_type = Args;
@@ -337,7 +337,7 @@ struct dispatcher : mapnik::noncopyable
 };
 
 template <typename Processor>
-struct arguments : mapnik::noncopyable
+struct arguments : util::noncopyable
 {
     using processor_type = Processor;
     arguments(Processor & proc, box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
@@ -367,7 +367,7 @@ struct arguments : mapnik::noncopyable
 }
 
 template <typename Processor, typename... ConverterTypes >
-struct vertex_converter : private mapnik::noncopyable
+struct vertex_converter : private util::noncopyable
 {
     using bbox_type = box2d<double>;
     using processor_type = Processor;

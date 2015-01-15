@@ -1,4 +1,7 @@
 <Map background-color="#eee" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">256,256</Parameter>
+    </Parameters>
 
     <Style name="frame" filter-mode="first">
         <Rule>
@@ -26,6 +29,7 @@
         <StyleName>frame</StyleName>
         <Datasource>
             <Parameter name="type">ogr</Parameter>
+            <Parameter name="extent">-10,-10,10,10</Parameter>
             <Parameter name="layer_by_index">0</Parameter>
             <Parameter name="inline"><![CDATA[
                 {

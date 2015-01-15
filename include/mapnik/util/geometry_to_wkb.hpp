@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -56,7 +56,7 @@ std::string to_hex(const char* blob, unsigned size)
     return s.str();
 }
 
-enum wkbByteOrder {
+enum wkbByteOrder : std::uint8_t {
     wkbXDR=0,
     wkbNDR=1
 };

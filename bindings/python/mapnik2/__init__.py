@@ -1,6 +1,6 @@
 #
 # This file is part of Mapnik (C++/Python mapping toolkit)
-# Copyright (C) 2011 Artem Pavlenko
+# Copyright (C) 2014 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 #
 
 # mapnik2 module (Deprecated)
- 
+
 import warnings
 from mapnik import *
 warnings.simplefilter("default")

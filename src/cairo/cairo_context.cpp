@@ -337,7 +337,7 @@ void cairo_context::set_gradient(cairo_gradient const& pattern, const box2d<doub
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_image(double x, double y, image_data_32 & data, double opacity)
+void cairo_context::add_image(double x, double y, image_data_rgba8 & data, double opacity)
 {
     cairo_pattern pattern(data);
     pattern.set_origin(x, y);
@@ -348,7 +348,7 @@ void cairo_context::add_image(double x, double y, image_data_32 & data, double o
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_image(agg::trans_affine const& tr, image_data_32 & data, double opacity)
+void cairo_context::add_image(agg::trans_affine const& tr, image_data_rgba8 & data, double opacity)
 {
     cairo_pattern pattern(data);
     if (!tr.is_identity())
@@ -432,7 +432,6 @@ void cairo_context::glyph_path(unsigned long index, pixel_position const &pos)
 
 void cairo_context::add_text(glyph_positions const& pos,
                              cairo_face_manager & manager,
-                             face_manager_freetype & font_manager,
                              composite_mode_e comp_op,
                              composite_mode_e halo_comp_op,
                              double scale_factor)

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -412,7 +412,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
             agg::image_filter_bilinear filter_kernel;
             agg::image_filter_lut filter(filter_kernel, false);
 
-            image_data_32 const& src = **marker.get_bitmap_data();
+            image_data_rgba8 const& src = **marker.get_bitmap_data();
             agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                              src.width(),
                                              src.height(),

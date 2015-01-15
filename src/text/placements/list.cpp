@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -65,7 +65,7 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 }
 
 
-text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor) const
+text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const
 {
     return std::make_shared<text_placement_info_list>(this, scale_factor);
 }

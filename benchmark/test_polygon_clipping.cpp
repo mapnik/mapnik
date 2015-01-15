@@ -54,7 +54,7 @@ void render(mapnik::geometry_type & geom,
     ras.add_path(path);
     agg::scanline_u8 sl;
     agg::render_scanlines(ras, sl, ren);
-    mapnik::save_to_file(im,name);
+    mapnik::save_to_file(im.data(),name);
     geom.rewind(0);
 }
 
@@ -108,7 +108,7 @@ public:
         render(geom2,geom.envelope(),actual);
         return benchmark::compare_images(actual,expect);
     }
-    void operator()() const
+    bool operator()() const
     {
         boost::ptr_vector<mapnik::geometry_type> paths;
         if (!mapnik::from_wkt(wkt_in_, paths))
@@ -130,6 +130,7 @@ public:
                 while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {}
             }
         }
+        return true;
     }
 };
 
@@ -189,7 +190,7 @@ public:
         render(geom2,geom.envelope(),actual);
         return benchmark::compare_images(actual,expect);
     }
-    void operator()() const
+    bool operator()() const
     {
         boost::ptr_vector<mapnik::geometry_type> paths;
         if (!mapnik::from_wkt(wkt_in_, paths))
@@ -217,6 +218,7 @@ public:
                 while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {}
             }
         }
+        return true;
     }
 };
 
@@ -265,7 +267,7 @@ public:
         render(geom2,geom.envelope(),actual);
         return benchmark::compare_images(actual,expect);
     }
-    void operator()() const
+    bool operator()() const
     {
         boost::ptr_vector<mapnik::geometry_type> paths;
         if (!mapnik::from_wkt(wkt_in_, paths))
@@ -282,6 +284,7 @@ public:
                 while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {}
             }
         }
+        return true;
     }
 };
 

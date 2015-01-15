@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ struct transform_processor
     using transform_type = agg::trans_affine;
 
     template <typename Container>
-    struct attribute_collector : util::static_visitor<void>
+    struct attribute_collector
     {
         expression_attributes<Container> collect_;
 
@@ -97,7 +97,7 @@ struct transform_processor
         }
     };
 
-    struct node_evaluator : util::static_visitor<void>
+    struct node_evaluator
     {
         node_evaluator(transform_type& tr,
                        feature_type const& feat,

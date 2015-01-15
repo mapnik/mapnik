@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@
 
 // mapnik
 #include <mapnik/vertex.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <algorithm>
@@ -40,7 +40,7 @@ namespace mapnik
 {
 
 template <typename T>
-class vertex_vector : private mapnik::noncopyable
+class vertex_vector : private util::noncopyable
 {
     using coord_type = T;
     enum block_e {

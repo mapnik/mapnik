@@ -1,0 +1,7 @@
+<Map>
+<Style name="deprecated">
+<Rule>
+  <MarkersSymbolizer marker-type="ellipse" />
+</Rule>
+</Style>
+</Map>

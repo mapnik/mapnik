@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -303,7 +303,7 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
     }
 }
 
-struct line_breaker : mapnik::noncopyable
+struct line_breaker : util::noncopyable
 {
     line_breaker(value_unicode_string const& ustr, char  wrap_char)
         : ustr_(ustr),

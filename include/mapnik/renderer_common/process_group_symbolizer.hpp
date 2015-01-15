@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/graphics.hpp>
@@ -56,7 +56,7 @@ class text_symbolizer_helper;
 using svg::svg_path_adapter;
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
-struct virtual_renderer_common : private mapnik::noncopyable
+struct virtual_renderer_common : private util::noncopyable
 {
     virtual_renderer_common(renderer_common & common) :
         width_(common.width_),
@@ -103,7 +103,7 @@ struct virtual_renderer_common : private mapnik::noncopyable
 // stores all the arguments necessary to re-render this point
 // symbolizer at a later time.
 
-struct vector_marker_render_thunk
+struct vector_marker_render_thunk  : util::noncopyable
 {
     svg_path_ptr src_;
     svg_attribute_type attrs_;
@@ -128,15 +128,15 @@ struct vector_marker_render_thunk
         snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
 };
 
-struct raster_marker_render_thunk
+struct raster_marker_render_thunk  : util::noncopyable
 {
-    image_data_32 & src_;
+    image_data_rgba8 & src_;
     agg::trans_affine tr_;
     double opacity_;
     composite_mode_e comp_op_;
     bool snap_to_pixels_;
 
-    raster_marker_render_thunk(image_data_32 & src,
+    raster_marker_render_thunk(image_data_rgba8 & src,
                                agg::trans_affine const& marker_trans,
                                double opacity,
                                composite_mode_e comp_op,
@@ -152,7 +152,7 @@ struct raster_marker_render_thunk
 
 using helper_ptr = std::unique_ptr<text_symbolizer_helper>;
 
-struct text_render_thunk : noncopyable
+struct text_render_thunk : util::noncopyable
 {
     // helper is stored here in order
     // to keep in scope the text rendering structures
@@ -190,7 +190,7 @@ using render_thunk_list = std::list<render_thunk_ptr>;
 // The bounding boxes can be used for layout, and the thunks are
 // used to re-render at locations according to the group layout.
 
-struct render_thunk_extractor : public util::static_visitor<>
+struct render_thunk_extractor
 {
     render_thunk_extractor(box2d<double> & box,
                            render_thunk_list & thunks,

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -182,7 +182,7 @@ int main (int argc,char** argv)
 
             boost::algorithm::ireplace_last(svg_name,".svg",".png");
             im.demultiply();
-            mapnik::save_to_file<mapnik::image_data_32>(im.data(),svg_name,"png");
+            mapnik::save_to_file<mapnik::image_data_rgba8>(im.data(),svg_name,"png");
             if (auto_open)
             {
                 std::ostringstream s;

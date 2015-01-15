@@ -67,7 +67,7 @@ struct process_impl<false>
  * \param sym        Symbolizer object
  */
 template <typename Processor>
-struct symbolizer_dispatch : public util::static_visitor<>
+struct symbolizer_dispatch
 {
     symbolizer_dispatch(Processor & output,
                         mapnik::feature_impl & f,

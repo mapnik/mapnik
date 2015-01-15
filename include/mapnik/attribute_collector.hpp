@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/transform_processor.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
@@ -52,7 +52,7 @@
 namespace mapnik {
 
 template <typename Container>
-struct expression_attributes : util::static_visitor<void>
+struct expression_attributes
 {
     explicit expression_attributes(Container& names)
         : names_(names) {}
@@ -92,7 +92,7 @@ private:
     Container& names_;
 };
 
-class group_attribute_collector : public mapnik::noncopyable
+class group_attribute_collector : public util::noncopyable
 {
 private:
     std::set<std::string>& names_;
@@ -107,7 +107,7 @@ public:
 };
 
 template <typename Container>
-struct extract_attribute_names : util::static_visitor<void>
+struct extract_attribute_names
 {
     explicit extract_attribute_names(Container& names)
         : names_(names),
@@ -159,7 +159,7 @@ private:
     expression_attributes<std::set<std::string> > f_attr_;
 };
 
-struct symbolizer_attributes : public util::static_visitor<>
+struct symbolizer_attributes
 {
     symbolizer_attributes(std::set<std::string>& names,
                           double & filter_factor)
@@ -209,7 +209,7 @@ private:
 };
 
 
-class attribute_collector : public mapnik::noncopyable
+class attribute_collector : public util::noncopyable
 {
 private:
     std::set<std::string> & names_;

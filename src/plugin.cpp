@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,8 +30,12 @@
   #define dlsym GetProcAddress
   #define dlclose FreeLibrary
   #define dlerror GetLastError
+  #define MAPNIK_SUPPORTS_DLOPEN
 #else
-  #include <dlfcn.h>
+  #ifdef MAPNIK_HAS_DLCFN
+    #include <dlfcn.h>
+    #define MAPNIK_SUPPORTS_DLOPEN
+  #endif
   #define handle void *
 #endif
 
@@ -52,21 +56,32 @@ PluginInfo::PluginInfo(std::string const& filename,
       {
 #ifdef _WINDOWS
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
-#else
-          if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
-#endif
           if (module_ && module_->dl)
           {
                 name_func name = reinterpret_cast<name_func>(dlsym(module_->dl, library_name.c_str()));
                 if (name) name_ = name();
           }
+#else
+  #ifdef MAPNIK_HAS_DLCFN
+          if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
+          if (module_ && module_->dl)
+          {
+                name_func name = reinterpret_cast<name_func>(dlsym(module_->dl, library_name.c_str()));
+                if (name) name_ = name();
+          }
+  #else
+          throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
+  #endif
+#endif
       }
 
 PluginInfo::~PluginInfo()
 {
     if (module_)
     {
+#ifdef MAPNIK_SUPPORTS_DLOPEN
         if (module_->dl) dlclose(module_->dl),module_->dl=0;
+#endif
         delete module_;
     }
 }
@@ -74,7 +89,11 @@ PluginInfo::~PluginInfo()
 
 void * PluginInfo::get_symbol(std::string const& sym_name) const
 {
+#ifdef MAPNIK_SUPPORTS_DLOPEN
     return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
+#else
+    return NULL;
+#endif
 }
 
 std::string const& PluginInfo::name() const
@@ -84,7 +103,9 @@ std::string const& PluginInfo::name() const
 
 bool PluginInfo::valid() const
 {
+#ifdef MAPNIK_SUPPORTS_DLOPEN
     if (module_ && module_->dl && !name_.empty()) return true;
+#endif
     return false;
 }
 

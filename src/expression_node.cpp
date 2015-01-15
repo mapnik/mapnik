@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
 #include <mapnik/expression_node.hpp>
 #include <mapnik/value_types.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
@@ -33,7 +33,7 @@
 namespace mapnik
 {
 
-struct _regex_match_impl : noncopyable {
+struct _regex_match_impl : util::noncopyable {
 #if defined(BOOST_REGEX_HAS_ICU)
     _regex_match_impl(value_unicode_string const& ustr) :
         pattern_(boost::make_u32regex(ustr)) {}
@@ -45,7 +45,7 @@ struct _regex_match_impl : noncopyable {
 #endif
 };
 
-struct _regex_replace_impl : noncopyable {
+struct _regex_replace_impl : util::noncopyable {
 #if defined(BOOST_REGEX_HAS_ICU)
     _regex_replace_impl(value_unicode_string const& ustr, value_unicode_string const& f) :
         pattern_(boost::make_u32regex(ustr)),

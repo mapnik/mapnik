@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,8 @@
 #include <mapnik/util/fs.hpp>
 
 // boost
-#include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/operations.hpp>  // for absolute, exists, etc
+#include <boost/filesystem/path.hpp>    // for path, operator/
 
 // stl
 #include <stdexcept>
@@ -81,7 +82,6 @@ namespace util {
         return (! child_path.has_root_directory() && ! child_path.has_root_name());
     }
 
-
     std::string make_relative(std::string const& filepath, std::string const& base)
     {
 #ifdef _WINDOWS
@@ -108,6 +108,32 @@ namespace util {
         boost::filesystem::path bp(filepath);
         return bp.parent_path().string();
     }
+
+    std::string basename(std::string const& value)
+    {
+        boost::filesystem::path bp(value);
+        return bp.filename().string();
+    }
+
+    std::vector<std::string> list_directory(std::string const& dir)
+    {
+        std::vector<std::string> listing;
+        boost::filesystem::directory_iterator end_itr;
+#ifdef _WINDOWS
+        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
+        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        {
+            listing.emplace_back(mapnik::utf16_to_utf8(itr->path().wstring()));
+        }
+#else
+        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
+        {
+            listing.emplace_back(itr->path().string());
+        }
+#endif
+        return listing;
+    }
+
 
 } // end namespace util
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -98,11 +98,11 @@ inline int import_image_data(T2 const& image,
     else
     {
         // need to copy: https://github.com/mapnik/mapnik/issues/2024
-        image_data_32 im(image.width(),image.height());
+        image_data_rgba8 im(image.width(),image.height());
         for (unsigned y = 0; y < image.height(); ++y)
         {
             typename T2::pixel_type const * row_from = image.getRow(y);
-            image_data_32::pixel_type * row_to = im.getRow(y);
+            image_data_rgba8::pixel_type * row_to = im.getRow(y);
             std::copy(row_from, row_from + stride, row_to);
         }
         if (alpha)
@@ -121,11 +121,11 @@ inline int import_image_data(T2 const& image,
 }
 
 template <>
-inline int import_image_data(image_data_32 const& im,
+inline int import_image_data(image_data_rgba8 const& im,
                              WebPPicture & pic,
                              bool alpha)
 {
-    int stride = sizeof(image_data_32::pixel_type) * im.width();
+    int stride = sizeof(image_data_rgba8::pixel_type) * im.width();
     if (alpha)
     {
         return WebPPictureImportRGBA(&pic, im.getBytes(), stride);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -57,7 +57,7 @@ struct clip_poly_tag;
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
 template <typename Detector>
-struct vector_markers_dispatch : mapnik::noncopyable
+struct vector_markers_dispatch : util::noncopyable
 {
     vector_markers_dispatch(svg_path_ptr const& src,
                             agg::trans_affine const& marker_trans,
@@ -116,9 +116,9 @@ protected:
 };
 
 template <typename Detector>
-struct raster_markers_dispatch : mapnik::noncopyable
+struct raster_markers_dispatch : util::noncopyable
 {
-    raster_markers_dispatch(image_data_32 & src,
+    raster_markers_dispatch(image_data_rgba8 & src,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector & detector,
@@ -163,7 +163,7 @@ struct raster_markers_dispatch : mapnik::noncopyable
     virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
 
 protected:
-    image_data_32 & src_;
+    image_data_rgba8 & src_;
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;

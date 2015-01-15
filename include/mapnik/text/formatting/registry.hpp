@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -40,7 +40,7 @@ namespace formatting
 using from_xml_function_ptr = node_ptr (*) (xml_node const&, fontset_map const&) ;
 
 class registry : public singleton<registry, CreateStatic>,
-                 private mapnik::noncopyable
+                 private util::noncopyable
 {
 public:
     registry();

@@ -23,13 +23,14 @@ public:
             utf32[3] != 0x5dd) return false;
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
         std::u32string utf32;
         std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> utf32conv;
         for (std::size_t i=0;i<iterations_;++i) {
              utf32 = utf32conv.from_bytes(utf8_);
         }
+        return true;
     }
 };
 
@@ -52,12 +53,13 @@ public:
             utf32[3] != 0x5dd) return false;
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
          std::u32string utf32;
          for (std::size_t i=0;i<iterations_;++i) {
              utf32 = boost::locale::conv::utf_to_utf<char32_t>(utf8_);
          }
+        return true;
     }
 };
 
@@ -80,13 +82,14 @@ public:
             utf32[3] != 0x5dd) return false;
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
         mapnik::transcoder tr_("utf-8");
         mapnik::value_unicode_string utf32;
         for (std::size_t i=0;i<iterations_;++i) {
             utf32 = tr_.transcode(utf8_.data(),utf8_.size());
         }
+        return true;
     }
 };
 

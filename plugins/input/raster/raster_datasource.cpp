@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -83,6 +83,16 @@ raster_datasource::raster_datasource(parameters const& params)
     else if (ext)
     {
         extent_initialized_ = extent_.from_string(*ext);
+    }
+    else //bounding box from image_reader
+    {
+        std::unique_ptr<image_reader> reader(mapnik::get_image_reader(*file));
+        auto bbox = reader->bounding_box();
+        if (bbox)
+        {
+            extent_ = *bbox;
+            extent_initialized_ = true;
+        }
     }
 
     if (! extent_initialized_)

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 #pragma GCC diagnostic pop
 
@@ -66,11 +65,10 @@ bool freetype_engine::is_font_file(std::string const& file_name)
     std::transform(fn.begin(), fn.end(), fn.begin(), ::tolower);
     return boost::algorithm::ends_with(fn,std::string(".ttf")) ||
         boost::algorithm::ends_with(fn,std::string(".otf")) ||
+        boost::algorithm::ends_with(fn,std::string(".woff"))||
         boost::algorithm::ends_with(fn,std::string(".ttc")) ||
         boost::algorithm::ends_with(fn,std::string(".pfa")) ||
         boost::algorithm::ends_with(fn,std::string(".pfb")) ||
-        boost::algorithm::ends_with(fn,std::string(".ttc")) ||
-        boost::algorithm::ends_with(fn,std::string(".woff"))||
         // Plus OSX custom ext
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
@@ -190,18 +188,9 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
     bool success = false;
     try
     {
-        boost::filesystem::directory_iterator end_itr;
-#ifdef _WINDOWS
-        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
-        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        for (std::string const& file_name : mapnik::util::list_directory(dir))
         {
-            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
-#else
-        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
-        {
-            std::string file_name = itr->path().string();
-#endif
-            if (boost::filesystem::is_directory(*itr) && recurse)
+            if (mapnik::util::is_directory(file_name) && recurse)
             {
                 if (register_fonts_impl(file_name, library, font_file_mapping, true))
                 {
@@ -210,7 +199,7 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
             }
             else
             {
-                std::string base_name = itr->path().filename().string();
+                std::string base_name = mapnik::util::basename(file_name);
                 if (!boost::algorithm::starts_with(base_name,".") &&
                     mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))
@@ -327,9 +316,9 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         itr = global_font_file_mapping.find(family_name);
         if (itr != global_font_file_mapping.end())
         {
-            auto mem_font_itr = global_memory_fonts_.find(itr->second.second);
+            auto mem_font_itr = global_memory_fonts.find(itr->second.second);
             // if font already in memory, use it
-            if (mem_font_itr != global_memory_fonts_.end())
+            if (mem_font_itr != global_memory_fonts.end())
             {
                 FT_Face face;
                 FT_Error error = FT_New_Memory_Face(library.get(),
@@ -351,7 +340,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
 #ifdef MAPNIK_THREADSAFE
             mapnik::scoped_lock lock(mutex_);
 #endif
-            auto result = global_memory_fonts_.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
+            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
             FT_Face face;
             FT_Error error = FT_New_Memory_Face(library.get(),
                                                 reinterpret_cast<FT_Byte const*>(result.first->second.first.get()), // data
@@ -361,7 +350,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
             if (error)
             {
                 // we can't load font, erase it.
-                global_memory_fonts_.erase(result.first);
+                global_memory_fonts.erase(result.first);
                 return face_ptr();
             }
             return std::make_shared<font_face>(face);

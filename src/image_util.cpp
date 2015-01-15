@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,6 @@ extern "C"
 
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
@@ -251,6 +250,127 @@ void handle_png_options(std::string const& type,
     if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
     {
         throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
+    }
+}
+#endif
+
+#if defined(HAVE_TIFF)
+void handle_tiff_options(std::string const& type,
+                        tiff_config & config)
+{
+    if (type == "tiff")
+    {
+        return;
+    }
+    if (type.length() > 4)
+    {
+        boost::char_separator<char> sep(":");
+        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+        for (auto const& t : tokens)
+        {
+            if (t == "tiff")
+            {
+                continue;
+            }
+            else if (boost::algorithm::starts_with(t, "compression="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (val == "deflate")
+                    {
+                        config.compression = COMPRESSION_DEFLATE;
+                    }
+                    else if (val == "adobedeflate")
+                    {
+                        config.compression = COMPRESSION_ADOBE_DEFLATE;
+                    }
+                    else if (val == "lzw")
+                    {
+                        config.compression = COMPRESSION_LZW;
+                    }
+                    else if (val == "none")
+                    {   
+                        config.compression = COMPRESSION_NONE;
+                    }
+                    else
+                    {
+                        throw ImageWriterException("invalid tiff compression: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "method="))
+            {
+                std::string val = t.substr(7);
+                if (!val.empty())
+                {
+                    if (val == "scanline")
+                    {
+                        config.method = TIFF_WRITE_SCANLINE;
+                    }
+                    else if (val == "strip" || val == "stripped")
+                    {
+                        config.method = TIFF_WRITE_STRIPPED;
+                    }
+                    else if (val == "tiled")
+                    {
+                        config.method = TIFF_WRITE_TILED;
+                    }
+                    else
+                    {
+                        throw ImageWriterException("invalid tiff method: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "zlevel="))
+            {
+                std::string val = t.substr(7);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
+                    {
+                        throw ImageWriterException("invalid tiff zlevel: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "tile_height="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.tile_height) || config.tile_height < 0 )
+                    {
+                        throw ImageWriterException("invalid tiff tile_height: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "tile_width="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.tile_width) || config.tile_width < 0 )
+                    {
+                        throw ImageWriterException("invalid tiff tile_width: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "rows_per_strip="))
+            {
+                std::string val = t.substr(15);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.rows_per_strip) || config.rows_per_strip < 0 )
+                    {
+                        throw ImageWriterException("invalid tiff rows_per_strip: '" + val + "'");
+                    }
+                }
+            }
+            else
+            {
+                throw ImageWriterException("unhandled tiff option: " + t);
+            }
+        }
     }
 }
 #endif
@@ -621,7 +741,9 @@ void save_to_stream(T const& image,
         else if (boost::algorithm::starts_with(t, "tif"))
         {
 #if defined(HAVE_TIFF)
-            save_as_tiff(stream, image);
+            tiff_config config;
+            handle_tiff_options(t, config);
+            save_as_tiff(stream, image, config);
 #else
             throw ImageWriterException("tiff output is not enabled in your build of Mapnik");
 #endif
@@ -769,83 +891,50 @@ void save_to_cairo_file(mapnik::Map const& map,
 
 #endif
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&);
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           std::string const&,
                                           rgba_palette const& palette);
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&);
 
-template void save_to_file<image_data_32>(image_data_32 const&,
+template void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
                                           std::string const&,
                                           rgba_palette const& palette);
 
-template std::string save_to_string<image_data_32>(image_data_32 const&,
+template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&);
 
-template std::string save_to_string<image_data_32>(image_data_32 const&,
+template std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
                                                    std::string const&,
                                                    rgba_palette const& palette);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         std::string const&);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&);
 
-template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+template void save_to_file<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
-template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&);
 
-template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+template std::string save_to_string<image_view<image_data_rgba8> > (image_view<image_data_rgba8> const&,
                                                                  std::string const&,
                                                                  rgba_palette const& palette);
-
-void save_to_file(image_32 const& image,std::string const& file)
-{
-    save_to_file<image_data_32>(image.data(), file);
-}
-
-void save_to_file (image_32 const& image,
-                   std::string const& file,
-                   std::string const& type)
-{
-    save_to_file<image_data_32>(image.data(), file, type);
-}
-
-void save_to_file (image_32 const& image,
-                   std::string const& file,
-                   std::string const& type,
-                   rgba_palette const& palette)
-{
-    save_to_file<image_data_32>(image.data(), file, type, palette);
-}
-
-std::string save_to_string(image_32 const& image,
-                           std::string const& type)
-{
-    return save_to_string<image_data_32>(image.data(), type);
-}
-
-std::string save_to_string(image_32 const& image,
-                           std::string const& type,
-                           rgba_palette const& palette)
-{
-    return save_to_string<image_data_32>(image.data(), type, palette);
-}
 
 }

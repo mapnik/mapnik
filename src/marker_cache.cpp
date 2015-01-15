@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -62,7 +62,7 @@ marker_cache::marker_cache()
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
                "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
-    boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_32>(4,4));
+    boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_rgba8>(4,4));
     (*bitmap_data)->set(0xff000000);
     marker_ptr mark = std::make_shared<mapnik::marker>(bitmap_data);
     marker_cache_.emplace("image://square",mark);
@@ -210,7 +210,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    mapnik::image_ptr image(std::make_shared<mapnik::image_data_32>(width,height));
+                    mapnik::image_ptr image(std::make_shared<mapnik::image_data_rgba8>(width,height));
                     reader->read(0,0,*image);
                     if (!reader->premultiplied_alpha())
                     {

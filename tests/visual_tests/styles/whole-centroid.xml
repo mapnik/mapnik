@@ -1,4 +1,7 @@
 <Map maximum-extent="736908, 4390316, 2060771, 5942346">
+  <Parameters>
+    <Parameter name="sizes">600,400</Parameter>
+  </Parameters>
 <Style name="whole">
   <Rule>
     <MarkersSymbolizer placement="point" multi-policy="whole" fill="yellow" width="20" allow-overlap="true"/>
@@ -14,6 +17,7 @@
     <StyleName>whole</StyleName>
     <Datasource>
        <Parameter name="type">csv</Parameter>
+       <Parameter name="extent">736908, 4390316, 2060771, 5942346</Parameter>
        <Parameter name="file">../data/whole-centroid.csv</Parameter>
        <Parameter name="separator">|</Parameter>
     </Datasource>

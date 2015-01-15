@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Parameters>
+        <Parameter name="sizes">800, 200</Parameter>
+    </Parameters>
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-0.05, -0.01, 0.95, 0.01</Parameter>
             <Parameter name="file">../data/points.csv</Parameter>
         </Datasource>
     </Layer>
@@ -13,52 +17,52 @@
     <Style name="My Style">
         <Rule>
             <Filter>[nr] = 1</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45">"XYZ"</TextSymbolizer>
-            <PointSymbolizer allow-overlap="true"/> 
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" text-transform="uppercase" orientation="rad_to_deg*0.7853981633974483">"XYZ"</TextSymbolizer>
+            <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 2</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" text-transform="lowercase" orientation="180/pi*1.5707963267948966">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 3</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" text-transform="capitalize" orientation="180">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 4</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45" dy="10">"Line&#10;break"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" text-transform="reverse" orientation="45" dy="10">"Line&#10;break"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 5</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="45" dy="10">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" orientation="45" dy="10">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 6</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90" dy="10">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" orientation="90" dy="10">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 7</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180" dy="10">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" orientation="180" dy="10">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 8</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="0" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" orientation="0" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 9</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" orientation="90" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = 10</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" allow-overlap="true" orientation="180" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
     </Style>

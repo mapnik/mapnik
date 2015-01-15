@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_array.h"
@@ -45,18 +45,18 @@ namespace mapnik
 using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
 using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;
 using svg_path_ptr = std::shared_ptr<svg_storage_type>;
-using image_ptr = std::shared_ptr<image_data_32>;
+using image_ptr = std::shared_ptr<image_data_rgba8>;
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
  */
-class marker: private mapnik::noncopyable
+class marker: private util::noncopyable
 {
 public:
     marker()
     {
         // create default OGC 4x4 black pixel
-        bitmap_data_ = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_32>(4,4));
+        bitmap_data_ = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_rgba8>(4,4));
         (*bitmap_data_)->set(0xff000000);
     }
 

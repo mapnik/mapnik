@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map>
+    <Parameters>
+        <Parameter name="sizes">600,400</Parameter>
+    </Parameters>
     <Style name="lines">
         <Rule>
             <LineSymbolizer stroke="#000000" />
@@ -8,7 +11,7 @@
     </Style>
     <Style name="markers">
         <Rule>
-            <MarkersSymbolizer marker-type="ellipse" placement="[placement]" />
+            <MarkersSymbolizer file="shape://ellipse" placement="[placement]" />
             <DebugSymbolizer />
         </Rule>
     </Style>
@@ -17,6 +20,7 @@
         <StyleName>markers</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
+            <Parameter name="extent">-1, -1, 11, 4</Parameter>
             <Parameter name="inline">
             wkt, placement
             "LINESTRING(0 0)", "vertex-first"

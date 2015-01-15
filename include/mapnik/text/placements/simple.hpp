@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,21 +29,25 @@
 namespace mapnik {
 
 class text_placement_info_simple;
+class feature_impl;
+struct attribute;
 
 // Automatically generates placement options from a user selected list of directions and text sizes.
 class text_placements_simple: public text_placements
 {
 public:
-    text_placements_simple();
-    text_placements_simple(std::string const& positions);
-    text_placement_info_ptr get_placement_info(double scale_factor) const;
-    void set_positions(std::string const& positions);
-    std::string get_positions();
-    static text_placements_ptr from_xml(xml_node const &xml, fontset_map const & fontsets, bool is_shield);
-private:
-    std::string positions_;
+    text_placements_simple(symbolizer_base::value_type const& positions);
+    text_placements_simple(symbolizer_base::value_type const& positions,
+                           std::vector<directions_e> && direction,
+                           std::vector<int> && text_sizes);
+    text_placement_info_ptr get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const;
+    std::string get_positions() const;
+    static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
+    void init_positions(std::string const& positions) const;
     std::vector<directions_e> direction_;
     std::vector<int> text_sizes_;
+private:
+    symbolizer_base::value_type positions_;
     friend class text_placement_info_simple;
 };
 
@@ -53,14 +57,15 @@ class text_placement_info_simple : public text_placement_info
 {
 public:
     text_placement_info_simple(text_placements_simple const* parent,
-                               double scale_factor)
-        : text_placement_info(parent, scale_factor),
-          state(0), position_state(0), parent_(parent) {}
+                               std::string const& evaluated_positions,
+                               double scale_factor);
     bool next() const;
 protected:
     bool next_position_only() const;
     mutable unsigned state;
     mutable unsigned position_state;
+    mutable std::vector<directions_e> direction_;
+    mutable std::vector<int> text_sizes_;
     text_placements_simple const* parent_;
 };
 

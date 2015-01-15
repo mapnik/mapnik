@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
 
 // stl
@@ -63,7 +63,7 @@ struct evaluated_format_properties
     font_feature_settings ff_settings;
 };
 
-struct evaluated_text_properties : noncopyable
+struct evaluated_text_properties : util::noncopyable
 {
     label_placement_e label_placement;
     double label_spacing;
@@ -84,7 +84,7 @@ struct evaluated_text_properties : noncopyable
 
 using evaluated_text_properties_ptr = std::unique_ptr<detail::evaluated_text_properties>;
 
-enum directions_e
+enum directions_e : std::uint8_t
 {
     NORTH,
     EAST,

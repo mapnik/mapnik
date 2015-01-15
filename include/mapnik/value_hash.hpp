@@ -42,7 +42,7 @@ inline void hash_combine(std::size_t & seed, T const& v)
     seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 }
 
-struct value_hasher: public util::static_visitor<std::size_t>
+struct value_hasher
 {
     std::size_t operator() (value_null val) const
     {

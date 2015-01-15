@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@
 
 namespace mapnik {
 
-struct property_value_hash_visitor : util::static_visitor<std::size_t>
+struct property_value_hash_visitor
 {
     std::size_t operator() (color const& val) const
     {
@@ -82,7 +82,7 @@ struct symbolizer_hash
     }
 };
 
-struct symbolizer_hash_visitor : util::static_visitor<std::size_t>
+struct symbolizer_hash_visitor
 {
     template <typename Symbolizer>
     std::size_t operator() (Symbolizer const& sym) const

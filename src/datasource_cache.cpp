@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #pragma GCC diagnostic pop
@@ -171,18 +170,9 @@ bool datasource_cache::register_datasources(std::string const& dir, bool recurse
     bool success = false;
     try
     {
-        boost::filesystem::directory_iterator end_itr;
-#ifdef _WINDOWS
-        std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
-        for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
+        for (std::string const& file_name : mapnik::util::list_directory(dir))
         {
-            std::string file_name = mapnik::utf16_to_utf8(itr->path().wstring());
-#else
-        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
-        {
-            std::string file_name = itr->path().string();
-#endif
-            if (boost::filesystem::is_directory(*itr) && recurse)
+            if (mapnik::util::is_directory(file_name) && recurse)
             {
                 if (register_datasources(file_name, true))
                 {
@@ -191,7 +181,7 @@ bool datasource_cache::register_datasources(std::string const& dir, bool recurse
             }
             else
             {
-                std::string base_name = itr->path().filename().string();
+                std::string base_name = mapnik::util::basename(file_name);
                 if (!boost::algorithm::starts_with(base_name,".") &&
                     mapnik::util::is_regular_file(file_name) &&
                     is_input_plugin(file_name))

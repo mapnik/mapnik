@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -192,7 +192,7 @@ inline void clear(transform_node& val)
 
 namespace  {
 
-struct is_null_transform_node : public mapnik::util::static_visitor<bool>
+struct is_null_transform_node
 {
     bool operator() (value const& val) const
     {

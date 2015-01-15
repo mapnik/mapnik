@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+ * Copyright (C) 2014 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,6 +44,7 @@
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <mapnik/cairo/cairo_context.hpp>
+#include <mapnik/cairo/cairo_image_util.hpp>
 #include <pycairo.h>
 #include <cairo.h>
 #endif
@@ -53,7 +54,6 @@ using mapnik::image_reader;
 using mapnik::get_image_reader;
 using mapnik::type_from_filename;
 using mapnik::save_to_file;
-using mapnik::save_to_string;
 
 using namespace boost::python;
 
@@ -73,7 +73,7 @@ PyObject* tostring1( image_32 const& im)
 // encode (png,jpeg)
 PyObject* tostring2(image_32 const & im, std::string const& format)
 {
-    std::string s = save_to_string(im, format);
+    std::string s = mapnik::save_to_string(im.data(), format);
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -85,7 +85,7 @@ PyObject* tostring2(image_32 const & im, std::string const& format)
 
 PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette const& pal)
 {
-    std::string s = save_to_string(im, format, pal);
+    std::string s = mapnik::save_to_string(im.data(), format, pal);
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -98,17 +98,17 @@ PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba
 
 void save_to_file1(mapnik::image_32 const& im, std::string const& filename)
 {
-    save_to_file(im,filename);
+    save_to_file(im.data(),filename);
 }
 
 void save_to_file2(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
 {
-    save_to_file(im,filename,type);
+    save_to_file(im.data(),filename,type);
 }
 
 void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
 {
-    save_to_file(im,filename,type,pal);
+    save_to_file(im.data(),filename,type,pal);
 }
 
 bool painted(mapnik::image_32 const& im)
@@ -120,12 +120,12 @@ bool is_solid(mapnik::image_32 const& im)
 {
     if (im.width() > 0 && im.height() > 0)
     {
-        mapnik::image_data_32 const & data = im.data();
-        mapnik::image_data_32::pixel_type const* first_row = data.getRow(0);
-        mapnik::image_data_32::pixel_type const first_pixel = first_row[0];
+        mapnik::image_data_rgba8 const & data = im.data();
+        mapnik::image_data_rgba8::pixel_type const* first_row = data.getRow(0);
+        mapnik::image_data_rgba8::pixel_type const first_pixel = first_row[0];
         for (unsigned y = 0; y < im.height(); ++y)
         {
-            mapnik::image_data_32::pixel_type const * row = data.getRow(y);
+            mapnik::image_data_rgba8::pixel_type const * row = data.getRow(y);
             for (unsigned x = 0; x < im.width(); ++x)
             {
                 if (first_pixel != row[x])
@@ -142,7 +142,7 @@ unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
 {
     if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
     {
-        mapnik::image_data_32 const & data = im.data();
+        mapnik::image_data_rgba8 const & data = im.data();
         return data(x,y);
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
@@ -217,7 +217,8 @@ void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, fl
 std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 {
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(surface);
+    std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
+    cairo_image_to_rgba8(image_ptr->data(), surface);
     return image_ptr;
 }
 #endif

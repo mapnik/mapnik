@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,28 +25,30 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/image_data.hpp>
-#include <mapnik/noncopyable.hpp>
-
+#include <mapnik/image_data_any.hpp>
+#include <mapnik/util/noncopyable.hpp>
+#include <mapnik/util/variant.hpp>
  // boost
 #include <boost/optional.hpp>
 
 namespace mapnik {
-class raster : private mapnik::noncopyable
+
+class raster : private util::noncopyable
 {
 public:
     box2d<double> ext_;
-    image_data_32 data_;
+    image_data_any data_;
     double filter_factor_;
     bool premultiplied_alpha_;
     boost::optional<double> nodata_;
+
+    template <typename ImageData>
     raster(box2d<double> const& ext,
-           unsigned width,
-           unsigned height,
+           ImageData && data,
            double filter_factor,
            bool premultiplied_alpha = false)
         : ext_(ext),
-          data_(width,height),
+          data_(std::move(data)),
           filter_factor_(filter_factor),
           premultiplied_alpha_(premultiplied_alpha) {}
 

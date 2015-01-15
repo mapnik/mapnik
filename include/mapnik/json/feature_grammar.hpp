@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
 class attribute_value_visitor
-    : public mapnik::util::static_visitor<mapnik::value>
+
 {
 public:
     attribute_value_visitor(mapnik::transcoder const& tr)

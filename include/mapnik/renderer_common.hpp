@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/attribute.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // fwd declarations to speed up compile
 namespace mapnik {
@@ -40,7 +40,7 @@ namespace mapnik {
 
 namespace mapnik {
 
-struct renderer_common : private mapnik::noncopyable
+struct renderer_common : private util::noncopyable
 {
     renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor);

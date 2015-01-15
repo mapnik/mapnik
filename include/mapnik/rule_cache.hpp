@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <vector>
@@ -34,7 +34,7 @@
 namespace mapnik
 {
 
-class rule_cache : private noncopyable
+class rule_cache : private util::noncopyable
 {
 public:
     using rule_ptrs = std::vector<rule const*>;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,11 +24,12 @@
 #define MAPNIK_VERTEX_HPP
 
 #include <utility>
+#include <cstdint>
 
 namespace mapnik
 {
 
-enum CommandType {
+enum CommandType : std::uint8_t {
     SEG_END    = 0,
     SEG_MOVETO = 1,
     SEG_LINETO = 2,
@@ -44,7 +45,7 @@ struct vertex {
 template <typename T>
 struct vertex<T,2>
 {
-    enum no_init_t { no_init };
+    enum no_init_t : std::uint8_t { no_init };
 
     using coord_type = T;
     coord_type x;

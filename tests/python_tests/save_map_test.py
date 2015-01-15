@@ -64,6 +64,13 @@ def test_compare_map():
     for m in glob.glob("../visual_tests/styles/*.xml"):
         compare_map(m)
 
+# TODO - enforce that original xml does not equal first saved xml
+def test_compare_map_deprecations():
+    dep = glob.glob("../data/deprecated_maps/*.xml")
+    dep = [os.path.normpath(p) for p in dep]
+    for m in dep:
+        compare_map(m)
+
 if __name__ == "__main__":
     setup()
     exit(run_all(eval(x) for x in dir() if x.startswith("test_")))

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/util/variant.hpp>
 
 // stl
@@ -34,6 +33,7 @@
 #include <ostream>
 #include <iterator>  // for std::back_insert_iterator
 #include <functional> // std::ref
+#include <exception>
 
 namespace mapnik { namespace filter {
 
@@ -101,7 +101,7 @@ struct scale_hsla : image_filter_base
               a0 < 0 || a0 > 1 ||
               a1 < 0 || a1 > 1)
           {
-              throw config_error("scale-hsla values must be between 0 and 1");
+              throw std::runtime_error("scale-hsla values must be between 0 and 1");
           }
       }
     inline bool is_identity() const {
@@ -267,7 +267,7 @@ inline std::ostream& operator<< (std::ostream& os, colorize_alpha const& filter)
 
 
 template <typename Out>
-struct to_string_visitor : util::static_visitor<void>
+struct to_string_visitor
 {
     to_string_visitor(Out & out)
     : out_(out) {}

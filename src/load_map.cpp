@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -50,7 +50,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/projection.hpp>
@@ -84,7 +84,7 @@ constexpr unsigned name2int(const char *str, int off = 0)
     return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ str[off];
 }
 
-class map_parser : mapnik::noncopyable
+class map_parser : util::noncopyable
 {
 public:
     map_parser(Map & map, bool strict, std::string const& filename = "") :
@@ -119,6 +119,7 @@ private:
     void parse_markers_symbolizer(rule & rule, xml_node const& node);
     void parse_group_symbolizer(rule &rule, xml_node const& node);
     void parse_debug_symbolizer(rule & rule, xml_node const& node);
+    void parse_dot_symbolizer(rule & rule, xml_node const& node);
     void parse_group_rule(group_symbolizer_properties &prop, xml_node const& node);
     void parse_simple_layout(group_symbolizer_properties &prop, xml_node const& node);
     void parse_pair_layout(group_symbolizer_properties &prop, xml_node const& node);
@@ -377,25 +378,15 @@ void map_parser::parse_map_include(Map & map, xml_node const& node)
                 {
                     if (p.is("Parameter"))
                     {
-                        bool is_string = true;
-                        boost::optional<std::string> type = p.get_opt_attr<std::string>("type");
-                        if (type)
-                        {
-                            if (*type == "int")
-                            {
-                                is_string = false;
-                                params[p.get_attr<std::string>("name")] = p.get_value<mapnik::value_integer>();
-                            }
-                            else if (*type == "float")
-                            {
-                                is_string = false;
-                                params[p.get_attr<std::string>("name")] = p.get_value<mapnik::value_double>();
-                            }
-                        }
-                        if (is_string)
-                        {
-                            params[p.get_attr<std::string>("name")] = p.get_text();
-                        }
+                        std::string val = p.get_text();
+                        std::string key = p.get_attr<std::string>("name");
+                        mapnik::value_bool b;
+                        mapnik::value_integer i;
+                        mapnik::value_double d;
+                        if (mapnik::util::string2bool(val,b)) params[key] = b;
+                        else if (mapnik::util::string2int(val,i)) params[key] = i;
+                        else if (mapnik::util::string2double(val,d)) params[key] = d;
+                        else params[key] = val;
                     }
                 }
             }
@@ -863,6 +854,11 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
             parse_debug_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
+        case name2int("DotSymbolizer"):
+            parse_dot_symbolizer(rule, sym_node);
+            sym_node.set_processed(true);
+            break;
+
         default:
             break;
         }
@@ -909,6 +905,25 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
             put(sym, keys::file, parse_path(filename));
         }
 
+        rule.append(std::move(sym));
+    }
+    catch (config_error const& ex)
+    {
+        ex.append_context(node);
+        throw;
+    }
+}
+
+void map_parser::parse_dot_symbolizer(rule & rule, xml_node const & node)
+{
+    try
+    {
+        dot_symbolizer sym;
+        set_symbolizer_property<symbolizer_base,color>(sym, keys::fill, node);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::width, node);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::height, node);
+        set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, node);
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)

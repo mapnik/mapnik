@@ -35,7 +35,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/attribute.hpp>
 
-
 namespace mapnik {
 
     static mapnik::attributes dict2attr(boost::python::dict const& d)
@@ -46,7 +45,26 @@ namespace mapnik {
         boost::python::list keys=d.keys();
         for (int i=0; i < len(keys); ++i)
         {
-            std::string key = extract<std::string>(keys[i]);
+            std::string key;
+            object obj_key = keys[i];
+            if (PyUnicode_Check(obj_key.ptr()))
+            {
+                PyObject* temp = PyUnicode_AsUTF8String(obj_key.ptr());
+                if (temp)
+                {
+    #if PY_VERSION_HEX >= 0x03000000
+                    char* c_str = PyBytes_AsString(temp);
+    #else
+                    char* c_str = PyString_AsString(temp);
+    #endif
+                    key = c_str;
+                    Py_DecRef(temp);
+                }
+            }
+            else
+            {
+                key = extract<std::string>(keys[i]);
+            }
             object obj = d[key];
             if (PyUnicode_Check(obj.ptr()))
             {
@@ -64,29 +82,37 @@ namespace mapnik {
                 continue;
             }
 
-            extract<std::string> ex0(obj);
-            if (ex0.check())
+            if (PyBool_Check(obj.ptr()))
             {
-                vars[key] = tr_.transcode(ex0().c_str());
-                continue;
+                extract<mapnik::value_bool> ex(obj);
+                if (ex.check())
+                {
+                    vars[key] = ex();
+                }
             }
-            extract<mapnik::value_integer> ex2(obj);
-            if (ex2.check())
+            else if (PyFloat_Check(obj.ptr()))
             {
-                vars[key] = ex2();
-                continue;
+                extract<mapnik::value_double> ex(obj);
+                if (ex.check())
+                {
+                    vars[key] = ex();
+                }
             }
-            extract<double> ex3(obj);
-            if (ex3.check())
+            else
             {
-                vars[key] = ex3();
-                continue;
-            }
-            extract<mapnik::value_bool> ex1(obj);
-            if (ex1.check())
-            {
-                vars[key] = ex1();
-                continue;
+                extract<mapnik::value_integer> ex(obj);
+                if (ex.check())
+                {
+                    vars[key] = ex();
+                }
+                else
+                {
+                    extract<std::string> ex0(obj);
+                    if (ex0.check())
+                    {
+                        vars[key] = tr_.transcode(ex0().c_str());
+                    }
+                }
             }
         }
         return vars;

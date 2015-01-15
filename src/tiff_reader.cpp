@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,9 +42,9 @@ extern "C"
 
 namespace mapnik { namespace impl {
 
-static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
+static toff_t tiff_seek_proc(thandle_t handle, toff_t off, int whence)
 {
-    std::istream* in = reinterpret_cast<std::istream*>(fd);
+    std::istream* in = reinterpret_cast<std::istream*>(handle);
 
     switch(whence)
     {
@@ -66,9 +66,9 @@ static int tiff_close_proc(thandle_t)
     return 0;
 }
 
-static toff_t tiff_size_proc(thandle_t fd)
+static toff_t tiff_size_proc(thandle_t handle)
 {
-    std::istream* in = reinterpret_cast<std::istream*>(fd);
+    std::istream* in = reinterpret_cast<std::istream*>(handle);
     std::ios::pos_type pos = in->tellg();
     in->seekg(0, std::ios::end);
     std::ios::pos_type len = in->tellg();
@@ -76,9 +76,9 @@ static toff_t tiff_size_proc(thandle_t fd)
     return static_cast<toff_t>(len);
 }
 
-static tsize_t tiff_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
+static tsize_t tiff_read_proc(thandle_t handle, tdata_t buf, tsize_t size)
 {
-    std::istream * in = reinterpret_cast<std::istream*>(fd);
+    std::istream * in = reinterpret_cast<std::istream*>(handle);
     std::streamsize request_size = size;
     if (static_cast<tsize_t>(request_size) != size)
         return static_cast<tsize_t>(-1);
@@ -123,15 +123,23 @@ class tiff_reader : public image_reader
 private:
     source_type source_;
     input_stream stream_;
+    tiff_ptr tif_;
     int read_method_;
-    std::size_t width_;
-    std::size_t height_;
     int rows_per_strip_;
     int tile_width_;
     int tile_height_;
-    tiff_ptr tif_;
+    std::size_t width_;
+    std::size_t height_;
+    boost::optional<box2d<double> > bbox_;
+    unsigned bps_;
+    unsigned photometric_;
+    unsigned bands_;
+    unsigned planar_config_;
+    unsigned compression_;
     bool premultiplied_alpha_;
     bool has_alpha_;
+    bool is_tiled_;
+
 public:
     enum TiffType {
         generic=1,
@@ -141,18 +149,35 @@ public:
     explicit tiff_reader(std::string const& file_name);
     tiff_reader(char const* data, std::size_t size);
     virtual ~tiff_reader();
-    unsigned width() const;
-    unsigned height() const;
-    inline bool has_alpha() const { return has_alpha_; }
-    bool premultiplied_alpha() const;
-    void read(unsigned x,unsigned y,image_data_32& image);
+    unsigned width() const final;
+    unsigned height() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
+    inline bool has_alpha() const final { return has_alpha_; }
+    bool premultiplied_alpha() const final;
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
+    // methods specific to tiff reader
+    unsigned bits_per_sample() const { return bps_; }
+    unsigned photometric() const { return photometric_; }
+    bool is_tiled() const { return is_tiled_; }
+    unsigned tile_width() const { return tile_width_; }
+    unsigned tile_height() const { return tile_height_; }
+    unsigned rows_per_strip() const { return rows_per_strip_; }
+    unsigned planar_config() const { return planar_config_; }
+    unsigned compression() const { return compression_; }
 private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
     void init();
-    void read_generic(unsigned x,unsigned y,image_data_32& image);
-    void read_stripped(unsigned x,unsigned y,image_data_32& image);
-    void read_tiled(unsigned x,unsigned y,image_data_32& image);
+    void read_generic(unsigned x,unsigned y,image_data_rgba8& image);
+    void read_stripped(unsigned x,unsigned y,image_data_rgba8& image);
+
+    template <typename ImageData>
+    void read_tiled(unsigned x,unsigned y, ImageData & image);
+
+    template <typename ImageData>
+    image_data_any read_any_gray(unsigned x, unsigned y, unsigned width, unsigned height);
+
     TIFF* open(std::istream & input);
 };
 
@@ -178,14 +203,21 @@ template <typename T>
 tiff_reader<T>::tiff_reader(std::string const& file_name)
     : source_(file_name, std::ios_base::in | std::ios_base::binary),
       stream_(source_),
+      tif_(nullptr),
       read_method_(generic),
-      width_(0),
-      height_(0),
       rows_per_strip_(0),
       tile_width_(0),
       tile_height_(0),
+      width_(0),
+      height_(0),
+      bps_(0),
+      photometric_(0),
+      bands_(1),
+      planar_config_(PLANARCONFIG_CONTIG),
+      compression_(COMPRESSION_NONE),
       premultiplied_alpha_(false),
-      has_alpha_(false)
+      has_alpha_(false),
+      is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
     init();
@@ -195,16 +227,24 @@ template <typename T>
 tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
     : source_(data, size),
       stream_(source_),
+      tif_(nullptr),
       read_method_(generic),
-      width_(0),
-      height_(0),
       rows_per_strip_(0),
       tile_width_(0),
       tile_height_(0),
+      width_(0),
+      height_(0),
+      bps_(0),
+      photometric_(0),
+      bands_(1),
+      planar_config_(PLANARCONFIG_CONTIG),
+      compression_(COMPRESSION_NONE),
       premultiplied_alpha_(false),
-      has_alpha_(false)
+      has_alpha_(false),
+      is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
+    stream_.rdbuf()->pubsetbuf(0, 0);
     stream_.seekg(0, std::ios::beg);
     init();
 }
@@ -220,39 +260,97 @@ void tiff_reader<T>::init()
 
     if (!tif) throw image_reader_exception("Can't open tiff file");
 
-    char msg[1024];
+    TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bps_);
+    TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photometric_);
+    TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &bands_);
 
-    if (TIFFRGBAImageOK(tif,msg))
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_;
+
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
+
+    if (width_ > 10000 || height_ > 10000)
     {
-        TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
-        TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
-        if (TIFFIsTiled(tif))
+        throw image_reader_exception("Can't allocate tiff > 10000x10000");
+    }
+
+    TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar_config_);
+    TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression_ );
+    TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_);
+
+    std::uint16_t orientation;
+    if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &orientation) == 0)
+    {
+        orientation = 1;
+    }
+    MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation;
+
+    is_tiled_ = TIFFIsTiled(tif);
+
+    if (is_tiled_)
+    {
+        TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
+        TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
+        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is tiled";
+        read_method_ = tiled;
+    }
+    else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+    {
+        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is stripped";
+        read_method_ = stripped;
+    }
+    //TIFFTAG_EXTRASAMPLES
+    uint16 extrasamples = 0;
+    uint16* sampleinfo = nullptr;
+    if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
+                     &extrasamples, &sampleinfo))
+    {
+        has_alpha_ = true;
+        if (extrasamples == 1 &&
+            sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
         {
-            TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width_);
-            TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height_);
-            read_method_=tiled;
-        }
-        else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
-        {
-            read_method_=stripped;
-        }
-        //TIFFTAG_EXTRASAMPLES
-        uint16 extrasamples = 0;
-        uint16* sampleinfo = nullptr;
-        if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES,
-                              &extrasamples, &sampleinfo))
-        {
-            has_alpha_ = true;
-            if (extrasamples == 1 &&
-                sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
-            {
-                premultiplied_alpha_ = true;
-            }
+            premultiplied_alpha_ = true;
         }
     }
-    else
+    // Try extracting bounding box from geoTIFF tags
     {
-        throw image_reader_exception(msg);
+        uint16 count = 0;
+        double *pixelscale;
+        double *tilepoint;
+        if (TIFFGetField(tif, 33550, &count, &pixelscale) == 1 && count == 3
+            && TIFFGetField(tif, 33922 , &count,  &tilepoint) == 1 && count == 6)
+        {
+            MAPNIK_LOG_DEBUG(tiff_reader) << "PixelScale:" << pixelscale[0] << "," << pixelscale[1] << "," <<  pixelscale[2];
+            MAPNIK_LOG_DEBUG(tiff_reader) << "TilePoint:" << tilepoint[0] << "," << tilepoint[1] << "," << tilepoint[2];
+            MAPNIK_LOG_DEBUG(tiff_reader) << "          " << tilepoint[3] << "," << tilepoint[4] << "," << tilepoint[5];
+
+            // assuming upper-left
+            double lox = tilepoint[3];
+            double loy = tilepoint[4];
+            double hix = lox + pixelscale[0] * width_;
+            double hiy = loy - pixelscale[1] * height_;
+            bbox_.reset(box2d<double>(lox, loy, hix, hiy));
+            MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_;
+        }
+
+    }
+    if (!is_tiled_ &&
+        compression_ == COMPRESSION_NONE &&
+        planar_config_ == PLANARCONFIG_CONTIG)
+    {
+        if (height_ > 128 * 1024 * 1024)
+        {
+            std::size_t line_size = (bands_ * width_ * bps_ + 7) / 8;
+            std::size_t default_strip_height = 8192 / line_size;
+            if (default_strip_height == 0) default_strip_height = 1;
+            std::size_t num_strips = height_ / default_strip_height;
+            if (num_strips > 128 * 1024 * 1024)
+            {
+                throw image_reader_exception("Can't allocate tiff");
+            }
+        }
     }
 }
 
@@ -274,13 +372,19 @@ unsigned tiff_reader<T>::height() const
 }
 
 template <typename T>
+boost::optional<box2d<double> > tiff_reader<T>::bounding_box() const
+{
+    return bbox_;
+}
+
+template <typename T>
 bool tiff_reader<T>::premultiplied_alpha() const
 {
     return premultiplied_alpha_;
 }
 
 template <typename T>
-void tiff_reader<T>::read(unsigned x,unsigned y,image_data_32& image)
+void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
 {
     if (read_method_==stripped)
     {
@@ -297,96 +401,279 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_32& image)
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_32&)
+template <typename ImageData>
+image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width, unsigned height)
+{
+    using image_data_type = ImageData;
+    using pixel_type = typename image_data_type::pixel_type;
+    if (read_method_ == tiled)
+    {
+        image_data_type data(width,height);
+        read_tiled<image_data_type>(x0, y0, data);
+        return image_data_any(std::move(data));
+    }
+    else
+    {
+        TIFF* tif = open(stream_);
+        if (tif)
+        {
+            image_data_type data(width, height);
+            std::size_t block_size = rows_per_strip_ > 0 ? rows_per_strip_ : tile_height_ ;
+            std::ptrdiff_t start_y = y0 - y0 % block_size;
+            std::ptrdiff_t end_y = std::min(y0 + height, static_cast<unsigned>(height_));
+            std::ptrdiff_t start_x = x0;
+            std::ptrdiff_t end_x = std::min(x0 + width, static_cast<unsigned>(width_));
+            std::size_t element_size = sizeof(pixel_type);
+            std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
+            const std::unique_ptr<pixel_type[]> scanline(new pixel_type[size_to_allocate]);
+            for  (std::size_t y = start_y; y < end_y; ++y)
+            {
+                if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                {
+                    pixel_type * row = data.getRow(y - y0);
+                    std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                }
+            }
+            return image_data_any(std::move(data));
+        }
+    }
+    return image_data_any();
+}
+
+
+namespace detail {
+
+struct rgb8
+{
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
+};
+
+struct rgb8_to_rgba8
+{
+    std::uint32_t operator() (rgb8 const& in) const
+    {
+        return ((255 << 24) | (in.r) | (in.g << 8) | (in.b << 16));
+    }
+};
+
+template <typename T>
+struct tiff_reader_traits
+{
+    using image_data_type = T;
+    using pixel_type = typename image_data_type::pixel_type;
+    static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
+    {
+        return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, tile_width * tile_height * sizeof(pixel_type)) != -1);
+    }
+};
+
+// default specialization that expands into RGBA
+template <>
+struct tiff_reader_traits<image_data_rgba8>
+{
+    using pixel_type = std::uint32_t;
+    static bool read_tile(TIFF * tif, unsigned x0, unsigned y0, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
+    {
+        if (TIFFReadRGBATile(tif, x0, y0, buf) != -1)
+        {
+            for (unsigned y = 0; y < tile_height/2; ++y)
+            {
+                std::swap_ranges(buf + y * tile_width, buf + (y + 1) * tile_width, buf + (tile_height - y - 1) * tile_width);
+            }
+            return true;
+        }
+        return false;
+    }
+};
+
+}
+
+template <typename T>
+image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigned height)
+{
+    switch (photometric_)
+    {
+    case PHOTOMETRIC_MINISBLACK:
+    case PHOTOMETRIC_MINISWHITE:
+    {
+        switch (bps_)
+        {
+        case 8:
+        {
+            return read_any_gray<image_data_gray8>(x0, y0, width, height);
+        }
+        case 16:
+        {
+            return read_any_gray<image_data_gray16>(x0, y0, width, height);
+        }
+        case 32:
+        {
+            return read_any_gray<image_data_gray32f>(x0, y0, width, height);
+        }
+        }
+    }
+// read PHOTOMETRIC_RGB expand using RGBA interface
+/*
+    case  PHOTOMETRIC_RGB:
+    {
+        switch (bps_)
+        {
+        case 8:
+        {
+            TIFF* tif = open(stream_);
+            if (tif)
+            {
+                image_data_rgba8 data(width, height);
+                std::size_t element_size = sizeof(detail::rgb8);
+                std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
+                const std::unique_ptr<detail::rgb8[]> scanline(new detail::rgb8[size_to_allocate]);
+                std::ptrdiff_t start_y = y0 - y0 % rows_per_strip_;
+                std::ptrdiff_t end_y = std::min(y0 + height, static_cast<unsigned>(height_));
+                std::ptrdiff_t start_x = x0;
+                std::ptrdiff_t end_x = std::min(x0 + width, static_cast<unsigned>(width_));
+                for  (std::size_t y = start_y; y < end_y; ++y)
+                {
+                    if (-1 != TIFFReadScanline(tif, scanline.get(), y))
+                    {
+                        if (y >= y0)
+                        {
+                            image_data_rgba8::pixel_type * row = data.getRow(y - y0);
+                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, detail::rgb8_to_rgba8());
+                        }
+                    }
+                }
+                return image_data_any(std::move(data));
+            }
+            return image_data_any();
+        }
+        case 16:
+        {
+            image_data_rgba8 data(width,height);
+            read(x0, y0, data);
+            return image_data_any(std::move(data));
+        }
+        case 32:
+        {
+            image_data_rgba8 data(width,height);
+            read(x0, y0, data);
+            return image_data_any(std::move(data));
+        }
+        }
+    }
+*/
+    default:
+    {
+        //PHOTOMETRIC_PALETTE = 3;
+        //PHOTOMETRIC_MASK = 4;
+        //PHOTOMETRIC_SEPARATED = 5;
+        //PHOTOMETRIC_YCBCR = 6;
+        //PHOTOMETRIC_CIELAB = 8;
+        //PHOTOMETRIC_ICCLAB = 9;
+        //PHOTOMETRIC_ITULAB = 10;
+        //PHOTOMETRIC_LOGL = 32844;
+        //PHOTOMETRIC_LOGLUV = 32845;
+        image_data_rgba8 data(width,height);
+        read(x0, y0, data);
+        return image_data_any(std::move(data));
+    }
+    }
+    return image_data_any();
+}
+
+template <typename T>
+void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
     {
-        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
+        throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
     }
 }
 
 template <typename T>
-void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
+template <typename ImageData>
+void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
 {
+    using pixel_type = typename detail::tiff_reader_traits<ImageData>::pixel_type;
+
     TIFF* tif = open(stream_);
     if (tif)
     {
-        uint32* buf = (uint32*)_TIFFmalloc(tile_width_*tile_height_*sizeof(uint32));
-        int width=image.width();
-        int height=image.height();
+        std::unique_ptr<pixel_type[]> buf(new pixel_type[tile_width_*tile_height_]);
+        int width = image.width();
+        int height = image.height();
+        int start_y = (y0 / tile_height_) * tile_height_;
+        int end_y = ((y0 + height) / tile_height_ + 1) * tile_height_;
+        int start_x = (x0 / tile_width_) * tile_width_;
+        int end_x = ((x0 + width) / tile_width_ + 1) * tile_width_;
+        end_y = std::min(end_y, int(height_));
+        end_x = std::min(end_x, int(width_));
 
-        int start_y=(y0/tile_height_)*tile_height_;
-        int end_y=((y0+height)/tile_height_+1)*tile_height_;
-
-        int start_x=(x0/tile_width_)*tile_width_;
-        int end_x=((x0+width)/tile_width_+1)*tile_width_;
-        int row,tx0,tx1,ty0,ty1;
-
-        for (int y=start_y;y<end_y;y+=tile_height_)
+        for (int y = start_y; y < end_y; y += tile_height_)
         {
-            ty0 = std::max(y0,(unsigned)y) - y;
-            ty1 = std::min(height+y0,(unsigned)(y+tile_height_)) - y;
+            int ty0 = std::max(y0, static_cast<unsigned>(y)) - y;
+            int ty1 = std::min(height + y0, static_cast<unsigned>(y + tile_height_)) - y;
 
-            int n0=tile_height_-ty1;
-            int n1=tile_height_-ty0-1;
-
-            for (int x=start_x;x<end_x;x+=tile_width_)
+            for (int x = start_x; x < end_x; x += tile_width_)
             {
-
-                if (!TIFFReadRGBATile(tif,x,y,buf)) break;
-
-                tx0=std::max(x0,(unsigned)x);
-                tx1=std::min(width+x0,(unsigned)(x+tile_width_));
-                row=y+ty0-y0;
-                for (int n=n1;n>=n0;--n)
+                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_, tile_height_))
                 {
-                    image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*tile_width_+tx0-x]);
-                    ++row;
+                    std::clog << "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
+                    break;
+                }
+                int tx0 = std::max(x0, static_cast<unsigned>(x));
+                int tx1 = std::min(width + x0, static_cast<unsigned>(x + tile_width_));
+                int row = y + ty0 - y0;
+                for (int ty = ty0; ty < ty1; ++ty, ++row)
+                {
+                    image.setRow(row, tx0 - x0, tx1 - x0, &buf[ty * tile_width_ + tx0 - x]);
                 }
             }
         }
-        _TIFFfree(buf);
     }
 }
 
+
 template <typename T>
-void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_32& image)
+void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
     {
-        uint32* buf = (uint32*)_TIFFmalloc(width_*rows_per_strip_*sizeof(uint32));
-
+        image_data_rgba8 strip(width_,rows_per_strip_,false);
         int width=image.width();
         int height=image.height();
 
         unsigned start_y=(y0/rows_per_strip_)*rows_per_strip_;
         unsigned end_y=((y0+height)/rows_per_strip_+1)*rows_per_strip_;
-        bool laststrip=((unsigned)end_y > height_)?true:false;
+        bool laststrip=(static_cast<unsigned>(end_y) > height_)?true:false;
         int row,tx0,tx1,ty0,ty1;
 
         tx0=x0;
-        tx1=std::min(width+x0,(unsigned)width_);
+        tx1=std::min(width+x0,static_cast<unsigned>(width_));
 
         for (unsigned y=start_y; y < end_y; y+=rows_per_strip_)
         {
             ty0 = std::max(y0,y)-y;
             ty1 = std::min(height+y0,y+rows_per_strip_)-y;
 
-            if (!TIFFReadRGBAStrip(tif,y,buf)) break;
-
+            if (!TIFFReadRGBAStrip(tif,y,strip.getData()))
+            {
+                std::clog << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
+                break;
+            }
             row=y+ty0-y0;
 
             int n0=laststrip ? 0:(rows_per_strip_-ty1);
             int n1=laststrip ? (ty1-ty0-1):(rows_per_strip_-ty0-1);
             for (int n=n1;n>=n0;--n)
             {
-                image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*width_+tx0]);
+                image.setRow(row,tx0-x0,tx1-x0,&strip.getData()[n*width_+tx0]);
                 ++row;
             }
         }
-        _TIFFfree(buf);
     }
 }
 
@@ -395,7 +682,7 @@ TIFF* tiff_reader<T>::open(std::istream & input)
 {
     if (!tif_)
     {
-        tif_ = tiff_ptr(TIFFClientOpen("tiff_input_stream", "rm",
+        tif_ = tiff_ptr(TIFFClientOpen("tiff_input_stream", "rcm",
                                        reinterpret_cast<thandle_t>(&input),
                                        impl::tiff_read_proc,
                                        impl::tiff_write_proc,

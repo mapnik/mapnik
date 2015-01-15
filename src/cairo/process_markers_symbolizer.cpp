@@ -27,7 +27,7 @@
 #include <mapnik/cairo/cairo_render_vector.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/marker.hpp>
@@ -48,7 +48,7 @@ class proj_transform;
 namespace detail {
 
 template <typename RendererContext, typename Detector>
-struct vector_markers_dispatch_cairo : public vector_markers_dispatch<Detector>
+struct vector_markers_dispatch_cairo  : public vector_markers_dispatch<Detector>
 {
     vector_markers_dispatch_cairo(svg_path_ptr const& src,
                                   svg::svg_path_adapter & path,
@@ -86,7 +86,7 @@ private:
 template <typename RendererContext, typename Detector>
 struct raster_markers_dispatch_cairo : public raster_markers_dispatch<Detector>
 {
-    raster_markers_dispatch_cairo(mapnik::image_data_32 & src,
+    raster_markers_dispatch_cairo(mapnik::image_data_rgba8 & src,
                                   agg::trans_affine const& marker_trans,
                                   markers_symbolizer const& sym,
                                   Detector & detector,

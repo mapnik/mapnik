@@ -1,4 +1,0 @@
-CXXFLAGS = `xml2-config --cflags` -I/usr/local/include/mapnik -I/usr/include/boost -I/usr/include/freetype2  -I/home/nick/mapnik-osm/agg/include  -fPIC -g
-MAPNIK_OSM_OBJ = osmparser.o osm.o osm_datasource.o osm_featureset.o 
-osm.input: $(MAPNIK_OSM_OBJ)
-  g++ -shared -o osm.input $(MAPNIK_OSM_OBJ) 

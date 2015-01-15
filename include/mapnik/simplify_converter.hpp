@@ -5,7 +5,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <limits>
@@ -19,7 +19,7 @@
 namespace mapnik
 {
 
-struct weighted_vertex : private mapnik::noncopyable
+struct weighted_vertex : private util::noncopyable
 {
     vertex2d coord;
     double weight;
@@ -45,7 +45,7 @@ struct weighted_vertex : private mapnik::noncopyable
 
     struct ascending_sort
     {
-        bool operator() (const weighted_vertex *a, const weighted_vertex *b)
+        bool operator() (const weighted_vertex *a, const weighted_vertex *b) const
         {
             return b->weight > a->weight;
         }
@@ -100,7 +100,7 @@ public:
         pos_(0)
     {}
 
-    enum status
+    enum status : std::uint8_t
     {
         initial,
         process,
@@ -204,7 +204,7 @@ private:
             return SEG_CLOSE;
         }
 
-        vertex2d last(vertex2d::no_init);
+        vertex2d last;
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
@@ -217,7 +217,7 @@ private:
                     // continue
                 }
             } else if (vtx.cmd == SEG_CLOSE) {
-                if (last.cmd == vertex2d::no_init) {
+                if (last.cmd == SEG_END) {
                     // The previous vertex was already output in the previous call.
                     // We can now safely output SEG_CLOSE.
                     status_ = end;

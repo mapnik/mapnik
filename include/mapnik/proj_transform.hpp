@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,14 +25,14 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik {
 
 class projection;
 template <typename T> class box2d;
 
-class MAPNIK_DECL proj_transform : private mapnik::noncopyable
+class MAPNIK_DECL proj_transform : private util::noncopyable
 {
 public:
     proj_transform(projection const& source,

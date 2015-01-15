@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@
 #include <mapnik/query.hpp>
 #include <mapnik/featureset.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
 
 // boost
@@ -63,15 +63,15 @@ private:
     std::string message_;
 };
 
-class MAPNIK_DECL datasource : private mapnik::noncopyable
+class MAPNIK_DECL datasource : private util::noncopyable
 {
 public:
-    enum datasource_t {
+    enum datasource_t : std::uint8_t {
         Vector,
         Raster
     };
 
-    enum geometry_t {
+    enum geometry_t : std::uint8_t {
         Point = 1,
         LineString = 2,
         Polygon = 3,

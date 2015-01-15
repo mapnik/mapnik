@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -76,11 +76,13 @@ public:
     explicit png_reader(std::string const& file_name);
     png_reader(char const* data, std::size_t size);
     ~png_reader();
-    unsigned width() const;
-    unsigned height() const;
-    inline bool has_alpha() const { return has_alpha_; }
-    bool premultiplied_alpha() const { return false; } //http://www.libpng.org/pub/png/spec/1.1/PNG-Rationale.html
-    void read(unsigned x,unsigned y,image_data_32& image);
+    unsigned width() const final;
+    unsigned height() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
+    inline bool has_alpha() const final { return has_alpha_; }
+    bool premultiplied_alpha() const final { return false; } //http://www.libpng.org/pub/png/spec/1.1/PNG-Rationale.html
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
     static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length);
@@ -219,7 +221,13 @@ unsigned png_reader<T>::height() const
 }
 
 template <typename T>
-void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
+boost::optional<box2d<double> > png_reader<T>::bounding_box() const
+{
+    return boost::optional<box2d<double> >();
+}
+
+template <typename T>
+void png_reader<T>::read(unsigned x0, unsigned y0,image_data_rgba8& image)
 {
     stream_.clear();
     stream_.seekg(0, std::ios_base::beg);
@@ -300,4 +308,14 @@ void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
     }
     png_read_end(png_ptr,0);
 }
+
+
+template <typename T>
+image_data_any png_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+{
+    image_data_rgba8 data(width,height);
+    read(x, y, data);
+    return image_data_any(std::move(data));
+}
+
 }

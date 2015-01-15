@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,29 +39,20 @@
 // boost
 #include <boost/optional/optional.hpp>
 
-struct _cairo_surface;
-typedef struct _cairo_surface cairo_surface_t;
-
 namespace mapnik
 {
-
-using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 class MAPNIK_DECL image_32
 {
 private:
-    unsigned width_;
-    unsigned height_;
+    image_data_rgba8 data_;
     boost::optional<color> background_;
-    image_data_32 data_;
     bool painted_;
     bool premultiplied_;
 public:
     image_32(int width,int height);
     image_32(image_32 const& rhs);
-#ifdef HAVE_CAIRO
-    explicit image_32(cairo_surface_ptr const& surface);
-#endif
+    image_32(image_data_rgba8 && data);
     ~image_32();
 
     void painted(bool painted)
@@ -98,12 +89,12 @@ public:
 
     void set_alpha(float opacity);
 
-    inline const image_data_32& data() const
+    inline const image_data_rgba8& data() const
     {
         return data_;
     }
 
-    inline image_data_32& data()
+    inline image_data_rgba8& data()
     {
         return data_;
     }
@@ -118,16 +109,16 @@ public:
         return data_.getBytes();
     }
 
-    inline image_view<image_data_32> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
+    inline image_view<image_data_rgba8> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
     {
-        return image_view<image_data_32>(x,y,w,h,data_);
+        return image_view<image_data_rgba8>(x,y,w,h,data_);
     }
 
 private:
 
     inline bool checkBounds(int x, int y) const
     {
-        return (x >= 0 && x < static_cast<int>(width_) && y >= 0 && y < static_cast<int>(height_));
+        return (x >= 0 && x < static_cast<int>(data_.width()) && y >= 0 && y < static_cast<int>(data_.height()));
     }
 
 public:
@@ -143,17 +134,17 @@ public:
 
     inline unsigned width() const
     {
-        return width_;
+        return data_.width();
     }
 
     inline unsigned height() const
     {
-        return height_;
+        return data_.height();
     }
 
-    inline void set_rectangle(int x0,int y0,image_data_32 const& data)
+    inline void set_rectangle(int x0,int y0,image_data_rgba8 const& data)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());
 
         if (ext0.intersects(ext1))
@@ -175,9 +166,9 @@ public:
         }
     }
 
-    inline void set_rectangle_alpha(int x0,int y0,const image_data_32& data)
+    inline void set_rectangle_alpha(int x0,int y0,const image_data_rgba8& data)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 
         if (ext0.intersects(ext1))
@@ -219,9 +210,9 @@ public:
         }
     }
 
-    inline void set_rectangle_alpha2(image_data_32 const& data, unsigned x0, unsigned y0, float opacity)
+    inline void set_rectangle_alpha2(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 
         if (ext0.intersects(ext1))
@@ -267,9 +258,9 @@ public:
     }
 
     template <typename MergeMethod>
-        inline void merge_rectangle(image_data_32 const& data, unsigned x0, unsigned y0, float opacity)
+        inline void merge_rectangle(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
-        box2d<int> ext0(0,0,width_,height_);
+        box2d<int> ext0(0,0,data_.width(),data_.height());
         box2d<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 
         if (ext0.intersects(ext1))

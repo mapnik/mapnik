@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -121,7 +121,7 @@ boost::optional<T> param_cast(std::string const& source)
 } // end namespace detail
 
 template <typename T>
-struct value_extractor_visitor : public util::static_visitor<>
+struct value_extractor_visitor
 {
 
     value_extractor_visitor(boost::optional<T> & var)

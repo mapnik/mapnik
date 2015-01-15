@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,167 +25,232 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-
 // stl
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
 
-namespace mapnik
+namespace mapnik {
+
+namespace detail {
+
+struct buffer
 {
-template <typename T>
-class image_data
-{
-public:
-    using pixel_type = T;
+    explicit buffer(std::size_t size)
+        : size_(size),
+          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
+    {}
 
-    image_data(int width, int height)
-        : width_(static_cast<unsigned>(width)),
-          height_(static_cast<unsigned>(height)),
-          owns_data_(true)
+    buffer(buffer && rhs) noexcept
+        : size_(std::move(rhs.size_)),
+          data_(std::move(rhs.data_))
     {
-        if (width < 0)
-        {
-            throw std::runtime_error("negative width not allowed for image_data");
-        }
-        if (height < 0)
-        {
-            throw std::runtime_error("negative height not allowed for image_data");
-        }
-        pData_ = (width!=0 && height!=0) ? static_cast<T*>(::operator new(sizeof(T) * width * height)):0;
-        if (pData_) std::fill(pData_, pData_ + width_ * height_, 0);
+        rhs.size_ = 0;
+        rhs.data_ = nullptr;
     }
 
-    image_data(int width, int height, T * data)
-        : width_(static_cast<unsigned>(width)),
-          height_(static_cast<unsigned>(height)),
-          owns_data_(false),
-          pData_(data)
+    buffer(buffer const& rhs)
+        : size_(rhs.size_),
+          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
     {
-        if (width < 0)
-        {
-            throw std::runtime_error("negative width not allowed for image_data");
-        }
-        if (height < 0)
-        {
-            throw std::runtime_error("negative height not allowed for image_data");
-        }
+        if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
     }
 
-    image_data(image_data<T> const& rhs)
-        :width_(rhs.width_),
-         height_(rhs.height_),
-         owns_data_(true),
-         pData_((rhs.width_!=0 && rhs.height_!=0)?
-                static_cast<T*>(::operator new(sizeof(T) * rhs.width_ * rhs.height_)) : 0)
-    {
-        if (pData_) std::copy(rhs.pData_, rhs.pData_ + rhs.width_* rhs.height_, pData_);
-    }
-
-    image_data(image_data<T> && rhs) noexcept
-        : width_(rhs.width_),
-          height_(rhs.height_),
-          pData_(rhs.pData_)
-    {
-        rhs.width_ = 0;
-        rhs.height_ = 0;
-        rhs.pData_ = nullptr;
-    }
-
-    image_data<T>& operator=(image_data<T> rhs)
+    buffer& operator=(buffer rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(image_data<T> & rhs)
+    void swap(buffer & rhs)
+    {
+        std::swap(size_, rhs.size_);
+        std::swap(data_, rhs.data_);
+    }
+
+    inline bool operator!() const { return (data_ == nullptr)? false : true; }
+    ~buffer()
+    {
+        ::operator delete(data_);
+    }
+
+    inline unsigned char* data() { return data_; }
+    inline unsigned char const* data() const { return data_; }
+    inline std::size_t size() const { return size_; }
+    std::size_t size_;
+    unsigned char* data_;
+
+};
+
+template <std::size_t max_size>
+struct image_dimensions
+{
+    image_dimensions(int width, int height)
+        : width_(width),
+          height_(height)
+    {
+        if (width < 0 || static_cast<std::size_t>(width) > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
+        if (height < 0 || static_cast<std::size_t>(height) > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
+    }
+
+    image_dimensions(image_dimensions const& other) = default;
+    image_dimensions(image_dimensions && other) = default;
+    image_dimensions& operator= (image_dimensions rhs)
     {
         std::swap(width_, rhs.width_);
         std::swap(height_, rhs.height_);
-        std::swap(pData_, rhs.pData_);
+        return *this;
     }
-
-    inline T& operator() (unsigned i,unsigned j)
-    {
-        assert(i<width_ && j<height_);
-        return pData_[j*width_+i];
-    }
-    inline const T& operator() (unsigned i,unsigned j) const
-    {
-        assert(i<width_ && j<height_);
-        return pData_[j*width_+i];
-    }
-    inline unsigned width() const
+    std::size_t width() const
     {
         return width_;
     }
-    inline unsigned height() const
+    std::size_t height() const
     {
         return height_;
     }
-    inline void set(T const& t)
+    std::size_t width_;
+    std::size_t height_;
+};
+
+}
+
+template <typename T, std::size_t max_size = 65535>
+class image_data
+{
+public:
+    using pixel_type = T;
+    static constexpr std::size_t pixel_size = sizeof(pixel_type);
+
+    image_data(int width, int height, bool initialize = true)
+        : dimensions_(width, height),
+          buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
     {
-        std::fill(pData_, pData_ + width_ * height_, t);
+        if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
 
-    inline const T* getData() const
+    image_data(image_data<pixel_type> const& rhs)
+        : dimensions_(rhs.dimensions_),
+          buffer_(rhs.buffer_),
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+    {}
+
+    image_data(image_data<pixel_type> && rhs) noexcept
+        : dimensions_(std::move(rhs.dimensions_)),
+        buffer_(std::move(rhs.buffer_)),
+        pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+    {
+        rhs.dimensions_ = { 0, 0 };
+        rhs.pData_ = nullptr;
+    }
+
+    image_data<pixel_type>& operator=(image_data<pixel_type> rhs)
+    {
+        swap(rhs);
+        return *this;
+    }
+
+    void swap(image_data<pixel_type> & rhs)
+    {
+        std::swap(dimensions_, rhs.dimensions_);
+        std::swap(buffer_, rhs.buffer_);
+    }
+
+    inline pixel_type& operator() (std::size_t i, std::size_t j)
+    {
+        assert(i < dimensions_.width() && j < dimensions_.height());
+        return pData_[j * dimensions_.width() + i];
+    }
+    inline const pixel_type& operator() (std::size_t i, std::size_t j) const
+    {
+        assert(i < dimensions_.width() && j < dimensions_.height());
+        return pData_[j * dimensions_.width() + i];
+    }
+    inline std::size_t width() const
+    {
+        return dimensions_.width();
+    }
+    inline std::size_t height() const
+    {
+        return dimensions_.height();
+    }
+    inline unsigned getSize() const
+    {
+        return dimensions_.height() * dimensions_.width() * pixel_size;
+    }
+    inline unsigned getRowSize() const
+    {
+        return dimensions_.width() * pixel_size;
+    }
+    inline void set(pixel_type const& t)
+    {
+        std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), t);
+    }
+
+    inline const pixel_type* getData() const
     {
         return pData_;
     }
 
-    inline T* getData()
+    inline pixel_type* getData()
     {
         return pData_;
     }
 
     inline const unsigned char* getBytes() const
     {
-        return reinterpret_cast<unsigned char*>(pData_);
+        return buffer_.data();
     }
 
     inline unsigned char* getBytes()
     {
-        return reinterpret_cast<unsigned char*>(pData_);
+        return buffer_.data();
     }
 
-    inline const T* getRow(unsigned row) const
+    inline const pixel_type* getRow(std::size_t row) const
     {
-        return pData_+row*width_;
+        return pData_ + row * dimensions_.width();
     }
 
-    inline T* getRow(unsigned row)
+    inline const pixel_type* getRow(std::size_t row, std::size_t x0) const
     {
-        return pData_+row*width_;
+        return pData_ + row * dimensions_.width() + x0;
     }
 
-    inline void setRow(unsigned row, T const* buf, unsigned size)
+    inline pixel_type* getRow(std::size_t row)
     {
-        assert(row<height_);
-        assert(size<=width_);
-        std::copy(buf, buf + size, pData_ + row * width_);
-    }
-    inline void setRow(unsigned row, unsigned x0, unsigned x1, T const* buf)
-    {
-        std::copy(buf, buf + (x1 - x0), pData_ + row * width_);
+        return pData_ + row * dimensions_.width();
     }
 
-    inline ~image_data()
+    inline pixel_type* getRow(std::size_t row, std::size_t x0)
     {
-        if (owns_data_)
-        {
-            ::operator delete(pData_),pData_=0;
-        }
+        return pData_ + row * dimensions_.width() + x0;
+    }
+
+    inline void setRow(std::size_t row, pixel_type const* buf, std::size_t size)
+    {
+        assert(row < dimensions_.height());
+        assert(size <= dimensions_.width());
+        std::copy(buf, buf + size, pData_ + row * dimensions_.width());
+    }
+    inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
+    {
+        assert(row < dimensions_.height());
+        assert ((x1 - x0) <= dimensions_.width() );
+        std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
     }
 
 private:
-    unsigned width_;
-    unsigned height_;
-    bool owns_data_;
-    T *pData_;
+    detail::image_dimensions<max_size> dimensions_;
+    detail::buffer buffer_;
+    pixel_type *pData_;
 };
 
-using image_data_32 = image_data<unsigned>;
-using image_data_8 = image_data<byte> ;
+using image_data_rgba8 = image_data<std::uint32_t>;
+using image_data_gray8 = image_data<std::uint8_t> ;
+using image_data_gray16 = image_data<std::int16_t>;
+using image_data_gray32f = image_data<float>;
 }
 
 #endif // MAPNIK_IMAGE_DATA_HPP

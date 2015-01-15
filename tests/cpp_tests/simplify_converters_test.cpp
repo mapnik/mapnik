@@ -7,9 +7,7 @@
 
 #include <mapnik/layer.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
-#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/simplify_converter.hpp>
 

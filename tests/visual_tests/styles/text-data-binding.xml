@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
 <Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Parameters>
+        <Parameter name="sizes">500, 500</Parameter>
+    </Parameters>
 
     <Layer name="l1" srs="+proj=latlong +datum=WGS84">
         <StyleName>text</StyleName>

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@ namespace mapnik
 {
 
 // This visitor will process offsets for the given layout
-struct process_layout : public util::static_visitor<>
+struct process_layout
 {
     // The vector containing the existing, centered item bounding boxes
     vector<bound_box> const& member_boxes_;

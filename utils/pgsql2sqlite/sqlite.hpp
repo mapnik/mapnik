@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
 #include <memory>
@@ -38,7 +38,7 @@
 
 namespace mapnik {  namespace sqlite {
 
-    class database : private mapnik::noncopyable
+    class database : private util::noncopyable
     {
         friend class prepared_statement;
 
@@ -75,9 +75,9 @@ namespace mapnik {  namespace sqlite {
     using value_type = mapnik::util::variant<int,double,std::string, blob,null_type>;
     using record_type = std::vector<value_type>;
 
-    class prepared_statement : mapnik::noncopyable
+    class prepared_statement : util::noncopyable
     {
-        struct binder : public mapnik::util::static_visitor<bool>
+        struct binder
         {
             binder(sqlite3_stmt * stmt, unsigned index)
                 : stmt_(stmt), index_(index) {}

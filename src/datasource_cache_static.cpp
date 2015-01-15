@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,46 +38,46 @@
 // static plugin linkage
 #ifdef MAPNIK_STATIC_PLUGINS
     #if defined(MAPNIK_STATIC_PLUGIN_CSV)
-        #include "plugins/input/csv/csv_datasource.hpp"
+        #include "input/csv/csv_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GDAL)
-        #include "plugins/input/gdal/gdal_datasource.hpp"
+        #include "input/gdal/gdal_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
-        #include "plugins/input/geojson/geojson_datasource.hpp"
+        #include "input/geojson/geojson_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GEOS)
-        #include "plugins/input/geos/geos_datasource.hpp"
+        #include "input/geos/geos_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_KISMET)
-        #include "plugins/input/kismet/kismet_datasource.hpp"
+        #include "input/kismet/kismet_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OCCI)
-        #include "plugins/input/occi/occi_datasource.hpp"
+        #include "input/occi/occi_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OGR)
-        #include "plugins/input/ogr/ogr_datasource.hpp"
+        #include "input/ogr/ogr_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OSM)
-        #include "plugins/input/osm/osm_datasource.hpp"
+        #include "input/osm/osm_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
-        #include "plugins/input/postgis/postgis_datasource.hpp"
+        #include "input/postgis/postgis_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_PYTHON)
-        #include "plugins/input/python/python_datasource.hpp"
+        #include "input/python/python_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
-        #include "plugins/input/raster/raster_datasource.hpp"
+        #include "input/raster/raster_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
-        #include "plugins/input/rasterlite/rasterlite_datasource.hpp"
+        #include "input/rasterlite/rasterlite_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
-        #include "plugins/input/shape/shape_datasource.hpp"
+        #include "input/shape/shape_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
-        #include "plugins/input/sqlite/sqlite_datasource.hpp"
+        #include "input/sqlite/sqlite_datasource.hpp"
     #endif
 #endif
 
@@ -90,7 +90,7 @@ datasource_ptr ds_generator(parameters const& params)
     return std::make_shared<T>(params);
 }
 
-using params) = datasource_ptr (*ds_generator_ptr)(parameters const&;
+typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
 using datasource_map = boost::unordered_map<std::string, ds_generator_ptr>;
 
 static datasource_map ds_map = boost::assign::map_list_of

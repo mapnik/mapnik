@@ -204,8 +204,8 @@ source = Split(
     svg/svg_transform_parser.cpp
     warp.cpp
     css_color_grammar.cpp
+    vertex_cache.cpp
     text/font_library.cpp
-    text/vertex_cache.cpp
     text/text_layout.cpp
     text/text_line.cpp
     text/itemizer.cpp
@@ -243,6 +243,7 @@ source = Split(
 
 if env['PLUGIN_LINKING'] == 'static':
     hit = False
+    lib_env.AppendUnique(CPPPATH='../plugins/')
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS'] or not details['lib']:
@@ -300,6 +301,7 @@ for cpp in enabled_imaging_libraries:
 source += Split(
     """
     agg/agg_renderer.cpp
+    agg/process_dot_symbolizer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_line_symbolizer.cpp
     agg/process_line_pattern_symbolizer.cpp

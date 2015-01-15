@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@
 
 namespace mapnik {
 
-enum well_known_srs_enum {
+enum well_known_srs_enum : std::uint8_t {
     WGS_84,
     G_MERC,
     well_known_srs_enum_MAX

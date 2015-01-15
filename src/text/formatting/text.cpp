@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/text/text_layout.hpp>
+#include <mapnik/debug.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -53,21 +54,28 @@ node_ptr text_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 void text_node::apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout &output) const
 {
     mapnik::value_unicode_string text_str = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(feature,vars), *text_).to_unicode();
-    if (p->text_transform == UPPERCASE)
+    switch (p->text_transform)
     {
-        text_str = text_str.toUpper();
-    }
-    else if (p->text_transform == LOWERCASE)
-    {
-        text_str = text_str.toLower();
-    }
+    case UPPERCASE:
+        text_str.toUpper();
+        break;
+    case LOWERCASE:
+        text_str.toLower();
+        break;
+    case REVERSE:
+        text_str.reverse();
+        break;
+    case CAPITALIZE:
 #if !UCONFIG_NO_BREAK_ITERATION
-    else if (p->text_transform == CAPITALIZE)
-    {
         // note: requires BreakIterator support in ICU which is optional
-        text_str = text_str.toTitle(nullptr);
-    }
+        text_str.toTitle(nullptr);
+#else
+        MAPNIK_LOG_DEBUG(text_node) << "text capitalize (toTitle) disabled because ICU was built without UCONFIG_NO_BREAK_ITERATION";
 #endif
+        break;
+    default:
+        break;
+    }
     if (text_str.length() > 0) {
         output.add_text(text_str, p);
     }

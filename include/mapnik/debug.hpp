@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/unique_lock.hpp>
 #include <mapnik/utils.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // std
 #include <iostream>
@@ -48,7 +48,7 @@ namespace mapnik {
     */
     class MAPNIK_DECL logger :
         public singleton<logger,CreateStatic>,
-        private mapnik::noncopyable
+        private util::noncopyable
     {
     public:
         enum severity_type
@@ -184,7 +184,7 @@ namespace mapnik {
                  class Ch = char,
                  class Tr = std::char_traits<Ch>,
                  class A = std::allocator<Ch> >
-        class base_log : public mapnik::noncopyable
+        class base_log : public util::noncopyable
         {
         public:
             using output_policy = OutputPolicy<Ch, Tr, A>;
@@ -254,7 +254,7 @@ namespace mapnik {
                  class Ch = char,
                  class Tr = std::char_traits<Ch>,
                  class A = std::allocator<Ch> >
-        class base_log_always : public mapnik::noncopyable
+        class base_log_always : public util::noncopyable
         {
         public:
             using output_policy = OutputPolicy<Ch, Tr, A>;

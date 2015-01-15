@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,12 +30,14 @@ namespace mapnik
 {
 
 class text_placement_info_dummy;
+class feature_impl;
+struct attribute;
 
 // Dummy placement algorithm. Always takes the default value.
 class MAPNIK_DECL text_placements_dummy: public text_placements
 {
 public:
-    text_placement_info_ptr get_placement_info(double scale_factor) const;
+    text_placement_info_ptr get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const;
     friend class text_placement_info_dummy;
 };
 

@@ -93,7 +93,7 @@ def test_compare_images():
         if not validate_pixels_are_not_premultiplied(a):
             fails.append('%s not validly demultiplied' % (name))
         a.save(actual,'png32')
-        if not os.path.exists(expected):
+        if not os.path.exists(expected) or os.environ.get('UPDATE'):
             print 'generating expected test image: %s' % expected
             a.save(expected,'png32')
         expected_im = mapnik.Image.open(expected)
@@ -167,7 +167,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             actual = '/tmp/mapnik-style-comp-op-' + name + '.png'
             expected = 'images/style-comp-op/' + name + '.png'
             im.save(actual,'png32')
-            if not os.path.exists(expected):
+            if not os.path.exists(expected) or os.environ.get('UPDATE'):
                 print 'generating expected test image: %s' % expected
                 im.save(expected,'png32')
             expected_im = mapnik.Image.open(expected)
@@ -197,13 +197,12 @@ def test_rounding_and_color_expectations():
     m.background = mapnik.Color('rgba(255,255,255,.4999999)')
     im = mapnik.Image(m.width,m.height)
     mapnik.render(m,im)
-    # ugh 252, see: https://github.com/mapnik/mapnik/issues/1519
-    eq_(get_unique_colors(im),['rgba(252,252,252,127)'])
+    eq_(get_unique_colors(im),['rgba(255,255,255,127)'])
     m = mapnik.Map(1,1)
     m.background = mapnik.Color('rgba(255,255,255,.5)')
     im = mapnik.Image(m.width,m.height)
     mapnik.render(m,im)
-    eq_(get_unique_colors(im),['rgba(253,253,253,128)'])
+    eq_(get_unique_colors(im),['rgba(255,255,255,128)'])
     im_file = mapnik.Image.open('../data/images/stripes_pattern.png')
     eq_(get_unique_colors(im_file),['rgba(0,0,0,0)', 'rgba(74,74,74,255)'])
     # should have no effect
@@ -224,10 +223,7 @@ def test_background_image_and_background_color():
     m.background_image = '../data/images/stripes_pattern.png'
     im = mapnik.Image(m.width,m.height)
     mapnik.render(m,im)
-    # note: data loss due to rounding as per https://github.com/mapnik/mapnik/issues/1519
-    # means that background will roundtrip to 253 not 255
-    #eq_(get_unique_colors(im),['rgba(255,255,255,128)', 'rgba(74,74,74,255)'])
-    eq_(get_unique_colors(im),['rgba(253,253,253,128)', 'rgba(74,74,74,255)'])
+    eq_(get_unique_colors(im),['rgba(255,255,255,128)', 'rgba(74,74,74,255)'])
 
 def test_background_image_with_alpha_and_background_color():
     m = mapnik.Map(10,10)

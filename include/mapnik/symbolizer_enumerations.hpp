@@ -27,7 +27,7 @@
 
 namespace mapnik {
 
-enum line_cap_enum
+enum line_cap_enum : std::uint8_t
 {
     BUTT_CAP,
     SQUARE_CAP,
@@ -37,7 +37,7 @@ enum line_cap_enum
 
 DEFINE_ENUM( line_cap_e, line_cap_enum );
 
-enum line_join_enum
+enum line_join_enum : std::uint8_t
 {
     MITER_JOIN,
     MITER_REVERT_JOIN,
@@ -48,7 +48,7 @@ enum line_join_enum
 
 DEFINE_ENUM( line_join_e, line_join_enum );
 
-enum line_rasterizer_enum
+enum line_rasterizer_enum : std::uint8_t
 {
     RASTERIZER_FULL,           // agg::renderer_scanline_aa_solid
     RASTERIZER_FAST,           // agg::rasterizer_outline_aa, twice as fast but only good for thin lines
@@ -58,7 +58,7 @@ enum line_rasterizer_enum
 DEFINE_ENUM( line_rasterizer_e, line_rasterizer_enum );
 
 
-enum halo_rasterizer_enum
+enum halo_rasterizer_enum : std::uint8_t
 {
     HALO_RASTERIZER_FULL,
     HALO_RASTERIZER_FAST,
@@ -67,7 +67,7 @@ enum halo_rasterizer_enum
 
 DEFINE_ENUM(halo_rasterizer_e, halo_rasterizer_enum);
 
-enum point_placement_enum
+enum point_placement_enum : std::uint8_t
 {
     CENTROID_POINT_PLACEMENT,
     INTERIOR_POINT_PLACEMENT,
@@ -76,7 +76,7 @@ enum point_placement_enum
 
 DEFINE_ENUM( point_placement_e, point_placement_enum );
 
-enum pattern_alignment_enum
+enum pattern_alignment_enum : std::uint8_t
 {
     LOCAL_ALIGNMENT,
     GLOBAL_ALIGNMENT,
@@ -85,7 +85,7 @@ enum pattern_alignment_enum
 
 DEFINE_ENUM( pattern_alignment_e, pattern_alignment_enum );
 
-enum debug_symbolizer_mode_enum
+enum debug_symbolizer_mode_enum : std::uint8_t
 {
     DEBUG_SYM_MODE_COLLISION,
     DEBUG_SYM_MODE_VERTEX,
@@ -97,7 +97,7 @@ DEFINE_ENUM( debug_symbolizer_mode_e, debug_symbolizer_mode_enum );
 
 // markers
 // TODO - consider merging with text_symbolizer label_placement_e
-enum marker_placement_enum
+enum marker_placement_enum : std::uint8_t
 {
     MARKER_POINT_PLACEMENT,
     MARKER_INTERIOR_PLACEMENT,
@@ -109,7 +109,7 @@ enum marker_placement_enum
 
 DEFINE_ENUM( marker_placement_e, marker_placement_enum );
 
-enum marker_multi_policy_enum
+enum marker_multi_policy_enum : std::uint8_t
 {
     MARKER_EACH_MULTI, // each component in a multi gets its marker
     MARKER_WHOLE_MULTI, // consider all components of a multi as a whole
@@ -119,18 +119,19 @@ enum marker_multi_policy_enum
 
 DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
 
-enum text_transform_enum
+enum text_transform_enum : std::uint8_t
 {
     NONE = 0,
     UPPERCASE,
     LOWERCASE,
     CAPITALIZE,
+    REVERSE,
     text_transform_enum_MAX
 };
 
 DEFINE_ENUM(text_transform_e, text_transform_enum);
 
-enum label_placement_enum
+enum label_placement_enum : std::uint8_t
 {
     POINT_PLACEMENT,
     LINE_PLACEMENT,
@@ -141,7 +142,7 @@ enum label_placement_enum
 
 DEFINE_ENUM(label_placement_e, label_placement_enum);
 
-enum vertical_alignment_enum
+enum vertical_alignment_enum : std::uint8_t
 {
     V_TOP = 0,
     V_MIDDLE,
@@ -152,7 +153,7 @@ enum vertical_alignment_enum
 
 DEFINE_ENUM(vertical_alignment_e, vertical_alignment_enum);
 
-enum horizontal_alignment_enum
+enum horizontal_alignment_enum : std::uint8_t
 {
     H_LEFT = 0,
     H_MIDDLE,
@@ -164,7 +165,7 @@ enum horizontal_alignment_enum
 
 DEFINE_ENUM(horizontal_alignment_e, horizontal_alignment_enum);
 
-enum justify_alignment_enum
+enum justify_alignment_enum : std::uint8_t
 {
     J_LEFT = 0,
     J_MIDDLE,
@@ -175,7 +176,7 @@ enum justify_alignment_enum
 
 DEFINE_ENUM(justify_alignment_e, justify_alignment_enum);
 
-enum text_upright_enum
+enum text_upright_enum : std::uint8_t
 {
     UPRIGHT_AUTO,
     UPRIGHT_LEFT,
@@ -187,7 +188,8 @@ enum text_upright_enum
 
 DEFINE_ENUM(text_upright_e, text_upright_enum);
 
-enum gamma_method_enum {
+enum gamma_method_enum : std::uint8_t
+{
     GAMMA_POWER, //agg::gamma_power
     GAMMA_LINEAR, //agg::gamma_linear
     GAMMA_NONE, //agg::gamma_none

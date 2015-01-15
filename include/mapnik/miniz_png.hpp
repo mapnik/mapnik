@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -83,12 +83,12 @@ private:
     static const unsigned char IEND_tpl[];
 };
 
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_8>(image_data_8 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_8> >(image_view<image_data_8> const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_32>(image_data_32 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_32> >(image_view<image_data_32> const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_data_32>(image_data_32 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_view<image_data_32> >(image_view<image_data_32> const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_gray8> >(image_view<image_data_gray8> const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_rgba8>(image_data_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_data_rgba8>(image_data_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
 
 }}
 

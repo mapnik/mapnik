@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/quad_tree.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
 // icu
@@ -63,7 +63,7 @@ private:
 };
 
 // quad_tree based label collision detector
-class label_collision_detector2 : mapnik::noncopyable
+class label_collision_detector2 : util::noncopyable
 {
     using tree_t = quad_tree<box2d<double> >;
     tree_t tree_;
@@ -92,7 +92,7 @@ public:
 };
 
 // quad_tree based label collision detector with seperate check/insert
-class label_collision_detector3 : mapnik::noncopyable
+class label_collision_detector3 : util::noncopyable
 {
     using tree_t = quad_tree< box2d<double> >;
     tree_t tree_;
@@ -126,7 +126,7 @@ public:
 
 
 //quad tree based label collision detector so labels dont appear within a given distance
-class label_collision_detector4 : mapnik::noncopyable
+class label_collision_detector4 : util::noncopyable
 {
 public:
     struct label

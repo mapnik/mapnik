@@ -30,3 +30,21 @@ run test_font_registration 10 1000
   --height 600 \
   --iterations 20 \
   --threads 10
+
+./benchmark/out/test_rendering \
+  --name "gdal tiff rendering" \
+  --map benchmark/data/gdal-wgs.xml  \
+  --extent -180.0,-120.0,180.0,120.0 \
+  --width 600 \
+  --height 600 \
+  --iterations 20 \
+  --threads 10
+
+./benchmark/out/test_rendering \
+  --name "raster tiff rendering" \
+  --map benchmark/data/raster-wgs.xml  \
+  --extent -180.0,-120.0,180.0,120.0 \
+  --width 600 \
+  --height 600 \
+  --iterations 20 \
+  --threads 10

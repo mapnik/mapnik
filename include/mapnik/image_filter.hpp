@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -761,7 +761,7 @@ void apply_filter(Src & src, invert const& /*op*/)
 }
 
 template <typename Src>
-struct filter_visitor : util::static_visitor<void>
+struct filter_visitor
 {
     filter_visitor(Src & src)
     : src_(src) {}
@@ -775,7 +775,7 @@ struct filter_visitor : util::static_visitor<void>
     Src & src_;
 };
 
-struct filter_radius_visitor : util::static_visitor<void>
+struct filter_radius_visitor
 {
     int & radius_;
     filter_radius_visitor(int & radius)

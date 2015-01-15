@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/image_data.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // agg
 #include "agg_color_rgba.h"
@@ -33,10 +33,10 @@
 namespace mapnik
 {
 
-class pattern_source : private mapnik::noncopyable
+class pattern_source : private util::noncopyable
 {
 public:
-    pattern_source(image_data_32 const& pattern, double opacity = 1.0)
+    pattern_source(image_data_rgba8 const& pattern, double opacity = 1.0)
         : pattern_(pattern),
           opacity_(opacity) {}
 
@@ -57,7 +57,7 @@ public:
                           static_cast<unsigned>(((c >> 24) & 0xff) * opacity_));
     }
 private:
-    image_data_32 const& pattern_;
+    image_data_rgba8 const& pattern_;
     double opacity_;
 };
 }

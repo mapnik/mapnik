@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -72,7 +72,7 @@ using value_base = util::variant<value_null, value_bool, value_integer,value_dou
 namespace impl {
 
 struct equals
-    : public util::static_visitor<bool>
+
 {
     bool operator() (value_integer lhs, value_double rhs) const
     {
@@ -124,7 +124,7 @@ struct equals
 };
 
 struct not_equals
-    : public util::static_visitor<bool>
+
 {
     template <typename T, typename U>
     bool operator() (const T &, const U &) const
@@ -186,7 +186,7 @@ struct not_equals
 };
 
 struct greater_than
-    : public util::static_visitor<bool>
+
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -222,7 +222,7 @@ struct greater_than
 };
 
 struct greater_or_equal
-    : public util::static_visitor<bool>
+
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -258,7 +258,7 @@ struct greater_or_equal
 };
 
 struct less_than
-    : public util::static_visitor<bool>
+
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -295,7 +295,7 @@ struct less_than
 };
 
 struct less_or_equal
-    : public util::static_visitor<bool>
+
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -332,7 +332,7 @@ struct less_or_equal
 };
 
 template <typename V>
-struct add : public util::static_visitor<V>
+struct add
 {
     using value_type = V;
     value_type operator() (value_unicode_string const& lhs ,
@@ -398,7 +398,7 @@ struct add : public util::static_visitor<V>
 };
 
 template <typename V>
-struct sub : public util::static_visitor<V>
+struct sub
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -436,7 +436,7 @@ struct sub : public util::static_visitor<V>
 };
 
 template <typename V>
-struct mult : public util::static_visitor<V>
+struct mult
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -473,7 +473,7 @@ struct mult : public util::static_visitor<V>
 };
 
 template <typename V>
-struct div: public util::static_visitor<V>
+struct div
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -514,7 +514,7 @@ struct div: public util::static_visitor<V>
 };
 
 template <typename V>
-struct mod: public util::static_visitor<V>
+struct mod
 {
     using value_type = V;
     template <typename T1, typename T2>
@@ -558,7 +558,7 @@ struct mod: public util::static_visitor<V>
 };
 
 template <typename V>
-struct negate : public util::static_visitor<V>
+struct negate
 {
     using value_type = V;
 
@@ -589,7 +589,7 @@ template <typename T>
 struct convert {};
 
 template <>
-struct convert<value_bool> : public util::static_visitor<value_bool>
+struct convert<value_bool>
 {
     value_bool operator() (value_bool val) const
     {
@@ -614,7 +614,7 @@ struct convert<value_bool> : public util::static_visitor<value_bool>
 };
 
 template <>
-struct convert<value_double> : public util::static_visitor<value_double>
+struct convert<value_double>
 {
     value_double operator() (value_double val) const
     {
@@ -653,7 +653,7 @@ struct convert<value_double> : public util::static_visitor<value_double>
 };
 
 template <>
-struct convert<value_integer> : public util::static_visitor<value_integer>
+struct convert<value_integer>
 {
     value_integer operator() (value_integer val) const
     {
@@ -692,7 +692,7 @@ struct convert<value_integer> : public util::static_visitor<value_integer>
 };
 
 template <>
-struct convert<std::string> : public util::static_visitor<std::string>
+struct convert<std::string>
 {
     template <typename T>
     std::string operator() (T val) const
@@ -723,7 +723,7 @@ struct convert<std::string> : public util::static_visitor<std::string>
     }
 };
 
-struct to_unicode : public util::static_visitor<value_unicode_string>
+struct to_unicode
 {
 
     template <typename T>
@@ -753,7 +753,7 @@ struct to_unicode : public util::static_visitor<value_unicode_string>
     }
 };
 
-struct to_expression_string : public util::static_visitor<std::string>
+struct to_expression_string
 {
     explicit to_expression_string(char quote = '\'')
         : quote_(quote) {}
@@ -947,7 +947,7 @@ using value_adl_barrier::operator<<;
 
 namespace detail {
 
-struct is_null_visitor : public util::static_visitor<bool>
+struct is_null_visitor
 {
     bool operator() (value const& val) const
     {

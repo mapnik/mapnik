@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,9 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/enumeration.hpp>
-
+#include <mapnik/image_data.hpp>
+ // boost
+#include <boost/optional.hpp>
 // boost
 #include <memory>
 
@@ -55,7 +57,7 @@ class raster;
 
 
 //! \brief Enumerates the modes of interpolation
-enum colorizer_mode_enum
+enum colorizer_mode_enum : std::uint8_t
 {
     COLORIZER_INHERIT = 0,    //!< The stop inherits the mode from the colorizer
     COLORIZER_LINEAR = 1,     //!< Linear interpolation between colors
@@ -195,12 +197,8 @@ public:
     //! \return The list of stops
     colorizer_stops const& get_stops() const { return stops_; }
 
-
-    //! \brief Colorize a raster
-    //!
-    //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
-    void colorize(std::shared_ptr<raster> const& raster, feature_impl const& f) const;
-
+    template <typename T>
+    void colorize(image_data_rgba8 & out, T const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!

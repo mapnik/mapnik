@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -146,7 +146,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
     using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
-    raster_markers_rasterizer_dispatch(image_data_32 & src,
+    raster_markers_rasterizer_dispatch(image_data_rgba8 & src,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,

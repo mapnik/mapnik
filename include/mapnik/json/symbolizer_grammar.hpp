@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,7 @@ namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
 template <typename Symbolizer>
-struct json_value_visitor : mapnik::util::static_visitor<>
+struct json_value_visitor
 {
     json_value_visitor(Symbolizer & sym, mapnik::keys key)
         : sym_(sym), key_(key) {}
@@ -82,7 +82,7 @@ struct json_value_visitor : mapnik::util::static_visitor<>
 };
 
 template <typename T>
-struct put_property_visitor : mapnik::util::static_visitor<>
+struct put_property_visitor
 {
     using value_type = T;
 

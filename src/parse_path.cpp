@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ path_expression_ptr parse_path(std::string const& str)
 
 namespace path_processor_detail
 {
-    struct path_visitor_ : util::static_visitor<void>
+    struct path_visitor_
     {
         path_visitor_ (std::string & filename, feature_impl const& f)
             : filename_(filename),
@@ -75,7 +75,7 @@ namespace path_processor_detail
         feature_impl const& feature_;
     };
 
-    struct to_string_ : util::static_visitor<void>
+    struct to_string_
     {
         to_string_ (std::string & str)
             : str_(str) {}
@@ -95,7 +95,7 @@ namespace path_processor_detail
         std::string & str_;
     };
 
-    struct collect_ : util::static_visitor<void>
+    struct collect_
     {
         collect_ (std::set<std::string> & cont)
             : cont_(cont) {}

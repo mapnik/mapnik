@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,10 @@
 #include <mapnik/text/placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/expression_string.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -47,14 +51,86 @@ namespace phoenix = boost::phoenix;
 using phoenix::push_back;
 using phoenix::ref;
 
+struct direction_name : qi::symbols<char, directions_e>
+{
+    direction_name()
+    {
+        add
+            ("N" , NORTH)
+            ("E" , EAST)
+            ("S" , SOUTH)
+            ("W" , WEST)
+            ("NE", NORTHEAST)
+            ("SE", SOUTHEAST)
+            ("NW", NORTHWEST)
+            ("SW", SOUTHWEST)
+            ("X" , EXACT_POSITION)
+            ;
+    }
+
+};
+
+// Position string: [POS][SIZE]
+// [POS] is any combination of
+// N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
+// [SIZE] is a list of font sizes, separated by commas. The first font size
+// is always the one given in the TextSymbolizer's parameters.
+// First all directions are tried, then font size is reduced
+// and all directions are tried again. The process ends when a placement is
+// found or the last fontsize is tried without success.
+// Example: N,S,15,10,8 (tries placement above, then below and if
+//    that fails it tries the additional font sizes 15, 10 and 8.
+
+bool parse_positions(std::string const& evaluated_positions,
+                     std::vector<directions_e> & direction,
+                     std::vector<int> & text_sizes)
+{
+    direction_name names;
+    boost::spirit::ascii::space_type space;
+    qi::_1_type _1;
+    qi::float_type float_;
+    std::string::const_iterator first = evaluated_positions.begin();
+    std::string::const_iterator last = evaluated_positions.end();
+    bool r = qi::phrase_parse(first, last,
+                     (names[push_back(phoenix::ref(direction), _1)] % ',')
+                     >> *(',' >> float_[push_back(phoenix::ref(text_sizes), _1)]),
+                     space);
+    if (first != last)
+    {
+        return false;
+    }
+    return r;
+}
+
+
+text_placement_info_simple::text_placement_info_simple(text_placements_simple const* parent,
+                           std::string const& evaluated_positions,
+                           double scale_factor)
+: text_placement_info(parent, scale_factor),
+  state(0),
+  position_state(0),
+  direction_(parent->direction_),
+  text_sizes_(parent->text_sizes_),
+  parent_(parent)
+{
+    if (direction_.empty() && !parse_positions(evaluated_positions,direction_,text_sizes_))
+    {
+        MAPNIK_LOG_ERROR(text_placements) << "Could not parse text_placement_simple placement string ('" << evaluated_positions << "')";
+        if (direction_.size() == 0)
+        {
+            MAPNIK_LOG_ERROR(text_placements) << "text_placements_simple with no valid placements! ('"<< evaluated_positions <<"')";
+        }
+    }
+}
+
 bool text_placement_info_simple::next() const
 {
     while (true)
     {
         if (state > 0)
         {
-            if (state > parent_->text_sizes_.size()) return false;
-            properties.format_defaults.text_size = value_double(parent_->text_sizes_[state-1]);
+            if (state > text_sizes_.size()) return false;
+            properties.format_defaults.text_size = value_double(text_sizes_[state-1]);
         }
         if (!next_position_only())
         {
@@ -68,90 +144,112 @@ bool text_placement_info_simple::next() const
 
 bool text_placement_info_simple::next_position_only() const
 {
-    if (position_state >= parent_->direction_.size()) return false;
-    //directions_e dir = parent_->direction_[position_state];
-    properties.layout_defaults.dir = parent_->direction_[position_state];
+    if (position_state >= direction_.size()) return false;
+    properties.layout_defaults.dir = direction_[position_state];
     ++position_state;
     return true;
 }
 
-text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor) const
+text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const
 {
-    return std::make_shared<text_placement_info_simple>(this, scale_factor);
+    std::string evaluated_positions = util::apply_visitor(extract_value<std::string>(feature,vars), positions_);
+    return std::make_shared<text_placement_info_simple>(this, evaluated_positions, scale_factor);
 }
 
-// Position string: [POS][SIZE]
-// [POS] is any combination of
-// N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
-// [SIZE] is a list of font sizes, separated by commas. The first font size
-// is always the one given in the TextSymbolizer's parameters.
-// First all directions are tried, then font size is reduced
-// and all directions are tried again. The process ends when a placement is
-// found or the last fontsize is tried without success.
-// Example: N,S,15,10,8 (tries placement above, then below and if
-//    that fails it tries the additional font sizes 15, 10 and 8.
+text_placements_simple::text_placements_simple(symbolizer_base::value_type const& positions)
+ : direction_(),
+   text_sizes_(),
+   positions_(positions) { }
 
-void text_placements_simple::set_positions(std::string const& positions)
-{
-    positions_ = positions;
-    struct direction_name_ : qi::symbols<char, directions_e>
+text_placements_simple::text_placements_simple(symbolizer_base::value_type const& positions,
+                                               std::vector<directions_e> && direction,
+                                               std::vector<int> && text_sizes)
+ : direction_(direction),
+   text_sizes_(text_sizes),
+   positions_(positions) { }
+
+namespace detail {
+    struct serialize_positions
     {
-        direction_name_()
+        serialize_positions() {}
+
+        std::string operator() (expression_ptr const& expr) const
         {
-            add
-                ("N" , NORTH)
-                ("E" , EAST)
-                ("S" , SOUTH)
-                ("W" , WEST)
-                ("NE", NORTHEAST)
-                ("SE", SOUTHEAST)
-                ("NW", NORTHWEST)
-                ("SW", SOUTHWEST)
-                ("X" , EXACT_POSITION)
-                ;
+            if (expr) return to_expression_string(*expr);
+            return "";
         }
 
-    } direction_name;
-    boost::spirit::ascii::space_type space;
-    qi::_1_type _1;
-    qi::float_type float_;
+        std::string operator() (std::string const val) const
+        {
+            return val;
+        }
 
-    std::string::const_iterator first = positions.begin(),  last = positions.end();
-    qi::phrase_parse(first, last,
-                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',')
-                     >> *(',' >> float_[push_back(phoenix::ref(text_sizes_), _1)]),
-                     space);
-    if (first != last)
-    {
-        MAPNIK_LOG_WARN(text_placements) << "Could not parse text_placement_simple placement string ('" << positions << "')";
-    }
-    if (direction_.size() == 0)
-    {
-        MAPNIK_LOG_WARN(text_placements) << "text_placements_simple with no valid placements! ('"<< positions<<"')";
-    }
+        template <typename T>
+        std::string operator() (T const& val) const
+        {
+            return "";
+        }
+    };
 }
 
-text_placements_simple::text_placements_simple()
+std::string text_placements_simple::get_positions() const
 {
-    set_positions("X");
-}
-
-text_placements_simple::text_placements_simple(std::string const& positions)
-{
-    set_positions(positions);
-}
-
-std::string text_placements_simple::get_positions()
-{
-    return positions_; //TODO: Build string from data in direction_ and text_sizes_
+    return util::apply_visitor(detail::serialize_positions(), positions_);
 }
 
 text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield)
 {
-    text_placements_ptr ptr = std::make_shared<text_placements_simple>(
-        xml.get_attr<std::string>("placements", "X"));
-    ptr->defaults.from_xml(xml, fontsets, is_shield);
-    return ptr;
+    // TODO - handle X cleaner
+    std::string placements_string = xml.get_attr<std::string>("placements", "X");
+    // like set_property_from_xml in properties_util.hpp
+    if (!placements_string.empty())
+    {
+        if (placements_string == "X")
+        {
+            text_placements_ptr ptr = std::make_shared<text_placements_simple>(placements_string);
+            ptr->defaults.from_xml(xml, fontsets, is_shield);
+            return ptr;
+        }
+        else
+        {
+            try
+            {
+                // we don't use parse_expression(placements_string) directly here to benefit from the cache in the xml_node
+                boost::optional<expression_ptr> val = xml.get_opt_attr<expression_ptr>("placements");
+                if (val)
+                {
+                    text_placements_ptr ptr = std::make_shared<text_placements_simple>(*val);
+                    ptr->defaults.from_xml(xml, fontsets, is_shield);
+                    return ptr;
+                }
+            }
+            catch (std::exception const& ex)
+            {
+                // otherwise ensure it is valid
+                std::vector<directions_e> direction;
+                std::vector<int> text_sizes;
+                if (!parse_positions(placements_string,direction,text_sizes))
+                {
+                    MAPNIK_LOG_ERROR(text_placements) << "Could not parse text_placement_simple placement string ('" << placements_string << "')";
+                    if (direction.size() == 0)
+                    {
+                        MAPNIK_LOG_ERROR(text_placements) << "text_placements_simple with no valid placements! ('"<< placements_string <<"')";
+                    }
+                    return text_placements_ptr();
+                }
+                else
+                {
+                    text_placements_ptr ptr = std::make_shared<text_placements_simple>(placements_string,std::move(direction),std::move(text_sizes));
+                    ptr->defaults.from_xml(xml, fontsets, is_shield);
+                    return ptr;
+                }
+            }
+            text_placements_ptr ptr = std::make_shared<text_placements_simple>(placements_string);
+            ptr->defaults.from_xml(xml, fontsets, is_shield);
+            return ptr;
+        }
+    }
+    return text_placements_ptr();
 }
 
 } //ns mapnik

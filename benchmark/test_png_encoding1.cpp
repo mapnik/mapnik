@@ -4,7 +4,7 @@
 
 class test : public benchmark::test_case
 {
-    mapnik::image_data_32 im_;
+    mapnik::image_data_rgba8 im_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params),
@@ -13,7 +13,7 @@ public:
     {
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
         std::string out;
         for (std::size_t i=0;i<iterations_;++i) {
@@ -21,6 +21,7 @@ public:
             out = mapnik::save_to_string(im_,"png8:m=h:z=1");
         }
     }
+    return true;
 };
 
 BENCHMARK(test,"encoding blank png")

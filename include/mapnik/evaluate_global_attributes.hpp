@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/color_factory.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/util/variant.hpp>
 
@@ -39,7 +39,7 @@ namespace mapnik {
 namespace {
 
 template <typename T, typename Attributes>
-struct evaluate_expression : util::static_visitor<T>
+struct evaluate_expression
 {
     using value_type = T;
 
@@ -133,7 +133,7 @@ struct evaluate_expression : util::static_visitor<T>
 };
 
 template <typename T>
-struct evaluate_expression<T, boost::none_t> : util::static_visitor<T>
+struct evaluate_expression<T, boost::none_t>
 {
     using value_type = T;
 
@@ -271,10 +271,10 @@ std::tuple<T,bool> pre_evaluate_expression (expression_ptr const& expr)
     }
 }
 
-struct evaluate_global_attributes : mapnik::noncopyable
+struct evaluate_global_attributes : util::noncopyable
 {
     template <typename Attributes>
-    struct evaluator : util::static_visitor<>
+    struct evaluator
     {
         evaluator(symbolizer_base::cont_type::value_type & prop, Attributes const& attributes)
             : prop_(prop),
@@ -296,7 +296,7 @@ struct evaluate_global_attributes : mapnik::noncopyable
     };
 
     template <typename Attributes>
-    struct extract_symbolizer : util::static_visitor<>
+    struct extract_symbolizer
     {
         extract_symbolizer(Attributes const& attributes)
             : attributes_(attributes) {}

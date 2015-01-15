@@ -1,4 +1,7 @@
 <Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-image="../../data/images/checker.jpg">
+    <Parameters>
+        <Parameter name="sizes">600,400; 400,600; 257,256</Parameter>
+    </Parameters>
 
     <Style name="ellipse"
       direct-image-filters="scale-hsla(0,1,0,1,0,1,0,.5)"
@@ -65,5 +68,5 @@ x,y
             </Parameter>
         </Datasource>
     </Layer>
-    
+
 </Map>

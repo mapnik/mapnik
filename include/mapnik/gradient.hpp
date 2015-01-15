@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,8 +61,8 @@ DEFINE_ENUM( gradient_unit_e, gradient_unit_enum );
 
 class MAPNIK_DECL gradient
 {
-    gradient_e gradient_type_;
-    stop_array stops_;
+    // transform
+    agg::trans_affine transform_;
     // control points for the gradient, x1/y1 is the start point, x2/y2 the stop point.
     double x1_;
     double y1_;
@@ -71,11 +71,11 @@ class MAPNIK_DECL gradient
     // for radial gradients r specifies the radius of the stop circle centered on x2/y2
     double r_;
 
+    stop_array stops_;
     // units for the coordinates
     gradient_unit_e units_;
+    gradient_e gradient_type_;
 
-    // transform
-    agg::trans_affine transform_;
 public:
     gradient();
     gradient(gradient const& other);

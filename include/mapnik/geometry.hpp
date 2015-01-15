@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,12 @@
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik {
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private mapnik::noncopyable
+class geometry : private util::noncopyable
 {
 
 public:

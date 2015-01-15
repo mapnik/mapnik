@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -120,10 +120,16 @@ struct symbolizer_traits<debug_symbolizer>
     static char const* name() { return "DebugSymbolizer";}
 };
 
+template<>
+struct symbolizer_traits<dot_symbolizer>
+{
+    static char const* name() { return "DotSymbolizer";}
+};
+
 // symbolizer name impl
 namespace detail {
 
-struct symbolizer_name_impl : public util::static_visitor<std::string>
+struct symbolizer_name_impl
 {
 public:
     template <typename Symbolizer>
@@ -144,7 +150,7 @@ inline std::string symbolizer_name(symbolizer const& sym)
 /*
 
 template <typename Meta>
-class symbolizer_property_value_string : public util::static_visitor<std::string>
+class symbolizer_property_value_string
 {
 public:
     symbolizer_property_value_string (Meta const& meta)
@@ -231,7 +237,7 @@ private:
     Meta const& meta_;
 };
 
-struct symbolizer_to_json : public util::static_visitor<std::string>
+struct symbolizer_to_json
 {
     using result_type = std::string;
 

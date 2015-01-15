@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -149,6 +149,7 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL building_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL group_symbolizer : public symbolizer_base {};
 struct MAPNIK_DECL debug_symbolizer : public symbolizer_base {};
+struct MAPNIK_DECL dot_symbolizer : public symbolizer_base {};
 
 // symbolizer
 using symbolizer = util::variant<point_symbolizer,
@@ -162,7 +163,8 @@ using symbolizer = util::variant<point_symbolizer,
                                  building_symbolizer,
                                  markers_symbolizer,
                                  group_symbolizer,
-                                 debug_symbolizer>;
+                                 debug_symbolizer,
+                                 dot_symbolizer>;
 
 }
 

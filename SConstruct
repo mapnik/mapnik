@@ -443,6 +443,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_CAIRO',
+        'MAPNIK_HAS_DLFCN',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
         'PYTHON_IS_64BIT',
@@ -829,6 +830,24 @@ int main()
         rm_path(item,'CPPPATH',context.env)
     return ret
 
+def CheckHasDlfcn(context, silent=False):
+    if not silent:
+        context.Message('Checking for dlfcn.h support ... ')
+    ret = context.TryCompile("""
+
+#include <dlfcn.h>
+
+int main()
+{
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    context.Result(ret)
+    return ret
+
 def GetBoostLibVersion(context):
     ret = context.TryRun("""
 
@@ -989,6 +1008,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
+               'CheckHasDlfcn'         : CheckHasDlfcn,
                'GetBoostLibVersion'    : GetBoostLibVersion,
                'parse_config'          : parse_config,
                'parse_pg_config'       : parse_pg_config,
@@ -1198,6 +1218,11 @@ if not preconfigured:
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
     ]
+
+    if conf.CheckHasDlfcn():
+        env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
+    else:
+        env['SKIPPED_DEPS'].extend(['dlfcn'])
 
     OPTIONAL_LIBSHEADERS = []
 
@@ -1725,8 +1750,8 @@ if not preconfigured:
             env.Append(CPPDEFINES = ndebug_defines)
 
         # Common flags for g++/clang++ CXX compiler.
-        # TODO: clean up code more to make -Wextra  -Wsign-conversion -Wconversion -Wshadow viable
-        common_cxx_flags = '-Wall -Wsign-compare %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+        # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion -Wshadow viable
+        common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
             common_cxx_flags += ' -Wno-unknown-pragmas -Wno-unsequenced '
@@ -1963,6 +1988,7 @@ if not HELP_REQUESTED:
 
     # build C++ tests
     SConscript('tests/cpp_tests/build.py')
+    SConscript('tests/cxx/build.py')
 
     if env['BENCHMARK']:
         SConscript('benchmark/build.py')

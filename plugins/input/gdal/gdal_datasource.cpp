@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,6 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
 #include <mapnik/value_types.hpp>
-#include <mapnik/boolean.hpp>
 
 #include <gdal_version.h>
 
@@ -110,7 +109,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
     nbands_ = dataset->GetRasterCount();
     width_ = dataset->GetRasterXSize();
     height_ = dataset->GetRasterYSize();
-    desc_.add_descriptor(mapnik::attribute_descriptor("nodata", mapnik::Integer));
+    desc_.add_descriptor(mapnik::attribute_descriptor("nodata", mapnik::Double));
 
     double tr[6];
     bool bbox_override = false;

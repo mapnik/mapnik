@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/utils.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <map>
@@ -42,7 +42,7 @@ class PluginInfo;
 
 class MAPNIK_DECL datasource_cache
     : public singleton<datasource_cache, CreateStatic>,
-      private mapnik::noncopyable
+      private util::noncopyable
 {
     friend class CreateStatic<datasource_cache>;
 public:

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -125,7 +125,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
-    raster_markers_rasterizer_dispatch(image_data_32 & src,
+    raster_markers_rasterizer_dispatch(image_data_rgba8 & src,
                                        agg::trans_affine const& marker_trans,
                                        symbolizer_base const& sym,
                                        Detector & detector,

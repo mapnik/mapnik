@@ -1,5 +1,5 @@
 #ifndef __MAPNIK_COMPARE_IMAGES_HPP__
-#define __MAPNIK_COMPARE_IMAGES_HPP__ 
+#define __MAPNIK_COMPARE_IMAGES_HPP__
 
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_data.hpp>
@@ -28,8 +28,8 @@ namespace benchmark {
         std::shared_ptr<image_32> image_ptr2 = std::make_shared<image_32>(reader2->width(),reader2->height());
         reader2->read(0,0,image_ptr2->data());
 
-        image_data_32 const& dest = image_ptr1->data();
-        image_data_32 const& src = image_ptr2->data();
+        image_data_rgba8 const& dest = image_ptr1->data();
+        image_data_rgba8 const& src = image_ptr2->data();
 
         unsigned int width = src.width();
         unsigned int height = src.height();

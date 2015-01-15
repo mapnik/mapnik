@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(geojson_datasource)
 
-struct attr_value_converter : public mapnik::util::static_visitor<mapnik::eAttributeType>
+struct attr_value_converter
 {
     mapnik::eAttributeType operator() (mapnik::value_integer) const
     {
@@ -127,7 +127,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         mapnik::util::file file(filename_);
         if (!file.open())
         {
-            throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
+            throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
         std::string file_buffer;
         file_buffer.resize(file.size());
@@ -147,7 +147,10 @@ void geojson_datasource::parse_geojson(T const& buffer)
 {
     boost::spirit::standard_wide::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)(boost::phoenix::ref(ctx)), space, features_);
+    std::size_t start_id = 1;
+    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)
+                                                  (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id)),
+                                                  space, features_);
     if (!result)
     {
         if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");

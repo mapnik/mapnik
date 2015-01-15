@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +26,15 @@
 namespace mapnik {
 
 class text_placement_info_list;
-
+class feature_impl;
+struct attribute;
 
 // Tries a list of placements.
 class text_placements_list: public text_placements
 {
 public:
     text_placements_list();
-    text_placement_info_ptr get_placement_info(double scale_factor) const;
+    text_placement_info_ptr get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const;
     virtual void add_expressions(expression_set & output) const;
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);

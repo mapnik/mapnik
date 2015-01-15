@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/rule.hpp>              // for rule, symbolizers
 #include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/color.hpp>     // for color
@@ -64,7 +64,7 @@ namespace mapnik
 // can target many other output destinations besides streams.
 template <typename OutputIterator>
 class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<OutputIterator> >,
-                                 private mapnik::noncopyable
+                                 private util::noncopyable
 {
 public:
     using processor_impl_type = svg_renderer<OutputIterator>;

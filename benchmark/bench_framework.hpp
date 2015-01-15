@@ -37,7 +37,7 @@ public:
         return iterations_;
     }
     virtual bool validate() const = 0;
-    virtual void operator()() const = 0;
+    virtual bool operator()() const = 0;
     virtual ~test_case() {}
 };
 
@@ -85,35 +85,40 @@ int run(T const& test_runner, std::string const& name)
             std::clog << "test did not validate: " << name << "\n";
             return -1;
         }
-        std::chrono::high_resolution_clock::time_point start;
-        std::chrono::high_resolution_clock::duration elapsed;
-        std::stringstream s;
-        s << name << ":"
-            << std::setw(45 - (int)s.tellp()) << std::right
-            << " t:" << test_runner.threads()
-            << " i:" << test_runner.iterations();
-        if (test_runner.threads() > 0)
+        // run test once before timing
+        // if it returns false then we'll abort timing
+        if (test_runner())
         {
-            using thread_group = std::vector<std::unique_ptr<std::thread> >;
-            using value_type = thread_group::value_type;
-            thread_group tg;
-            for (std::size_t i=0;i<test_runner.threads();++i)
+            std::chrono::high_resolution_clock::time_point start;
+            std::chrono::high_resolution_clock::duration elapsed;
+            std::stringstream s;
+            s << name << ":"
+                << std::setw(45 - (int)s.tellp()) << std::right
+                << " t:" << test_runner.threads()
+                << " i:" << test_runner.iterations();
+            if (test_runner.threads() > 0)
             {
-                tg.emplace_back(new std::thread(test_runner));
+                using thread_group = std::vector<std::unique_ptr<std::thread> >;
+                using value_type = thread_group::value_type;
+                thread_group tg;
+                for (std::size_t i=0;i<test_runner.threads();++i)
+                {
+                    tg.emplace_back(new std::thread(test_runner));
+                }
+                start = std::chrono::high_resolution_clock::now();
+                std::for_each(tg.begin(), tg.end(), [](value_type & t) {if (t->joinable()) t->join();});
+                elapsed = std::chrono::high_resolution_clock::now() - start;
             }
-            start = std::chrono::high_resolution_clock::now();
-            std::for_each(tg.begin(), tg.end(), [](value_type & t) {if (t->joinable()) t->join();});
-            elapsed = std::chrono::high_resolution_clock::now() - start;
+            else
+            {
+                start = std::chrono::high_resolution_clock::now();
+                test_runner();
+                elapsed = std::chrono::high_resolution_clock::now() - start;
+            }
+            s << std::setw(65 - (int)s.tellp()) << std::right
+                << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " milliseconds\n";
+            std::clog << s.str();
         }
-        else
-        {
-            start = std::chrono::high_resolution_clock::now();
-            test_runner();
-            elapsed = std::chrono::high_resolution_clock::now() - start;
-        }
-        s << std::setw(65 - (int)s.tellp()) << std::right
-            << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " milliseconds\n";
-        std::clog << s.str();
         return 0;
     }
     catch (std::exception const& ex)

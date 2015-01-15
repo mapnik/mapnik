@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_pixel.hpp>
@@ -98,7 +98,7 @@ private:
 };
 
 template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
-class svg_renderer_agg : mapnik::noncopyable
+class svg_renderer_agg : util::noncopyable
 {
 public:
     using curved_type = agg::conv_curve<VertexSource>           ;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@ using rasterlite_query = mapnik::util::variant<mapnik::query,mapnik::coord2d>;
 
 class rasterlite_featureset : public mapnik::Featureset
 {
-    struct query_dispatch : public mapnik::util::static_visitor<mapnik::feature_ptr>
+    struct query_dispatch
     {
         query_dispatch( rasterlite_featureset & featureset)
             : featureset_(featureset) {}

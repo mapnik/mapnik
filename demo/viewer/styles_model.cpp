@@ -1,6 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/expression_string.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -35,7 +35,7 @@
 #include <QPainter>
 #include <QPixmap>
 
-class node : private mapnik::noncopyable
+class node : private mapnik::util::noncopyable
 {
     struct node_base
     {
@@ -122,7 +122,7 @@ private:
 };
 
 
-struct symbolizer_info : public mapnik::util::static_visitor<QString>
+struct symbolizer_info
 {
     QString operator() (mapnik::point_symbolizer const& sym) const
     {
@@ -185,7 +185,7 @@ struct symbolizer_info : public mapnik::util::static_visitor<QString>
     }
 };
 
-struct symbolizer_icon : public mapnik::util::static_visitor<QIcon>
+struct symbolizer_icon
 {
     QIcon operator() (mapnik::polygon_symbolizer const& sym) const
     {
@@ -201,7 +201,7 @@ struct symbolizer_icon : public mapnik::util::static_visitor<QIcon>
     {
         // FIXME!
         /*
-          std::shared_ptr<mapnik::image_data_32> symbol = sym.get_image();
+          std::shared_ptr<mapnik::image_data_rgba8> symbol = sym.get_image();
           if (symbol)
           {
           QImage image(symbol->getBytes(),

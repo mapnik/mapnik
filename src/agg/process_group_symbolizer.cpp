@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,7 +48,7 @@ namespace mapnik {
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.
  */
-struct thunk_renderer : public util::static_visitor<>
+struct thunk_renderer
 {
     using renderer_type = agg_renderer<image_32>;
     using buffer_type = renderer_type::buffer_type;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 //mapnik
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // freetype2
 extern "C"
@@ -44,7 +44,7 @@ extern "C"
 namespace mapnik
 {
 
-class font_face : mapnik::noncopyable
+class font_face : util::noncopyable
 {
 public:
     font_face(FT_Face face);
@@ -77,7 +77,7 @@ private:
 using face_ptr = std::shared_ptr<font_face>;
 
 
-class MAPNIK_DECL font_face_set : private mapnik::noncopyable
+class MAPNIK_DECL font_face_set : private util::noncopyable
 {
 public:
     using iterator = std::vector<face_ptr>::iterator;
@@ -97,7 +97,7 @@ using face_set_ptr = std::unique_ptr<font_face_set>;
 
 
 // FT_Stroker wrapper
-class stroker : mapnik::noncopyable
+class stroker : util::noncopyable
 {
 public:
     explicit stroker(FT_Stroker s)

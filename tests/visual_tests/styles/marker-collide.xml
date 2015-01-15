@@ -1,4 +1,7 @@
 <Map>
+  <Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+  </Parameters>
 
   <Style name="line">
     <Rule>
@@ -14,8 +17,8 @@
 
   <Style name="point-placement">
     <Rule>
-      <MarkersSymbolizer placement="line" marker-type="ellipse" fill="blue" transform="scale(1.5,.3)" spacing="1" allow-overlap="false"/>
-      <MarkersSymbolizer placement="line" marker-type="ellipse" fill="blue" transform="scale(.3,1.5)" spacing="1" allow-overlap="false"/>
+      <MarkersSymbolizer placement="line" file="shape://ellipse" fill="blue" transform="scale(1.5,.3)" spacing="1" allow-overlap="false"/>
+      <MarkersSymbolizer placement="line" file="shape://ellipse" fill="blue" transform="scale(.3,1.5)" spacing="1" allow-overlap="false"/>
     </Rule>
   </Style>
 

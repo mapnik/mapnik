@@ -25,10 +25,10 @@ public:
         mapnik::image_32 im(m.width(),m.height());
         mapnik::agg_renderer<mapnik::image_32> ren(m,im);
         ren.apply();
-        //mapnik::save_to_file(im,"test.png");
+        //mapnik::save_to_file(im.data(),"test.png");
         return true;
     }
-    void operator()() const
+    bool operator()() const
     {
         mapnik::Map m(256,256);
         mapnik::load_map(m,xml_);
@@ -39,6 +39,7 @@ public:
             mapnik::agg_renderer<mapnik::image_32> ren(m,im);
             ren.apply();
         }
+        return true;
     }
 };
 

@@ -29,6 +29,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp> // for raster_ptr
+#include <mapnik/box2d.hpp>
 
 enum pgraster_color_interp {
   // Automatic color interpretation:
@@ -65,9 +66,9 @@ public:
   }
 
 private:
-  void read_indexed(mapnik::raster_ptr raster);
-  void read_grayscale(mapnik::raster_ptr raster);
-  void read_rgba(mapnik::raster_ptr raster);
+  mapnik::raster_ptr read_indexed(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
+  mapnik::raster_ptr read_grayscale(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
+  mapnik::raster_ptr read_rgba(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
 
   //int wkbsize_;
   //const uint8_t* wkb_;

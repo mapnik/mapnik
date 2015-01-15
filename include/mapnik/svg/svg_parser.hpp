@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,14 +28,14 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/gradient.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <map>
 
 namespace  mapnik { namespace svg {
 
-    class svg_parser : private mapnik::noncopyable
+    class svg_parser : private util::noncopyable
     {
     public:
         explicit svg_parser(svg_converter_type & path);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,14 +28,14 @@
 #include <mapnik/coord_array.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
 {
 
 using CoordinateArray = coord_array<coord2d>;
 
-struct wkb_reader : mapnik::noncopyable
+struct wkb_reader : util::noncopyable
 {
 private:
     enum wkbByteOrder {

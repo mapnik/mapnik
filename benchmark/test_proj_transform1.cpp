@@ -36,7 +36,7 @@ public:
                 (std::fabs(bbox.maxy() - to_.maxy()) < .5)
                );
     }
-    void operator()() const
+    bool operator()() const
     {
         for (std::size_t i=0;i<iterations_;++i) {
             for (int i=-180;i<180;i=i+5)
@@ -51,6 +51,7 @@ public:
                 }
             }
         }
+        return true;
     }
 };
 

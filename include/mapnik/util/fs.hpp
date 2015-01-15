@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@
 
 // stl
 #include <string>
+#include <vector>
 
 namespace mapnik { namespace util {
 
@@ -39,6 +40,8 @@ MAPNIK_DECL bool is_relative(std::string const& value);
 MAPNIK_DECL std::string make_relative(std::string const& filepath, std::string const& base);
 MAPNIK_DECL std::string make_absolute(std::string const& filepath, std::string const& base);
 MAPNIK_DECL std::string dirname(std::string const& value);
+MAPNIK_DECL std::string basename(std::string const& value);
+MAPNIK_DECL std::vector<std::string> list_directory(std::string const& value);
 
 }}
 

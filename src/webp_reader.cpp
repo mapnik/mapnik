@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -120,11 +120,13 @@ public:
     explicit webp_reader(char const* data, std::size_t size);
     explicit webp_reader(std::string const& filename);
     ~webp_reader();
-    unsigned width() const;
-    unsigned height() const;
-    inline bool has_alpha() const { return has_alpha_; }
-    bool premultiplied_alpha() const { return false; }
-    void read(unsigned x,unsigned y,image_data_32& image);
+    unsigned width() const final;
+    unsigned height() const final;
+    boost::optional<box2d<double> > bounding_box() const final;
+    inline bool has_alpha() const final { return has_alpha_; }
+    bool premultiplied_alpha() const final { return false; }
+    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
 };
@@ -229,7 +231,13 @@ unsigned webp_reader<T>::height() const
 }
 
 template <typename T>
-void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
+boost::optional<box2d<double> > webp_reader<T>::bounding_box() const
+{
+    return boost::optional<box2d<double> >();
+}
+
+template <typename T>
+void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_rgba8& image)
 {
     WebPDecoderConfig config;
     config_guard guard(config);
@@ -241,8 +249,8 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
     config.options.use_cropping = 1;
     config.options.crop_left = x0;
     config.options.crop_top = y0;
-    config.options.crop_width = std::min(width_ - x0, image.width());
-    config.options.crop_height = std::min(height_ - y0, image.height());
+    config.options.crop_width = std::min(static_cast<std::size_t>(width_ - x0), image.width());
+    config.options.crop_height = std::min(static_cast<std::size_t>(height_ - y0), image.height());
 
     if (WebPGetFeatures(buffer_->data(), buffer_->size(), &config.input) != VP8_STATUS_OK)
     {
@@ -250,7 +258,7 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
     }
 
     config.output.colorspace = MODE_RGBA;
-    config.output.u.RGBA.rgba = (uint8_t *)image.getBytes();
+    config.output.u.RGBA.rgba = reinterpret_cast<uint8_t *>(image.getBytes());
     config.output.u.RGBA.stride = 4 * image.width();
     config.output.u.RGBA.size = image.width() * image.height() * 4;
     config.output.is_external_memory = 1;
@@ -258,6 +266,14 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
     {
         throw image_reader_exception("WEBP reader: WebPDecode failed");
     }
+}
+
+template <typename T>
+image_data_any webp_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+{
+    image_data_rgba8 data(width,height);
+    read(x, y, data);
+    return image_data_any(std::move(data));
 }
 
 }

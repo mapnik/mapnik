@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,28 +45,26 @@ static const char * gradient_unit_strings[] = {
 IMPLEMENT_ENUM( gradient_unit_e, gradient_unit_strings )
 
 gradient::gradient()
-: gradient_type_(NO_GRADIENT),
-    stops_(),
-    x1_(0),
-    y1_(0),
-    x2_(0),
-    y2_(0),
-    r_(0),
-    units_(OBJECT_BOUNDING_BOX),
-    transform_()
-{}
+: transform_(),
+  x1_(0),
+  y1_(0),
+  x2_(0),
+  y2_(0),
+  r_(0),
+  stops_(),
+  units_(OBJECT_BOUNDING_BOX),
+  gradient_type_(NO_GRADIENT) {}
 
 gradient::gradient(gradient const& other)
-    : gradient_type_(other.gradient_type_),
-      stops_(other.stops_),
+    : transform_(other.transform_),
       x1_(other.x1_),
       y1_(other.y1_),
       x2_(other.x2_),
       y2_(other.y2_),
       r_(other.r_),
+      stops_(other.stops_),
       units_(other.units_),
-      transform_(other.transform_)
-{}
+      gradient_type_(other.gradient_type_) {}
 
 gradient & gradient::operator=(const gradient& rhs)
 {

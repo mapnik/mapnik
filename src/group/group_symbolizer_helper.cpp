@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,8 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
-#include <mapnik/text/vertex_cache.hpp>
-#include <mapnik/text/tolerance_iterator.hpp>
+#include <mapnik/vertex_cache.hpp>
+#include <mapnik/tolerance_iterator.hpp>
 
 //agg
 #include "agg_conv_clip_polyline.h"

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,10 +25,10 @@
 
 //mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
-// stl
+// std
 #include <cstdint>
 #include <string>
 
@@ -36,14 +36,13 @@ struct UConverter;
 
 namespace mapnik {
 
-class MAPNIK_DECL transcoder : private mapnik::noncopyable
+class MAPNIK_DECL transcoder : private util::noncopyable
 {
 public:
     explicit transcoder (std::string const& encoding);
     mapnik::value_unicode_string transcode(const char* data, std::int32_t length = -1) const;
     ~transcoder();
 private:
-    bool ok_;
     UConverter * conv_;
 };
 }

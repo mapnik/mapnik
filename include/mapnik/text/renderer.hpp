@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/util/noncopyable.hpp>
 // agg
 #include <agg_trans_affine.h>
 
@@ -50,7 +50,7 @@ struct glyph_t
         : image(image_), properties(properties_) {}
 };
 
-class text_renderer : private mapnik::noncopyable
+class text_renderer : private util::noncopyable
 {
 public:
     text_renderer (halo_rasterizer_e rasterizer,

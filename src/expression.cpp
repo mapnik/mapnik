@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2014 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,12 +40,18 @@ expression_ptr parse_expression(std::string const& str)
     auto node = std::make_shared<expr_node>();
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = boost::spirit::qi::phrase_parse(itr, end, g, space, *node);
-    if (r && itr == end)
-    {
-        return node;
+    try {
+        bool r = boost::spirit::qi::phrase_parse(itr, end, g, space, *node);
+        if (r && itr == end)
+        {
+            return node;
+        }
+        else
+        {
+            throw config_error("Failed to parse expression: \"" + str + "\"");
+        }
     }
-    else
+    catch (std::exception const&) // boost::spirit::qi::expectation_failure
     {
         throw config_error("Failed to parse expression: \"" + str + "\"");
     }
