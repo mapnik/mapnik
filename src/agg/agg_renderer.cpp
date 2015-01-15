@@ -111,6 +111,7 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1>
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::setup(Map const &m)
 {
+    mapnik::set_premultiplied_alpha(pixmap_.data(), true);
     boost::optional<color> const& bg = m.background();
     if (bg)
     {
@@ -145,8 +146,6 @@ void agg_renderer<T0,T1>::setup(Map const &m)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        premultiply_alpha(*bg_image);
-                        premultiply_alpha(pixmap_.data());
                         composite(pixmap_.data(),*bg_image, m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h);
                     }
                 }
@@ -255,6 +254,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             ras_ptr->clip_box(0,0,common_.width_,common_.height_);
         }
         current_buffer_ = internal_buffer_.get();
+        set_premultiplied_alpha(current_buffer_->data(),true);
     }
     else
     {
@@ -279,8 +279,6 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
                 util::apply_visitor(visitor, filter_tag);
             }
         }
-        mapnik::premultiply_alpha(pixmap_.data());
-        mapnik::premultiply_alpha(current_buffer_->data());
         if (st.comp_op())
         {
             composite(pixmap_.data(), current_buffer_->data(),
@@ -374,8 +372,6 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
         {
             double cx = 0.5 * width;
             double cy = 0.5 * height;
-            mapnik::premultiply_alpha(current_buffer_->data());
-            mapnik::premultiply_alpha(**marker.get_bitmap_data());
             composite(current_buffer_->data(), **marker.get_bitmap_data(),
                       comp_op, opacity,
                       std::floor(pos.x - cx + .5),

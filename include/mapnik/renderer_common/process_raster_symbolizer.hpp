@@ -72,7 +72,7 @@ struct image_data_dispatcher
     void operator() (image_data_null const& data_in) const {}  //no-op
     void operator() (image_data_rgba8 const& data_in) const
     {
-        image_data_rgba8 data_out(width_, height_);
+        image_data_rgba8 data_out(width_, height_, true, true);
         scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
         composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
     }
@@ -86,6 +86,7 @@ struct image_data_dispatcher
         image_data_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
         if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        premultiply_alpha(dst);
         composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
@@ -138,7 +139,7 @@ struct image_data_warp_dispatcher
 
     void operator() (image_data_rgba8 const& data_in) const
     {
-        image_data_rgba8 data_out(width_, height_);
+        image_data_rgba8 data_out(width_, height_, true, true);
         warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
     }
@@ -153,6 +154,7 @@ struct image_data_warp_dispatcher
         image_data_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
         if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        premultiply_alpha(dst);
         composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
