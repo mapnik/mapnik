@@ -89,7 +89,7 @@ PyObject* view_tostring3(image_view_rgba8 const & view, std::string const& forma
 
 bool is_solid(image_view_rgba8 const& view)
 {
-    mapnik::is_solid(view);
+    return mapnik::is_solid(view);
 }
 
 void save_view1(image_view_rgba8 const& view,
