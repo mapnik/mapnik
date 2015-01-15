@@ -24,10 +24,11 @@
 #define MAPNIK_IMAGE_HPP
 
 #include <mapnik/image_data_any.hpp>
+#include <mapnik/config.hpp>
 
 namespace mapnik {
 
-class image
+class MAPNIK_DECL image
 {
 public:
     image() = default;
