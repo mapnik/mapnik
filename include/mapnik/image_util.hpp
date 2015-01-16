@@ -127,10 +127,10 @@ template <typename T>
 MAPNIK_DECL void set_alpha (T & image, float opacity);
 
 template <typename T>
-MAPNIK_DECL void set_grayscale_to_alpha (T const& image);
+MAPNIK_DECL void set_grayscale_to_alpha (T & image);
 
 template <typename T>
-MAPNIK_DECL void set_color_to_alpha (T const& image, color const& c);
+MAPNIK_DECL void set_color_to_alpha (T & image, color const& c);
 
 inline bool is_png(std::string const& filename)
 {

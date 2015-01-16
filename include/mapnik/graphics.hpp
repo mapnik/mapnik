@@ -74,10 +74,6 @@ public:
 
     void set_background(const color& c);
 
-    void set_grayscale_to_alpha();
-
-    void set_color_to_alpha(color const& c);
-
     inline const image_data_rgba8& data() const
     {
         return data_;

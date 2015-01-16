@@ -625,12 +625,6 @@ void visitor_set_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
     }
 }
 
-template <>
-void visitor_set_alpha::operator()<image_data_null> (image_data_null &)
-{
-    throw std::runtime_error("Can not set alpha for null image");
-}
-
 } // end detail ns
 
 template<>
@@ -652,6 +646,134 @@ MAPNIK_DECL void set_alpha<image_data_rgba8> (image_data_rgba8 & data, float opa
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
     detail::visitor_set_alpha visit(opacity);
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+namespace detail {
+
+struct visitor_set_grayscale_to_alpha
+{
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Error: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
+    }
+};
+
+template <>
+void visitor_set_grayscale_to_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    using pixel_type = typename image_data_rgba8::pixel_type;
+    for (unsigned int y = 0; y < data.height(); ++y)
+    {
+        pixel_type* row_from = data.getRow(y);
+        for (unsigned int x = 0; x < data.width(); ++x)
+        {
+            pixel_type rgba = row_from[x];
+            pixel_type r = rgba & 0xff;
+            pixel_type g = (rgba >> 8 ) & 0xff;
+            pixel_type b = (rgba >> 16) & 0xff;
+
+            // magic numbers for grayscale
+            pixel_type a = static_cast<pixel_type>(std::ceil((r * .3) + (g * .59) + (b * .11)));
+
+            row_from[x] = (a << 24)| (255 << 16) |  (255 << 8) | (255) ;
+        }
+    }
+}
+
+} // end detail ns
+
+template<>
+MAPNIK_DECL void set_grayscale_to_alpha<image_data_any> (image_data_any & data)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_set_grayscale_to_alpha(), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+// TEMPORARY can be removed once image_data_any is only way it is being passed.
+template<>
+MAPNIK_DECL void set_grayscale_to_alpha<image_data_rgba8> (image_data_rgba8 & data)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_set_grayscale_to_alpha visit;
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+namespace detail {
+
+struct visitor_set_color_to_alpha
+{
+    visitor_set_color_to_alpha(color const& c)
+        : c_(c) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Error: set_color_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
+    }
+
+  private:
+    color const& c_;
+
+};
+
+template <>
+void visitor_set_color_to_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    using pixel_type = typename image_data_rgba8::pixel_type;
+    for (unsigned y = 0; y < data.height(); ++y)
+    {
+        pixel_type* row_from = data.getRow(y);
+        for (unsigned x = 0; x < data.width(); ++x)
+        {
+            pixel_type rgba = row_from[x];
+            pixel_type r = rgba & 0xff;
+            pixel_type g = (rgba >> 8 ) & 0xff;
+            pixel_type b = (rgba >> 16) & 0xff;
+            if (r == c_.red() && g == c_.green() && b == c_.blue())
+            {
+                row_from[x] = 0;
+            }
+        }
+    }
+}
+
+} // end detail ns
+
+template<>
+MAPNIK_DECL void set_color_to_alpha<image_data_any> (image_data_any & data, color const& c)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_set_color_to_alpha(c), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+// TEMPORARY can be removed once image_data_any is only way it is being passed.
+template<>
+MAPNIK_DECL void set_color_to_alpha<image_data_rgba8> (image_data_rgba8 & data, color const& c)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_set_color_to_alpha visit(c);
     visit(data);
     if (remultiply)
     {

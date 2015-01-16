@@ -53,45 +53,6 @@ image_32::image_32(image_data_rgba8 && data)
 
 image_32::~image_32() {}
 
-void image_32::set_grayscale_to_alpha()
-{
-    for (unsigned int y = 0; y < data_.height(); ++y)
-    {
-        unsigned int* row_from = data_.getRow(y);
-        for (unsigned int x = 0; x < data_.width(); ++x)
-        {
-            unsigned rgba = row_from[x];
-            unsigned r = rgba & 0xff;
-            unsigned g = (rgba >> 8 ) & 0xff;
-            unsigned b = (rgba >> 16) & 0xff;
-
-            // magic numbers for grayscale
-            unsigned a = static_cast<unsigned>(std::ceil((r * .3) + (g * .59) + (b * .11)));
-
-            row_from[x] = (a << 24)| (255 << 16) |  (255 << 8) | (255) ;
-        }
-    }
-}
-
-void image_32::set_color_to_alpha(const color& c)
-{
-    for (unsigned y = 0; y < data_.height(); ++y)
-    {
-        unsigned int* row_from = data_.getRow(y);
-        for (unsigned x = 0; x < data_.width(); ++x)
-        {
-            unsigned rgba = row_from[x];
-            unsigned r = rgba & 0xff;
-            unsigned g = (rgba >> 8 ) & 0xff;
-            unsigned b = (rgba >> 16) & 0xff;
-            if (r == c.red() && g == c.green() && b == c.blue())
-            {
-                row_from[x] = 0;
-            }
-        }
-    }
-}
-
 void image_32::set_background(const color& c)
 {
     background_=c;
