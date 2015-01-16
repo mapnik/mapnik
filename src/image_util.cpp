@@ -781,4 +781,86 @@ MAPNIK_DECL void set_color_to_alpha<image_data_rgba8> (image_data_rgba8 & data, 
     }
 }
 
+namespace detail {
+
+template <typename T1>
+struct visitor_fill 
+{
+    visitor_fill(T1 const& val)
+        : val_(val) {}
+
+    template <typename T2>
+    void operator() (T2 & data)
+    {
+        using pixel_type = typename T2::pixel_type;
+        pixel_type val = static_cast<pixel_type>(val_);
+        data.set(val);
+    }
+
+  private:
+    T1 const& val_;
+};
+
+template<>
+struct visitor_fill<color>
+{
+    visitor_fill(color const& val)
+        : val_(val) {}
+
+    template <typename T2>
+    void operator() (T2 & data)
+    {
+        using pixel_type = typename T2::pixel_type;
+        pixel_type val = static_cast<pixel_type>(val_.rgba());
+        data.set(val);
+    }
+
+  private:
+    color const& val_;
+};
+
+} // end detail ns
+
+// For all the generic data types.
+template <typename T1, typename T2>
+MAPNIK_DECL void fill (T1 & data, T2 const& val)
+{
+    util::apply_visitor(detail::visitor_fill<T2>(val), data);
+}
+
+template void fill(image_data_any &, color const&);
+template void fill(image_data_any &, uint32_t const&);
+template void fill(image_data_any &, int32_t const&);
+template void fill(image_data_any &, uint16_t const&);
+template void fill(image_data_any &, int16_t const&);
+template void fill(image_data_any &, uint8_t const&);
+template void fill(image_data_any &, int8_t const&);
+template void fill(image_data_any &, float const&);
+template void fill(image_data_any &, double const&);
+
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL void fill<image_data_rgba8, color> (image_data_rgba8 & data , color const& val)
+{
+    detail::visitor_fill<color> visitor(val);
+    visitor(data);
+}
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL void fill<image_data_rgba8, uint32_t> (image_data_rgba8 & data , uint32_t const& val)
+{
+    detail::visitor_fill<uint32_t> visitor(val);
+    visitor(data);
+}
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL void fill<image_data_rgba8, int32_t> (image_data_rgba8 & data , int32_t const& val)
+{
+    detail::visitor_fill<int32_t> visitor(val);
+    visitor(data);
+}
+
 } // end ns

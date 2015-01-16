@@ -15,7 +15,7 @@ def setup():
 def test_tiff_round_trip_scanline():
     filepath = '/tmp/mapnik-tiff-io-scanline.tiff'
     im = mapnik.Image(255,267)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     org_str = len(im.tostring())
     im.save(filepath,'tiff:method=scanline')
     im2 = mapnik.Image.open(filepath)
@@ -33,7 +33,7 @@ def test_tiff_round_trip_scanline():
 def test_tiff_round_trip_stripped():
     filepath = '/tmp/mapnik-tiff-io-stripped.tiff'
     im = mapnik.Image(255,267)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     org_str = len(im.tostring())
     im.save(filepath,'tiff:method=stripped')
     im2 = mapnik.Image.open(filepath)
@@ -51,7 +51,7 @@ def test_tiff_round_trip_stripped():
 def test_tiff_round_trip_rows_stripped():
     filepath = '/tmp/mapnik-tiff-io-stripped.tiff'
     im = mapnik.Image(255,267)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     org_str = len(im.tostring())
     im.save(filepath,'tiff:method=stripped:rows_per_strip=8')
     im2 = mapnik.Image.open(filepath)
@@ -71,7 +71,7 @@ def test_tiff_round_trip_buffered_tiled():
     filepath2 = '/tmp/mapnik-tiff-io-buffered-tiled2.tiff'
     im = mapnik.Image(255,267)
     #im = mapnik.Image(256,256)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     im.save(filepath,'tiff:method=tiled:tile_width=32:tile_height=32')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())
@@ -91,7 +91,7 @@ def test_tiff_round_trip_buffered_tiled():
 def test_tiff_round_trip_tiled():
     filepath = '/tmp/mapnik-tiff-io-tiled.tiff'
     im = mapnik.Image(256,256)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     im.save(filepath,'tiff:method=tiled')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())

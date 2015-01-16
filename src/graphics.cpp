@@ -53,17 +53,6 @@ image_32::image_32(image_data_rgba8 && data)
 
 image_32::~image_32() {}
 
-void image_32::set_background(const color& c)
-{
-    background_=c;
-    data_.set(background_->rgba());
-}
-
-boost::optional<color> const& image_32::get_background() const
-{
-    return background_;
-}
-
 void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
 {
     using color_type = agg::rgba8;

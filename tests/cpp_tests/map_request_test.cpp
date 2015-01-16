@@ -92,7 +92,7 @@ int main(int argc, char** argv)
         //BOOST_TEST(compare_images(actual1,expected));
 
         // reset image
-        im.clear();
+        mapnik::fill(im.data(), 0);
 
         // set up a mapnik::request object
         mapnik::request req(m.width(),m.height(),m.get_current_extent());
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
         //BOOST_TEST(compare_images(actual2,expected));
 
         // reset image
-        im.clear();
+        mapnik::fill(im.data(), 0);
 
         // render with apply_to_layer api and mapnik::request params passed to apply_to_layer
         mapnik::agg_renderer<mapnik::image_32> renderer3(m,req,vars,im,scale_factor);

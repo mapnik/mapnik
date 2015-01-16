@@ -119,11 +119,11 @@ void agg_renderer<T0,T1>::setup(Map const &m)
         {
             mapnik::color bg_color = *bg;
             bg_color.premultiply();
-            pixmap_.set_background(bg_color);
+            mapnik::fill(pixmap_.data(), bg_color);
         }
         else
         {
-            pixmap_.set_background(*bg);
+            mapnik::fill(pixmap_.data(),*bg);
         }
     }
 
@@ -237,7 +237,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             }
             else
             {
-                internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+                mapnik::fill(internal_buffer_->data(), 0); // fill with transparent colour
             }
         }
         else
@@ -248,7 +248,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             }
             else
             {
-                internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
+                mapnik::fill(internal_buffer_->data(), 0); // fill with transparent colour
             }
             common_.t_.set_offset(0);
             ras_ptr->clip_box(0,0,common_.width_,common_.height_);

@@ -46,7 +46,6 @@ class MAPNIK_DECL image_32
 {
 private:
     image_data_rgba8 data_;
-    boost::optional<color> background_;
     bool painted_;
 public:
     using pixel_type = typename image_data_rgba8::pixel_type;
@@ -64,15 +63,6 @@ public:
     {
         return painted_;
     }
-
-    inline void clear()
-    {
-        std::fill(data_.getData(), data_.getData() + data_.width() * data_.height(), 0);
-    }
-
-    boost::optional<color> const& get_background() const;
-
-    void set_background(const color& c);
 
     inline const image_data_rgba8& data() const
     {

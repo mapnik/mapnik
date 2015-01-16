@@ -29,13 +29,15 @@
 namespace mapnik {
 
 struct image_data_null
-{
+{   
+    using pixel_type = uint8_t;
     unsigned char const* getBytes() const { return nullptr; }
     unsigned char* getBytes() { return nullptr;}
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
     bool get_premultiplied() const { return false; }
     void set_premultiplied(bool) const {}
+    void set(pixel_type const&) { throw std::runtime_error("Can not set values for null image_data"); }
 };
 
 using image_data_base = util::variant<image_data_null, 

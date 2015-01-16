@@ -61,7 +61,7 @@ if mapnik.has_png():
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
         # solid image
-        im.background = mapnik.Color('green');
+        im.background(mapnik.Color('green'))
         for opt in opts:
             expected = gen_filepath('blank',opt)
             actual = os.path.join(tmp_dir,os.path.basename(expected))
@@ -91,7 +91,7 @@ if mapnik.has_png():
     def test_transparency_levels():
         # create partial transparency image
         im = mapnik.Image(256,256)
-        im.background = mapnik.Color('rgba(255,255,255,.5)')
+        im.background(mapnik.Color('rgba(255,255,255,.5)'))
         c2 = mapnik.Color('rgba(255,255,0,.2)')
         c3 = mapnik.Color('rgb(0,255,255)')
         for y in range(0,im.height()/2):

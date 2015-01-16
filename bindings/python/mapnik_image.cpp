@@ -125,6 +125,11 @@ bool is_solid(mapnik::image_32 const& im)
     return mapnik::is_solid(im.data());
 }
 
+void background(mapnik::image_32 & im, mapnik::color const& c)
+{
+    mapnik::fill(im.data(), c);
+}
+
 unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
 {
     if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
@@ -217,6 +222,11 @@ bool premultiply(image_32 & im)
 bool demultiply(image_32 & im)
 {
     return mapnik::demultiply_alpha(im.data());
+}
+
+void clear(image_32 & im)
+{
+    mapnik::fill(im.data(), 0);
 }
 
 void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity, int dx, int dy)
@@ -316,9 +326,7 @@ void export_image()
         .def("view",&image_32::get_view)
         .def("painted",&painted)
         .def("is_solid",&is_solid)
-        .add_property("background",make_function
-                      (&image_32::get_background,return_value_policy<copy_const_reference>()),
-                      &image_32::set_background, "The background color of the image.")
+        .def("background",&background, "Set the background color of the image.")
         .def("set_grayscale_to_alpha",&set_grayscale_to_alpha, "Set the grayscale values to the alpha channel of the Image")
         .def("set_color_to_alpha",&set_color_to_alpha, "Set a given color to the alpha channel of the Image")
         .def("set_alpha",&set_alpha, "Set the overall alpha channel of the Image")
@@ -335,7 +343,7 @@ void export_image()
         .def("demultiply",&demultiply)
         .def("set_pixel",&set_pixel)
         .def("get_pixel",&get_pixel)
-        .def("clear",&image_32::clear)
+        .def("clear",&clear)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 
         .def("tostring",&tostring1)

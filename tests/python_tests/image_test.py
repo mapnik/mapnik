@@ -30,7 +30,7 @@ def test_image_premultiply():
 
 def test_set_color_to_alpha():
     im = mapnik.Image(256,256)
-    im.background = mapnik.Color('rgba(12,12,12,255)')
+    im.background(mapnik.Color('rgba(12,12,12,255)'))
     eq_(get_unique_colors(im), ['rgba(12,12,12,255)'])
     im.set_color_to_alpha(mapnik.Color('rgba(12,12,12,0)'))
     eq_(get_unique_colors(im), ['rgba(0,0,0,0)'])
@@ -43,7 +43,7 @@ def test_negative_image_dimensions():
 def test_jpeg_round_trip():
     filepath = '/tmp/mapnik-jpeg-io.jpeg'
     im = mapnik.Image(255,267)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     im.save(filepath,'jpeg')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())
@@ -59,7 +59,7 @@ def test_jpeg_round_trip():
 def test_png_round_trip():
     filepath = '/tmp/mapnik-png-io.png'
     im = mapnik.Image(255,267)
-    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.background(mapnik.Color('rgba(1,2,3,.5)'))
     im.save(filepath,'png')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())
