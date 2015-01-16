@@ -935,16 +935,83 @@ void visitor_set_rectangle::operator()<image_data_null> (image_data_null &)
 } // end detail ns 
 
 template <typename T>
-void set_rectangle (T & dst, T const& src, int x, int y)
+MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x, int y)
 {
     detail::visitor_set_rectangle visit(src, x, y);
     visit(dst);
 }
 
 template <>
-void set_rectangle<image_data_any> (image_data_any & dst, image_data_any const& src, int x, int y)
+MAPNIK_DECL void set_rectangle<image_data_any> (image_data_any & dst, image_data_any const& src, int x, int y)
 {
     util::apply_visitor(detail::visitor_set_rectangle(src, x, y), dst);
+}
+
+namespace detail
+{
+
+struct visitor_composite_pixel
+{
+    // Obviously c variable would only work for rgba8 currently, but didn't want to 
+    // make this a template class until new rgba types exist. 
+    visitor_composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
+        :   opacity_(opacity),
+            op_(op),
+            x_(x),
+            y_(y),
+            c_(c),
+            cover_(cover) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Composite pixel is not supported for this data type");
+    }
+
+  private:
+    double opacity_;
+    unsigned op_;
+    int x_;
+    int y_;
+    int c_;
+    unsigned cover_;
+
+};
+
+template<>
+void visitor_composite_pixel::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    using color_type = agg::rgba8;
+    using value_type = color_type::value_type;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba<color_type,order_type>;
+
+    if (mapnik::check_bounds(data, x_, y_))
+    {
+        unsigned rgba = data(x_,y_);
+        unsigned ca = (unsigned)(((c_ >> 24) & 0xff) * opacity_);
+        unsigned cb = (c_ >> 16 ) & 0xff;
+        unsigned cg = (c_ >> 8) & 0xff;
+        unsigned cr = (c_ & 0xff);
+        blender_type::blend_pix(op_, (value_type*)&rgba, cr, cg, cb, ca, cover_);
+        data(x_,y_) = rgba;
+    }
+}
+
+} // end detail ns
+
+template <typename T>
+MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity )
+{
+    util::apply_visitor(detail::visitor_composite_pixel(op, x, y, c, cover, opacity), data);
+}
+
+// Temporary delete later
+template <>
+MAPNIK_DECL void composite_pixel<image_data_rgba8>(image_data_rgba8 & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity )
+{
+    detail::visitor_composite_pixel visitor(op, x, y, c, cover, opacity);
+    visitor(data);
 }
 
 } // end ns

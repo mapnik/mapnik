@@ -105,8 +105,6 @@ public:
         }
     }
 
-    void composite_pixel(unsigned op, int x,int y,unsigned c, unsigned cover, double opacity);
-
     inline unsigned width() const
     {
         return data_.width();

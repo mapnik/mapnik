@@ -53,23 +53,4 @@ image_32::image_32(image_data_rgba8 && data)
 
 image_32::~image_32() {}
 
-void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
-{
-    using color_type = agg::rgba8;
-    using value_type = color_type::value_type;
-    using order_type = agg::order_rgba;
-    using blender_type = agg::comp_op_adaptor_rgba<color_type,order_type>;
-
-    if (checkBounds(x,y))
-    {
-        unsigned rgba = data_(x,y);
-        unsigned ca = (unsigned)(((c >> 24) & 0xff) * opacity);
-        unsigned cb = (c >> 16 ) & 0xff;
-        unsigned cg = (c >> 8) & 0xff;
-        unsigned cr = (c & 0xff);
-        blender_type::blend_pix(op, (value_type*)&rgba, cr, cg, cb, ca, cover);
-        data_(x,y) = rgba;
-    }
-}
-
 }
