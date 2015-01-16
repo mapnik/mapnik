@@ -25,6 +25,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <functional>
 
 // boost
 
@@ -314,10 +315,14 @@ mapnik::featureset_ptr large_geojson_datasource::features(mapnik::query const& q
     {
 #if BOOST_VERSION >= 105600
         large_geojson_featureset::array_type index_array;
+        using item_type = large_geojson_featureset::array_type::value_type;
         if (tree_)
         {
             tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
             std::cerr << "Query size=" << index_array.size() << std::endl;
+            std::cerr << "Sort index_array by offsets" << std::endl;
+            std::sort(index_array.begin(),index_array.end(), [](item_type const& item0, item_type const& item1) {return item0.second < item1.second;});
+            std::cerr << "Done" << std::endl;
             return std::make_shared<large_geojson_featureset>(filename_, std::move(index_array));
         }
 #else
