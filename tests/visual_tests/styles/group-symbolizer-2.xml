@@ -41,7 +41,7 @@ lat,long,name1,ref1,name2,ref2
       <GroupSymbolizer start-column="1" num-columns="2" placement="point" avoid-edges="false">
         <PairLayout item-margin="1"/>
         <GroupRule>
-          <PointSymbolizer file="../../data/svg/rect.svg"/>
+          <ShieldSymbolizer file="../../data/svg/rect.svg" face-name="DejaVu Sans Book"/>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="10">[name%]</TextSymbolizer>
           <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dy="-10">[ref%]</TextSymbolizer>
         </GroupRule>
@@ -63,11 +63,11 @@ lat,long,name1,ref1,name2,ref2
 
   <Style name="non-grouped">
     <Rule>
-      <ShieldSymbolizer face-name="DejaVu Sans Book" dx="-16.25" file="../../data/svg/rect.svg"/>
+      <ShieldSymbolizer dx="-16.25" file="../../data/svg/rect.svg" face-name="DejaVu Sans Book"/>
       <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="-0.25" dy="10">[name1]</TextSymbolizer>
       <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="-11.25" dy="-10">[ref1]</TextSymbolizer>
 
-      <ShieldSymbolizer face-name="DejaVu Sans Book" dx="15" file="../../data/svg/rect.svg"/>
+      <ShieldSymbolizer dx="15" file="../../data/svg/rect.svg" face-name="DejaVu Sans Book"/>
       <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="0.25" dy="10">[name2]</TextSymbolizer>
       <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="10" dy="-10">[ref2]</TextSymbolizer>
     </Rule>

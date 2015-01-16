@@ -23,6 +23,9 @@
 // mapnik
 #include <mapnik/marker_helpers.hpp>
 
+#include "agg_ellipse.h"
+#include "agg_color_rgba.h"
+
 namespace mapnik {
 
 void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)

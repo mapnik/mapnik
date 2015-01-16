@@ -32,21 +32,12 @@
 namespace mapnik
 {
 
-void render_vector_marker(cairo_context & context, pixel_position const& pos,
-                          svg::svg_path_adapter & svg_path, box2d<double> const& bbox,
+void render_vector_marker(cairo_context & context, svg::svg_path_adapter & svg_path,
                           agg::pod_bvector<svg::path_attributes> const & attributes,
-                          agg::trans_affine const& tr, double opacity, bool recenter)
+                          box2d<double> const& bbox, agg::trans_affine const& tr,
+                          double opacity)
 {
     using namespace mapnik::svg;
-    agg::trans_affine mtx = tr;
-    if (recenter)
-    {
-        coord<double,2> c = bbox.center();
-        mtx = agg::trans_affine_translation(-c.x,-c.y);
-        mtx *= tr;
-        mtx.translate(pos.x, pos.y);
-    }
-
     agg::trans_affine transform;
 
     for(unsigned i = 0; i < attributes.size(); ++i)
@@ -56,7 +47,7 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos,
             continue;
         cairo_save_restore guard(context);
         transform = attr.transform;
-        transform *= mtx;
+        transform *= tr;
 
         // TODO - this 'is_valid' check is not used in the AGG renderer and also
         // appears to lead to bogus results with

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Without unlock-image -->
+<!DOCTYPE Map>
+<Map background-color="green" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="2.0.0">
+
+  <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>points</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,ref1,ref2,ref3,ref4,ref5,ref6,ref7,ref8,ref9,ref10
+0,0,1,2,3,4,5,6,7,8,9,10
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="points">
+    <Rule>
+      <GroupSymbolizer start-column="1" num-columns="10" placement="point" avoid-edges="false" minimum-distance="10" spacing="20" repeat-key="[ref%]">
+        <SimpleLayout item-margin="5"/>
+        <GroupRule>
+          <Filter>[ref%] = 1</Filter>
+          <MarkersSymbolizer file="shape://ellipse" width="12" height="25" />
+          <TextSymbolizer face-name="DejaVu Sans Book" size="14" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 2</Filter>
+          <MarkersSymbolizer file="shape://ellipse" width="18" height="18" fill="red" stroke="white" stroke-width="2" />
+          <TextSymbolizer face-name="DejaVu Sans Bold" size="14" fill="white" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 3</Filter>
+          <MarkersSymbolizer file="shape://ellipse" comp-op="invert" />
+          <TextSymbolizer face-name="DejaVu Sans Book" size="14" dy="10" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 4</Filter>
+          <MarkersSymbolizer file="../../data/images/crosshair16x16.png"/>
+          <TextSymbolizer face-name="DejaVu Sans Book" size="12" placement="point" dy="-5" dx="-5" horizontal-alignment="left" vertical-alignment="top">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 5</Filter>
+          <MarkersSymbolizer file="../../data/images/marker.png" comp-op="xor"/>
+          <TextSymbolizer face-name="DejaVu Sans Bold" size="16" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 6</Filter>
+          <MarkersSymbolizer file="../../data/svg/rect.svg" />
+          <TextSymbolizer face-name="DejaVu Sans Book" size="14" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 7</Filter>
+          <MarkersSymbolizer file="../../data/svg/rect.svg" width="20" height="20" fill="red" stroke="white" stroke-width="3" />
+          <TextSymbolizer face-name="DejaVu Sans Bold" size="14" fill="white" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+        <GroupRule>
+          <Filter>[ref%] = 8</Filter>
+          <MarkersSymbolizer file="../../data/svg/rect.svg" comp-op="grain-extract"/>
+          <TextSymbolizer face-name="DejaVu Sans Book" size="14" placement="point">[ref%]</TextSymbolizer>
+        </GroupRule>
+      </GroupSymbolizer>
+    </Rule>
+  </Style>
+
+  <Layer name="layer2" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>frame</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+lat,long,nr
+-1,-2,0
+-1,2,1
+1,-2,2
+1,2,3
+      </Parameter>
+    </Datasource>
+  </Layer>
+
+  <Style name="frame">
+    <Rule>
+      <PointSymbolizer/>
+      <DebugSymbolizer/>
+    </Rule>
+  </Style>
+
+</Map>

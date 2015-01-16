@@ -23,8 +23,11 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
+#include <mapnik/marker.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
+#include <mapnik/cairo/cairo_render_vector.hpp>
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
@@ -56,11 +59,32 @@ struct thunk_renderer
           common_(common), offset_(offset)
     {}
 
-    void operator()(point_render_thunk const &thunk) const
+    void operator()(vector_marker_render_thunk const &thunk) const
     {
-        pixel_position new_pos(thunk.pos_.x + offset_.x, thunk.pos_.y + offset_.y);
-        ren_.render_marker(new_pos, *thunk.marker_, thunk.tr_, thunk.opacity_,
-                           thunk.comp_op_);
+        cairo_save_restore guard(context_);
+        context_.set_operator(thunk.comp_op_);
+
+        svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(thunk.src_->source());
+        svg::svg_path_adapter svg_path(stl_storage);
+
+        agg::trans_affine offset_tr = thunk.tr_;
+        offset_tr.translate(offset_.x, offset_.y);
+        mapnik::render_vector_marker(context_,
+                                     svg_path,
+                                     thunk.attrs_,
+                                     thunk.src_->bounding_box(),
+                                     offset_tr,
+                                     thunk.opacity_);
+    }
+
+    void operator()(raster_marker_render_thunk const &thunk) const
+    {
+        cairo_save_restore guard(context_);
+        context_.set_operator(thunk.comp_op_);
+
+        agg::trans_affine offset_tr = thunk.tr_;
+        offset_tr.translate(offset_.x, offset_.y);
+        context_.add_image(offset_tr, thunk.src_, thunk.opacity_);
     }
 
     void operator()(text_render_thunk const &thunk) const
