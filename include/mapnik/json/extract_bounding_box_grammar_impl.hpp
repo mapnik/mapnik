@@ -55,13 +55,13 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::_r3_type _r3;
     qi::_a_type _a;
     qi::_b_type _b;
+    qi::skip_type skip;
+    qi::lexeme_type lexeme;
+    boost::spirit::repository::qi::seek_type seek;
+    boost::spirit::repository::qi::iter_pos_type iter_pos;
     using qi::fail;
     using qi::on_error;
-    using qi::skip;
-    using qi::lexeme;
     using boost::phoenix::push_back;
-    using boost::spirit::repository::qi::seek;
-    using boost::spirit::repository::qi::iter_pos;
 
     start = features(_r1)
         ;

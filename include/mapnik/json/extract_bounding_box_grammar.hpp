@@ -42,9 +42,8 @@
 
 namespace mapnik { namespace json {
 
-struct empty {};
 using position = std::tuple<double,double>;
-using boxes = std::vector<std::tuple<std::size_t,box2d<double>>>;
+using boxes = std::vector<std::tuple<box2d<double>, std::size_t>>;
 
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
@@ -78,7 +77,7 @@ struct push_box_impl
     template <typename T>
     result_type operator() (T & boxes, std::size_t offset, box2d<double> const& box) const
     {
-        boxes.emplace_back(offset, box);
+        boxes.emplace_back(box, offset);
     }
 };
 
