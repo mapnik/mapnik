@@ -61,7 +61,7 @@ mapnik::feature_ptr large_geojson_featureset::next()
 #if BOOST_VERSION >= 105600
         large_geojson_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second;
-//std::cerr << file_offset << " -- " << item.first << std::endl;
+        //std::cerr << file_offset << " -- " << item.first << std::endl;
 #else
         std::size_t index = *index_itr_++;
 #endif
@@ -72,7 +72,7 @@ mapnik::feature_ptr large_geojson_featureset::next()
             boost::spirit::multi_pass
             < base_iterator_type
               , boost::spirit::iterator_policies::default_policy
-              <  boost::spirit::iterator_policies::ref_counted
+              <  boost::spirit::iterator_policies::first_owner//ref_counted
                  , boost::spirit::iterator_policies::no_check
                  //, boost::spirit::iterator_policies::functor_input
                  //, boost::spirit::iterator_policies::split_std_deque
