@@ -135,6 +135,9 @@ MAPNIK_DECL void set_color_to_alpha (T & image, color const& c);
 template <typename T1, typename T2>
 MAPNIK_DECL void fill (T1 & data, T2 const& c);
 
+template <typename T>
+MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
+
 inline bool is_png(std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".png"));

@@ -863,4 +863,88 @@ MAPNIK_DECL void fill<image_data_rgba8, int32_t> (image_data_rgba8 & data , int3
     visitor(data);
 }
 
+namespace detail {
+
+struct visitor_set_rectangle
+{
+    visitor_set_rectangle(image_data_any const & src, int x0, int y0)
+        : src_(src), x0_(x0), y0_(y0) {}
+
+    template <typename T>
+    void operator() (T & dst)
+    {
+        using pixel_type = typename T::pixel_type;
+        T src = util::get<T>(src_);
+        box2d<int> ext0(0,0,dst.width(),dst.height());
+        box2d<int> ext1(x0_,y0_,x0_+src.width(),y0_+src.height());
+
+        if (ext0.intersects(ext1))
+        {
+            box2d<int> box = ext0.intersect(ext1);
+            for (std::size_t y = box.miny(); y < box.maxy(); ++y)
+            {
+                pixel_type* row_to =  dst.getRow(y);
+                pixel_type const * row_from = src.getRow(y-y0_);
+
+                for (std::size_t x = box.minx(); x < box.maxx(); ++x)
+                {
+                    row_to[x] = row_from[x-x0_];
+                }
+            }
+        }
+    }
+  private:
+    image_data_any const& src_;
+    int x0_;
+    int y0_;
+};
+
+template <>
+void visitor_set_rectangle::operator()<image_data_rgba8> (image_data_rgba8 & dst)
+{
+    using pixel_type = typename image_data_rgba8::pixel_type;
+    image_data_rgba8 src = util::get<image_data_rgba8>(src_);
+    box2d<int> ext0(0,0,dst.width(),dst.height());
+    box2d<int> ext1(x0_,y0_,x0_+src.width(),y0_+src.height());
+
+    if (ext0.intersects(ext1))
+    {
+        box2d<int> box = ext0.intersect(ext1);
+        for (std::size_t y = box.miny(); y < box.maxy(); ++y)
+        {
+            pixel_type* row_to =  dst.getRow(y);
+            pixel_type const * row_from = src.getRow(y-y0_);
+
+            for (std::size_t x = box.minx(); x < box.maxx(); ++x)
+            {
+                if (row_from[x-x0_] & 0xff000000) // Don't change if alpha == 0
+                {
+                    row_to[x] = row_from[x-x0_];
+                }
+            }
+        }
+    }
+}
+
+template<>
+void visitor_set_rectangle::operator()<image_data_null> (image_data_null &)
+{
+    throw std::runtime_error("Set rectangle not support for null images");
+}
+
+} // end detail ns 
+
+template <typename T>
+void set_rectangle (T & dst, T const& src, int x, int y)
+{
+    detail::visitor_set_rectangle visit(src, x, y);
+    visit(dst);
+}
+
+template <>
+void set_rectangle<image_data_any> (image_data_any & dst, image_data_any const& src, int x, int y)
+{
+    util::apply_visitor(detail::visitor_set_rectangle(src, x, y), dst);
+}
+
 } // end ns

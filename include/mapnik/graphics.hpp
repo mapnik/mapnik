@@ -117,30 +117,6 @@ public:
         return data_.height();
     }
 
-    inline void set_rectangle(int x0,int y0,image_data_rgba8 const& data)
-    {
-        box2d<int> ext0(0,0,data_.width(),data_.height());
-        box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());
-
-        if (ext0.intersects(ext1))
-        {
-            box2d<int> box = ext0.intersect(ext1);
-            for (int y = box.miny(); y < box.maxy(); ++y)
-            {
-                unsigned int* row_to =  data_.getRow(y);
-                unsigned int const * row_from = data.getRow(y-y0);
-
-                for (int x = box.minx(); x < box.maxx(); ++x)
-                {
-                    if (row_from[x-x0] & 0xff000000)
-                    {
-                        row_to[x] = row_from[x-x0];
-                    }
-                }
-            }
-        }
-    }
-
     template <typename MergeMethod>
         inline void merge_rectangle(image_data_rgba8 const& data, unsigned x0, unsigned y0, float opacity)
     {
