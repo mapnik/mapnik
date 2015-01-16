@@ -36,6 +36,7 @@
 
 // mapnik
 #include <mapnik/graphics.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
@@ -188,12 +189,19 @@ std::shared_ptr<image_32> frombuffer(PyObject * obj)
     throw mapnik::image_reader_exception("Failed to load image from buffer" );
 }
 
-
-void blend (image_32 & im, unsigned x, unsigned y, image_32 & im2, float opacity)
+void set_grayscale_to_alpha(image_32 & im)
 {
-    mapnik::premultiply_alpha(im.data());
-    mapnik::premultiply_alpha(im2.data());
-    mapnik::composite(im.data(),im2.data(),mapnik::src_over,opacity,x,y);
+    mapnik::set_grayscale_to_alpha(im.data());
+}
+
+void set_color_to_alpha(image_32 & im, mapnik::color const& c)
+{
+    mapnik::set_color_to_alpha(im.data(), c);
+}
+
+void set_alpha(image_32 & im, float opacity)
+{
+    mapnik::set_alpha(im.data(), opacity);
 }
 
 bool premultiplied(image_32 &im)
@@ -201,21 +209,29 @@ bool premultiplied(image_32 &im)
     return im.data().get_premultiplied();
 }
 
-void premultiply(image_32 & im)
+bool premultiply(image_32 & im)
 {
-    mapnik::premultiply_alpha(im.data());
+    return mapnik::premultiply_alpha(im.data());
 }
 
-void demultiply(image_32 & im)
+bool demultiply(image_32 & im)
 {
-    mapnik::demultiply_alpha(im.data());
+    return mapnik::demultiply_alpha(im.data());
 }
 
-void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
+void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity, int dx, int dy)
 {
-    mapnik::premultiply_alpha(dst.data());
-    mapnik::premultiply_alpha(src.data());
-    mapnik::composite(dst.data(),src.data(),mode,opacity,0,0);
+    bool demultiply_dst = mapnik::premultiply_alpha(dst.data());
+    bool demultiply_src = mapnik::premultiply_alpha(src.data());
+    mapnik::composite(dst.data(),src.data(),mode,opacity,dx,dy);
+    if (demultiply_dst) 
+    {
+        mapnik::demultiply_alpha(dst.data());
+    }
+    if (demultiply_src)
+    {
+        mapnik::demultiply_alpha(src.data());
+    }
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -303,15 +319,16 @@ void export_image()
         .add_property("background",make_function
                       (&image_32::get_background,return_value_policy<copy_const_reference>()),
                       &image_32::set_background, "The background color of the image.")
-        .def("set_grayscale_to_alpha",&image_32::set_grayscale_to_alpha, "Set the grayscale values to the alpha channel of the Image")
-        .def("set_color_to_alpha",&image_32::set_color_to_alpha, "Set a given color to the alpha channel of the Image")
-        .def("set_alpha",&image_32::set_alpha, "Set the overall alpha channel of the Image")
-        .def("blend",&blend)
+        .def("set_grayscale_to_alpha",&set_grayscale_to_alpha, "Set the grayscale values to the alpha channel of the Image")
+        .def("set_color_to_alpha",&set_color_to_alpha, "Set a given color to the alpha channel of the Image")
+        .def("set_alpha",&set_alpha, "Set the overall alpha channel of the Image")
         .def("composite",&composite,
          ( arg("self"),
            arg("image"),
            arg("mode")=mapnik::src_over,
-           arg("opacity")=1.0f
+           arg("opacity")=1.0f,
+           arg("dx")=0,
+           arg("dy")=0
          ))
         .def("premultiplied",&premultiplied)
         .def("premultiply",&premultiply)

@@ -28,6 +28,7 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/color.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -111,16 +112,25 @@ MAPNIK_DECL void save_to_stream
 );
 
 template <typename T>
-MAPNIK_DECL void premultiply_alpha(T & image);
+MAPNIK_DECL bool premultiply_alpha(T & image);
 
 template <typename T>
-MAPNIK_DECL void demultiply_alpha(T & image);
+MAPNIK_DECL bool demultiply_alpha(T & image);
 
 template <typename T>
 MAPNIK_DECL void set_premultiplied_alpha(T & image, bool status);
 
 template <typename T>
 MAPNIK_DECL bool is_solid (T const& image);
+
+template <typename T>
+MAPNIK_DECL void set_alpha (T & image, float opacity);
+
+template <typename T>
+MAPNIK_DECL void set_grayscale_to_alpha (T & image);
+
+template <typename T>
+MAPNIK_DECL void set_color_to_alpha (T & image, color const& c);
 
 inline bool is_png(std::string const& filename)
 {

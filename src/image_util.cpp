@@ -33,6 +33,7 @@
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
 
@@ -473,7 +474,7 @@ namespace detail {
 struct premultiply_visitor
 {
     template <typename T>
-    void operator() (T & data) 
+    bool operator() (T & data) 
     {
         throw std::runtime_error("Error: Premultiply with " + std::string(typeid(data).name()) + " is not supported");
     }
@@ -481,7 +482,7 @@ struct premultiply_visitor
 };
 
 template <>
-void premultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
+bool premultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
 {
     if (!data.get_premultiplied())
     {
@@ -489,13 +490,15 @@ void premultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
         agg::pixfmt_rgba32 pixf(buffer);
         pixf.premultiply();
         data.set_premultiplied(true);
+        return true;
     }
+    return false;
 }
 
 struct demultiply_visitor
 {
     template <typename T>
-    void operator() (T & data) 
+    bool operator() (T & data) 
     {
         throw std::runtime_error("Error: Premultiply with " + std::string(typeid(data).name()) + " is not supported");
     }
@@ -503,7 +506,7 @@ struct demultiply_visitor
 };
 
 template <>
-void demultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
+bool demultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
 {
     if (data.get_premultiplied())
     {
@@ -511,7 +514,9 @@ void demultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
         agg::pixfmt_rgba32_pre pixf(buffer);
         pixf.demultiply();
         data.set_premultiplied(false);
+        return true;
     }
+    return false;
 }
 
 struct set_premultiplied_visitor
@@ -531,35 +536,35 @@ struct set_premultiplied_visitor
 } // end detail ns
 
 template <typename T>
-MAPNIK_DECL void premultiply_alpha(T & image)
+MAPNIK_DECL bool premultiply_alpha(T & image)
 {
-    util::apply_visitor(detail::premultiply_visitor(), image);
+    return util::apply_visitor(detail::premultiply_visitor(), image);
 }
 
-template void premultiply_alpha<image_data_any> (image_data_any &);
+template bool premultiply_alpha<image_data_any> (image_data_any &);
 
 // Temporary, can be removed once image_view_any and image_data_any are the only ones passed
 template <>
-MAPNIK_DECL void premultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
+MAPNIK_DECL bool premultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
 {
     detail::premultiply_visitor visit;
-    visit(image);
+    return visit(image);
 }
 
 template <typename T>
-MAPNIK_DECL void demultiply_alpha(T & image)
+MAPNIK_DECL bool demultiply_alpha(T & image)
 {
-    util::apply_visitor(detail::demultiply_visitor(), image);
+    return util::apply_visitor(detail::demultiply_visitor(), image);
 }
 
-template void demultiply_alpha<image_data_any> (image_data_any &);
+template bool demultiply_alpha<image_data_any> (image_data_any &);
 
 // Temporary, can be removed once image_view_any and image_data_any are the only ones passed
 template <>
-MAPNIK_DECL void demultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
+MAPNIK_DECL bool demultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
 {
     detail::demultiply_visitor visit;
-    visit(image);
+    return visit(image);
 }
 
 template <typename T>
@@ -576,6 +581,204 @@ MAPNIK_DECL void set_premultiplied_alpha<image_data_rgba8>(image_data_rgba8 & im
 {
     detail::set_premultiplied_visitor visit(status);
     visit(image);
+}
+
+namespace detail {
+
+struct visitor_set_alpha
+{
+    visitor_set_alpha(float opacity)
+        : opacity_(opacity) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Error: set_alpha with " + std::string(typeid(data).name()) + " is not supported");
+    }
+
+  private:
+    float opacity_;
+
+};
+
+template <>
+void visitor_set_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    using pixel_type = typename image_data_rgba8::pixel_type;
+    for (unsigned int y = 0; y < data.height(); ++y)
+    {
+        pixel_type* row_to =  data.getRow(y);
+        for (unsigned int x = 0; x < data.width(); ++x)
+        {
+            pixel_type rgba = row_to[x];
+            pixel_type a0 = (rgba >> 24) & 0xff;
+            pixel_type a1 = pixel_type( ((rgba >> 24) & 0xff) * opacity_ );
+            //unsigned a1 = opacity;
+            if (a0 == a1) continue;
+
+            pixel_type r = rgba & 0xff;
+            pixel_type g = (rgba >> 8 ) & 0xff;
+            pixel_type b = (rgba >> 16) & 0xff;
+
+            row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
+        }
+    }
+}
+
+} // end detail ns
+
+template<>
+MAPNIK_DECL void set_alpha<image_data_any> (image_data_any & data, float opacity)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_set_alpha(opacity), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+// TEMPORARY can be removed once image_data_any is only way it is being passed.
+template<>
+MAPNIK_DECL void set_alpha<image_data_rgba8> (image_data_rgba8 & data, float opacity)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_set_alpha visit(opacity);
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+namespace detail {
+
+struct visitor_set_grayscale_to_alpha
+{
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Error: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
+    }
+};
+
+template <>
+void visitor_set_grayscale_to_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    using pixel_type = typename image_data_rgba8::pixel_type;
+    for (unsigned int y = 0; y < data.height(); ++y)
+    {
+        pixel_type* row_from = data.getRow(y);
+        for (unsigned int x = 0; x < data.width(); ++x)
+        {
+            pixel_type rgba = row_from[x];
+            pixel_type r = rgba & 0xff;
+            pixel_type g = (rgba >> 8 ) & 0xff;
+            pixel_type b = (rgba >> 16) & 0xff;
+
+            // magic numbers for grayscale
+            pixel_type a = static_cast<pixel_type>(std::ceil((r * .3) + (g * .59) + (b * .11)));
+
+            row_from[x] = (a << 24)| (255 << 16) |  (255 << 8) | (255) ;
+        }
+    }
+}
+
+} // end detail ns
+
+template<>
+MAPNIK_DECL void set_grayscale_to_alpha<image_data_any> (image_data_any & data)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_set_grayscale_to_alpha(), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+// TEMPORARY can be removed once image_data_any is only way it is being passed.
+template<>
+MAPNIK_DECL void set_grayscale_to_alpha<image_data_rgba8> (image_data_rgba8 & data)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_set_grayscale_to_alpha visit;
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+namespace detail {
+
+struct visitor_set_color_to_alpha
+{
+    visitor_set_color_to_alpha(color const& c)
+        : c_(c) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Error: set_color_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
+    }
+
+  private:
+    color const& c_;
+
+};
+
+template <>
+void visitor_set_color_to_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    using pixel_type = typename image_data_rgba8::pixel_type;
+    for (unsigned y = 0; y < data.height(); ++y)
+    {
+        pixel_type* row_from = data.getRow(y);
+        for (unsigned x = 0; x < data.width(); ++x)
+        {
+            pixel_type rgba = row_from[x];
+            pixel_type r = rgba & 0xff;
+            pixel_type g = (rgba >> 8 ) & 0xff;
+            pixel_type b = (rgba >> 16) & 0xff;
+            if (r == c_.red() && g == c_.green() && b == c_.blue())
+            {
+                row_from[x] = 0;
+            }
+        }
+    }
+}
+
+} // end detail ns
+
+template<>
+MAPNIK_DECL void set_color_to_alpha<image_data_any> (image_data_any & data, color const& c)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_set_color_to_alpha(c), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+// TEMPORARY can be removed once image_data_any is only way it is being passed.
+template<>
+MAPNIK_DECL void set_color_to_alpha<image_data_rgba8> (image_data_rgba8 & data, color const& c)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_set_color_to_alpha visit(c);
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
 }
 
 } // end ns
