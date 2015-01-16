@@ -312,8 +312,6 @@ mapnik::featureset_ptr large_geojson_datasource::features(mapnik::query const& q
     mapnik::box2d<double> const& box = q.get_bbox();
     if (extent_.intersects(box))
     {
-        std::cerr << "extent_.intersects(box)" << std::endl;
-        //box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
 #if BOOST_VERSION >= 105600
         large_geojson_featureset::array_type index_array;
         if (tree_)
