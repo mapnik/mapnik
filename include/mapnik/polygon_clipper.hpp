@@ -24,6 +24,7 @@
 
 // stl
 #include <iostream>
+#include <iomanip>
 #include <deque>
 
 // mapnik
