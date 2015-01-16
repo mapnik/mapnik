@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,7 +44,6 @@ namespace mapnik { namespace json {
 
 struct empty {};
 using position = std::tuple<double,double>;
-//using positions = std::vector<position>;
 using boxes = std::vector<std::tuple<std::size_t,box2d<double>>>;
 
 namespace qi = boost::spirit::qi;
@@ -87,11 +86,9 @@ struct offset_impl
 {
     using result_type = std::size_t;
     template <typename T0, typename T1>
-    std::size_t operator() (T0 const& begin, T1 const& range) const
+    std::size_t operator() (T0 const& begin, T1 const& itr) const
     {
-        //std::cerr << std::distance(range.begin(),range.end()) << std::endl;
-        //std::cerr << std::string(range.begin(),range.end()) << std::endl;
-        return std::distance(begin, range.begin());
+        return std::distance(begin, itr);
     }
 };
 
@@ -101,8 +98,8 @@ struct extract_bounding_box_grammar :
 {
     extract_bounding_box_grammar();
     qi::rule<Iterator, void(boxes&), space_type> start;
-    qi::rule<Iterator, qi::locals<Iterator,boost::iterator_range<Iterator>>, void(boxes&), space_type> features;
-    qi::rule<Iterator, void(boxes&, Iterator const&, boost::iterator_range<Iterator> const&), space_type> feature;
+    qi::rule<Iterator, qi::locals<Iterator,Iterator>, void(boxes&), space_type> features;
+    qi::rule<Iterator, void(boxes&, Iterator const&, Iterator const&), space_type> feature;
     qi::rule<Iterator, void(boxes&,std::size_t), space_type> bounding_box;
     qi::rule<Iterator, qi::locals<box2d<double>>, box2d<double>(), space_type> coords;
     qi::rule<Iterator, boost::optional<position>(), space_type> pos;

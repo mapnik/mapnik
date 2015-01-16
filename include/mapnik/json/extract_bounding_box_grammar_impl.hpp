@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,28 +59,21 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     using qi::on_error;
     using qi::skip;
     using qi::lexeme;
-    using qi::raw;
     using boost::phoenix::push_back;
     using boost::spirit::repository::qi::seek;
     using boost::spirit::repository::qi::iter_pos;
 
     start = features(_r1)
         ;
-
-    //features = iter_pos[_a = _1] >> *(iter_pos[_b = _1] >> seek[lexeme[skip[lit('{') >> lit("\"type\"") >> ":" >> "\"Feature\""]]]
-    //                                 >> feature(_r1, _a, _b))
-    //    ;
-
-    features = iter_pos[_a = _1] >> -(lit('{') >> -lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
-                                      >> lit(',') >> lit("\"features\"") >> lit(':'))
-                                 >> lit('[') >> *(raw[seek[lexeme[skip[iter_pos > lit('{') > lit("\"type\"") > lit(':') > lit("\"Feature\"")]]]] [_b = _1]
-                                                  > feature(_r1, _a, _b))
+    features = iter_pos[_a = _1] >> -(lit('{') >> -lit("\"type\"")
+                                      >> lit(':') >> lit("\"FeatureCollection\"")
+                                      >> lit(',') >> lit("\"features\"")
+                                      >> lit(':'))
+                                 >> lit('[') >> *(seek[lexeme[skip[iter_pos[_b = _1] >> lit('{') >> lit("\"type\"") >> lit(':') >> lit("\"Feature\"")]]]
+                                                  >> feature(_r1, _a, _b))
         ;
-    //features = iter_pos[_a = _1] >> seek[lexeme[skip[lit("\"type\"") >> lit(':') >> " ]]]
-    //                             >> iter_pos[_b = _1] >> *(lit(':') >> feature(_r1, _a, _b) | seek["\"type\""] >> iter_pos[_b = _1])
-    //    ;
 
-    feature = /*lit("\"Feature\"") >> */bounding_box(_r1, offset(_r2, _r3))
+    feature = bounding_box(_r1, offset(_r2, _r3))
         ;
     bounding_box = seek["\"coordinates\""] >> lit(':') >> coords[push_box(_r1, _r2, _1)]
         ;
