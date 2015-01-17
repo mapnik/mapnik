@@ -1106,4 +1106,102 @@ MAPNIK_DECL void set_pixel<image_data_rgba8, int32_t> (image_data_rgba8 & data, 
     visitor(data);
 }
 
+namespace detail {
+
+template <typename T1>
+struct visitor_get_pixel
+{
+    visitor_get_pixel(std::size_t x, std::size_t y)
+        : x_(x), y_(y) {}
+
+    template <typename T2>
+    T1 operator() (T2 const& data)
+    {
+        if (check_bounds(data, x_, y_))
+        {
+            return static_cast<T1>(data(x_, y_));
+        }
+        else
+        {
+            throw std::runtime_error("Out of range for dataset with get pixel");
+        }
+    }
+
+  private:
+    std::size_t x_;
+    std::size_t y_;
+};
+
+template<>
+struct visitor_get_pixel<color>
+{
+    visitor_get_pixel(std::size_t x, std::size_t y)
+        : x_(x), y_(y) {}
+
+    template <typename T2>
+    color operator() (T2 const& data)
+    {
+        if (check_bounds(data, x_, y_))
+        {
+            uint32_t val = static_cast<uint32_t>(data(x_, y_));
+            return color(static_cast<uint8_t>(val),
+                         static_cast<uint8_t>((val >>= 8)),
+                         static_cast<uint8_t>((val >>= 8)),
+                         static_cast<uint8_t>((val >>= 8)));
+        }
+        else
+        {
+            throw std::runtime_error("Out of range for dataset with get pixel");
+        }
+    }
+
+  private:
+    std::size_t x_;
+    std::size_t y_;
+};
+
+} // end detail ns
+
+// For all the generic data types.
+template <typename T1, typename T2>
+MAPNIK_DECL T2 get_pixel (T1 const& data, std::size_t x, std::size_t y)
+{
+    return util::apply_visitor(detail::visitor_get_pixel<T2>(x, y), data);
+}
+
+template color get_pixel(image_data_any const&, std::size_t, std::size_t);
+template uint32_t get_pixel(image_data_any const&, std::size_t, std::size_t);
+template int32_t get_pixel(image_data_any const&, std::size_t, std::size_t);
+template uint16_t get_pixel(image_data_any const&, std::size_t, std::size_t);
+template int16_t get_pixel(image_data_any const&, std::size_t, std::size_t);
+template uint8_t get_pixel(image_data_any const&, std::size_t, std::size_t);
+template int8_t get_pixel(image_data_any const&, std::size_t, std::size_t);
+template float get_pixel(image_data_any const&, std::size_t, std::size_t);
+template double get_pixel(image_data_any const&, std::size_t, std::size_t); 
+
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL color get_pixel<image_data_rgba8, color> (image_data_rgba8 const& data, std::size_t x, std::size_t y)
+{
+    detail::visitor_get_pixel<color> visitor(x, y);
+    return visitor(data);
+}
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL uint32_t get_pixel<image_data_rgba8, uint32_t> (image_data_rgba8 const& data, std::size_t x, std::size_t y)
+{
+    detail::visitor_get_pixel<uint32_t> visitor(x, y);
+    return visitor(data);
+}
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL int32_t get_pixel<image_data_rgba8, int32_t> (image_data_rgba8 const& data, std::size_t x, std::size_t y)
+{
+    detail::visitor_get_pixel<int32_t> visitor(x, y);
+    return visitor(data);
+}
+
 } // end ns

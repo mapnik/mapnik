@@ -130,12 +130,11 @@ void background(mapnik::image_32 & im, mapnik::color const& c)
     mapnik::fill(im.data(), c);
 }
 
-unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
+uint32_t get_pixel(mapnik::image_32 const& im, int x, int y)
 {
     if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
     {
-        mapnik::image_data_rgba8 const & data = im.data();
-        return data(x,y);
+        return mapnik::get_pixel<mapnik::image_data_rgba8, uint32_t>(im.data(), x, y);
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
     boost::python::throw_error_already_set();

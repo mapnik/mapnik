@@ -150,6 +150,9 @@ MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c
 template <typename T1, typename T2>
 MAPNIK_DECL void set_pixel(T1 & data, std::size_t x, std::size_t y, T2 const& val);
 
+template <typename T1, typename T2>
+MAPNIK_DECL T2 get_pixel(T1 const& data, std::size_t x, std::size_t y);
+
 inline bool is_png(std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".png"));
