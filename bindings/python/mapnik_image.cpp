@@ -144,7 +144,7 @@ unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
 
 void set_pixel(mapnik::image_32 & im, unsigned x, unsigned y, mapnik::color const& c)
 {
-    im.setPixel(x, y, c.rgba());
+    mapnik::set_pixel(im.data(), x, y, c);
 }
 
 std::shared_ptr<image_32> open_from_file(std::string const& filename)

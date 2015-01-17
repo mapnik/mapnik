@@ -26,6 +26,7 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/image_util.hpp>
 
 namespace mapnik {
 
@@ -38,13 +39,13 @@ void draw_rect(image_32 &pixmap, box2d<double> const& box)
     unsigned color1 = 0xff0000ff;
     for (int x=x0; x<x1; x++)
     {
-        pixmap.setPixel(x, y0, color1);
-        pixmap.setPixel(x, y1, color1);
+        mapnik::set_pixel(pixmap.data(), x, y0, color1);
+        mapnik::set_pixel(pixmap.data(), x, y1, color1);
     }
     for (int y=y0; y<y1; y++)
     {
-        pixmap.setPixel(x0, y, color1);
-        pixmap.setPixel(x1, y, color1);
+        mapnik::set_pixel(pixmap.data(), x0, y, color1);
+        mapnik::set_pixel(pixmap.data(), x1, y, color1);
     }
 }
 
@@ -79,11 +80,11 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
                 if (cmd == SEG_CLOSE) continue;
                 prj_trans.backward(x,y,z);
                 common_.t_.forward(&x,&y);
-                pixmap_.setPixel(x,y,0xff0000ff);
-                pixmap_.setPixel(x-1,y-1,0xff0000ff);
-                pixmap_.setPixel(x+1,y+1,0xff0000ff);
-                pixmap_.setPixel(x-1,y+1,0xff0000ff);
-                pixmap_.setPixel(x+1,y-1,0xff0000ff);
+                mapnik::set_pixel(pixmap_.data(),x,y,0xff0000ff);
+                mapnik::set_pixel(pixmap_.data(),x-1,y-1,0xff0000ff);
+                mapnik::set_pixel(pixmap_.data(),x+1,y+1,0xff0000ff);
+                mapnik::set_pixel(pixmap_.data(),x-1,y+1,0xff0000ff);
+                mapnik::set_pixel(pixmap_.data(),x+1,y-1,0xff0000ff);
             }
         }
     }

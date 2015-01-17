@@ -38,6 +38,7 @@ struct image_data_null
     bool get_premultiplied() const { return false; }
     void set_premultiplied(bool) const {}
     void set(pixel_type const&) { throw std::runtime_error("Can not set values for null image_data"); }
+    pixel_type& operator() (std::size_t, std::size_t) { throw std::runtime_error("Can not set or get values for null image_data"); }
 };
 
 using image_data_base = util::variant<image_data_null, 

@@ -139,13 +139,16 @@ template <typename T>
 MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
 
 template <typename T>
-MAPNIK_DECL bool check_bounds (T const& data, int x, int y)
+MAPNIK_DECL bool check_bounds (T const& data, std::size_t x, std::size_t y)
 {
-    return (x >= 0 && x < static_cast<int>(data.width()) && y >= 0 && y < static_cast<int>(data.height()));
+    return (x < static_cast<int>(data.width()) && y < static_cast<int>(data.height()));
 }
 
 template <typename T>
 MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity );
+
+template <typename T1, typename T2>
+MAPNIK_DECL void set_pixel(T1 & data, std::size_t x, std::size_t y, T2 const& val);
 
 inline bool is_png(std::string const& filename)
 {

@@ -166,7 +166,7 @@ MAPNIK_DECL void composite(image_data_rgba8 & dst, image_data_rgba8 const& src, 
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
     agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32, const_rendering_buffer, agg::pixel32_type> pixf_mask(src_buffer);
-    // DEBUGGING ONLY REMOVE
+#ifdef MAPNIK_DEBUG
     if (!src.get_premultiplied()) 
     {
         throw std::runtime_error("SOURCE MUST BE PREMULTIPLIED FOR COMPOSITING!");
@@ -175,6 +175,7 @@ MAPNIK_DECL void composite(image_data_rgba8 & dst, image_data_rgba8 const& src, 
     {
         throw std::runtime_error("DESTINATION MUST BE PREMULTIPLIED FOR COMPOSITING!");
     }    
+#endif
     renderer_type ren(pixf);
     ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
 }

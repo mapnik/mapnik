@@ -1014,4 +1014,96 @@ MAPNIK_DECL void composite_pixel<image_data_rgba8>(image_data_rgba8 & data, unsi
     visitor(data);
 }
 
+namespace detail {
+
+template <typename T1>
+struct visitor_set_pixel
+{
+    visitor_set_pixel(std::size_t x, std::size_t y, T1 const& val)
+        : val_(val), x_(x), y_(y) {}
+
+    template <typename T2>
+    void operator() (T2 & data)
+    {
+        using pixel_type = typename T2::pixel_type;
+        pixel_type val = static_cast<pixel_type>(val_);
+        if (check_bounds(data, x_, y_))
+        {
+            data(x_, y_) = val;
+        }
+    }
+
+  private:
+    T1 const& val_;
+    std::size_t x_;
+    std::size_t y_;
+};
+
+template<>
+struct visitor_set_pixel<color>
+{
+    visitor_set_pixel(std::size_t x, std::size_t y, color const& val)
+        : val_(val), x_(x), y_(y) {}
+
+    template <typename T2>
+    void operator() (T2 & data)
+    {
+        using pixel_type = typename T2::pixel_type;
+        pixel_type val = static_cast<pixel_type>(val_.rgba());
+        if (check_bounds(data, x_, y_))
+        {
+            data(x_, y_) = val;
+        }
+    }
+
+  private:
+    color const& val_;
+    std::size_t x_;
+    std::size_t y_;
+};
+
+} // end detail ns
+
+// For all the generic data types.
+template <typename T1, typename T2>
+MAPNIK_DECL void set_pixel (T1 & data, std::size_t x, std::size_t y, T2 const& val)
+{
+    util::apply_visitor(detail::visitor_set_pixel<T2>(x, y, val), data);
+}
+
+template void set_pixel(image_data_any &, std::size_t, std::size_t, color const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, uint32_t const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, int32_t const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, uint16_t const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, int16_t const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, uint8_t const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, int8_t const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, float const&);
+template void set_pixel(image_data_any &, std::size_t, std::size_t, double const&);
+
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL void set_pixel<image_data_rgba8, color> (image_data_rgba8 & data, std::size_t x, std::size_t y, color const& val)
+{
+    detail::visitor_set_pixel<color> visitor(x, y, val);
+    visitor(data);
+}
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL void set_pixel<image_data_rgba8, uint32_t> (image_data_rgba8 & data, std::size_t x, std::size_t y, uint32_t const& val)
+{
+    detail::visitor_set_pixel<uint32_t> visitor(x, y, val);
+    visitor(data);
+}
+
+// Temporary remove these later!
+template <>
+MAPNIK_DECL void set_pixel<image_data_rgba8, int32_t> (image_data_rgba8 & data, std::size_t x, std::size_t y, int32_t const& val)
+{
+    detail::visitor_set_pixel<int32_t> visitor(x, y, val);
+    visitor(data);
+}
+
 } // end ns

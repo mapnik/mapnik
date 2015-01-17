@@ -89,22 +89,7 @@ public:
         return image_view_rgba8(x,y,w,h,data_);
     }
 
-private:
-
-    inline bool checkBounds(int x, int y) const
-    {
-        return (x >= 0 && x < static_cast<int>(data_.width()) && y >= 0 && y < static_cast<int>(data_.height()));
-    }
-
 public:
-    inline void setPixel(int x,int y,unsigned int rgba)
-    {
-        if (checkBounds(x,y))
-        {
-            data_(x,y)=rgba;
-        }
-    }
-
     inline unsigned width() const
     {
         return data_.width();

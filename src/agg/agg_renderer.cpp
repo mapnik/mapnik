@@ -507,13 +507,13 @@ void agg_renderer<T0,T1>::draw_geo_extent(box2d<double> const& extent, mapnik::c
     unsigned rgba = color.rgba();
     for (double x=x0; x<x1; x++)
     {
-        pixmap_.setPixel(x, y0, rgba);
-        pixmap_.setPixel(x, y1, rgba);
+        mapnik::set_pixel(pixmap_.data(), x, y0, rgba);
+        mapnik::set_pixel(pixmap_.data(), x, y1, rgba);
     }
     for (double y=y0; y<y1; y++)
     {
-        pixmap_.setPixel(x0, y, rgba);
-        pixmap_.setPixel(x1, y, rgba);
+        mapnik::set_pixel(pixmap_.data(), x0, y, rgba);
+        mapnik::set_pixel(pixmap_.data(), x1, y, rgba);
     }
 }
 
