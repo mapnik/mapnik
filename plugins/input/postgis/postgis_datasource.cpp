@@ -67,6 +67,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       schema_(""),
       geometry_table_(*params.get<std::string>("geometry_table", "")),
       geometry_field_(*params.get<std::string>("geometry_field", "")),
+      geometry_sql_(*params.get<std::string>("geometry_sql", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
@@ -776,7 +777,30 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           s << "ST_Simplify(";
         }
 
-        s << "\"" << geometryColumn_ << "\"";
+        std::string geometrySQL = geometry_sql_;
+        if ( geometrySQL.empty() ) {
+          geometrySQL = "\"" + geometryColumn_ + "\"";
+        } else {
+          if (boost::algorithm::icontains(geometry_sql_, pixel_width_token_))
+          {
+              std::ostringstream ss;
+              ss << px_gw;
+              boost::algorithm::replace_all(geometrySQL, pixel_width_token_, ss.str());
+          }
+          if (boost::algorithm::icontains(geometry_sql_, pixel_height_token_))
+          {
+              std::ostringstream ss;
+              ss << px_gh;
+              boost::algorithm::replace_all(geometrySQL, pixel_height_token_, ss.str());
+          }
+          if (boost::algorithm::icontains(geometry_sql_, bbox_token_))
+          {
+              boost::algorithm::replace_all(geometrySQL, bbox_token_, sql_bbox(box));
+          }
+          MAPNIK_LOG_WARN(postgis) << "postgis_datasource: expr: " << geometrySQL;
+        }
+
+        s << geometrySQL;
 
         if (simplify_geometries_) {
           // 1/20 of pixel seems to be a good compromise to avoid
