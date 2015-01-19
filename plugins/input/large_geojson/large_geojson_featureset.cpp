@@ -43,7 +43,7 @@
 
 large_geojson_featureset::large_geojson_featureset(std::string const& filename,
                                                    array_type && index_array)
-    : file_(filename, std::ios::binary),
+: file_(filename.c_str(), std::ios::binary),
     index_array_(std::move(index_array)),
     index_itr_(index_array_.begin()),
     index_end_(index_array_.end()),
@@ -60,29 +60,19 @@ mapnik::feature_ptr large_geojson_featureset::next()
     {
 #if BOOST_VERSION >= 105600
         large_geojson_datasource::item_type const& item = *index_itr_++;
-        std::size_t file_offset = item.second;
-        //std::cerr << file_offset << " -- " << item.first << std::endl;
+        std::size_t file_offset = item.second.first;
+        std::size_t size = item.second.second;
+        //std::cerr << file_offset << " (" << size << ") " << item.first << std::endl;
 #else
         std::size_t index = *index_itr_++;
 #endif
-
-        using base_iterator_type = std::istreambuf_iterator<char>;
-
-        using chr_iterator_type =
-            boost::spirit::multi_pass
-            < base_iterator_type
-              , boost::spirit::iterator_policies::default_policy
-              <  boost::spirit::iterator_policies::first_owner//ref_counted
-                 , boost::spirit::iterator_policies::no_check
-                 //, boost::spirit::iterator_policies::functor_input
-                 //, boost::spirit::iterator_policies::split_std_deque
-                 >
-              > ;
-
         file_.seekg(file_offset);
-        base_iterator_type in(file_);
-        chr_iterator_type start(in);
-        chr_iterator_type end;
+        std::string json;
+        json.resize(size,' ');
+        file_.read(&*json.begin(), size);
+        using chr_iterator_type = std::string::const_iterator;
+        chr_iterator_type start = json.begin();
+        chr_iterator_type end = json.end();
 
         static const mapnik::transcoder tr("utf8");
         static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);

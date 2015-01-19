@@ -124,7 +124,7 @@ large_geojson_datasource::large_geojson_datasource(parameters const& params)
     }
     if (!inline_string_.empty())
     {
-        parse_geojson(inline_string_);
+        //parse_geojson(inline_string_);
     }
     else
     {
@@ -175,6 +175,7 @@ const mapnik::transcoder tr("utf8");
 const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> fc_grammar(tr);
 }
 
+/*
 template <typename T>
 void large_geojson_datasource::parse_geojson(T const& buffer)
 {
@@ -233,6 +234,7 @@ void large_geojson_datasource::parse_geojson(T const& buffer)
 #endif
 
 }
+*/
 
 template <typename Iterator>
 void large_geojson_datasource::initialise_index(Iterator start, Iterator end)
@@ -263,7 +265,7 @@ void large_geojson_datasource::initialise_index(Iterator start, Iterator end)
     }
 }
 
-large_geojson_datasource::~large_geojson_datasource() { }
+large_geojson_datasource::~large_geojson_datasource() {}
 
 const char * large_geojson_datasource::name()
 {
@@ -321,7 +323,7 @@ mapnik::featureset_ptr large_geojson_datasource::features(mapnik::query const& q
             tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
             std::cerr << "Query size=" << index_array.size() << std::endl;
             std::cerr << "Sort index_array by offsets" << std::endl;
-            std::sort(index_array.begin(),index_array.end(), [](item_type const& item0, item_type const& item1) {return item0.second < item1.second;});
+            std::sort(index_array.begin(),index_array.end(), [](item_type const& item0, item_type const& item1) {return item0.second.first < item1.second.first;});
             std::cerr << "Done" << std::endl;
             return std::make_shared<large_geojson_featureset>(filename_, std::move(index_array));
         }
