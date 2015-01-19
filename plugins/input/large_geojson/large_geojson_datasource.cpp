@@ -263,6 +263,7 @@ void large_geojson_datasource::initialise_index(Iterator start, Iterator end)
             extent_.expand_to_include(box);
         }
     }
+    std::cerr << "Extent" << extent_ << std::endl;
 }
 
 large_geojson_datasource::~large_geojson_datasource() {}
