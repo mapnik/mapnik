@@ -43,7 +43,7 @@
 namespace mapnik { namespace json {
 
 using position = std::tuple<double,double>;
-using boxes = std::vector<std::tuple<box2d<double>, std::size_t>>;
+using boxes = std::vector<std::pair<box2d<double>, std::pair<std::size_t, std::size_t>>>;
 
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
@@ -51,7 +51,7 @@ using standard_wide::space_type;
 
 struct calculate_bounding_box_impl
 {
-    using result_type = void;// box2d<double>;
+    using result_type = void;
     template <typename T0, typename T1>
     result_type operator() (T0 & bbox, T1 const& pos) const
     {
@@ -74,20 +74,10 @@ struct calculate_bounding_box_impl
 struct push_box_impl
 {
     using result_type = void;
-    template <typename T>
-    result_type operator() (T & boxes, std::size_t offset, box2d<double> const& box) const
+    template <typename T0, typename T1, typename T2, typename T3>
+    void operator() (T0 & boxes, T1 const& begin, T2 const& box, T3 const& range) const
     {
-        boxes.emplace_back(box, offset);
-    }
-};
-
-struct offset_impl
-{
-    using result_type = std::size_t;
-    template <typename T0, typename T1>
-    std::size_t operator() (T0 const& begin, T1 const& itr) const
-    {
-        return std::distance(begin, itr);
+        boxes.emplace_back(box, std::make_pair(std::distance(begin, range.begin()), std::distance(range.begin(), range.end())));
     }
 };
 
@@ -96,17 +86,17 @@ struct extract_bounding_box_grammar :
         qi::grammar<Iterator, void(boxes&) ,space_type>
 {
     extract_bounding_box_grammar();
+    // rules
     qi::rule<Iterator, void(boxes&), space_type> start;
-    qi::rule<Iterator, qi::locals<Iterator,Iterator>, void(boxes&), space_type> features;
-    qi::rule<Iterator, void(boxes&, Iterator const&, Iterator const&), space_type> feature;
-    qi::rule<Iterator, void(boxes&,std::size_t), space_type> bounding_box;
+    qi::rule<Iterator, qi::locals<Iterator>, void(boxes&), space_type> features;
+    qi::rule<Iterator, qi::locals<int, box2d<double>>, void(boxes&, Iterator const&), space_type> feature;
     qi::rule<Iterator, qi::locals<box2d<double>>, box2d<double>(), space_type> coords;
     qi::rule<Iterator, boost::optional<position>(), space_type> pos;
     qi::rule<Iterator, void(box2d<double>&), space_type> ring;
     qi::rule<Iterator, void(box2d<double>&), space_type> rings;
     qi::rule<Iterator, void(box2d<double>&), space_type> rings_array;
 
-    boost::phoenix::function<offset_impl> offset;
+    // phoenix functions
     boost::phoenix::function<push_box_impl> push_box;
     boost::phoenix::function<calculate_bounding_box_impl> calculate_bounding_box;
     // error handler

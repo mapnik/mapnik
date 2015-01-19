@@ -28,7 +28,6 @@
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/repository/include/qi_seek.hpp>
 #include <boost/spirit/repository/include/qi_iter_pos.hpp>
 // stl
 #include <iostream>
@@ -52,16 +51,15 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::omit_type omit;
     qi::_r1_type _r1;
     qi::_r2_type _r2;
-    qi::_r3_type _r3;
     qi::_a_type _a;
     qi::_b_type _b;
-    qi::skip_type skip;
-    qi::lexeme_type lexeme;
-    boost::spirit::repository::qi::seek_type seek;
+    qi::eps_type eps;
+    qi::raw_type raw;
+    standard_wide::char_type char_;
     boost::spirit::repository::qi::iter_pos_type iter_pos;
     using qi::fail;
     using qi::on_error;
-    using boost::phoenix::push_back;
+
 
     start = features(_r1)
         ;
@@ -69,15 +67,18 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
                                       >> lit(':') >> lit("\"FeatureCollection\"")
                                       >> lit(',') >> lit("\"features\"")
                                       >> lit(':'))
-                                 >> lit('[') >> *(seek[lexeme[skip[iter_pos[_b = _1] >> lit('{') >> lit("\"type\"") >> lit(':') >> lit("\"Feature\"")]]]
-                                                  >> feature(_r1, _a, _b))
+                                 >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
         ;
-
-    feature = bounding_box(_r1, offset(_r2, _r3))
+    feature = raw[lit('{')[_a = 1] >> lit("\"type\"") >> lit(':') >> lit("\"Feature\"")
+                   >> *(eps(_a > 0) >> (lit('{')[_a += 1]
+                                        |
+                                        lit('}')[_a -=1]
+                                        |
+                                        coords[_b = _1]
+                                        |
+                                        char_))][push_box(_r1, _r2, _b, _1)]
         ;
-    bounding_box = seek["\"coordinates\""] >> lit(':') >> coords[push_box(_r1, _r2, _1)]
-        ;
-    coords = (rings_array(_a) | rings (_a) | ring(_a) | pos[calculate_bounding_box(_a,_1)])[_val = _a]
+    coords = lit("\"coordinates\"") >> lit(':') >> (rings_array(_a) | rings (_a) | ring(_a) | pos[calculate_bounding_box(_a,_1)])[_val = _a]
         ;
     pos = lit('[') > -(double_ > lit(',') > double_) > omit[*(lit(',') > double_)] > lit(']')
         ;
