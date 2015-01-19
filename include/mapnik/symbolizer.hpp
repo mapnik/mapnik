@@ -91,6 +91,7 @@ enum class property_types : std::uint8_t
     target_justify_alignment,
     target_vertical_alignment,
     target_upright,
+    target_direction,
     target_font_feature_settings
 };
 
@@ -184,6 +185,7 @@ ENUM_FROM_STRING( horizontal_alignment_enum )
 ENUM_FROM_STRING( justify_alignment_enum )
 ENUM_FROM_STRING( text_transform_enum )
 ENUM_FROM_STRING( text_upright_enum )
+ENUM_FROM_STRING( direction_enum )
 ENUM_FROM_STRING( gamma_method_enum )
 
 // enum

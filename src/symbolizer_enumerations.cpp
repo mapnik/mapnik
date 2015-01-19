@@ -177,6 +177,19 @@ static const char * text_upright_strings[] = {
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
 
+static const char * direction_strings[] = {
+    "left",
+    "right",
+    "left-only",
+    "right-only",
+    "auto",
+    "auto-down",
+    "up",
+    "down",
+    ""
+};
+IMPLEMENT_ENUM(direction_e, direction_strings)
+
 static const char * gamma_method_strings[] = {
     "power", //agg::gamma_power
     "linear", //agg::gamma_linear

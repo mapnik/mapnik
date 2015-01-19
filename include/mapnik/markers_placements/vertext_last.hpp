@@ -74,6 +74,10 @@ public:
         if (agg::is_line_to(command1))
         {
             angle = std::atan2(y0 - y1, x0 - x1);
+            if (!this->set_direction(angle))
+            {
+                return false;
+            }
         }
 
         box2d<double> box = this->perform_transform(angle, x, y);
