@@ -29,7 +29,6 @@
 #include <mapnik/image_data_any.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/image_view_any.hpp>
-#include <mapnik/util/variant.hpp>
 #include <mapnik/color.hpp>
 
 // boost
@@ -41,13 +40,11 @@
 
 // stl
 #include <string>
-#include <cmath>
 #include <exception>
 
 namespace mapnik {
 
 // fwd declares
-class Map;
 class rgba_palette;
 
 class ImageWriterException : public std::exception
