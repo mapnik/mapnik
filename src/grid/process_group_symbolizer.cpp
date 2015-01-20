@@ -115,7 +115,7 @@ struct thunk_renderer
         renderer_type ren(renb);
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
-        render_raster_marker(ren, ras_, thunk.src_, feature_, offset_tr, thunk.opacity_);
+        render_raster_marker(ren, ras_, util::get<buffer_type>(thunk.src_), feature_, offset_tr, thunk.opacity_);
         pixmap_.add_feature(feature_);
     }
 

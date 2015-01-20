@@ -28,6 +28,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_data_any.hpp>
 
 namespace mapnik
 {
@@ -103,7 +104,7 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
             unsigned gray=bitmap->buffer[q*bitmap->width+p];
             if (gray)
             {
-                mapnik::composite_pixel(pixmap.data(), comp_op, i, j, rgba, gray, opacity);
+                mapnik::composite_pixel(pixmap, comp_op, i, j, rgba, gray, opacity);
             }
         }
     }
@@ -292,17 +293,17 @@ void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
                 int gray = bitmap->buffer[y*bitmap->width+x];
                 if (gray)
                 {
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1-1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1,   y+y1-1, rgba, gray*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1+1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1,   y+y1-1, rgba, gray*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1+1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
 
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1-1, y+y1,   rgba, gray*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1,   y+y1,   rgba, gray, opacity);
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1+1, y+y1,   rgba, gray*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1,   rgba, gray*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1,   y+y1,   rgba, gray, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1+1, y+y1,   rgba, gray*halo_radius, opacity);
 
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1-1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1,   y+y1+1, rgba, gray*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1+1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1,   y+y1+1, rgba, gray*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x+x1+1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
                 }
             }
         }
@@ -318,7 +319,7 @@ void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
                 {
                     for (int n=-halo_radius; n <=halo_radius; ++n)
                         for (int m=-halo_radius; m <= halo_radius; ++m)
-                            mapnik::composite_pixel(pixmap_.data(), comp_op, x+x1+m, y+y1+n, rgba, gray, opacity);
+                            mapnik::composite_pixel(pixmap_, comp_op, x+x1+m, y+y1+n, rgba, gray, opacity);
                 }
             }
         }
@@ -358,7 +359,8 @@ grid_text_renderer<T>::grid_text_renderer(pixmap_type &pixmap,
     : text_renderer(HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor),
       pixmap_(pixmap) {}
 
-template class agg_text_renderer<image_32>;
+template class agg_text_renderer<image_data_any>;
+//template class agg_text_renderer<image_32>;
 template class grid_text_renderer<grid>;
 
 } // namespace mapnik

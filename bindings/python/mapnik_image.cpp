@@ -39,6 +39,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image.hpp>
+#include <mapnik/image_view_any.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -53,7 +54,6 @@
 
 using mapnik::image;
 using mapnik::image_data_any;
-using mapnik::image_32;
 using mapnik::image_reader;
 using mapnik::get_image_reader;
 using mapnik::type_from_filename;
@@ -62,22 +62,21 @@ using mapnik::save_to_file;
 using namespace boost::python;
 
 // output 'raw' pixels
-PyObject* tostring1( image_32 const& im)
+PyObject* tostring1( image_data_any const& im)
 {
-    int size = im.width() * im.height() * 4;
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
         ::PyString_FromStringAndSize
 #endif
-        ((const char*)im.raw_data(),size);
+        ((const char*)im.getBytes(),im.getSize());
 }
 
 // encode (png,jpeg)
-PyObject* tostring2(image_32 const & im, std::string const& format)
+PyObject* tostring2(image_data_any const & im, std::string const& format)
 {
-    std::string s = mapnik::save_to_string(im.data(), format);
+    std::string s = mapnik::save_to_string(im, format);
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -87,9 +86,9 @@ PyObject* tostring2(image_32 const & im, std::string const& format)
         (s.data(),s.size());
 }
 
-PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette const& pal)
+PyObject* tostring3(image_data_any const & im, std::string const& format, mapnik::rgba_palette const& pal)
 {
-    std::string s = mapnik::save_to_string(im.data(), format, pal);
+    std::string s = mapnik::save_to_string(im, format, pal);
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -100,53 +99,58 @@ PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba
 }
 
 
-void save_to_file1(mapnik::image_32 const& im, std::string const& filename)
+void save_to_file1(mapnik::image_data_any const& im, std::string const& filename)
 {
-    save_to_file(im.data(),filename);
+    save_to_file(im,filename);
 }
 
-void save_to_file2(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
+void save_to_file2(mapnik::image_data_any const& im, std::string const& filename, std::string const& type)
 {
-    save_to_file(im.data(),filename,type);
+    save_to_file(im,filename,type);
 }
 
-void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
+void save_to_file3(mapnik::image_data_any const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
 {
-    save_to_file(im.data(),filename,type,pal);
+    save_to_file(im,filename,type,pal);
 }
 
-bool painted(mapnik::image_32 const& im)
+mapnik::image_view_any get_view(mapnik::image_data_any const& data,unsigned x,unsigned y, unsigned w,unsigned h)
+{
+    return mapnik::create_view(data,x,y,w,h);
+}
+
+bool painted(mapnik::image_data_any const& im)
 {
     return im.painted();
 }
 
-bool is_solid(mapnik::image_32 const& im)
+bool is_solid(mapnik::image_data_any const& im)
 {
-    return mapnik::is_solid(im.data());
+    return mapnik::is_solid(im);
 }
 
-void background(mapnik::image_32 & im, mapnik::color const& c)
+void background(mapnik::image_data_any & im, mapnik::color const& c)
 {
-    mapnik::fill(im.data(), c);
+    mapnik::fill(im, c);
 }
 
-uint32_t get_pixel(mapnik::image_32 const& im, int x, int y)
+uint32_t get_pixel(mapnik::image_data_any const& im, int x, int y)
 {
     if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
     {
-        return mapnik::get_pixel<mapnik::image_data_rgba8, uint32_t>(im.data(), x, y);
+        return mapnik::get_pixel<mapnik::image_data_any, uint32_t>(im, x, y);
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
     boost::python::throw_error_already_set();
     return 0;
 }
 
-void set_pixel(mapnik::image_32 & im, unsigned x, unsigned y, mapnik::color const& c)
+void set_pixel(mapnik::image_data_any & im, unsigned x, unsigned y, mapnik::color const& c)
 {
-    mapnik::set_pixel(im.data(), x, y, c);
+    mapnik::set_pixel(im, x, y, c);
 }
 
-std::shared_ptr<image_32> open_from_file(std::string const& filename)
+std::shared_ptr<image_data_any> open_from_file(std::string const& filename)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
@@ -154,29 +158,24 @@ std::shared_ptr<image_32> open_from_file(std::string const& filename)
         std::unique_ptr<image_reader> reader(get_image_reader(filename,*type));
         if (reader.get())
         {
-
-            std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(reader->width(),reader->height());
-            reader->read(0,0,image_ptr->data());
-            return image_ptr;
+            return std::make_shared<image_data_any>(std::move(reader->read(0,0,reader->width(),reader->height())));
         }
         throw mapnik::image_reader_exception("Failed to load: " + filename);
     }
     throw mapnik::image_reader_exception("Unsupported image format:" + filename);
 }
 
-std::shared_ptr<image_32> fromstring(std::string const& str)
+std::shared_ptr<image_data_any> fromstring(std::string const& str)
 {
     std::unique_ptr<image_reader> reader(get_image_reader(str.c_str(),str.size()));
     if (reader.get())
     {
-        std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(reader->width(),reader->height());
-        reader->read(0,0,image_ptr->data());
-        return image_ptr;
+        return std::make_shared<image_data_any>(std::move(reader->read(0,0,reader->width(), reader->height())));
     }
     throw mapnik::image_reader_exception("Failed to load image from buffer" );
 }
 
-std::shared_ptr<image_32> frombuffer(PyObject * obj)
+std::shared_ptr<image_data_any> frombuffer(PyObject * obj)
 {
     void const* buffer=0;
     Py_ssize_t buffer_len;
@@ -185,71 +184,69 @@ std::shared_ptr<image_32> frombuffer(PyObject * obj)
         std::unique_ptr<image_reader> reader(get_image_reader(reinterpret_cast<char const*>(buffer),buffer_len));
         if (reader.get())
         {
-            std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(reader->width(),reader->height());
-            reader->read(0,0,image_ptr->data());
-            return image_ptr;
+            return std::make_shared<image_data_any>(reader->read(0,0,reader->width(),reader->height()));
         }
     }
     throw mapnik::image_reader_exception("Failed to load image from buffer" );
 }
 
-void set_grayscale_to_alpha(image_32 & im)
+void set_grayscale_to_alpha(image_data_any & im)
 {
-    mapnik::set_grayscale_to_alpha(im.data());
+    mapnik::set_grayscale_to_alpha(im);
 }
 
-void set_color_to_alpha(image_32 & im, mapnik::color const& c)
+void set_color_to_alpha(image_data_any & im, mapnik::color const& c)
 {
-    mapnik::set_color_to_alpha(im.data(), c);
+    mapnik::set_color_to_alpha(im, c);
 }
 
-void set_alpha(image_32 & im, float opacity)
+void set_alpha(image_data_any & im, float opacity)
 {
-    mapnik::set_alpha(im.data(), opacity);
+    mapnik::set_alpha(im, opacity);
 }
 
-bool premultiplied(image_32 &im)
+bool premultiplied(image_data_any &im)
 {
-    return im.data().get_premultiplied();
+    return im.get_premultiplied();
 }
 
-bool premultiply(image_32 & im)
+bool premultiply(image_data_any & im)
 {
-    return mapnik::premultiply_alpha(im.data());
+    return mapnik::premultiply_alpha(im);
 }
 
-bool demultiply(image_32 & im)
+bool demultiply(image_data_any & im)
 {
-    return mapnik::demultiply_alpha(im.data());
+    return mapnik::demultiply_alpha(im);
 }
 
-void clear(image_32 & im)
+void clear(image_data_any & im)
 {
-    mapnik::fill(im.data(), 0);
+    mapnik::fill(im, 0);
 }
 
-void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity, int dx, int dy)
+void composite(image_data_any & dst, image_data_any & src, mapnik::composite_mode_e mode, float opacity, int dx, int dy)
 {
-    bool demultiply_dst = mapnik::premultiply_alpha(dst.data());
-    bool demultiply_src = mapnik::premultiply_alpha(src.data());
-    mapnik::composite(dst.data(),src.data(),mode,opacity,dx,dy);
+    bool demultiply_dst = mapnik::premultiply_alpha(dst);
+    bool demultiply_src = mapnik::premultiply_alpha(src);
+    mapnik::composite(dst,src,mode,opacity,dx,dy);
     if (demultiply_dst) 
     {
-        mapnik::demultiply_alpha(dst.data());
+        mapnik::demultiply_alpha(dst);
     }
     if (demultiply_src)
     {
-        mapnik::demultiply_alpha(src.data());
+        mapnik::demultiply_alpha(src);
     }
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
+std::shared_ptr<image_data_any> from_cairo(PycairoSurface* py_surface)
 {
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
-    cairo_image_to_rgba8(image_ptr->data(), surface);
-    return image_ptr;
+    mapnik::image_data_rgba8 image = mapnik::image_data_rgba8(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
+    cairo_image_to_rgba8(image, surface);
+    return std::make_shared<image_data_any>(std::move(image));
 }
 #endif
 
@@ -319,10 +316,10 @@ void export_image()
         .def("save",&image::save_to_file)
         ;
 
-    class_<image_32,std::shared_ptr<image_32>, boost::noncopyable >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
-        .def("width",&image_32::width)
-        .def("height",&image_32::height)
-        .def("view",&image_32::get_view)
+    class_<image_data_any,std::shared_ptr<image_data_any>, boost::noncopyable >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
+        .def("width",&image_data_any::width)
+        .def("height",&image_data_any::height)
+        .def("view",&get_view)
         .def("painted",&painted)
         .def("is_solid",&is_solid)
         .def("background",&background, "Set the background color of the image.")

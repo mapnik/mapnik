@@ -25,6 +25,7 @@
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/image_data_any.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
@@ -55,6 +56,6 @@ template class feature_style_processor<svg_renderer<std::ostream_iterator<char> 
 template class feature_style_processor<grid_renderer<grid> >;
 #endif
 
-template class feature_style_processor<agg_renderer<image_32> >;
+template class feature_style_processor<agg_renderer<image_data_any> >;
 
 }

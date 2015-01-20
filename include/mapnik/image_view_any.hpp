@@ -53,6 +53,23 @@ struct get_view_height_visitor
     }
 };
 
+struct get_view_size_visitor
+{
+    template <typename T>
+    unsigned operator()(T const& data) const
+    {
+        return data.getSize();
+    }
+};
+
+struct get_view_row_size_visitor
+{
+    template <typename T>
+    unsigned operator()(T const& data) const
+    {
+        return data.getRowSize();
+    }
+};
 } // namespace detail
 
 struct image_view_any : image_view_base
@@ -71,6 +88,16 @@ struct image_view_any : image_view_base
     std::size_t height() const
     {
         return util::apply_visitor(detail::get_view_height_visitor(),*this);
+    }
+
+    unsigned getSize() const
+    {
+        return util::apply_visitor(detail::get_view_size_visitor(),*this);
+    }
+
+    unsigned getRowSize() const
+    {
+        return util::apply_visitor(detail::get_view_row_size_visitor(),*this);
     }
 };
 

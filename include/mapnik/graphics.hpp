@@ -56,12 +56,12 @@ public:
 
     void painted(bool painted)
     {
-        painted_ = painted;
+        data_.painted(painted);
     }
 
     bool painted() const
     {
-        return painted_;
+        return data_.painted();
     }
 
     inline const image_data_rgba8& data() const

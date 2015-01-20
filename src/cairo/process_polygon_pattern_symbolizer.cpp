@@ -37,6 +37,37 @@
 namespace mapnik
 {
 
+namespace detail
+{
+
+struct visitor_set_pattern
+{
+    visitor_set_pattern(cairo_context & context, unsigned offset_x, unsigned offset_y, float opacity)
+        : context_(context), offset_x_(offset_x), offset_y_(offset_y), opacity_(opacity) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("This data type is not supported by cairo rendering in mapnik.");
+    }
+  private:
+    cairo_context & context_;
+    unsigned offset_x_;
+    unsigned offset_y_;
+    float opacity_;
+};
+
+template <>
+void visitor_set_pattern::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    cairo_pattern pattern(data, opacity_);
+    pattern.set_extend(CAIRO_EXTEND_REPEAT);
+    pattern.set_origin(offset_x_, offset_y_);
+    context_.set_pattern(pattern);
+}
+
+} // end detail ns
+
 template <typename T>
 void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
@@ -83,15 +114,12 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     if ((*marker)->is_bitmap())
     {
-        cairo_pattern pattern(**((*marker)->get_bitmap_data()), opacity);
-        pattern.set_extend(CAIRO_EXTEND_REPEAT);
-        pattern.set_origin(offset_x, offset_y);
-        context_.set_pattern(pattern);
+        util::apply_visitor(detail::visitor_set_pattern(context_, offset_x, offset_y, opacity), **((*marker)->get_bitmap_data()));
     }
     else
     {
         mapnik::rasterizer ras;
-        image_ptr image = render_pattern(ras, **marker, image_tr, 1.0); //
+        std::shared_ptr<image_data_rgba8> image = render_pattern<image_data_rgba8>(ras, **marker, image_tr, 1.0); //
         cairo_pattern pattern(*image, opacity);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
         pattern.set_origin(offset_x, offset_y);

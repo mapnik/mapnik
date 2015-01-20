@@ -27,6 +27,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/image_data.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -70,7 +71,7 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
     color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
     ras_ptr->reset();
-    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(),current_buffer_->width() * 4);
+    agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(),current_buffer_->width() * 4);
     using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>;
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
@@ -98,7 +99,16 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     }
 }
 
-template void agg_renderer<image_32>::process(dot_symbolizer const&,
+template void agg_renderer<image_data_rgba8>::process(dot_symbolizer const&,
+                                              mapnik::feature_impl &,
+                                              proj_transform const&);
+template void agg_renderer<image_data_gray8>::process(dot_symbolizer const&,
+                                              mapnik::feature_impl &,
+                                              proj_transform const&);
+template void agg_renderer<image_data_gray16>::process(dot_symbolizer const&,
+                                              mapnik::feature_impl &,
+                                              proj_transform const&);
+template void agg_renderer<image_data_gray32f>::process(dot_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

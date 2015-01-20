@@ -165,7 +165,7 @@ public:
     {
         return common_.vars_;
     }
-
+    
     void render_marker(pixel_position const& pos,
                        marker const& marker,
                        agg::trans_affine const& mtx,

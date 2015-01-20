@@ -40,7 +40,6 @@ class marker;
 
 using marker_ptr = std::shared_ptr<marker>;
 
-
 class MAPNIK_DECL marker_cache :
         public singleton <marker_cache, CreateUsingNew>,
         private util::noncopyable

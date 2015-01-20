@@ -153,6 +153,7 @@ source = Split(
     color.cpp
     conversions.cpp
     image.cpp
+    image_convert.cpp
     image_compositing.cpp
     image_scaling.cpp
     box2d.cpp

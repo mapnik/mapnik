@@ -56,12 +56,14 @@ struct marker_info
     marker_ptr marker;
     agg::trans_affine transform;
 };
+
 using marker_info_ptr = std::shared_ptr<marker_info>;
 
 /** Stores positions of glphys.
  *
  * The actual glyphs and their format are stored in text_layout.
  */
+
 class glyph_positions
 {
 public:

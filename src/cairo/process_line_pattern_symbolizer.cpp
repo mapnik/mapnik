@@ -36,6 +36,32 @@
 namespace mapnik
 {
 
+namespace detail
+{
+
+struct visitor_create_pattern
+{
+    visitor_create_pattern(float opacity)
+        : opacity_(opacity) {}
+
+    template <typename T>
+    std::shared_ptr<cairo_pattern> operator() (T & data)
+    {
+        throw std::runtime_error("This data type is not supported by cairo rendering in mapnik.");
+    }
+
+  private:
+    float opacity_;
+};
+
+template <>
+std::shared_ptr<cairo_pattern> visitor_create_pattern::operator()<image_data_rgba8> (image_data_rgba8 & data)
+{
+    return std::make_shared<cairo_pattern>(data, opacity_);
+}
+
+} // end detail ns
+
 template <typename T>
 void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
@@ -61,12 +87,12 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
     std::shared_ptr<cairo_pattern> pattern;
-    image_ptr image = nullptr;
+    std::shared_ptr<image_data_rgba8> image = nullptr;
     // TODO - re-implement at renderer level like polygon_pattern symbolizer
     double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     if ((*marker)->is_bitmap())
     {
-        pattern = std::make_unique<cairo_pattern>(**((*marker)->get_bitmap_data()), opacity);
+        pattern = util::apply_visitor(detail::visitor_create_pattern(opacity), **((*marker)->get_bitmap_data()));
         context_.set_line_width(height);
     }
     else
@@ -75,7 +101,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        image = render_pattern(ras, **marker, image_tr, 1.0);
+        image = render_pattern<image_data_rgba8>(ras, **marker, image_tr, 1.0);
         pattern = std::make_unique<cairo_pattern>(*image, opacity);
         width = image->width();
         height = image->height();

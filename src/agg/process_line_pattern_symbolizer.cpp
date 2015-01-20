@@ -24,6 +24,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/image_data_any.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
@@ -72,19 +73,22 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     if (filename.empty()) return;
     boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
     if (!marker_ptr || !(*marker_ptr)) return;
-    boost::optional<image_ptr> pat;
+    boost::optional<std::shared_ptr<buffer_type> > pat;
     // TODO - re-implement at renderer level like polygon_pattern symbolizer
     value_double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     if ((*marker_ptr)->is_bitmap())
     {
-        pat = (*marker_ptr)->get_bitmap_data();
+        pat = boost::optional<std::shared_ptr<buffer_type>>(
+                    std::make_shared<buffer_type>(
+                            std::move(util::get<buffer_type>(**(*marker_ptr)->get_bitmap_data())
+                    )));
     }
     else
     {
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, 1.0);
+        pat = render_pattern<buffer_type>(*ras_ptr, **marker_ptr, image_tr, 1.0);
     }
 
     if (!pat) return;
@@ -94,7 +98,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
     value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
+    agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
     renderer_base ren_base(pixf);
@@ -144,7 +148,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     }
 }
 
-template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,
+template void agg_renderer<image_data_rgba8>::process(line_pattern_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

@@ -43,6 +43,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_data_any.hpp>
 // agg
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -111,7 +112,7 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1>
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::setup(Map const &m)
 {
-    mapnik::set_premultiplied_alpha(pixmap_.data(), true);
+    mapnik::set_premultiplied_alpha(pixmap_, true);
     boost::optional<color> const& bg = m.background();
     if (bg)
     {
@@ -119,11 +120,11 @@ void agg_renderer<T0,T1>::setup(Map const &m)
         {
             mapnik::color bg_color = *bg;
             bg_color.premultiply();
-            mapnik::fill(pixmap_.data(), bg_color);
+            mapnik::fill(pixmap_, bg_color);
         }
         else
         {
-            mapnik::fill(pixmap_.data(),*bg);
+            mapnik::fill(pixmap_,*bg);
         }
     }
 
@@ -146,7 +147,7 @@ void agg_renderer<T0,T1>::setup(Map const &m)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        composite(pixmap_.data(),*bg_image, m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h);
+                        composite(pixmap_,util::get<buffer_type>(*bg_image), m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h);
                     }
                 }
             }
@@ -168,7 +169,7 @@ void agg_renderer<T0,T1>::start_map_processing(Map const& map)
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::end_map_processing(Map const& )
 {
-    mapnik::demultiply_alpha(pixmap_.data());
+    mapnik::demultiply_alpha(pixmap_);
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
@@ -237,7 +238,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             }
             else
             {
-                mapnik::fill(internal_buffer_->data(), 0); // fill with transparent colour
+                mapnik::fill(*internal_buffer_, 0); // fill with transparent colour
             }
         }
         else
@@ -248,13 +249,13 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             }
             else
             {
-                mapnik::fill(internal_buffer_->data(), 0); // fill with transparent colour
+                mapnik::fill(*internal_buffer_, 0); // fill with transparent colour
             }
             common_.t_.set_offset(0);
             ras_ptr->clip_box(0,0,common_.width_,common_.height_);
         }
         current_buffer_ = internal_buffer_.get();
-        set_premultiplied_alpha(current_buffer_->data(),true);
+        set_premultiplied_alpha(*current_buffer_,true);
     }
     else
     {
@@ -273,7 +274,7 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
         if (st.image_filters().size() > 0)
         {
             blend_from = true;
-            mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
+            mapnik::filter::filter_visitor<buffer_type> visitor(*current_buffer_);
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
                 util::apply_visitor(visitor, filter_tag);
@@ -281,21 +282,21 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
         }
         if (st.comp_op())
         {
-            composite(pixmap_.data(), current_buffer_->data(),
+            composite(pixmap_, *current_buffer_,
                       *st.comp_op(), st.get_opacity(),
                       -common_.t_.offset(),
                       -common_.t_.offset());
         }
         else if (blend_from || st.get_opacity() < 1.0)
         {
-            composite(pixmap_.data(), current_buffer_->data(),
+            composite(pixmap_, *current_buffer_,
                       src_over, st.get_opacity(),
                       -common_.t_.offset(),
                       -common_.t_.offset());
         }
     }
     // apply any 'direct' image filters
-    mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
+    mapnik::filter::filter_visitor<buffer_type> visitor(pixmap_);
     for (mapnik::filter::filter_type const& filter_tag : st.direct_image_filters())
     {
         util::apply_visitor(visitor, filter_tag);
@@ -326,7 +327,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
         gamma_ = 1.0;
     }
     agg::scanline_u8 sl;
-    agg::rendering_buffer buf(current_buffer_->raw_data(),
+    agg::rendering_buffer buf(current_buffer_->getBytes(),
                               current_buffer_->width(),
                               current_buffer_->height(),
                               current_buffer_->width() * 4);
@@ -372,7 +373,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
         {
             double cx = 0.5 * width;
             double cy = 0.5 * height;
-            composite(current_buffer_->data(), **marker.get_bitmap_data(),
+            composite(*current_buffer_, util::get<buffer_type>(**marker.get_bitmap_data()),
                       comp_op, opacity,
                       std::floor(pos.x - cx + .5),
                       std::floor(pos.y - cy + .5));
@@ -410,7 +411,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
             agg::image_filter_bilinear filter_kernel;
             agg::image_filter_lut filter(filter_kernel, false);
 
-            image_data_rgba8 const& src = **marker.get_bitmap_data();
+            buffer_type const& src = util::get<buffer_type>(**marker.get_bitmap_data());
             agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                              src.width(),
                                              src.height(),
@@ -451,7 +452,7 @@ template <typename T0, typename T1>
 void agg_renderer<T0,T1>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    agg::rendering_buffer buf(current_buffer_->raw_data(),
+    agg::rendering_buffer buf(current_buffer_->getBytes(),
                               current_buffer_->width(),
                               current_buffer_->height(),
                               current_buffer_->width() * 4);
@@ -507,18 +508,33 @@ void agg_renderer<T0,T1>::draw_geo_extent(box2d<double> const& extent, mapnik::c
     unsigned rgba = color.rgba();
     for (double x=x0; x<x1; x++)
     {
-        mapnik::set_pixel(pixmap_.data(), x, y0, rgba);
-        mapnik::set_pixel(pixmap_.data(), x, y1, rgba);
+        mapnik::set_pixel(pixmap_, x, y0, rgba);
+        mapnik::set_pixel(pixmap_, x, y1, rgba);
     }
     for (double y=y0; y<y1; y++)
     {
-        mapnik::set_pixel(pixmap_.data(), x0, y, rgba);
-        mapnik::set_pixel(pixmap_.data(), x1, y, rgba);
+        mapnik::set_pixel(pixmap_, x0, y, rgba);
+        mapnik::set_pixel(pixmap_, x1, y, rgba);
     }
 }
 
-template class agg_renderer<image_32>;
-template void agg_renderer<image_32>::debug_draw_box<agg::rendering_buffer>(
+template class agg_renderer<image_data_rgba8>;
+template void agg_renderer<image_data_rgba8>::debug_draw_box<agg::rendering_buffer>(
+                agg::rendering_buffer& buf,
+                box2d<double> const& box,
+                double x, double y, double angle);
+template class agg_renderer<image_data_gray8>;
+template void agg_renderer<image_data_gray8>::debug_draw_box<agg::rendering_buffer>(
+                agg::rendering_buffer& buf,
+                box2d<double> const& box,
+                double x, double y, double angle);
+template class agg_renderer<image_data_gray16>;
+template void agg_renderer<image_data_gray16>::debug_draw_box<agg::rendering_buffer>(
+                agg::rendering_buffer& buf,
+                box2d<double> const& box,
+                double x, double y, double angle);
+template class agg_renderer<image_data_gray32f>;
+template void agg_renderer<image_data_gray32f>::debug_draw_box<agg::rendering_buffer>(
                 agg::rendering_buffer& buf,
                 box2d<double> const& box,
                 double x, double y, double angle);

@@ -24,13 +24,15 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/image_data_any.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/image_util.hpp>
 
 namespace mapnik {
 
-void draw_rect(image_32 &pixmap, box2d<double> const& box)
+template <typename T>
+void draw_rect(T &pixmap, box2d<double> const& box)
 {
     int x0 = static_cast<int>(box.minx());
     int x1 = static_cast<int>(box.maxx());
@@ -39,13 +41,13 @@ void draw_rect(image_32 &pixmap, box2d<double> const& box)
     unsigned color1 = 0xff0000ff;
     for (int x=x0; x<x1; x++)
     {
-        mapnik::set_pixel(pixmap.data(), x, y0, color1);
-        mapnik::set_pixel(pixmap.data(), x, y1, color1);
+        mapnik::set_pixel(pixmap, x, y0, color1);
+        mapnik::set_pixel(pixmap, x, y1, color1);
     }
     for (int y=y0; y<y1; y++)
     {
-        mapnik::set_pixel(pixmap.data(), x0, y, color1);
-        mapnik::set_pixel(pixmap.data(), x1, y, color1);
+        mapnik::set_pixel(pixmap, x0, y, color1);
+        mapnik::set_pixel(pixmap, x1, y, color1);
     }
 }
 
@@ -80,17 +82,26 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
                 if (cmd == SEG_CLOSE) continue;
                 prj_trans.backward(x,y,z);
                 common_.t_.forward(&x,&y);
-                mapnik::set_pixel(pixmap_.data(),x,y,0xff0000ff);
-                mapnik::set_pixel(pixmap_.data(),x-1,y-1,0xff0000ff);
-                mapnik::set_pixel(pixmap_.data(),x+1,y+1,0xff0000ff);
-                mapnik::set_pixel(pixmap_.data(),x-1,y+1,0xff0000ff);
-                mapnik::set_pixel(pixmap_.data(),x+1,y-1,0xff0000ff);
+                mapnik::set_pixel(pixmap_,x,y,0xff0000ff);
+                mapnik::set_pixel(pixmap_,x-1,y-1,0xff0000ff);
+                mapnik::set_pixel(pixmap_,x+1,y+1,0xff0000ff);
+                mapnik::set_pixel(pixmap_,x-1,y+1,0xff0000ff);
+                mapnik::set_pixel(pixmap_,x+1,y-1,0xff0000ff);
             }
         }
     }
 }
 
-template void agg_renderer<image_32>::process(debug_symbolizer const&,
+template void agg_renderer<image_data_rgba8>::process(debug_symbolizer const&,
+                                              mapnik::feature_impl &,
+                                              proj_transform const&);
+template void agg_renderer<image_data_gray8>::process(debug_symbolizer const&,
+                                              mapnik::feature_impl &,
+                                              proj_transform const&);
+template void agg_renderer<image_data_gray16>::process(debug_symbolizer const&,
+                                              mapnik::feature_impl &,
+                                              proj_transform const&);
+template void agg_renderer<image_data_gray32f>::process(debug_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 }

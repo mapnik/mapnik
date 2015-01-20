@@ -122,11 +122,12 @@ public:
     using pixel_type = T;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 
-    image_data(int width, int height, bool initialize = true, bool premultiplied = false)
+    image_data(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false)
         : dimensions_(width, height),
           buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          premultiplied_alpha_(premultiplied)
+          premultiplied_alpha_(premultiplied),
+          painted_(painted)
     {
         if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
@@ -135,14 +136,16 @@ public:
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          premultiplied_alpha_(rhs.premultiplied_alpha_)
+          premultiplied_alpha_(rhs.premultiplied_alpha_),
+          painted_(rhs.painted_)
     {}
 
     image_data(image_data<pixel_type> && rhs) noexcept
         : dimensions_(std::move(rhs.dimensions_)),
           buffer_(std::move(rhs.buffer_)),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          premultiplied_alpha_(std::move(rhs.premultiplied_alpha_))
+          premultiplied_alpha_(rhs.premultiplied_alpha_),
+          painted_(rhs.painted_)
     {
         rhs.dimensions_ = { 0, 0 };
         rhs.pData_ = nullptr;
@@ -254,17 +257,38 @@ public:
         premultiplied_alpha_ = set;
     }
 
+    inline void painted(bool painted)
+    {
+        painted_ = painted;
+    }
+
+    inline bool painted() const
+    {
+        return painted_;
+    }
+
 private:
     detail::image_dimensions<max_size> dimensions_;
     detail::buffer buffer_;
     pixel_type *pData_;
     bool premultiplied_alpha_;
+    bool painted_;
 };
 
 using image_data_rgba8 = image_data<std::uint32_t>;
 using image_data_gray8 = image_data<std::uint8_t> ;
 using image_data_gray16 = image_data<std::int16_t>;
 using image_data_gray32f = image_data<float>;
-}
+
+enum image_dtype
+{
+    image_dtype_rgba8 = 0,
+    image_dtype_gray8,
+    image_dtype_gray16,
+    image_dtype_gray32f,
+    image_dtype_null
+};
+
+} // end ns
 
 #endif // MAPNIK_IMAGE_DATA_HPP

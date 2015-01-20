@@ -102,6 +102,7 @@ void export_logger();
 #include <mapnik/graphics.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_data_any.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
@@ -190,18 +191,18 @@ bool python_thread::thread_support = true;
 boost::thread_specific_ptr<PyThreadState> python_thread::state;
 
 void render(mapnik::Map const& map,
-            mapnik::image_32& image,
+            mapnik::image_data_any& image,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
             unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
+    mapnik::agg_renderer<mapnik::image_data_any> ren(map,image,scale_factor,offset_x, offset_y);
     ren.apply();
 }
 
 void render_with_vars(mapnik::Map const& map,
-            mapnik::image_32& image,
+            mapnik::image_data_any& image,
             boost::python::dict const& d,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
@@ -211,25 +212,25 @@ void render_with_vars(mapnik::Map const& map,
     mapnik::request req(map.width(),map.height(),map.get_current_extent());
     req.set_buffer_size(map.buffer_size());
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,image,scale_factor,offset_x,offset_y);
+    mapnik::agg_renderer<mapnik::image_data_any> ren(map,req,vars,image,scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
 void render_with_detector(
     mapnik::Map const& map,
-    mapnik::image_32 &image,
+    mapnik::image_data_any &image,
     std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector,scale_factor,offset_x,offset_y);
+    mapnik::agg_renderer<mapnik::image_data_any> ren(map,image,detector,scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
 void render_layer2(mapnik::Map const& map,
-                   mapnik::image_32& image,
+                   mapnik::image_data_any& image,
                    unsigned layer_idx,
                    double scale_factor,
                    unsigned offset_x,
@@ -246,7 +247,7 @@ void render_layer2(mapnik::Map const& map,
 
     python_unblock_auto_block b;
     mapnik::layer const& layer = layers[layer_idx];
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x,offset_y);
+    mapnik::agg_renderer<mapnik::image_data_any> ren(map,image,scale_factor,offset_x,offset_y);
     std::set<std::string> names;
     ren.apply(layer,names);
 }
@@ -351,9 +352,9 @@ void render_tile_to_file(mapnik::Map const& map,
                          std::string const& file,
                          std::string const& format)
 {
-    mapnik::image_32 image(width,height);
+    mapnik::image_data_any image(width,height);
     render(map,image,1.0,offset_x, offset_y);
-    mapnik::save_to_file(image.data(),file,format);
+    mapnik::save_to_file(image,file,format);
 }
 
 void render_to_file1(mapnik::Map const& map,
@@ -386,9 +387,9 @@ void render_to_file1(mapnik::Map const& map,
     }
     else
     {
-        mapnik::image_32 image(map.width(),map.height());
+        mapnik::image_data_any image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image.data(),filename,format);
+        mapnik::save_to_file(image,filename,format);
     }
 }
 
@@ -405,9 +406,9 @@ void render_to_file2(mapnik::Map const& map,std::string const& filename)
     }
     else
     {
-        mapnik::image_32 image(map.width(),map.height());
+        mapnik::image_data_any image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image.data(),filename);
+        mapnik::save_to_file(image,filename);
     }
 }
 
@@ -443,9 +444,9 @@ void render_to_file3(mapnik::Map const& map,
     }
     else
     {
-        mapnik::image_32 image(map.width(),map.height());
+        mapnik::image_data_any image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
-        mapnik::save_to_file(image.data(),filename,format);
+        mapnik::save_to_file(image,filename,format);
     }
 }
 
@@ -725,7 +726,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render", &render, render_overloads(
             "\n"
-            "Render Map to an AGG image_32 using offsets\n"
+            "Render Map to an AGG image_data_any using offsets\n"
             "\n"
             "Usage:\n"
             ">>> from mapnik import Map, Image, render, load_map\n"
@@ -742,7 +743,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render_with_detector", &render_with_detector, render_with_detector_overloads(
             "\n"
-            "Render Map to an AGG image_32 using a pre-constructed detector.\n"
+            "Render Map to an AGG image_data_any using a pre-constructed detector.\n"
             "\n"
             "Usage:\n"
             ">>> from mapnik import Map, Image, LabelCollisionDetector, render_with_detector, load_map\n"

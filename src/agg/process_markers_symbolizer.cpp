@@ -191,7 +191,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+    buf_type render_buffer(current_buffer_->getBytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     box2d<double> clip_box = clipping_extent(common_);
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
@@ -203,7 +203,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
-template void agg_renderer<image_32>::process(markers_symbolizer const&,
+template void agg_renderer<image_data_rgba8>::process(markers_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 }

@@ -28,6 +28,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/image_data.hpp>
+#include <mapnik/image_data_any.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
@@ -279,7 +280,6 @@ inline cairo_ptr create_context(cairo_surface_ptr const& surface)
 class cairo_context : private util::noncopyable
 {
 public:
-
     cairo_context(cairo_ptr const& cairo);
 
     inline ErrorStatus get_status() const
@@ -308,6 +308,8 @@ public:
     void paint();
     void set_pattern(cairo_pattern const& pattern);
     void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
+    void add_image(double x, double y, image_data_any & data, double opacity);
+    void add_image(agg::trans_affine const& tr, image_data_any & data, double opacity);
     void add_image(double x, double y, image_data_rgba8 & data, double opacity = 1.0);
     void add_image(agg::trans_affine const& tr, image_data_rgba8 & data, double opacity = 1.0);
     void set_font_face(cairo_face_manager & manager, face_ptr face);
