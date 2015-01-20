@@ -24,9 +24,9 @@
 #define MAPNIK_JSON_EXTRACT_BOUNDING_BOX_GRAMMAR_HPP
 
 // mapnik
+#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/box2d.hpp>
-#include <iostream>
 
 // boost
 #pragma GCC diagnostic push
@@ -95,7 +95,8 @@ struct extract_bounding_box_grammar :
     qi::rule<Iterator, void(box2d<double>&), space_type> ring;
     qi::rule<Iterator, void(box2d<double>&), space_type> rings;
     qi::rule<Iterator, void(box2d<double>&), space_type> rings_array;
-
+    // generic JSON support
+    json::generic_json<Iterator> json;
     // phoenix functions
     boost::phoenix::function<push_box_impl> push_box;
     boost::phoenix::function<calculate_bounding_box_impl> calculate_bounding_box;

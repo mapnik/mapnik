@@ -48,6 +48,7 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::_2_type _2;
     qi::_3_type _3;
     qi::_4_type _4;
+    qi::no_skip_type no_skip;
     qi::omit_type omit;
     qi::_r1_type _r1;
     qi::_r2_type _r2;
@@ -60,11 +61,11 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     using qi::fail;
     using qi::on_error;
 
-
     start = features(_r1)
         ;
     features = iter_pos[_a = _1] >> -(lit('{') >> -lit("\"type\"")
                                       >> lit(':') >> lit("\"FeatureCollection\"")
+                                      >> *(lit(',') >> (json.key_value - lit("\"features\"")))
                                       >> lit(',') >> lit("\"features\"")
                                       >> lit(':'))
                                  >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
@@ -87,6 +88,38 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     rings = lit('[') >> ring(_r1)  % lit(',') > lit(']')
         ;
     rings_array = lit('[') >> rings(_r1) % lit(',') > lit(']')
+        ;
+
+    // generic json types
+    json.value = json.object | json.array | json.string_ | json.number
+        ;
+    json.pairs = json.key_value % lit(',')
+        ;
+    json.key_value = (json.string_ >> lit(':') >> json.value)
+        ;
+    json.object = lit('{') >> *json.pairs >> lit('}')
+        ;
+    json.array = lit('[')
+        >> json.value >> *(lit(',') >> json.value)
+        >> lit(']')
+        ;
+    json.number = json.strict_double
+        | json.int__
+        | lit("true")
+        | lit("false")
+        | lit("null")
+        ;
+    json.unesc_char.add
+        ("\\\"", '\"') // quotation mark
+        ("\\\\", '\\') // reverse solidus
+        ("\\/", '/')   // solidus
+        ("\\b", '\b')  // backspace
+        ("\\f", '\f')  // formfeed
+        ("\\n", '\n')  // newline
+        ("\\r", '\r')  // carrige return
+        ("\\t", '\t')  // tab
+        ;
+    json.string_ %= lit('"') >> no_skip[*(json.unesc_char | "\\u" >> json.hex4 | (char_ - lit('"')))] >> lit('"')
         ;
 
     coords.name("Coordinates");
