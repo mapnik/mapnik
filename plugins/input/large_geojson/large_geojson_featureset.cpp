@@ -67,10 +67,10 @@ mapnik::feature_ptr large_geojson_featureset::next()
         std::size_t index = *index_itr_++;
 #endif
         file_.seekg(file_offset);
-        std::string json;
-        json.resize(size,' ');
-        file_.read(&*json.begin(), size);
-        using chr_iterator_type = std::string::const_iterator;
+        std::vector<char> json;
+        json.resize(size);
+        file_.read(json.data(), size);
+        using chr_iterator_type = std::vector<char>::const_iterator;
         chr_iterator_type start = json.begin();
         chr_iterator_type end = json.end();
 
