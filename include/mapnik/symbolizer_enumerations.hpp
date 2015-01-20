@@ -179,6 +179,7 @@ DEFINE_ENUM(justify_alignment_e, justify_alignment_enum);
 enum text_upright_enum : std::uint8_t
 {
     UPRIGHT_AUTO,
+    UPRIGHT_AUTO_DOWN,
     UPRIGHT_LEFT,
     UPRIGHT_RIGHT,
     UPRIGHT_LEFT_ONLY,
