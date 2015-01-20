@@ -29,18 +29,22 @@
 #include <vector>
 #include <deque>
 #include <fstream>
+#include <cstdio>
 
 class large_geojson_featureset : public mapnik::Featureset
 {
 public:
-    typedef std::deque<large_geojson_datasource::item_type> array_type;
+    using array_type = std::deque<large_geojson_datasource::item_type>;
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+
     large_geojson_featureset(std::string const& filename,
                              array_type && index_array);
     virtual ~large_geojson_featureset();
     mapnik::feature_ptr next();
 
 private:
-    std::ifstream file_;
+    file_ptr file_;
+
     const array_type index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;

@@ -128,113 +128,17 @@ large_geojson_datasource::large_geojson_datasource(parameters const& params)
     }
     else
     {
-        std::ifstream file(filename_.c_str(), std::ios::binary);
-        if (!file)
-        {
-            throw mapnik::datasource_exception("Large GeoJSON Plugin: could not open: '" + filename_ + "'");
-        }
-        /*
-        using base_iterator_type = std::istreambuf_iterator<char>;
-        using chr_iterator_type =
-        boost::spirit::multi_pass
-            <base_iterator_type
-             , boost::spirit::iterator_policies::default_policy
-             <  boost::spirit::iterator_policies::ref_counted
-                , boost::spirit::iterator_policies::no_check
-                //, boost::spirit::iterator_policies::functor_input
-                //, boost::spirit::iterator_policies::split_std_deque
-                >
-             > ;
-        base_iterator_type in(file);
-        chr_iterator_type start(in);
-        chr_iterator_type end;
-        */
-
-        std::string json((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        std::string::const_iterator start = json.begin();
-        std::string::const_iterator end = json.end();
-        initialise_index(start, end);
-
-        /*
         mapnik::util::file file(filename_);
         if (!file.open())
         {
             throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
-        std::string file_buffer;
-        file_buffer.resize(file.size());
-        std::fread(&file_buffer[0], file.size(), 1, file.get());
-        parse_geojson(file_buffer);
-        */
+        std::vector<char> json;
+        json.resize(file.size());
+        std::fread(json.data(), file.size(), 1, file.get());
+        initialise_index(json.begin(), json.end());
     }
 }
-
-namespace {
-using base_iterator_type = std::string::const_iterator;
-const mapnik::transcoder tr("utf8");
-const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> fc_grammar(tr);
-}
-
-/*
-template <typename T>
-void large_geojson_datasource::parse_geojson(T const& buffer)
-{
-    boost::spirit::standard_wide::space_type space;
-    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    std::size_t start_id = 1;
-    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)
-                                                  (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id)),
-                                                  space, features_);
-    if (!result)
-    {
-        if (!inline_string_.empty()) throw mapnik::datasource_exception("large_geojson_datasource: Failed parse GeoJSON file from in-memory string");
-        else throw mapnik::datasource_exception("large_geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
-    }
-
-#if BOOST_VERSION >= 105600
-    using values_container = std::vector< std::pair<box_type, std::size_t> >;
-    values_container values;
-    values.reserve(features_.size());
-#else
-    tree_ = std::make_unique<spatial_index_type>(16, 4);
-#endif
-
-    std::size_t geometry_index = 0;
-    for (mapnik::feature_ptr const& f : features_)
-    {
-        mapnik::box2d<double> box = f->envelope();
-        if (box.valid())
-        {
-            if (geometry_index == 0)
-            {
-                extent_ = box;
-                for ( auto const& kv : *f)
-                {
-                    desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
-                                                                      mapnik::util::apply_visitor(attr_value_converter(),
-                                                                                                  std::get<1>(kv))));
-                }
-            }
-            else
-            {
-                extent_.expand_to_include(box);
-            }
-        }
-#if BOOST_VERSION >= 105600
-        values.emplace_back(box, geometry_index);
-#else
-        tree_->insert(box ,geometry_index);
-#endif
-        ++geometry_index;
-    }
-
-#if BOOST_VERSION >= 105600
-    // packing algorithm
-    tree_ = std::make_unique<spatial_index_type>(values);
-#endif
-
-}
-*/
 
 template <typename Iterator>
 void large_geojson_datasource::initialise_index(Iterator start, Iterator end)
@@ -263,7 +167,7 @@ void large_geojson_datasource::initialise_index(Iterator start, Iterator end)
             extent_.expand_to_include(box);
         }
     }
-    std::cerr << "Extent" << extent_ << std::endl;
+    std::cerr << "Extent: " << extent_ << std::endl;
 }
 
 large_geojson_datasource::~large_geojson_datasource() {}

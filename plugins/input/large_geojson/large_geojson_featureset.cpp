@@ -25,6 +25,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/json/geometry_grammar_impl.hpp>
 #include <mapnik/json/feature_grammar_impl.hpp>
+#include <mapnik/utils.hpp>
 // boost
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/spirit/home/support/iterators/detail/functor_input_policy.hpp>
@@ -43,7 +44,12 @@
 
 large_geojson_featureset::large_geojson_featureset(std::string const& filename,
                                                    array_type && index_array)
-: file_(filename.c_str(), std::ios::binary),
+:
+#ifdef _WINDOWS
+    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
+#else
+    file_(std::fopen(filename.c_str(),"rb"), std::fclose),
+#endif
     index_array_(std::move(index_array)),
     index_itr_(index_array_.begin()),
     index_end_(index_array_.end()),
@@ -66,10 +72,10 @@ mapnik::feature_ptr large_geojson_featureset::next()
 #else
         std::size_t index = *index_itr_++;
 #endif
-        file_.seekg(file_offset);
+        std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> json;
         json.resize(size);
-        file_.read(json.data(), size);
+        std::fread(json.data(), size, 1, file_.get());
         using chr_iterator_type = std::vector<char>::const_iterator;
         chr_iterator_type start = json.begin();
         chr_iterator_type end = json.end();
