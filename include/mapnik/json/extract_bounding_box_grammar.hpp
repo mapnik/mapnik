@@ -61,7 +61,7 @@ struct calculate_bounding_box_impl
             double y = std::get<1>(*pos);
             if (!bbox.valid())
             {
-                bbox.init(x, y, x, y); // TODO: add init(x,y) convinience method
+                bbox.init(x, y, x, y); //TODO: add init(x,y) convinience method
             }
             else
             {
@@ -83,7 +83,7 @@ struct push_box_impl
 
 template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct extract_bounding_box_grammar :
-        qi::grammar<Iterator, void(boxes&) ,space_type>
+        qi::grammar<Iterator, void(boxes&), space_type>
 {
     extract_bounding_box_grammar();
     // rules
