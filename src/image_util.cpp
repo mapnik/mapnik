@@ -29,16 +29,11 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_data_any.hpp>
 #include <mapnik/image_view_any.hpp>
-#include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
-#include <mapnik/map.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/util/conversions.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/util/variant.hpp>
-
-// boost
-#include <boost/tokenizer.hpp>
 
 // agg
 #include "agg_rendering_buffer.h"
@@ -47,7 +42,6 @@
 
 // stl
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
