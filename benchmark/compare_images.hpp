@@ -17,19 +17,15 @@ namespace benchmark {
         {
             throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
         }
-        std::shared_ptr<image_32> image_ptr1 = std::make_shared<image_32>(reader1->width(),reader1->height());
-        reader1->read(0,0,image_ptr1->data());
 
         std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
         if (!reader2.get())
         {
             throw mapnik::image_reader_exception("Failed to load: " + src_fn);
         }
-        std::shared_ptr<image_32> image_ptr2 = std::make_shared<image_32>(reader2->width(),reader2->height());
-        reader2->read(0,0,image_ptr2->data());
 
-        image_data_rgba8 const& dest = image_ptr1->data();
-        image_data_rgba8 const& src = image_ptr2->data();
+        image_data_rgba8 const& dest = util::get<image_data_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
+        image_data_rgba8 const& src = util::get<image_data_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
 
         unsigned int width = src.width();
         unsigned int height = src.height();

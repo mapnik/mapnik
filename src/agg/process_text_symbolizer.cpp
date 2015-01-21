@@ -76,12 +76,8 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
     }
 }
 
-template void agg_renderer<image_data_any>::process(text_symbolizer const&,
+template void agg_renderer<image_data_rgba8>::process(text_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
-
-//template void agg_renderer<image_32>::process(text_symbolizer const&,
-//                                              mapnik::feature_impl &,
-//                                              proj_transform const&);
 
 }

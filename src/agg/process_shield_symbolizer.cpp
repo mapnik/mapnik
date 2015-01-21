@@ -73,7 +73,7 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
 }
 
 
-template void agg_renderer<image_32>::process(shield_symbolizer const&,
+template void agg_renderer<image_data_rgba8>::process(shield_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

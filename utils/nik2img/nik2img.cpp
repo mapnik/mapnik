@@ -111,7 +111,7 @@ int main (int argc,char** argv)
         mapnik::Map map(600,400);
         mapnik::load_map(map,xml_file,true);
         map.zoom_all();
-        mapnik::image_32 im(map.width(),map.height());
+        mapnik::image_data_rgba8 im(map.width(),map.height());
         mapnik::request req(map.width(),map.height(),map.get_current_extent());
         req.set_buffer_size(map.buffer_size());
         mapnik::attributes vars;
@@ -138,9 +138,9 @@ int main (int argc,char** argv)
                 }
             }            
         }
-        mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,im,scale_factor,0,0);
+        mapnik::agg_renderer<mapnik::image_data_rgba8> ren(map,req,vars,im,scale_factor,0,0);
         ren.apply();
-        mapnik::save_to_file(im.data(),img_file);
+        mapnik::save_to_file(im,img_file);
         if (auto_open)
         {
             std::ostringstream s;

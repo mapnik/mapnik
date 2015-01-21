@@ -523,19 +523,4 @@ template void agg_renderer<image_data_rgba8>::debug_draw_box<agg::rendering_buff
                 agg::rendering_buffer& buf,
                 box2d<double> const& box,
                 double x, double y, double angle);
-template class agg_renderer<image_data_gray8>;
-template void agg_renderer<image_data_gray8>::debug_draw_box<agg::rendering_buffer>(
-                agg::rendering_buffer& buf,
-                box2d<double> const& box,
-                double x, double y, double angle);
-template class agg_renderer<image_data_gray16>;
-template void agg_renderer<image_data_gray16>::debug_draw_box<agg::rendering_buffer>(
-                agg::rendering_buffer& buf,
-                box2d<double> const& box,
-                double x, double y, double angle);
-template class agg_renderer<image_data_gray32f>;
-template void agg_renderer<image_data_gray32f>::debug_draw_box<agg::rendering_buffer>(
-                agg::rendering_buffer& buf,
-                box2d<double> const& box,
-                double x, double y, double angle);
-}
+} // end ns

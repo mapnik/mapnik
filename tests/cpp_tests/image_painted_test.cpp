@@ -60,8 +60,8 @@ int main(int argc, char** argv)
 
         m.zoom_all();
 
-        image_32 image(m.width(), m.height());
-        agg_renderer<image_32> ren(m, image);
+        image_data_rgba8 image(m.width(), m.height());
+        agg_renderer<image_data_rgba8> ren(m, image);
         ren.apply();
 
         BOOST_TEST_EQ(image.painted(), true);

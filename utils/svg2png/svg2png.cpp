@@ -158,8 +158,8 @@ int main (int argc,char** argv)
                 std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
             }
             // 10 pixel buffer to avoid edge clipping of 100% svg's
-            mapnik::image_32 im(w+0,h+0);
-            agg::rendering_buffer buf(im.raw_data(), im.width(), im.height(), im.width() * 4);
+            mapnik::image_data_rgba8 im(w+0,h+0);
+            agg::rendering_buffer buf(im.getBytes(), im.width(), im.height(), im.width() * 4);
             pixfmt pixf(buf);
             renderer_base renb(pixf);
 
@@ -181,8 +181,8 @@ int main (int argc,char** argv)
             svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 
             boost::algorithm::ireplace_last(svg_name,".svg",".png");
-            demultiply_alpha(im.data());
-            mapnik::save_to_file<mapnik::image_data_rgba8>(im.data(),svg_name,"png");
+            demultiply_alpha(im);
+            mapnik::save_to_file<mapnik::image_data_rgba8>(im,svg_name,"png");
             if (auto_open)
             {
                 std::ostringstream s;

@@ -128,15 +128,16 @@ struct vector_marker_render_thunk  : util::noncopyable
         snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
 };
 
+template <typename BufferType>
 struct raster_marker_render_thunk  : util::noncopyable
 {
-    image_data_any & src_;
+    BufferType & src_;
     agg::trans_affine tr_;
     double opacity_;
     composite_mode_e comp_op_;
     bool snap_to_pixels_;
 
-    raster_marker_render_thunk(image_data_any & src,
+    raster_marker_render_thunk(BufferType & src,
                                agg::trans_affine const& marker_trans,
                                double opacity,
                                composite_mode_e comp_op,
@@ -149,6 +150,11 @@ struct raster_marker_render_thunk  : util::noncopyable
         comp_op_(std::move(rhs.comp_op_)),
         snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
 };
+
+template struct raster_marker_render_thunk<image_data_rgba8>;
+template struct raster_marker_render_thunk<image_data_gray8>;
+template struct raster_marker_render_thunk<image_data_gray16>;
+template struct raster_marker_render_thunk<image_data_gray32f>;
 
 using helper_ptr = std::unique_ptr<text_symbolizer_helper>;
 
@@ -179,7 +185,10 @@ struct text_render_thunk : util::noncopyable
 // via a static visitor later.
 
 using render_thunk = util::variant<vector_marker_render_thunk,
-                                   raster_marker_render_thunk,
+                                   raster_marker_render_thunk<image_data_rgba8>,
+                                   raster_marker_render_thunk<image_data_gray8>,
+                                   raster_marker_render_thunk<image_data_gray16>,
+                                   raster_marker_render_thunk<image_data_gray32f>,
                                    text_render_thunk>;
 using render_thunk_ptr = std::unique_ptr<render_thunk>;
 using render_thunk_list = std::list<render_thunk_ptr>;

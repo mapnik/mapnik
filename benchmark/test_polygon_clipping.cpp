@@ -37,12 +37,12 @@ void render(mapnik::geometry_type & geom,
     using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
-    mapnik::image_32 im(256,256);
-    im.set_background(mapnik::color("white"));
+    mapnik::image_data_rgba8 im(256,256);
+    mapnik::fill(im, mapnik::color("white"));
     mapnik::box2d<double> padded_extent = extent;
     padded_extent.pad(10);
     mapnik::view_transform tr(im.width(),im.height(),padded_extent,0,0);
-    agg::rendering_buffer buf(im.raw_data(),im.width(),im.height(), im.width() * 4);
+    agg::rendering_buffer buf(im.getBytes(),im.width(),im.height(), im.width() * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
     ren_base renb(pixf);
     renderer ren(renb);
@@ -54,7 +54,7 @@ void render(mapnik::geometry_type & geom,
     ras.add_path(path);
     agg::scanline_u8 sl;
     agg::render_scanlines(ras, sl, ren);
-    mapnik::save_to_file(im.data(),name);
+    mapnik::save_to_file(im,name);
     geom.rewind(0);
 }
 

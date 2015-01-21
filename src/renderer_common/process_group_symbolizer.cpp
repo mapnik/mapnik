@@ -39,7 +39,38 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
       comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
 {}
 
-raster_marker_render_thunk::raster_marker_render_thunk(image_data_any & src,
+template <>
+raster_marker_render_thunk<image_data_rgba8>::raster_marker_render_thunk(image_data_rgba8 & src,
+                                                       agg::trans_affine const& marker_trans,
+                                                       double opacity,
+                                                       composite_mode_e comp_op,
+                                                       bool snap_to_pixels)
+    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
+      snap_to_pixels_(snap_to_pixels)
+{}
+
+template <>
+raster_marker_render_thunk<image_data_gray8>::raster_marker_render_thunk(image_data_gray8 & src,
+                                                       agg::trans_affine const& marker_trans,
+                                                       double opacity,
+                                                       composite_mode_e comp_op,
+                                                       bool snap_to_pixels)
+    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
+      snap_to_pixels_(snap_to_pixels)
+{}
+
+template <>
+raster_marker_render_thunk<image_data_gray16>::raster_marker_render_thunk(image_data_gray16 & src,
+                                                       agg::trans_affine const& marker_trans,
+                                                       double opacity,
+                                                       composite_mode_e comp_op,
+                                                       bool snap_to_pixels)
+    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
+      snap_to_pixels_(snap_to_pixels)
+{}
+
+template <>
+raster_marker_render_thunk<image_data_gray32f>::raster_marker_render_thunk(image_data_gray32f & src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -94,6 +125,40 @@ private:
     render_thunk_list & thunks_;
 };
 
+struct visitor_push_thunk
+{
+    visitor_push_thunk(render_thunk_list & thunks,
+                       agg::trans_affine const& marker_tr, 
+                       double opacity, 
+                       composite_mode_e comp_op, 
+                       bool snap_to_pixels)
+        : thunks_(thunks),
+          marker_tr_(marker_tr),
+          opacity_(opacity),
+          comp_op_(comp_op),
+          snap_to_pixels_(snap_to_pixels) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        raster_marker_render_thunk<T> thunk(data, marker_tr_, opacity_, comp_op_, snap_to_pixels_);
+        thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
+    }
+
+  private:
+    render_thunk_list & thunks_;
+    agg::trans_affine const& marker_tr_; 
+    double opacity_;
+    composite_mode_e comp_op_;
+    bool snap_to_pixels_;
+};
+
+template <>
+void visitor_push_thunk::operator()<image_data_null> (image_data_null &)
+{
+    throw std::runtime_error("Push thunk does not support null images");
+}
+
 template <typename Detector, typename RendererContext>
 struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 {
@@ -115,8 +180,7 @@ struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
-        raster_marker_render_thunk thunk(this->src_, marker_tr, opacity, comp_op_, snap_to_pixels_);
-        thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
+        util::apply_visitor(visitor_push_thunk(thunks_, marker_tr, opacity, comp_op_, snap_to_pixels_), this->src_);
     }
 
 private:
@@ -125,7 +189,7 @@ private:
     render_thunk_list & thunks_;
 };
 
-}
+} // end detail ns
 
 render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
                                                render_thunk_list & thunks,

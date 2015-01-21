@@ -86,7 +86,7 @@ private:
 template <typename RendererContext, typename Detector>
 struct raster_markers_dispatch_cairo : public raster_markers_dispatch<Detector>
 {
-    raster_markers_dispatch_cairo(mapnik::image_data_any & src,
+    raster_markers_dispatch_cairo(image_data_any & src,
                                   agg::trans_affine const& marker_trans,
                                   markers_symbolizer const& sym,
                                   Detector & detector,

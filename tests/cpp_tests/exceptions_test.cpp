@@ -83,8 +83,8 @@ int main(int argc, char** argv)
             mapnik::Map m = map;
             m.add_layer(l);
             m.zoom_all();
-            mapnik::image_32 im(m.width(),m.height());
-            mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+            mapnik::image_data_rgba8 im(m.width(),m.height());
+            mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m,im);
             //std::clog << mapnik::save_map_to_string(m) << "\n";
             BOOST_TEST(true);
             // should throw here with "CSV Plugin: no attribute 'foo'. Valid attributes are: x,y."

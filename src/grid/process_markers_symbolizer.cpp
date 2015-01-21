@@ -146,7 +146,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
     using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
-    raster_markers_rasterizer_dispatch(image_data_rgba8 & src,
+    raster_markers_rasterizer_dispatch(image_data_any & src,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
@@ -165,7 +165,9 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
-        render_raster_marker(RendererType(renb_), ras_, this->src_, this->feature_, marker_tr, opacity);
+        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts 
+        // the destination pixel type required.   
+        render_raster_marker(RendererType(renb_), ras_, util::get<image_data_rgba8>(this->src_), this->feature_, marker_tr, opacity);
         if (!placed_)
         {
             pixmap_.add_feature(this->feature_);

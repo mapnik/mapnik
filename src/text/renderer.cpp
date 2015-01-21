@@ -359,8 +359,7 @@ grid_text_renderer<T>::grid_text_renderer(pixmap_type &pixmap,
     : text_renderer(HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor),
       pixmap_(pixmap) {}
 
-template class agg_text_renderer<image_data_any>;
-//template class agg_text_renderer<image_32>;
+template class agg_text_renderer<image_data_rgba8>;
 template class grid_text_renderer<grid>;
 
 } // namespace mapnik

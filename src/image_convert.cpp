@@ -21,41 +21,42 @@
  *****************************************************************************/
 
 // mapnik
-
-#include <mapnik/feature_style_processor_impl.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
+#include <mapnik/image_convert.hpp>
+#include <mapnik/image_data.hpp>
 #include <mapnik/image_data_any.hpp>
-
-#if defined(GRID_RENDERER)
-#include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid.hpp>
-#endif
-
-#if defined(HAVE_CAIRO)
-#include <cairo.h>
-#include <mapnik/cairo/cairo_renderer.hpp>
-#endif
-
-#if defined(SVG_RENDERER)
-#include <mapnik/svg/output/svg_renderer.hpp>
-#endif
-
+ 
 namespace mapnik
 {
 
-#if defined(HAVE_CAIRO)
-template class feature_style_processor<cairo_renderer<cairo_ptr> >;
-#endif
+namespace detail
+{
 
-#if defined(SVG_RENDERER)
-template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
-#endif
+template <typename T0>
+struct visitor_convert
+{
+    using dst_type = typename T0::pixel_type;
+    template <typename T1>
+    T0 operator() (T1 const& src)
+    {
+        T0 dst(src.width(), src.height());
+        for (unsigned y = 0; y < dst.height(); ++y)
+        {
+            for (unsigned x = 0; x < dst.width(); ++x)
+            {
+                dst(x,y) = static_cast<dst_type>(src(x,y));
+            }
+        }
+        return T0(std::move(dst));
+    }
+};
 
-#if defined(GRID_RENDERER)
-template class feature_style_processor<grid_renderer<grid> >;
-#endif
+} // end detail ns
 
-template class feature_style_processor<agg_renderer<image_data_rgba8> >;
-
+template <typename T1, typename T2>
+MAPNIK_DECL T2 convert_image(T1 const& data)
+{
+    detail::visitor_convert<T2> visit;
+    return visit(data);
 }
+
+} // end mapnik ns

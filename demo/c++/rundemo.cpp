@@ -306,8 +306,8 @@ int main ( int, char** )
 
         m.zoom_to_box(box2d<double>(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855));
 
-        image_32 buf(m.width(),m.height());
-        agg_renderer<image_32> ren(m,buf);
+        image_data_rgba8 buf(m.width(),m.height());
+        agg_renderer<image_data_rgba8> ren(m,buf);
         ren.apply();
         std::string msg("These maps have been rendered using AGG in the current directory:\n");
 #ifdef HAVE_JPEG

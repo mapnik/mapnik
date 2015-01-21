@@ -172,9 +172,6 @@ private:
 };
 
 extern template class MAPNIK_DECL agg_renderer<image_data_rgba8>;
-//extern template class MAPNIK_DECL agg_renderer<image_data_gray8>;
-//extern template class MAPNIK_DECL agg_renderer<image_data_gray16>;
-//extern template class MAPNIK_DECL agg_renderer<image_data_gray32f>;
 
 } // namespace mapnik
 

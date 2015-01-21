@@ -20,42 +20,17 @@
  *
  *****************************************************************************/
 
-// mapnik
+#ifndef MAPNIK_IMAGE_CONVERT_HPP
+#define MAPNIK_IMAGE_CONVERT_HPP
 
-#include <mapnik/feature_style_processor_impl.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
-#include <mapnik/image_data_any.hpp>
-
-#if defined(GRID_RENDERER)
-#include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid.hpp>
-#endif
-
-#if defined(HAVE_CAIRO)
-#include <cairo.h>
-#include <mapnik/cairo/cairo_renderer.hpp>
-#endif
-
-#if defined(SVG_RENDERER)
-#include <mapnik/svg/output/svg_renderer.hpp>
-#endif
+#include <mapnik/config.hpp>
 
 namespace mapnik
 {
 
-#if defined(HAVE_CAIRO)
-template class feature_style_processor<cairo_renderer<cairo_ptr> >;
-#endif
+template <typename T1, typename T2>
+MAPNIK_DECL T2 convert_image(T1 const& data);
 
-#if defined(SVG_RENDERER)
-template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
-#endif
+} // end mapnik ns
 
-#if defined(GRID_RENDERER)
-template class feature_style_processor<grid_renderer<grid> >;
-#endif
-
-template class feature_style_processor<agg_renderer<image_data_rgba8> >;
-
-}
+#endif // MAPNIK_IMAGE_CONVERT_HPP

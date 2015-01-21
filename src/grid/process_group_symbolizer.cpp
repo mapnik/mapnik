@@ -103,7 +103,7 @@ struct thunk_renderer
         pixmap_.add_feature(feature_);
     }
 
-    void operator()(raster_marker_render_thunk const &thunk) const
+    void operator()(raster_marker_render_thunk<image_data_rgba8> const &thunk) const
     {
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
@@ -115,8 +115,23 @@ struct thunk_renderer
         renderer_type ren(renb);
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
-        render_raster_marker(ren, ras_, util::get<buffer_type>(thunk.src_), feature_, offset_tr, thunk.opacity_);
+        render_raster_marker(ren, ras_, thunk.src_, feature_, offset_tr, thunk.opacity_);
         pixmap_.add_feature(feature_);
+    }
+    
+    void operator()(raster_marker_render_thunk<image_data_gray8> const &thunk) const
+    {
+        throw std::runtime_error("Rendering of this image_data_gray8 type is not supported currently by the image_data_rgba8 renderer");
+    }
+
+    void operator()(raster_marker_render_thunk<image_data_gray16> const &thunk) const
+    {
+        throw std::runtime_error("Rendering of this image_data_gray16 type is not supported currently by the image_data_rgba8 renderer");
+    }
+
+    void operator()(raster_marker_render_thunk<image_data_gray32f> const &thunk) const
+    {
+        throw std::runtime_error("Rendering of this image_data_gray32f type is not supported currently by the image_data_rgba8 renderer");
     }
 
     void operator()(text_render_thunk const &thunk) const

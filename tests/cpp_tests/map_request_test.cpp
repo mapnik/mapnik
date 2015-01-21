@@ -30,19 +30,19 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
     }
-    std::shared_ptr<image_32> image_ptr1 = std::make_shared<image_32>(reader1->width(),reader1->height());
-    reader1->read(0,0,image_ptr1->data());
+    std::shared_ptr<image_data_rgba8> image_ptr1 = std::make_shared<image_data_rgba8>(reader1->width(),reader1->height());
+    reader1->read(0,0,*image_ptr1);
 
     std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
     if (!reader2.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
     }
-    std::shared_ptr<image_32> image_ptr2 = std::make_shared<image_32>(reader2->width(),reader2->height());
-    reader2->read(0,0,image_ptr2->data());
+    std::shared_ptr<image_data_rgba8> image_ptr2 = std::make_shared<image_data_rgba8>(reader2->width(),reader2->height());
+    reader2->read(0,0,*image_ptr2);
 
-    image_data_rgba8 const& dest = image_ptr1->data();
-    image_data_rgba8 const& src = image_ptr2->data();
+    image_data_rgba8 const& dest = *image_ptr1;
+    image_data_rgba8 const& src = *image_ptr2;
 
     unsigned int width = src.width();
     unsigned int height = src.height();
@@ -78,21 +78,21 @@ int main(int argc, char** argv)
         mapnik::Map m(256,256);
         mapnik::load_map(m,"./tests/data/good_maps/marker-text-line.xml",false);
         m.zoom_all();
-        mapnik::image_32 im(m.width(),m.height());
+        mapnik::image_data_rgba8 im(m.width(),m.height());
         double scale_factor = 1.2;
 
         // render normally with apply() and just map and image
-        mapnik::agg_renderer<mapnik::image_32> renderer1(m,im,scale_factor);
+        mapnik::agg_renderer<mapnik::image_data_rgba8> renderer1(m,im,scale_factor);
         renderer1.apply();
         std::string actual1("/tmp/map-request-marker-text-line-actual1.png");
-        //mapnik::save_to_file(im.data(),expected);
-        mapnik::save_to_file(im.data(),actual1);
+        //mapnik::save_to_file(im,expected);
+        mapnik::save_to_file(im,actual1);
         // TODO - re-enable if we can control the freetype/cairo versions used
         // https://github.com/mapnik/mapnik/issues/1868
         //BOOST_TEST(compare_images(actual1,expected));
 
         // reset image
-        mapnik::fill(im.data(), 0);
+        mapnik::fill(im, 0);
 
         // set up a mapnik::request object
         mapnik::request req(m.width(),m.height(),m.get_current_extent());
@@ -100,19 +100,19 @@ int main(int argc, char** argv)
 
         // render using apply() and mapnik::request
         mapnik::attributes vars;
-        mapnik::agg_renderer<mapnik::image_32> renderer2(m,req,vars,im,scale_factor);
+        mapnik::agg_renderer<mapnik::image_data_rgba8> renderer2(m,req,vars,im,scale_factor);
         renderer2.apply();
         std::string actual2("/tmp/map-request-marker-text-line-actual2.png");
-        mapnik::save_to_file(im.data(),actual2);
+        mapnik::save_to_file(im,actual2);
         // TODO - re-enable if we can control the freetype/cairo versions used
         // https://github.com/mapnik/mapnik/issues/1868
         //BOOST_TEST(compare_images(actual2,expected));
 
         // reset image
-        mapnik::fill(im.data(), 0);
+        mapnik::fill(im, 0);
 
         // render with apply_to_layer api and mapnik::request params passed to apply_to_layer
-        mapnik::agg_renderer<mapnik::image_32> renderer3(m,req,vars,im,scale_factor);
+        mapnik::agg_renderer<mapnik::image_data_rgba8> renderer3(m,req,vars,im,scale_factor);
         renderer3.start_map_processing(m);
         mapnik::projection map_proj(m.srs(),true);
         double scale_denom = mapnik::scale_denominator(req.scale(),map_proj.is_geographic());
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
         }
         renderer3.end_map_processing(m);
         std::string actual3("/tmp/map-request-marker-text-line-actual3.png");
-        mapnik::save_to_file(im.data(),actual3);
+        mapnik::save_to_file(im,actual3);
         // TODO - re-enable if we can control the freetype/cairo versions used
         // https://github.com/mapnik/mapnik/issues/1868
         //BOOST_TEST(compare_images(actual3,expected));

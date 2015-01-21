@@ -46,16 +46,6 @@ int main(int argc, char** argv)
 
     try
     {
-        mapnik::image_32 im(-10,-10); // should throw rather than overflow
-        BOOST_TEST( im.width() < 10 ); // should not get here, but if we did this test should fail
-    }
-    catch (std::exception const& ex)
-    {
-        BOOST_TEST( true ); // should hit bad alloc here
-    }
-
-    try
-    {
         mapnik::image_data_rgba8 im(-10,-10); // should throw rather than overflow
         BOOST_TEST( im.width() < 10 ); // should not get here, but if we did this test should fail
     }
