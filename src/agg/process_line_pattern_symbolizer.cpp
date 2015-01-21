@@ -78,10 +78,16 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     value_double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     if ((*marker_ptr)->is_bitmap())
     {
-        pat = boost::optional<std::shared_ptr<buffer_type>>(
-                    std::make_shared<buffer_type>(
-                            std::move(util::get<buffer_type>(**(*marker_ptr)->get_bitmap_data())
-                    )));
+        // FIXME: copy is necessary atm to transform a
+        // shared_ptr<image_data_any> into shared_ptr<image_data_rgba8>
+        boost::optional<image_ptr> bitmap = (*marker_ptr)->get_bitmap_data();
+        if (bitmap) {
+            mapnik::image_data_any const& im = *(bitmap)->get();
+            if (im.is<buffer_type>()) {
+                // invoke copy ctor of image_data_rgba8
+                pat = std::make_shared<buffer_type>(util::get<buffer_type>(im));
+            }
+        }
     }
     else
     {
