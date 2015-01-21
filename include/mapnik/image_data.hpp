@@ -161,6 +161,8 @@ public:
     {
         std::swap(dimensions_, rhs.dimensions_);
         std::swap(buffer_, rhs.buffer_);
+        std::swap(premultiplied_alpha_, rhs.premultiplied_alpha_);
+        std::swap(painted_, rhs.painted_);
     }
 
     inline pixel_type& operator() (std::size_t i, std::size_t j)
