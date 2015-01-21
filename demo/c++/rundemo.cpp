@@ -24,7 +24,6 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/text/text_properties.hpp>

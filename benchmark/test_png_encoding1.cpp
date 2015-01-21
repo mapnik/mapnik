@@ -1,6 +1,5 @@
 #include "bench_framework.hpp"
 #include <mapnik/image_util.hpp>
-#include <mapnik/graphics.hpp>
 
 class test : public benchmark::test_case
 {

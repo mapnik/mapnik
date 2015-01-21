@@ -5,7 +5,6 @@
 #include <mapnik/vertex.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/view_transform.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <mapnik/geometry.hpp>

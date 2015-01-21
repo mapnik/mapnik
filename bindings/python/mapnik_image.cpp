@@ -35,14 +35,12 @@
 #pragma GCC diagnostic pop
 
 // mapnik
-#include <mapnik/graphics.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/palette.hpp>
-#include <mapnik/image.hpp>
-#include <mapnik/image_view_any.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/image_view_any.hpp>
 
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -52,7 +50,6 @@
 #include <cairo.h>
 #endif
 
-using mapnik::image;
 using mapnik::image_data_any;
 using mapnik::image_reader;
 using mapnik::get_image_reader;
@@ -250,21 +247,6 @@ std::shared_ptr<image_data_any> from_cairo(PycairoSurface* py_surface)
 }
 #endif
 
-// ============ image any
-std::shared_ptr<image> read_from_file_impl(std::string const& filename)
-{
-    std::shared_ptr<image> img = std::make_shared<image>();
-    std::unique_ptr<image_reader> reader(get_image_reader(filename));
-    if (reader)
-    {
-        unsigned w = reader->width();
-        unsigned h = reader->height();
-        img->set_data(reader->read(0, 0, w, h));
-    }
-    return img;
-}
-// =========================
-
 void export_image()
 {
     using namespace boost::python;
@@ -306,14 +288,6 @@ void export_image()
         .value("linear_dodge", mapnik::linear_dodge)
         .value("linear_burn", mapnik::linear_burn)
         .value("divide", mapnik::divide)
-        ;
-
-    class_<image, std::shared_ptr<image>, boost::noncopyable > ("ImageAny", "This class represents an any Image object", no_init)
-        .def("width",&image::width)
-        .def("height",&image::height)
-        .def("open", &read_from_file_impl)
-        .staticmethod("open")
-        .def("save",&image::save_to_file)
         ;
 
     class_<image_data_any,std::shared_ptr<image_data_any>, boost::noncopyable >("Image","This class represents a 32 bit RGBA image.",init<int,int>())

@@ -7,7 +7,6 @@
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
 #endif
-#include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>

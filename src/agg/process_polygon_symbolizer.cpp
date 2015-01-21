@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer.hpp>

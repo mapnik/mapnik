@@ -1,6 +1,5 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
-#include <mapnik/graphics.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>

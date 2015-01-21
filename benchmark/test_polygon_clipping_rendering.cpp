@@ -1,7 +1,6 @@
 #include "bench_framework.hpp"
 #include <mapnik/map.hpp>
 #include <mapnik/load_map.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/datasource_cache.hpp>
 

@@ -4,7 +4,6 @@
 #include <mapnik/version.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>

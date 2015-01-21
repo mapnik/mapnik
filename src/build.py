@@ -152,7 +152,6 @@ source = Split(
     miniz_png.cpp
     color.cpp
     conversions.cpp
-    image.cpp
     image_convert.cpp
     image_compositing.cpp
     image_scaling.cpp
@@ -172,7 +171,6 @@ source = Split(
     font_set.cpp
     function_call.cpp
     gradient.cpp
-    graphics.cpp
     parse_path.cpp
     image_reader.cpp
     cairo_io.cpp

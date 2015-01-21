@@ -99,7 +99,6 @@ void export_logger();
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_data_any.hpp>

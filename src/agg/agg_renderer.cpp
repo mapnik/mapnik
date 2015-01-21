@@ -24,7 +24,6 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_helpers.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>

@@ -4,7 +4,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/save_map.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_type_style.hpp>

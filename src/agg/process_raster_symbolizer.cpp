@@ -25,7 +25,6 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/agg_rasterizer.hpp>

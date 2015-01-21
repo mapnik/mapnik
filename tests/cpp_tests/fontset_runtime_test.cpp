@@ -13,7 +13,6 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/save_map.hpp>

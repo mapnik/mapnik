@@ -26,7 +26,6 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_keys.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/renderer_common.hpp>
