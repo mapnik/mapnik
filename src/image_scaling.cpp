@@ -168,13 +168,13 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
 template MAPNIK_DECL void scale_image_agg(image_rgba8 &, image_rgba8 const&, scaling_method_e,
                               double, double , double, double , double);
 
-template MAPNIK_DECL void scale_image_agg(image_data_gray8 &, image_data_gray8 const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_gray8 &, image_gray8 const&, scaling_method_e,
                               double, double , double, double , double);
 
-template MAPNIK_DECL void scale_image_agg(image_data_gray16 &, image_data_gray16 const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_gray16 &, image_gray16 const&, scaling_method_e,
                               double, double , double, double , double);
 
-template MAPNIK_DECL void scale_image_agg(image_data_gray32f &, image_data_gray32f const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_gray32f &, image_gray32f const&, scaling_method_e,
                               double, double , double, double , double);
 
 }

@@ -50,7 +50,7 @@ raster_marker_render_thunk<image_rgba8>::raster_marker_render_thunk(image_rgba8 
 {}
 
 template <>
-raster_marker_render_thunk<image_data_gray8>::raster_marker_render_thunk(image_data_gray8 & src,
+raster_marker_render_thunk<image_gray8>::raster_marker_render_thunk(image_gray8 & src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -60,7 +60,7 @@ raster_marker_render_thunk<image_data_gray8>::raster_marker_render_thunk(image_d
 {}
 
 template <>
-raster_marker_render_thunk<image_data_gray16>::raster_marker_render_thunk(image_data_gray16 & src,
+raster_marker_render_thunk<image_gray16>::raster_marker_render_thunk(image_gray16 & src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -70,7 +70,7 @@ raster_marker_render_thunk<image_data_gray16>::raster_marker_render_thunk(image_
 {}
 
 template <>
-raster_marker_render_thunk<image_data_gray32f>::raster_marker_render_thunk(image_data_gray32f & src,
+raster_marker_render_thunk<image_gray32f>::raster_marker_render_thunk(image_gray32f & src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,

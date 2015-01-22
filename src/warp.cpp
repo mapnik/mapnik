@@ -213,13 +213,13 @@ void reproject_and_scale_raster(raster & target, raster const& source,
 template MAPNIK_DECL void warp_image (image_rgba8&, image_rgba8 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
-template MAPNIK_DECL void warp_image (image_data_gray8&, image_data_gray8 const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_gray8&, image_gray8 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
-template MAPNIK_DECL void warp_image (image_data_gray16&, image_data_gray16 const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_gray16&, image_gray16 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
-template MAPNIK_DECL void warp_image (image_data_gray32f&, image_data_gray32f const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_gray32f&, image_gray32f const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
 

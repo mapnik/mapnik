@@ -81,7 +81,7 @@ std::shared_ptr<image_data_null> render_pattern<image_data_null>(rasterizer & ra
 }
 /*
 template <>
-std::shared_ptr<image_data_gray8> render_pattern<image_data_gray8>(rasterizer & ras,
+std::shared_ptr<image_gray8> render_pattern<image_gray8>(rasterizer & ras,
                                               marker const& marker,
                                               agg::trans_affine const& tr,
                                               double opacity)
@@ -97,7 +97,7 @@ std::shared_ptr<image_data_gray8> render_pattern<image_data_gray8>(rasterizer & 
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
-    std::shared_ptr<mapnik::image_data_gray8> image = std::make_shared<mapnik::image_data_gray8>(bbox.width(), bbox.height());
+    std::shared_ptr<mapnik::image_gray8> image = std::make_shared<mapnik::image_gray8>(bbox.width(), bbox.height());
     agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
@@ -115,7 +115,7 @@ std::shared_ptr<image_data_gray8> render_pattern<image_data_gray8>(rasterizer & 
 }
 
 template <>
-std::shared_ptr<image_data_gray16> render_pattern<image_data_gray16>(rasterizer & ras,
+std::shared_ptr<image_gray16> render_pattern<image_gray16>(rasterizer & ras,
                                               marker const& marker,
                                               agg::trans_affine const& tr,
                                               double opacity)
@@ -131,7 +131,7 @@ std::shared_ptr<image_data_gray16> render_pattern<image_data_gray16>(rasterizer 
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
-    std::shared_ptr<mapnik::image_data_gray16> image = std::make_shared<mapnik::image_data_gray16>(bbox.width(), bbox.height());
+    std::shared_ptr<mapnik::image_gray16> image = std::make_shared<mapnik::image_gray16>(bbox.width(), bbox.height());
     agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 2);
     pixfmt pixf(buf);
     renderer_base renb(pixf);
@@ -149,7 +149,7 @@ std::shared_ptr<image_data_gray16> render_pattern<image_data_gray16>(rasterizer 
 }
 
 template <>
-std::shared_ptr<image_data_gray32f> render_pattern<image_data_gray32f>(rasterizer & ras,
+std::shared_ptr<image_gray32f> render_pattern<image_gray32f>(rasterizer & ras,
                                               marker const& marker,
                                               agg::trans_affine const& tr,
                                               double opacity)
@@ -165,7 +165,7 @@ std::shared_ptr<image_data_gray32f> render_pattern<image_data_gray32f>(rasterize
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
-    std::shared_ptr<mapnik::image_data_gray32f> image = std::make_shared<mapnik::image_data_gray32f>(bbox.width(), bbox.height());
+    std::shared_ptr<mapnik::image_gray32f> image = std::make_shared<mapnik::image_gray32f>(bbox.width(), bbox.height());
     agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 4);
     pixfmt pixf(buf);
     renderer_base renb(pixf);

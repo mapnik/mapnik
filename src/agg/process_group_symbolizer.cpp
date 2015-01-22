@@ -112,19 +112,19 @@ struct thunk_renderer<image_rgba8>
         render_raster_marker(renb, *ras_ptr_, thunk.src_, offset_tr, thunk.opacity_, common_.scale_factor_, thunk.snap_to_pixels_);
     }
 
-    void operator()(raster_marker_render_thunk<image_data_gray8> const &thunk) const
+    void operator()(raster_marker_render_thunk<image_gray8> const &thunk) const
     {
-        throw std::runtime_error("Rendering of this image_data_gray8 type is not supported currently by the image_rgba8 renderer");
+        throw std::runtime_error("Rendering of this image_gray8 type is not supported currently by the image_rgba8 renderer");
     }
 
-    void operator()(raster_marker_render_thunk<image_data_gray16> const &thunk) const
+    void operator()(raster_marker_render_thunk<image_gray16> const &thunk) const
     {
-        throw std::runtime_error("Rendering of this image_data_gray16 type is not supported currently by the image_rgba8 renderer");
+        throw std::runtime_error("Rendering of this image_gray16 type is not supported currently by the image_rgba8 renderer");
     }
 
-    void operator()(raster_marker_render_thunk<image_data_gray32f> const &thunk) const
+    void operator()(raster_marker_render_thunk<image_gray32f> const &thunk) const
     {
-        throw std::runtime_error("Rendering of this image_data_gray32f type is not supported currently by the image_rgba8 renderer");
+        throw std::runtime_error("Rendering of this image_gray32f type is not supported currently by the image_rgba8 renderer");
     }
 
     void operator()(text_render_thunk const &thunk) const

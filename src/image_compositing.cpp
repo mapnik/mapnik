@@ -182,12 +182,12 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
 }
 
 template <>
-MAPNIK_DECL void composite(image_data_gray32f & dst, image_data_gray32f const& src, composite_mode_e mode,
+MAPNIK_DECL void composite(image_gray32f & dst, image_gray32f const& src, composite_mode_e mode,
                float opacity,
                int dx,
                int dy)
 {
-    using const_rendering_buffer = detail::rendering_buffer<image_data_gray32f>;
+    using const_rendering_buffer = detail::rendering_buffer<image_gray32f>;
     using src_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, const_rendering_buffer, 1, 0>;
     using dst_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, agg::rendering_buffer, 1, 0>;
     using renderer_type = agg::renderer_base<dst_pixfmt_type>;
@@ -239,9 +239,9 @@ void composite_visitor::operator()<image_rgba8> (image_rgba8 & dst)
 }
 
 template <>
-void composite_visitor::operator()<image_data_gray32f> (image_data_gray32f & dst)
+void composite_visitor::operator()<image_gray32f> (image_gray32f & dst)
 {
-    composite(dst, util::get<image_data_gray32f>(src_), mode_, opacity_, dx_, dy_);
+    composite(dst, util::get<image_gray32f>(src_), mode_, opacity_, dx_, dy_);
 }
 
 } // end ns

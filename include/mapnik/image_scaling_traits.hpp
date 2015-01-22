@@ -50,7 +50,7 @@ struct agg_scaling_traits<image_rgba8>
 };
 
 template <>
-struct agg_scaling_traits<image_data_gray8>
+struct agg_scaling_traits<image_gray8>
 {
     using pixfmt_pre = agg::pixfmt_gray8_pre;
     using color_type = agg::gray8;
@@ -61,7 +61,7 @@ struct agg_scaling_traits<image_data_gray8>
 };
 
 template <>
-struct agg_scaling_traits<image_data_gray16>
+struct agg_scaling_traits<image_gray16>
 {
     using pixfmt_pre = agg::pixfmt_gray16_pre;
     using color_type = agg::gray16;
@@ -72,7 +72,7 @@ struct agg_scaling_traits<image_data_gray16>
 };
 
 template <>
-struct agg_scaling_traits<image_data_gray32f>
+struct agg_scaling_traits<image_gray32f>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;

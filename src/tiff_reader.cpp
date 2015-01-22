@@ -495,15 +495,15 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
         {
         case 8:
         {
-            return read_any_gray<image_data_gray8>(x0, y0, width, height);
+            return read_any_gray<image_gray8>(x0, y0, width, height);
         }
         case 16:
         {
-            return read_any_gray<image_data_gray16>(x0, y0, width, height);
+            return read_any_gray<image_gray16>(x0, y0, width, height);
         }
         case 32:
         {
-            return read_any_gray<image_data_gray32f>(x0, y0, width, height);
+            return read_any_gray<image_gray32f>(x0, y0, width, height);
         }
         }
     }

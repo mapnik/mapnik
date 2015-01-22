@@ -151,9 +151,9 @@ struct raster_marker_render_thunk  : util::noncopyable
 };
 
 template struct raster_marker_render_thunk<image_rgba8>;
-template struct raster_marker_render_thunk<image_data_gray8>;
-template struct raster_marker_render_thunk<image_data_gray16>;
-template struct raster_marker_render_thunk<image_data_gray32f>;
+template struct raster_marker_render_thunk<image_gray8>;
+template struct raster_marker_render_thunk<image_gray16>;
+template struct raster_marker_render_thunk<image_gray32f>;
 
 using helper_ptr = std::unique_ptr<text_symbolizer_helper>;
 
@@ -185,9 +185,9 @@ struct text_render_thunk : util::noncopyable
 
 using render_thunk = util::variant<vector_marker_render_thunk,
                                    raster_marker_render_thunk<image_rgba8>,
-                                   raster_marker_render_thunk<image_data_gray8>,
-                                   raster_marker_render_thunk<image_data_gray16>,
-                                   raster_marker_render_thunk<image_data_gray32f>,
+                                   raster_marker_render_thunk<image_gray8>,
+                                   raster_marker_render_thunk<image_gray16>,
+                                   raster_marker_render_thunk<image_gray32f>,
                                    text_render_thunk>;
 using render_thunk_ptr = std::unique_ptr<render_thunk>;
 using render_thunk_list = std::list<render_thunk_ptr>;

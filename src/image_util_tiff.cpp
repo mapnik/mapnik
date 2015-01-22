@@ -182,9 +182,9 @@ void tiff_saver::operator() (T const& image) const
 }
 
 template void tiff_saver::operator() (image_rgba8 const& image) const;
-template void tiff_saver::operator() (image_data_gray8 const& image) const;
-template void tiff_saver::operator() (image_data_gray16 const& image) const;
-template void tiff_saver::operator() (image_data_gray32f const& image) const;
+template void tiff_saver::operator() (image_gray8 const& image) const;
+template void tiff_saver::operator() (image_gray16 const& image) const;
+template void tiff_saver::operator() (image_gray32f const& image) const;
 template void tiff_saver::operator() (image_view_rgba8 const& image) const;
 template void tiff_saver::operator() (image_view_gray8 const& image) const;
 template void tiff_saver::operator() (image_view_gray16 const& image) const;

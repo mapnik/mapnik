@@ -308,15 +308,15 @@ void png_saver_pal::operator() (T const& image) const
 #endif
 }
 
-template void png_saver::operator() (image_data_gray8 const& image) const;
-template void png_saver::operator() (image_data_gray16 const& image) const;
-template void png_saver::operator() (image_data_gray32f const& image) const;
+template void png_saver::operator() (image_gray8 const& image) const;
+template void png_saver::operator() (image_gray16 const& image) const;
+template void png_saver::operator() (image_gray32f const& image) const;
 template void png_saver::operator() (image_view_gray8 const& image) const;
 template void png_saver::operator() (image_view_gray16 const& image) const;
 template void png_saver::operator() (image_view_gray32f const& image) const;
-template void png_saver_pal::operator() (image_data_gray8 const& image) const;
-template void png_saver_pal::operator() (image_data_gray16 const& image) const;
-template void png_saver_pal::operator() (image_data_gray32f const& image) const;
+template void png_saver_pal::operator() (image_gray8 const& image) const;
+template void png_saver_pal::operator() (image_gray16 const& image) const;
+template void png_saver_pal::operator() (image_gray32f const& image) const;
 template void png_saver_pal::operator() (image_view_gray8 const& image) const;
 template void png_saver_pal::operator() (image_view_gray16 const& image) const;
 template void png_saver_pal::operator() (image_view_gray32f const& image) const;

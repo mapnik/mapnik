@@ -361,7 +361,7 @@ const mz_uint8 PNGWriter::IEND_tpl[] = {
     'I', 'E', 'N', 'D'      // "IEND"
 };
 
-template void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
+template void PNGWriter::writeIDAT<image_gray8>(image_gray8 const& image);
 template void PNGWriter::writeIDAT<image_view_gray8>(image_view_gray8 const& image);
 template void PNGWriter::writeIDAT<image_rgba8>(image_rgba8 const& image);
 template void PNGWriter::writeIDAT<image_view_rgba8>(image_view_rgba8 const& image);

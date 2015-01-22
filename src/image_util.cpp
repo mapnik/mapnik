@@ -422,9 +422,9 @@ struct is_solid_visitor
 };
 
 template bool is_solid_visitor::operator()<image_rgba8> (image_rgba8 const& data);
-template bool is_solid_visitor::operator()<image_data_gray8> (image_data_gray8 const& data);
-template bool is_solid_visitor::operator()<image_data_gray16> (image_data_gray16 const& data);
-template bool is_solid_visitor::operator()<image_data_gray32f> (image_data_gray32f const& data);
+template bool is_solid_visitor::operator()<image_gray8> (image_gray8 const& data);
+template bool is_solid_visitor::operator()<image_gray16> (image_gray16 const& data);
+template bool is_solid_visitor::operator()<image_gray32f> (image_gray32f const& data);
 template bool is_solid_visitor::operator()<image_view_rgba8> (image_view_rgba8 const& data);
 template bool is_solid_visitor::operator()<image_view_gray8> (image_view_gray8 const& data);
 template bool is_solid_visitor::operator()<image_view_gray16> (image_view_gray16 const& data);

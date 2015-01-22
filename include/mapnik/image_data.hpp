@@ -278,9 +278,9 @@ private:
 };
 
 using image_rgba8 = image_data<std::uint32_t>;
-using image_data_gray8 = image_data<std::uint8_t> ;
-using image_data_gray16 = image_data<std::int16_t>;
-using image_data_gray32f = image_data<float>;
+using image_gray8 = image_data<std::uint8_t> ;
+using image_gray16 = image_data<std::int16_t>;
+using image_gray32f = image_data<float>;
 
 enum image_dtype
 {

@@ -53,9 +53,9 @@ struct image_data_null
 
 using image_data_base = util::variant<image_data_null, 
                                       image_rgba8, 
-                                      image_data_gray8, 
-                                      image_data_gray16, 
-                                      image_data_gray32f>;
+                                      image_gray8, 
+                                      image_gray16, 
+                                      image_gray32f>;
 
 // Forward declaring
 struct image_any;
@@ -208,11 +208,11 @@ inline image_any create_image_any(int width,
     switch (type)
     {
       case image_dtype_gray8:
-        return image_any(std::move(image_data_gray8(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_gray8(width, height, initialize, premultiplied, painted)));
       case image_dtype_gray16:
-        return image_any(std::move(image_data_gray16(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_gray16(width, height, initialize, premultiplied, painted)));
       case image_dtype_gray32f:
-        return image_any(std::move(image_data_gray32f(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_gray32f(width, height, initialize, premultiplied, painted)));
       case image_dtype_null:
         return image_any(std::move(image_data_null()));
       case image_dtype_rgba8:

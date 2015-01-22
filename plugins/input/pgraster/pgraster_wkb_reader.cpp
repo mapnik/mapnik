@@ -183,7 +183,7 @@ mapnik::raster_ptr read_data_band(mapnik::box2d<double> const& bbox,
                     uint16_t width, uint16_t height,
                     bool hasnodata, T reader)
 {
-  mapnik::image_data_gray32f image(width, height);
+  mapnik::image_gray32f image(width, height);
   //image.set(std::numeric_limits<float>::max());
   // Start with plain white (ABGR or RGBA depending on endiannes)
   // TODO: set to transparent instead?

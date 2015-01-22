@@ -203,7 +203,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
             if (band_ > 0) // we are querying a single band
             {
-                mapnik::image_data_gray16 image(im_width, im_height);
+                mapnik::image_gray16 image(im_width, im_height);
                 image.set(std::numeric_limits<std::int16_t>::max());
                 if (band_ > nbands_)
                 {

@@ -216,7 +216,7 @@ struct tag_setter
 
         }
     }
-    inline void operator() (image_data_gray32f const&) const
+    inline void operator() (image_gray32f const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
@@ -229,7 +229,7 @@ struct tag_setter
             TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
         }
     }
-    inline void operator() (image_data_gray16 const&) const
+    inline void operator() (image_gray16 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
@@ -243,7 +243,7 @@ struct tag_setter
 
         }
     }
-    inline void operator() (image_data_gray8 const&) const
+    inline void operator() (image_gray8 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);

@@ -88,9 +88,9 @@ void jpeg_saver::operator() (T const& image) const
     throw ImageWriterException("Mapnik does not support jpeg grayscale images");
 }
 
-template void jpeg_saver::operator() (image_data_gray8 const& image) const;
-template void jpeg_saver::operator() (image_data_gray16 const& image) const;
-template void jpeg_saver::operator() (image_data_gray32f const& image) const;
+template void jpeg_saver::operator() (image_gray8 const& image) const;
+template void jpeg_saver::operator() (image_gray16 const& image) const;
+template void jpeg_saver::operator() (image_gray32f const& image) const;
 template void jpeg_saver::operator() (image_view_gray8 const& image) const;
 template void jpeg_saver::operator() (image_view_gray16 const& image) const;
 template void jpeg_saver::operator() (image_view_gray32f const& image) const;
