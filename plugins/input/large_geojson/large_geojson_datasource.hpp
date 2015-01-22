@@ -89,9 +89,13 @@ class large_geojson_datasource : public mapnik::datasource
 {
 public:
     using box_type = mapnik::box2d<double>;
+#if BOOST_VERSION >= 105600
     using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
     using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
-
+#else
+    using item_type = std::pair<std::size_t,std::size_t>;
+    using spatial_index_type = boost::geometry::index::rtree<box_type,item_type>;
+#endif
     // constructor
     large_geojson_datasource(mapnik::parameters const& params);
     virtual ~large_geojson_datasource ();

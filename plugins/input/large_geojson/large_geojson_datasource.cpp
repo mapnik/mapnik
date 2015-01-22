@@ -152,12 +152,21 @@ void large_geojson_datasource::initialise_index(Iterator start, Iterator end)
     }
     std::cerr << "OK size=" << boxes.size() << std::endl;
     std::cerr << "Populate index" << std::endl;
+#if BOOST_VERSION >= 105600
     tree_ = std::make_unique<spatial_index_type>(boxes);
+#else
+    tree_ = std::make_unique<spatial_index_type>(16, 4);
+#endif
     std::cerr << "Calculate total extent" << std::endl;
 
     for (auto const& item : boxes)
     {
         auto const& box = std::get<0>(item);
+
+#if BOOST_VERSION < 105600
+        auto const& geometry_index = std::get<1>(item);
+        tree_->insert(box, geometry_index);
+#endif
         if (!extent_.valid())
         {
             extent_ = box;
