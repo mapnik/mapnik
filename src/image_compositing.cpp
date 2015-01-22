@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -204,7 +204,7 @@ namespace detail {
 
 struct composite_visitor
 {
-    composite_visitor(image_data_any const& src, 
+    composite_visitor(image_any const& src, 
                       composite_mode_e mode,
                       float opacity,
                       int dx,
@@ -219,7 +219,7 @@ struct composite_visitor
     void operator() (T & dst);
 
   private:
-    image_data_any const& src_;
+    image_any const& src_;
     composite_mode_e mode_;
     float opacity_;
     int dx_;
@@ -247,7 +247,7 @@ void composite_visitor::operator()<image_data_gray32f> (image_data_gray32f & dst
 } // end ns
 
 template <>
-MAPNIK_DECL void composite(image_data_any & dst, image_data_any const& src, composite_mode_e mode,
+MAPNIK_DECL void composite(image_any & dst, image_any const& src, composite_mode_e mode,
                float opacity,
                int dx,
                int dy)

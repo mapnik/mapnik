@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
@@ -78,10 +78,10 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     if ((*marker_ptr)->is_bitmap())
     {
         // FIXME: copy is necessary atm to transform a
-        // shared_ptr<image_data_any> into shared_ptr<image_data_rgba8>
+        // shared_ptr<image_any> into shared_ptr<image_data_rgba8>
         boost::optional<image_ptr> bitmap = (*marker_ptr)->get_bitmap_data();
         if (bitmap) {
-            mapnik::image_data_any const& im = *(bitmap)->get();
+            mapnik::image_any const& im = *(bitmap)->get();
             if (im.is<buffer_type>()) {
                 // invoke copy ctor of image_data_rgba8
                 pat = std::make_shared<buffer_type>(util::get<buffer_type>(im));

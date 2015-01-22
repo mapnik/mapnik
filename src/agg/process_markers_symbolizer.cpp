@@ -124,7 +124,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
-    raster_markers_rasterizer_dispatch(image_data_any & src,
+    raster_markers_rasterizer_dispatch(image_any & src,
                                        agg::trans_affine const& marker_trans,
                                        symbolizer_base const& sym,
                                        Detector & detector,

@@ -146,7 +146,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
     using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
-    raster_markers_rasterizer_dispatch(image_data_any & src,
+    raster_markers_rasterizer_dispatch(image_any & src,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,

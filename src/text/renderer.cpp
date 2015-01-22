@@ -27,7 +27,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 
 namespace mapnik
 {

@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
  // boost
@@ -37,7 +37,7 @@ class raster : private util::noncopyable
 {
 public:
     box2d<double> ext_;
-    image_data_any data_;
+    image_any data_;
     double filter_factor_;
     boost::optional<double> nodata_;
 

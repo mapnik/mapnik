@@ -35,7 +35,7 @@ extern "C"
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_util_png.hpp>
 #include <mapnik/image_data.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/util/conversions.hpp>
 

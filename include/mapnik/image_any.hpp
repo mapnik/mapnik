@@ -58,8 +58,8 @@ using image_data_base = util::variant<image_data_null,
                                       image_data_gray32f>;
 
 // Forward declaring
-struct image_data_any;
-image_data_any create_image_any(int width, 
+struct image_any;
+image_any create_image_any(int width, 
                 int height, 
                 image_dtype type = image_dtype_rgba8,
                 bool initialize = true, 
@@ -141,11 +141,11 @@ struct get_any_row_size_visitor
 };
 } // namespace detail
 
-struct image_data_any : image_data_base
+struct image_any : image_data_base
 {
-    image_data_any() = default;
+    image_any() = default;
 
-    image_data_any(int width,
+    image_any(int width,
                    int height,
                    image_dtype type = image_dtype_rgba8,
                    bool initialize = true, 
@@ -154,7 +154,7 @@ struct image_data_any : image_data_base
         : image_data_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
 
     template <typename T>
-    image_data_any(T && data) noexcept
+    image_any(T && data) noexcept
         : image_data_base(std::move(data)) {}
 
     unsigned char const* getBytes() const
@@ -198,7 +198,7 @@ struct image_data_any : image_data_base
     }
 };
 
-inline image_data_any create_image_any(int width, 
+inline image_any create_image_any(int width, 
                                 int height,
                                 image_dtype type, 
                                 bool initialize, 
@@ -208,16 +208,16 @@ inline image_data_any create_image_any(int width,
     switch (type)
     {
       case image_dtype_gray8:
-        return image_data_any(std::move(image_data_gray8(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_data_gray8(width, height, initialize, premultiplied, painted)));
       case image_dtype_gray16:
-        return image_data_any(std::move(image_data_gray16(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_data_gray16(width, height, initialize, premultiplied, painted)));
       case image_dtype_gray32f:
-        return image_data_any(std::move(image_data_gray32f(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_data_gray32f(width, height, initialize, premultiplied, painted)));
       case image_dtype_null:
-        return image_data_any(std::move(image_data_null()));
+        return image_any(std::move(image_data_null()));
       case image_dtype_rgba8:
       default:
-        return image_data_any(std::move(image_data_rgba8(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_data_rgba8(width, height, initialize, premultiplied, painted)));
     }
 }
 

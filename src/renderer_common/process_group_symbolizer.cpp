@@ -162,7 +162,7 @@ void visitor_push_thunk::operator()<image_data_null> (image_data_null &)
 template <typename Detector, typename RendererContext>
 struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 {
-    raster_marker_thunk_dispatch(image_data_any & src,
+    raster_marker_thunk_dispatch(image_any & src,
                                  agg::trans_affine const& marker_trans,
                                  symbolizer_base const& sym,
                                  Detector & detector,

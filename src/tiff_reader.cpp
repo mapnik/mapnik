@@ -154,7 +154,7 @@ public:
     boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     void read(unsigned x,unsigned y,image_data_rgba8& image) final;
-    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
+    image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
     unsigned bits_per_sample() const { return bps_; }
     unsigned photometric() const { return photometric_; }
@@ -175,7 +175,7 @@ private:
     void read_tiled(unsigned x,unsigned y, ImageData & image);
 
     template <typename ImageData>
-    image_data_any read_any_gray(unsigned x, unsigned y, unsigned width, unsigned height);
+    image_any read_any_gray(unsigned x, unsigned y, unsigned width, unsigned height);
 
     TIFF* open(std::istream & input);
 };
@@ -395,7 +395,7 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
 
 template <typename T>
 template <typename ImageData>
-image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width, unsigned height)
+image_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width, unsigned height)
 {
     using image_data_type = ImageData;
     using pixel_type = typename image_data_type::pixel_type;
@@ -403,7 +403,7 @@ image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned 
     {
         image_data_type data(width,height);
         read_tiled<image_data_type>(x0, y0, data);
-        return image_data_any(std::move(data));
+        return image_any(std::move(data));
     }
     else
     {
@@ -427,10 +427,10 @@ image_data_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned 
                     std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
                 }
             }
-            return image_data_any(std::move(data));
+            return image_any(std::move(data));
         }
     }
-    return image_data_any();
+    return image_any();
 }
 
 
@@ -484,7 +484,7 @@ struct tiff_reader_traits<image_data_rgba8>
 }
 
 template <typename T>
-image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigned height)
+image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigned height)
 {
     switch (photometric_)
     {
@@ -537,21 +537,21 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
                         }
                     }
                 }
-                return image_data_any(std::move(data));
+                return image_any(std::move(data));
             }
-            return image_data_any();
+            return image_any();
         }
         case 16:
         {
             image_data_rgba8 data(width,height,true,premultiplied_alpha_);
             read(x0, y0, data);
-            return image_data_any(std::move(data));
+            return image_any(std::move(data));
         }
         case 32:
         {
             image_data_rgba8 data(width,height,true,premultiplied_alpha_);
             read(x0, y0, data);
-            return image_data_any(std::move(data));
+            return image_any(std::move(data));
         }
         }
     }
@@ -569,10 +569,10 @@ image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, un
         //PHOTOMETRIC_LOGLUV = 32845;
         image_data_rgba8 data(width,height, true, premultiplied_alpha_);
         read(x0, y0, data);
-        return image_data_any(std::move(data));
+        return image_any(std::move(data));
     }
     }
-    return image_data_any();
+    return image_any();
 }
 
 template <typename T>

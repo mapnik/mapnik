@@ -42,7 +42,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 // agg
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"

@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/image_util.hpp>

@@ -24,7 +24,7 @@
 
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>

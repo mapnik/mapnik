@@ -64,7 +64,7 @@ marker_cache::marker_cache()
                "</svg>");
     image_data_rgba8 im(4,4,true,true);
     im.set(0xff000000);
-    boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_any>(std::move(im)));
+    boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_any>(std::move(im)));
     marker_ptr mark = std::make_shared<mapnik::marker>(bitmap_data);
     marker_cache_.emplace("image://square",mark);
 }
@@ -129,7 +129,7 @@ struct visitor_create_marker
     template <typename T>
     marker_ptr operator() (T & data)
     {
-        std::shared_ptr<image_data_any> image = std::make_shared<image_data_any>(data);
+        std::shared_ptr<image_any> image = std::make_shared<image_any>(data);
         return std::make_shared<marker>(image);
     }   
 };
@@ -137,7 +137,7 @@ struct visitor_create_marker
 template<>
 marker_ptr visitor_create_marker::operator()<image_data_rgba8> (image_data_rgba8 & data)
 {
-        std::shared_ptr<image_data_any> image = std::make_shared<image_data_any>(data);
+        std::shared_ptr<image_any> image = std::make_shared<image_any>(data);
         mapnik::premultiply_alpha(*image);
         return std::make_shared<marker>(image);
 }
@@ -240,7 +240,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    image_data_any im = reader->read(0,0,width,height);
+                    image_any im = reader->read(0,0,width,height);
                     marker_ptr mark(util::apply_visitor(detail::visitor_create_marker(), im));
                     result.reset(mark);
                     if (update_cache)

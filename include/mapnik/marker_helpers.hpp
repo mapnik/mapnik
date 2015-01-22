@@ -118,7 +118,7 @@ protected:
 template <typename Detector>
 struct raster_markers_dispatch : util::noncopyable
 {
-    raster_markers_dispatch(image_data_any & src,
+    raster_markers_dispatch(image_any & src,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector & detector,
@@ -163,7 +163,7 @@ struct raster_markers_dispatch : util::noncopyable
     virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
 
 protected:
-    image_data_any & src_;
+    image_any & src_;
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;

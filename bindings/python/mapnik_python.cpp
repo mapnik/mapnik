@@ -101,7 +101,7 @@ void export_logger();
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
@@ -301,7 +301,7 @@ void agg_renderer_visitor_4::operator()<mapnik::image_data_rgba8> (mapnik::image
 
 
 void render(mapnik::Map const& map,
-            mapnik::image_data_any& image,
+            mapnik::image_any& image,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
             unsigned offset_y = 0u)
@@ -311,7 +311,7 @@ void render(mapnik::Map const& map,
 }
 
 void render_with_vars(mapnik::Map const& map,
-            mapnik::image_data_any& image,
+            mapnik::image_any& image,
             boost::python::dict const& d,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
@@ -326,7 +326,7 @@ void render_with_vars(mapnik::Map const& map,
 
 void render_with_detector(
     mapnik::Map const& map,
-    mapnik::image_data_any &image,
+    mapnik::image_any &image,
     std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
@@ -337,7 +337,7 @@ void render_with_detector(
 }
 
 void render_layer2(mapnik::Map const& map,
-                   mapnik::image_data_any& image,
+                   mapnik::image_any& image,
                    unsigned layer_idx,
                    double scale_factor,
                    unsigned offset_x,
@@ -458,7 +458,7 @@ void render_tile_to_file(mapnik::Map const& map,
                          std::string const& file,
                          std::string const& format)
 {
-    mapnik::image_data_any image(width,height);
+    mapnik::image_any image(width,height);
     render(map,image,1.0,offset_x, offset_y);
     mapnik::save_to_file(image,file,format);
 }
@@ -493,7 +493,7 @@ void render_to_file1(mapnik::Map const& map,
     }
     else
     {
-        mapnik::image_data_any image(map.width(),map.height());
+        mapnik::image_any image(map.width(),map.height());
         render(map,image,1.0,0,0);
         mapnik::save_to_file(image,filename,format);
     }
@@ -512,7 +512,7 @@ void render_to_file2(mapnik::Map const& map,std::string const& filename)
     }
     else
     {
-        mapnik::image_data_any image(map.width(),map.height());
+        mapnik::image_any image(map.width(),map.height());
         render(map,image,1.0,0,0);
         mapnik::save_to_file(image,filename);
     }
@@ -550,7 +550,7 @@ void render_to_file3(mapnik::Map const& map,
     }
     else
     {
-        mapnik::image_data_any image(map.width(),map.height());
+        mapnik::image_any image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
         mapnik::save_to_file(image,filename,format);
     }
@@ -832,7 +832,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render", &render, render_overloads(
             "\n"
-            "Render Map to an AGG image_data_any using offsets\n"
+            "Render Map to an AGG image_any using offsets\n"
             "\n"
             "Usage:\n"
             ">>> from mapnik import Map, Image, render, load_map\n"
@@ -849,7 +849,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render_with_detector", &render_with_detector, render_with_detector_overloads(
             "\n"
-            "Render Map to an AGG image_data_any using a pre-constructed detector.\n"
+            "Render Map to an AGG image_any using a pre-constructed detector.\n"
             "\n"
             "Usage:\n"
             ">>> from mapnik import Map, Image, LabelCollisionDetector, render_with_detector, load_map\n"

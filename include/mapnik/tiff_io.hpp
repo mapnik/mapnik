@@ -25,7 +25,7 @@
 
 #include <mapnik/global.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/util/variant.hpp>
 
 extern "C"

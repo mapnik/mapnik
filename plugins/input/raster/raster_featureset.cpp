@@ -114,7 +114,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                             rem.maxx() + x_off + width,
                                                             rem.maxy() + y_off + height);
                         intersect = t.backward(feature_raster_extent);
-                        mapnik::image_data_any data = reader->read(x_off, y_off, width, height);
+                        mapnik::image_any data = reader->read(x_off, y_off, width, height);
                         mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, std::move(data), 1.0);
                         feature->set_raster(raster);
                     }

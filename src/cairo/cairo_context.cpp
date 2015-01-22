@@ -388,12 +388,12 @@ void cairo_context::set_gradient(cairo_gradient const& pattern, const box2d<doub
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_image(double x, double y, image_data_any & data, double opacity)
+void cairo_context::add_image(double x, double y, image_any & data, double opacity)
 {
     util::apply_visitor(detail::visitor_context_add_image_1(*this,x,y,opacity), data);
 }
 
-void cairo_context::add_image(agg::trans_affine const& tr, image_data_any & data, double opacity)
+void cairo_context::add_image(agg::trans_affine const& tr, image_any & data, double opacity)
 {
     util::apply_visitor(detail::visitor_context_add_image_2(*this,tr,opacity), data);
 }
