@@ -96,7 +96,7 @@ public:
     using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
 #else
     using item_type = std::size_t;
-    using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
+    using spatial_index_type = boost::geometry::index::rtree<box_type,item_type>;
 #endif
 
     // constructor
