@@ -41,7 +41,7 @@
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
-using mapnik::image_data_rgba8;
+using mapnik::image_rgba8;
 using mapnik::Map;
 using mapnik::layer;
 using mapnik::box2d;
@@ -478,7 +478,7 @@ void MapWidget::zoomToLevel(int level)
 
 void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::string const&)
 {
-   //image_data_rgba8 image(width,height);
+   //image_rgba8 image(width,height);
    //agg_renderer renderer(map,image);
    //renderer.apply();
    //image.saveToFile(filename,type);
@@ -495,8 +495,8 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     unsigned width=map.width();
     unsigned height=map.height();
 
-    image_data_rgba8 buf(width,height);
-    mapnik::agg_renderer<image_data_rgba8> ren(map,buf,scaling_factor);
+    image_rgba8 buf(width,height);
+    mapnik::agg_renderer<image_rgba8> ren(map,buf,scaling_factor);
 
     try
     {
@@ -539,7 +539,7 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
         mapnik::cairo_renderer<mapnik::cairo_ptr> renderer(map, cairo, scaling_factor);
         renderer.apply();
     }
-    mapnik::image_data_rgba8 data(map.width(), map.height());
+    mapnik::image_rgba8 data(map.width(), map.height());
     mapnik::cairo_image_to_rgba8(data, image_surface);
     QImage image((uchar*)data.getBytes(),data.width(),data.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());

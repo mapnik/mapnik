@@ -38,7 +38,7 @@ template <typename T>
 struct agg_scaling_traits  {};
 
 template <>
-struct agg_scaling_traits<image_data_rgba8>
+struct agg_scaling_traits<image_rgba8>
 {
     using pixfmt_pre = agg::pixfmt_rgba32_pre;
     using color_type = agg::rgba8;

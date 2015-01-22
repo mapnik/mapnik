@@ -149,7 +149,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     {
         // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts 
         // the destination pixel type required.   
-        render_raster_marker(renb_, ras_, util::get<image_data_rgba8>(this->src_), marker_tr, opacity, this->scale_factor_, snap_to_pixels_);
+        render_raster_marker(renb_, ras_, util::get<image_rgba8>(this->src_), marker_tr, opacity, this->scale_factor_, snap_to_pixels_);
     }
 
 private:
@@ -204,7 +204,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
-template void agg_renderer<image_data_rgba8>::process(markers_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(markers_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 }

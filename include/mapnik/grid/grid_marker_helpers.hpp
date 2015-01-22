@@ -51,7 +51,7 @@ struct raster_markers_rasterizer_dispatch_grid : util::noncopyable
     using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
     using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
-    raster_markers_rasterizer_dispatch_grid(image_data_rgba8 const& src,
+    raster_markers_rasterizer_dispatch_grid(image_rgba8 const& src,
                                             agg::trans_affine const& marker_trans,
                                             markers_symbolizer const& sym,
                                             Detector & detector,
@@ -130,7 +130,7 @@ private:
     pixfmt_type pixf_;
     RendererBase renb_;
     RasterizerType & ras_;
-    image_data_rgba8 const& src_;
+    image_rgba8 const& src_;
     agg::trans_affine const& marker_trans_;
     markers_symbolizer const& sym_;
     Detector & detector_;

@@ -118,7 +118,7 @@ private:
     T const& data_;
 };
 
-using image_view_rgba8 = image_view<image_data_rgba8>;
+using image_view_rgba8 = image_view<image_rgba8>;
 using image_view_gray8 = image_view<image_data_gray8>;
 using image_view_gray16 = image_view<image_data_gray16>;
 using image_view_gray32f = image_view<image_data_gray32f>;

@@ -43,7 +43,7 @@
 using mapnik::query;
 using mapnik::image_reader;
 using mapnik::feature_ptr;
-using mapnik::image_data_rgba8;
+using mapnik::image_rgba8;
 using mapnik::raster;
 using mapnik::feature_factory;
 

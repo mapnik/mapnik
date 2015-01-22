@@ -165,7 +165,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, pixel_
     }
     else
     {
-        image_data_rgba8 const& data = util::get<image_data_rgba8>(**marker.get_bitmap_data());
+        image_rgba8 const& data = util::get<image_rgba8>(**marker.get_bitmap_data());
         double width = data.width();
         double height = data.height();
         double cx = 0.5 * width;
@@ -179,7 +179,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, pixel_
         }
         else
         {
-            image_data_rgba8 target(data.width(), data.height());
+            image_rgba8 target(data.width(), data.height());
             mapnik::scale_image_agg(target,
                                     data,
                                     SCALING_NEAR,

@@ -259,7 +259,7 @@ void process_rgba8_png(T const& image,
 }
 
 template<>
-void png_saver_pal::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
+void png_saver_pal::operator()<image_rgba8> (image_rgba8 const& image) const
 {
     process_rgba8_png_pal(image, t_, stream_, pal_);
 }
@@ -271,7 +271,7 @@ void png_saver_pal::operator()<image_view_rgba8> (image_view_rgba8 const& image)
 }
 
 template<>
-void png_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
+void png_saver::operator()<image_rgba8> (image_rgba8 const& image) const
 {
     process_rgba8_png(image, t_, stream_);
 }

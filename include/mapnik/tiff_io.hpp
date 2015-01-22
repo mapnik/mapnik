@@ -192,7 +192,7 @@ struct tag_setter
         throw ImageWriterException("Could not write TIFF - unknown image type provided");
     }
 
-    inline void operator() (image_data_rgba8 const& data) const
+    inline void operator() (image_rgba8 const& data) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);

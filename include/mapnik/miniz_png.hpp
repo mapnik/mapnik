@@ -85,9 +85,9 @@ private:
 
 extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
 extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view_gray8>(image_view_gray8 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_rgba8>(image_data_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_rgba8>(image_rgba8 const& image);
 extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view_rgba8>(image_view_rgba8 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_data_rgba8>(image_data_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_rgba8>(image_rgba8 const& image);
 extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_view_rgba8>(image_view_rgba8 const& image);
 
 }}

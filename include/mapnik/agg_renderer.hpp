@@ -171,7 +171,7 @@ private:
     void setup(Map const& m);
 };
 
-extern template class MAPNIK_DECL agg_renderer<image_data_rgba8>;
+extern template class MAPNIK_DECL agg_renderer<image_rgba8>;
 
 } // namespace mapnik
 

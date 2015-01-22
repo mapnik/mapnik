@@ -166,7 +166,7 @@ void reduce_8(T const& in,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        mapnik::image_data_rgba8::pixel_type const * row = in.getRow(y);
+        mapnik::image_rgba8::pixel_type const * row = in.getRow(y);
         mapnik::image_data_gray8::pixel_type  * row_out = out.getRow(y);
         for (unsigned x = 0; x < width; ++x)
         {
@@ -217,7 +217,7 @@ void reduce_4(T const& in,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        mapnik::image_data_rgba8::pixel_type const * row = in.getRow(y);
+        mapnik::image_rgba8::pixel_type const * row = in.getRow(y);
         mapnik::image_data_gray8::pixel_type  * row_out = out.getRow(y);
         for (unsigned x = 0; x < width; ++x)
         {
@@ -603,7 +603,7 @@ void save_as_png8(T1 & file,
         image_data_gray8 reduced_image(width, height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_data_rgba8::pixel_type const * row = image.getRow(y);
+            mapnik::image_rgba8::pixel_type const * row = image.getRow(y);
             mapnik::image_data_gray8::pixel_type  * row_out = reduced_image.getRow(y);
             for (unsigned x = 0; x < width; ++x)
             {
@@ -629,7 +629,7 @@ void save_as_png8(T1 & file,
         image_data_gray8 reduced_image(image_width, image_height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_data_rgba8::pixel_type const * row = image.getRow(y);
+            mapnik::image_rgba8::pixel_type const * row = image.getRow(y);
             mapnik::image_data_gray8::pixel_type  * row_out = reduced_image.getRow(y);
             byte index = 0;
             for (unsigned x = 0; x < width; ++x)

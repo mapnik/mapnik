@@ -150,7 +150,7 @@ struct raster_marker_render_thunk  : util::noncopyable
         snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
 };
 
-template struct raster_marker_render_thunk<image_data_rgba8>;
+template struct raster_marker_render_thunk<image_rgba8>;
 template struct raster_marker_render_thunk<image_data_gray8>;
 template struct raster_marker_render_thunk<image_data_gray16>;
 template struct raster_marker_render_thunk<image_data_gray32f>;
@@ -184,7 +184,7 @@ struct text_render_thunk : util::noncopyable
 // via a static visitor later.
 
 using render_thunk = util::variant<vector_marker_render_thunk,
-                                   raster_marker_render_thunk<image_data_rgba8>,
+                                   raster_marker_render_thunk<image_rgba8>,
                                    raster_marker_render_thunk<image_data_gray8>,
                                    raster_marker_render_thunk<image_data_gray16>,
                                    raster_marker_render_thunk<image_data_gray32f>,

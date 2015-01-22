@@ -36,7 +36,7 @@ void render(mapnik::geometry_type & geom,
     using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
-    mapnik::image_data_rgba8 im(256,256);
+    mapnik::image_rgba8 im(256,256);
     mapnik::fill(im, mapnik::color("white"));
     mapnik::box2d<double> padded_extent = extent;
     padded_extent.pad(10);

@@ -81,8 +81,8 @@ int main(int argc, char** argv)
         m.insert_style("style", std::move(the_style) );
         m.zoom_to_box(mapnik::box2d<double>(-256,-256,
                                             256,256));
-        mapnik::image_data_rgba8 buf(m.width(),m.height());
-        mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m,buf);
+        mapnik::image_rgba8 buf(m.width(),m.height());
+        mapnik::agg_renderer<mapnik::image_rgba8> ren(m,buf);
         ren.apply();
     } catch (std::exception const& ex) {
         BOOST_TEST_EQ(std::string(ex.what()),std::string("Unable to find specified font face 'DejaVu Sans Book' in font set: 'fontset'"));

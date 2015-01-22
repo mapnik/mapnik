@@ -21,8 +21,8 @@ public:
         mapnik::Map m(256,256);
         mapnik::load_map(m,xml_);
         m.zoom_to_box(extent_);
-        mapnik::image_data_rgba8 im(m.width(),m.height());
-        mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m,im);
+        mapnik::image_rgba8 im(m.width(),m.height());
+        mapnik::agg_renderer<mapnik::image_rgba8> ren(m,im);
         ren.apply();
         //mapnik::save_to_file(im.data(),"test.png");
         return true;
@@ -34,8 +34,8 @@ public:
         m.zoom_to_box(extent_);
         for (unsigned i=0;i<iterations_;++i)
         {
-            mapnik::image_data_rgba8 im(m.width(),m.height());
-            mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m,im);
+            mapnik::image_rgba8 im(m.width(),m.height());
+            mapnik::agg_renderer<mapnik::image_rgba8> ren(m,im);
             ren.apply();
         }
         return true;

@@ -75,7 +75,7 @@ SECTION("scan rgb8 striped") {
     REQUIRE( reader2->width() == 512 );
     REQUIRE( reader2->height() == 512 );
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
-    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA( data );
     TIFF_READ_ONE_PIXEL
@@ -105,7 +105,7 @@ SECTION("scan rgb8 tiled") {
     REQUIRE( reader2->width() == 512 );
     REQUIRE( reader2->height() == 512 );
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
-    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA( data );
     TIFF_READ_ONE_PIXEL
@@ -121,7 +121,7 @@ SECTION("rgba8 striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     REQUIRE( tiff_reader.compression() == COMPRESSION_ADOBE_DEFLATE );
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
-    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_ALPHA( data );
     TIFF_READ_ONE_PIXEL
@@ -137,7 +137,7 @@ SECTION("rgba8 tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
-    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_ALPHA( data );
     TIFF_READ_ONE_PIXEL
@@ -153,7 +153,7 @@ SECTION("rgb8 striped") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     REQUIRE( tiff_reader.compression() == COMPRESSION_NONE );
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
-    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA( data );
     TIFF_READ_ONE_PIXEL
@@ -169,7 +169,7 @@ SECTION("rgb8 tiled") {
     REQUIRE( tiff_reader.photometric() == PHOTOMETRIC_RGB );
     REQUIRE( tiff_reader.compression() == COMPRESSION_LZW );
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
-    REQUIRE( data.is<mapnik::image_data_rgba8>() == true );
+    REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
     TIFF_ASSERT_NO_ALPHA( data );
     TIFF_READ_ONE_PIXEL

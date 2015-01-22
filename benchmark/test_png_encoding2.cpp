@@ -3,7 +3,7 @@
 
 class test : public benchmark::test_case
 {
-    std::shared_ptr<image_data_rgba8> im_;
+    std::shared_ptr<image_rgba8> im_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params) {

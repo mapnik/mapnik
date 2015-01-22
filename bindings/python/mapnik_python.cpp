@@ -208,9 +208,9 @@ struct agg_renderer_visitor_1
 };
 
 template <>
-void agg_renderer_visitor_1::operator()<mapnik::image_data_rgba8> (mapnik::image_data_rgba8 & pixmap)
+void agg_renderer_visitor_1::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
 {
-    mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m_,pixmap,scale_factor_,offset_x_, offset_y_);
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,pixmap,scale_factor_,offset_x_, offset_y_);
     ren.apply();
 }
 
@@ -235,9 +235,9 @@ struct agg_renderer_visitor_2
 };
 
 template <>
-void agg_renderer_visitor_2::operator()<mapnik::image_data_rgba8> (mapnik::image_data_rgba8 & pixmap)
+void agg_renderer_visitor_2::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
 {
-    mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m_,pixmap,detector_, scale_factor_,offset_x_, offset_y_);
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,pixmap,detector_, scale_factor_,offset_x_, offset_y_);
     ren.apply();
 }
 
@@ -264,9 +264,9 @@ struct agg_renderer_visitor_3
 };
 
 template <>
-void agg_renderer_visitor_3::operator()<mapnik::image_data_rgba8> (mapnik::image_data_rgba8 & pixmap)
+void agg_renderer_visitor_3::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
 {
-    mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m_,req_, vars_, pixmap, scale_factor_, offset_x_, offset_y_);
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,req_, vars_, pixmap, scale_factor_, offset_x_, offset_y_);
     ren.apply();
 }
 
@@ -293,9 +293,9 @@ struct agg_renderer_visitor_4
 };
 
 template <>
-void agg_renderer_visitor_4::operator()<mapnik::image_data_rgba8> (mapnik::image_data_rgba8 & pixmap)
+void agg_renderer_visitor_4::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
 {
-    mapnik::agg_renderer<mapnik::image_data_rgba8> ren(m_,pixmap,scale_factor_,offset_x_, offset_y_);
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,pixmap,scale_factor_,offset_x_, offset_y_);
     ren.apply(layer_, names_);
 }
 

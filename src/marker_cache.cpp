@@ -62,7 +62,7 @@ marker_cache::marker_cache()
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
                "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
-    image_data_rgba8 im(4,4,true,true);
+    image_rgba8 im(4,4,true,true);
     im.set(0xff000000);
     boost::optional<mapnik::image_ptr> bitmap_data = boost::optional<mapnik::image_ptr>(std::make_shared<image_any>(std::move(im)));
     marker_ptr mark = std::make_shared<mapnik::marker>(bitmap_data);
@@ -135,7 +135,7 @@ struct visitor_create_marker
 };
 
 template<>
-marker_ptr visitor_create_marker::operator()<image_data_rgba8> (image_data_rgba8 & data)
+marker_ptr visitor_create_marker::operator()<image_rgba8> (image_rgba8 & data)
 {
         std::shared_ptr<image_any> image = std::make_shared<image_any>(data);
         mapnik::premultiply_alpha(*image);

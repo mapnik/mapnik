@@ -55,7 +55,7 @@ struct visitor_create_pattern
 };
 
 template <>
-std::shared_ptr<cairo_pattern> visitor_create_pattern::operator()<image_data_rgba8> (image_data_rgba8 & data)
+std::shared_ptr<cairo_pattern> visitor_create_pattern::operator()<image_rgba8> (image_rgba8 & data)
 {
     return std::make_shared<cairo_pattern>(data, opacity_);
 }
@@ -87,7 +87,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
     std::shared_ptr<cairo_pattern> pattern;
-    std::shared_ptr<image_data_rgba8> image = nullptr;
+    std::shared_ptr<image_rgba8> image = nullptr;
     // TODO - re-implement at renderer level like polygon_pattern symbolizer
     double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     if ((*marker)->is_bitmap())
@@ -101,7 +101,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        image = render_pattern<image_data_rgba8>(ras, **marker, image_tr, 1.0);
+        image = render_pattern<image_rgba8>(ras, **marker, image_tr, 1.0);
         pattern = std::make_unique<cairo_pattern>(*image, opacity);
         width = image->width();
         height = image->height();

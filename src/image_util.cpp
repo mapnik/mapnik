@@ -126,7 +126,7 @@ MAPNIK_DECL void save_to_stream(T const& image,
 // This can be removed once image_any and image_view_any are the only 
 // items using this template
 template <>
-MAPNIK_DECL void save_to_stream<image_data_rgba8>(image_data_rgba8 const& image,
+MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
                     std::ostream & stream,
                     std::string const& type,
                     rgba_palette const& palette)
@@ -222,7 +222,7 @@ MAPNIK_DECL void save_to_stream(T const& image,
 // This can be removed once image_any and image_view_any are the only 
 // items using this template
 template <>
-MAPNIK_DECL void save_to_stream<image_data_rgba8>(image_data_rgba8 const& image,
+MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
                     std::ostream & stream,
                     std::string const& type)
 {
@@ -321,27 +321,27 @@ MAPNIK_DECL void save_to_file(T const& image, std::string const& filename, rgba_
     else throw ImageWriterException("Could not write file to " + filename );
 }
 
-// image_data_rgba8
-template MAPNIK_DECL void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
+// image_rgba8
+template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
                                              std::string const&,
                                              std::string const&);
 
-template MAPNIK_DECL void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
+template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
                                              std::string const&,
                                              std::string const&,
                                              rgba_palette const& palette);
 
-template MAPNIK_DECL void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
+template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
                                              std::string const&);
 
-template MAPNIK_DECL void save_to_file<image_data_rgba8>(image_data_rgba8 const&,
+template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
                                              std::string const&,
                                              rgba_palette const& palette);
 
-template MAPNIK_DECL std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
+template MAPNIK_DECL std::string save_to_string<image_rgba8>(image_rgba8 const&,
                                                       std::string const&);
 
-template MAPNIK_DECL std::string save_to_string<image_data_rgba8>(image_data_rgba8 const&,
+template MAPNIK_DECL std::string save_to_string<image_rgba8>(image_rgba8 const&,
                                                       std::string const&,
                                                       rgba_palette const& palette);
 
@@ -421,7 +421,7 @@ struct is_solid_visitor
     }
 };
 
-template bool is_solid_visitor::operator()<image_data_rgba8> (image_data_rgba8 const& data);
+template bool is_solid_visitor::operator()<image_rgba8> (image_rgba8 const& data);
 template bool is_solid_visitor::operator()<image_data_gray8> (image_data_gray8 const& data);
 template bool is_solid_visitor::operator()<image_data_gray16> (image_data_gray16 const& data);
 template bool is_solid_visitor::operator()<image_data_gray32f> (image_data_gray32f const& data);
@@ -447,9 +447,9 @@ MAPNIK_DECL bool is_solid(T const& image)
 template MAPNIK_DECL bool is_solid<image_any> (image_any const&);
 template MAPNIK_DECL bool is_solid<image_view_any> (image_view_any const&);
 
-// Temporary until image_data_rgba8 is removed from passing
+// Temporary until image_rgba8 is removed from passing
 template <>
-MAPNIK_DECL bool is_solid<image_data_rgba8>(image_data_rgba8 const& image)
+MAPNIK_DECL bool is_solid<image_rgba8>(image_rgba8 const& image)
 {
     detail::is_solid_visitor visitor;
     return visitor(image);
@@ -476,7 +476,7 @@ struct premultiply_visitor
 };
 
 template <>
-bool premultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
+bool premultiply_visitor::operator()<image_rgba8> (image_rgba8 & data)
 {
     if (!data.get_premultiplied())
     {
@@ -500,7 +500,7 @@ struct demultiply_visitor
 };
 
 template <>
-bool demultiply_visitor::operator()<image_data_rgba8> (image_data_rgba8 & data)
+bool demultiply_visitor::operator()<image_rgba8> (image_rgba8 & data)
 {
     if (data.get_premultiplied())
     {
@@ -539,7 +539,7 @@ template MAPNIK_DECL bool premultiply_alpha<image_any> (image_any &);
 
 // Temporary, can be removed once image_view_any and image_any are the only ones passed
 template <>
-MAPNIK_DECL bool premultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
+MAPNIK_DECL bool premultiply_alpha<image_rgba8>(image_rgba8 & image)
 {
     detail::premultiply_visitor visit;
     return visit(image);
@@ -555,7 +555,7 @@ template MAPNIK_DECL bool demultiply_alpha<image_any> (image_any &);
 
 // Temporary, can be removed once image_view_any and image_any are the only ones passed
 template <>
-MAPNIK_DECL bool demultiply_alpha<image_data_rgba8>(image_data_rgba8 & image)
+MAPNIK_DECL bool demultiply_alpha<image_rgba8>(image_rgba8 & image)
 {
     detail::demultiply_visitor visit;
     return visit(image);
@@ -571,7 +571,7 @@ template void set_premultiplied_alpha<image_any> (image_any &, bool);
 
 // Temporary, can be removed once image_view_any and image_any are the only ones passed
 template <>
-MAPNIK_DECL void set_premultiplied_alpha<image_data_rgba8>(image_data_rgba8 & image, bool status)
+MAPNIK_DECL void set_premultiplied_alpha<image_rgba8>(image_rgba8 & image, bool status)
 {
     detail::set_premultiplied_visitor visit(status);
     visit(image);
@@ -596,9 +596,9 @@ struct visitor_set_alpha
 };
 
 template <>
-void visitor_set_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_set_alpha::operator()<image_rgba8> (image_rgba8 & data)
 {
-    using pixel_type = typename image_data_rgba8::pixel_type;
+    using pixel_type = typename image_rgba8::pixel_type;
     for (unsigned int y = 0; y < data.height(); ++y)
     {
         pixel_type* row_to =  data.getRow(y);
@@ -635,7 +635,7 @@ MAPNIK_DECL void set_alpha<image_any> (image_any & data, float opacity)
 
 // TEMPORARY can be removed once image_any is only way it is being passed.
 template<>
-MAPNIK_DECL void set_alpha<image_data_rgba8> (image_data_rgba8 & data, float opacity)
+MAPNIK_DECL void set_alpha<image_rgba8> (image_rgba8 & data, float opacity)
 {
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
@@ -659,9 +659,9 @@ struct visitor_set_grayscale_to_alpha
 };
 
 template <>
-void visitor_set_grayscale_to_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_set_grayscale_to_alpha::operator()<image_rgba8> (image_rgba8 & data)
 {
-    using pixel_type = typename image_data_rgba8::pixel_type;
+    using pixel_type = typename image_rgba8::pixel_type;
     for (unsigned int y = 0; y < data.height(); ++y)
     {
         pixel_type* row_from = data.getRow(y);
@@ -696,7 +696,7 @@ MAPNIK_DECL void set_grayscale_to_alpha<image_any> (image_any & data)
 
 // TEMPORARY can be removed once image_any is only way it is being passed.
 template<>
-MAPNIK_DECL void set_grayscale_to_alpha<image_data_rgba8> (image_data_rgba8 & data)
+MAPNIK_DECL void set_grayscale_to_alpha<image_rgba8> (image_rgba8 & data)
 {
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
@@ -727,9 +727,9 @@ struct visitor_set_color_to_alpha
 };
 
 template <>
-void visitor_set_color_to_alpha::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_set_color_to_alpha::operator()<image_rgba8> (image_rgba8 & data)
 {
-    using pixel_type = typename image_data_rgba8::pixel_type;
+    using pixel_type = typename image_rgba8::pixel_type;
     for (unsigned y = 0; y < data.height(); ++y)
     {
         pixel_type* row_from = data.getRow(y);
@@ -763,7 +763,7 @@ MAPNIK_DECL void set_color_to_alpha<image_any> (image_any & data, color const& c
 
 // TEMPORARY can be removed once image_any is only way it is being passed.
 template<>
-MAPNIK_DECL void set_color_to_alpha<image_data_rgba8> (image_data_rgba8 & data, color const& c)
+MAPNIK_DECL void set_color_to_alpha<image_rgba8> (image_rgba8 & data, color const& c)
 {
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
@@ -835,7 +835,7 @@ template MAPNIK_DECL void fill(image_any &, double const&);
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL void fill<image_data_rgba8, color> (image_data_rgba8 & data , color const& val)
+MAPNIK_DECL void fill<image_rgba8, color> (image_rgba8 & data , color const& val)
 {
     detail::visitor_fill<color> visitor(val);
     visitor(data);
@@ -843,7 +843,7 @@ MAPNIK_DECL void fill<image_data_rgba8, color> (image_data_rgba8 & data , color 
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL void fill<image_data_rgba8, uint32_t> (image_data_rgba8 & data , uint32_t const& val)
+MAPNIK_DECL void fill<image_rgba8, uint32_t> (image_rgba8 & data , uint32_t const& val)
 {
     detail::visitor_fill<uint32_t> visitor(val);
     visitor(data);
@@ -851,7 +851,7 @@ MAPNIK_DECL void fill<image_data_rgba8, uint32_t> (image_data_rgba8 & data , uin
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL void fill<image_data_rgba8, int32_t> (image_data_rgba8 & data , int32_t const& val)
+MAPNIK_DECL void fill<image_rgba8, int32_t> (image_rgba8 & data , int32_t const& val)
 {
     detail::visitor_fill<int32_t> visitor(val);
     visitor(data);
@@ -894,10 +894,10 @@ struct visitor_set_rectangle
 };
 
 template <>
-void visitor_set_rectangle::operator()<image_data_rgba8> (image_data_rgba8 & dst)
+void visitor_set_rectangle::operator()<image_rgba8> (image_rgba8 & dst)
 {
-    using pixel_type = typename image_data_rgba8::pixel_type;
-    image_data_rgba8 src = util::get<image_data_rgba8>(src_);
+    using pixel_type = typename image_rgba8::pixel_type;
+    image_rgba8 src = util::get<image_rgba8>(src_);
     box2d<int> ext0(0,0,dst.width(),dst.height());
     box2d<int> ext1(x0_,y0_,x0_+src.width(),y0_+src.height());
 
@@ -973,7 +973,7 @@ struct visitor_composite_pixel
 };
 
 template<>
-void visitor_composite_pixel::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_composite_pixel::operator()<image_rgba8> (image_rgba8 & data)
 {
     using color_type = agg::rgba8;
     using value_type = color_type::value_type;
@@ -1002,7 +1002,7 @@ MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c
 
 // Temporary delete later
 template <>
-MAPNIK_DECL void composite_pixel<image_data_rgba8>(image_data_rgba8 & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity )
+MAPNIK_DECL void composite_pixel<image_rgba8>(image_rgba8 & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity )
 {
     detail::visitor_composite_pixel visitor(op, x, y, c, cover, opacity);
     visitor(data);
@@ -1078,7 +1078,7 @@ template MAPNIK_DECL void set_pixel(image_any &, std::size_t, std::size_t, doubl
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL void set_pixel<image_data_rgba8, color> (image_data_rgba8 & data, std::size_t x, std::size_t y, color const& val)
+MAPNIK_DECL void set_pixel<image_rgba8, color> (image_rgba8 & data, std::size_t x, std::size_t y, color const& val)
 {
     detail::visitor_set_pixel<color> visitor(x, y, val);
     visitor(data);
@@ -1086,7 +1086,7 @@ MAPNIK_DECL void set_pixel<image_data_rgba8, color> (image_data_rgba8 & data, st
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL void set_pixel<image_data_rgba8, uint32_t> (image_data_rgba8 & data, std::size_t x, std::size_t y, uint32_t const& val)
+MAPNIK_DECL void set_pixel<image_rgba8, uint32_t> (image_rgba8 & data, std::size_t x, std::size_t y, uint32_t const& val)
 {
     detail::visitor_set_pixel<uint32_t> visitor(x, y, val);
     visitor(data);
@@ -1094,7 +1094,7 @@ MAPNIK_DECL void set_pixel<image_data_rgba8, uint32_t> (image_data_rgba8 & data,
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL void set_pixel<image_data_rgba8, int32_t> (image_data_rgba8 & data, std::size_t x, std::size_t y, int32_t const& val)
+MAPNIK_DECL void set_pixel<image_rgba8, int32_t> (image_rgba8 & data, std::size_t x, std::size_t y, int32_t const& val)
 {
     detail::visitor_set_pixel<int32_t> visitor(x, y, val);
     visitor(data);
@@ -1176,7 +1176,7 @@ template MAPNIK_DECL double get_pixel(image_any const&, std::size_t, std::size_t
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL color get_pixel<image_data_rgba8, color> (image_data_rgba8 const& data, std::size_t x, std::size_t y)
+MAPNIK_DECL color get_pixel<image_rgba8, color> (image_rgba8 const& data, std::size_t x, std::size_t y)
 {
     detail::visitor_get_pixel<color> visitor(x, y);
     return visitor(data);
@@ -1184,7 +1184,7 @@ MAPNIK_DECL color get_pixel<image_data_rgba8, color> (image_data_rgba8 const& da
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL uint32_t get_pixel<image_data_rgba8, uint32_t> (image_data_rgba8 const& data, std::size_t x, std::size_t y)
+MAPNIK_DECL uint32_t get_pixel<image_rgba8, uint32_t> (image_rgba8 const& data, std::size_t x, std::size_t y)
 {
     detail::visitor_get_pixel<uint32_t> visitor(x, y);
     return visitor(data);
@@ -1192,7 +1192,7 @@ MAPNIK_DECL uint32_t get_pixel<image_data_rgba8, uint32_t> (image_data_rgba8 con
 
 // Temporary remove these later!
 template <>
-MAPNIK_DECL int32_t get_pixel<image_data_rgba8, int32_t> (image_data_rgba8 const& data, std::size_t x, std::size_t y)
+MAPNIK_DECL int32_t get_pixel<image_rgba8, int32_t> (image_rgba8 const& data, std::size_t x, std::size_t y)
 {
     detail::visitor_get_pixel<int32_t> visitor(x, y);
     return visitor(data);

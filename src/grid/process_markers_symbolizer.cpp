@@ -167,7 +167,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     {
         // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts 
         // the destination pixel type required.   
-        render_raster_marker(RendererType(renb_), ras_, util::get<image_data_rgba8>(this->src_), this->feature_, marker_tr, opacity);
+        render_raster_marker(RendererType(renb_), ras_, util::get<image_rgba8>(this->src_), this->feature_, marker_tr, opacity);
         if (!placed_)
         {
             pixmap_.add_feature(this->feature_);

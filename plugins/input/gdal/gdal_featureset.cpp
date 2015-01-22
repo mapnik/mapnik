@@ -229,7 +229,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             }
             else // working with all bands
             {
-                mapnik::image_data_rgba8 image(im_width, im_height);
+                mapnik::image_rgba8 image(im_width, im_height);
                 image.set(std::numeric_limits<std::uint32_t>::max());
                 for (int i = 0; i < nbands_; ++i)
                 {

@@ -49,7 +49,7 @@ class test : public benchmark::test_case
     std::shared_ptr<mapnik::Map> m_;
     double scale_factor_;
     std::string preview_;
-    mutable mapnik::image_data_rgba8 im_;
+    mutable mapnik::image_rgba8 im_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params),
@@ -93,7 +93,7 @@ public:
         mapnik::projection map_proj(m_->srs(),true);
         double scale_denom = mapnik::scale_denominator(m_req.scale(),map_proj.is_geographic());
         scale_denom *= scale_factor_;
-        mapnik::agg_renderer<mapnik::image_data_rgba8> ren(*m_,m_req,variables,im_,scale_factor_);
+        mapnik::agg_renderer<mapnik::image_rgba8> ren(*m_,m_req,variables,im_,scale_factor_);
         ren.start_map_processing(*m_);
         std::vector<mapnik::layer> const& layers = m_->layers();
         process_layers(ren,m_req,map_proj,layers,scale_denom);
@@ -113,20 +113,20 @@ public:
         for (unsigned i=0;i<iterations_;++i)
         {
             mapnik::request m_req(width_,height_,extent_);
-            mapnik::image_data_rgba8 im(m_->width(),m_->height());
+            mapnik::image_rgba8 im(m_->width(),m_->height());
             mapnik::attributes variables;
             m_req.set_buffer_size(m_->buffer_size());
             mapnik::projection map_proj(m_->srs(),true);
             double scale_denom = mapnik::scale_denominator(m_req.scale(),map_proj.is_geographic());
             scale_denom *= scale_factor_;
-            mapnik::agg_renderer<mapnik::image_data_rgba8> ren(*m_,m_req,variables,im,scale_factor_);
+            mapnik::agg_renderer<mapnik::image_rgba8> ren(*m_,m_req,variables,im,scale_factor_);
             ren.start_map_processing(*m_);
             std::vector<mapnik::layer> const& layers = m_->layers();
             process_layers(ren,m_req,map_proj,layers,scale_denom);
             ren.end_map_processing(*m_);
             bool diff = false;
-            mapnik::image_data_rgba8 const& dest = im;
-            mapnik::image_data_rgba8 const& src = im_;
+            mapnik::image_rgba8 const& dest = im;
+            mapnik::image_rgba8 const& src = im_;
             for (unsigned int y = 0; y < height_; ++y)
             {
                 const unsigned int* row_from = src.getRow(y);

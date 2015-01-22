@@ -38,7 +38,7 @@
 namespace mapnik {
 
 template <>
-std::shared_ptr<image_data_rgba8> render_pattern<image_data_rgba8>(rasterizer & ras,
+std::shared_ptr<image_rgba8> render_pattern<image_rgba8>(rasterizer & ras,
                                               marker const& marker,
                                               agg::trans_affine const& tr,
                                               double opacity)
@@ -54,7 +54,7 @@ std::shared_ptr<image_data_rgba8> render_pattern<image_data_rgba8>(rasterizer & 
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
-    std::shared_ptr<mapnik::image_data_rgba8> image = std::make_shared<mapnik::image_data_rgba8>(bbox.width(), bbox.height());
+    std::shared_ptr<mapnik::image_rgba8> image = std::make_shared<mapnik::image_rgba8>(bbox.width(), bbox.height());
     agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 4);
     pixfmt pixf(buf);
     renderer_base renb(pixf);

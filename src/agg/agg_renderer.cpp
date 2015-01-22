@@ -517,8 +517,8 @@ void agg_renderer<T0,T1>::draw_geo_extent(box2d<double> const& extent, mapnik::c
     }
 }
 
-template class agg_renderer<image_data_rgba8>;
-template void agg_renderer<image_data_rgba8>::debug_draw_box<agg::rendering_buffer>(
+template class agg_renderer<image_rgba8>;
+template void agg_renderer<image_rgba8>::debug_draw_box<agg::rendering_buffer>(
                 agg::rendering_buffer& buf,
                 box2d<double> const& box,
                 double x, double y, double angle);

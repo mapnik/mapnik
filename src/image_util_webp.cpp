@@ -360,7 +360,7 @@ void process_rgba8_webp(T const& image, std::string const& t, std::ostream & str
 }
 
 template <>
-void webp_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
+void webp_saver::operator()<image_rgba8> (image_rgba8 const& image) const
 {
     process_rgba8_webp(image, t_, stream_);
 }
@@ -377,7 +377,7 @@ void webp_saver::operator() (T const& image) const
     throw ImageWriterException("Mapnik does not support webp grayscale images");
 }
 
-template void webp_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const;
+template void webp_saver::operator()<image_rgba8> (image_rgba8 const& image) const;
 template void webp_saver::operator()<image_data_gray8> (image_data_gray8 const& image) const;
 template void webp_saver::operator()<image_data_gray16> (image_data_gray16 const& image) const;
 template void webp_saver::operator()<image_data_gray32f> (image_data_gray32f const& image) const;

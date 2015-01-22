@@ -66,7 +66,7 @@ void render_vector_marker(SvgRenderer & svg_renderer, RasterizerType & ras, Rend
 }
 
 template <typename RendererType, typename RasterizerType>
-void render_raster_marker(RendererType renb, RasterizerType & ras, image_data_rgba8 const& src,
+void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 const& src,
                           agg::trans_affine const& tr, double opacity,
                           float scale_factor, bool snap_to_pixels)
 {

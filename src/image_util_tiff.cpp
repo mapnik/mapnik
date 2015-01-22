@@ -181,7 +181,7 @@ void tiff_saver::operator() (T const& image) const
 #endif
 }
 
-template void tiff_saver::operator() (image_data_rgba8 const& image) const;
+template void tiff_saver::operator() (image_rgba8 const& image) const;
 template void tiff_saver::operator() (image_data_gray8 const& image) const;
 template void tiff_saver::operator() (image_data_gray16 const& image) const;
 template void tiff_saver::operator() (image_data_gray32f const& image) const;

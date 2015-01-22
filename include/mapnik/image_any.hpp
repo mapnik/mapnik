@@ -52,7 +52,7 @@ struct image_data_null
 };
 
 using image_data_base = util::variant<image_data_null, 
-                                      image_data_rgba8, 
+                                      image_rgba8, 
                                       image_data_gray8, 
                                       image_data_gray16, 
                                       image_data_gray32f>;
@@ -217,7 +217,7 @@ inline image_any create_image_any(int width,
         return image_any(std::move(image_data_null()));
       case image_dtype_rgba8:
       default:
-        return image_any(std::move(image_data_rgba8(width, height, initialize, premultiplied, painted)));
+        return image_any(std::move(image_rgba8(width, height, initialize, premultiplied, painted)));
     }
 }
 

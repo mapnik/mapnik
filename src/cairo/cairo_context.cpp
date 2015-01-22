@@ -53,7 +53,7 @@ struct visitor_context_add_image_1
 };
 
 template <>
-void visitor_context_add_image_1::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_context_add_image_1::operator()<image_rgba8> (image_rgba8 & data)
 {
     context_.add_image(x_, y_, data, opacity_);
 }
@@ -76,7 +76,7 @@ struct visitor_context_add_image_2
 };
 
 template <>
-void visitor_context_add_image_2::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_context_add_image_2::operator()<image_rgba8> (image_rgba8 & data)
 {
     context_.add_image(tr_, data, opacity_);
 }
@@ -398,7 +398,7 @@ void cairo_context::add_image(agg::trans_affine const& tr, image_any & data, dou
     util::apply_visitor(detail::visitor_context_add_image_2(*this,tr,opacity), data);
 }
 
-void cairo_context::add_image(double x, double y, image_data_rgba8 & data, double opacity)
+void cairo_context::add_image(double x, double y, image_rgba8 & data, double opacity)
 {
     cairo_pattern pattern(data);
     pattern.set_origin(x, y);
@@ -409,7 +409,7 @@ void cairo_context::add_image(double x, double y, image_data_rgba8 & data, doubl
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_image(agg::trans_affine const& tr, image_data_rgba8 & data, double opacity)
+void cairo_context::add_image(agg::trans_affine const& tr, image_rgba8 & data, double opacity)
 {
     cairo_pattern pattern(data);
     if (!tr.is_identity())

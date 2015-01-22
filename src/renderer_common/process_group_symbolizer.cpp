@@ -40,7 +40,7 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
 {}
 
 template <>
-raster_marker_render_thunk<image_data_rgba8>::raster_marker_render_thunk(image_data_rgba8 & src,
+raster_marker_render_thunk<image_rgba8>::raster_marker_render_thunk(image_rgba8 & src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,

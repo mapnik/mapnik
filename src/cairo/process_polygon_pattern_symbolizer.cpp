@@ -58,7 +58,7 @@ struct visitor_set_pattern
 };
 
 template <>
-void visitor_set_pattern::operator()<image_data_rgba8> (image_data_rgba8 & data)
+void visitor_set_pattern::operator()<image_rgba8> (image_rgba8 & data)
 {
     cairo_pattern pattern(data, opacity_);
     pattern.set_extend(CAIRO_EXTEND_REPEAT);
@@ -119,7 +119,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     else
     {
         mapnik::rasterizer ras;
-        std::shared_ptr<image_data_rgba8> image = render_pattern<image_data_rgba8>(ras, **marker, image_tr, 1.0); //
+        std::shared_ptr<image_rgba8> image = render_pattern<image_rgba8>(ras, **marker, image_tr, 1.0); //
         cairo_pattern pattern(*image, opacity);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
         pattern.set_origin(offset_x, offset_y);

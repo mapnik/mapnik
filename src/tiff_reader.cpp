@@ -153,7 +153,7 @@ public:
     unsigned height() const final;
     boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
-    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    void read(unsigned x,unsigned y,image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
     unsigned bits_per_sample() const { return bps_; }
@@ -168,8 +168,8 @@ private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
     void init();
-    void read_generic(unsigned x,unsigned y,image_data_rgba8& image);
-    void read_stripped(unsigned x,unsigned y,image_data_rgba8& image);
+    void read_generic(unsigned x,unsigned y,image_rgba8& image);
+    void read_stripped(unsigned x,unsigned y,image_rgba8& image);
 
     template <typename ImageData>
     void read_tiled(unsigned x,unsigned y, ImageData & image);
@@ -377,7 +377,7 @@ boost::optional<box2d<double> > tiff_reader<T>::bounding_box() const
 }
 
 template <typename T>
-void tiff_reader<T>::read(unsigned x,unsigned y,image_data_rgba8& image)
+void tiff_reader<T>::read(unsigned x,unsigned y,image_rgba8& image)
 {
     if (read_method_==stripped)
     {
@@ -464,7 +464,7 @@ struct tiff_reader_traits
 
 // default specialization that expands into RGBA
 template <>
-struct tiff_reader_traits<image_data_rgba8>
+struct tiff_reader_traits<image_rgba8>
 {
     using pixel_type = std::uint32_t;
     static bool read_tile(TIFF * tif, unsigned x0, unsigned y0, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
@@ -518,7 +518,7 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
             TIFF* tif = open(stream_);
             if (tif)
             {
-                image_data_rgba8 data(width, height, true, premultiplied_alpha_);
+                image_rgba8 data(width, height, true, premultiplied_alpha_);
                 std::size_t element_size = sizeof(detail::rgb8);
                 std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
                 const std::unique_ptr<detail::rgb8[]> scanline(new detail::rgb8[size_to_allocate]);
@@ -532,7 +532,7 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
                     {
                         if (y >= y0)
                         {
-                            image_data_rgba8::pixel_type * row = data.getRow(y - y0);
+                            image_rgba8::pixel_type * row = data.getRow(y - y0);
                             std::transform(scanline.get() + start_x, scanline.get() + end_x, row, detail::rgb8_to_rgba8());
                         }
                     }
@@ -543,13 +543,13 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
         }
         case 16:
         {
-            image_data_rgba8 data(width,height,true,premultiplied_alpha_);
+            image_rgba8 data(width,height,true,premultiplied_alpha_);
             read(x0, y0, data);
             return image_any(std::move(data));
         }
         case 32:
         {
-            image_data_rgba8 data(width,height,true,premultiplied_alpha_);
+            image_rgba8 data(width,height,true,premultiplied_alpha_);
             read(x0, y0, data);
             return image_any(std::move(data));
         }
@@ -567,7 +567,7 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
         //PHOTOMETRIC_ITULAB = 10;
         //PHOTOMETRIC_LOGL = 32844;
         //PHOTOMETRIC_LOGLUV = 32845;
-        image_data_rgba8 data(width,height, true, premultiplied_alpha_);
+        image_rgba8 data(width,height, true, premultiplied_alpha_);
         read(x0, y0, data);
         return image_any(std::move(data));
     }
@@ -576,7 +576,7 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_rgba8& image)
+void tiff_reader<T>::read_generic(unsigned, unsigned, image_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
@@ -630,12 +630,12 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
 
 
 template <typename T>
-void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_data_rgba8& image)
+void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
     {
-        image_data_rgba8 strip(width_,rows_per_strip_,false);
+        image_rgba8 strip(width_,rows_per_strip_,false);
         int width=image.width();
         int height=image.height();
 

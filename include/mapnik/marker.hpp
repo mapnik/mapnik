@@ -57,7 +57,7 @@ public:
     marker()
     {
         // create default OGC 4x4 black pixel
-        image_data_rgba8 image(4,4,true,true);
+        image_rgba8 image(4,4,true,true);
         image.set(0xff000000);
         bitmap_data_ = boost::optional<image_ptr>(std::make_shared<image_any>(std::move(image)));
     }

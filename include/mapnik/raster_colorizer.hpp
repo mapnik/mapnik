@@ -198,7 +198,7 @@ public:
     colorizer_stops const& get_stops() const { return stops_; }
 
     template <typename T>
-    void colorize(image_data_rgba8 & out, T const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
+    void colorize(image_rgba8 & out, T const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!

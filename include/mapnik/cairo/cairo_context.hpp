@@ -122,7 +122,7 @@ private:
 class cairo_pattern : private util::noncopyable
 {
 public:
-    explicit cairo_pattern(image_data_rgba8 const& data, double opacity = 1.0)
+    explicit cairo_pattern(image_rgba8 const& data, double opacity = 1.0)
     {
         int pixels = data.width() * data.height();
         const unsigned int *in_ptr = data.getData();
@@ -310,8 +310,8 @@ public:
     void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_any & data, double opacity);
     void add_image(agg::trans_affine const& tr, image_any & data, double opacity);
-    void add_image(double x, double y, image_data_rgba8 & data, double opacity = 1.0);
-    void add_image(agg::trans_affine const& tr, image_data_rgba8 & data, double opacity = 1.0);
+    void add_image(double x, double y, image_rgba8 & data, double opacity = 1.0);
+    void add_image(agg::trans_affine const& tr, image_rgba8 & data, double opacity = 1.0);
     void set_font_face(cairo_face_manager & manager, face_ptr face);
     void set_font_matrix(cairo_matrix_t const& matrix);
     void set_matrix(cairo_matrix_t const& matrix);

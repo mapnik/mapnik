@@ -65,7 +65,7 @@ void process_rgba8_jpeg(T const& image, std::string const& t, std::ostream & str
 }
 
 template<>
-void jpeg_saver::operator()<image_data_rgba8> (image_data_rgba8 const& image) const
+void jpeg_saver::operator()<image_rgba8> (image_rgba8 const& image) const
 {
     process_rgba8_jpeg(image, t_, stream_);
 }

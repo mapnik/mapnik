@@ -241,7 +241,7 @@ void composite(image_any & dst, image_any & src, mapnik::composite_mode_e mode, 
 std::shared_ptr<image_any> from_cairo(PycairoSurface* py_surface)
 {
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
-    mapnik::image_data_rgba8 image = mapnik::image_data_rgba8(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
+    mapnik::image_rgba8 image = mapnik::image_rgba8(cairo_image_surface_get_width(&*surface), cairo_image_surface_get_height(&*surface));
     cairo_image_to_rgba8(image, surface);
     return std::make_shared<image_any>(std::move(image));
 }

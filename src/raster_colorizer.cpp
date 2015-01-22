@@ -123,7 +123,7 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 }
 
 template <typename T>
-void raster_colorizer::colorize(image_data_rgba8 & out, T const& in,
+void raster_colorizer::colorize(image_rgba8 & out, T const& in,
                                 boost::optional<double> const& nodata,
                                 feature_impl const& f) const
 {
@@ -286,13 +286,13 @@ unsigned raster_colorizer::get_color(float value) const
 }
 
 
-template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray8 const& in,
+template void raster_colorizer::colorize(image_rgba8 & out, image_data_gray8 const& in,
                                 boost::optional<double>const& nodata,
                                 feature_impl const& f) const;
-template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray16 const& in,
+template void raster_colorizer::colorize(image_rgba8 & out, image_data_gray16 const& in,
                                 boost::optional<double>const& nodata,
                                 feature_impl const& f) const;
-template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray32f const& in,
+template void raster_colorizer::colorize(image_rgba8 & out, image_data_gray32f const& in,
                                          boost::optional<double>const& nodata,
                                          feature_impl const& f) const;
 

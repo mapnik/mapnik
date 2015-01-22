@@ -124,7 +124,7 @@ public:
     unsigned height() const final;
     boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
-    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
+    void read(unsigned x,unsigned y,image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
@@ -236,7 +236,7 @@ boost::optional<box2d<double> > webp_reader<T>::bounding_box() const
 }
 
 template <typename T>
-void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_rgba8& image)
+void webp_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
 {
     WebPDecoderConfig config;
     config_guard guard(config);
@@ -270,7 +270,7 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_data_rgba8& image)
 template <typename T>
 image_any webp_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
 {
-    image_data_rgba8 data(width,height);
+    image_rgba8 data(width,height);
     read(x, y, data);
     return image_any(std::move(data));
 }

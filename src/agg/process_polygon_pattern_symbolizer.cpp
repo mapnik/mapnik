@@ -68,12 +68,12 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     if ((*marker_ptr)->is_bitmap())
     {
         // FIXME: copy is necessary atm to transform a
-        // shared_ptr<image_any> into shared_ptr<image_data_rgba8>
+        // shared_ptr<image_any> into shared_ptr<image_rgba8>
         boost::optional<image_ptr> bitmap = (*marker_ptr)->get_bitmap_data();
         if (bitmap) {
             mapnik::image_any const& im = *(bitmap)->get();
             if (im.is<buffer_type>()) {
-                // invoke copy ctor of image_data_rgba8
+                // invoke copy ctor of image_rgba8
                 pat = std::make_shared<buffer_type>(util::get<buffer_type>(im));
             }
         }
@@ -188,7 +188,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 }
 
 
-template void agg_renderer<image_data_rgba8>::process(polygon_pattern_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(polygon_pattern_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

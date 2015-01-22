@@ -114,7 +114,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         {
             if (size > 0)
             {
-                mapnik::image_data_rgba8 image(width,height);
+                mapnik::image_rgba8 image(width,height);
                 unsigned char* raster_data = static_cast<unsigned char*>(raster);
                 unsigned char* image_data = image.getBytes();
                 std::memcpy(image_data, raster_data, size);

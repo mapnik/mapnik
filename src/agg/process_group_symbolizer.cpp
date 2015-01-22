@@ -54,9 +54,9 @@ template <typename T>
 struct thunk_renderer;
 
 template <>
-struct thunk_renderer<image_data_rgba8>
+struct thunk_renderer<image_rgba8>
 {
-    using renderer_type = agg_renderer<image_data_rgba8>;
+    using renderer_type = agg_renderer<image_rgba8>;
     using buffer_type = renderer_type::buffer_type;
     using text_renderer_type = agg_text_renderer<buffer_type>;
 
@@ -94,7 +94,7 @@ struct thunk_renderer<image_data_rgba8>
         render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(), offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
     }
 
-    void operator()(raster_marker_render_thunk<image_data_rgba8> const &thunk) const
+    void operator()(raster_marker_render_thunk<image_rgba8> const &thunk) const
     {
         using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>; // comp blender
         using buf_type = agg::rendering_buffer;
@@ -114,17 +114,17 @@ struct thunk_renderer<image_data_rgba8>
 
     void operator()(raster_marker_render_thunk<image_data_gray8> const &thunk) const
     {
-        throw std::runtime_error("Rendering of this image_data_gray8 type is not supported currently by the image_data_rgba8 renderer");
+        throw std::runtime_error("Rendering of this image_data_gray8 type is not supported currently by the image_rgba8 renderer");
     }
 
     void operator()(raster_marker_render_thunk<image_data_gray16> const &thunk) const
     {
-        throw std::runtime_error("Rendering of this image_data_gray16 type is not supported currently by the image_data_rgba8 renderer");
+        throw std::runtime_error("Rendering of this image_data_gray16 type is not supported currently by the image_rgba8 renderer");
     }
 
     void operator()(raster_marker_render_thunk<image_data_gray32f> const &thunk) const
     {
-        throw std::runtime_error("Rendering of this image_data_gray32f type is not supported currently by the image_data_rgba8 renderer");
+        throw std::runtime_error("Rendering of this image_data_gray32f type is not supported currently by the image_rgba8 renderer");
     }
 
     void operator()(text_render_thunk const &thunk) const
@@ -179,7 +179,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
         });
 }
 
-template void agg_renderer<image_data_rgba8>::process(group_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(group_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

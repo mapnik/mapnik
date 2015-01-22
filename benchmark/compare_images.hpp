@@ -24,8 +24,8 @@ namespace benchmark {
             throw mapnik::image_reader_exception("Failed to load: " + src_fn);
         }
 
-        image_data_rgba8 const& dest = util::get<image_data_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
-        image_data_rgba8 const& src = util::get<image_data_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
+        image_rgba8 const& dest = util::get<image_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
+        image_rgba8 const& src = util::get<image_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
 
         unsigned int width = src.width();
         unsigned int height = src.height();
