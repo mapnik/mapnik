@@ -42,7 +42,6 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/graphics.hpp>
 
 // agg
 #include <agg_trans_affine.h>
