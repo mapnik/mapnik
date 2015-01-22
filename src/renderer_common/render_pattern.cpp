@@ -72,12 +72,12 @@ std::shared_ptr<image_rgba8> render_pattern<image_rgba8>(rasterizer & ras,
 }
 
 template <>
-std::shared_ptr<image_data_null> render_pattern<image_data_null>(rasterizer & ras,
+std::shared_ptr<image_null> render_pattern<image_null>(rasterizer & ras,
                                               marker const& marker,
                                               agg::trans_affine const& tr,
                                               double opacity)
 {
-    throw std::runtime_error("Can not return image_data_null type from render pattern");
+    throw std::runtime_error("Can not return image_null type from render pattern");
 }
 /*
 template <>

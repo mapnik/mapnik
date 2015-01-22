@@ -431,7 +431,7 @@ template bool is_solid_visitor::operator()<image_view_gray16> (image_view_gray16
 template bool is_solid_visitor::operator()<image_view_gray32f> (image_view_gray32f const& data);
 
 template<>
-bool is_solid_visitor::operator()<image_data_null> (image_data_null const&)
+bool is_solid_visitor::operator()<image_null> (image_null const&)
 {
     return true;
 }
@@ -921,7 +921,7 @@ void visitor_set_rectangle::operator()<image_rgba8> (image_rgba8 & dst)
 }
 
 template<>
-void visitor_set_rectangle::operator()<image_data_null> (image_data_null &)
+void visitor_set_rectangle::operator()<image_null> (image_null &)
 {
     throw std::runtime_error("Set rectangle not support for null images");
 }
@@ -1250,7 +1250,7 @@ struct visitor_create_view
 };
 
 template <>
-image_view_any visitor_create_view::operator()<image_data_null> (image_data_null const&)
+image_view_any visitor_create_view::operator()<image_null> (image_null const&)
 {
     throw std::runtime_error("Can not make a view from a null image");
 }

@@ -172,7 +172,7 @@ struct warp_image_visitor
           scaling_method_(scaling_method),
         filter_factor_(filter_factor) {}
 
-    void operator() (image_data_null const&) {}
+    void operator() (image_null const&) {}
 
     template <typename T>
     void operator() (T const& source)

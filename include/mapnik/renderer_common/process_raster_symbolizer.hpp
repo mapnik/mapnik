@@ -69,7 +69,7 @@ struct image_data_dispatcher
         composite_(composite),
         nodata_(nodata) {}
 
-    void operator() (image_data_null const& data_in) const {}  //no-op
+    void operator() (image_null const& data_in) const {}  //no-op
     void operator() (image_rgba8 const& data_in) const
     {
         image_rgba8 data_out(width_, height_, true, true);
@@ -135,7 +135,7 @@ struct image_data_warp_dispatcher
         composite_(composite),
         nodata_(nodata) {}
 
-    void operator() (image_data_null const& data_in) const {} //no-op
+    void operator() (image_null const& data_in) const {} //no-op
 
     void operator() (image_rgba8 const& data_in) const
     {

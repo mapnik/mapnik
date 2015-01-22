@@ -257,7 +257,7 @@ struct tag_setter
 
         }
     }
-    inline void operator() (image_data_null const&) const
+    inline void operator() (image_null const&) const
     {
         // Assume this would be null type
         throw ImageWriterException("Could not write TIFF - Null image provided");

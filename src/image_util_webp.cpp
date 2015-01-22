@@ -335,7 +335,7 @@ webp_saver::webp_saver(std::ostream & stream, std::string const& t):
     stream_(stream), t_(t) {}
 
 template<>
-void webp_saver::operator()<image_data_null> (image_data_null const& image) const
+void webp_saver::operator()<image_null> (image_null const& image) const
 {
     throw ImageWriterException("null images not supported");
 }

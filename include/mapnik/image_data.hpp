@@ -282,7 +282,7 @@ using image_gray8 = image_data<std::uint8_t> ;
 using image_gray16 = image_data<std::int16_t>;
 using image_gray32f = image_data<float>;
 
-enum image_dtype
+enum image_dtype : std::uint8_t
 {
     image_dtype_rgba8 = 0,
     image_dtype_gray8,

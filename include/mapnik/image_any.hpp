@@ -28,7 +28,7 @@
 
 namespace mapnik {
 
-struct image_data_null
+struct image_null
 {   
     using pixel_type = uint8_t;
     unsigned char const* getBytes() const { return nullptr; }
@@ -51,7 +51,7 @@ struct image_data_null
     }
 };
 
-using image_data_base = util::variant<image_data_null, 
+using image_data_base = util::variant<image_null, 
                                       image_rgba8, 
                                       image_gray8, 
                                       image_gray16, 
@@ -214,7 +214,7 @@ inline image_any create_image_any(int width,
       case image_dtype_gray32f:
         return image_any(std::move(image_gray32f(width, height, initialize, premultiplied, painted)));
       case image_dtype_null:
-        return image_any(std::move(image_data_null()));
+        return image_any(std::move(image_null()));
       case image_dtype_rgba8:
       default:
         return image_any(std::move(image_rgba8(width, height, initialize, premultiplied, painted)));

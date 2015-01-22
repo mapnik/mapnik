@@ -154,7 +154,7 @@ struct visitor_push_thunk
 };
 
 template <>
-void visitor_push_thunk::operator()<image_data_null> (image_data_null &)
+void visitor_push_thunk::operator()<image_null> (image_null &)
 {
     throw std::runtime_error("Push thunk does not support null images");
 }

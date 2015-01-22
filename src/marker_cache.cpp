@@ -143,7 +143,7 @@ marker_ptr visitor_create_marker::operator()<image_rgba8> (image_rgba8 & data)
 }
 
 template<>
-marker_ptr visitor_create_marker::operator()<image_data_null> (image_data_null & data)
+marker_ptr visitor_create_marker::operator()<image_null> (image_null & data)
 {
     throw std::runtime_error("Can not make marker from null image data type");
 }

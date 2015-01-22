@@ -184,13 +184,13 @@ png_saver_pal::png_saver_pal(std::ostream & stream, std::string const& t, rgba_p
     stream_(stream), t_(t), pal_(pal) {}
 
 template<>
-void png_saver::operator()<image_data_null> (image_data_null const& image) const
+void png_saver::operator()<image_null> (image_null const& image) const
 {
     throw ImageWriterException("null images not supported for png");
 }
 
 template<>
-void png_saver_pal::operator()<image_data_null> (image_data_null const& image) const
+void png_saver_pal::operator()<image_null> (image_null const& image) const
 {
     throw ImageWriterException("null images not supported for png");
 }
