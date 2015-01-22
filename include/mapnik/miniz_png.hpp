@@ -32,7 +32,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 
 /* miniz.c porting issues:

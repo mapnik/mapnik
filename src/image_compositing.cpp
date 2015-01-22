@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
 
 // boost
@@ -129,8 +129,8 @@ namespace detail {
 template <typename T>
 struct rendering_buffer
 {
-    using image_data_type = T;
-    using pixel_type = typename image_data_type::pixel_type;
+    using image_type = T;
+    using pixel_type = typename image_type::pixel_type;
     using row_data = agg::const_row_info<uint8_t>;
 
     rendering_buffer(T const& data)
@@ -143,7 +143,7 @@ struct rendering_buffer
     uint8_t const* row_ptr(int, int y, unsigned) {return row_ptr(y);}
     uint8_t const* row_ptr(int y) const { return reinterpret_cast<uint8_t const*>(data_.getRow(y)); }
     row_data row (int y) const { return row_data(0, data_.width() - 1, row_ptr(y)); }
-    image_data_type const& data_;
+    image_type const& data_;
 };
 
 } // end detail ns

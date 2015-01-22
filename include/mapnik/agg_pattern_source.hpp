@@ -24,7 +24,7 @@
 #define MAPNIK_AGG_PATTERN_SOURCE_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // agg

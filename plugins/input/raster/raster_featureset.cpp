@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/image_reader.hpp>

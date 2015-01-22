@@ -28,7 +28,7 @@
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
 #include <mapnik/miniz_png.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION

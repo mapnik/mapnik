@@ -10,7 +10,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/feature_style_processor.hpp>

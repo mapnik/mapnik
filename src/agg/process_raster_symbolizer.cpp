@@ -28,7 +28,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/box2d.hpp>

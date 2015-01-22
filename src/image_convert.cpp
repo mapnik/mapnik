@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/image_convert.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
  
 namespace mapnik

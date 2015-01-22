@@ -23,7 +23,7 @@
 #ifndef MAPNIK_IMAGE_DATA_ANY_HPP
 #define MAPNIK_IMAGE_DATA_ANY_HPP
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/variant.hpp>
 
 namespace mapnik {
@@ -40,18 +40,18 @@ struct image_null
     bool painted() const { return false; }
     bool get_premultiplied() const { return false; }
     void set_premultiplied(bool) const {}
-    void set(pixel_type const&) { throw std::runtime_error("Can not set values for null image_data"); }
+    void set(pixel_type const&) { throw std::runtime_error("Can not set values for null image"); }
     pixel_type& operator() (std::size_t, std::size_t) 
     { 
-        throw std::runtime_error("Can not set or get values for null image_data"); 
+        throw std::runtime_error("Can not set or get values for null image"); 
     }
     pixel_type const& operator() (std::size_t, std::size_t) const
     { 
-        throw std::runtime_error("Can not set or get values for null image_data"); 
+        throw std::runtime_error("Can not set or get values for null image"); 
     }
 };
 
-using image_data_base = util::variant<image_null, 
+using image_base = util::variant<image_null, 
                                       image_rgba8, 
                                       image_gray8, 
                                       image_gray16, 
@@ -141,7 +141,7 @@ struct get_any_row_size_visitor
 };
 } // namespace detail
 
-struct image_any : image_data_base
+struct image_any : image_base
 {
     image_any() = default;
 
@@ -151,11 +151,11 @@ struct image_any : image_data_base
                    bool initialize = true, 
                    bool premultiplied = false, 
                    bool painted = false)
-        : image_data_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
+        : image_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
 
     template <typename T>
     image_any(T && data) noexcept
-        : image_data_base(std::move(data)) {}
+        : image_base(std::move(data)) {}
 
     unsigned char const* getBytes() const
     {

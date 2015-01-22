@@ -25,7 +25,7 @@
 #define MAPNIK_CAIRO_IMAGE_UTIL_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/cairo/cairo_context.hpp> // for cairo_surface_ptr
 
 // stl

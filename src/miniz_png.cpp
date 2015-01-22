@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/palette.hpp>
 #include <mapnik/miniz_png.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 
 // miniz

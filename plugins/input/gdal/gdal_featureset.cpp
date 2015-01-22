@@ -24,7 +24,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/feature.hpp>

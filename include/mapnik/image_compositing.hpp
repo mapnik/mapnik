@@ -24,7 +24,7 @@
 #define MAPNIK_IMAGE_COMPOSITING_HPP
 
 #include <mapnik/config.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 
 // boost
 #include <boost/optional.hpp>

@@ -26,7 +26,7 @@
 #include <mapnik/image_util_png.hpp>
 #include <mapnik/image_util_tiff.hpp>
 #include <mapnik/image_util_webp.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
 #include <mapnik/image_view_any.hpp>
 #include <mapnik/image_view.hpp>

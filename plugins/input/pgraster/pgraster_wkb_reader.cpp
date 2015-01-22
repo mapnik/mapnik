@@ -32,7 +32,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/box2d.hpp> // for box2d
@@ -279,7 +279,7 @@ mapnik::raster_ptr read_grayscale_band(mapnik::box2d<double> const& bbox,
 
   int val;
   uint8_t * data = image.getBytes();
-  int ps = 4; // sizeof(image_data::pixel_type)
+  int ps = 4; // sizeof(image::pixel_type)
   int off;
   val = reader(); // nodata value, need to read anyway
   for (int y=0; y<height; ++y) {
@@ -352,9 +352,9 @@ mapnik::raster_ptr pgraster_wkb_reader::read_grayscale(mapnik::box2d<double> con
 mapnik::raster_ptr pgraster_wkb_reader::read_rgba(mapnik::box2d<double> const& bbox,
                                                   uint16_t width, uint16_t height)
 {
-  mapnik::image_rgba8 image(width, height, true, true);
+  mapnik::image_rgba8 im(width, height, true, true);
   // Start with plain white (ABGR or RGBA depending on endiannes)
-  image.set(0xffffffff);
+  im.set(0xffffffff);
 
   uint8_t nodataval;
   for (int bn=0; bn<numBands_; ++bn) {
@@ -387,8 +387,8 @@ mapnik::raster_ptr pgraster_wkb_reader::read_rgba(mapnik::box2d<double> const& b
             << " nodataval " << tmp << " != band 0 nodataval " << nodataval;
     }
 
-    int ps = 4; // sizeof(image_data::pixel_type)
-    uint8_t * image_data = image.getBytes();
+    int ps = 4; // sizeof(image::pixel_type)
+    uint8_t * image_data = im.getBytes();
     for (int y=0; y<height_; ++y) {
       for (int x=0; x<width_; ++x) {
         uint8_t val = read_uint8(&ptr_);
@@ -400,7 +400,7 @@ mapnik::raster_ptr pgraster_wkb_reader::read_rgba(mapnik::box2d<double> const& b
       }
     }
   }
-  mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(bbox, image, 1.0);
+  mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(bbox, im, 1.0);
   raster->set_nodata(0xffffffff);
   return raster;
 }

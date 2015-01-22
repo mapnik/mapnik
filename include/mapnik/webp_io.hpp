@@ -24,7 +24,7 @@
 #define MAPNIK_WEBP_IO_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 
 // webp
@@ -73,14 +73,14 @@ std::string webp_encoding_error(WebPEncodingError error)
 }
 
 template <typename T2>
-inline int import_image_data(T2 const& image,
+inline int import_image(T2 const& im_in,
                              WebPPicture & pic,
                              bool alpha)
 {
-    image_data<typename T2::pixel_type> const& data = image.data();
-    int stride = sizeof(typename T2::pixel_type) * image.width();
-    if (data.width() == image.width() &&
-        data.height() == image.height())
+    image<typename T2::pixel_type> const& data = im_in.data();
+    int stride = sizeof(typename T2::pixel_type) * im_in.width();
+    if (data.width() == im_in.width() &&
+        data.height() == im_in.height())
     {
         if (alpha)
         {
@@ -98,10 +98,10 @@ inline int import_image_data(T2 const& image,
     else
     {
         // need to copy: https://github.com/mapnik/mapnik/issues/2024
-        image_rgba8 im(image.width(),image.height());
-        for (unsigned y = 0; y < image.height(); ++y)
+        image_rgba8 im(im_in.width(),im_in.height());
+        for (unsigned y = 0; y < im_in.height(); ++y)
         {
-            typename T2::pixel_type const * row_from = image.getRow(y);
+            typename T2::pixel_type const * row_from = im_in.getRow(y);
             image_rgba8::pixel_type * row_to = im.getRow(y);
             std::copy(row_from, row_from + stride, row_to);
         }
@@ -121,7 +121,7 @@ inline int import_image_data(T2 const& image,
 }
 
 template <>
-inline int import_image_data(image_rgba8 const& im,
+inline int import_image(image_rgba8 const& im,
                              WebPPicture & pic,
                              bool alpha)
 {
@@ -187,10 +187,10 @@ void save_as_webp(T1& file,
     {
         // different approach for lossy since ImportYUVAFromRGBA is needed
         // to prepare WebPPicture and working with view pixels is not viable
-        ok = import_image_data(image,pic,alpha);
+        ok = import_image(image,pic,alpha);
     }
 #else
-    ok = import_image_data(image,pic,alpha);
+    ok = import_image(image,pic,alpha);
 #endif
     if (!ok)
     {

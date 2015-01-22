@@ -116,13 +116,13 @@ struct image_dimensions
 }
 
 template <typename T, std::size_t max_size = 65535>
-class image_data
+class image
 {
 public:
     using pixel_type = T;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 
-    image_data(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false)
+    image(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false)
         : dimensions_(width, height),
           buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -132,7 +132,7 @@ public:
         if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
 
-    image_data(image_data<pixel_type> const& rhs)
+    image(image<pixel_type> const& rhs)
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -140,7 +140,7 @@ public:
           painted_(rhs.painted_)
     {}
 
-    image_data(image_data<pixel_type> && rhs) noexcept
+    image(image<pixel_type> && rhs) noexcept
         : dimensions_(std::move(rhs.dimensions_)),
           buffer_(std::move(rhs.buffer_)),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -151,13 +151,13 @@ public:
         rhs.pData_ = nullptr;
     }
 
-    image_data<pixel_type>& operator=(image_data<pixel_type> rhs)
+    image<pixel_type>& operator=(image<pixel_type> rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(image_data<pixel_type> & rhs)
+    void swap(image<pixel_type> & rhs)
     {
         std::swap(dimensions_, rhs.dimensions_);
         std::swap(buffer_, rhs.buffer_);
@@ -277,10 +277,10 @@ private:
     bool painted_;
 };
 
-using image_rgba8 = image_data<std::uint32_t>;
-using image_gray8 = image_data<std::uint8_t> ;
-using image_gray16 = image_data<std::int16_t>;
-using image_gray32f = image_data<float>;
+using image_rgba8 = image<std::uint32_t>;
+using image_gray8 = image<std::uint8_t> ;
+using image_gray16 = image<std::int16_t>;
+using image_gray32f = image<float>;
 
 enum image_dtype : std::uint8_t
 {

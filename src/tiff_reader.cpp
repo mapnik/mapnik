@@ -397,12 +397,12 @@ template <typename T>
 template <typename ImageData>
 image_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width, unsigned height)
 {
-    using image_data_type = ImageData;
-    using pixel_type = typename image_data_type::pixel_type;
+    using image_type = ImageData;
+    using pixel_type = typename image_type::pixel_type;
     if (read_method_ == tiled)
     {
-        image_data_type data(width,height);
-        read_tiled<image_data_type>(x0, y0, data);
+        image_type data(width,height);
+        read_tiled<image_type>(x0, y0, data);
         return image_any(std::move(data));
     }
     else
@@ -410,7 +410,7 @@ image_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width
         TIFF* tif = open(stream_);
         if (tif)
         {
-            image_data_type data(width, height);
+            image_type data(width, height);
             std::size_t block_size = rows_per_strip_ > 0 ? rows_per_strip_ : tile_height_ ;
             std::ptrdiff_t start_y = y0 - y0 % block_size;
             std::ptrdiff_t end_y = std::min(y0 + height, static_cast<unsigned>(height_));
@@ -454,8 +454,8 @@ struct rgb8_to_rgba8
 template <typename T>
 struct tiff_reader_traits
 {
-    using image_data_type = T;
-    using pixel_type = typename image_data_type::pixel_type;
+    using image_type = T;
+    using pixel_type = typename image_type::pixel_type;
     static bool read_tile(TIFF * tif, unsigned x, unsigned y, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
         return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, tile_width * tile_height * sizeof(pixel_type)) != -1);

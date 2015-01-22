@@ -27,7 +27,7 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>

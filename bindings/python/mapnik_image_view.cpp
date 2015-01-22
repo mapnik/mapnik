@@ -35,7 +35,7 @@
 #pragma GCC diagnostic pop
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/image_view_any.hpp>
 #include <mapnik/image_util.hpp>

@@ -45,10 +45,10 @@ namespace mapnik {
 namespace detail {
 
 template <typename F>
-struct image_data_dispatcher
+struct image_dispatcher
 {
     using composite_function = F;
-    image_data_dispatcher(int start_x, int start_y,
+    image_dispatcher(int start_x, int start_y,
                           int width, int height,
                           double scale_x, double scale_y,
                           scaling_method_e method, double filter_factor,
@@ -80,8 +80,8 @@ struct image_data_dispatcher
     template <typename T>
     void operator() (T const& data_in) const
     {
-        using image_data_type = T;
-        image_data_type data_out(width_, height_);
+        using image_type = T;
+        image_type data_out(width_, height_);
         scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
         image_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
@@ -107,10 +107,10 @@ private:
 };
 
 template <typename F>
-struct image_data_warp_dispatcher
+struct image_warp_dispatcher
 {
     using composite_function = F;
-    image_data_warp_dispatcher(proj_transform const& prj_trans,
+    image_warp_dispatcher(proj_transform const& prj_trans,
                                int start_x, int start_y, int width, int height,
                                box2d<double> const& target_ext, box2d<double> const& source_ext,
                                double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method,
@@ -147,8 +147,8 @@ struct image_data_warp_dispatcher
     template <typename T>
     void operator() (T const& data_in) const
     {
-        using image_data_type = T;
-        image_data_type data_out(width_, height_);
+        using image_type = T;
+        image_type data_out(width_, height_);
         if (nodata_) data_out.set(*nodata_);
         warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         image_rgba8 dst(width_, height_);
@@ -220,7 +220,7 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
                 double offset_x = ext.minx() - start_x;
                 double offset_y = ext.miny() - start_y;
                 unsigned mesh_size = static_cast<unsigned>(get<value_integer>(sym,keys::mesh_size,feature, common.vars_, 16));
-                detail::image_data_warp_dispatcher<F> dispatcher(prj_trans, start_x, start_y, raster_width, raster_height,
+                detail::image_warp_dispatcher<F> dispatcher(prj_trans, start_x, start_y, raster_width, raster_height,
                                                                  target_ext, source->ext_, offset_x, offset_y, mesh_size,
                                                                  scaling_method, source->get_filter_factor(),
                                                                  opacity, comp_op, sym, feature, composite, source->nodata());
@@ -243,7 +243,7 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
                 }
                 else
                 {
-                    detail::image_data_dispatcher<F> dispatcher(start_x, start_y, raster_width, raster_height,
+                    detail::image_dispatcher<F> dispatcher(start_x, start_y, raster_width, raster_height,
                                                                 image_ratio_x, image_ratio_y,
                                                                 scaling_method, source->get_filter_factor(),
                                                                 opacity, comp_op, sym, feature, composite, source->nodata());

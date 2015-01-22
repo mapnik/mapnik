@@ -40,7 +40,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
  // boost
 #include <boost/optional.hpp>
 // boost

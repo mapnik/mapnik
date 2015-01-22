@@ -26,7 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_render_marker.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/geom_util.hpp>

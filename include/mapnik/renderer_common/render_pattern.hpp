@@ -23,7 +23,7 @@
 #ifndef MAPNIK_RENDER_PATTERN_HPP
 #define MAPNIK_RENDER_PATTERN_HPP
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <memory>
 
 // fwd decl

@@ -387,7 +387,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_TILELENGTH, tile_height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         std::size_t tile_size = tile_width * tile_height;
-        std::unique_ptr<pixel_type[]> image_data_out (new pixel_type[tile_size]);
+        std::unique_ptr<pixel_type[]> image_out (new pixel_type[tile_size]);
         int end_y = (height / tile_height + 1) * tile_height;
         int end_x = (width / tile_width + 1) * tile_width;
         end_y = std::min(end_y, height);
@@ -400,14 +400,14 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
             for (int x = 0; x < end_x; x += tile_width)
             {
                 // Prefill the entire array with zeros.
-                std::fill(image_data_out.get(), image_data_out.get() + tile_size, 0);
+                std::fill(image_out.get(), image_out.get() + tile_size, 0);
                 int tx1 = std::min(width, x + tile_width);
                 int row = y;
                 for (int ty = 0; ty < ty1; ++ty, ++row)
                 {
-                    std::copy(image.getRow(row, x), image.getRow(row, tx1), image_data_out.get() + ty * tile_width);
+                    std::copy(image.getRow(row, x), image.getRow(row, tx1), image_out.get() + ty * tile_width);
                 }
-                if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_data_out.get(), tile_size * sizeof(pixel_type)) == -1)
+                if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_out.get(), tile_size * sizeof(pixel_type)) == -1)
                 {
                     throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
                 }

@@ -36,7 +36,7 @@
 #include <mapnik/request.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
 // stl
 #include <memory>

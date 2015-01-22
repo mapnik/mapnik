@@ -2,7 +2,7 @@
 #define __MAPNIK_COMPARE_IMAGES_HPP__
 
 #include <mapnik/graphics.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 
