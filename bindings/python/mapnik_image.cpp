@@ -290,7 +290,18 @@ void export_image()
         .value("divide", mapnik::divide)
         ;
 
-    class_<image_any,std::shared_ptr<image_any>, boost::noncopyable >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
+    enum_<mapnik::image_dtype>("ImageType")
+        .value("rgba8", mapnik::image_dtype_rgba8)
+        .value("gray8", mapnik::image_dtype_gray8)
+        .value("gray16", mapnik::image_dtype_gray16)
+        .value("gray32f", mapnik::image_dtype_gray32f)
+        ;
+
+    class_<image_any,std::shared_ptr<image_any>, boost::noncopyable >("Image","This class represents a image.",init<int,int>())
+        .def(init<int,int,mapnik::image_dtype>())
+        .def(init<int,int,mapnik::image_dtype,bool>())
+        .def(init<int,int,mapnik::image_dtype,bool,bool>())
+        .def(init<int,int,mapnik::image_dtype,bool,bool,bool>())
         .def("width",&image_any::width)
         .def("height",&image_any::height)
         .def("view",&get_view)

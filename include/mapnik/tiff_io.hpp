@@ -200,12 +200,14 @@ struct tag_setter
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
         if (data.get_premultiplied()) 
         {
-            uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
+            //uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
+            uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
             TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
         }
         else
         {
-            uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+            //uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+            uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
             TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
         }
         if (config_.compression == COMPRESSION_DEFLATE
@@ -346,7 +348,8 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, rows_per_strip);
         std::size_t strip_size = width * rows_per_strip;
         std::unique_ptr<pixel_type[]> strip_buffer(new pixel_type[strip_size]);
-        int end_y=(height/rows_per_strip+1)*rows_per_strip;
+        //int end_y=(height/rows_per_strip+1)*rows_per_strip;
+        int end_y=height;
 
         for (int y=0; y < end_y; y+=rows_per_strip)
         {

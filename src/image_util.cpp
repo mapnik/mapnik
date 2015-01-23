@@ -783,6 +783,19 @@ struct visitor_fill
     visitor_fill(T1 const& val)
         : val_(val) {}
 
+    void operator() (image_rgba8 & data)
+    {
+        using pixel_type = typename image_rgba8::pixel_type;
+        bool was_demultiplied = mapnik::demultiply_alpha(data);
+        pixel_type val = static_cast<pixel_type>(val_);
+        data.set(val);
+        if (was_demultiplied)
+        {
+            mapnik::premultiply_alpha(data);
+        }
+
+    }
+
     template <typename T2>
     void operator() (T2 & data)
     {
@@ -800,6 +813,19 @@ struct visitor_fill<color>
 {
     visitor_fill(color const& val)
         : val_(val) {}
+    
+    void operator() (image_rgba8 & data)
+    {
+        using pixel_type = typename image_rgba8::pixel_type;
+        bool was_demultiplied = mapnik::demultiply_alpha(data);
+        pixel_type val = static_cast<pixel_type>(val_.rgba());
+        data.set(val);
+        if (was_demultiplied)
+        {
+            mapnik::premultiply_alpha(data);
+        }
+
+    }
 
     template <typename T2>
     void operator() (T2 & data)
