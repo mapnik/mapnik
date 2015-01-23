@@ -4,11 +4,6 @@ compiler:
  - clang
  - gcc
 
-env:
-  matrix:
-   - DEBUG=False PLUGIN_LINKING=static ENABLE_LOG=True  DEFAULT_LOG_SEVERITY=debug XMLPARSER="libxml2" DEMO=False BENCHMARK=False CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
-   - DEBUG=False ENABLE_LOG=False DEFAULT_LOG_SEVERITY=none  XMLPARSER="ptree"   DEMO=False BENCHMARK=True CUSTOM_CXXFLAGS="" CUSTOM_LDFLAGS=""
-
 # travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
 # the below is thanks to https://github.com/CartoDB/Windshaft/blob/d82fe08b32fc7907bbe907ab290f8a082215ae26/.travis.yml#L1
 before_install:
@@ -16,38 +11,26 @@ before_install:
   - sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
   - sudo apt-get -qq purge postgis* postgresql*
   - sudo apt-add-repository -y ppa:cartodb/postgresql-9.3
-  - sudo apt-add-repository -y ppa:cartodb/gis
-  # grab harfbuzz from ppa
-  - sudo apt-add-repository -y ppa:fontforge/fontforge
-  # we need at least g++-4.7 for c++11 features
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   # enable to test against latest boost rather that v1.48
   #- sudo add-apt-repository -y ppa:boost-latest/ppa
   - sudo rm -Rf /var/lib/postgresql /etc/postgresql
   - sudo apt-get update -qq
-  - sudo apt-get install -q libharfbuzz-dev postgresql-9.3-postgis-2.1 postgresql-contrib-9.3 gdal-bin libgdal-dev
+  - sudo apt-get install -q postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
   - echo -e "local\tall\tall\ttrust\nhost\tall\tall\t127.0.0.1/32\ttrust\nhost\tall\tall\t::1/128\ttrust" |sudo tee /etc/postgresql/9.3/main/pg_hba.conf
   - sudo service postgresql restart
 
 install:
  # enable to test against boost ppa
- #- sudo apt-get install -y boost1.55
- - sudo apt-get install -y libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev
- - sudo apt-get install -y ttf-wqy-microhei make libstdc++6 libstdc++-4.8-dev valgrind python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
+ - sudo apt-get install -y ttf-wqy-microhei make valgrind python-nose 
 
 before_script:
  - psql -U postgres -c 'create database template_postgis'
  - psql -U postgres -c 'create extension postgis' -d template_postgis
- - if [[ "${CXX}" == 'g++' ]]; then export JOBS=2; sudo apt-get install gcc-4.8 g++-4.8; export CXX="$(which g++-4.8)"; export CC="$(which gcc-4.8)"; fi;
- - if [[ "${CXX}" == 'clang++' ]]; then export JOBS=4; export CXX="$(which clang++)"; export CC="$(which clang)"; fi;
 
 script:
- - rm -rf ./git
- - ./configure CXX="${CXX}" CC="${CC}" CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS}" CUSTOM_LDFLAGS="${CUSTOM_LDFLAGS}" XML_PARSER="${XML_PARSER}" ENABLE_LOG="${ENABLE_LOG}" DEBUG="${DEBUG}" DEMO="${DEMO}" BENCHMARK="${BENCHMARK}" CPP_TESTS=True CAIRO=True FAST=True || cat config.log
- - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
- - make
+ - source bootstrap.sh
+ - JOBS=2 make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - source localize.sh && make grind
- - if [[ ${BENCHMARK} != False ]]; then make bench; fi;
- - if [[ ${BENCHMARK} != False ]]; then for i in $(ls tests/visual_tests/styles/*xml); do echo $i;./benchmark/out/test_rendering --name "text rendering" --map $i --width 1024 --height 1024 --iterations 2 --threads 5;done;fi
+ - make bench
