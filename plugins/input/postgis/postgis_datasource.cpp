@@ -445,6 +445,14 @@ postgis_datasource::postgis_datasource(parameters const& params)
         // Close explicitly the connection so we can 'fork()' without sharing open connections
         conn->close();
 
+        // Finally, add unique metadata to layer descriptor
+        mapnik::parameters & extra_params = desc_.get_extra_parameters();
+        // explicitly make copies of values due to https://github.com/mapnik/mapnik/issues/2651
+        extra_params["srid"] = int(srid_);
+        if (!key_field_.empty())
+        {
+            extra_params["key_field"] = std::string(key_field_);
+        }
     }
 }
 

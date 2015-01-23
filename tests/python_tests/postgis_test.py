@@ -245,7 +245,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feature['subregion'],29)
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Polygon)
+        meta = ds.describe()
+        eq_(meta['srid'],3857)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['encoding'],u'UTF8')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
 
     def test_subquery():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select * from world_merc) as w')
@@ -263,7 +267,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feature['subregion'],29)
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Polygon)
+        meta = ds.describe()
+        eq_(meta['srid'],3857)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['encoding'],u'UTF8')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select gid,geom,fips as _fips from world_merc) as w')
         fs = ds.featureset()
@@ -271,7 +279,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feature['gid'],1)
         eq_(feature['_fips'],u'AC')
         eq_(len(feature),2)
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Polygon)
+        meta = ds.describe()
+        eq_(meta['srid'],3857)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['encoding'],u'UTF8')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
 
     def test_empty_db():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
@@ -282,12 +294,34 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         except StopIteration:
             pass
         eq_(feature,None)
-        eq_(ds.describe()['geometry_type'],None)
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['encoding'],u'UTF8')
+        eq_(meta['geometry_type'],None)
+
+    def test_manual_srid():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,srid=99, table='empty')
+        fs = ds.featureset()
+        feature = None
+        try:
+            feature = fs.next()
+        except StopIteration:
+            pass
+        eq_(feature,None)
+        meta = ds.describe()
+        eq_(meta['srid'],99)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['encoding'],u'UTF8')
+        eq_(meta['geometry_type'],None)
 
     def test_geometry_detection():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
                             geometry_field='geom')
-        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Collection)
 
         # will fail with postgis 2.0 because it automatically adds a geometry_columns entry
         #ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
@@ -327,6 +361,10 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(fs.next().id(),-1000)
         eq_(fs.next().id(),2147483647)
         eq_(fs.next().id(),-2147483648)
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),u'manual_id')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
 
     def test_auto_detection_will_fail_since_no_primary_key():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test3',
@@ -352,6 +390,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(fs.next().id(),4)
         eq_(fs.next().id(),5)
         eq_(fs.next().id(),6)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
 
     @raises(RuntimeError)
     def test_auto_detection_will_fail_and_should_throw():
@@ -380,6 +423,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(fs.next().id(),2147483647)
         eq_(fs.next().id(),-2147483648)
 
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),u'manual_id')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_disabled_auto_detection_and_subquery():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select geom, 'a'::varchar as name from test2) as t''',
                             geometry_field='geom',
@@ -404,6 +452,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feat.id(),6)
         eq_(feat['name'],'a')
 
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_auto_detection_and_subquery_including_key():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select geom, manual_id from test2) as t''',
                             geometry_field='geom',
@@ -423,6 +476,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(fs.next().id(),-1000)
         eq_(fs.next().id(),2147483647)
         eq_(fs.next().id(),-2147483648)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),u'manual_id')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
 
     @raises(RuntimeError)
     def test_auto_detection_of_invalid_numeric_primary_key():
@@ -463,6 +521,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(fs.next().id(),2147483647)
         eq_(fs.next().id(),-2147483648)
 
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),u'manual_id')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_numeric_type_feature_id_field():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test5',
                             geometry_field='geom',
@@ -475,6 +538,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(fs.next().id(),1)
         eq_(fs.next().id(),2)
 
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_querying_table_with_mixed_case():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='"tableWithMixedCase"',
                             geometry_field='geom',
@@ -483,6 +551,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         for id in range(1,5):
             eq_(fs.next().id(),id)
 
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),u'gid')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_querying_subquery_with_mixed_case():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(SeLeCt * FrOm "tableWithMixedCase") as MixedCaseQuery',
                             geometry_field='geom',
@@ -490,6 +563,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         fs = ds.featureset()
         for id in range(1,5):
             eq_(fs.next().id(),id)
+
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),u'gid')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
 
     def test_bbox_token_in_subquery1():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
@@ -500,6 +578,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         for id in range(1,5):
             eq_(fs.next().id(),id)
 
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),u'gid')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_bbox_token_in_subquery2():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
            (SeLeCt * FrOm "tableWithMixedCase" where ST_Intersects(geom,!bbox!) ) as MixedCaseQuery''',
@@ -509,11 +592,21 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         for id in range(1,5):
             eq_(fs.next().id(),id)
 
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),u'gid')
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_empty_geom():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test7',
                             geometry_field='geom')
         fs = ds.featureset()
         eq_(fs.next()['gid'],1)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Collection)
 
     def create_ds():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
@@ -522,6 +615,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             geometry_field='geom')
         fs = ds.all_features()
         eq_(len(fs),8)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Collection)
 
     def test_threaded_create(NUM_THREADS=100):
         # run one to start before thread loop
@@ -568,6 +666,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feat['gid'],2)
         eq_(feat['int_field'],922337203685477580)
 
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
     def test_persist_connection_off():
         # NOTE: max_size should be equal or greater than
         #       the pool size. There's currently no API to
@@ -576,19 +679,29 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         #       http://github.com/mapnik/mapnik/issues/863
         max_size = 20
         for i in range(0, max_size+1):
-          ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+            ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
                               max_size=1, # unused
                               persist_connection=False,
                               table='(select ST_MakePoint(0,0) as g, pg_backend_pid() as p, 1 as v) as w',
                               geometry_field='g')
-          fs = ds.featureset()
-          eq_(fs.next()['v'], 1)
+            fs = ds.featureset()
+            eq_(fs.next()['v'], 1)
+
+            meta = ds.describe()
+            eq_(meta['srid'],-1)
+            eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
 
     def test_null_comparision():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test9',
                             geometry_field='geom')
         fs = ds.featureset()
         feat = fs.next()
+
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
         eq_(feat['gid'],1)
         eq_(feat['name'],'name')
         eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),True)
@@ -636,6 +749,12 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             geometry_field='geom')
         fs = ds.featureset()
         feat = fs.next()
+
+        meta = ds.describe()
+        eq_(meta['srid'],-1)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
         eq_(feat['gid'],1)
         eq_(feat['bool_field'],True)
         eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
@@ -695,6 +814,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         feat = fs.next()
         eq_(feat.id(),1L)
         eq_(feat['osm_id'],None)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
 
     @raises(StopIteration)
     def test_null_key_field():
@@ -798,6 +922,13 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(ds.fields(),['gid', 'dim', 'name'])
         eq_(ds.field_types(),['int', 'int', 'str'])
         fs = ds.featureset()
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),None)
+        # Note: this is incorrect because we only check first couple geoms
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+
         # Point (2d)
         feat = fs.next()
         eq_(feat.id(),1)
@@ -1023,6 +1154,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         fs = ds.featureset(variables={'zoom':30})
         for id in range(1,5):
             eq_(fs.next().id(),id)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta.get('key_field'),"gid")
+        eq_(meta['geometry_type'],None)
 
 
     atexit.register(postgis_takedown)

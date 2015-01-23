@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/attribute_descriptor.hpp>
+#include <mapnik/params.hpp>
 
 // stl
 #include <iosfwd>
@@ -39,12 +40,14 @@ public:
     layer_descriptor(std::string const& name, std::string const& encoding)
         : name_(name),
           encoding_(encoding),
-          desc_ar_() {}
+          desc_ar_(),
+          extra_params_() {}
 
     layer_descriptor(layer_descriptor const& other)
         : name_(other.name_),
           encoding_(other.encoding_),
-          desc_ar_(other.desc_ar_) {}
+          desc_ar_(other.desc_ar_),
+          extra_params_(other.extra_params_) {}
 
     void set_name(std::string const& name)
     {
@@ -81,10 +84,21 @@ public:
         return desc_ar_;
     }
 
+    parameters const& get_extra_parameters() const
+    {
+        return extra_params_;
+    }
+
+    parameters& get_extra_parameters()
+    {
+        return extra_params_;
+    }
+
 private:
     std::string name_;
     std::string encoding_;
     std::vector<attribute_descriptor> desc_ar_;
+    parameters extra_params_;
 };
 
 }
