@@ -108,55 +108,52 @@ function setup_nose() {
 }
 
 function make_config() {
-    local MASON_LINKED=./mason_packages/.link
-    export PROJ_LIB=${MASON_LINKED}/share/proj/
-    export ICU_DATA=${MASON_LINKED}/share/icu/54.1/
-    export GDAL_DATA=${MASON_LINKED}/share/gdal
-    export PKG_CONFIG_PATH="${MASON_LINKED}/lib/pkgconfig"
-    export C_INCLUDE_PATH="${MASON_LINKED}/include"
-    export CPLUS_INCLUDE_PATH="${MASON_LINKED}/include"
-    export LIBRARY_PATH="${MASON_LINKED}/lib"
-    export PATH="${MASON_LINKED}/bin":${PATH}
+    local MASON_LINKED_REL=./mason_packages/.link
+    export PKG_CONFIG_PATH="${MASON_LINKED_REL}/lib/pkgconfig"
+    export C_INCLUDE_PATH="${MASON_LINKED_REL}/include"
+    export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
+    export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
+    export PATH="${MASON_LINKED_REL}/bin":${PATH}
 
     local CUSTOM_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1"
-    local MASON_LIBS="${MASON_LINKED}/lib"
-    local MASON_INCLUDES="${MASON_LINKED}/include"
+    local MASON_LIBS="${MASON_LINKED_REL}/lib"
+    local MASON_INCLUDES="${MASON_LINKED_REL}/include"
     echo "
 CXX = '$CXX'
 CC = '$CC'
 CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
-CUSTOM_LDFLAGS = '-L${MASON_LINKED}/lib'
+CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'csv,gdal,geojson,occi,ogr,osm,pgraster,postgis,python,raster,rasterlite,shape,sqlite,topojson'
 PREFIX = '/opt/mapnik-3.x'
-PATH = '${MASON_LINKED}/bin'
+PATH = '${MASON_LINKED_REL}/bin'
 PATH_REMOVE = '/usr:/usr/local'
 MAPNIK_NAME = 'mapnik_3-0-0'
-BOOST_INCLUDES = '${MASON_LINKED}/include'
-BOOST_LIBS = '${MASON_LINKED}/lib'
-ICU_INCLUDES = '${MASON_LINKED}/include'
-ICU_LIBS = '${MASON_LINKED}/lib'
-HB_INCLUDES = '${MASON_LINKED}/include'
-HB_LIBS = '${MASON_LINKED}/lib'
-PNG_INCLUDES = '${MASON_LINKED}/include/libpng16'
-PNG_LIBS = '${MASON_LINKED}/lib'
-JPEG_INCLUDES = '${MASON_LINKED}/include'
-JPEG_LIBS = '${MASON_LINKED}/lib'
-TIFF_INCLUDES = '${MASON_LINKED}/include'
-TIFF_LIBS = '${MASON_LINKED}/lib'
-WEBP_INCLUDES = '${MASON_LINKED}/include'
-WEBP_LIBS = '${MASON_LINKED}/lib'
-PROJ_INCLUDES = '${MASON_LINKED}/include'
-PROJ_LIBS = '${MASON_LINKED}/lib'
-FREETYPE_INCLUDES = '${MASON_LINKED}/include/freetype2'
-FREETYPE_LIBS = '${MASON_LINKED}/lib'
-XML2_INCLUDES = '${MASON_LINKED}/include/libxml2'
-XML2_LIBS = '${MASON_LINKED}/lib'
+BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
+BOOST_LIBS = '${MASON_LINKED_REL}/lib'
+ICU_INCLUDES = '${MASON_LINKED_REL}/include'
+ICU_LIBS = '${MASON_LINKED_REL}/lib'
+HB_INCLUDES = '${MASON_LINKED_REL}/include'
+HB_LIBS = '${MASON_LINKED_REL}/lib'
+PNG_INCLUDES = '${MASON_LINKED_REL}/include/libpng16'
+PNG_LIBS = '${MASON_LINKED_REL}/lib'
+JPEG_INCLUDES = '${MASON_LINKED_REL}/include'
+JPEG_LIBS = '${MASON_LINKED_REL}/lib'
+TIFF_INCLUDES = '${MASON_LINKED_REL}/include'
+TIFF_LIBS = '${MASON_LINKED_REL}/lib'
+WEBP_INCLUDES = '${MASON_LINKED_REL}/include'
+WEBP_LIBS = '${MASON_LINKED_REL}/lib'
+PROJ_INCLUDES = '${MASON_LINKED_REL}/include'
+PROJ_LIBS = '${MASON_LINKED_REL}/lib'
+FREETYPE_INCLUDES = '${MASON_LINKED_REL}/include/freetype2'
+FREETYPE_LIBS = '${MASON_LINKED_REL}/lib'
+XML2_INCLUDES = '${MASON_LINKED_REL}/include/libxml2'
+XML2_LIBS = '${MASON_LINKED_REL}/lib'
 SVG_RENDERER = True
-CAIRO_INCLUDES = '${MASON_LINKED}/include'
-CAIRO_LIBS = '${MASON_LINKED}/lib'
-SQLITE_INCLUDES = '${MASON_LINKED}/include'
-SQLITE_LIBS = '${MASON_LINKED}/lib'
+CAIRO_INCLUDES = '${MASON_LINKED_REL}/include'
+CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
+SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
+SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
 FRAMEWORK_PYTHON = False
 BINDINGS = 'python'
 XMLPARSER = 'ptree'
@@ -165,12 +162,20 @@ SAMPLE_INPUT_PLUGINS = True
 " > ./config.py
 }
 
+function setup_runtime_settings() {
+    local MASON_LINKED_ABS=$(pwd)/mason_packages/.link
+    export PROJ_LIB=${MASON_LINKED_ABS}/share/proj/
+    export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1/
+    export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal
+}
+
 function main() {
     setup_mason
     install_mason_deps
     setup_nose
     setup_cpp11_toolchain
     make_config
+    setup_runtime_settings
 }
 
 main
