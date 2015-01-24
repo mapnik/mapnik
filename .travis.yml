@@ -31,7 +31,7 @@ before_script:
 
 script:
  - source bootstrap.sh
- - JOBS=2 make
+ - JOBS=4 make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  #- source localize.sh && make grind
