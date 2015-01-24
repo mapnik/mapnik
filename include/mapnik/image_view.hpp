@@ -84,6 +84,10 @@ public:
     {
         return height_;
     }
+    inline const pixel_type& operator() (std::size_t i, std::size_t j) const
+    {
+        return data_(i,j);
+    }
 
     inline unsigned getSize() const
     {
@@ -108,6 +112,11 @@ public:
     inline T const& data() const
     {
         return data_;
+    }
+
+    inline bool get_premultiplied() const
+    {
+        return data_.get_premultiplied();
     }
 
 private:

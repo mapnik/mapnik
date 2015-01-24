@@ -31,7 +31,7 @@
     REQUIRE( reader->has_alpha() == true ); \
     REQUIRE( tiff_reader2.has_alpha() == true ); \
     REQUIRE( reader2->has_alpha() == true ); \
-    REQUIRE( data.get_premultiplied() == false ); \
+    REQUIRE( data.get_premultiplied() == true ); \
 
 #define TIFF_ASSERT_NO_ALPHA( data ) \
     REQUIRE( tiff_reader.has_alpha() == false ); \

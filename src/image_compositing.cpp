@@ -169,7 +169,6 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
 #ifdef MAPNIK_DEBUG
     if (!src.get_premultiplied()) 
     {
-        abort();
         throw std::runtime_error("SOURCE MUST BE PREMULTIPLIED FOR COMPOSITING!");
     }
     if (!dst.get_premultiplied())

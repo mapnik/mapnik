@@ -308,10 +308,10 @@ void tiff_reader<T>::init()
     {
         has_alpha_ = true;
         premultiplied_alpha_ = true;
-        if (extrasamples == 1 &&
-            sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+        if (extrasamples > 0 &&
+            sampleinfo[0] == EXTRASAMPLE_UNSPECIFIED)
         {
-            premultiplied_alpha_ = false;
+            throw std::runtime_error("Unspecified provided for extra samples to tiff reader.");
         }
     }
     // Try extracting bounding box from geoTIFF tags
@@ -641,15 +641,12 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_rgba8& image)
         int height=image.height();
 
         unsigned start_y=(y0/rows_per_strip_)*rows_per_strip_;
-        //unsigned end_y=((y0+height)/rows_per_strip_+1)*rows_per_strip_;
         unsigned end_y=std::min(y0+height, static_cast<unsigned>(height_));
-        //bool laststrip=(static_cast<unsigned>(end_y) > height_)?true:false;
-        int row,tx0,tx1,ty0,ty1;
+        int tx0,tx1,ty0,ty1;
 
-        //image.set_premultiplied(true);
         tx0=x0;
         tx1=std::min(width+x0,static_cast<unsigned>(width_));
-
+        int row = 0;
         for (unsigned y=start_y; y < end_y; y+=rows_per_strip_)
         {
             ty0 = std::max(y0,y)-y;
@@ -660,18 +657,11 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_rgba8& image)
                 std::clog << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
             }
-            row=y+ty0;
-
-            //int n0=laststrip ? 0:(rows_per_strip_-ty1);
-            //int n1=laststrip ? (ty1-ty0-1):(rows_per_strip_-ty0-1);
-            //std::cout << " n0: " << n0 << " n1: " << n1 << " y: " << y << " endy: " << end_y << std::endl;
-            //for (int n=n1;n>=n0;--n)
-            //for (int n=n0;n>=n1;++n)
-            // This is in reverse becauase the TIFFReadRGBAStrip reads inverted?
-            for (int ty = ty1-1; ty >= ty0; --ty, ++row)
+            // This is in reverse becauase the TIFFReadRGBAStrip reads inverted
+            for (unsigned ty = ty1; ty > ty0; --ty)
             {
-                //std::cout << "row: " << row <<" s: " << (tx0-x0) << " e: " << (tx1-x0) << " n: " << (n*width_+tx0) << std::endl;
-                image.setRow(row,tx0-x0,tx1-x0,&strip.getData()[ty*width_+tx0]);
+                image.setRow(row,tx0-x0,tx1-x0,&strip.getData()[(ty-1)*width_+tx0]);
+                ++row;
             }
         }
     }

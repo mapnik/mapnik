@@ -45,16 +45,19 @@ def test_tiff_round_trip_stripped():
     eq_(im.height(),im3.height())
     eq_(len(im.tostring()), org_str)
     eq_(len(im.tostring()),len(im2.tostring()))
-    eq_(len(im.tostring('png')),len(im2.tostring('png')))
+    # Because one will end up with UNASSOC alpha tag which internally the TIFF will multiply, the first to string will not be the same due to the
+    # difference in tags. But size should still be the same
     eq_(len(im.tostring('tiff:method=stripped')),len(im2.tostring('tiff:method=stripped')))
-    eq_(len(im.tostring()),len(im3.tostring()))
-    eq_(len(im.tostring('tiff:method=stripped')),len(im3.tostring('tiff:method=stripped')))
+    eq_(len(im2.tostring()),len(im3.tostring()))
+    # Both of these started out premultiplied, so this round trip should be exactly the same!
+    eq_(len(im2.tostring('tiff:method=stripped')),len(im3.tostring('tiff:method=stripped')))
 
 def test_tiff_round_trip_rows_stripped():
     filepath = '/tmp/mapnik-tiff-io-rows_stripped.tiff'
     filepath2 = '/tmp/mapnik-tiff-io-rows_stripped2.tiff'
     im = mapnik.Image(255,267)
     im.background(mapnik.Color('rgba(12,255,128,.5)'))
+    #im.premultiply()
     org_str = len(im.tostring())
     im.save(filepath,'tiff:method=stripped:rows_per_strip=8')
     im2 = mapnik.Image.open(filepath)
@@ -66,31 +69,35 @@ def test_tiff_round_trip_rows_stripped():
     eq_(im.height(),im3.height())
     eq_(len(im.tostring()), org_str)
     eq_(len(im.tostring()),len(im2.tostring()))
+    # Because one will end up with UNASSOC alpha tag which internally the TIFF will multiply, the first to string will not be the same due to the
+    # difference in tags. But size should still be the same
     eq_(len(im.tostring('tiff:method=stripped:rows_per_strip=8')),len(im2.tostring('tiff:method=stripped:rows_per_strip=8')))
-    eq_(len(im.tostring()),len(im3.tostring()))
-    eq_(len(im.tostring('tiff:method=stripped:rows_per_strip=8')),len(im3.tostring('tiff:method=stripped:rows_per_strip=8')))
+    eq_(len(im2.tostring()),len(im3.tostring()))
+    # Both of these started out premultiplied, so this round trip should be exactly the same!
+    eq_(len(im2.tostring('tiff:method=stripped:rows_per_strip=8')),len(im3.tostring('tiff:method=stripped:rows_per_strip=8')))
 
 def test_tiff_round_trip_buffered_tiled():
     filepath = '/tmp/mapnik-tiff-io-buffered-tiled.tiff'
     filepath2 = '/tmp/mapnik-tiff-io-buffered-tiled2.tiff'
+    filepath3 = '/tmp/mapnik-tiff-io-buffered-tiled3.tiff'
     im = mapnik.Image(255,267)
-    #im = mapnik.Image(256,256)
-    im.background(mapnik.Color('rgba(1,255,128,.5)'))
+    im.background(mapnik.Color('rgba(33,255,128,.5)'))
     im.save(filepath,'tiff:method=tiled:tile_width=32:tile_height=32')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())
     im2.save(filepath2, 'tiff:method=tiled:tile_width=32:tile_height=32')
-    im4 = mapnik.Image.open(filepath2)
+    im3.save(filepath3, 'tiff:method=tiled:tile_width=32:tile_height=32')
     eq_(im.width(),im2.width())
     eq_(im.height(),im2.height())
     eq_(im.width(),im3.width())
     eq_(im.height(),im3.height())
-    eq_(len(im2.tostring()),len(im4.tostring()))
-    eq_(len(im2.tostring('tiff:method=tiled:tile_width=32:tile_height=32')),len(im4.tostring('tiff:method=tiled:tile_width=32:tile_height=32')))
     eq_(len(im.tostring()),len(im2.tostring()))
+    # Because one will end up with UNASSOC alpha tag which internally the TIFF will multiply, the first to string will not be the same due to the
+    # difference in tags. But size should still be the same
     eq_(len(im.tostring('tiff:method=tiled:tile_width=32:tile_height=32')),len(im2.tostring('tiff:method=tiled:tile_width=32:tile_height=32')))
-    eq_(len(im.tostring()),len(im3.tostring()))
-    eq_(len(im.tostring('tiff:method=tiled:tile_width=32:tile_height=32')),len(im3.tostring('tiff:method=tiled:tile_width=32:tile_height=32')))
+    eq_(len(im2.tostring()),len(im3.tostring()))
+    # Both of these started out premultiplied, so this round trip should be exactly the same!
+    eq_(len(im2.tostring('tiff:method=tiled:tile_width=32:tile_height=32')),len(im3.tostring('tiff:method=tiled:tile_width=32:tile_height=32')))
 
 def test_tiff_round_trip_tiled():
     filepath = '/tmp/mapnik-tiff-io-tiled.tiff'
@@ -104,9 +111,12 @@ def test_tiff_round_trip_tiled():
     eq_(im.width(),im3.width())
     eq_(im.height(),im3.height())
     eq_(len(im.tostring()),len(im2.tostring()))
+    # Because one will end up with UNASSOC alpha tag which internally the TIFF will multiply, the first to string will not be the same due to the
+    # difference in tags. HOWEVER for this type they have the same size? Perhaps is a bad test?
     eq_(len(im.tostring('tiff:method=tiled')),len(im2.tostring('tiff:method=tiled')))
-    eq_(len(im.tostring()),len(im3.tostring()))
-    eq_(len(im.tostring('tiff:method=tiled')),len(im3.tostring('tiff:method=tiled')))
+    eq_(len(im2.tostring()),len(im3.tostring()))
+    # Both of these started out premultiplied, so this round trip should be exactly the same!
+    eq_(len(im2.tostring('tiff:method=tiled')),len(im3.tostring('tiff:method=tiled')))
 
 
 def test_tiff_rgb8_compare():

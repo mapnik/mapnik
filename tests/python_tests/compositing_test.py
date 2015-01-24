@@ -231,7 +231,7 @@ def test_background_image_with_alpha_and_background_color():
     m.background_image = '../data/images/yellow_half_trans.png'
     im = mapnik.Image(m.width,m.height)
     mapnik.render(m,im)
-    eq_(get_unique_colors(im),['rgba(255,255,85,191)'])
+    eq_(get_unique_colors(im),['rgba(255,255,170,191)'])
 
 def test_background_image_with_alpha_and_background_color_against_composited_control():
     m = mapnik.Map(10,10)
