@@ -72,7 +72,7 @@ else
     if [[ ! -d mason ]]; then
         git clone --depth 1 https://github.com/mapbox/mason.git
     fi
-    export MASON_DIR=$(PWD)
+    export MASON_DIR=$(pwd)
     export PATH=$(pwd)/mason:$PATH
 fi
 
