@@ -9,11 +9,11 @@
 
 todo
 
-- switch to clang
 - gdal shared lib
 - boost_python_patch
 - shrink icu data
 - cairo
+- benchmarks not linking to chrono
 '
 
 TOOLCHAIN="$(pwd)/toolchain"
@@ -29,28 +29,21 @@ function setup_linux_cpp11_toolchain() {
       dpkg -x gcc-4.8_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
       wget ${PPA}/g%2B%2B-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
       dpkg -x g++-4.8_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
-
       wget ${PPA}/libisl10_0.12.2-2~12.04_amd64.deb
       dpkg -x libisl10_0.12.2-2~12.04_amd64.deb ${TOOLCHAIN}
       wget ${PPA}/libcloog-isl4_0.18.2-1~12.04_amd64.deb
       dpkg -x libcloog-isl4_0.18.2-1~12.04_amd64.deb ${TOOLCHAIN}
-
       wget ${PPA}/libstdc%2B%2B-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
       dpkg -x libstdc++-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
-
       ${PPA}/gcc-4.8-base_4.8.1-2ubuntu1~12.04_amd64.deb
       dpkg -x gcc-4.8-base_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
-
       wget ${PPA}/libgcc-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
       dpkg -x libgcc-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
-
       wget ${PPA}/libgcc1_4.8.1-2ubuntu1~12.04_amd64.deb
       dpkg -x libgcc1_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
-
       wget ${PPA}/cpp-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
       dpkg -x cpp-4.8_4.8.1-2ubuntu1~12.04_amd64.deb ${TOOLCHAIN}
   fi
-  #export CPLUS_INCLUDE_PATH="${TOOLCHAIN}/usr/include/:${TOOLCHAIN}/usr/include/x86_64-linux-gnu:${TOOLCHAIN}/usr/include/c++/4.8:${TOOLCHAIN}/usr/include/x86_64-linux-gnu/c++/4.8:${CPLUS_INCLUDE_PATH}"
 }
 
 function dpack() {
@@ -75,11 +68,11 @@ function setup_clang_toolchain() {
     dpack ${LLVM_DIST} clang-3.5_3.5~svn217304-1~exp1_amd64.deb
     dpack ${LLVM_DIST} libllvm3.5_3.5~svn217304-1~exp1_amd64.deb
     dpack ${LLVM_DIST} libclang-common-3.5-dev_3.5~svn215019-1~exp1_amd64.deb
+    dpack ${PPA} libstdc++6_4.8.1-2ubuntu1~12.04_amd64.deb
+    dpack ${PPA} libstdc++-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${LLVM_DIST} libclang1-3.5_3.5~svn215019-1~exp1_amd64.deb
     #dpack ${LLVM_DIST} libclang-3.5-dev_3.5~svn215019-1~exp1_amd64.deb
     #dpack ${LLVM_DIST} llvm-3.5-runtime_3.5~svn215019-1~exp1_amd64.deb
-    dpack ${PPA} libstdc++6_4.8.1-2ubuntu1~12.04_amd64.deb
-    dpack ${PPA} libstdc++-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} libgcc-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} libgcc1_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} cpp-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
@@ -91,6 +84,7 @@ function setup_clang_toolchain() {
     #dpack ${PPA} g++-4.8-multilib_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} g++-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} gcc-4.8-locales_4.8.1-2ubuntu1~12.04_all.deb
+    #export CPLUS_INCLUDE_PATH="${TOOLCHAIN}/usr/include/:${TOOLCHAIN}/usr/include/x86_64-linux-gnu:${TOOLCHAIN}/usr/include/c++/4.8:${TOOLCHAIN}/usr/include/x86_64-linux-gnu/c++/4.8:${CPLUS_INCLUDE_PATH}"
     #dpack ${SECURITY} libc6-dev_2.15-0ubuntu10.9_amd64.deb
     #wget http://mirrors.kernel.org/ubuntu/pool/main/l/linux/linux-libc-dev_3.2.0-75.110_amd64.deb
     #dpkg -x linux-libc-dev_3.2.0-75.110_amd64.deb ${TOOLCHAIN}
@@ -157,6 +151,10 @@ if [[ $(uname -s) == 'Linux' ]]; then
   #sudo apt-get -y install zlib1g-dev python-dev make git python-dev python-nose
 fi
 
+wget https://pypi.python.org/packages/source/n/nose/nose-1.3.4.tar.gz
+tar -xzf nose-1.3.4.tar.gz
+export PYTHONPATH=$(pwd)/nose-1.3.4:${PYTHONPATH}
+
 CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1"
 MASON_LIBS="${MASON_LINKED}/lib"
 MASON_INCLUDES="${MASON_LINKED}/include"
@@ -167,7 +165,7 @@ MASON_INCLUDES="${MASON_LINKED}/include"
   INPUT_PLUGINS=all \
   SAMPLE_INPUT_PLUGINS=True \
   SVG2PNG=True \
-  BENCHMARK=True \
+  BENCHMARK=False \
   SVG_RENDERER=True \
   PATH_REMOVE=/usr:/usr/local \
   RUNTIME_LINK=static \
