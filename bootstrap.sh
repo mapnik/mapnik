@@ -78,7 +78,7 @@ function setup_mason() {
     if [[ -d ~/.mason ]]; then
         export PATH=~/.mason:$PATH
     else
-        if [[ ! -d mason ]]; then
+        if [[ ! -d ./.mason ]]; then
             git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
         fi
         export MASON_DIR=$(pwd)/.mason
