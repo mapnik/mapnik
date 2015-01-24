@@ -122,6 +122,8 @@ function make_config() {
     local MASON_LIBS="${MASON_LINKED}/lib"
     local MASON_INCLUDES="${MASON_LINKED}/include"
     echo "
+CXX = '$CXX'
+CC = '$CC'
 CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
 CUSTOM_LDFLAGS = '-L${MASON_LINKED}/lib'
 RUNTIME_LINK = 'static'
@@ -132,7 +134,6 @@ PATH_REMOVE = '/usr:/usr/local'
 MAPNIK_NAME = 'mapnik_3-0-0'
 BOOST_INCLUDES = '${MASON_LINKED}/include'
 BOOST_LIBS = '${MASON_LINKED}/lib'
-BOOST_PYTHON_LIB = 'boost_python-2.7'
 ICU_INCLUDES = '${MASON_LINKED}/include'
 ICU_LIBS = '${MASON_LINKED}/lib'
 HB_INCLUDES = '${MASON_LINKED}/include'
