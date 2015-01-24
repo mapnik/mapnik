@@ -162,8 +162,8 @@ MASON_LIBS="${MASON_LINKED}/lib"
 MASON_INCLUDES="${MASON_LINKED}/include"
 
 ./configure \
-  CC=${TOOLCHAIN}/usr/bin/g++-4.8 \
-  CXX=${TOOLCHAIN}/usr/bin/g++-4.8 \
+  CC=${TOOLCHAIN}/usr/bin/clang-3.5 \
+  CXX=${TOOLCHAIN}/usr/bin/clang++-3.5 \
   INPUT_PLUGINS=all \
   SAMPLE_INPUT_PLUGINS=True \
   SVG2PNG=True \

@@ -2,10 +2,6 @@ language: cpp
 
 sudo: false
 
-compiler:
- - clang
- - gcc
-
 # travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
 # the below is thanks to https://github.com/CartoDB/Windshaft/blob/d82fe08b32fc7907bbe907ab290f8a082215ae26/.travis.yml#L1
 before_install:
