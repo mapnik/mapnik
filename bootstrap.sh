@@ -14,6 +14,8 @@ todo
 - shrink icu data
 - cairo
 - benchmarks not linking to chrono
+- clang + libc++
+- pkg-config-less
 '
 
 TOOLCHAIN="$(pwd)/toolchain"
@@ -60,7 +62,9 @@ function test_cpp11() {
   echo 'return 0;' >> test.cpp
   echo '}' >> test.cpp
   echo ' ' >> test.cpp
-  ./toolchain/usr/bin/clang++-3.5 -o test test.cpp -std=c++11
+  # ensure no gcc 4.6 paths and that
+  # "./toolchain/usr/bin/../lib/gcc/x86_64-linux-gnu/4.8" is chosen
+  ./toolchain/usr/bin/clang++-3.5 -o test test.cpp -std=c++11 -v
 }
 
 # http://llvm.org/apt/precise/dists/llvm-toolchain-precise-3.5/main/binary-amd64/Packages
@@ -70,18 +74,18 @@ function setup_clang_toolchain() {
     dpack ${LLVM_DIST} libclang-common-3.5-dev_3.5~svn215019-1~exp1_amd64.deb
     dpack ${PPA} libstdc++6_4.8.1-2ubuntu1~12.04_amd64.deb
     dpack ${PPA} libstdc++-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
+    dpack ${PPA} libgcc-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
+    #dpack ${PPA} cpp-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
+    #dpack ${PPA} g++-4.8-multilib_4.8.1-2ubuntu1~12.04_amd64.deb
+    #dpack ${PPA} gcc-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
+    #dpack ${PPA} gcc-4.8-base_4.8.1-2ubuntu1~12.04_amd64.deb
+    #dpack ${PPA} libgcc1_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${LLVM_DIST} libclang1-3.5_3.5~svn215019-1~exp1_amd64.deb
     #dpack ${LLVM_DIST} libclang-3.5-dev_3.5~svn215019-1~exp1_amd64.deb
     #dpack ${LLVM_DIST} llvm-3.5-runtime_3.5~svn215019-1~exp1_amd64.deb
-    #dpack ${PPA} libgcc-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
-    #dpack ${PPA} libgcc1_4.8.1-2ubuntu1~12.04_amd64.deb
-    #dpack ${PPA} cpp-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
-    #dpack ${PPA} gcc-4.8-base_4.8.1-2ubuntu1~12.04_amd64.deb
-    #dpack ${PPA} gcc-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} g++-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} libisl10_0.12.2-2~12.04_amd64.deb
     #dpack ${PPA} libcloog-isl4_0.18.2-1~12.04_amd64.deb
-    #dpack ${PPA} g++-4.8-multilib_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} g++-4.8_4.8.1-2ubuntu1~12.04_amd64.deb
     #dpack ${PPA} gcc-4.8-locales_4.8.1-2ubuntu1~12.04_all.deb
     #export CPLUS_INCLUDE_PATH="${TOOLCHAIN}/usr/include/:${TOOLCHAIN}/usr/include/x86_64-linux-gnu:${TOOLCHAIN}/usr/include/c++/4.8:${TOOLCHAIN}/usr/include/x86_64-linux-gnu/c++/4.8:${CPLUS_INCLUDE_PATH}"
@@ -92,6 +96,7 @@ function setup_clang_toolchain() {
     #dpkg -x binutils-gold_2.22-6ubuntu1.1_amd64.deb ${TOOLCHAIN}
     #wget -q http://security.ubuntu.com/ubuntu/pool/main/b/binutils/binutils_2.22-6ubuntu1.1_amd64.deb
     #dpkg -x binutils_2.22-6ubuntu1.1_amd64.deb ${TOOLCHAIN}
+    # build-essential gets: binutils build-essential cpp cpp-4.6 dpkg-dev fakeroot g++ g++-4.6 gcc gcc-4.6 libalgorithm-diff-perl libalgorithm-diff-xs-perl libalgorithm-merge-perl libc-dev-bin libc6-dev libdpkg-perl libgomp1 libmpc2 libmpfr4 libquadmath0 libstdc++6-4.6-dev linux-libc-dev make manpages-dev
 }
 
 declare -A DEPS
@@ -113,6 +118,7 @@ DEPS["boost_libregex"]="1.57.0"
 DEPS["boost_libpython"]="1.57.0"
 DEPS["gdal"]="1.11.1"
 DEPS["libpq"]="9.4.0"
+DEPS["sqlite"]="3.8.6"
 
 if [[ -d ~/.mason ]]; then
     export PATH=~/.mason:$PATH
@@ -141,13 +147,14 @@ export PKG_CONFIG_PATH="${MASON_LINKED}/lib/pkgconfig"
 export C_INCLUDE_PATH="${MASON_LINKED}/include"
 export CPLUS_INCLUDE_PATH="${MASON_LINKED}/include"
 export LIBRARY_PATH="${MASON_LINKED}/lib"
+export PATH="${MASON_LINKED}/bin":${PATH}
 
 if [[ $(uname -s) == 'Linux' ]]; then
   #setup_linux_cpp11_toolchain
   setup_clang_toolchain
   export CPLUS_INCLUDE_PATH="${TOOLCHAIN}/usr/include/c++/4.8:${TOOLCHAIN}/usr/include/x86_64-linux-gnu/c++/4.8:${CPLUS_INCLUDE_PATH}"
-  export LD_LIBRARY_PATH="${TOOLCHAIN}/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
-  export LIBRARY_PATH="${TOOLCHAIN}/usr/lib/x86_64-linux-gnu:${LIBRARY_PATH}"
+  export LD_LIBRARY_PATH="${TOOLCHAIN}/usr/lib/x86_64-linux-gnu:${TOOLCHAIN}/usr/lib/gcc/x86_64-linux-gnu/4.8/:${LD_LIBRARY_PATH}"
+  export LIBRARY_PATH="${LD_LIBRARY_PATH}"
   export PATH=${TOOLCHAIN}/usr/bin:$PATH
   #sudo apt-get -y install zlib1g-dev python-dev make git python-dev python-nose
 fi
@@ -168,6 +175,7 @@ MASON_INCLUDES="${MASON_LINKED}/include"
   SVG2PNG=True \
   BENCHMARK=False \
   SVG_RENDERER=True \
+  PATH="${MASON_LINKED}/bin" \
   PATH_REMOVE=/usr:/usr/local \
   RUNTIME_LINK=static \
   CUSTOM_LDFLAGS="-L${MASON_LIBS}" \
