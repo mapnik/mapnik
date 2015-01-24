@@ -1462,7 +1462,7 @@ if not preconfigured:
                         sqlite_backup = env.Clone().Dictionary()
                         # if statically linking, on linux we likely
                         # need to link sqlite to pthreads and dl
-                        if env['RUNTIME_LINK'] == 'static':
+                        if env['RUNTIME_LINK'] == 'static' and not env['PLATFORM'] == 'Darwin':
                             if CHECK_PKG_CONFIG and conf.CheckPKG('sqlite3'):
                                 sqlite_env = env.Clone()
                                 try:
@@ -1472,7 +1472,10 @@ if not preconfigured:
                                             env["SQLITE_LINKFLAGS"].append(lib)
                                             env.Append(LIBS=lib)
                                 except OSError,e:
-                                    pass
+                                    for lib in ["sqlite3","dl","pthread"]:
+                                        if not lib in env['LIBS']:
+                                            env["SQLITE_LINKFLAGS"].append("lib")
+                                            env.Append(LIBS=lib)
                         SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         if not SQLITE_HAS_RTREE:
                             env.Replace(**sqlite_backup)
