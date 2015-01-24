@@ -2,34 +2,17 @@ language: cpp
 
 sudo: false
 
-# travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
-# the below is thanks to https://github.com/CartoDB/Windshaft/blob/d82fe08b32fc7907bbe907ab290f8a082215ae26/.travis.yml#L1
-before_install:
-  - export PGUSER=postgres
-  #- sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
-  #- sudo apt-get -qq purge postgis* postgresql*
-  #- sudo apt-add-repository -y ppa:cartodb/postgresql-9.3
-  # enable to test against latest boost rather that v1.48
-  #- sudo add-apt-repository -y ppa:boost-latest/ppa
-  #- sudo rm -Rf /var/lib/postgresql /etc/postgresql
-  #- sudo apt-get update -qq
-  #- sudo apt-get install -q postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
-  #- echo -e "local\tall\tall\ttrust\nhost\tall\tall\t127.0.0.1/32\ttrust\nhost\tall\tall\t::1/128\ttrust" |sudo tee /etc/postgresql/9.3/main/pg_hba.conf
-  #- sudo service postgresql restart
+addons:
+  postgresql: "9.3"
 
 install:
- # enable to test against boost ppa
- #- sudo apt-get install -y ttf-wqy-microhei make valgrind python-nose 
-
-before_script:
- - psql -U postgres -c 'create database template_postgis'
- - psql -U postgres -c 'create extension postgis' -d template_postgis
+ - psql -U postgres -c 'create database template_postgis;' -U postgres
+ - psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres
 
 script:
  - source bootstrap.sh
- - cat config.log
  - JOBS=4 make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  #- source localize.sh && make grind
- - make bench
+ #- make bench
