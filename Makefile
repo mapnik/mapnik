@@ -13,6 +13,20 @@ install:
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
+	# we first build memory intensive files with -j1
+	$(PYTHON) scons/scons.py -j1 \
+		--config=cache --implicit-cache --max-drift=1 \
+		src/json/libmapnik-json.a \
+		src/wkt/libmapnik-wkt.a \
+		src/css_color_grammar.os \
+		src/expression_grammar.os \
+		src/transform_expression_grammar.os \
+		src/image_filter_types.os \
+		src/renderer_common/process_group_symbolizer.cpp \
+		src/agg/process_markers_symbolizer.cpp \
+		src/grid/process_markers_symbolizer.cpp \
+		src/cairo/process_markers_symbolizer.cpp
+	# then install the rest with -j$(JOBS)
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
 clean:

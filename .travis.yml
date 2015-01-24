@@ -11,7 +11,8 @@ install:
 
 script:
  - source bootstrap.sh
- - JOBS=4 make
+ - ./configure
+ - JOBS=6 make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  #- source localize.sh && make grind
