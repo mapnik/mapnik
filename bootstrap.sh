@@ -119,6 +119,9 @@ DEPS["boost_libpython"]="1.57.0"
 DEPS["gdal"]="1.11.1"
 DEPS["libpq"]="9.4.0"
 DEPS["sqlite"]="3.8.6"
+# gdal deps
+DEPS["expat"]="2.1.0"
+
 
 if [[ -d ~/.mason ]]; then
     export PATH=~/.mason:$PATH

@@ -1476,6 +1476,11 @@ if not preconfigured:
                                         if not lib in env['LIBS']:
                                             env["SQLITE_LINKFLAGS"].append("lib")
                                             env.Append(LIBS=lib)
+                            else:
+                                for lib in ["sqlite3","dl","pthread"]:
+                                    if not lib in env['LIBS']:
+                                        env["SQLITE_LINKFLAGS"].append("lib")
+                                        env.Append(LIBS=lib)
                         SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         if not SQLITE_HAS_RTREE:
                             env.Replace(**sqlite_backup)
