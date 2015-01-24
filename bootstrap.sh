@@ -70,10 +70,10 @@ if [[ -d ~/.mason ]]; then
     export PATH=~/.mason:$PATH
 else
     if [[ ! -d mason ]]; then
-        git clone --depth 1 https://github.com/mapbox/mason.git
+        git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
     fi
-    export MASON_DIR=$(pwd)
-    export PATH=$(pwd)/mason:$PATH
+    export MASON_DIR=$(pwd)/.mason
+    export PATH=$(pwd)/.mason:$PATH
 fi
 
 for DEP in "${!DEPS[@]}"; do
