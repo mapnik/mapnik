@@ -59,7 +59,7 @@ public:
         ren.apply();
         if (!preview_.empty()) {
             std::clog << "preview available at " << preview_ << "\n";
-            mapnik::save_to_file(im.data(),preview_);
+            mapnik::save_to_file(im,preview_);
         }
         return true;
     }
