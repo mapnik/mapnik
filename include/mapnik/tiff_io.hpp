@@ -35,6 +35,9 @@ extern "C"
 #define RealTIFFClose TIFFClose
 }
 
+//std
+#include <memory>
+
 #define TIFF_WRITE_SCANLINE 0
 #define TIFF_WRITE_STRIPPED 1
 #define TIFF_WRITE_TILED 2
