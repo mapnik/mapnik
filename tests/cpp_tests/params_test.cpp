@@ -6,6 +6,22 @@
 #include <vector>
 #include <algorithm>
 
+namespace detail {
+
+class string_holder {
+ public:
+    string_holder() :
+     member_("member") {}
+    std::string const& get_string() const
+    {
+        return member_;
+    }
+ private:
+    std::string member_;
+};
+
+}
+
 int main(int argc, char** argv)
 {
     std::vector<std::string> args;
@@ -79,6 +95,20 @@ int main(int argc, char** argv)
         params["null"] = mapnik::value_null();
         // https://github.com/mapnik/mapnik/issues/2471
         //BOOST_TEST( (params.get<mapnik::value_null>("null") && *params.get<mapnik::value_null>("null") == mapnik::value_null()) );
+
+        std::string rvalue("rvalue");
+        params["rvalue"] = rvalue;
+        BOOST_TEST(params.get<std::string>("rvalue") == std::string("rvalue"));
+        // Currently this fails because rvalue gets moved and nulled out
+        // Is this really the right behavior?
+        BOOST_TEST(rvalue == std::string("rvalue"));
+
+        // ensure that const member is not moved incorrectly when added to params
+        detail::string_holder holder;
+        std::string const& holder_member = holder.get_string();
+        params["member"] = holder_member;
+        BOOST_TEST(params.get<std::string>("member") == std::string("member"));
+        BOOST_TEST(holder_member == std::string("member"));
     }
     catch (std::exception const& ex)
     {
