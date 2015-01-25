@@ -131,9 +131,9 @@ void background(mapnik::image_any & im, mapnik::color const& c)
     mapnik::fill(im, c);
 }
 
-uint32_t get_pixel(mapnik::image_any const& im, int x, int y)
+uint32_t get_pixel(mapnik::image_any const& im, unsigned x, unsigned y)
 {
-    if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
+    if (x < static_cast<unsigned>(im.width()) && y < static_cast<unsigned>(im.height()))
     {
         return mapnik::get_pixel<mapnik::image_any, uint32_t>(im, x, y);
     }
@@ -142,8 +142,25 @@ uint32_t get_pixel(mapnik::image_any const& im, int x, int y)
     return 0;
 }
 
+mapnik::color get_pixel_color(mapnik::image_any const& im, unsigned x, unsigned y)
+{
+    if (x < static_cast<unsigned>(im.width()) && y < static_cast<unsigned>(im.height()))
+    {
+        return mapnik::get_pixel<mapnik::image_any, mapnik::color>(im, x, y);
+    }
+    PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
+    boost::python::throw_error_already_set();
+    return 0;
+}
+
 void set_pixel(mapnik::image_any & im, unsigned x, unsigned y, mapnik::color const& c)
 {
+    if (x >= static_cast<int>(im.width()) && y >= static_cast<int>(im.height()))
+    {
+        PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
+        boost::python::throw_error_already_set();
+        return;
+    }
     mapnik::set_pixel(im, x, y, c);
 }
 
@@ -290,7 +307,18 @@ void export_image()
         .value("divide", mapnik::divide)
         ;
 
-    class_<image_any,std::shared_ptr<image_any>, boost::noncopyable >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
+    enum_<mapnik::image_dtype>("ImageType")
+        .value("rgba8", mapnik::image_dtype_rgba8)
+        .value("gray8", mapnik::image_dtype_gray8)
+        .value("gray16", mapnik::image_dtype_gray16)
+        .value("gray32f", mapnik::image_dtype_gray32f)
+        ;
+
+    class_<image_any,std::shared_ptr<image_any>, boost::noncopyable >("Image","This class represents a image.",init<int,int>())
+        .def(init<int,int,mapnik::image_dtype>())
+        .def(init<int,int,mapnik::image_dtype,bool>())
+        .def(init<int,int,mapnik::image_dtype,bool,bool>())
+        .def(init<int,int,mapnik::image_dtype,bool,bool,bool>())
         .def("width",&image_any::width)
         .def("height",&image_any::height)
         .def("view",&get_view)
@@ -313,6 +341,7 @@ void export_image()
         .def("demultiply",&demultiply)
         .def("set_pixel",&set_pixel)
         .def("get_pixel",&get_pixel)
+        .def("get_pixel_color",&get_pixel_color)
         .def("clear",&clear)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 

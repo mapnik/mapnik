@@ -800,6 +800,14 @@ struct visitor_fill<color>
 {
     visitor_fill(color const& val)
         : val_(val) {}
+    
+    void operator() (image_rgba8 & data)
+    {
+        using pixel_type = typename image_rgba8::pixel_type;
+        pixel_type val = static_cast<pixel_type>(val_.rgba());
+        data.set(val);
+        data.set_premultiplied(val_.get_premultiplied());
+    }
 
     template <typename T2>
     void operator() (T2 & data)
@@ -1043,7 +1051,23 @@ struct visitor_set_pixel<color>
     void operator() (T2 & data)
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val = static_cast<pixel_type>(val_.rgba());
+        pixel_type val;
+        if (data.get_premultiplied() && !val_.get_premultiplied())
+        {
+            color tmp(val_);
+            tmp.premultiply();
+            val = static_cast<pixel_type>(tmp.rgba());
+        }
+        else if (!data.get_premultiplied() && val_.get_premultiplied())
+        {
+            color tmp(val_);
+            tmp.demultiply();
+            val = static_cast<pixel_type>(tmp.rgba());
+        }
+        else
+        {
+            val = static_cast<pixel_type>(val_.rgba());
+        }
         if (check_bounds(data, x_, y_))
         {
             data(x_, y_) = val;
@@ -1137,11 +1161,7 @@ struct visitor_get_pixel<color>
     {
         if (check_bounds(data, x_, y_))
         {
-            uint32_t val = static_cast<uint32_t>(data(x_, y_));
-            return color(static_cast<uint8_t>(val),
-                         static_cast<uint8_t>((val >>= 8)),
-                         static_cast<uint8_t>((val >>= 8)),
-                         static_cast<uint8_t>((val >>= 8)));
+            return color(static_cast<uint32_t>(data(x_, y_)), data.get_premultiplied());
         }
         else
         {

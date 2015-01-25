@@ -31,9 +31,16 @@
     REQUIRE( reader->has_alpha() == true ); \
     REQUIRE( tiff_reader2.has_alpha() == true ); \
     REQUIRE( reader2->has_alpha() == true ); \
-    REQUIRE( data.get_premultiplied() == false ); \
+    REQUIRE( data.get_premultiplied() == true ); \
 
-#define TIFF_ASSERT_NO_ALPHA( data ) \
+#define TIFF_ASSERT_NO_ALPHA_RGB( data ) \
+    REQUIRE( tiff_reader.has_alpha() == false ); \
+    REQUIRE( reader->has_alpha() == false ); \
+    REQUIRE( tiff_reader2.has_alpha() == false ); \
+    REQUIRE( reader2->has_alpha() == false ); \
+    REQUIRE( data.get_premultiplied() == true ); \
+
+#define TIFF_ASSERT_NO_ALPHA_GRAY( data ) \
     REQUIRE( tiff_reader.has_alpha() == false ); \
     REQUIRE( reader->has_alpha() == false ); \
     REQUIRE( tiff_reader2.has_alpha() == false ); \
@@ -77,7 +84,7 @@ SECTION("scan rgb8 striped") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_RGB( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -107,7 +114,7 @@ SECTION("scan rgb8 tiled") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_RGB( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -155,7 +162,7 @@ SECTION("rgb8 striped") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_RGB( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -171,7 +178,7 @@ SECTION("rgb8 tiled") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_rgba8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_RGB( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -187,7 +194,7 @@ SECTION("gray8 striped") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_gray8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_GRAY( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -203,7 +210,7 @@ SECTION("gray8 tiled") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_gray8>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_GRAY( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -219,7 +226,7 @@ SECTION("gray16 striped") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_gray16>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_GRAY( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -235,7 +242,7 @@ SECTION("gray16 tiled") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_gray16>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_GRAY( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -251,7 +258,7 @@ SECTION("gray32f striped") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_gray32f>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_GRAY( data );
     TIFF_READ_ONE_PIXEL
 }
 
@@ -267,7 +274,7 @@ SECTION("gray32f tiled") {
     mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
     REQUIRE( data.is<mapnik::image_gray32f>() == true );
     TIFF_ASSERT_SIZE( data,reader );
-    TIFF_ASSERT_NO_ALPHA( data );
+    TIFF_ASSERT_NO_ALPHA_GRAY( data );
     TIFF_READ_ONE_PIXEL
 }
 

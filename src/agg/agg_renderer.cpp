@@ -123,7 +123,9 @@ void agg_renderer<T0,T1>::setup(Map const &m)
         }
         else
         {
-            mapnik::fill(pixmap_,*bg);
+            mapnik::color bg_color = *bg;
+            bg_color.set_premultiplied(true);
+            mapnik::fill(pixmap_,bg_color);
         }
     }
 

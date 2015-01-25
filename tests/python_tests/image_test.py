@@ -28,6 +28,137 @@ def test_image_premultiply():
     eq_(im.demultiply(), False)
     eq_(im.premultiplied(),False)
 
+def test_image_premultiply_values():
+    im = mapnik.Image(256,256)
+    im.background(mapnik.Color(16, 33, 255, 128))
+    im.premultiply()
+    c = im.get_pixel_color(0,0)
+    eq_(c.r, 8)
+    eq_(c.g, 17)
+    eq_(c.b, 128)
+    eq_(c.a, 128)
+    im.demultiply()
+    # Do to the nature of this operation the result will not be exactly the same
+    c = im.get_pixel_color(0,0)
+    eq_(c.r,15)
+    eq_(c.g,33)
+    eq_(c.b,255)
+    eq_(c.a,128)
+
+def test_background():
+    im = mapnik.Image(256,256)
+    eq_(im.premultiplied(), False)
+    im.background(mapnik.Color(32,64,125,128))
+    eq_(im.premultiplied(), False)
+    c = im.get_pixel_color(0,0)
+    eq_(c.get_premultiplied(), False)
+    eq_(c.r,32)
+    eq_(c.g,64)
+    eq_(c.b,125)
+    eq_(c.a,128)
+    # Now again with a premultiplied alpha
+    im.background(mapnik.Color(32,64,125,128,True))
+    eq_(im.premultiplied(), True)
+    c = im.get_pixel_color(0,0)
+    eq_(c.get_premultiplied(), True)
+    eq_(c.r,32)
+    eq_(c.g,64)
+    eq_(c.b,125)
+    eq_(c.a,128)
+
+def test_set_and_get_pixel():
+    # Create an image that is not premultiplied
+    im = mapnik.Image(256,256)
+    c0 = mapnik.Color(16,33,255,128)
+    c0_pre = mapnik.Color(16,33,255,128, True)
+    im.set_pixel(0,0,c0)
+    im.set_pixel(1,1,c0_pre)
+    # No differences for non premultiplied pixels
+    c1_int = mapnik.Color(im.get_pixel(0,0))
+    eq_(c0.r, c1_int.r)
+    eq_(c0.g, c1_int.g)
+    eq_(c0.b, c1_int.b)
+    eq_(c0.a, c1_int.a)
+    c1 = im.get_pixel_color(0,0)
+    eq_(c0.r, c1.r)
+    eq_(c0.g, c1.g)
+    eq_(c0.b, c1.b)
+    eq_(c0.a, c1.a)
+    # The premultiplied Color should be demultiplied before being applied.
+    c0_pre.demultiply()
+    c1_int = mapnik.Color(im.get_pixel(1,1))
+    eq_(c0_pre.r, c1_int.r)
+    eq_(c0_pre.g, c1_int.g)
+    eq_(c0_pre.b, c1_int.b)
+    eq_(c0_pre.a, c1_int.a)
+    c1 = im.get_pixel_color(1,1)
+    eq_(c0_pre.r, c1.r)
+    eq_(c0_pre.g, c1.g)
+    eq_(c0_pre.b, c1.b)
+    eq_(c0_pre.a, c1.a)
+    
+    # Now create a new image that is premultiplied
+    im = mapnik.Image(256,256, mapnik.ImageType.rgba8, True, True)
+    c0 = mapnik.Color(16,33,255,128)
+    c0_pre = mapnik.Color(16,33,255,128, True)
+    im.set_pixel(0,0,c0)
+    im.set_pixel(1,1,c0_pre)
+    # It should have put pixels that are the same as premultiplied so premultiply c0
+    c0.premultiply()
+    c1_int = mapnik.Color(im.get_pixel(0,0))
+    eq_(c0.r, c1_int.r)
+    eq_(c0.g, c1_int.g)
+    eq_(c0.b, c1_int.b)
+    eq_(c0.a, c1_int.a)
+    c1 = im.get_pixel_color(0,0)
+    eq_(c0.r, c1.r)
+    eq_(c0.g, c1.g)
+    eq_(c0.b, c1.b)
+    eq_(c0.a, c1.a)
+    # The premultiplied Color should be the same though
+    c1_int = mapnik.Color(im.get_pixel(1,1))
+    eq_(c0_pre.r, c1_int.r)
+    eq_(c0_pre.g, c1_int.g)
+    eq_(c0_pre.b, c1_int.b)
+    eq_(c0_pre.a, c1_int.a)
+    c1 = im.get_pixel_color(1,1)
+    eq_(c0_pre.r, c1.r)
+    eq_(c0_pre.g, c1.g)
+    eq_(c0_pre.b, c1.b)
+    eq_(c0_pre.a, c1.a)
+
+@raises(IndexError)
+def test_set_pixel_out_of_range_1():
+    im = mapnik.Image(4,4)
+    c = mapnik.Color('blue')
+    im.set_pixel(5,5,c)
+
+@raises(OverflowError)
+def test_set_pixel_out_of_range_2():
+    im = mapnik.Image(4,4)
+    c = mapnik.Color('blue')
+    im.set_pixel(-1,1,c)
+
+@raises(IndexError)
+def test_get_pixel_out_of_range_1():
+    im = mapnik.Image(4,4)
+    c = im.get_pixel(5,5)
+
+@raises(OverflowError)
+def test_get_pixel_out_of_range_2():
+    im = mapnik.Image(4,4)
+    c = im.get_pixel(-1,1)
+
+@raises(IndexError)
+def test_get_pixel_color_out_of_range_1():
+    im = mapnik.Image(4,4)
+    c = im.get_pixel_color(5,5)
+
+@raises(OverflowError)
+def test_get_pixel_color_out_of_range_2():
+    im = mapnik.Image(4,4)
+    c = im.get_pixel_color(-1,1)
+    
 def test_set_color_to_alpha():
     im = mapnik.Image(256,256)
     im.background(mapnik.Color('rgba(12,12,12,255)'))

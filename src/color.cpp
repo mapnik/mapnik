@@ -45,9 +45,10 @@
 
 namespace mapnik {
 
-color::color(std::string const& str)
+color::color(std::string const& str, bool premultiplied)
 {
     *this = parse_color(str);
+    premultiplied_ = premultiplied;
 }
 
 std::string color::to_string() const
@@ -95,23 +96,28 @@ std::string color::to_hex_string() const
     return str;
 }
 
-void color::premultiply()
+bool color::premultiply()
 {
+    if (premultiplied_) return false;
     agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
     pre_c.premultiply();
     red_ = pre_c.r;
     green_ = pre_c.g;
     blue_ = pre_c.b;
+    premultiplied_ = true;
+    return true;
 }
 
-void color::demultiply()
+bool color::demultiply()
 {
-    // note: this darkens too much: https://github.com/mapnik/mapnik/issues/1519
+    if (!premultiplied_) return false;
     agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
     pre_c.demultiply();
     red_ = pre_c.r;
     green_ = pre_c.g;
     blue_ = pre_c.b;
+    premultiplied_ = false;
+    return true;
 }
 
 }
