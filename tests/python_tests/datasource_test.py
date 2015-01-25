@@ -14,6 +14,7 @@ def test_that_datasources_exist():
         print '***NOTICE*** - no datasource plugins have been loaded'
 
 # adapted from raster_symboliser_test#test_dataraster_query_point
+@raises(RuntimeError)
 def test_vrt_referring_to_missing_files():
     srs = '+init=epsg:32630'
     if 'gdal' in mapnik.DatasourceCache.plugin_names():
@@ -31,13 +32,26 @@ def test_vrt_referring_to_missing_files():
 
         _map.zoom_all()
 
-        # Should RuntimeError here
+        # Fancy stuff to supress output of error
+        # open 2 fds
+        null_fds = [os.open(os.devnull, os.O_RDWR) for x in xrange(2)]
+        # save the current file descriptors to a tuple
+        save = os.dup(1), os.dup(2)
+        # put /dev/null fds on 1 and 2
+        os.dup2(null_fds[0], 1)
+        os.dup2(null_fds[1], 2)
+
+        # *** run the function ***
         try:
+            # Should RuntimeError here
             _map.query_point(0, x, y).features
-        except RuntimeError, e:
-            eq_("this_file_should_not_exist.tif' does not exist in the file system" in str(e), True)
-        else:
-            assert False
+        finally:
+            # restore file descriptors so I can print the results
+            os.dup2(save[0], 1)
+            os.dup2(save[1], 2)
+            # close the temporary fds
+            os.close(null_fds[0])
+            os.close(null_fds[1])
 
 
 def test_field_listing():

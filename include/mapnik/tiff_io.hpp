@@ -179,7 +179,7 @@ struct tiff_config
 
 struct tag_setter
 {
-    tag_setter(TIFF * output, tiff_config & config)
+    tag_setter(TIFF * output, tiff_config const& config)
         : output_(output),
           config_(config) {}
 
@@ -263,10 +263,10 @@ struct tag_setter
 
     private:
         TIFF * output_;
-        tiff_config & config_;
+        tiff_config const& config_;
 };
 
-inline void set_tiff_config(TIFF* output, tiff_config & config)
+inline void set_tiff_config(TIFF* output, tiff_config const& config)
 {
     // Set some constant tiff information that doesn't vary based on type of data
     // or image size
@@ -287,7 +287,7 @@ inline void set_tiff_config(TIFF* output, tiff_config & config)
 }
 
 template <typename T1, typename T2>
-void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
+void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
 {
     using pixel_type = typename T2::pixel_type;
 
@@ -317,7 +317,6 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     // Set tags that vary based on the type of data being provided.
     tag_setter set(output, config);
     set(image);
-    //util::apply_visitor(set, image);
 
     // Use specific types of writing methods.
     if (TIFF_WRITE_SCANLINE == config.method)

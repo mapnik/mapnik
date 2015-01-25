@@ -87,7 +87,7 @@ public:
         alpha_(std::move(rhs.alpha_)),
         premultiplied_(std::move(rhs.premultiplied_)) {}
 
-    color( std::string const& str);
+    color( std::string const& str, bool premultiplied = false);
 
     std::string to_string() const;
     std::string to_hex_string() const;

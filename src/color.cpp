@@ -45,9 +45,10 @@
 
 namespace mapnik {
 
-color::color(std::string const& str)
+color::color(std::string const& str, bool premultiplied)
 {
     *this = parse_color(str);
+    premultiplied_ = premultiplied;
 }
 
 std::string color::to_string() const

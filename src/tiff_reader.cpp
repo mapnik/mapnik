@@ -136,7 +136,6 @@ private:
     unsigned bands_;
     unsigned planar_config_;
     unsigned compression_;
-    bool premultiplied_alpha_;
     bool has_alpha_;
     bool is_tiled_;
 
@@ -214,7 +213,6 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       bands_(1),
       planar_config_(PLANARCONFIG_CONTIG),
       compression_(COMPRESSION_NONE),
-      premultiplied_alpha_(false),
       has_alpha_(false),
       is_tiled_(false)
 {
@@ -238,7 +236,6 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       bands_(1),
       planar_config_(PLANARCONFIG_CONTIG),
       compression_(COMPRESSION_NONE),
-      premultiplied_alpha_(false),
       has_alpha_(false),
       is_tiled_(false)
 {
@@ -307,7 +304,6 @@ void tiff_reader<T>::init()
                      &extrasamples, &sampleinfo))
     {
         has_alpha_ = true;
-        premultiplied_alpha_ = true;
         if (extrasamples > 0 &&
             sampleinfo[0] == EXTRASAMPLE_UNSPECIFIED)
         {
@@ -568,7 +564,7 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
         //PHOTOMETRIC_ITULAB = 10;
         //PHOTOMETRIC_LOGL = 32844;
         //PHOTOMETRIC_LOGLUV = 32845;
-        image_rgba8 data(width,height, true, premultiplied_alpha_);
+        image_rgba8 data(width,height, true, true);
         read(x0, y0, data);
         return image_any(std::move(data));
     }

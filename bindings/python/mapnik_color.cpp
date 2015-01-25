@@ -84,6 +84,12 @@ void export_color ()
                  "The string may be a CSS color name (e.g. 'blue')\n"
                  "or a hex color string (e.g. '#0000ff').\n")
             )
+        .def(init<std::string, bool>(
+                 ( arg("color_string"), arg("premultiplied") ),
+                 "Creates a new color from its CSS string representation.\n"
+                 "The string may be a CSS color name (e.g. 'blue')\n"
+                 "or a hex color string (e.g. '#0000ff').\n")
+            )
         .add_property("r",
                       &color::red,
                       &color::set_red,
@@ -108,8 +114,6 @@ void export_color ()
         .def(self != self)
         .def_pickle(color_pickle_suite())
         .def("__str__",&color::to_string)
-        .def("packed",&color::rgba)
-        .def("premultiply",&color::premultiply)
         .def("set_premultiplied",&color::set_premultiplied)
         .def("get_premultiplied",&color::get_premultiplied)
         .def("premultiply",&color::premultiply)
