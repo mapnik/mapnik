@@ -33,12 +33,6 @@
 
 #include "large_geojson_featureset.hpp"
 
-//namespace {
-//using base_iterator_type = std::string::const_iterator;
-//const mapnik::transcoder tr("utf8");
-//const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> fc_grammar(tr);
-//}
-
 large_geojson_featureset::large_geojson_featureset(std::string const& filename,
                                                    array_type && index_array)
 :
