@@ -47,7 +47,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
-#include <mapnik/polygon_clipper.hpp> // boost::geometry - register box2d<double>
+#include <mapnik/util/boost_geometry_adapters.hpp> // boost.geometry - register box2d<double>
 
 using mapnik::datasource;
 using mapnik::parameters;
