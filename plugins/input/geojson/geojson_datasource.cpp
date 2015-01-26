@@ -199,8 +199,10 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
             using namespace boost::spirit;
+            static const mapnik::transcoder tr("utf8");
+            static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
             standard_wide::space_type space;
-            if (!qi::phrase_parse(start, end, (fc_grammar.feature_g)(boost::phoenix::ref(*feature)), space))
+            if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
