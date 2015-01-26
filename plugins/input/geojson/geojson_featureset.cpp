@@ -44,9 +44,9 @@ mapnik::feature_ptr geojson_featureset::next()
     {
 #if BOOST_VERSION >= 105600
         geojson_datasource::item_type const& item = *index_itr_++;
-        std::size_t index = item.second;
+        std::size_t index = item.second.first;
 #else
-        std::size_t index = *index_itr_++;
+        std::size_t index = (*index_itr_++).second;
 #endif
         if ( index < features_.size())
         {

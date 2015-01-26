@@ -27,8 +27,8 @@
 #include <algorithm>
 
 // boost
-
 #include <boost/algorithm/string.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 // mapnik
 #include <mapnik/unicode.hpp>
@@ -45,8 +45,7 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
-
-#include <boost/spirit/include/qi.hpp>
+#include <mapnik/polygon_clipper.hpp> // boost::geometry - register box2d<double>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -158,7 +157,7 @@ void geojson_datasource::parse_geojson(T const& buffer)
     }
 
 #if BOOST_VERSION >= 105600
-    using values_container = std::vector< std::pair<box_type, std::size_t> >;
+    using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
     values_container values;
     values.reserve(features_.size());
 #else
@@ -187,9 +186,9 @@ void geojson_datasource::parse_geojson(T const& buffer)
             }
         }
 #if BOOST_VERSION >= 105600
-        values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
+        values.emplace_back(box, std::make_pair(geometry_index,0));
 #else
-        tree_->insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
+        tree_->insert(box, std::make_pair(geometry_index));
 #endif
         ++geometry_index;
     }
@@ -248,10 +247,9 @@ mapnik::layer_descriptor geojson_datasource::get_descriptor() const
 mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) const
 {
     // if the query box intersects our world extent then query for features
-    mapnik::box2d<double> const& b = q.get_bbox();
-    if (extent_.intersects(b))
+    mapnik::box2d<double> const& box = q.get_bbox();
+    if (extent_.intersects(box))
     {
-        box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
 #if BOOST_VERSION >= 105600
         geojson_featureset::array_type index_array;
         if (tree_)
