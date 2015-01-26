@@ -24,7 +24,7 @@
 #define LARGE_GEOJSON_FEATURESET_HPP
 
 #include <mapnik/feature.hpp>
-#include "large_geojson_datasource.hpp"
+#include "geojson_datasource.hpp"
 
 #include <vector>
 #include <deque>
@@ -34,7 +34,7 @@
 class large_geojson_featureset : public mapnik::Featureset
 {
 public:
-    using array_type = std::deque<large_geojson_datasource::item_type>;
+    using array_type = std::deque<geojson_datasource::item_type>;
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
 
     large_geojson_featureset(std::string const& filename,

@@ -31,6 +31,7 @@ plugin_sources = Split(
   """
   %(PLUGIN_NAME)s_datasource.cpp
   %(PLUGIN_NAME)s_featureset.cpp
+  large_%(PLUGIN_NAME)s_featureset.cpp
   """ % locals()
 )
 

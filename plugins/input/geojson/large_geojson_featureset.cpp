@@ -26,9 +26,6 @@
 #include <mapnik/json/geometry_grammar_impl.hpp>
 #include <mapnik/json/feature_grammar_impl.hpp>
 #include <mapnik/utils.hpp>
-// boost
-#include <boost/spirit/include/support_multi_pass.hpp>
-#include <boost/spirit/home/support/iterators/detail/functor_input_policy.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -65,7 +62,7 @@ mapnik::feature_ptr large_geojson_featureset::next()
     if (index_itr_ != index_end_)
     {
 #if BOOST_VERSION >= 105600
-        large_geojson_datasource::item_type const& item = *index_itr_++;
+        geojson_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second.first;
         std::size_t size = item.second.second;
 #else
