@@ -88,15 +88,13 @@ struct options_type<geojson_linear<Max,Min> >
 class geojson_datasource : public mapnik::datasource
 {
 public:
-    using point_type = boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian>;
-    using box_type = boost::geometry::model::box<point_type>;
-
+    using box_type = mapnik::box2d<double>;
 #if BOOST_VERSION >= 105600
-    using item_type = std::pair<box_type,std::size_t>;
+    using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t> >;
     using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
 #else
-    using item_type = std::size_t;
-    using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
+    using item_type = std::pair<std::size_t, std::size_t>;
+    using spatial_index_type = boost::geometry::index::rtree<box_type,item_type>;
 #endif
 
     // constructor
@@ -109,8 +107,11 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    //
     template <typename T>
     void parse_geojson(T const& buffer);
+    template <typename Iterator>
+    void initialise_index(Iterator start, Iterator end);
 private:
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;
@@ -119,6 +120,7 @@ private:
     mapnik::box2d<double> extent_;
     std::vector<mapnik::feature_ptr> features_;
     std::unique_ptr<spatial_index_type> tree_;
+    bool cache_features_ = true;
 };
 
 
