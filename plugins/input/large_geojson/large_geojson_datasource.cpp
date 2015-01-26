@@ -31,8 +31,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
-#include <boost/spirit/home/support/iterators/detail/functor_input_policy.hpp>
 
 // mapnik
 #include <mapnik/unicode.hpp>
