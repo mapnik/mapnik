@@ -20,38 +20,35 @@
  *
  *****************************************************************************/
 
-// mapnik
+#ifndef LARGE_GEOJSON_FEATURESET_HPP
+#define LARGE_GEOJSON_FEATURESET_HPP
+
 #include <mapnik/feature.hpp>
-// stl
-#include <string>
+#include "geojson_datasource.hpp"
+
 #include <vector>
 #include <deque>
+#include <fstream>
+#include <cstdio>
 
-#include "geojson_featureset.hpp"
-
-geojson_featureset::geojson_featureset(std::vector<mapnik::feature_ptr> const& features,
-                                       array_type && index_array)
-    : features_(features),
-      index_array_(std::move(index_array)),
-      index_itr_(index_array_.begin()),
-      index_end_(index_array_.end()) {}
-
-geojson_featureset::~geojson_featureset() {}
-
-mapnik::feature_ptr geojson_featureset::next()
+class large_geojson_featureset : public mapnik::Featureset
 {
-    if (index_itr_ != index_end_)
-    {
-#if BOOST_VERSION >= 105600
-        geojson_datasource::item_type const& item = *index_itr_++;
-        std::size_t index = item.second.first;
-#else
-        std::size_t index = (*index_itr_++).second;
-#endif
-        if ( index < features_.size())
-        {
-            return features_.at(index);
-        }
-    }
-    return mapnik::feature_ptr();
-}
+public:
+    using array_type = std::deque<geojson_datasource::item_type>;
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+
+    large_geojson_featureset(std::string const& filename,
+                             array_type && index_array);
+    virtual ~large_geojson_featureset();
+    mapnik::feature_ptr next();
+
+private:
+    file_ptr file_;
+
+    const array_type index_array_;
+    array_type::const_iterator index_itr_;
+    array_type::const_iterator index_end_;
+    mapnik::context_ptr ctx_;
+};
+
+#endif // LARGE_GEOJSON_FEATURESET_HPP

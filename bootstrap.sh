@@ -22,13 +22,13 @@ todo
 declare -A DEPS
 DEPS["freetype"]="2.5.4"
 DEPS["harfbuzz"]="2cd5323"
-DEPS["jpeg"]="v8d"
+DEPS["jpeg_turbo"]="1.4.0"
 DEPS["libxml2"]="2.9.2"
 DEPS["libpng"]="1.6.13"
 DEPS["webp"]="0.4.2"
 DEPS["icu"]="54.1"
 DEPS["proj"]="4.8.0"
-DEPS["libtiff"]="dev"
+DEPS["libtiff"]="4.0.4beta"
 DEPS["boost"]="1.57.0"
 DEPS["boost_libsystem"]="1.57.0"
 DEPS["boost_libthread"]="1.57.0"
@@ -87,16 +87,13 @@ function setup_mason() {
 }
 
 function install_mason_deps() {
-    if [[ ! -d ./mason_packages ]]; then
-        for DEP in "${!DEPS[@]}"; do
+    MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
+    for DEP in "${!DEPS[@]}"; do
+        if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${DEP} ]]; then
             mason install ${DEP} ${DEPS[$DEP]}
-        done
-    fi
-    if [[ ! -d ./mason_packages/.link ]]; then
-        for DEP in "${!DEPS[@]}"; do
             mason link ${DEP} ${DEPS[$DEP]}
-        done
-    fi
+        fi
+    done
 }
 
 function setup_nose() {
