@@ -10,15 +10,9 @@ try:
 except ImportError:
     import simplejson as json
 
-COMPUTE_THRESHOLD = 16
 
-# testcase images are generated on OS X
-# so they should exactly match
-if platform.uname()[0] == 'Darwin':
-    COMPUTE_THRESHOLD = 2
-
-# returns true if pixels are not identical
-def compare_pixels(pixel1, pixel2, alpha=True):
+# returns true if pixels are not nearly identical
+def compare_pixels(pixel1, pixel2, alpha=True, pixel_threshold=0):
     if pixel1 == pixel2:
         return False
     r_diff = abs((pixel1 & 0xff) - (pixel2 & 0xff))
@@ -26,15 +20,15 @@ def compare_pixels(pixel1, pixel2, alpha=True):
     b_diff = abs(((pixel1 >> 16) & 0xff)- ((pixel2 >> 16) & 0xff))
     if alpha:
         a_diff = abs(((pixel1 >> 24) & 0xff) - ((pixel2 >> 24) & 0xff))
-        if(r_diff > COMPUTE_THRESHOLD or
-           g_diff > COMPUTE_THRESHOLD or
-           b_diff > COMPUTE_THRESHOLD or
-           a_diff > COMPUTE_THRESHOLD):
+        if(r_diff > pixel_threshold or
+           g_diff > pixel_threshold or
+           b_diff > pixel_threshold or
+           a_diff > pixel_threshold):
             return True
     else:
-        if(r_diff > COMPUTE_THRESHOLD or
-           g_diff > COMPUTE_THRESHOLD or
-           b_diff > COMPUTE_THRESHOLD):
+        if(r_diff > pixel_threshold or
+           g_diff > pixel_threshold or
+           b_diff > pixel_threshold):
             return True
     return False
 
@@ -47,6 +41,7 @@ def compare(actual, expected, alpha=True):
     delta_pixels = (im2.width() * im2.height()) - pixels
     if delta_pixels != 0:
         return delta_pixels
+    # TODO: convert to C++ to speed this up
     for x in range(0,im1.width(),2):
         for y in range(0,im1.height(),2):
             if compare_pixels(im1.get_pixel(x,y),im2.get_pixel(x,y),alpha=alpha):
