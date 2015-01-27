@@ -6,6 +6,8 @@ from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
 import os, sys, inspect, traceback
 import mapnik
 
+HERE = os.path.dirname(__file__)
+
 def execution_path(filename):
     return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
 
@@ -84,5 +86,9 @@ def side_by_side_image(left_im, right_im):
     height = max(left_im.height(), right_im.height())
     im = mapnik.Image(width, height)
     im.composite(left_im,mapnik.CompositeOp.src_over,1.0,0,0)
+    if width > 80:
+       im.composite(mapnik.Image.open(HERE+'/images/expected.png'),mapnik.CompositeOp.difference,1.0,0,0)
     im.composite(right_im,mapnik.CompositeOp.src_over,1.0,left_im.width() + 1, 0)
+    if width > 80:
+       im.composite(mapnik.Image.open(HERE+'/images/actual.png'),mapnik.CompositeOp.difference,1.0,left_im.width() + 1, 0)
     return im
