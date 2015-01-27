@@ -139,7 +139,7 @@ struct rendering_buffer
     uint8_t const* buf() const { return data_.getBytes(); }
     unsigned width() const { return data_.width();}
     unsigned height() const { return data_.height();}
-    int stride() const { return data_.width() * sizeof(pixel_type);}
+    int stride() const { return data_.getRowSize();}
     uint8_t const* row_ptr(int, int y, unsigned) {return row_ptr(y);}
     uint8_t const* row_ptr(int y) const { return reinterpret_cast<uint8_t const*>(data_.getRow(y)); }
     row_data row (int y) const { return row_data(0, data_.width() - 1, row_ptr(y)); }
@@ -161,7 +161,7 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_type = agg::renderer_base<pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width() * 4);
+    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.getRowSize());
     const_rendering_buffer src_buffer(src);
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));

@@ -92,7 +92,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
 
     agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
-                              current_buffer_->height(), current_buffer_->width() * 4);
+                              current_buffer_->height(), current_buffer_->getRowSize());
     ras_ptr->reset();
     value_double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);
     gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym, feature, common_.vars_);

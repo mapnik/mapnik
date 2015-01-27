@@ -55,7 +55,7 @@ std::shared_ptr<image_rgba8> render_pattern<image_rgba8>(rasterizer & ras,
     mtx = tr * mtx;
 
     std::shared_ptr<mapnik::image_rgba8> image = std::make_shared<mapnik::image_rgba8>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 4);
+    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
@@ -98,7 +98,7 @@ std::shared_ptr<image_gray8> render_pattern<image_gray8>(rasterizer & ras,
     mtx = tr * mtx;
 
     std::shared_ptr<mapnik::image_gray8> image = std::make_shared<mapnik::image_gray8>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width());
+    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
@@ -132,7 +132,7 @@ std::shared_ptr<image_gray16> render_pattern<image_gray16>(rasterizer & ras,
     mtx = tr * mtx;
 
     std::shared_ptr<mapnik::image_gray16> image = std::make_shared<mapnik::image_gray16>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 2);
+    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
@@ -166,7 +166,7 @@ std::shared_ptr<image_gray32f> render_pattern<image_gray32f>(rasterizer & ras,
     mtx = tr * mtx;
 
     std::shared_ptr<mapnik::image_gray32f> image = std::make_shared<mapnik::image_gray32f>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->width() * 4);
+    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 

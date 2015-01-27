@@ -331,7 +331,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
     agg::rendering_buffer buf(current_buffer_->getBytes(),
                               current_buffer_->width(),
                               current_buffer_->height(),
-                              current_buffer_->width() * 4);
+                              current_buffer_->getRowSize());
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
@@ -416,7 +416,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
             agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                              src.width(),
                                              src.height(),
-                                             src.width()*4);
+                                             src.getRowSize());
             agg::pixfmt_rgba32_pre marker_pixf(marker_buf);
             using img_accessor_type = agg::image_accessor_clone<agg::pixfmt_rgba32_pre>;
             using interpolator_type = agg::span_interpolator_linear<agg::trans_affine>;
@@ -456,7 +456,7 @@ void agg_renderer<T0,T1>::debug_draw_box(box2d<double> const& box,
     agg::rendering_buffer buf(current_buffer_->getBytes(),
                               current_buffer_->width(),
                               current_buffer_->height(),
-                              current_buffer_->width() * 4);
+                              current_buffer_->getRowSize());
     debug_draw_box(buf, box, x, y, angle);
 }
 

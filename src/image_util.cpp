@@ -480,7 +480,7 @@ bool premultiply_visitor::operator()<image_rgba8> (image_rgba8 & data)
 {
     if (!data.get_premultiplied())
     {
-        agg::rendering_buffer buffer(data.getBytes(),data.width(),data.height(),data.width() * 4);
+        agg::rendering_buffer buffer(data.getBytes(),data.width(),data.height(),data.getRowSize());
         agg::pixfmt_rgba32 pixf(buffer);
         pixf.premultiply();
         data.set_premultiplied(true);
@@ -504,7 +504,7 @@ bool demultiply_visitor::operator()<image_rgba8> (image_rgba8 & data)
 {
     if (data.get_premultiplied())
     {
-        agg::rendering_buffer buffer(data.getBytes(),data.width(),data.height(),data.width() * 4);
+        agg::rendering_buffer buffer(data.getBytes(),data.width(),data.height(),data.getRowSize());
         agg::pixfmt_rgba32_pre pixf(buffer);
         pixf.demultiply();
         data.set_premultiplied(false);
@@ -1253,6 +1253,15 @@ template MAPNIK_DECL uint8_t get_pixel(image_any const&, std::size_t, std::size_
 template MAPNIK_DECL int8_t get_pixel(image_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL float get_pixel(image_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL double get_pixel(image_any const&, std::size_t, std::size_t); 
+template MAPNIK_DECL color get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint32_t get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL int32_t get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint16_t get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL int16_t get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint8_t get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL int8_t get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL float get_pixel(image_view_any const&, std::size_t, std::size_t);
+template MAPNIK_DECL double get_pixel(image_view_any const&, std::size_t, std::size_t); 
 
 
 // Temporary remove these later!
@@ -1452,7 +1461,7 @@ struct visitor_compare
 template <>
 MAPNIK_DECL unsigned compare<image_any>(image_any const& im1, image_any const& im2, double threshold, bool alpha)
 {
-    util::apply_visitor(detail::visitor_compare(im2, threshold, alpha), im1);
+    return util::apply_visitor(detail::visitor_compare(im2, threshold, alpha), im1);
 }
 
 } // end ns

@@ -158,7 +158,7 @@ int main (int argc,char** argv)
             }
             // 10 pixel buffer to avoid edge clipping of 100% svg's
             mapnik::image_rgba8 im(w+0,h+0);
-            agg::rendering_buffer buf(im.getBytes(), im.width(), im.height(), im.width() * 4);
+            agg::rendering_buffer buf(im.getBytes(), im.width(), im.height(), im.getRowSize());
             pixfmt pixf(buf);
             renderer_base renb(pixf);
 

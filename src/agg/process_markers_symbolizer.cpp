@@ -192,7 +192,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buf_type render_buffer(current_buffer_->getBytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+    buf_type render_buffer(current_buffer_->getBytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->getRowSize());
     box2d<double> clip_box = clipping_extent(common_);
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
