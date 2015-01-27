@@ -115,6 +115,16 @@ class Reporting:
             else:
                 print '✓'
 
+    def updating(self, actual, expected):
+        self.passed += 1
+        if self.quiet:
+            sys.stderr.write('\x1b[33m.\x1b[0m')
+        else:
+            print '\x1b[33m✓\x1b[0m (\x1b[34mUpdating\x1b[0m)'
+        contents = open(actual, 'r').read()
+        open(expected, 'wb').write(contents)
+
+
     def not_found(self, actual, expected):
         self.failed += 1
         self.errors.append((self.NOT_FOUND, actual, expected, 0, None))
@@ -236,6 +246,8 @@ def render(filename, config, scale_factor, reporting):
                     renderer['render'](m, actual, scale_factor)
                     if not os.path.exists(expected):
                         reporting.not_found(actual, expected)
+                    elif os.environ.get('UPDATE'):
+                        reporting.updating(actual, expected)
                     else:
                         diff = renderer['compare'](actual, expected)
                         if diff > renderer['threshold']:
