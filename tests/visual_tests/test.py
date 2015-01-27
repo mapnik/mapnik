@@ -27,17 +27,9 @@ defaults = {
     'grid': mapnik.has_grid_renderer()
 }
 
-cairo_threshold = 10
+cairo_threshold = 0
 agg_threshold = 0
-grid_threshold = 5
-if 'Linux' == platform.uname()[0]:
-    # we assume if linux then you are running packaged cairo
-    # which is older than the 1.12.14 version we used on OS X
-    # to generate the expected images, so we'll rachet back the threshold
-    # https://github.com/mapnik/mapnik/issues/1868
-    cairo_threshold = 230
-    agg_threshold = 12
-    grid_threshold = 6
+grid_threshold = 0
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
