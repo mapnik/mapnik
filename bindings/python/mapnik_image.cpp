@@ -239,7 +239,7 @@ void clear(image_any & im)
     mapnik::fill(im, 0);
 }
 
-void composite(image_any & dst, image_any & src, mapnik::composite_mode_e mode, float opacity, int dx, int dy)
+void composite(image_any & dst, image_any const& src, mapnik::composite_mode_e mode, float opacity, int dx, int dy)
 {
     bool demultiply_dst = mapnik::premultiply_alpha(dst);
     bool demultiply_src = mapnik::premultiply_alpha(src);
