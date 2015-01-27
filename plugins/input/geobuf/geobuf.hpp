@@ -91,14 +91,13 @@ struct geobuf
 public:
     //ctor
     geobuf (unsigned char const* buf, std::size_t size)
-     : pbf_(buf, size),
-       ctx_(std::make_shared<mapnik::context_type>()),
-       tr_(new mapnik::transcoder("utf8")) {}
+        : pbf_(buf, size),
+          ctx_(std::make_shared<mapnik::context_type>()),
+          tr_(new mapnik::transcoder("utf8")) {}
 
     template <typename T>
     void read(T & features)
     {
-        //using feature_container_type = T;
         while (pbf_.next())
         {
             switch (pbf_.tag)
@@ -129,6 +128,11 @@ public:
                 std::cerr << "FIXME" << std::endl;
                 //auto geometry = pbf_.message();
                 //read_geometry(geometry);
+                break;
+            }
+            case 7:
+            {
+                throw std::runtime_error("Topology is not supported");
             }
             default:
                 std::cerr << "FIXME tag=" << pbf_.tag << std::endl;
@@ -323,13 +327,26 @@ private:
         }
         case LineString:
         {
-            read_line_string(pbf, paths);
+            read_line_string(pbf,paths);
             break;
+        }
+        case MultiPoint:
+        {
+            read_multi_point(pbf, paths);
+            break;
+        }
+        case MultiLineString:
+        {
+            read_multi_linestring(pbf, lengths, paths);
         }
         case MultiPolygon:
         {
-            read_multipolygon(pbf, lengths, paths);
+            read_multi_polygon(pbf, lengths, paths);
             break;
+        }
+        case GeometryCollection:
+        {
+            throw std::runtime_error("GeometryCollection is not supported");
         }
         default:
         {
@@ -373,6 +390,26 @@ private:
     }
 
     template <typename T, typename GeometryContainer>
+    void read_multi_point(T & pbf, GeometryContainer & paths)
+    {
+        int x = 0.0;
+        int y = 0.0;
+        auto size = pbf.varint();
+        uint8_t const* end = pbf.data + size;
+        while (pbf.data < end)
+        {
+            std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
+            for (int d = 0; d < dim; ++d)
+            {
+                if (d == 0) x += pbf.svarint();
+                else if (d == 1) y += pbf.svarint();
+            }
+            point->move_to(x, y);
+            paths.push_back(point.release());
+        }
+    }
+
+    template <typename T, typename GeometryContainer>
     void read_line_string(T & pbf, GeometryContainer & paths)
     {
         std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
@@ -382,10 +419,30 @@ private:
     }
 
     template <typename T, typename GeometryContainer>
+    void read_multi_linestring(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
+    {
+        auto size = pbf.varint();
+        if (!lengths)
+        {
+            std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+            read_linear_ring(pbf, 0, size, *line);
+            paths.push_back(line.release());
+        }
+        else
+        {
+            for (auto len : *lengths)
+            {
+                std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+                read_linear_ring(pbf, len, size, *line, true);
+                paths.push_back(line.release());
+            }
+        }
+    }
+
+    template <typename T, typename GeometryContainer>
     void read_polygon(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
     {
         std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
-
         auto size = pbf.varint();
         if (!lengths)
         {
@@ -402,7 +459,7 @@ private:
     }
 
     template <typename T, typename GeometryContainer>
-    void read_multipolygon(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
+    void read_multi_polygon(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
     {
         auto size = pbf.varint();
         if (!lengths)
