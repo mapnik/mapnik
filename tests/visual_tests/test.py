@@ -27,17 +27,9 @@ defaults = {
     'grid': mapnik.has_grid_renderer()
 }
 
-cairo_threshold = 10
+cairo_threshold = 0
 agg_threshold = 0
-grid_threshold = 5
-if 'Linux' == platform.uname()[0]:
-    # we assume if linux then you are running packaged cairo
-    # which is older than the 1.12.14 version we used on OS X
-    # to generate the expected images, so we'll rachet back the threshold
-    # https://github.com/mapnik/mapnik/issues/1868
-    cairo_threshold = 230
-    agg_threshold = 12
-    grid_threshold = 6
+grid_threshold = 0
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
@@ -64,7 +56,7 @@ renderers = [
     },
     { 'name': 'cairo',
       'render': render_cairo,
-      'compare': lambda actual, reference: compare(actual, reference, alpha=False),
+      'compare': lambda actual, reference: compare(actual, reference, alpha=True),
       'threshold': cairo_threshold,
       'filetype': 'png',
       'dir': 'images'
@@ -122,6 +114,16 @@ class Reporting:
                 print '\x1b[32m✓\x1b[0m'
             else:
                 print '✓'
+
+    def updating(self, actual, expected):
+        self.passed += 1
+        if self.quiet:
+            sys.stderr.write('\x1b[33m.\x1b[0m')
+        else:
+            print '\x1b[33m✓\x1b[0m (\x1b[34mUpdating\x1b[0m)'
+        contents = open(actual, 'r').read()
+        open(expected, 'wb').write(contents)
+
 
     def not_found(self, actual, expected):
         self.failed += 1
@@ -244,6 +246,8 @@ def render(filename, config, scale_factor, reporting):
                     renderer['render'](m, actual, scale_factor)
                     if not os.path.exists(expected):
                         reporting.not_found(actual, expected)
+                    elif os.environ.get('UPDATE'):
+                        reporting.updating(actual, expected)
                     else:
                         diff = renderer['compare'](actual, expected)
                         if diff > renderer['threshold']:

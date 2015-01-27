@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
+from nose.tools import assert_almost_equal
 
 import os, sys, inspect, traceback
 import mapnik
@@ -92,3 +93,10 @@ def side_by_side_image(left_im, right_im):
     if width > 80:
        im.composite(mapnik.Image.open(HERE+'/images/actual.png'),mapnik.CompositeOp.difference,1.0,left_im.width() + 1, 0)
     return im
+
+def assert_box2d_almost_equal(a, b, msg=None):
+    msg = msg or ("%r != %r" % (a, b))
+    assert_almost_equal(a.minx, b.minx, msg=msg)
+    assert_almost_equal(a.maxx, b.maxx, msg=msg)
+    assert_almost_equal(a.miny, b.miny, msg=msg)
+    assert_almost_equal(a.maxy, b.maxy, msg=msg)

@@ -5,14 +5,28 @@ sudo: false
 addons:
   postgresql: "9.3"
 
+matrix:
+  include:
+    - os: osx
+      compiler: clang
+      env: JOBS=6
+    - os: linux
+      compiler: clang
+      env: JOBS=6
+    - os: linux
+      compiler: gcc
+      env: JOBS=2
+
 install:
- - psql -U postgres -c 'create database template_postgis;' -U postgres
- - psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres
+ - if [[ $(uname -s) == 'Linux' ]]; then psql -U postgres -c 'create database template_postgis;' -U postgres; psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres; fi;
+ - if [[ $(uname -s) == 'Darwin' ]]; then brew install bash; export PATH="$(brew --prefix)/bin":${PATH}; fi;
+ - echo `which bash`
 
 script:
  - source bootstrap.sh
  - ./configure
- - JOBS=6 make
+ - cat config.log
+ - make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  #- source localize.sh && make grind

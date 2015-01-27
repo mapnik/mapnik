@@ -5,7 +5,7 @@ from nose.tools import *
 import mapnik
 import random
 import math
-from utilities import run_all
+from utilities import run_all, assert_box2d_almost_equal
 
 # Tests that exercise map projections.
 
@@ -112,6 +112,40 @@ def test_proj_transform_between_init_and_literal():
             eq_(math.fabs(coord.y - lon_lat_coord2.y) < 1,True)
             eq_(math.fabs(coord.y - lon_lat_coord3.y) < 1,True)
             eq_(math.fabs(coord.y - lon_lat_coord4.y) < 1,True)
+
+
+# Github Issue #2648
+def test_proj_antimeridian_bbox():
+    # this is logic from feature_style_processor::prepare_layer()
+    PROJ_ENVELOPE_POINTS = 20  # include/mapnik/config.hpp
+
+    prjGeog = mapnik.Projection('+init=epsg:4326')
+    prjProj = mapnik.Projection('+init=epsg:2193')
+    prj_trans_fwd = mapnik.ProjTransform(prjProj, prjGeog)
+    prj_trans_rev = mapnik.ProjTransform(prjGeog, prjProj)
+
+    # bad = mapnik.Box2d(-177.31453250437079, -62.33374815225163, 178.02778363316355, -24.584597490955804)
+    better = mapnik.Box2d(-180.0, -62.33374815225163, 180.0, -24.584597490955804)
+
+    buffered_query_ext = mapnik.Box2d(274000, 3087000, 3327000, 7173000)
+    fwd_ext = prj_trans_fwd.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS)
+    assert_box2d_almost_equal(fwd_ext, better)
+
+    # check the same logic works for .backward()
+    ext = mapnik.Box2d(274000, 3087000, 3327000, 7173000)
+    rev_ext = prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS)
+    assert_box2d_almost_equal(rev_ext, better)
+
+    # checks for not being snapped (ie. not antimeridian)
+    normal = mapnik.Box2d(148.766759749,-60.1222810238,159.95484893,-24.9771195151)
+    buffered_query_ext = mapnik.Box2d(274000, 3087000, 276000, 7173000)
+    fwd_ext = prj_trans_fwd.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS)
+    assert_box2d_almost_equal(fwd_ext, normal)
+
+    # check the same logic works for .backward()
+    ext = mapnik.Box2d(274000, 3087000, 276000, 7173000)
+    rev_ext = prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS)
+    assert_box2d_almost_equal(rev_ext, normal)
 
 
 if __name__ == "__main__":
