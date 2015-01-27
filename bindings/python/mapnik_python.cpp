@@ -136,13 +136,16 @@ void clear_cache()
 #endif
 }
 
-#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+#if defined(HAVE_CAIRO)
 #include <mapnik/cairo_io.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
+#include <cairo.h>
+#endif
+
+#if defined(HAVE_PYCAIRO)
 #include <boost/python/type_id.hpp>
 #include <boost/python/converter/registry.hpp>
 #include <pycairo.h>
-#include <cairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
 static void *extract_surface(PyObject* op)
 {
