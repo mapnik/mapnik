@@ -2,9 +2,6 @@
 
 #set -eu
 
-# NOTE: requires at least bash >= 4.0
-# brew install bash
-
 : '
 
 todo
@@ -18,28 +15,6 @@ todo
 - pkg-config-less
 - gdal shared lib?
 '
-
-declare -A DEPS
-DEPS["freetype"]="2.5.4"
-DEPS["harfbuzz"]="2cd5323"
-DEPS["jpeg_turbo"]="1.4.0"
-DEPS["libxml2"]="2.9.2"
-DEPS["libpng"]="1.6.13"
-DEPS["webp"]="0.4.2"
-DEPS["icu"]="54.1"
-DEPS["proj"]="4.8.0"
-DEPS["libtiff"]="4.0.4beta"
-DEPS["boost"]="1.57.0"
-DEPS["boost_libsystem"]="1.57.0"
-DEPS["boost_libthread"]="1.57.0"
-DEPS["boost_libfilesystem"]="1.57.0"
-DEPS["boost_libprogram_options"]="1.57.0"
-DEPS["boost_libregex"]="1.57.0"
-DEPS["boost_libpython"]="1.57.0"
-DEPS["libpq"]="9.4.0"
-DEPS["sqlite"]="3.8.6"
-DEPS["gdal"]="1.11.1"
-DEPS["expat"]="2.1.0"
 
 CPP11_TOOLCHAIN="$(pwd)/toolchain"
 
@@ -86,14 +61,36 @@ function setup_mason() {
     fi
 }
 
+function ip() {
+    if [[ ! -d ./mason_packages/${3}/${1}/ ]]; then
+        echo ./mason_packages/${3}/${1}/
+        mason install $1 $2
+        mason link $1 $2
+    fi
+}
+
 function install_mason_deps() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
-    for DEP in "${!DEPS[@]}"; do
-        if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${DEP} ]]; then
-            mason install ${DEP} ${DEPS[$DEP]}
-            mason link ${DEP} ${DEPS[$DEP]}
-        fi
-    done
+    ip freetype 2.5.4 $MASON_PLATFORM_ID
+    ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
+    ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
+    ip libxml2 2.9.2 $MASON_PLATFORM_ID
+    ip libpng 1.6.13 $MASON_PLATFORM_ID
+    ip webp 0.4.2 $MASON_PLATFORM_ID
+    ip icu 54.1 $MASON_PLATFORM_ID
+    ip proj 4.8.0 $MASON_PLATFORM_ID
+    ip libtiff 4.0.4beta $MASON_PLATFORM_ID
+    ip boost 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libsystem 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libthread 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libfilesystem 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libprogram_options 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libregex 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libpython 1.57.0 $MASON_PLATFORM_ID
+    ip libpq 9.4.0 $MASON_PLATFORM_ID
+    ip sqlite 3.8.6 $MASON_PLATFORM_ID
+    ip gdal 1.11.1 $MASON_PLATFORM_ID
+    ip expat 2.1.0 $MASON_PLATFORM_ID
 }
 
 function setup_nose() {
