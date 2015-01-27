@@ -83,6 +83,6 @@ def side_by_side_image(left_im, right_im):
     width = left_im.width() + 1 + right_im.width()
     height = max(left_im.height(), right_im.height())
     im = mapnik.Image(width, height)
-    im.blend(0, 0, left_im, 1.0)
-    im.blend(left_im.width() + 1, 0, right_im, 1.0)
+    im.composite(left_im,mapnik.CompositeOp.src_over,1.0,0,0)
+    im.composite(right_im,mapnik.CompositeOp.src_over,1.0,left_im.width() + 1, 0)
     return im
