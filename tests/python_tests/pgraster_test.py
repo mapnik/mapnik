@@ -113,7 +113,7 @@ def drop_imported(tabname, overview):
       psql_run('DROP TABLE IF EXISTS "o_' + of + '_' + tabname + '";')
 
 def compare_images(expected,im):
-  if not os.path.exists(expected):
+  if not os.path.exists(expected) or os.environ.get('UPDATE'):
     print 'generating expected image %s' % expected
     im.save(expected,'png32')
   expected_im = mapnik.Image.open(expected)
@@ -622,19 +622,6 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       expected = 'images/support/pgraster/%s-%s-%s-%s.png' % (lyr.name,lbl,pixtype,value)
       compare_images(expected,im)
-      h = format(value, '02x')
-      hex_v = '0000ffff'
-      hex_a = 'ff0000ff'
-      hex_b = '00ff00ff'
-      eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 3, 8,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 8, 8,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view(13, 8,1,1).tostring()), hex_a);
-      eq_(hexlify(im.view( 3,13,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 8,13,1,1).tostring()), hex_b);
-      eq_(hexlify(im.view(13,13,1,1).tostring()), hex_v);
 
     def test_data_2bui_subquery():
       _test_data_subquery('data_2bui_subquery', '2BUI', 3)
