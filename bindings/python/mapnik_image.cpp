@@ -116,11 +116,6 @@ mapnik::image_view_any get_view(mapnik::image_any const& data,unsigned x,unsigne
     return mapnik::create_view(data,x,y,w,h);
 }
 
-bool painted(mapnik::image_any const& im)
-{
-    return im.painted();
-}
-
 bool is_solid(mapnik::image_any const& im)
 {
     return mapnik::is_solid(im);
@@ -129,6 +124,11 @@ bool is_solid(mapnik::image_any const& im)
 void background(mapnik::image_any & im, mapnik::color const& c)
 {
     mapnik::fill(im, c);
+}
+
+void compare(mapnik::image_any const& im1, mapnik::image_any const& im2, double threshold, bool alpha)
+{
+    mapnik::compare(im1, im2, threshold, alpha);
 }
 
 uint32_t get_pixel(mapnik::image_any const& im, unsigned x, unsigned y)
@@ -207,6 +207,11 @@ std::shared_ptr<image_any> frombuffer(PyObject * obj)
 void set_grayscale_to_alpha(image_any & im)
 {
     mapnik::set_grayscale_to_alpha(im);
+}
+
+void set_grayscale_to_alpha_c(image_any & im, mapnik::color const& c)
+{
+    mapnik::set_grayscale_to_alpha(im, c);
 }
 
 void set_color_to_alpha(image_any & im, mapnik::color const& c)
@@ -322,10 +327,11 @@ void export_image()
         .def("width",&image_any::width)
         .def("height",&image_any::height)
         .def("view",&get_view)
-        .def("painted",&painted)
+        .def("painted",&image_any::painted)
         .def("is_solid",&is_solid)
         .def("background",&background, "Set the background color of the image.")
         .def("set_grayscale_to_alpha",&set_grayscale_to_alpha, "Set the grayscale values to the alpha channel of the Image")
+        .def("set_grayscale_to_alpha",&set_grayscale_to_alpha_c, "Set the grayscale values to the alpha channel of the Image")
         .def("set_color_to_alpha",&set_color_to_alpha, "Set a given color to the alpha channel of the Image")
         .def("set_alpha",&set_alpha, "Set the overall alpha channel of the Image")
         .def("composite",&composite,
@@ -335,6 +341,12 @@ void export_image()
            arg("opacity")=1.0f,
            arg("dx")=0,
            arg("dy")=0
+         ))
+        .def("compare",&compare,
+         ( arg("self"),
+           arg("image"),
+           arg("threshold")=0.0,
+           arg("alpha")=true
          ))
         .def("premultiplied",&premultiplied)
         .def("premultiply",&premultiply)

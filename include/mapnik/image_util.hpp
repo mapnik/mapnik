@@ -129,6 +129,9 @@ template <typename T>
 MAPNIK_DECL void set_grayscale_to_alpha (T & image);
 
 template <typename T>
+MAPNIK_DECL void set_grayscale_to_alpha (T & image, color const& c);
+
+template <typename T>
 MAPNIK_DECL void set_color_to_alpha (T & image, color const& c);
 
 template <typename T1, typename T2>
@@ -155,6 +158,9 @@ MAPNIK_DECL T2 get_pixel(T1 const& data, std::size_t x, std::size_t y);
 MAPNIK_DECL void view_to_string (image_view_any const& view, std::ostringstream & ss);
 
 MAPNIK_DECL image_view_any create_view (image_any const& data, unsigned x, unsigned y, unsigned w, unsigned h);
+
+template <typename T>
+MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold = 0, bool alpha = true);
 
 inline bool is_png(std::string const& filename)
 {

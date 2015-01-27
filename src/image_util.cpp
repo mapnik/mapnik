@@ -468,9 +468,9 @@ namespace detail {
 struct premultiply_visitor
 {
     template <typename T>
-    bool operator() (T & data) 
+    bool operator() (T &) 
     {
-        throw std::runtime_error("Error: Premultiply with " + std::string(typeid(data).name()) + " is not supported");
+        return false;
     }
 
 };
@@ -492,9 +492,9 @@ bool premultiply_visitor::operator()<image_rgba8> (image_rgba8 & data)
 struct demultiply_visitor
 {
     template <typename T>
-    bool operator() (T & data) 
+    bool operator() (T &) 
     {
-        throw std::runtime_error("Error: Premultiply with " + std::string(typeid(data).name()) + " is not supported");
+        return false;
     }
 
 };
@@ -654,7 +654,7 @@ struct visitor_set_grayscale_to_alpha
     template <typename T>
     void operator() (T & data)
     {
-        throw std::runtime_error("Error: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
+        std::clog << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified" << std::endl;
     }
 };
 
@@ -680,6 +680,43 @@ void visitor_set_grayscale_to_alpha::operator()<image_rgba8> (image_rgba8 & data
     }
 }
 
+struct visitor_set_grayscale_to_alpha_c
+{
+    visitor_set_grayscale_to_alpha_c(color const& c)
+        : c_(c) {}
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        std::clog << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified" << std::endl;
+    }
+
+  private:
+    color const& c_;
+};
+
+template <>
+void visitor_set_grayscale_to_alpha_c::operator()<image_rgba8> (image_rgba8 & data)
+{
+    using pixel_type = typename image_rgba8::pixel_type;
+    for (unsigned int y = 0; y < data.height(); ++y)
+    {
+        pixel_type* row_from = data.getRow(y);
+        for (unsigned int x = 0; x < data.width(); ++x)
+        {
+            pixel_type rgba = row_from[x];
+            pixel_type r = rgba & 0xff;
+            pixel_type g = (rgba >> 8 ) & 0xff;
+            pixel_type b = (rgba >> 16) & 0xff;
+
+            // magic numbers for grayscale
+            pixel_type a = static_cast<pixel_type>(std::ceil((r * .3) + (g * .59) + (b * .11)));
+
+            row_from[x] = (a << 24)| (c_.blue() << 16) |  (c_.green() << 8) | (c_.red()) ;
+        }
+    }
+}
+
 } // end detail ns
 
 template<>
@@ -694,13 +731,37 @@ MAPNIK_DECL void set_grayscale_to_alpha<image_any> (image_any & data)
     }
 }
 
-// TEMPORARY can be removed once image_any is only way it is being passed.
 template<>
 MAPNIK_DECL void set_grayscale_to_alpha<image_rgba8> (image_rgba8 & data)
 {
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
     detail::visitor_set_grayscale_to_alpha visit;
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+template<>
+MAPNIK_DECL void set_grayscale_to_alpha<image_any> (image_any & data, color const& c)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_set_grayscale_to_alpha_c(c), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+template<>
+MAPNIK_DECL void set_grayscale_to_alpha<image_rgba8> (image_rgba8 & data, color const& c)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_set_grayscale_to_alpha_c visit(c);
     visit(data);
     if (remultiply)
     {
@@ -1280,6 +1341,118 @@ image_view_any visitor_create_view::operator()<image_null> (image_null const&)
 MAPNIK_DECL image_view_any create_view(image_any const& data,unsigned x,unsigned y, unsigned w,unsigned h)
 {
     return util::apply_visitor(detail::visitor_create_view(x,y,w,h), data);
+}
+
+template <typename T>
+MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold, bool)
+{
+    using pixel_type = typename T::pixel_type;
+    if (im1.width() != im2.width() || im1.height() != im2.height())
+    {
+        std::clog << "Warning the two images compared are not the same sizes." << std::endl;
+        return im1.width() * im1.height();
+    }
+    unsigned difference = 0;
+    for (unsigned int y = 0; y < im1.height(); ++y)
+    {
+        const pixel_type * row_from = im1.getRow(y);
+        const pixel_type * row_from2 = im2.getRow(y);
+        for (unsigned int x = 0; x < im1.width(); ++x)
+        {
+            double d = std::abs(static_cast<double>(row_from[x]) - static_cast<double>(row_from2[x]));
+            if (d > threshold)
+            {
+                ++difference;
+            }
+        }
+    }
+    return difference;
+}
+
+template MAPNIK_DECL unsigned compare(image_gray8 const&, image_gray8 const&, double, bool); 
+template MAPNIK_DECL unsigned compare(image_gray16 const&, image_gray16 const&, double, bool); 
+template MAPNIK_DECL unsigned compare(image_gray32f const&, image_gray32f const&, double, bool); 
+
+template <>
+MAPNIK_DECL unsigned compare<image_null>(image_null const&, image_null const&, double, bool)
+{
+    return 0;
+}
+
+template <>
+MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 const& im2, double threshold, bool alpha)
+{
+    using pixel_type = image_rgba8::pixel_type;
+    if (im1.width() != im2.width() || im1.height() != im2.height())
+    {
+        std::clog << "Warning: The two images compared are not the same sizes." << std::endl;
+        return im1.width() * im1.height();
+    }
+    unsigned difference = 0;
+    for (unsigned int y = 0; y < im1.height(); ++y)
+    {
+        const pixel_type * row_from = im1.getRow(y);
+        const pixel_type * row_from2 = im2.getRow(y);
+        for (unsigned int x = 0; x < im1.width(); ++x)
+        {
+            unsigned rgba = row_from[x];
+            unsigned rgba2 = row_from2[x];
+            unsigned r = rgba & 0xff;
+            unsigned g = (rgba >> 8 ) & 0xff;
+            unsigned b = (rgba >> 16) & 0xff;
+            unsigned r2 = rgba2 & 0xff;
+            unsigned g2 = (rgba2 >> 8 ) & 0xff;
+            unsigned b2 = (rgba2 >> 16) & 0xff;
+            if (std::abs(static_cast<int>(r - r2)) > static_cast<int>(threshold) ||
+                std::abs(static_cast<int>(g - g2)) > static_cast<int>(threshold) ||
+                std::abs(static_cast<int>(b - b2)) > static_cast<int>(threshold)) {
+                ++difference;
+                continue;
+            }
+            if (alpha) {
+                unsigned a = (rgba >> 24) & 0xff;
+                unsigned a2 = (rgba2 >> 24) & 0xff;
+                if (std::abs(static_cast<int>(a - a2)) > static_cast<int>(threshold)) {
+                    ++difference;
+                    continue;
+                }
+            }
+        }
+    }
+    return difference;
+}
+
+namespace detail
+{
+
+struct visitor_compare
+{
+    visitor_compare(image_any const& im2, double threshold, bool alpha)
+        : im2_(im2), threshold_(threshold), alpha_(alpha) {}
+
+    template <typename T>
+    unsigned operator() (T const & im1)
+    {
+        if (!im2_.is<T>())
+        {
+            std::clog << "Warning: Comparing different image types." << std::endl;
+            return im1.width() * im1.height();
+        }
+        return mapnik::compare<T>(im1, util::get<T>(im2_), threshold_, alpha_);
+    }
+
+  private:
+    image_any const& im2_;
+    double threshold_;
+    bool alpha_;
+};
+
+} // end detail ns
+
+template <>
+MAPNIK_DECL unsigned compare<image_any>(image_any const& im1, image_any const& im2, double threshold, bool alpha)
+{
+    util::apply_visitor(detail::visitor_compare(im2, threshold, alpha), im1);
 }
 
 } // end ns
