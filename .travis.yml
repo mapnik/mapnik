@@ -5,6 +5,15 @@ sudo: false
 addons:
   postgresql: "9.3"
 
+matrix:
+  include:
+    - os: osx
+      compiler: clang
+    - os: linux
+      compiler: clang
+    - os: linux
+      compiler: gcc
+
 install:
  - psql -U postgres -c 'create database template_postgis;' -U postgres
  - psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres
@@ -12,7 +21,7 @@ install:
 script:
  - source bootstrap.sh
  - ./configure
- - JOBS=6 make
+ - if [[ $CXX == "g++" ]]; then JOBS=2 make; else JOBS=6 make; fi
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  #- source localize.sh && make grind
