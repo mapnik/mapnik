@@ -56,7 +56,7 @@ renderers = [
     },
     { 'name': 'cairo',
       'render': render_cairo,
-      'compare': lambda actual, reference: compare(actual, reference, alpha=False),
+      'compare': lambda actual, reference: compare(actual, reference, alpha=True),
       'threshold': cairo_threshold,
       'filetype': 'png',
       'dir': 'images'
