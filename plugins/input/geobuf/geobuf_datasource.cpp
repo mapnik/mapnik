@@ -52,18 +52,56 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(geobuf_datasource)
 
+struct attr_value_converter
+{
+    mapnik::eAttributeType operator() (mapnik::value_integer) const
+    {
+        return mapnik::Integer;
+    }
+
+    mapnik::eAttributeType operator() (double) const
+    {
+        return mapnik::Double;
+    }
+
+    mapnik::eAttributeType operator() (float) const
+    {
+        return mapnik::Double;
+    }
+
+    mapnik::eAttributeType operator() (bool) const
+    {
+        return mapnik::Boolean;
+    }
+
+    mapnik::eAttributeType operator() (std::string const& ) const
+    {
+        return mapnik::String;
+    }
+
+    mapnik::eAttributeType operator() (mapnik::value_unicode_string const&) const
+    {
+        return mapnik::String;
+    }
+
+    mapnik::eAttributeType operator() (mapnik::value_null const& ) const
+    {
+        return mapnik::String;
+    }
+};
+
 geobuf_datasource::geobuf_datasource(parameters const& params)
-  : datasource(params),
-    type_(datasource::Vector),
-    desc_(geobuf_datasource::name(),
-          *params.get<std::string>("encoding","utf-8")),
-    filename_(),
-    extent_(),
-    features_(),
-    tree_(nullptr)
+    : datasource(params),
+      type_(datasource::Vector),
+      desc_(geobuf_datasource::name(),
+            *params.get<std::string>("encoding","utf-8")),
+      filename_(),
+      extent_(),
+      features_(),
+      tree_(nullptr)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
+    if (!file) throw mapnik::datasource_exception("Geobuf Plugin: missing <file> parameter");
 
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
@@ -88,6 +126,47 @@ void geobuf_datasource::parse_geobuf(std::uint8_t const* data, std::size_t size)
     mapnik::util::geobuf buf(data, size);
     buf.read(features_);
     std::cerr << "Num of features  = " << features_.size() << std::endl;
+#if BOOST_VERSION >= 105600
+    using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
+    values_container values;
+    values.reserve(features_.size());
+#else
+    tree_ = std::make_unique<spatial_index_type>(16, 4);
+#endif
+
+    std::size_t geometry_index = 0;
+    for (mapnik::feature_ptr const& f : features_)
+    {
+        mapnik::box2d<double> box = f->envelope();
+        if (box.valid())
+        {
+            if (geometry_index == 0)
+            {
+                extent_ = box;
+                for ( auto const& kv : *f)
+                {
+                    desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
+                                                                      mapnik::util::apply_visitor(attr_value_converter(),
+                                                                                                  std::get<1>(kv))));
+                }
+            }
+            else
+            {
+                extent_.expand_to_include(box);
+            }
+        }
+#if BOOST_VERSION >= 105600
+        values.emplace_back(box, std::make_pair(geometry_index,0));
+#else
+        tree_->insert(box, std::make_pair(geometry_index));
+#endif
+        ++geometry_index;
+    }
+
+#if BOOST_VERSION >= 105600
+    // packing algorithm
+    tree_ = std::make_unique<spatial_index_type>(values);
+#endif
 }
 
 geobuf_datasource::~geobuf_datasource() {}
@@ -136,6 +215,24 @@ mapnik::layer_descriptor geobuf_datasource::get_descriptor() const
 
 mapnik::featureset_ptr geobuf_datasource::features(mapnik::query const& q) const
 {
+    // if the query box intersects our world extent then query for features
+    mapnik::box2d<double> const& box = q.get_bbox();
+    if (extent_.intersects(box))
+    {
+#if BOOST_VERSION >= 105600
+        geobuf_featureset::array_type index_array;
+        if (tree_)
+        {
+            tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+            return std::make_shared<geobuf_featureset>(features_, std::move(index_array));
+        }
+    }
+#else
+    if (tree_)
+    {
+        return std::make_shared<geobuf_featureset>(features_, tree_->find(box));
+    }
+#endif
     return mapnik::featureset_ptr();
 }
 
