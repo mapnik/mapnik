@@ -167,8 +167,6 @@ def test_tiff_gray8_compare_scanline():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=scanline')),len(im2.tostring('tiff:method=scanline')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray8_compare_stripped():
     filepath1 = '../data/tiff/ndvi_256x256_gray8_striped.tif'
@@ -180,8 +178,6 @@ def test_tiff_gray8_compare_stripped():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=stripped')),len(im2.tostring('tiff:method=stripped')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray8_compare_tiled():
     filepath1 = '../data/tiff/ndvi_256x256_gray8_striped.tif'
@@ -193,8 +189,6 @@ def test_tiff_gray8_compare_tiled():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=tiled')),len(im2.tostring('tiff:method=tiled')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray16_compare_scanline():
     filepath1 = '../data/tiff/ndvi_256x256_gray16_striped.tif'
@@ -206,8 +200,6 @@ def test_tiff_gray16_compare_scanline():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=scanline')),len(im2.tostring('tiff:method=scanline')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray16_compare_stripped():
     filepath1 = '../data/tiff/ndvi_256x256_gray16_striped.tif'
@@ -219,8 +211,6 @@ def test_tiff_gray16_compare_stripped():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=stripped')),len(im2.tostring('tiff:method=stripped')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray16_compare_tiled():
     filepath1 = '../data/tiff/ndvi_256x256_gray16_striped.tif'
@@ -232,8 +222,6 @@ def test_tiff_gray16_compare_tiled():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=tiled')),len(im2.tostring('tiff:method=tiled')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray32f_compare_scanline():
     filepath1 = '../data/tiff/ndvi_256x256_gray32f_striped.tif'
@@ -245,8 +233,6 @@ def test_tiff_gray32f_compare_scanline():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=scanline')),len(im2.tostring('tiff:method=scanline')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray32f_compare_stripped():
     filepath1 = '../data/tiff/ndvi_256x256_gray32f_striped.tif'
@@ -258,8 +244,6 @@ def test_tiff_gray32f_compare_stripped():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=stripped')),len(im2.tostring('tiff:method=stripped')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 def test_tiff_gray32f_compare_tiled():
     filepath1 = '../data/tiff/ndvi_256x256_gray32f_striped.tif'
@@ -271,8 +255,6 @@ def test_tiff_gray32f_compare_tiled():
     eq_(im.height(),im2.height())
     eq_(len(im.tostring()),len(im2.tostring()))
     eq_(len(im.tostring('tiff:method=tiled')),len(im2.tostring('tiff:method=tiled')))
-    # should not be a blank image
-    eq_(len(im.tostring("png")) != len(mapnik.Image(im.width(),im.height()).tostring("png")),True)
 
 if __name__ == "__main__":
     setup()
