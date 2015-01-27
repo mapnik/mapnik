@@ -91,6 +91,8 @@ function install_mason_deps() {
     ip sqlite 3.8.6 $MASON_PLATFORM_ID
     ip gdal 1.11.1 $MASON_PLATFORM_ID
     ip expat 2.1.0 $MASON_PLATFORM_ID
+    ip pixman 0.32.6 $MASON_PLATFORM_ID
+    ip cairo 1.12.18 $MASON_PLATFORM_ID
 }
 
 function setup_nose() {
@@ -109,19 +111,17 @@ function make_config() {
     export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
     export PATH="${MASON_LINKED_REL}/bin":${PATH}
 
-    local CUSTOM_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1"
-    local MASON_LIBS="${MASON_LINKED_REL}/lib"
-    local MASON_INCLUDES="${MASON_LINKED_REL}/include"
     echo "
 CXX = '$CXX'
 CC = '$CC'
 CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
 CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
-INPUT_PLUGINS = 'csv,gdal,geojson,occi,ogr,osm,pgraster,postgis,python,raster,rasterlite,shape,sqlite,topojson'
+INPUT_PLUGINS = 'all'
 PREFIX = '/opt/mapnik-3.x'
 PATH = '${MASON_LINKED_REL}/bin'
 PATH_REMOVE = '/usr:/usr/local'
+PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
 MAPNIK_NAME = 'mapnik_3-0-0'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
 BOOST_LIBS = '${MASON_LINKED_REL}/lib'
