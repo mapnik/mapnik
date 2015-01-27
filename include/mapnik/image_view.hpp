@@ -23,6 +23,8 @@
 #ifndef MAPNIK_IMAGE_VIEW_HPP
 #define MAPNIK_IMAGE_VIEW_HPP
 
+#include <mapnik/image.hpp>
+
 namespace mapnik {
 
 template <typename T>
