@@ -333,6 +333,13 @@ source += Split(
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
 
+# add these to the compile flags no matter what
+# to make it safe to try to compile them from Makefile wrapper
+source += Split("""
+grid/process_markers_symbolizer.cpp
+grid/process_group_symbolizer.cpp
+""")
+
 # grid backend
 if env['GRID_RENDERER']:
     source += Split(
@@ -342,14 +349,12 @@ if env['GRID_RENDERER']:
         grid/process_building_symbolizer.cpp
         grid/process_line_pattern_symbolizer.cpp
         grid/process_line_symbolizer.cpp
-        grid/process_markers_symbolizer.cpp
         grid/process_point_symbolizer.cpp
         grid/process_polygon_pattern_symbolizer.cpp
         grid/process_polygon_symbolizer.cpp
         grid/process_raster_symbolizer.cpp
         grid/process_shield_symbolizer.cpp
         grid/process_text_symbolizer.cpp
-        grid/process_group_symbolizer.cpp
         """)
     lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
     libmapnik_defines.append('-DGRID_RENDERER')
