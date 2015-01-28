@@ -96,14 +96,10 @@ int main(int argc, char** argv)
         // https://github.com/mapnik/mapnik/issues/2471
         //BOOST_TEST( (params.get<mapnik::value_null>("null") && *params.get<mapnik::value_null>("null") == mapnik::value_null()) );
 
-        std::string rvalue("rvalue");
-        params["rvalue"] = rvalue;
-        BOOST_TEST(params.get<std::string>("rvalue") == std::string("rvalue"));
-        // Currently this fails because rvalue gets moved and nulled out
-        // Is this really the right behavior?
-        std::clog << "FIXME: line 104 of tests/cpp_tests/params_test.cpp\n";
-        std::clog << "https://github.com/mapnik/mapnik/issues/2651\n";
-        //BOOST_TEST(rvalue == std::string("rvalue"));
+        std::string value("value");
+        params["value"] = value;
+        BOOST_TEST(params.get<std::string>("value") == std::string("value"));
+        BOOST_TEST(value == std::string("value"));
 
         // ensure that const member is not moved incorrectly when added to params
         detail::string_holder holder;
