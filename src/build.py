@@ -274,25 +274,32 @@ if env['PLUGIN_LINKING'] == 'static':
         lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGINS')
         libmapnik_defines.append('-DMAPNIK_STATIC_PLUGINS')
 
+# add these to the compile flags no matter what
+# to make it safe to try to compile them from Makefile wrapper
+source += Split("""
+cairo/process_markers_symbolizer.cpp
+cairo/process_group_symbolizer.cpp
+""")
+
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
     lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     libmapnik_defines.append('-DHAVE_CAIRO')
     lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
-    source.append('cairo/cairo_context.cpp')
-    source.append('cairo/cairo_renderer.cpp')
-    source.append('cairo/cairo_render_vector.cpp')
-    source.append('cairo/process_markers_symbolizer.cpp')
-    source.append('cairo/process_text_symbolizer.cpp')
-    source.append('cairo/process_group_symbolizer.cpp')
-    source.append('cairo/process_line_symbolizer.cpp')
-    source.append('cairo/process_line_pattern_symbolizer.cpp')
-    source.append('cairo/process_polygon_symbolizer.cpp')
-    source.append('cairo/process_polygon_pattern_symbolizer.cpp')
-    source.append('cairo/process_debug_symbolizer.cpp')
-    source.append('cairo/process_point_symbolizer.cpp')
-    source.append('cairo/process_raster_symbolizer.cpp')
-    source.append('cairo/process_building_symbolizer.cpp')
+    source += Split("""
+    cairo/cairo_context.cpp
+    cairo/cairo_renderer.cpp
+    cairo/cairo_render_vector.cpp
+    cairo/process_text_symbolizer.cpp
+    cairo/process_line_symbolizer.cpp
+    cairo/process_line_pattern_symbolizer.cpp
+    cairo/process_polygon_symbolizer.cpp
+    cairo/process_polygon_pattern_symbolizer.cpp
+    cairo/process_debug_symbolizer.cpp
+    cairo/process_point_symbolizer.cpp
+    cairo/process_raster_symbolizer.cpp
+    cairo/process_building_symbolizer.cpp
+    """)
 
 for cpp in enabled_imaging_libraries:
     source.append(cpp)
@@ -326,6 +333,13 @@ source += Split(
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
 
+# add these to the compile flags no matter what
+# to make it safe to try to compile them from Makefile wrapper
+source += Split("""
+grid/process_markers_symbolizer.cpp
+grid/process_group_symbolizer.cpp
+""")
+
 # grid backend
 if env['GRID_RENDERER']:
     source += Split(
@@ -335,14 +349,12 @@ if env['GRID_RENDERER']:
         grid/process_building_symbolizer.cpp
         grid/process_line_pattern_symbolizer.cpp
         grid/process_line_symbolizer.cpp
-        grid/process_markers_symbolizer.cpp
         grid/process_point_symbolizer.cpp
         grid/process_polygon_pattern_symbolizer.cpp
         grid/process_polygon_symbolizer.cpp
         grid/process_raster_symbolizer.cpp
         grid/process_shield_symbolizer.cpp
         grid/process_text_symbolizer.cpp
-        grid/process_group_symbolizer.cpp
         """)
     lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
     libmapnik_defines.append('-DGRID_RENDERER')

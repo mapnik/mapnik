@@ -2,9 +2,6 @@
 
 #set -eu
 
-# NOTE: requires at least bash >= 4.0
-# brew install bash
-
 : '
 
 todo
@@ -18,28 +15,6 @@ todo
 - pkg-config-less
 - gdal shared lib?
 '
-
-declare -A DEPS
-DEPS["freetype"]="2.5.4"
-DEPS["harfbuzz"]="2cd5323"
-DEPS["jpeg"]="v8d"
-DEPS["libxml2"]="2.9.2"
-DEPS["libpng"]="1.6.13"
-DEPS["webp"]="0.4.2"
-DEPS["icu"]="54.1"
-DEPS["proj"]="4.8.0"
-DEPS["libtiff"]="dev"
-DEPS["boost"]="1.57.0"
-DEPS["boost_libsystem"]="1.57.0"
-DEPS["boost_libthread"]="1.57.0"
-DEPS["boost_libfilesystem"]="1.57.0"
-DEPS["boost_libprogram_options"]="1.57.0"
-DEPS["boost_libregex"]="1.57.0"
-DEPS["boost_libpython"]="1.57.0"
-DEPS["libpq"]="9.4.0"
-DEPS["sqlite"]="3.8.6"
-DEPS["gdal"]="1.11.1"
-DEPS["expat"]="2.1.0"
 
 CPP11_TOOLCHAIN="$(pwd)/toolchain"
 
@@ -86,17 +61,38 @@ function setup_mason() {
     fi
 }
 
+function ip() {
+    if [[ ! -d ./mason_packages/${3}/${1}/ ]]; then
+        echo ./mason_packages/${3}/${1}/
+        mason install $1 $2
+        mason link $1 $2
+    fi
+}
+
 function install_mason_deps() {
-    if [[ ! -d ./mason_packages ]]; then
-        for DEP in "${!DEPS[@]}"; do
-            mason install ${DEP} ${DEPS[$DEP]}
-        done
-    fi
-    if [[ ! -d ./mason_packages/.link ]]; then
-        for DEP in "${!DEPS[@]}"; do
-            mason link ${DEP} ${DEPS[$DEP]}
-        done
-    fi
+    MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
+    ip freetype 2.5.4 $MASON_PLATFORM_ID
+    ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
+    ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
+    ip libxml2 2.9.2 $MASON_PLATFORM_ID
+    ip libpng 1.6.13 $MASON_PLATFORM_ID
+    ip webp 0.4.2 $MASON_PLATFORM_ID
+    ip icu 54.1 $MASON_PLATFORM_ID
+    ip proj 4.8.0 $MASON_PLATFORM_ID
+    ip libtiff 4.0.4beta $MASON_PLATFORM_ID
+    ip boost 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libsystem 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libthread 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libfilesystem 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libprogram_options 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libregex 1.57.0 $MASON_PLATFORM_ID
+    ip boost_libpython 1.57.0 $MASON_PLATFORM_ID
+    ip libpq 9.4.0 $MASON_PLATFORM_ID
+    ip sqlite 3.8.6 $MASON_PLATFORM_ID
+    ip gdal 1.11.1 $MASON_PLATFORM_ID
+    ip expat 2.1.0 $MASON_PLATFORM_ID
+    ip pixman 0.32.6 $MASON_PLATFORM_ID
+    ip cairo 1.12.18 $MASON_PLATFORM_ID
 }
 
 function setup_nose() {
@@ -115,19 +111,17 @@ function make_config() {
     export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
     export PATH="${MASON_LINKED_REL}/bin":${PATH}
 
-    local CUSTOM_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1"
-    local MASON_LIBS="${MASON_LINKED_REL}/lib"
-    local MASON_INCLUDES="${MASON_LINKED_REL}/include"
     echo "
 CXX = '$CXX'
 CC = '$CC'
 CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
 CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
-INPUT_PLUGINS = 'csv,gdal,geojson,occi,ogr,osm,pgraster,postgis,python,raster,rasterlite,shape,sqlite,topojson'
+INPUT_PLUGINS = 'all'
 PREFIX = '/opt/mapnik-3.x'
 PATH = '${MASON_LINKED_REL}/bin'
 PATH_REMOVE = '/usr:/usr/local'
+PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
 MAPNIK_NAME = 'mapnik_3-0-0'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
 BOOST_LIBS = '${MASON_LINKED_REL}/lib'

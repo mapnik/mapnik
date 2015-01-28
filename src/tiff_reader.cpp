@@ -271,11 +271,6 @@ void tiff_reader<T>::init()
     TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
     TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
 
-    if (width_ > 10000 || height_ > 10000)
-    {
-        throw image_reader_exception("Can't allocate tiff > 10000x10000");
-    }
-
     TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar_config_);
     TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression_ );
     TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_);
@@ -493,6 +488,10 @@ struct tiff_reader_traits<image_data_rgba8>
 template <typename T>
 image_data_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigned height)
 {
+    if (width > 10000 || height > 10000)
+    {
+        throw image_reader_exception("Can't allocate tiff > 10000x10000");
+    }
     switch (photometric_)
     {
     case PHOTOMETRIC_MINISBLACK:

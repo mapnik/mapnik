@@ -600,20 +600,6 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
-      #im.save('/tmp/xfull.png') # for debugging
-      h = format(value, '02x')
-      hex_v = '0000ffff'
-      hex_a = 'ff0000ff'
-      hex_b = '00ff00ff'
-      eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 3, 8,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 8, 8,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view(13, 8,1,1).tostring()), hex_a);
-      eq_(hexlify(im.view( 3,13,1,1).tostring()), hex_v);
-      eq_(hexlify(im.view( 8,13,1,1).tostring()), hex_b);
-      eq_(hexlify(im.view(13,13,1,1).tostring()), hex_v);
 
     def test_data_2bui_subquery():
       _test_data_subquery('data_2bui_subquery', '2BUI', 3)
