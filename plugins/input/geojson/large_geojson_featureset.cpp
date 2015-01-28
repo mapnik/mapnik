@@ -55,15 +55,9 @@ mapnik::feature_ptr large_geojson_featureset::next()
 {
     if (index_itr_ != index_end_)
     {
-#if BOOST_VERSION >= 105600
         geojson_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second.first;
         std::size_t size = item.second.second;
-#else
-        std::pair<std::size_t,std::size_t> index = *index_itr_++;
-        std::size_t file_offset = index.first;
-        std::size_t size = index.second;
-#endif
         std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> json;
         json.resize(size);

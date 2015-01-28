@@ -44,11 +44,7 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
 #include <boost/version.hpp>
-#if BOOST_VERSION >= 105600
 #include <boost/geometry/index/rtree.hpp>
-#else
-#include <boost/geometry/extensions/index/rtree/rtree.hpp>
-#endif
 #pragma GCC diagnostic pop
 
 // stl
@@ -64,14 +60,9 @@ public:
     using point_type = boost::geometry::model::d2::point_xy<double>;
     using box_type = boost::geometry::model::box<point_type>;
 
-#if BOOST_VERSION >= 105600
     using item_type = std::pair<box_type,std::size_t>;
     using linear_type = boost::geometry::index::linear<16,4>;
     using spatial_index_type = boost::geometry::index::rtree<item_type,linear_type>;
-#else
-    using item_type = std::size_t;
-    using spatial_index_type = boost::geometry::index::rtree<box_type,std::size_t>;
-#endif
 
     // constructor
     topojson_datasource(mapnik::parameters const& params);
