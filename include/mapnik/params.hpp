@@ -48,19 +48,11 @@ struct value_holder : value_holder_base
     value_holder()
         : value_holder_base() {}
 
-    // copy
-    value_holder(const char* val)
-        : value_holder_base(val) {}
-
-    template <typename T>
-    value_holder(T const& obj)
-        : value_holder_base(typename detail::mapnik_value_type<T>::type(obj))
-    {}
-
-    // move
+    // perfect forwarding
     template <typename T>
     value_holder(T && obj) noexcept
-        : value_holder_base(std::move(obj)) {}
+        : value_holder_base(std::forward<T>(obj))
+    {}
 };
 
 using parameter = std::pair<std::string, value_holder>;
