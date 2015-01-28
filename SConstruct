@@ -1773,7 +1773,7 @@ if not preconfigured:
         else:
             # TODO - add back -fvisibility-inlines-hidden
             # https://github.com/mapnik/mapnik/issues/1863
-            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
