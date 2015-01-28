@@ -37,6 +37,7 @@ source = Split(
     )
 
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+program_env['LINKFLAGS'] = copy(env['LIBMAPNIK_LINKFLAGS'])
 program_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 if env['HAS_CAIRO']:
