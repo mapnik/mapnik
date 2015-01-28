@@ -72,7 +72,6 @@ function ip() {
 function install_mason_deps() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
     ip freetype 2.5.4 $MASON_PLATFORM_ID
-    ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
     ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
     ip libxml2 2.9.2 $MASON_PLATFORM_ID
     ip libpng 1.6.13 $MASON_PLATFORM_ID
