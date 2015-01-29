@@ -6,64 +6,32 @@
 
 todo
 
+- gdal shared lib / avoid dlclose atexit crash
 - clang debs to s3
 - docs for base setup: sudo apt-get -y install zlib1g-dev python-dev make git python-dev
-- boost_python_patch
 - shrink icu data
 - cairo/pycairo
-- clang + libc++
 - pkg-config-less
-- gdal shared lib?
 '
-
-CPP11_TOOLCHAIN="$(pwd)/toolchain"
-
-function dpack() {
-    if [[ ! -f $2 ]]; then
-        wget -q $1/$(echo $2 | sed 's/+/%2B/g')
-        dpkg -x $2 ${CPP11_TOOLCHAIN}
-    fi
-}
-
-function setup_cpp11_toolchain() {
-    if [[ $(uname -s) == 'Linux' ]]; then
-        local PPA="https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test/+files"
-        # http://llvm.org/apt/precise/dists/llvm-toolchain-precise-3.5/main/binary-amd64/Packages
-        # TODO: cache these for faster downloads
-        local LLVM_DIST="http://llvm.org/apt/precise/pool/main/l/llvm-toolchain-3.5"
-        dpack ${LLVM_DIST} clang-3.5_3.5~svn217304-1~exp1_amd64.deb
-        dpack ${LLVM_DIST} libllvm3.5_3.5~svn217304-1~exp1_amd64.deb
-        dpack ${LLVM_DIST} libclang-common-3.5-dev_3.5~svn215019-1~exp1_amd64.deb
-        dpack ${PPA} libstdc++6_4.8.1-2ubuntu1~12.04_amd64.deb
-        dpack ${PPA} libstdc++-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
-        dpack ${PPA} libgcc-4.8-dev_4.8.1-2ubuntu1~12.04_amd64.deb
-        export CPLUS_INCLUDE_PATH="${CPP11_TOOLCHAIN}/usr/include/c++/4.8:${CPP11_TOOLCHAIN}/usr/include/x86_64-linux-gnu/c++/4.8:${CPLUS_INCLUDE_PATH}"
-        export LD_LIBRARY_PATH="${CPP11_TOOLCHAIN}/usr/lib/x86_64-linux-gnu:${CPP11_TOOLCHAIN}/usr/lib/gcc/x86_64-linux-gnu/4.8/:${LD_LIBRARY_PATH}"
-        export LIBRARY_PATH="${LD_LIBRARY_PATH}"
-        export PATH="${CPP11_TOOLCHAIN}/usr/bin":${PATH}
-        export CXX="${CPP11_TOOLCHAIN}/usr/bin/clang++-3.5"
-        export CC="${CPP11_TOOLCHAIN}/usr/bin/clang-3.5"
-    else
-        export CXX=clang++
-        export CC=clang
-    fi
-}
 
 function setup_mason() {
     if [[ -d ~/.mason ]]; then
         export PATH=~/.mason:$PATH
+        if [[ $(uname -s) == 'Linux' ]]; then source ~/.mason/scripts/setup_cpp11_toolchain.sh; fi
     else
         if [[ ! -d ./.mason ]]; then
             git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
         fi
+        if [[ $(uname -s) == 'Linux' ]]; then source ~/.mason/scripts/setup_cpp11_toolchain.sh; fi
         export MASON_DIR=$(pwd)/.mason
         export PATH=$(pwd)/.mason:$PATH
     fi
+    export CXX=${CXX:-clang++}
+    export CC=${CC:-clang}
 }
 
 function ip() {
     if [[ ! -d ./mason_packages/${3}/${1}/ ]]; then
-        echo ./mason_packages/${3}/${1}/
         mason install $1 $2
         mason link $1 $2
     fi
@@ -122,7 +90,6 @@ PREFIX = '/opt/mapnik-3.x'
 PATH = '${MASON_LINKED_REL}/bin'
 PATH_REMOVE = '/usr:/usr/local'
 PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
-MAPNIK_NAME = 'mapnik_3-0-0'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
 BOOST_LIBS = '${MASON_LINKED_REL}/lib'
 ICU_INCLUDES = '${MASON_LINKED_REL}/include'
@@ -149,6 +116,8 @@ CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
 SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
 SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
 FRAMEWORK_PYTHON = False
+CPP_TESTS = True
+PGSQL2SQLITE = True
 BINDINGS = 'python'
 XMLPARSER = 'ptree'
 SVG2PNG = True
@@ -167,7 +136,6 @@ function main() {
     setup_mason
     install_mason_deps
     setup_nose
-    setup_cpp11_toolchain
     make_config
     setup_runtime_settings
 }
