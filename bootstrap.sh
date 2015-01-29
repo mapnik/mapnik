@@ -15,17 +15,15 @@ todo
 '
 
 function setup_mason() {
-    if [[ -d ~/.mason ]]; then
-        export PATH=~/.mason:$PATH
-        if [[ $(uname -s) == 'Linux' ]]; then source ~/.mason/scripts/setup_cpp11_toolchain.sh; fi
+    if [[ ! -d ./.mason ]]; then
+        git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
     else
-        if [[ ! -d ./.mason ]]; then
-            git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
-        fi
-        if [[ $(uname -s) == 'Linux' ]]; then source ~/.mason/scripts/setup_cpp11_toolchain.sh; fi
-        export MASON_DIR=$(pwd)/.mason
-        export PATH=$(pwd)/.mason:$PATH
+        echo "Updating to latest mason"
+        (cd ./.mason && git pull)
     fi
+    export MASON_DIR=$(pwd)/.mason
+    if [[ $(uname -s) == 'Linux' ]]; then source ./.mason/scripts/setup_cpp11_toolchain.sh; fi
+    export PATH=$(pwd)/.mason:$PATH
     export CXX=${CXX:-clang++}
     export CC=${CC:-clang}
 }
@@ -138,6 +136,9 @@ function main() {
     setup_nose
     make_config
     setup_runtime_settings
+    echo "Ready, now run:"
+    echo ""
+    echo "    ./configure && make"
 }
 
 main
