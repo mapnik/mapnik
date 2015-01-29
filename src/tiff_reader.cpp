@@ -609,7 +609,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
             {
                 if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_, tile_height_))
                 {
-                    std::clog << "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
+                    MAPNIK_LOG_DEBUG(tiff_reader) <<  "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
                     break;
                 }
                 int tx0 = std::max(x0, static_cast<unsigned>(x));
@@ -649,7 +649,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_rgba8& image)
 
             if (!TIFFReadRGBAStrip(tif,y,strip.getData()))
             {
-                std::clog << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
+                MAPNIK_LOG_DEBUG(tiff_reader) << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
             }
             // This is in reverse becauase the TIFFReadRGBAStrip reads inverted

@@ -34,6 +34,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/debug.hpp>
 
 // agg
 #include "agg_rendering_buffer.h"
@@ -661,7 +662,7 @@ struct visitor_set_grayscale_to_alpha
     template <typename T>
     void operator() (T & data)
     {
-        std::clog << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified" << std::endl;
+        MAPNIK_LOG_WARN(image_util) << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified";
     }
 };
 
@@ -695,7 +696,7 @@ struct visitor_set_grayscale_to_alpha_c
     template <typename T>
     void operator() (T & data)
     {
-        std::clog << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified" << std::endl;
+        MAPNIK_LOG_WARN(image_util) << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified";
     }
 
   private:
@@ -855,7 +856,19 @@ struct visitor_fill
     void operator() (T2 & data)
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val = static_cast<pixel_type>(val_);
+        pixel_type val;
+        try
+        {
+            val = numeric_cast<pixel_type>(val_);
+        }
+        catch(negative_overflow&)
+        {
+            val = std::numeric_limits<pixel_type>::min();
+        }
+        catch(positive_overflow&) 
+        {
+            val = std::numeric_limits<pixel_type>::max();
+        }
         data.set(val);
     }
 
@@ -891,11 +904,10 @@ struct visitor_fill<color>
 
 } // end detail ns
 
-// For all the generic data types.
-template <typename T1, typename T2>
-MAPNIK_DECL void fill (T1 & data, T2 const& val)
+template <typename T>
+MAPNIK_DECL void fill (image_any & data, T const& val)
 {
-    util::apply_visitor(detail::visitor_fill<T2>(val), data);
+    util::apply_visitor(detail::visitor_fill<T>(val), data);
 }
 
 template MAPNIK_DECL void fill(image_any &, color const&);
@@ -908,30 +920,73 @@ template MAPNIK_DECL void fill(image_any &, int8_t const&);
 template MAPNIK_DECL void fill(image_any &, float const&);
 template MAPNIK_DECL void fill(image_any &, double const&);
 
-
-// Temporary remove these later!
-template <>
-MAPNIK_DECL void fill<image_rgba8, color> (image_rgba8 & data , color const& val)
+template <typename T>
+MAPNIK_DECL void fill (image_rgba8 & data, T const& val)
 {
-    detail::visitor_fill<color> visitor(val);
-    visitor(data);
+    detail::visitor_fill<T> visitor(val); 
+    return visitor(data);
 }
 
-// Temporary remove these later!
-template <>
-MAPNIK_DECL void fill<image_rgba8, uint32_t> (image_rgba8 & data , uint32_t const& val)
+template MAPNIK_DECL void fill(image_rgba8 &, color const&);
+template MAPNIK_DECL void fill(image_rgba8 &, uint32_t const&);
+template MAPNIK_DECL void fill(image_rgba8 &, int32_t const&);
+template MAPNIK_DECL void fill(image_rgba8 &, uint16_t const&);
+template MAPNIK_DECL void fill(image_rgba8 &, int16_t const&);
+template MAPNIK_DECL void fill(image_rgba8 &, uint8_t const&);
+template MAPNIK_DECL void fill(image_rgba8 &, int8_t const&);
+template MAPNIK_DECL void fill(image_rgba8 &, float const&);
+template MAPNIK_DECL void fill(image_rgba8 &, double const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray8 & data, T const& val)
 {
-    detail::visitor_fill<uint32_t> visitor(val);
-    visitor(data);
+    detail::visitor_fill<T> visitor(val); 
+    return visitor(data);
 }
 
-// Temporary remove these later!
-template <>
-MAPNIK_DECL void fill<image_rgba8, int32_t> (image_rgba8 & data , int32_t const& val)
+template MAPNIK_DECL void fill(image_gray8 &, color const&);
+template MAPNIK_DECL void fill(image_gray8 &, uint32_t const&);
+template MAPNIK_DECL void fill(image_gray8 &, int32_t const&);
+template MAPNIK_DECL void fill(image_gray8 &, uint16_t const&);
+template MAPNIK_DECL void fill(image_gray8 &, int16_t const&);
+template MAPNIK_DECL void fill(image_gray8 &, uint8_t const&);
+template MAPNIK_DECL void fill(image_gray8 &, int8_t const&);
+template MAPNIK_DECL void fill(image_gray8 &, float const&);
+template MAPNIK_DECL void fill(image_gray8 &, double const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray16 & data, T const& val)
 {
-    detail::visitor_fill<int32_t> visitor(val);
-    visitor(data);
+    detail::visitor_fill<T> visitor(val); 
+    return visitor(data);
 }
+
+template MAPNIK_DECL void fill(image_gray16 &, color const&);
+template MAPNIK_DECL void fill(image_gray16 &, uint32_t const&);
+template MAPNIK_DECL void fill(image_gray16 &, int32_t const&);
+template MAPNIK_DECL void fill(image_gray16 &, uint16_t const&);
+template MAPNIK_DECL void fill(image_gray16 &, int16_t const&);
+template MAPNIK_DECL void fill(image_gray16 &, uint8_t const&);
+template MAPNIK_DECL void fill(image_gray16 &, int8_t const&);
+template MAPNIK_DECL void fill(image_gray16 &, float const&);
+template MAPNIK_DECL void fill(image_gray16 &, double const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray32f & data, T const& val)
+{
+    detail::visitor_fill<T> visitor(val); 
+    return visitor(data);
+}
+
+template MAPNIK_DECL void fill(image_gray32f &, color const&);
+template MAPNIK_DECL void fill(image_gray32f &, uint32_t const&);
+template MAPNIK_DECL void fill(image_gray32f &, int32_t const&);
+template MAPNIK_DECL void fill(image_gray32f &, uint16_t const&);
+template MAPNIK_DECL void fill(image_gray32f &, int16_t const&);
+template MAPNIK_DECL void fill(image_gray32f &, uint8_t const&);
+template MAPNIK_DECL void fill(image_gray32f &, int8_t const&);
+template MAPNIK_DECL void fill(image_gray32f &, float const&);
+template MAPNIK_DECL void fill(image_gray32f &, double const&);
 
 namespace detail {
 
@@ -1463,7 +1518,6 @@ MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold, bool)
     using pixel_type = typename T::pixel_type;
     if (im1.width() != im2.width() || im1.height() != im2.height())
     {
-        std::clog << "Warning the two images compared are not the same sizes." << std::endl;
         return im1.width() * im1.height();
     }
     unsigned difference = 0;
@@ -1499,7 +1553,6 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
     using pixel_type = image_rgba8::pixel_type;
     if (im1.width() != im2.width() || im1.height() != im2.height())
     {
-        std::clog << "Warning: The two images compared are not the same sizes." << std::endl;
         return im1.width() * im1.height();
     }
     unsigned difference = 0;
@@ -1549,7 +1602,6 @@ struct visitor_compare
     {
         if (!im2_.is<T>())
         {
-            std::clog << "Warning: Comparing different image types." << std::endl;
             return im1.width() * im1.height();
         }
         return mapnik::compare<T>(im1, util::get<T>(im2_), threshold_, alpha_);

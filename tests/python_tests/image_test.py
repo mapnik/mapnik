@@ -30,7 +30,7 @@ def test_image_premultiply():
 
 def test_image_premultiply_values():
     im = mapnik.Image(256,256)
-    im.background(mapnik.Color(16, 33, 255, 128))
+    im.fill(mapnik.Color(16, 33, 255, 128))
     im.premultiply()
     c = im.get_pixel_color(0,0)
     eq_(c.r, 8)
@@ -48,7 +48,7 @@ def test_image_premultiply_values():
 def test_background():
     im = mapnik.Image(256,256)
     eq_(im.premultiplied(), False)
-    im.background(mapnik.Color(32,64,125,128))
+    im.fill(mapnik.Color(32,64,125,128))
     eq_(im.premultiplied(), False)
     c = im.get_pixel_color(0,0)
     eq_(c.get_premultiplied(), False)
@@ -57,7 +57,7 @@ def test_background():
     eq_(c.b,125)
     eq_(c.a,128)
     # Now again with a premultiplied alpha
-    im.background(mapnik.Color(32,64,125,128,True))
+    im.fill(mapnik.Color(32,64,125,128,True))
     eq_(im.premultiplied(), True)
     c = im.get_pixel_color(0,0)
     eq_(c.get_premultiplied(), True)
@@ -127,6 +127,15 @@ def test_set_and_get_pixel():
     eq_(c0_pre.b, c1.b)
     eq_(c0_pre.a, c1.a)
 
+def test_pixel_floats():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray32f)
+    val_list = [0.9, 0.99, 0.999, 0.9999, 0.99999, 1, 1.0001, 1.001, 1.01, 1.1]
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        assert_almost_equal(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        assert_almost_equal(im.get_pixel(0,0), -v)
+
 def test_pixel_overflow():
     im = mapnik.Image(4,4,mapnik.ImageType.gray8)
     im.set_pixel(0,0,256)
@@ -171,7 +180,7 @@ def test_get_pixel_color_out_of_range_2():
     
 def test_set_color_to_alpha():
     im = mapnik.Image(256,256)
-    im.background(mapnik.Color('rgba(12,12,12,255)'))
+    im.fill(mapnik.Color('rgba(12,12,12,255)'))
     eq_(get_unique_colors(im), ['rgba(12,12,12,255)'])
     im.set_color_to_alpha(mapnik.Color('rgba(12,12,12,0)'))
     eq_(get_unique_colors(im), ['rgba(0,0,0,0)'])
@@ -184,7 +193,7 @@ def test_negative_image_dimensions():
 def test_jpeg_round_trip():
     filepath = '/tmp/mapnik-jpeg-io.jpeg'
     im = mapnik.Image(255,267)
-    im.background(mapnik.Color('rgba(1,2,3,.5)'))
+    im.fill(mapnik.Color('rgba(1,2,3,.5)'))
     im.save(filepath,'jpeg')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())
@@ -200,7 +209,7 @@ def test_jpeg_round_trip():
 def test_png_round_trip():
     filepath = '/tmp/mapnik-png-io.png'
     im = mapnik.Image(255,267)
-    im.background(mapnik.Color('rgba(1,2,3,.5)'))
+    im.fill(mapnik.Color('rgba(1,2,3,.5)'))
     im.save(filepath,'png')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())

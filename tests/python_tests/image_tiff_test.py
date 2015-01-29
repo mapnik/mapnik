@@ -19,7 +19,7 @@ def setup():
 def test_tiff_round_trip_scanline():
     filepath = '/tmp/mapnik-tiff-io-scanline.tiff'
     im = mapnik.Image(255,267)
-    im.background(mapnik.Color('rgba(12,255,128,.5)'))
+    im.fill(mapnik.Color('rgba(12,255,128,.5)'))
     org_str = hashstr(im.tostring())
     im.save(filepath,'tiff:method=scanline')
     im2 = mapnik.Image.open(filepath)
@@ -42,7 +42,7 @@ def test_tiff_round_trip_scanline():
 def test_tiff_round_trip_stripped():
     filepath = '/tmp/mapnik-tiff-io-stripped.tiff'
     im = mapnik.Image(255,267)
-    im.background(mapnik.Color('rgba(12,255,128,.5)'))
+    im.fill(mapnik.Color('rgba(12,255,128,.5)'))
     org_str = hashstr(im.tostring())
     im.save(filepath,'tiff:method=stripped')
     im2 = mapnik.Image.open(filepath)
@@ -68,7 +68,7 @@ def test_tiff_round_trip_rows_stripped():
     filepath = '/tmp/mapnik-tiff-io-rows_stripped.tiff'
     filepath2 = '/tmp/mapnik-tiff-io-rows_stripped2.tiff'
     im = mapnik.Image(255,267)
-    im.background(mapnik.Color('rgba(12,255,128,.5)'))
+    im.fill(mapnik.Color('rgba(12,255,128,.5)'))
     c = im.get_pixel_color(0,0)
     eq_(c.r, 12)
     eq_(c.g, 255)
@@ -105,7 +105,7 @@ def test_tiff_round_trip_buffered_tiled():
     filepath2 = '/tmp/mapnik-tiff-io-buffered-tiled2.tiff'
     filepath3 = '/tmp/mapnik-tiff-io-buffered-tiled3.tiff'
     im = mapnik.Image(255,267)
-    im.background(mapnik.Color('rgba(33,255,128,.5)'))
+    im.fill(mapnik.Color('rgba(33,255,128,.5)'))
     c = im.get_pixel_color(0,0)
     eq_(c.r, 33)
     eq_(c.g, 255)
@@ -142,7 +142,7 @@ def test_tiff_round_trip_buffered_tiled():
 def test_tiff_round_trip_tiled():
     filepath = '/tmp/mapnik-tiff-io-tiled.tiff'
     im = mapnik.Image(256,256)
-    im.background(mapnik.Color('rgba(1,255,128,.5)'))
+    im.fill(mapnik.Color('rgba(1,255,128,.5)'))
     im.save(filepath,'tiff:method=tiled')
     im2 = mapnik.Image.open(filepath)
     im3 = mapnik.Image.fromstring(open(filepath,'r').read())

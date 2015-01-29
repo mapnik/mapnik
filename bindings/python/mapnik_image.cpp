@@ -122,9 +122,19 @@ bool is_solid(mapnik::image_any const& im)
     return mapnik::is_solid(im);
 }
 
-void background(mapnik::image_any & im, mapnik::color const& c)
+void fill_color(mapnik::image_any & im, mapnik::color const& c)
 {
     mapnik::fill(im, c);
+}
+
+void fill_int(mapnik::image_any & im, int val)
+{
+    mapnik::fill(im, val);
+}
+
+void fill_double(mapnik::image_any & im, double val)
+{
+    mapnik::fill(im, val);
 }
 
 std::shared_ptr<image_any> cast(mapnik::image_any const& im, mapnik::image_dtype type, double offset, double scaling)
@@ -392,7 +402,9 @@ void export_image()
         .def("view",&get_view)
         .def("painted",&image_any::painted)
         .def("is_solid",&is_solid)
-        .def("background",&background, "Set the background color of the image.")
+        .def("fill",&fill_color)
+        .def("fill",&fill_int)
+        .def("fill",&fill_double)
         .def("set_grayscale_to_alpha",&set_grayscale_to_alpha, "Set the grayscale values to the alpha channel of the Image")
         .def("set_grayscale_to_alpha",&set_grayscale_to_alpha_c, "Set the grayscale values to the alpha channel of the Image")
         .def("set_color_to_alpha",&set_color_to_alpha, "Set a given color to the alpha channel of the Image")

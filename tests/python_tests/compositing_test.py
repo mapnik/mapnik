@@ -241,10 +241,10 @@ def test_background_image_with_alpha_and_background_color_against_composited_con
     mapnik.render(m,im)
     # create and composite the expected result
     im1 = mapnik.Image(10,10)
-    im1.background(mapnik.Color('rgba(255,255,255,.5)'))
+    im1.fill(mapnik.Color('rgba(255,255,255,.5)'))
     im1.premultiply()
     im2 = mapnik.Image(10,10)
-    im2.background(mapnik.Color('rgba(255,255,0,.5)'))
+    im2.fill(mapnik.Color('rgba(255,255,0,.5)'))
     im2.premultiply()
     im1.composite(im2)
     im1.demultiply()
