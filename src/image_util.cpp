@@ -1218,10 +1218,10 @@ struct visitor_set_pixel<color>
 } // end detail ns
 
 // For all the generic data types.
-template <typename T1, typename T2>
-MAPNIK_DECL void set_pixel (T1 & data, std::size_t x, std::size_t y, T2 const& val)
+template <typename T>
+MAPNIK_DECL void set_pixel (image_any & data, std::size_t x, std::size_t y, T const& val)
 {
-    util::apply_visitor(detail::visitor_set_pixel<T2>(x, y, val), data);
+    util::apply_visitor(detail::visitor_set_pixel<T>(x, y, val), data);
 }
 
 template MAPNIK_DECL void set_pixel(image_any &, std::size_t, std::size_t, color const&);
@@ -1355,10 +1355,10 @@ struct visitor_get_pixel<color>
 } // end detail ns
 
 // For all the generic data types.
-template <typename T1, typename T2>
-MAPNIK_DECL T2 get_pixel (T1 const& data, std::size_t x, std::size_t y)
+template <typename T>
+MAPNIK_DECL T get_pixel (image_any const& data, std::size_t x, std::size_t y)
 {
-    return util::apply_visitor(detail::visitor_get_pixel<T2>(x, y), data);
+    return util::apply_visitor(detail::visitor_get_pixel<T>(x, y), data);
 }
 
 template MAPNIK_DECL color get_pixel(image_any const&, std::size_t, std::size_t);
@@ -1370,6 +1370,13 @@ template MAPNIK_DECL uint8_t get_pixel(image_any const&, std::size_t, std::size_
 template MAPNIK_DECL int8_t get_pixel(image_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL float get_pixel(image_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL double get_pixel(image_any const&, std::size_t, std::size_t); 
+
+template <typename T>
+MAPNIK_DECL T get_pixel (image_view_any const& data, std::size_t x, std::size_t y)
+{
+    return util::apply_visitor(detail::visitor_get_pixel<T>(x, y), data);
+}
+
 template MAPNIK_DECL color get_pixel(image_view_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL uint32_t get_pixel(image_view_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL int32_t get_pixel(image_view_any const&, std::size_t, std::size_t);

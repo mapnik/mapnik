@@ -197,7 +197,7 @@ mapnik::color get_pixel_color(mapnik::image_any const& im, unsigned x, unsigned 
 {
     if (x < static_cast<unsigned>(im.width()) && y < static_cast<unsigned>(im.height()))
     {
-        return mapnik::get_pixel<mapnik::image_any, mapnik::color>(im, x, y);
+        return mapnik::get_pixel<mapnik::color>(im, x, y);
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
     boost::python::throw_error_already_set();
