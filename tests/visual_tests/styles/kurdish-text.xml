@@ -1,5 +1,9 @@
 <Map font-directory="../fonts/Noto/NotoNaskhArabic-Regular.ttf">
 
+    <Parameters>
+        <Parameter name="sizes">512,512</Parameter>
+    </Parameters>
+
     <Style name="style">
         <Rule>
             <TextSymbolizer face-name="Noto Naskh Arabic Regular" size="100">[name]</TextSymbolizer>
