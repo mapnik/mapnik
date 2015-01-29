@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
 
 namespace mapnik {
 
@@ -121,11 +122,21 @@ class image
 public:
     using pixel_type = T;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-
+private:
+    detail::image_dimensions<max_size> dimensions_;
+    detail::buffer buffer_;
+    pixel_type *pData_;
+    double offset_;
+    double scaling_;
+    bool premultiplied_alpha_;
+    bool painted_;
+public:
     image(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false)
         : dimensions_(width, height),
           buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          offset_(0.0),
+          scaling_(1.0),
           premultiplied_alpha_(premultiplied),
           painted_(painted)
     {
@@ -136,6 +147,8 @@ public:
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          offset_(rhs.offset_),
+          scaling_(rhs.scaling_),
           premultiplied_alpha_(rhs.premultiplied_alpha_),
           painted_(rhs.painted_)
     {}
@@ -144,6 +157,8 @@ public:
         : dimensions_(std::move(rhs.dimensions_)),
           buffer_(std::move(rhs.buffer_)),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          offset_(rhs.offset_),
+          scaling_(rhs.scaling_),
           premultiplied_alpha_(rhs.premultiplied_alpha_),
           painted_(rhs.painted_)
     {
@@ -161,6 +176,8 @@ public:
     {
         std::swap(dimensions_, rhs.dimensions_);
         std::swap(buffer_, rhs.buffer_);
+        std::swap(offset_, rhs.offset_);
+        std::swap(scaling_, rhs.scaling_);
         std::swap(premultiplied_alpha_, rhs.premultiplied_alpha_);
         std::swap(painted_, rhs.painted_);
     }
@@ -249,6 +266,31 @@ public:
         std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
     }
 
+    inline double get_offset() const
+    {
+        return offset_;
+    }
+
+    inline void set_offset(double set)
+    {
+        offset_ = set;
+    }
+
+    inline double get_scaling() const
+    {
+        return scaling_;
+    }
+
+    inline void set_scaling(double set)
+    {
+        if (set != 0.0)
+        {
+            scaling_ = set;
+            return;
+        }
+        std::clog << "Can not set scaling to 0.0, offset not set." << std::endl;
+    }
+
     inline bool get_premultiplied() const
     {
         return premultiplied_alpha_;
@@ -268,13 +310,6 @@ public:
     {
         return painted_;
     }
-
-private:
-    detail::image_dimensions<max_size> dimensions_;
-    detail::buffer buffer_;
-    pixel_type *pData_;
-    bool premultiplied_alpha_;
-    bool painted_;
 };
 
 using image_rgba8 = image<std::uint32_t>;

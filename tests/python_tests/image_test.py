@@ -127,6 +127,16 @@ def test_set_and_get_pixel():
     eq_(c0_pre.b, c1.b)
     eq_(c0_pre.a, c1.a)
 
+def test_pixel_overflow():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray8)
+    im.set_pixel(0,0,256)
+    eq_(im.get_pixel(0,0),255)
+
+def test_pixel_underflow():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray8)
+    im.set_pixel(0,0,-1)
+    eq_(im.get_pixel(0,0),0)
+
 @raises(IndexError)
 def test_set_pixel_out_of_range_1():
     im = mapnik.Image(4,4)

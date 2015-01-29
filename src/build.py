@@ -152,7 +152,7 @@ source = Split(
     miniz_png.cpp
     color.cpp
     conversions.cpp
-    image_convert.cpp
+    image_cast.cpp
     image_compositing.cpp
     image_scaling.cpp
     box2d.cpp

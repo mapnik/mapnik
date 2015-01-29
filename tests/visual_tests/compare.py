@@ -36,17 +36,17 @@ def compare_pixels(pixel1, pixel2, alpha=True, pixel_threshold=0):
 def compare(actual, expected, alpha=True):
     im1 = mapnik.Image.open(actual)
     im2 = mapnik.Image.open(expected)
-    diff = 0
     pixels = im1.width() * im1.height()
     delta_pixels = (im2.width() * im2.height()) - pixels
+    #diff = 0
     if delta_pixels != 0:
         return delta_pixels
-    # TODO: convert to C++ to speed this up
-    for x in range(0,im1.width(),2):
-        for y in range(0,im1.height(),2):
-            if compare_pixels(im1.get_pixel(x,y),im2.get_pixel(x,y),alpha=alpha):
-                diff += 1
-    return diff
+    #for x in range(0,im1.width(),2):
+    #    for y in range(0,im1.height(),2):
+    #        if compare_pixels(im1.get_pixel(x,y),im2.get_pixel(x,y),alpha=alpha):
+    #            diff += 1
+    #return diff
+    return im1.compare(im2, 0, alpha)
 
 def compare_grids(actual, expected, threshold=0, alpha=True):
     global errors

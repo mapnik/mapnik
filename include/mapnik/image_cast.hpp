@@ -20,43 +20,32 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/image_convert.hpp>
-#include <mapnik/image.hpp>
+#ifndef MAPNIK_IMAGE_CAST_HPP
+#define MAPNIK_IMAGE_CAST_HPP
+
 #include <mapnik/image_any.hpp>
- 
+#include <mapnik/config.hpp>
+
 namespace mapnik
 {
 
-namespace detail
-{
+template <typename T>
+MAPNIK_DECL T image_cast(image_any const&, double offset = 0.0, double scaling = 1.0);
 
-template <typename T0>
-struct visitor_convert
-{
-    using dst_type = typename T0::pixel_type;
-    template <typename T1>
-    T0 operator() (T1 const& src)
-    {
-        T0 dst(src.width(), src.height());
-        for (unsigned y = 0; y < dst.height(); ++y)
-        {
-            for (unsigned x = 0; x < dst.width(); ++x)
-            {
-                dst(x,y) = static_cast<dst_type>(src(x,y));
-            }
-        }
-        return T0(std::move(dst));
-    }
-};
+template <typename T>
+MAPNIK_DECL T image_cast(image_rgba8 const&, double offset = 0.0, double scaling = 1.0);
 
-} // end detail ns
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray8 const&, double offset = 0.0, double scaling = 1.0);
 
-template <typename T1, typename T2>
-MAPNIK_DECL T2 convert_image(T1 const& data)
-{
-    detail::visitor_convert<T2> visit;
-    return visit(data);
-}
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray16 const&, double offset = 0.0, double scaling = 1.0);
+
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray32f const&, double offset = 0.0, double scaling = 1.0);
+
+MAPNIK_DECL image_any image_cast(image_any const&, image_dtype type, double offset = 0.0, double scaling = 1.0);
 
 } // end mapnik ns
+
+#endif // MAPNIK_IMAGE_CAST_HPP

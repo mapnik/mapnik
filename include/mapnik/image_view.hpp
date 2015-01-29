@@ -121,6 +121,16 @@ public:
         return data_.get_premultiplied();
     }
 
+    inline double get_offset() const
+    {
+        return data_.get_offset();
+    }
+
+    inline double get_scaling() const
+    {
+        return data_.get_scaling();
+    }
+
 private:
     unsigned x_;
     unsigned y_;

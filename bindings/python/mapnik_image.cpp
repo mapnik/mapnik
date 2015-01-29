@@ -38,6 +38,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_cast.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_view_any.hpp>
@@ -126,16 +127,56 @@ void background(mapnik::image_any & im, mapnik::color const& c)
     mapnik::fill(im, c);
 }
 
-void compare(mapnik::image_any const& im1, mapnik::image_any const& im2, double threshold, bool alpha)
+std::shared_ptr<image_any> cast(mapnik::image_any const& im, mapnik::image_dtype type, double offset, double scaling)
 {
-    mapnik::compare(im1, im2, threshold, alpha);
+    return std::make_shared<image_any>(std::move(mapnik::image_cast(im, type, offset, scaling)));
 }
 
-uint32_t get_pixel(mapnik::image_any const& im, unsigned x, unsigned y)
+unsigned compare(mapnik::image_any const& im1, mapnik::image_any const& im2, double threshold, bool alpha)
+{
+    return mapnik::compare(im1, im2, threshold, alpha);
+}
+
+struct get_pixel_visitor
+{
+    get_pixel_visitor(unsigned x, unsigned y)
+        : x_(x), y_(y) {}
+
+    PyObject* operator() (mapnik::image_null const&)
+    {
+        throw std::runtime_error("Can not return a null image from a pixel (shouldn't have reached here)");
+    }
+
+    PyObject* operator() (mapnik::image_rgba8 const& im)
+    {
+        return PyInt_FromLong(mapnik::get_pixel<uint32_t>(im, x_, y_));
+    }
+
+    PyObject* operator() (mapnik::image_gray8 const& im)
+    {
+        return PyInt_FromLong(mapnik::get_pixel<uint8_t>(im, x_, y_));
+    }
+
+    PyObject* operator() (mapnik::image_gray16 const& im)
+    {
+        return PyInt_FromLong(mapnik::get_pixel<uint16_t>(im, x_, y_));
+    }
+    
+    PyObject* operator() (mapnik::image_gray32f const& im)
+    {
+        return PyFloat_FromDouble(mapnik::get_pixel<double>(im, x_, y_));
+    }
+
+  private:
+    unsigned x_;
+    unsigned y_;
+};
+
+PyObject* get_pixel(mapnik::image_any const& im, unsigned x, unsigned y)
 {
     if (x < static_cast<unsigned>(im.width()) && y < static_cast<unsigned>(im.height()))
     {
-        return mapnik::get_pixel<mapnik::image_any, uint32_t>(im, x, y);
+        return mapnik::util::apply_visitor(get_pixel_visitor(x, y), im);
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
     boost::python::throw_error_already_set();
@@ -153,7 +194,7 @@ mapnik::color get_pixel_color(mapnik::image_any const& im, unsigned x, unsigned 
     return 0;
 }
 
-void set_pixel(mapnik::image_any & im, unsigned x, unsigned y, mapnik::color const& c)
+void set_pixel_color(mapnik::image_any & im, unsigned x, unsigned y, mapnik::color const& c)
 {
     if (x >= static_cast<int>(im.width()) && y >= static_cast<int>(im.height()))
     {
@@ -162,6 +203,28 @@ void set_pixel(mapnik::image_any & im, unsigned x, unsigned y, mapnik::color con
         return;
     }
     mapnik::set_pixel(im, x, y, c);
+}
+
+void set_pixel_double(mapnik::image_any & im, unsigned x, unsigned y, double val)
+{
+    if (x >= static_cast<int>(im.width()) && y >= static_cast<int>(im.height()))
+    {
+        PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
+        boost::python::throw_error_already_set();
+        return;
+    }
+    mapnik::set_pixel(im, x, y, val);
+}
+
+void set_pixel_int(mapnik::image_any & im, unsigned x, unsigned y, int val)
+{
+    if (x >= static_cast<int>(im.width()) && y >= static_cast<int>(im.height()))
+    {
+        PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
+        boost::python::throw_error_already_set();
+        return;
+    }
+    mapnik::set_pixel(im, x, y, val);
 }
 
 std::shared_ptr<image_any> open_from_file(std::string const& filename)
@@ -348,10 +411,26 @@ void export_image()
            arg("threshold")=0.0,
            arg("alpha")=true
          ))
+        .def("cast",&cast,
+         ( arg("self"),
+           arg("type"),
+           arg("offset")=0.0,
+           arg("scaling")=1.0
+         ))
+        .add_property("offset",
+                      &image_any::get_offset,
+                      &image_any::set_offset,
+                      "Gets or sets the offset component.\n")
+        .add_property("scaling",
+                      &image_any::get_scaling,
+                      &image_any::set_scaling,
+                      "Gets or sets the offset component.\n")
         .def("premultiplied",&premultiplied)
         .def("premultiply",&premultiply)
         .def("demultiply",&demultiply)
-        .def("set_pixel",&set_pixel)
+        .def("set_pixel",&set_pixel_color)
+        .def("set_pixel",&set_pixel_double)
+        .def("set_pixel",&set_pixel_int)
         .def("get_pixel",&get_pixel)
         .def("get_pixel_color",&get_pixel_color)
         .def("clear",&clear)

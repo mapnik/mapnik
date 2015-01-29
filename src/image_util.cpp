@@ -46,6 +46,13 @@
 #include <sstream>
 #include <algorithm>
 
+// boost
+#include <boost/numeric/conversion/cast.hpp>
+
+using boost::numeric_cast;
+using boost::numeric::positive_overflow;
+using boost::numeric::negative_overflow;
+
 namespace mapnik
 {
 
@@ -1089,7 +1096,19 @@ struct visitor_set_pixel
     void operator() (T2 & data)
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val = static_cast<pixel_type>(val_);
+        pixel_type val;
+        try
+        {
+            val = numeric_cast<pixel_type>(val_);
+        }
+        catch(negative_overflow&)
+        {
+            val = std::numeric_limits<pixel_type>::min();
+        }
+        catch(positive_overflow&) 
+        {
+            val = std::numeric_limits<pixel_type>::max();
+        }
         if (check_bounds(data, x_, y_))
         {
             data(x_, y_) = val;
@@ -1160,30 +1179,73 @@ template MAPNIK_DECL void set_pixel(image_any &, std::size_t, std::size_t, int8_
 template MAPNIK_DECL void set_pixel(image_any &, std::size_t, std::size_t, float const&);
 template MAPNIK_DECL void set_pixel(image_any &, std::size_t, std::size_t, double const&);
 
-
-// Temporary remove these later!
-template <>
-MAPNIK_DECL void set_pixel<image_rgba8, color> (image_rgba8 & data, std::size_t x, std::size_t y, color const& val)
+template <typename T>
+MAPNIK_DECL void set_pixel (image_rgba8 & data, std::size_t x, std::size_t y, T const& val)
 {
-    detail::visitor_set_pixel<color> visitor(x, y, val);
+    detail::visitor_set_pixel<T> visitor(x, y, val);
     visitor(data);
 }
 
-// Temporary remove these later!
-template <>
-MAPNIK_DECL void set_pixel<image_rgba8, uint32_t> (image_rgba8 & data, std::size_t x, std::size_t y, uint32_t const& val)
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, color const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, uint32_t const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, int32_t const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, uint16_t const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, int16_t const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, uint8_t const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, int8_t const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, float const&);
+template MAPNIK_DECL void set_pixel(image_rgba8 &, std::size_t, std::size_t, double const&);
+
+template <typename T>
+MAPNIK_DECL void set_pixel (image_gray8 & data, std::size_t x, std::size_t y, T const& val)
 {
-    detail::visitor_set_pixel<uint32_t> visitor(x, y, val);
+    detail::visitor_set_pixel<T> visitor(x, y, val);
     visitor(data);
 }
 
-// Temporary remove these later!
-template <>
-MAPNIK_DECL void set_pixel<image_rgba8, int32_t> (image_rgba8 & data, std::size_t x, std::size_t y, int32_t const& val)
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, color const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, uint32_t const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, int32_t const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, uint16_t const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, int16_t const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, uint8_t const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, int8_t const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, float const&);
+template MAPNIK_DECL void set_pixel(image_gray8 &, std::size_t, std::size_t, double const&);
+
+template <typename T>
+MAPNIK_DECL void set_pixel (image_gray16 & data, std::size_t x, std::size_t y, T const& val)
 {
-    detail::visitor_set_pixel<int32_t> visitor(x, y, val);
+    detail::visitor_set_pixel<T> visitor(x, y, val);
     visitor(data);
 }
+
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, color const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, uint32_t const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, int32_t const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, uint16_t const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, int16_t const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, uint8_t const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, int8_t const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, float const&);
+template MAPNIK_DECL void set_pixel(image_gray16 &, std::size_t, std::size_t, double const&);
+
+template <typename T>
+MAPNIK_DECL void set_pixel (image_gray32f & data, std::size_t x, std::size_t y, T const& val)
+{
+    detail::visitor_set_pixel<T> visitor(x, y, val);
+    visitor(data);
+}
+
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, color const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, uint32_t const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, int32_t const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, uint16_t const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, int16_t const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, uint8_t const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, int8_t const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, float const&);
+template MAPNIK_DECL void set_pixel(image_gray32f &, std::size_t, std::size_t, double const&);
 
 namespace detail {
 
@@ -1263,30 +1325,73 @@ template MAPNIK_DECL int8_t get_pixel(image_view_any const&, std::size_t, std::s
 template MAPNIK_DECL float get_pixel(image_view_any const&, std::size_t, std::size_t);
 template MAPNIK_DECL double get_pixel(image_view_any const&, std::size_t, std::size_t); 
 
-
-// Temporary remove these later!
-template <>
-MAPNIK_DECL color get_pixel<image_rgba8, color> (image_rgba8 const& data, std::size_t x, std::size_t y)
+template <typename T>
+MAPNIK_DECL T get_pixel (image_rgba8 const& data, std::size_t x, std::size_t y)
 {
-    detail::visitor_get_pixel<color> visitor(x, y);
+    detail::visitor_get_pixel<T> visitor(x, y);
     return visitor(data);
 }
 
-// Temporary remove these later!
-template <>
-MAPNIK_DECL uint32_t get_pixel<image_rgba8, uint32_t> (image_rgba8 const& data, std::size_t x, std::size_t y)
+template MAPNIK_DECL color get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint32_t get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int32_t get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint16_t get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int16_t get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint8_t get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int8_t get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL float get_pixel(image_rgba8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL double get_pixel(image_rgba8 const&, std::size_t, std::size_t); 
+
+template <typename T>
+MAPNIK_DECL T get_pixel (image_gray8 const& data, std::size_t x, std::size_t y)
 {
-    detail::visitor_get_pixel<uint32_t> visitor(x, y);
+    detail::visitor_get_pixel<T> visitor(x, y);
     return visitor(data);
 }
 
-// Temporary remove these later!
-template <>
-MAPNIK_DECL int32_t get_pixel<image_rgba8, int32_t> (image_rgba8 const& data, std::size_t x, std::size_t y)
+template MAPNIK_DECL color get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint32_t get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int32_t get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint16_t get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int16_t get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint8_t get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int8_t get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL float get_pixel(image_gray8 const&, std::size_t, std::size_t);
+template MAPNIK_DECL double get_pixel(image_gray8 const&, std::size_t, std::size_t); 
+
+template <typename T>
+MAPNIK_DECL T get_pixel (image_gray16 const& data, std::size_t x, std::size_t y)
 {
-    detail::visitor_get_pixel<int32_t> visitor(x, y);
+    detail::visitor_get_pixel<T> visitor(x, y);
     return visitor(data);
 }
+
+template MAPNIK_DECL color get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint32_t get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int32_t get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint16_t get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int16_t get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint8_t get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL int8_t get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL float get_pixel(image_gray16 const&, std::size_t, std::size_t);
+template MAPNIK_DECL double get_pixel(image_gray16 const&, std::size_t, std::size_t); 
+
+template <typename T>
+MAPNIK_DECL T get_pixel (image_gray32f const& data, std::size_t x, std::size_t y)
+{
+    detail::visitor_get_pixel<T> visitor(x, y);
+    return visitor(data);
+}
+
+template MAPNIK_DECL color get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint32_t get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL int32_t get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint16_t get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL int16_t get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL uint8_t get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL int8_t get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL float get_pixel(image_gray32f const&, std::size_t, std::size_t);
+template MAPNIK_DECL double get_pixel(image_gray32f const&, std::size_t, std::size_t); 
 
 namespace detail 
 {

@@ -149,8 +149,32 @@ MAPNIK_DECL bool check_bounds (T const& data, std::size_t x, std::size_t y)
 template <typename T>
 MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity );
 
+template <typename T>
+MAPNIK_DECL void set_pixel(image_rgba8 & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray8 & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray16 & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray32f & data, std::size_t x, std::size_t y, T const& val);
+
 template <typename T1, typename T2>
 MAPNIK_DECL void set_pixel(T1 & data, std::size_t x, std::size_t y, T2 const& val);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_rgba8 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray8 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray16 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray32f const& data, std::size_t x, std::size_t y);
 
 template <typename T1, typename T2>
 MAPNIK_DECL T2 get_pixel(T1 const& data, std::size_t x, std::size_t y);

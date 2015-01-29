@@ -38,8 +38,12 @@ struct image_null
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
     bool painted() const { return false; }
+    double get_offset() const { return 0.0; }
+    void set_offset(double) {}
+    double get_scaling() const { return 1.0; }
+    void set_scaling(double) {}
     bool get_premultiplied() const { return false; }
-    void set_premultiplied(bool) const {}
+    void set_premultiplied(bool) {}
     void set(pixel_type const&) { throw std::runtime_error("Can not set values for null image"); }
     pixel_type& operator() (std::size_t, std::size_t) 
     { 
@@ -139,6 +143,51 @@ struct get_any_row_size_visitor
         return data.getRowSize();
     }
 };
+
+struct get_offset_visitor
+{
+    template <typename T>
+    double operator() (T const& data) const
+    {
+        return data.get_offset();
+    }
+};
+
+struct get_scaling_visitor
+{
+    template <typename T>
+    double operator() (T const& data) const
+    {
+        return data.get_scaling();
+    }
+};
+
+struct set_offset_visitor
+{
+    set_offset_visitor(double val)
+        : val_(val) {}
+    template <typename T>
+    void operator() (T & data)
+    {
+        data.set_offset(val_);
+    }
+  private:
+    double val_;
+};
+
+struct set_scaling_visitor
+{
+    set_scaling_visitor(double val)
+        : val_(val) {}
+    template <typename T>
+    void operator() (T & data)
+    {
+        data.set_scaling(val_);
+    }
+  private:
+    double val_;
+};
+
 } // namespace detail
 
 struct image_any : image_base
@@ -195,6 +244,26 @@ struct image_any : image_base
     unsigned getRowSize() const
     {
         return util::apply_visitor(detail::get_any_row_size_visitor(),*this);
+    }
+
+    double get_offset() const
+    {
+        return util::apply_visitor(detail::get_offset_visitor(),*this);
+    }
+
+    double get_scaling() const
+    {
+        return util::apply_visitor(detail::get_scaling_visitor(),*this);
+    }
+
+    void set_offset(double val)
+    {
+        util::apply_visitor(detail::set_offset_visitor(val),*this);
+    }
+
+    void set_scaling(double val)
+    {
+        util::apply_visitor(detail::set_scaling_visitor(val),*this);
     }
 };
 

@@ -70,6 +70,33 @@ struct get_view_row_size_visitor
         return data.getRowSize();
     }
 };
+
+struct get_view_premultiplied_visitor
+{
+    template <typename T>
+    bool operator()(T const& data) const
+    {
+        return data.get_premultiplied();
+    }
+};
+
+struct get_view_offset_visitor
+{
+    template <typename T>
+    double operator()(T const& data) const
+    {
+        return data.get_offset();
+    }
+};
+
+struct get_view_scaling_visitor
+{
+    template <typename T>
+    double operator()(T const& data) const
+    {
+        return data.get_scaling();
+    }
+};
 } // namespace detail
 
 struct image_view_any : image_view_base
@@ -98,6 +125,21 @@ struct image_view_any : image_view_base
     unsigned getRowSize() const
     {
         return util::apply_visitor(detail::get_view_row_size_visitor(),*this);
+    }
+
+    bool get_premultiplied() const
+    { 
+        return util::apply_visitor(detail::get_view_premultiplied_visitor(),*this);
+    }
+
+    double get_offset() const
+    { 
+        return util::apply_visitor(detail::get_view_offset_visitor(),*this);
+    }
+
+    double get_scaling() const
+    { 
+        return util::apply_visitor(detail::get_view_scaling_visitor(),*this);
     }
 };
 
