@@ -121,10 +121,29 @@ geobuf_datasource::geobuf_datasource(parameters const& params)
     parse_geobuf(geobuf.data(), geobuf.size());
 }
 
+namespace {
+template <typename T>
+struct push_feature
+{
+    using features_container = T;
+    push_feature(features_container & features)
+        : features_(features) {}
+
+    void operator() (mapnik::feature_ptr const& feature)
+    {
+        features_.push_back(feature);
+    }
+    features_container & features_;
+};
+}
+
+
 void geobuf_datasource::parse_geobuf(std::uint8_t const* data, std::size_t size)
 {
-    mapnik::util::geobuf buf(data, size);
-    buf.read(features_);
+    using push_feature_callback = push_feature<std::vector<mapnik::feature_ptr>>;
+    push_feature_callback callback(features_);
+    mapnik::util::geobuf<push_feature_callback> buf(data, size, callback);
+    buf.read();
     std::cerr << "Num of features  = " << features_.size() << std::endl;
 #if BOOST_VERSION >= 105600
     using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
