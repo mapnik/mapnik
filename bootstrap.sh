@@ -41,7 +41,7 @@ function install_mason_deps() {
     ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
     ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
     ip libxml2 2.9.2 $MASON_PLATFORM_ID
-    ip libpng 1.6.13 $MASON_PLATFORM_ID
+    ip libpng 1.6.16 $MASON_PLATFORM_ID
     ip webp 0.4.2 $MASON_PLATFORM_ID
     ip icu 54.1 $MASON_PLATFORM_ID
     ip proj 4.8.0 $MASON_PLATFORM_ID
