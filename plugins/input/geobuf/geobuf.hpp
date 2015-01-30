@@ -23,7 +23,7 @@
 #ifndef MAPNIK_UTIL_GEOBUF_HPP
 #define MAPNIK_UTIL_GEOBUF_HPP
 
-#include <iostream>
+#include <mapnik/debug.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature.hpp>
@@ -127,19 +127,18 @@ public:
             }
             case 6:
             {
-                std::cerr << "FIXME" << std::endl;
-                //auto geometry = pbf_.message();
-                //read_geometry(geometry);
+                pbf_.message();
+                MAPNIK_LOG_DEBUG(geobuf) << "standalone Geometry is not supported";
                 break;
             }
             case 7:
             {
-
-                std::cerr << "Topology is not supported" << std::endl;
+                pbf_.message();
+                MAPNIK_LOG_DEBUG(geobuf) << "Topology is not supported";
                 break;
             }
             default:
-                std::cerr << "FIXME tag=" << pbf_.tag << std::endl;
+                MAPNIK_LOG_DEBUG(geobuf) << "FIXME tag=" << pbf_.tag;
                 break;
             }
         }
@@ -232,7 +231,7 @@ private:
             }
             case 12:
             {
-                feature->set_id(pbf.svarint());
+                feature->set_id(pbf.template svarint<std::int64_t>());
                 break;
             }
             case 13:
@@ -254,7 +253,7 @@ private:
                 break;
             }
             default:
-                std::cerr << "FAIL tag=" << pbf.tag <<  std::endl;
+                MAPNIK_LOG_DEBUG(geobuf) << "FAIL tag=" << pbf.tag;
                 break;
             }
         }
@@ -358,7 +357,6 @@ private:
         }
         default:
         {
-            //std::cout << "read coord FAIL type=" << type << std::endl;
             break;
         }
         }
@@ -514,24 +512,32 @@ private:
                 break;
             }
             case 2:
+            {
                 lengths = std::move(read_lengths(pbf));
                 break;
+            }
             case 3:
             {
                 read_coords(pbf, type, lengths, paths);
                 break;
             }
             case 4:
-                std::cerr << "read geometry=?" << std::endl;
+            {
+                MAPNIK_LOG_DEBUG(geobuf) << "fixme read geometry=?";
                 break;
+            }
             case 11:
-                pbf.string();
-                std::cerr << "geom_id=" << pbf.string() << std::endl;
+            {
+                auto geom_id = pbf.string();
+                MAPNIK_LOG_DEBUG(geobuf) << "geometry id's are not supported geom_id=" << geom_id ;
                 break;
+            }
             case 12:
-                pbf.varint();
-                std::cerr << "geom_id=" << pbf.varint() << std::endl;
+            {
+                auto geom_id = pbf.template varint<std::int64_t>();
+                MAPNIK_LOG_DEBUG(geobuf) << "geometry id's are not supported geom_id=" << geom_id ;
                 break;
+            }
             case 13:
             {
                 auto value = pbf.message();
