@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-
+#include <mapnik/util/noncopyable.hpp>
 #include <cmath>
 #include <cassert>
 #include <vector>
@@ -75,28 +75,30 @@ struct value_visitor
 };
 }
 
-struct geobuf
+template <typename FeatureCallback>
+struct geobuf : mapnik::util::noncopyable
 {
     using value_type = mapnik::util::variant<bool, int, double, std::string>;
     unsigned dim = 2;
-    unsigned precision = std::pow(10,6);
+    double precision = std::pow(10,6);
     bool is_topo = false;
     bool transformed = false;
     std::size_t lengths = 0;
     std::vector<std::string> keys_;
     std::vector<value_type> values_;
     mbgl::pbf pbf_;
+    FeatureCallback & callback_;
     mapnik::context_ptr ctx_;
     const std::unique_ptr<mapnik::transcoder> tr_;
 public:
     //ctor
-    geobuf (unsigned char const* buf, std::size_t size)
+    geobuf (unsigned char const* buf, std::size_t size, FeatureCallback & callback)
         : pbf_(buf, size),
+          callback_(callback),
           ctx_(std::make_shared<mapnik::context_type>()),
           tr_(new mapnik::transcoder("utf8")) {}
 
-    template <typename T>
-    void read(T & features)
+    void read()
     {
         while (pbf_.next())
         {
@@ -120,7 +122,7 @@ public:
             case 4:
             {
                 auto feature_collection = pbf_.message();
-                read_feature_collection(feature_collection, features);
+                read_feature_collection(feature_collection);
                 break;
             }
             case 6:
@@ -132,7 +134,9 @@ public:
             }
             case 7:
             {
-                throw std::runtime_error("Topology is not supported");
+
+                std::cerr << "Topology is not supported" << std::endl;
+                break;
             }
             default:
                 std::cerr << "FIXME tag=" << pbf_.tag << std::endl;
@@ -142,6 +146,11 @@ public:
     }
 
 private:
+
+    double transform(std::int64_t input)
+    {
+        return (transformed) ? ((double)input) : (input/precision);
+    }
 
     template <typename T>
     void read_value(T & pbf)
@@ -202,11 +211,10 @@ private:
         values_.clear();
     }
 
-    template <typename T, typename Features>
-    void read_feature (T & pbf, Features & features)
+    template <typename T>
+    void read_feature (T & pbf)
     {
-        using feature_type = typename Features::value_type;
-        feature_type feature(feature_factory::create(ctx_,1));
+        auto feature = feature_factory::create(ctx_,1);
         while (pbf.next())
         {
             switch (pbf.tag)
@@ -250,11 +258,11 @@ private:
                 break;
             }
         }
-        features.push_back(feature);
+        callback_(feature);
     }
 
-    template <typename T, typename Features>
-    void read_feature_collection(T & pbf, Features & features)
+    template <typename T>
+    void read_feature_collection(T & pbf)
     {
         while (pbf.next())
         {
@@ -263,7 +271,7 @@ private:
             case 1:
             {
                 auto message = pbf.message();
-                read_feature(message, features);
+                read_feature(message);
                 break;
             }
             case 13:
@@ -298,11 +306,11 @@ private:
             auto index = count % dim;
             if ( index == 0)
             {
-                x = p;
+                x = transform(p);
             }
             else if (index == 1)
             {
-                y = p;
+                y = transform(p);
                 point->move_to(x, y);
             }
             ++count;
@@ -373,20 +381,27 @@ private:
     void read_linear_ring(T & pbf, int len, std::size_t size, Geometry & geom, bool polygon = false)
     {
         int i = 0;
-        int x = 0.0;
-        int y = 0.0;
+        double x = 0.0;
+        double y = 0.0;
         uint8_t const* end = pbf.data + size;
-        while ( (len > 0) ? i++ < len : pbf.data < end)
+        while ( (len > 0) ? i < len : pbf.data < end)
         {
             for (int d = 0; d < dim; ++d)
             {
-                if (d == 0) x += pbf.svarint();
-                else if (d == 1) y += pbf.svarint();
+                std::int64_t delta = pbf.template svarint<std::int64_t>();
+                if (d == 0) x += delta;
+                else if (d == 1) y += delta;
             }
-            if (i == 1) geom.move_to(x, y);
-            else geom.line_to(x, y);
+            if (i == 0)
+                geom.move_to(transform(x), transform(y));
+            else
+                geom.line_to(transform(x), transform(y));
+            ++i;
         }
-        if (polygon) geom.close_path();
+        if (polygon)
+        {
+            geom.close_path();
+        }
     }
 
     template <typename T, typename GeometryContainer>
@@ -433,7 +448,7 @@ private:
             for (auto len : *lengths)
             {
                 std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
-                read_linear_ring(pbf, len, size, *line, true);
+                read_linear_ring(pbf, len, size, *line);
                 paths.push_back(line.release());
             }
         }
