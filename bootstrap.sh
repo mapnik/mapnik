@@ -54,7 +54,7 @@ function install_mason_deps() {
     ip boost_libregex 1.57.0 $MASON_PLATFORM_ID
     ip boost_libpython 1.57.0 $MASON_PLATFORM_ID
     ip libpq 9.4.0 $MASON_PLATFORM_ID
-    ip sqlite 3.8.6 $MASON_PLATFORM_ID
+    ip sqlite 3.8.8.1 $MASON_PLATFORM_ID
     ip gdal 1.11.1 $MASON_PLATFORM_ID
     ip expat 2.1.0 $MASON_PLATFORM_ID
     ip pixman 0.32.6 $MASON_PLATFORM_ID
