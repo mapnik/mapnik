@@ -15,17 +15,15 @@ todo
 '
 
 function setup_mason() {
-    if [[ -d ~/.mason ]]; then
-        export PATH=~/.mason:$PATH
-        if [[ $(uname -s) == 'Linux' ]]; then source ~/.mason/scripts/setup_cpp11_toolchain.sh; fi
+    if [[ ! -d ./.mason ]]; then
+        git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
     else
-        if [[ ! -d ./.mason ]]; then
-            git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
-        fi
-        if [[ $(uname -s) == 'Linux' ]]; then source ~/.mason/scripts/setup_cpp11_toolchain.sh; fi
-        export MASON_DIR=$(pwd)/.mason
-        export PATH=$(pwd)/.mason:$PATH
+        echo "Updating to latest mason"
+        (cd ./.mason && git pull)
     fi
+    export MASON_DIR=$(pwd)/.mason
+    if [[ $(uname -s) == 'Linux' ]]; then source ./.mason/scripts/setup_cpp11_toolchain.sh; fi
+    export PATH=$(pwd)/.mason:$PATH
     export CXX=${CXX:-clang++}
     export CC=${CC:-clang}
 }
@@ -43,7 +41,7 @@ function install_mason_deps() {
     ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
     ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
     ip libxml2 2.9.2 $MASON_PLATFORM_ID
-    ip libpng 1.6.13 $MASON_PLATFORM_ID
+    ip libpng 1.6.16 $MASON_PLATFORM_ID
     ip webp 0.4.2 $MASON_PLATFORM_ID
     ip icu 54.1 $MASON_PLATFORM_ID
     ip proj 4.8.0 $MASON_PLATFORM_ID
@@ -56,7 +54,7 @@ function install_mason_deps() {
     ip boost_libregex 1.57.0 $MASON_PLATFORM_ID
     ip boost_libpython 1.57.0 $MASON_PLATFORM_ID
     ip libpq 9.4.0 $MASON_PLATFORM_ID
-    ip sqlite 3.8.6 $MASON_PLATFORM_ID
+    ip sqlite 3.8.8.1 $MASON_PLATFORM_ID
     ip gdal 1.11.1 $MASON_PLATFORM_ID
     ip expat 2.1.0 $MASON_PLATFORM_ID
     ip pixman 0.32.6 $MASON_PLATFORM_ID
@@ -138,6 +136,9 @@ function main() {
     setup_nose
     make_config
     setup_runtime_settings
+    echo "Ready, now run:"
+    echo ""
+    echo "    ./configure && make"
 }
 
 main
