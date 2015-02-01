@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import mapnik
-import sys
 import os.path
 from compare import compare
 
