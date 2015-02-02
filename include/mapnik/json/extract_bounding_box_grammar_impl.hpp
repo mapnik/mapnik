@@ -48,7 +48,6 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::_2_type _2;
     qi::_3_type _3;
     qi::_4_type _4;
-    qi::no_skip_type no_skip;
     qi::omit_type omit;
     qi::_r1_type _r1;
     qi::_r2_type _r2;
@@ -56,7 +55,7 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::_b_type _b;
     qi::eps_type eps;
     qi::raw_type raw;
-    standard_wide::char_type char_;
+    ascii::char_type char_;
     boost::spirit::repository::qi::iter_pos_type iter_pos;
     using qi::fail;
     using qi::on_error;
@@ -109,19 +108,6 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
         | lit("false")
         | lit("null")
         ;
-    json.unesc_char.add
-        ("\\\"", '\"') // quotation mark
-        ("\\\\", '\\') // reverse solidus
-        ("\\/", '/')   // solidus
-        ("\\b", '\b')  // backspace
-        ("\\f", '\f')  // formfeed
-        ("\\n", '\n')  // newline
-        ("\\r", '\r')  // carrige return
-        ("\\t", '\t')  // tab
-        ;
-    json.string_ %= lit('"') >> no_skip[*(json.unesc_char | "\\u" >> json.hex4 | (char_ - lit('"')))] >> lit('"')
-        ;
-
     coords.name("Coordinates");
     pos.name("Position");
     ring.name("Ring");

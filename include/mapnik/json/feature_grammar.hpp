@@ -42,8 +42,6 @@ namespace mapnik { namespace json {
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
-namespace standard_wide =  boost::spirit::standard_wide;
-using standard_wide::space_type;
 
 class attribute_value_visitor
 
@@ -99,7 +97,6 @@ struct feature_grammar :
     // start
     // generic JSON
     generic_json<Iterator> json_;
-
     // geoJSON
     qi::rule<Iterator,void(FeatureType&),space_type> feature; // START
     qi::rule<Iterator,space_type> feature_type;
