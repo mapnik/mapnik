@@ -84,7 +84,6 @@ CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_I
 CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
-PREFIX = '/opt/mapnik-3.x'
 PATH = '${MASON_LINKED_REL}/bin'
 PATH_REMOVE = '/usr:/usr/local'
 PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
@@ -114,6 +113,7 @@ CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
 SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
 SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
 FRAMEWORK_PYTHON = False
+BENCHMARK = True
 CPP_TESTS = True
 PGSQL2SQLITE = True
 BINDINGS = 'python'
