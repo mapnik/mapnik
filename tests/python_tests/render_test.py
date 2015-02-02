@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
+from nose.tools import eq_,raises
 import tempfile
 import os, mapnik
-from nose.tools import *
 from utilities import execution_path, run_all
 
 def setup():

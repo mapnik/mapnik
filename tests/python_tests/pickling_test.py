@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
-import tempfile
 
 import mapnik, pickle
 

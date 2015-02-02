@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
-from Queue import Queue
 import threading
-import time
 
 import os, mapnik
 import sqlite3
@@ -19,7 +17,7 @@ TOTAL = 245
 
 def create_ds(test_db,table):
     ds = mapnik.SQLite(file=test_db,table=table)
-    fs = ds.all_features()
+    ds.all_features()
     del ds
 
 if 'sqlite' in mapnik.DatasourceCache.plugin_names():

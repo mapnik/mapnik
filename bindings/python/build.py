@@ -19,7 +19,7 @@
 #
 #
 
-import os, re, sys, glob
+import glob
 from subprocess import Popen, PIPE
 
 

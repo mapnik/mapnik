@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
+from nose.tools import eq_,raises
 from utilities import execution_path, run_all
 import os, mapnik
 
@@ -348,7 +348,7 @@ if mapnik.has_grid_renderer():
         # should throw right here since Name will be a property now on the `grid` object
         # and it is not found on the second layer
         mapnik.render_layer(m,grid,layer=1,fields=['Value'])
-        utf1 = grid.encode()
+        grid.encode()
 
 if __name__ == "__main__":
     setup()

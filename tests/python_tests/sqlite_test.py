@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_, raises
 from utilities import execution_path, run_all
+import os
+import mapnik
 
-import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -304,7 +305,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             query.add_property_name(fld)
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
-        fs = ds.features(query)
+        ds.features(query)
 
     def test_intersects_token1():
         ds = mapnik.SQLite(file='../data/sqlite/empty.db',

@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_,assert_almost_equal
 import atexit
-import cProfile, pstats, io
 import time
 from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
-from Queue import Queue
-import threading
 import sys
 import re
-from binascii import hexlify, unhexlify
+from binascii import hexlify
 
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-pgraster-test-db'
@@ -49,7 +46,7 @@ def psql_can_connect():
     try:
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
-    except RuntimeError, e:
+    except RuntimeError:
         print 'Notice: skipping pgraster tests (connection)'
         return False
 
@@ -67,7 +64,7 @@ def raster2pgsql_on_path():
     try:
         call('raster2pgsql')
         return True
-    except RuntimeError, e:
+    except RuntimeError:
         print 'Notice: skipping pgraster tests (raster2pgsql)'
         return False
 
@@ -80,7 +77,7 @@ def createdb_and_dropdb_on_path():
         call('createdb --help')
         call('dropdb --help')
         return True
-    except RuntimeError, e:
+    except RuntimeError:
         print 'Notice: skipping pgraster tests (createdb/dropdb)'
         return False
 

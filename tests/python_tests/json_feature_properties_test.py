@@ -1,9 +1,8 @@
 #encoding: utf8
 
-from nose.tools import *
-import os,sys
+from nose.tools import eq_
 import mapnik
-from utilities import execution_path, run_all
+from utilities import run_all
 try:
     import json
 except ImportError:

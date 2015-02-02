@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-from nose.tools import *
-
+from nose.tools import eq_
 from utilities import execution_path, run_all
-
-import os, sys, glob, mapnik
+import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests

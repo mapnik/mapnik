@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
 import os, mapnik
+from itertools import groupby
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -119,8 +120,6 @@ def test_ogr_layer_by_sql():
         eq_(num_feats, 1)
 
 def test_hit_grid():
-    import os
-    from itertools import groupby
 
     def rle_encode(l):
         """ encode a list of strings with run-length compression """

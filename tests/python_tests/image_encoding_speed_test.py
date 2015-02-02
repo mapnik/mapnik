@@ -113,7 +113,6 @@ def do_encoding():
         min_ = str(s[0])[:6]
         avg = str(s[1])[:6]
         elapsed = str(s[2])[:6]
-        percent_reduction = s[4]
         name = s[3]
         size = s[4]
         print 'min: %sms | avg: %sms | total: %sms | len: %s <-- %s' % (min_,avg,elapsed,size,name)

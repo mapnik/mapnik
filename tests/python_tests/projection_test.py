@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_,assert_almost_equal
 
 import mapnik
-import random
 import math
 from utilities import run_all, assert_box2d_almost_equal
 

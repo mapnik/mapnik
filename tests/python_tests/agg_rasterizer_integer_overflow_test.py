@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
+from nose.tools import eq_
 from utilities import run_all
 import mapnik
 import json
