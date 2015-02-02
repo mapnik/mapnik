@@ -159,7 +159,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
 {
     mapnik::json::boxes boxes;
     mapnik::json::extract_bounding_box_grammar<Iterator> bbox_grammar;
-    boost::spirit::standard_wide::space_type space;
+    boost::spirit::ascii::space_type space;
     if (!boost::spirit::qi::phrase_parse(start, end, (bbox_grammar)(boost::phoenix::ref(boxes)) , space))
     {
         throw mapnik::datasource_exception("GeoJSON Plugin: could not parse: '" + filename_ + "'");
@@ -194,7 +194,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             using namespace boost::spirit;
             static const mapnik::transcoder tr("utf8");
             static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
-            standard_wide::space_type space;
+            ascii::space_type space;
             if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
@@ -216,7 +216,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
 template <typename T>
 void geojson_datasource::parse_geojson(T const& buffer)
 {
-    boost::spirit::standard_wide::space_type space;
+    boost::spirit::ascii::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     std::size_t start_id = 1;
 

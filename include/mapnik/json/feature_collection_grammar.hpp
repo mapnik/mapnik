@@ -37,8 +37,6 @@ namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
-namespace standard_wide =  boost::spirit::standard_wide;
-using standard_wide::space_type;
 
 struct default_feature_callback
 {
