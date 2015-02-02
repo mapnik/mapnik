@@ -27,4 +27,4 @@ script:
  - ./configure
  - cat config.log
  - make
- - make test-local
+ - make test

@@ -1,11 +1,5 @@
-UNAME := $(shell uname)
-LINK_FIX=LD_LIBRARY_PATH
-ifeq ($(UNAME), Darwin)
-	LINK_FIX=DYLD_LIBRARY_PATH
-else
-endif
 
-OS:=$(shell uname -s)
+OS := $(shell uname -s)
 
 PYTHON = python
 
@@ -24,16 +18,19 @@ mapnik:
 clean:
 	@$(PYTHON) scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
-	@if test -e "config.log"; then rm  "config.log"; fi
+	@if test -e "config.log"; then rm "config.log"; fi
+	@if test -e "config.cache"; then rm "config.cache"; fi
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@find ./ -name "*.os" -exec rm {} \;
+	@find ./ -name "*.dylib" -exec rm {} \;
+	@find ./ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
+	@find ./ -name "*.a" -exec rm {} \;
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
 
 distclean:
-	@if test -e "config.cache"; then rm "config.cache"; fi
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
 
 reset: distclean
@@ -45,32 +42,31 @@ uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@ ./run_tests
+	./run_tests
 
-test-local:
-	@echo "*** Boostrapping local test environment..."
-	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
-	export PATH=`pwd`/utils/mapnik-config/:${PATH} && \
-	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
-	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
-	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
-	make test
+test-visual:
+	bash -c "source ./localize.sh && python tests/visual_tests/test.py -q"
+
+test-python:
+	bash -c "source ./localize.sh && python tests/run_tests.py -q"
+
+test-cpp:
+	./tests/cpp_tests/run
+
+check: test
 
 bench:
-	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
 	./benchmark/run
 
-check: test-local
-
 demo:
-	@echo "*** Running rundemo.cpp…"
 	cd demo/c++; ./rundemo `mapnik-config --prefix`
 
 pep8:
 	# https://gist.github.com/1903033
 	# gsed on osx
-	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$//'
-	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}'
+	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$$//'
+	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$$/{$$d;N;ba' -e '}'
+	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs ged -i '/./,/^$$/!d'
 
 grind:
 	@for FILE in tests/cpp_tests/*-bin; do \
