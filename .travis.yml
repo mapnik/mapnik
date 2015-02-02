@@ -9,13 +9,13 @@ matrix:
   include:
     - os: osx
       compiler: clang
-      env: JOBS=12
+      env: JOBS=4
     - os: linux
       compiler: clang
-      env: JOBS=12
+      env: JOBS=4
     - os: linux
       compiler: gcc
-      env: JOBS=6
+      env: JOBS=2
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then psql -U postgres -c 'create database template_postgis;' -U postgres; psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres; fi;
@@ -28,3 +28,4 @@ script:
  - cat config.log
  - make
  - make test
+ - make bench
