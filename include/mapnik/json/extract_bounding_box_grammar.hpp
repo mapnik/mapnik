@@ -46,8 +46,6 @@ using position = std::tuple<double,double>;
 using boxes = std::vector<std::pair<box2d<double>, std::pair<std::size_t, std::size_t>>>;
 
 namespace qi = boost::spirit::qi;
-namespace standard_wide =  boost::spirit::standard_wide;
-using standard_wide::space_type;
 
 struct calculate_bounding_box_impl
 {

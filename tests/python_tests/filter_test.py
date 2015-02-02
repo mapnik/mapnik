@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
+from nose.tools import eq_,raises
 from utilities import run_all
 import mapnik
 
@@ -443,7 +443,7 @@ def test_division_by_zero():
 
 @raises(RuntimeError)
 def test_invalid_syntax1():
-    expr = mapnik.Expression('abs()')
+    mapnik.Expression('abs()')
 
 
 if __name__ == "__main__":

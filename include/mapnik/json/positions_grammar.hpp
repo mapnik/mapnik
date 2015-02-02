@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/util/variant.hpp>
+#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 
 // boost
@@ -46,8 +47,6 @@ using positions = std::vector<position>;
 using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;
 
 namespace qi = boost::spirit::qi;
-namespace standard_wide =  boost::spirit::standard_wide;
-using standard_wide::space_type;
 
 struct set_position_impl
 {

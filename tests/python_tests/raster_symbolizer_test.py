@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from nose.tools import *
-from utilities import execution_path, run_all, contains_word, get_unique_colors
+from nose.tools import eq_
+from utilities import execution_path, run_all, get_unique_colors
 
 import os, mapnik
 
@@ -139,7 +139,7 @@ def test_raster_with_alpha_blends_correctly_with_background():
         mim = mapnik.Image(WIDTH, HEIGHT)
 
         mapnik.render(map, mim)
-        imdata = mim.tostring()
+        mim.tostring()
         # All white is expected
         eq_(get_unique_colors(mim),['rgba(254,254,254,255)'])
 

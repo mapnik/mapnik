@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
-from utilities import execution_path, run_all
+from nose.tools import eq_
+from utilities import run_all
 import mapnik
 
 # Map initialization

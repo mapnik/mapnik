@@ -41,7 +41,7 @@ function install_mason_deps() {
     ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
     ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
     ip libxml2 2.9.2 $MASON_PLATFORM_ID
-    ip libpng 1.6.13 $MASON_PLATFORM_ID
+    ip libpng 1.6.16 $MASON_PLATFORM_ID
     ip webp 0.4.2 $MASON_PLATFORM_ID
     ip icu 54.1 $MASON_PLATFORM_ID
     ip proj 4.8.0 $MASON_PLATFORM_ID
@@ -54,7 +54,7 @@ function install_mason_deps() {
     ip boost_libregex 1.57.0 $MASON_PLATFORM_ID
     ip boost_libpython 1.57.0 $MASON_PLATFORM_ID
     ip libpq 9.4.0 $MASON_PLATFORM_ID
-    ip sqlite 3.8.6 $MASON_PLATFORM_ID
+    ip sqlite 3.8.8.1 $MASON_PLATFORM_ID
     ip gdal 1.11.1 $MASON_PLATFORM_ID
     ip expat 2.1.0 $MASON_PLATFORM_ID
     ip pixman 0.32.6 $MASON_PLATFORM_ID
@@ -84,7 +84,6 @@ CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_I
 CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
-PREFIX = '/opt/mapnik-3.x'
 PATH = '${MASON_LINKED_REL}/bin'
 PATH_REMOVE = '/usr:/usr/local'
 PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
@@ -114,6 +113,7 @@ CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
 SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
 SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
 FRAMEWORK_PYTHON = False
+BENCHMARK = True
 CPP_TESTS = True
 PGSQL2SQLITE = True
 BINDINGS = 'python'

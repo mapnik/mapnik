@@ -19,7 +19,8 @@
 #
 #
 
-import os, re, sys, glob
+import glob
+import os
 from subprocess import Popen, PIPE
 
 

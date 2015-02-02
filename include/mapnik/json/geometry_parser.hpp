@@ -38,7 +38,7 @@ inline bool from_geojson(std::string const& json, geometry_container & paths)
 {
     using namespace boost::spirit;
     static const geometry_grammar<std::string::const_iterator> g;
-    standard_wide::space_type space;
+    ascii::space_type space;
     std::string::const_iterator start = json.begin();
     std::string::const_iterator end = json.end();
     return qi::phrase_parse(start, end, (g)(boost::phoenix::ref(paths)), space);

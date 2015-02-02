@@ -35,8 +35,6 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     qi::lit_type lit;
     qi::long_long_type long_long;
     qi::double_type double_;
-    qi::no_skip_type no_skip;
-    standard_wide::char_type char_;
     qi::_val_type _val;
     qi::_1_type _1;
     qi::_2_type _2;
@@ -75,20 +73,6 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]
-        ;
-
-    json_.unesc_char.add
-        ("\\\"", '\"') // quotation mark
-        ("\\\\", '\\') // reverse solidus
-        ("\\/", '/')   // solidus
-        ("\\b", '\b')  // backspace
-        ("\\f", '\f')  // formfeed
-        ("\\n", '\n')  // newline
-        ("\\r", '\r')  // carrige return
-        ("\\t", '\t')  // tab
-        ;
-
-    json_.string_ %= lit('"') >> no_skip[*(json_.unesc_char | "\\u" >> json_.hex4 | (char_ - lit('"')))] >> lit('"')
         ;
 
     // geojson types

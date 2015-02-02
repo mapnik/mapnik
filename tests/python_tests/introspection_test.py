@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
 
 import mapnik
