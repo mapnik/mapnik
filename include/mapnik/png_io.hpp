@@ -541,7 +541,7 @@ void save_as_png8_oct(T1 & file,
             trees[j].create_palette(pal);
             leftovers = cols[j] - static_cast<unsigned>(pal.size());
             cols[j] = static_cast<unsigned>(pal.size());
-            palette.insert(palette.begin(), pal.begin(), pal.end());
+            palette.insert(palette.end(), pal.begin(), pal.end());
         }
     }
 
