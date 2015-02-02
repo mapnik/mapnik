@@ -41,6 +41,7 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Carlos López
 * Dennis Luxen
 * Tom MacWright
+* Sara Metz
 * Michal Migurski
 * Andrii Mishkovskyi
 * Ben Moores
