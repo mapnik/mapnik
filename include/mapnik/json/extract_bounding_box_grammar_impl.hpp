@@ -55,7 +55,7 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::_b_type _b;
     qi::eps_type eps;
     qi::raw_type raw;
-    ascii::char_type char_;
+    boost::spirit::standard_wide::char_type char_;
     boost::spirit::repository::qi::iter_pos_type iter_pos;
     using qi::fail;
     using qi::on_error;
