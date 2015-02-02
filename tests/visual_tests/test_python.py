@@ -105,4 +105,3 @@ for format_tree in format_trees:
     diff = compare(actual,expected)
     if diff > 0:
        print 'comparision failed between:\n  %s (actual)\n  %s (expected)' % (actual,expected)
-

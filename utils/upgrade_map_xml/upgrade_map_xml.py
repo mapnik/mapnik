@@ -40,7 +40,7 @@ def indent(elem, level=0):
     else:
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
-            
+
 def name2expr(sym):
     if 'name' not in sym.attrib: return
     name = sym.attrib['name']
@@ -71,12 +71,12 @@ def handle_attr_changes(sym):
             sym.attrib.pop('text_convert')
         if sym.attrib.get('text_transform'):
             sym.attrib.pop('text_transform')
-    
+
     # https://github.com/mapnik/mapnik/issues/807
     justify_alignment = sym.attrib.get('justify_alignment',sym.attrib.get('justify-alignment'))
     if justify_alignment and justify_alignment == "middle":
         sym.attrib['justify-alignment'] = 'center'    
-    
+
     minimum_distance = sym.attrib.get('min_distance')
     if minimum_distance:
         sym.attrib['minimum-distance'] = minimum_distance
@@ -122,7 +122,7 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
     if not os.path.exists(input_xml):
         sys.stderr.write('input xml "%s" does not exist' % input_xml)
         sys.exit(1)
-    
+
     pre_read = open(input_xml,'r')
     if '!ENTITY' in pre_read.read() and not HAS_LXML:
         sys.stderr.write('\nSorry, it appears the xml you are trying to upgrade has entities, which requires lxml (python bindings to libxml2)\n')
@@ -135,7 +135,7 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
     except:
         print 'Could not parse "%s" invalid XML' % input_xml
         return
-    
+
     if hasattr(tree,'xinclude'):
         tree.xinclude()
     root = tree.getroot()
@@ -144,12 +144,12 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
     if root.attrib.get('bgcolor'):
         root.attrib['background-color'] = root.attrib.get('bgcolor')
         root.attrib.pop('bgcolor')
-    
+
     # underscores to spaces for <Map ..>
     underscore2dash(root)
-    
+
     root.set('minimum-version', '0.7.2')
-    
+
     # underscores to spaces for <FontSet ..>
     fontset = root.findall('FontSet') or root.findall('*/FontSet')
     for f in fontset:
@@ -161,8 +161,8 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
     layers = root.findall('Layer') or root.findall('*/Layer')
     for l in layers:
         underscore2dash(l)
-    
-    
+
+
     styles = root.findall('Style') or root.findall('*/Style')
     if not len(styles):
         sys.stderr.write('### Warning, no styles encountered and nothing able to be upgraded!\n')
@@ -210,7 +210,7 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
 
     if indent_xml:
         indent(root)
-    
+
     if output_xml:
         tree.write(output_xml)
     else:
@@ -248,20 +248,20 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     if not len(args) > 0:
         parser.error("Please provide the path to a map.xml and a new xml to write")
-    
+
     input_xml = args[0]
     output_xml = None
 
     if len(args) < 3 and not options.update_in_place:
         if len(args) == 2:
             output_xml = args[1]
-            
+
         if (len(args) == 1) or (input_xml == output_xml):
             parser.error(color_text(1,'\n\nAre you sure you want to overwrite "%s"?\nIf so, then pass --in-place to confirm.\nOtherwise pass a different filename to write an upgraded copy to.\n' % input_xml))
 
         print 'Upgrading "%s" to "%s"...' % (input_xml,output_xml)
         upgrade(input_xml,output_xml=output_xml,indent_xml=options.indent_xml)
-    
+
     elif len(args) == 1:
         print 'Upgrading "%s"...' % (input_xml)
         upgrade(input_xml,output_xml=output_xml,indent_xml=options.indent_xml)
