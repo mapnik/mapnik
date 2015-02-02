@@ -14,7 +14,8 @@
     <StyleName>style</StyleName>
     <Datasource>
         <Parameter name="file">../data/kurdish.geojson</Parameter>
-        <Parameter name="type">geojson</Parameter>
+        <Parameter name="type">ogr</Parameter>
+        <Parameter name="layer_by_index">0</Parameter>
     </Datasource>
     </Layer>
 </Map>
