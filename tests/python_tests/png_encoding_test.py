@@ -41,7 +41,7 @@ if mapnik.has_png():
     def gen_filepath(name,format):
         return os.path.join('images/support/encoding-opts',name+'-'+format.replace(":","+")+'.png')
 
-    generate = False
+    generate = os.environ.get('UPDATE')
 
     def test_expected_encodings():
         # blank image
