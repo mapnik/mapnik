@@ -19,18 +19,13 @@ matrix:
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then psql -U postgres -c 'create database template_postgis;' -U postgres; psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres; fi;
- - if [[ $(uname -s) == 'Darwin' ]]; then brew install bash; export PATH="$(brew --prefix)/bin":${PATH}; fi;
- - echo `which bash`
 
 script:
  - source bootstrap.sh
- # also install pycairo
  - wget https://gist.githubusercontent.com/springmeyer/0833fa43794838889139/raw/build_pycairo.sh && chmod +x build_pycairo.sh && ./build_pycairo.sh
  - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages:${PYTHONPATH}
  - ./configure
- - cat config.log
  - make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
- #- source localize.sh && make grind
- #- make bench
+ - make bench
