@@ -92,7 +92,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
         throw datasource_exception(CPLGetLastErrorMsg());
     }
 
-    MAPNIK_LOG_ERROR(gdal) << "gdal_featureset: opened Dataset=" << dataset_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: opened Dataset=" << dataset_;
 
     nbands_ = dataset_->GetRasterCount();
     width_ = dataset_->GetRasterXSize();
@@ -182,7 +182,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
 gdal_datasource::~gdal_datasource()
 {
-    MAPNIK_LOG_ERROR(gdal) << "gdal_featureset: Closing Dataset=" << dataset_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << dataset_;
     GDALClose(dataset_);
 }
 
