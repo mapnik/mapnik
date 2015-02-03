@@ -80,7 +80,6 @@ gdal_featureset::~gdal_featureset()
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << &dataset_;
 
-    GDALClose(&dataset_);
 }
 
 feature_ptr gdal_featureset::next()

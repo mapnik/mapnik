@@ -56,6 +56,7 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
 private:
     GDALDataset* open_dataset() const;
+    GDALDataset* dataset_;
     mapnik::box2d<double> extent_;
     std::string dataset_name_;
     int band_;
