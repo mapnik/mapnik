@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os, mapnik
-from nose.tools import eq_,raises
+from nose.tools import eq_,raises, assert_almost_equal
 from utilities import execution_path, run_all, get_unique_colors
 
 def setup():

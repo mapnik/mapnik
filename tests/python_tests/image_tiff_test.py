@@ -3,7 +3,7 @@
 
 import os, mapnik
 import hashlib
-from nose.tools import eq_
+from nose.tools import eq_, assert_not_equal
 from utilities import execution_path, run_all
 
 def hashstr(var):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from nose.tools import eq_
+from nose.tools import eq_, raises
 from utilities import execution_path, run_all
 import os, mapnik
 from itertools import groupby
