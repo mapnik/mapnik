@@ -29,7 +29,7 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
-
+#include <boost/interprocess/mapped_region.hpp>
 // mapnik
 #include <mapnik/boolean.hpp>
 #include <mapnik/unicode.hpp>
@@ -49,6 +49,8 @@
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 #include <mapnik/util/boost_geometry_adapters.hpp> // boost.geometry - register box2d<double>
+
+#include <mapnik/mapped_memory_cache.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -122,11 +124,14 @@ geojson_datasource::geojson_datasource(parameters const& params)
     }
     if (!inline_string_.empty())
     {
-        parse_geojson(inline_string_);
+        char const* start = inline_string_.c_str();
+        char const* end = start + inline_string_.size();
+        parse_geojson(start, end);
     }
     else
     {
-
+        cache_features_ = *params.get<mapnik::boolean_type>("cache_features", true);
+#if 0
         mapnik::util::file file(filename_);
         if (!file.open())
         {
@@ -136,20 +141,40 @@ geojson_datasource::geojson_datasource(parameters const& params)
         std::string file_buffer;
         file_buffer.resize(file.size());
         std::fread(&file_buffer[0], file.size(), 1, file.get());
-        cache_features_ = *params.get<mapnik::boolean_type>("cache_features", true);
+        char const* start = file_buffer.c_str();
+        char const* end = start + file_buffer.length();
         if (cache_features_)
         {
-            parse_geojson(file_buffer);
+            parse_geojson(start, end);
         }
         else
         {
-            initialise_index(file_buffer.begin(), file_buffer.end());
+            initialise_index(start, end);
         }
+#else
+        boost::optional<mapnik::mapped_region_ptr> mapped_region =
+            mapnik::mapped_memory_cache::instance().find(filename_, false);
+        if (!mapped_region)
+        {
+            throw std::runtime_error("could not get file mapping for "+ filename_);
+        }
+
+        char const* start = reinterpret_cast<char const*>((*mapped_region)->get_address());
+        char const* end = start + (*mapped_region)->get_size();
+        if (cache_features_)
+        {
+            parse_geojson(start, end);
+        }
+        else
+        {
+            initialise_index(start, end);
+        }
+#endif
     }
 }
 
 namespace {
-using base_iterator_type = std::string::const_iterator;
+using base_iterator_type = char const*;
 const mapnik::transcoder tr("utf8");
 const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> fc_grammar(tr);
 }
@@ -160,11 +185,14 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
     mapnik::json::boxes boxes;
     mapnik::json::extract_bounding_box_grammar<Iterator> bbox_grammar;
     boost::spirit::ascii::space_type space;
-    if (!boost::spirit::qi::phrase_parse(start, end, (bbox_grammar)(boost::phoenix::ref(boxes)) , space))
+    Iterator itr = start;
+    if (!boost::spirit::qi::phrase_parse(itr, end, (bbox_grammar)(boost::phoenix::ref(boxes)) , space))
     {
         throw mapnik::datasource_exception("GeoJSON Plugin: could not parse: '" + filename_ + "'");
     }
+    // bulk insert initialise r-tree
     tree_ = std::make_unique<spatial_index_type>(boxes);
+    // calculate total extent
     for (auto const& item : boxes)
     {
         auto const& box = std::get<0>(item);
@@ -174,28 +202,14 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             extent_ = box;
             // parse first feature to extract attributes schema.
             // NOTE: this doesn't yield correct answer for geoJSON in general, just an indication
-            mapnik::util::file file(filename_);
-            if (!file.open())
-            {
-                throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
-            }
-
-            std::fseek(file.get(), geometry_index.first, SEEK_SET);
-            std::vector<char> json;
-            json.resize(geometry_index.second);
-            std::fread(json.data(), geometry_index.second, 1, file.get());
-
-            using chr_iterator_type = std::vector<char>::const_iterator;
-            chr_iterator_type start = json.begin();
-            chr_iterator_type end = json.end();
-
+            Iterator itr = start + geometry_index.first;
+            Iterator end = itr + geometry_index.second;
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            using namespace boost::spirit;
             static const mapnik::transcoder tr("utf8");
-            static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
-            ascii::space_type space;
-            if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space))
+            static const mapnik::json::feature_grammar<Iterator, mapnik::feature_impl> grammar(tr);
+            boost::spirit::ascii::space_type space;
+            if (!boost::spirit::qi::phrase_parse(itr, end, (grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
@@ -213,8 +227,8 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
     }
 }
 
-template <typename T>
-void geojson_datasource::parse_geojson(T const& buffer)
+template <typename Iterator>
+void geojson_datasource::parse_geojson(Iterator start, Iterator end)
 {
     boost::spirit::ascii::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
@@ -222,7 +236,7 @@ void geojson_datasource::parse_geojson(T const& buffer)
 
     mapnik::json::default_feature_callback callback(features_);
 
-    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), (fc_grammar)
+    bool result = boost::spirit::qi::phrase_parse(start, end, (fc_grammar)
                                                   (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
                                                   space);
     if (!result)
