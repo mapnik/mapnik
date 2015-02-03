@@ -24,5 +24,5 @@
 #include <mapnik/json/feature_collection_grammar_impl.hpp>
 #include <string>
 
-using iterator_type = std::string::const_iterator;
+using iterator_type = char const*;
 template struct mapnik::json::feature_collection_grammar<iterator_type,mapnik::feature_impl, mapnik::json::default_feature_callback> ;

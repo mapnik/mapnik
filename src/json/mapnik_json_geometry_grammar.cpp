@@ -23,5 +23,5 @@
 #include <mapnik/json/geometry_grammar_impl.hpp>
 #include <string>
 
-using iterator_type = std::string::const_iterator;
+using iterator_type = char const*;
 template struct mapnik::json::geometry_grammar<iterator_type>;
