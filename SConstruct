@@ -450,6 +450,7 @@ pickle_store = [# Scons internal variables
         'HAS_CAIRO',
         'MAPNIK_HAS_DLFCN',
         'HAS_PYCAIRO',
+        'PYCAIRO_PATHS',
         'HAS_LIBXML2',
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
@@ -1094,6 +1095,7 @@ if not preconfigured:
     env['CAIRO_ALL_LIBS'] = []
     env['CAIRO_CPPPATHS'] = []
     env['HAS_PYCAIRO'] = False
+    env['PYCAIRO_PATHS'] = []
     env['HAS_LIBXML2'] = False
     env['LIBMAPNIK_LIBS'] = []
     env['LIBMAPNIK_LINKFLAGS'] = []
@@ -1660,6 +1662,13 @@ if not preconfigured:
             if env['CAIRO']:
                 if CHECK_PKG_CONFIG and conf.CheckPKG('pycairo'):
                     env['HAS_PYCAIRO'] = True
+                    temp_env = env.Clone()
+                    temp_env['CPPPATH'] = []
+                    temp_env.ParseConfig('pkg-config --cflags pycairo')
+                    if temp_env['CPPPATH']:
+                        env['PYCAIRO_PATHS'] = copy(temp_env['CPPPATH'])
+                    else:
+                        print temp_env['CPPPATH']
                 else:
                     env['SKIPPED_DEPS'].extend(['pycairo'])
             else:
