@@ -71,7 +71,6 @@ function setup_nose() {
 
 function make_config() {
     local MASON_LINKED_REL=./mason_packages/.link
-    export PKG_CONFIG_PATH="${MASON_LINKED_REL}/lib/pkgconfig"
     export C_INCLUDE_PATH="${MASON_LINKED_REL}/include"
     export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
     export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
@@ -85,6 +84,7 @@ CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
+PKG_CONFIG_PATH = '${MASON_LINKED_REL}/lib/pkgconfig'
 PATH_REMOVE = '/usr:/usr/local'
 PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'

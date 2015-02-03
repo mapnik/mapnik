@@ -24,6 +24,9 @@ install:
 
 script:
  - source bootstrap.sh
+ # also install pycairo
+ - wget https://gist.githubusercontent.com/springmeyer/0833fa43794838889139/raw/build_pycairo.sh && chmod +x build_pycairo.sh && ./build_pycairo.sh
+ - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages:${PYTHONPATH}
  - ./configure
  - cat config.log
  - make
