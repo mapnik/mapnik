@@ -96,8 +96,8 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     //
-    template <typename T>
-    void parse_geojson(T const& buffer);
+    template <typename Iterator>
+    void parse_geojson(Iterator start, Iterator end);
     template <typename Iterator>
     void initialise_index(Iterator start, Iterator end);
 private:
