@@ -10,8 +10,6 @@ todo
 - clang debs to s3
 - docs for base setup: sudo apt-get -y install zlib1g-dev python-dev make git python-dev
 - shrink icu data
-- cairo/pycairo
-- pkg-config-less
 '
 
 function setup_mason() {
@@ -28,37 +26,37 @@ function setup_mason() {
     export CC=${CC:-clang}
 }
 
-function ip() {
-    if [[ ! -d ./mason_packages/${3}/${1}/ ]]; then
+function install() {
+    MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
+    if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/ ]]; then
         mason install $1 $2
         mason link $1 $2
     fi
 }
 
 function install_mason_deps() {
-    MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
-    ip freetype 2.5.4 $MASON_PLATFORM_ID
-    ip harfbuzz 2cd5323 $MASON_PLATFORM_ID
-    ip jpeg_turbo 1.4.0 $MASON_PLATFORM_ID
-    ip libxml2 2.9.2 $MASON_PLATFORM_ID
-    ip libpng 1.6.16 $MASON_PLATFORM_ID
-    ip webp 0.4.2 $MASON_PLATFORM_ID
-    ip icu 54.1 $MASON_PLATFORM_ID
-    ip proj 4.8.0 $MASON_PLATFORM_ID
-    ip libtiff 4.0.4beta $MASON_PLATFORM_ID
-    ip boost 1.57.0 $MASON_PLATFORM_ID
-    ip boost_libsystem 1.57.0 $MASON_PLATFORM_ID
-    ip boost_libthread 1.57.0 $MASON_PLATFORM_ID
-    ip boost_libfilesystem 1.57.0 $MASON_PLATFORM_ID
-    ip boost_libprogram_options 1.57.0 $MASON_PLATFORM_ID
-    ip boost_libregex 1.57.0 $MASON_PLATFORM_ID
-    ip boost_libpython 1.57.0 $MASON_PLATFORM_ID
-    ip libpq 9.4.0 $MASON_PLATFORM_ID
-    ip sqlite 3.8.8.1 $MASON_PLATFORM_ID
-    ip gdal 1.11.1 $MASON_PLATFORM_ID
-    ip expat 2.1.0 $MASON_PLATFORM_ID
-    ip pixman 0.32.6 $MASON_PLATFORM_ID
-    ip cairo 1.12.18 $MASON_PLATFORM_ID
+    install freetype 2.5.4
+    install harfbuzz 2cd5323
+    install jpeg_turbo 1.4.0
+    install libxml2 2.9.2
+    install libpng 1.6.16
+    install webp 0.4.2
+    install icu 54.1
+    install proj 4.8.0
+    install libtiff 4.0.4beta
+    install boost 1.57.0
+    install boost_libsystem 1.57.0
+    install boost_libthread 1.57.0
+    install boost_libfilesystem 1.57.0
+    install boost_libprogram_options 1.57.0
+    install boost_libregex 1.57.0
+    install boost_libpython 1.57.0
+    install libpq 9.4.0
+    install sqlite 3.8.8.1
+    install gdal 1.11.1
+    install expat 2.1.0
+    install pixman 0.32.6
+    install cairo 1.12.18
 }
 
 function setup_nose() {
@@ -71,7 +69,6 @@ function setup_nose() {
 
 function make_config() {
     local MASON_LINKED_REL=./mason_packages/.link
-    export PKG_CONFIG_PATH="${MASON_LINKED_REL}/lib/pkgconfig"
     export C_INCLUDE_PATH="${MASON_LINKED_REL}/include"
     export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
     export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
@@ -85,6 +82,7 @@ CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
+PKG_CONFIG_PATH = '${MASON_LINKED_REL}/lib/pkgconfig'
 PATH_REMOVE = '/usr:/usr/local'
 PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
