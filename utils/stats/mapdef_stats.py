@@ -22,7 +22,7 @@ if __name__ == "__main__":
             for r in style.rules:
                 print "        Filter: %s" % r.filter
                 num_sym += len(r.symbols)
-                            
+
     print "Total number of layers      %s" % len(m.layers)
     print "Total number of styles      %s" % len(set(styles)) # unique styles
     print "Total number of rules       %s" % num_rules

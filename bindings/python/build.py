@@ -19,7 +19,8 @@
 #
 #
 
-import os, re, sys, glob
+import glob
+import os
 from subprocess import Popen, PIPE
 
 
@@ -44,6 +45,7 @@ target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + en
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
 py_env = env.Clone()
+
 py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
 
 py_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
@@ -179,8 +181,8 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
             py_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
 
     if env['HAS_PYCAIRO']:
-        py_env.ParseConfig('pkg-config --cflags pycairo')
         py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
+        py_env.Append(CPPPATH = env['PYCAIRO_PATHS'])
 
 py_env.Append(LINKFLAGS=python_link_flag)
 py_env.AppendUnique(LIBS='mapnik-json')

@@ -4,7 +4,7 @@
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
 from nose.tools import assert_almost_equal
 
-import os, sys, inspect, traceback
+import os, sys, traceback
 import mapnik
 
 HERE = os.path.dirname(__file__)

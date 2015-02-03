@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import mapnik
-import platform
 
 try:
     import json

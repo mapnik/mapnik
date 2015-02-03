@@ -27,6 +27,7 @@
 #include <mapnik/geometry.hpp>  // for geometry_type
 #include <mapnik/vertex.hpp>  // for CommandType
 #include <mapnik/make_unique.hpp>
+#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/geometry_util.hpp>
 #include <mapnik/geometry_container.hpp>
@@ -38,8 +39,6 @@
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-namespace standard_wide =  boost::spirit::standard_wide;
-using standard_wide::space_type;
 
 template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct geometry_grammar :

@@ -190,20 +190,16 @@ const mapnik::topojson::topojson_grammar<base_iterator_type> g;
 template <typename T>
 void topojson_datasource::parse_topojson(T const& buffer)
 {
-    boost::spirit::standard_wide::space_type space;
+    boost::spirit::ascii::space_type space;
     bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), g, space, topo_);
     if (!result)
     {
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
-#if BOOST_VERSION >= 105600
     using values_container = std::vector< std::pair<box_type, std::size_t> >;
     values_container values;
     values.reserve(topo_.geometries.size());
-#else
-    tree_ = std::make_unique<spatial_index_type>(16, 4);
-#endif
 
     std::size_t geometry_index = 0;
 
@@ -223,18 +219,12 @@ void topojson_datasource::parse_topojson(T const& buffer)
                 extent_.expand_to_include(box);
             }
         }
-#if BOOST_VERSION >= 105600
         values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
-#else
-        tree_->insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())),geometry_index);
-#endif
         ++geometry_index;
     }
 
-#if BOOST_VERSION >= 105600
     // packing algorithm
     tree_ = std::make_unique<spatial_index_type>(values);
-#endif
 }
 
 topojson_datasource::~topojson_datasource() { }
@@ -292,19 +282,12 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
     if (extent_.intersects(b))
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
-#if BOOST_VERSION >= 105600
         topojson_featureset::array_type index_array;
         if (tree_)
         {
             tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
             return std::make_shared<topojson_featureset>(topo_, *tr_, std::move(index_array));
         }
-#else
-        if (tree_)
-        {
-            return std::make_shared<topojson_featureset>(topo_, *tr_, tree_->find(box));
-        }
-#endif
     }
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();

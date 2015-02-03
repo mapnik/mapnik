@@ -1,7 +1,6 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
 from utilities import execution_path, run_all
 import os, mapnik
 from glob import glob
@@ -41,7 +40,7 @@ def test_opening_data():
                     kwargs = {'type': 'ogr','file': filepath}
                     kwargs['layer_by_index'] = 0
                     try:
-                        ds = mapnik.Datasource(**kwargs)
+                        mapnik.Datasource(**kwargs)
                     except Exception, e:
                         print 'could not open, %s: %s' % (kwargs,e)
                 else:
@@ -50,7 +49,7 @@ def test_opening_data():
                       if plugin is 'ogr':
                           kwargs['layer_by_index'] = 0
                       try:
-                          ds = mapnik.Datasource(**kwargs)
+                          mapnik.Datasource(**kwargs)
                       except Exception, e:
                           print 'could not open, %s: %s' % (kwargs,e)
             #else:

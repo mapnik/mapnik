@@ -1,7 +1,5 @@
-import sys
 import os, mapnik
-from timeit import Timer, time
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
 
 def setup():

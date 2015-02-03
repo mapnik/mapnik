@@ -3,7 +3,7 @@
 
 import os, mapnik
 
-from nose.tools import *
+from nose.tools import eq_,assert_almost_equal,raises
 from utilities import execution_path, run_all
 
 def setup():

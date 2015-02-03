@@ -1,7 +1,7 @@
 #encoding: utf8
 
-from nose.tools import *
-import os,sys
+from nose.tools import eq_,raises
+import os
 from utilities import execution_path, run_all
 import mapnik
 from binascii import unhexlify
@@ -136,18 +136,18 @@ def test_wkb_parsing():
 def test_geojson_parsing():
     path = mapnik.Path()
     count = 0
-    for json in geojson:
-        count += json[0]
-        path.add_geojson(json[1])
+    for j in geojson:
+        count += j[0]
+        path.add_geojson(j[1])
     eq_(count,len(path))
 
 def test_geojson_parsing_reversed():
     path = mapnik.Path()
     path2 = mapnik.Path()
     count = 0
-    for idx,json in enumerate(geojson_reversed):
-        count += json[0]
-        path.add_geojson(json[1])
+    for idx,j in enumerate(geojson_reversed):
+        count += j[0]
+        path.add_geojson(j[1])
         path2.add_geojson(geojson[idx][1])
         eq_(path.to_geojson(),path2.to_geojson())
     eq_(count,len(path))
@@ -166,7 +166,7 @@ def test_geojson_point_positions():
     path.add_geojson('{"type":"Point","coordinates":[30,10,50,50,50,50]}')
     eq_(path.to_geojson(),input_json)
 
-def test_geojson_point_positions():
+def test_geojson_point_positions2():
     input_json = '{"type":"LineString","coordinates":[[30,10],[10,30],[40,40]]}'
 
     path = mapnik.Path()
@@ -333,9 +333,9 @@ def test_creating_feature_from_geojson():
     eq_(feat['name'],u'value')
 
 def test_handling_geojson_null_geoms():
-    for json in geojson_nulls:
+    for j in geojson_nulls:
         ctx = mapnik.Context()
-        out_json = mapnik.Feature.from_geojson(json,ctx).to_geojson()
+        out_json = mapnik.Feature.from_geojson(j,ctx).to_geojson()
         expected = '{"type":"Feature","id":1,"geometry":null,"properties":{}}'
         eq_(out_json,expected)
         # ensure it round trips

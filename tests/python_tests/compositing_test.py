@@ -1,8 +1,8 @@
 #encoding: utf8
 
-from nose.tools import *
-import os,sys
-from utilities import execution_path, run_all, Todo
+from nose.tools import eq_
+import os
+from utilities import execution_path, run_all
 from utilities import get_unique_colors, pixel2channels, side_by_side_image
 import mapnik
 

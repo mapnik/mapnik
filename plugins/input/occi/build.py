@@ -31,12 +31,12 @@ plugin_sources = Split(
   %(PLUGIN_NAME)s_types.cpp
   %(PLUGIN_NAME)s_datasource.cpp
   %(PLUGIN_NAME)s_featureset.cpp
-  spatial_classesm.cpp      
-  spatial_classeso.cpp      
+  spatial_classesm.cpp
+  spatial_classeso.cpp
   """ % locals()
 )
 
-libraries = [ 'occi', 'ociei' ]
+libraries = [ 'clntsh' ]
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append(env['ICU_LIB_NAME'])
 

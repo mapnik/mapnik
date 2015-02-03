@@ -37,23 +37,46 @@ namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
-namespace standard_wide =  boost::spirit::standard_wide;
-using standard_wide::space_type;
 
-template <typename Iterator, typename FeatureType>
+struct default_feature_callback
+{
+    default_feature_callback(std::vector<feature_ptr> & features)
+        : features_(features) {}
+    void operator() (feature_ptr const& feature)
+    {
+        features_.push_back(feature);
+    }
+    std::vector<feature_ptr> & features_;
+};
+
+struct apply_feature_callback
+{
+    using result_type = void;
+    template <typename Callback, typename Feature>
+    void operator() (Callback & callback, Feature const& feature) const
+    {
+        callback(feature);
+    }
+};
+
+template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback>
 struct feature_collection_grammar :
-        qi::grammar<Iterator, std::vector<feature_ptr>(context_ptr const&, std::size_t& ), space_type>
+        qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
 {
     feature_collection_grammar(mapnik::transcoder const& tr);
+    // grammars
     feature_grammar<Iterator,FeatureType> feature_g;
     geometry_grammar<Iterator> geometry_g;
-    phoenix::function<extract_geometry> extract_geometry_;
-    qi::rule<Iterator, std::vector<feature_ptr>(context_ptr const&, std::size_t&), space_type> start; // START
-    qi::rule<Iterator, std::vector<feature_ptr>(context_ptr const&, std::size_t&), space_type> feature_collection;
+    // rules
+    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> start; // START
+    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> feature_collection;
     qi::rule<Iterator, space_type> type;
-    qi::rule<Iterator, std::vector<feature_ptr>(context_ptr const&, std::size_t&), space_type> features;
-    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, std::vector<feature_ptr>&), space_type> feature;
-    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, std::vector<feature_ptr>&), space_type> feature_from_geometry;
+    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> features;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature_from_geometry;
+    // phoenix functions
+    phoenix::function<json::extract_geometry> extract_geometry;
+    phoenix::function<apply_feature_callback> on_feature;
 };
 
 }}

@@ -1,6 +1,6 @@
 import mapnik
-from nose.tools import *
-from utilities import execution_path, run_all
+from nose.tools import eq_
+from utilities import run_all
 
 def test_grayscale_conversion():
     im = mapnik.Image(2,2)

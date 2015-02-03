@@ -1,7 +1,7 @@
 #encoding: utf8
 import mapnik
-from utilities import execution_path, run_all
-from nose.tools import *
+from utilities import run_all
+from nose.tools import eq_
 
 def test_add_feature():
     md = mapnik.MemoryDatasource()

@@ -13,8 +13,8 @@ install:
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	# we first build memory intensive files with -j1
-	$(PYTHON) scons/scons.py -j1 \
+	# we first build memory intensive files with -j2
+	$(PYTHON) scons/scons.py -j2 \
 		--config=cache --implicit-cache --max-drift=1 \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
@@ -22,10 +22,13 @@ mapnik:
 		src/expression_grammar.os \
 		src/transform_expression_grammar.os \
 		src/image_filter_types.os \
-		src/renderer_common/process_group_symbolizer.cpp \
-		src/agg/process_markers_symbolizer.cpp \
-		src/grid/process_markers_symbolizer.cpp \
-		src/cairo/process_markers_symbolizer.cpp
+		src/renderer_common/process_group_symbolizer.os \
+		src/agg/process_markers_symbolizer.os \
+		src/agg/process_group_symbolizer.os \
+		src/grid/process_markers_symbolizer.os \
+		src/grid/process_group_symbolizer.os \
+		src/cairo/process_markers_symbolizer.os \
+		src/cairo/process_group_symbolizer.os \
 	# then install the rest with -j$(JOBS)
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
@@ -81,8 +84,9 @@ demo:
 pep8:
 	# https://gist.github.com/1903033
 	# gsed on osx
-	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$//'
-	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}'
+	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$$//'
+	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$$/{$$d;N;ba' -e '}'
+	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs ged -i '/./,/^$$/!d'
 
 grind:
 	@for FILE in tests/cpp_tests/*-bin; do \

@@ -41,7 +41,6 @@ Several things happen when you do:
 
 import itertools
 import os
-import sys
 import warnings
 try:
     import json

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-from nose.tools import *
-from utilities import execution_path, run_all
+from nose.tools import eq_,assert_true,assert_almost_equal,assert_false
+from utilities import run_all
 import mapnik
 
 def test_coord_init():
