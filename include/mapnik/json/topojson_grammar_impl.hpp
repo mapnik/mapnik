@@ -27,8 +27,6 @@ namespace mapnik { namespace topojson {
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
-//namespace standard_wide = boost::spirit::standard_wide;
-//using standard_wide::space_type;
 
 template <typename Iterator, typename ErrorHandler>
 topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()

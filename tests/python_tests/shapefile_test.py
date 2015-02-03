@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
+from nose.tools import eq_,assert_almost_equal,raises
 from utilities import execution_path, run_all
 import os, mapnik
 
@@ -49,7 +49,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             query.add_property_name(fld)
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
-        fs = ds.features(query)
+        ds.features(query)
 
     def test_dbf_logical_field_is_boolean():
         ds = mapnik.Shapefile(file='../data/shp/long_lat')

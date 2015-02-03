@@ -41,7 +41,7 @@ def name2expr(sym):
             name = '[%s]' % name
     sym.attrib.pop('name')
     sym._setText(name)
-    
+
 def fixup_pointsym(sym):
     if sym.attrib.get('width'):
         sym.attrib.pop('width')
@@ -61,10 +61,10 @@ def fixup_sym_attributes(sym):
     sym.clear() # remove CssParameter elements
     for k,v in attrib.items(): # insert attributes instead
         sym.attrib[k] = v
-    
-        
+
+
 if __name__ == "__main__":
-    
+
     # Required parameters:
     #   map_xml_file: outdated stylesheet file
     #   output_file: new stylesheet file
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         print >> sys.stderr,'Usage: %s <map_xml_file> <output_file> <includes_folder>' % sys.argv[0]
         sys.exit(1)
     xml = sys.argv[1]
-    
+
     if sys.argv[3] is not None:
         includes_folder = sys.argv[3]
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # This dummy tree expands the entities that I found and puts them 
     # in a dictionary (entity) => resolved_entity
     # NOTE: `findall' makes the script very slow
-    
+
     # First get the entities declared in the header
     temp_xml = ''.join([good_doctype, dummy_map % '<dummy_tag></dummy_tag>'])
     expanded_tree = objectify.parse(StringIO.StringIO(temp_xml))
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # Tree to be updated to be mapnik compliant
     tree = objectify.parse(StringIO.StringIO(fixed_xml_string), parser=parser)
     root = tree.getroot()
-            
+
     for layer in layer_entities:
         file = open("%s/%s" % (includes_folder, doctype_entities[layer]))
         layer_xml_string = file.read()
@@ -177,7 +177,7 @@ if __name__ == "__main__":
                 if hasattr(rule,'BuildingSymbolizer') :
                     for sym in rule.BuildingSymbolizer:
                         fixup_sym_attributes(sym)
-                        
+
     updated_xml = etree.tostring(tree,
                                  pretty_print=True, 
                                  xml_declaration=True,
@@ -186,9 +186,9 @@ if __name__ == "__main__":
 
     # Insert the original doctype declaration
     fixed_updated_xml = re.sub(r'(?ims)^.*DOCTYPE.*\[.*\]\>', good_doctype, updated_xml)
-    
+
     output_file = open(sys.argv[2], 'w')
     output_file.write(fixed_updated_xml)
     output_file.close()    
-    
+
     # print fixed_updated_xml

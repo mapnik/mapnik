@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_,raises
 import atexit
-import time
 from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
-from Queue import Queue
 import threading
 
 
@@ -41,7 +39,7 @@ def psql_can_connect():
     try:
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
-    except RuntimeError, e:
+    except RuntimeError:
         print 'Notice: skipping postgis tests (connection)'
         return False
 
@@ -53,7 +51,7 @@ def shp2pgsql_on_path():
     try:
         call('shp2pgsql')
         return True
-    except RuntimeError, e:
+    except RuntimeError:
         print 'Notice: skipping postgis tests (shp2pgsql)'
         return False
 
@@ -66,7 +64,7 @@ def createdb_and_dropdb_on_path():
         call('createdb --help')
         call('dropdb --help')
         return True
-    except RuntimeError, e:
+    except RuntimeError:
         print 'Notice: skipping postgis tests (createdb/dropdb)'
         return False
 
@@ -340,7 +338,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
             query.add_property_name(fld)
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
-        fs = ds.features(query)
+        ds.features(query)
 
     def test_auto_detection_of_unique_feature_id_32_bit():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test2',
@@ -401,7 +399,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test3',
                             geometry_field='geom',
                             autodetect_key_field=True)
-        fs = ds.featureset()
+        ds.featureset()
 
     def test_auto_detection_of_unique_feature_id_64_bit():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test4',
@@ -484,19 +482,19 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
     @raises(RuntimeError)
     def test_auto_detection_of_invalid_numeric_primary_key():
-        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select geom, manual_id::numeric from test2) as t''',
+        mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select geom, manual_id::numeric from test2) as t''',
                             geometry_field='geom',
                             autodetect_key_field=True)
 
     @raises(RuntimeError)
     def test_auto_detection_of_invalid_multiple_keys():
-        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''test6''',
+        mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''test6''',
                             geometry_field='geom',
                             autodetect_key_field=True)
 
     @raises(RuntimeError)
     def test_auto_detection_of_invalid_multiple_keys_subquery():
-        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select first_id,second_id,geom from test6) as t''',
+        mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select first_id,second_id,geom from test6) as t''',
                             geometry_field='geom',
                             autodetect_key_field=True)
 
@@ -639,7 +637,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
             ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
                                 table='asdfasdfasdfasdfasdf',
                                 max_size=20)
-            fs = ds.all_features()
+            ds.all_features()
         except Exception, e:
             eq_('in executeQuery' in str(e),True)
 
@@ -800,7 +798,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     # https://github.com/mapnik/mapnik/issues/1816
     def test_exception_message_reporting():
         try:
-            ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
+            mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
         except Exception, e:
             eq_(e.message != 'unidentifiable C++ exception', True)
 
@@ -829,7 +827,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                 'table':"(select null::bigint as osm_id, GeomFromEWKT('SRID=4326;POINT(0 0)') as geom) as tmp"}
         ds = mapnik.Datasource(**opts)
         fs = ds.featureset()
-        feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
+        fs.next() ## should throw since key_field is null: StopIteration: No more features.
 
     def test_psql_error_should_not_break_connection_pool():
         # Bad request, will trigger an error when returning result

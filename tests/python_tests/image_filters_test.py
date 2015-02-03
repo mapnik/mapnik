@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
 from utilities import side_by_side_image
 import os, mapnik

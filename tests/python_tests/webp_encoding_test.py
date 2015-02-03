@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import os, mapnik
-from timeit import Timer, time
-from nose.tools import *
+from nose.tools import raises,eq_
 from utilities import execution_path, run_all
 
 def setup():
@@ -60,7 +58,7 @@ if mapnik.has_webp():
         im = mapnik.Image(256,256)
         im.tostring('webp:quality=-1')
 
-    generate = False
+    generate = os.environ.get('UPDATE')
 
     def test_expected_encodings():
         fails = []
@@ -151,8 +149,7 @@ if mapnik.has_webp():
                 # this will happen if libweb is old, since it cannot open images created by more recent webp
                 print 'warning, cannot open webp expected image (your libwebp is likely too old)'
                 return
-            # disabled to avoid failures on ubuntu when using old webp packages
-            #eq_(t0_len,len(expected_bytes))
+            eq_(t0_len,len(expected_bytes))
         except RuntimeError, e:
             print e
 

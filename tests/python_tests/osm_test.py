@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
 import os, mapnik
 
@@ -32,7 +32,7 @@ if 'osm' in mapnik.DatasourceCache.plugin_names():
             query.add_property_name(fld)
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
-        fs = ds.features(query)
+        ds.features(query)
 
     def test_that_64bit_int_fields_work():
         ds = mapnik.Osm(file='../data/osm/64bit.osm')

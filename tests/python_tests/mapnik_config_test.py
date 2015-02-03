@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-from nose.tools import *
-from utilities import execution_path, run_all
-from subprocess import Popen, PIPE, STDOUT
-import os
-
-import os, sys, glob, mapnik
+from nose.tools import eq_
+from utilities import run_all
+from subprocess import Popen, PIPE
 
 def test_mapnik_config_no_args():
     process = Popen('mapnik-config', shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)

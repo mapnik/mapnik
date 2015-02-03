@@ -41,6 +41,7 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Carlos López
 * Dennis Luxen
 * Tom MacWright
+* Sara Metz
 * Michal Migurski
 * Andrii Mishkovskyi
 * Ben Moores
@@ -67,6 +68,7 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Dave Stubbs
 * River Tarnell
 * Cezary Tarnowski
+* Blake Thompson
 * Oliver Tonnhofer
 * Jochen Topf
 * Alberto Valverde
@@ -77,4 +79,3 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Rich Wareham
 * Nick Whitelegg
 * Leslie Wu
-* Blake Thompson

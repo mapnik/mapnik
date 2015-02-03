@@ -393,7 +393,7 @@ private:
     // clip extreme alfa values
     void create_palette_rek(std::vector<rgba> & palette, node * itr) const
     {
-        if (itr->count >= 3)
+        if (itr->count != 0)
         {
             unsigned count = itr->count;
             byte a = byte(itr->alphas/float(count));

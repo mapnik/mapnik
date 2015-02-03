@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import os, mapnik
 from timeit import Timer, time
-from nose.tools import *
 from utilities import execution_path, run_all
 
 def setup():
@@ -42,8 +40,8 @@ combinations = ['png',
                 'png:z=1:s=filtered',
                 'png:z=1:s=huff',
                 'png:z=1:s=rle',
-                'png:m=h:g=2.0',
-                'png:m=h:g=1.0',
+                'png8:m=h:g=2.0',
+                'png8:m=h:g=1.0',
                 'png:e=miniz',
                 'png8:e=miniz'
                ]
@@ -59,7 +57,7 @@ iterations = 10
 
 def do_encoding():
 
-    image = None
+    global image
 
     results = {}
     sortable = {}
@@ -115,7 +113,6 @@ def do_encoding():
         min_ = str(s[0])[:6]
         avg = str(s[1])[:6]
         elapsed = str(s[2])[:6]
-        percent_reduction = s[4]
         name = s[3]
         size = s[4]
         print 'min: %sms | avg: %sms | total: %sms | len: %s <-- %s' % (min_,avg,elapsed,size,name)

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import os, mapnik
-from timeit import Timer, time
-from nose.tools import *
+from nose.tools import eq_,raises
 from utilities import execution_path, run_all
 
 def setup():
@@ -24,6 +22,9 @@ def test_image_premultiply():
 def test_negative_image_dimensions():
     # TODO - this may have regressed in https://github.com/mapnik/mapnik/commit/4f3521ac24b61fc8ae8fd344a16dc3a5fdf15af7
     im = mapnik.Image(-40,40)
+    # should not get here
+    eq_(im.width(),0)
+    eq_(im.height(),0)
 
 def test_jpeg_round_trip():
     filepath = '/tmp/mapnik-jpeg-io.jpeg'

@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import glob
-import sys
-from nose.tools import *
+from nose.tools import eq_,raises
 from utilities import execution_path
 
 import os, mapnik
@@ -33,25 +32,26 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         broken.append("../data/csv/fails/does_not_exist.csv")
 
         for csv in broken:
-            throws = False
             if visual:
                 try:
-                    ds = mapnik.Datasource(type='csv',file=csv,strict=True)
-                    print '\x1b[33mfailed\x1b[0m',csv
+                    mapnik.Datasource(type='csv',file=csv,strict=True)
+                    print '\x1b[33mfailed: should have thrown\x1b[0m',csv
                 except Exception:
                     print '\x1b[1;32m✓ \x1b[0m', csv
 
     def test_good_files(visual=False):
         good_files = glob.glob("../data/csv/*.*")
         good_files.extend(glob.glob("../data/csv/warns/*.*"))
+        ignorable = os.path.join('..','data','csv','long_lat.vrt')
+        good_files.remove(ignorable)
 
         for csv in good_files:
             if visual:
                 try:
-                    ds = mapnik.Datasource(type='csv',file=csv)
+                    mapnik.Datasource(type='csv',file=csv)
                     print '\x1b[1;32m✓ \x1b[0m', csv
-                except Exception:
-                    print '\x1b[33mfailed\x1b[0m',csv
+                except Exception, e:
+                    print '\x1b[33mfailed: should not have thrown\x1b[0m',csv,str(e)
 
     def test_lon_lat_detection(**kwargs):
         ds = get_csv_ds('lon_lat.csv')
@@ -68,7 +68,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         attr = {'lon': 0, 'lat': 0}
         eq_(feat.attributes,attr)
 
-    def test_lon_lat_detection(**kwargs):
+    def test_lng_lat_detection(**kwargs):
         ds = get_csv_ds('lng_lat.csv')
         eq_(len(ds.fields()),2)
         eq_(ds.fields(),['lng','lat'])
@@ -357,9 +357,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
             query.add_property_name(fld)
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
-        fs = ds.features(query)
-        desc = ds.describe()
-        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        ds.features(query)
 
     def test_that_leading_zeros_mean_strings(**kwargs):
         ds = get_csv_ds('leading_zeros.csv')
@@ -471,7 +469,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     @raises(RuntimeError)
     def test_that_fewer_headers_than_rows_throws(**kwargs):
         # this has invalid header # so throw
-        ds = get_csv_ds('more_column_values_than_headers.csv')
+        get_csv_ds('more_column_values_than_headers.csv')
 
     def test_that_feature_id_only_incremented_for_valid_rows(**kwargs):
         ds = mapnik.Datasource(type='csv',
