@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import os, mapnik
-from timeit import Timer, time
-from nose.tools import *
+from nose.tools import eq_
 from utilities import execution_path, run_all
 
 def setup():
@@ -43,7 +41,7 @@ if mapnik.has_png():
     def gen_filepath(name,format):
         return os.path.join('images/support/encoding-opts',name+'-'+format.replace(":","+")+'.png')
 
-    generate = False
+    generate = os.environ.get('UPDATE')
 
     def test_expected_encodings():
         # blank image
@@ -56,8 +54,8 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-              eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+              eq_(mapnik.Image.open(actual).tostring(opt),
+                mapnik.Image.open(expected).tostring(opt),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
         # solid image
@@ -70,8 +68,8 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-              eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+              eq_(mapnik.Image.open(actual).tostring(opt),
+                mapnik.Image.open(expected).tostring(opt),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
         # aerial
@@ -84,8 +82,8 @@ if mapnik.has_png():
               im.save(expected,opt)
             else:
               im.save(actual,opt)
-              eq_(mapnik.Image.open(actual).tostring(),
-                mapnik.Image.open(expected).tostring(),
+              eq_(mapnik.Image.open(actual).tostring(opt),
+                mapnik.Image.open(expected).tostring(opt),
                 '%s (actual) not == to %s (expected)' % (actual,expected))
 
     def test_transparency_levels():
