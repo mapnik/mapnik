@@ -43,15 +43,14 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     qi::_a_type _a;
     qi::_r1_type _r1;
     qi::eps_type eps;
-
+    qi::char_type char_;
     using qi::fail;
     using qi::on_error;
     using phoenix::new_;
     using phoenix::construct;
 
     // generic json types
-    json_.value =  json_.object | json_.array | json_.string_
-        | json_.number
+    json_.value =  json_.object | json_.array | json_.string_ | json_.number
         ;
 
     json_.pairs = json_.key_value % lit(',')
@@ -94,7 +93,14 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     attributes = (json_.string_ [_a = _1] > lit(':') > attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
-    attribute_value %= json_.number | json_.string_  ;
+    attribute_value %= json_.number | json_.string_ | stringify_object | stringify_array
+        ;
+
+    stringify_object %= char_('{')[_a = 1 ] >> *(eps(_a > 0) >> (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))
+        ;
+
+    stringify_array %= char_('[')[_a = 1 ] >> *(eps(_a > 0) >> (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))
+        ;
 
     feature.name("Feature");
     feature_type.name("type");

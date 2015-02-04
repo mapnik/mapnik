@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Parameters>
+        <Parameter name="sizes">800, 800</Parameter>
+        <Parameter name="bbox">-1.05, -1.05, 1.05, 1.05</Parameter>
+    </Parameters>
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>lines</StyleName>
+        <StyleName>text</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+                id, wkt, upright
+                 0, "LINESTRING(1   0, 0 -1,   -1   0, 0 1,   1   0)", "[default]"
+                 1, "LINESTRING(0.9 0, 0 -0.9, -0.9 0, 0 0.9, 0.9 0)", "auto"
+                 2, "LINESTRING(0.8 0, 0 -0.8, -0.8 0, 0 0.8, 0.8 0)", "auto-down"
+                 3, "LINESTRING(0.7 0, 0 -0.7, -0.7 0, 0 0.7, 0.7 0)", "left"
+                 4, "LINESTRING(0.6 0, 0 -0.6, -0.6 0, 0 0.6, 0.6 0)", "right"
+                 5, "LINESTRING(0.5 0, 0 -0.5, -0.5 0, 0 0.5, 0.5 0)", "left_only"
+                 6, "LINESTRING(0.4 0, 0 -0.4, -0.4 0, 0 0.4, 0.4 0)", "right_only"
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="lines">
+        <Rule>
+            <LineSymbolizer
+                stroke-width="12"
+                stroke="rgb(255, 100, 100)"
+                />
+        </Rule>
+    </Style>
+
+    <Style name="text">
+        <Rule>
+            <Filter>[id] = 0</Filter>
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="16"
+                placement="line"
+                spacing="100"
+                max-char-angle-delta="0"
+                >[upright]</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <ElseFilter />
+            <TextSymbolizer
+                face-name="DejaVu Sans Book"
+                size="16"
+                placement="line"
+                spacing="100"
+                upright="[upright]"
+                max-char-angle-delta="0"
+                >[upright]</TextSymbolizer>
+        </Rule>
+    </Style>
+
+</Map>
