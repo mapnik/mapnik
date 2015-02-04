@@ -25,6 +25,8 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/pixel_types.hpp>
+
 // stl
 #include <algorithm>
 #include <cassert>
@@ -120,7 +122,8 @@ template <typename T, std::size_t max_size = 65535>
 class image
 {
 public:
-    using pixel_type = T;
+    using pixel = T;
+    using pixel_type = typename T::type;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
     detail::image_dimensions<max_size> dimensions_;
@@ -143,7 +146,7 @@ public:
         if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
 
-    image(image<pixel_type> const& rhs)
+    image(image<T> const& rhs)
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -153,7 +156,7 @@ public:
           painted_(rhs.painted_)
     {}
 
-    image(image<pixel_type> && rhs) noexcept
+    image(image<T> && rhs) noexcept
         : dimensions_(std::move(rhs.dimensions_)),
           buffer_(std::move(rhs.buffer_)),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -166,13 +169,13 @@ public:
         rhs.pData_ = nullptr;
     }
 
-    image<pixel_type>& operator=(image<pixel_type> rhs)
+    image<T>& operator=(image<T> rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(image<pixel_type> & rhs)
+    void swap(image<T> & rhs)
     {
         std::swap(dimensions_, rhs.dimensions_);
         std::swap(buffer_, rhs.buffer_);
@@ -312,17 +315,31 @@ public:
     }
 };
 
-using image_rgba8 = image<std::uint32_t>;
-using image_gray8 = image<std::uint8_t> ;
-using image_gray16 = image<std::int16_t>;
-using image_gray32f = image<float>;
+using image_rgba8 = image<rgba8_t>;
+using image_gray8 = image<gray8_t>;
+using image_gray8s = image<gray8s_t>;
+using image_gray16 = image<gray16_t>;
+using image_gray16s = image<gray16s_t>;
+using image_gray32 = image<gray32_t>;
+using image_gray32s = image<gray32s_t>;
+using image_gray32f = image<gray32f_t>;
+using image_gray64 = image<gray64_t>;
+using image_gray64s = image<gray64s_t>;
+using image_gray64f = image<gray64f_t>;
 
 enum image_dtype : std::uint8_t
 {
     image_dtype_rgba8 = 0,
     image_dtype_gray8,
+    image_dtype_gray8s,
     image_dtype_gray16,
+    image_dtype_gray16s,
+    image_dtype_gray32,
+    image_dtype_gray32s,
     image_dtype_gray32f,
+    image_dtype_gray64,
+    image_dtype_gray64s,
+    image_dtype_gray64f,
     image_dtype_null
 };
 

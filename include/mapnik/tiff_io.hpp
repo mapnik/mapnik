@@ -217,6 +217,75 @@ struct tag_setter
 
         }
     }
+    inline void operator() (image_gray64 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 64);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray64s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 64);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray64f const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 64);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+        }
+    }
+    inline void operator() (image_gray32 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray32s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
     inline void operator() (image_gray32f const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
@@ -244,10 +313,38 @@ struct tag_setter
 
         }
     }
+    inline void operator() (image_gray16s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
     inline void operator() (image_gray8 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray8s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
         if (config_.compression == COMPRESSION_DEFLATE

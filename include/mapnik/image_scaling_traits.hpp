@@ -61,6 +61,17 @@ struct agg_scaling_traits<image_gray8>
 };
 
 template <>
+struct agg_scaling_traits<image_gray8s>
+{
+    using pixfmt_pre = agg::pixfmt_gray8_pre;
+    using color_type = agg::gray8;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
 struct agg_scaling_traits<image_gray16>
 {
     using pixfmt_pre = agg::pixfmt_gray16_pre;
@@ -72,7 +83,73 @@ struct agg_scaling_traits<image_gray16>
 };
 
 template <>
+struct agg_scaling_traits<image_gray16s>
+{
+    using pixfmt_pre = agg::pixfmt_gray16_pre;
+    using color_type = agg::gray16;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
+struct agg_scaling_traits<image_gray32>
+{
+    using pixfmt_pre = agg::pixfmt_gray32_pre;
+    using color_type = agg::gray32;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
+struct agg_scaling_traits<image_gray32s>
+{
+    using pixfmt_pre = agg::pixfmt_gray32_pre;
+    using color_type = agg::gray32;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
 struct agg_scaling_traits<image_gray32f>
+{
+    using pixfmt_pre = agg::pixfmt_gray32_pre;
+    using color_type = agg::gray32;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
+struct agg_scaling_traits<image_gray64>
+{
+    using pixfmt_pre = agg::pixfmt_gray32_pre;
+    using color_type = agg::gray32;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
+struct agg_scaling_traits<image_gray64s>
+{
+    using pixfmt_pre = agg::pixfmt_gray32_pre;
+    using color_type = agg::gray32;
+    using interpolator_type = agg::span_interpolator_linear<>;
+    using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_resample_affine = agg::span_image_resample_gray_affine<img_src_type>;
+};
+
+template <>
+struct agg_scaling_traits<image_gray64f>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;

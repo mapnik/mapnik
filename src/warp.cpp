@@ -70,8 +70,8 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
     std::size_t mesh_nx = std::ceil(source.width()/double(mesh_size) + 1);
     std::size_t mesh_ny = std::ceil(source.height()/double(mesh_size) + 1);
 
-    image<double> xs(mesh_nx, mesh_ny);
-    image<double> ys(mesh_nx, mesh_ny);
+    image_gray64f xs(mesh_nx, mesh_ny, false);
+    image_gray64f ys(mesh_nx, mesh_ny, false);
 
     // Precalculate reprojected mesh
     for(std::size_t j = 0; j < mesh_ny; ++j)

@@ -379,11 +379,25 @@ void webp_saver::operator() (T const& image) const
 
 template void webp_saver::operator()<image_rgba8> (image_rgba8 const& image) const;
 template void webp_saver::operator()<image_gray8> (image_gray8 const& image) const;
+template void webp_saver::operator()<image_gray8s> (image_gray8s const& image) const;
 template void webp_saver::operator()<image_gray16> (image_gray16 const& image) const;
+template void webp_saver::operator()<image_gray16s> (image_gray16s const& image) const;
+template void webp_saver::operator()<image_gray32> (image_gray32 const& image) const;
+template void webp_saver::operator()<image_gray32s> (image_gray32s const& image) const;
 template void webp_saver::operator()<image_gray32f> (image_gray32f const& image) const;
+template void webp_saver::operator()<image_gray64> (image_gray64 const& image) const;
+template void webp_saver::operator()<image_gray64s> (image_gray64s const& image) const;
+template void webp_saver::operator()<image_gray64f> (image_gray64f const& image) const;
 template void webp_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const;
 template void webp_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
+template void webp_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
 template void webp_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;
+template void webp_saver::operator()<image_view_gray16s> (image_view_gray16s const& image) const;
+template void webp_saver::operator()<image_view_gray32> (image_view_gray32 const& image) const;
+template void webp_saver::operator()<image_view_gray32s> (image_view_gray32s const& image) const;
 template void webp_saver::operator()<image_view_gray32f> (image_view_gray32f const& image) const;
+template void webp_saver::operator()<image_view_gray64> (image_view_gray64 const& image) const;
+template void webp_saver::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
+template void webp_saver::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
 
 } // end ns

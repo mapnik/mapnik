@@ -194,7 +194,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, pixel_
     pixmap_.add_feature(feature);
 }
 
-template class grid_renderer<grid>;
+template class MAPNIK_DECL grid_renderer<grid>;
 
 }
 

@@ -34,7 +34,7 @@ namespace mapnik
 {
 
 template <typename T>
-const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_limits<T>::min();
+const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_limits<typename T::type>::min();
 
 template <typename T>
 hit_grid<T>::hit_grid(int width, int height, std::string const& key, unsigned int resolution)
@@ -146,7 +146,7 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
 }
 
 
-template class hit_grid<mapnik::value_integer>;
+template class MAPNIK_DECL hit_grid<mapnik::value_integer_pixel>;
 
 }
 

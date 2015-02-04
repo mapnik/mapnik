@@ -77,7 +77,7 @@ inline int import_image(T2 const& im_in,
                              WebPPicture & pic,
                              bool alpha)
 {
-    image<typename T2::pixel_type> const& data = im_in.data();
+    image<typename T2::pixel> const& data = im_in.data();
     int stride = sizeof(typename T2::pixel_type) * im_in.width();
     if (data.width() == im_in.width() &&
         data.height() == im_in.height())

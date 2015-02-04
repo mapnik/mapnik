@@ -289,10 +289,31 @@ unsigned raster_colorizer::get_color(float value) const
 template void raster_colorizer::colorize(image_rgba8 & out, image_gray8 const& in,
                                 boost::optional<double>const& nodata,
                                 feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray8s const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const;
 template void raster_colorizer::colorize(image_rgba8 & out, image_gray16 const& in,
                                 boost::optional<double>const& nodata,
                                 feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray16s const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray32 const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray32s const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
 template void raster_colorizer::colorize(image_rgba8 & out, image_gray32f const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray64 const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray64s const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray64f const& in,
                                          boost::optional<double>const& nodata,
                                          feature_impl const& f) const;
 

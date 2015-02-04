@@ -178,7 +178,67 @@ MAPNIK_DECL T image_cast(image_gray8 const& data, double offset, double scaling)
 }
 
 template <typename T>
+MAPNIK_DECL T image_cast(image_gray8s const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
+template <typename T>
 MAPNIK_DECL T image_cast(image_gray16 const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray16s const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray32 const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray32s const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
     {
@@ -207,6 +267,51 @@ MAPNIK_DECL T image_cast(image_gray32f const& data, double offset, double scalin
     }
 }
 
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray64 const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray64s const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
+template <typename T>
+MAPNIK_DECL T image_cast(image_gray64f const& data, double offset, double scaling)
+{
+    if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
+    {
+        detail::visitor_image_cast<T> visit;
+        return visit(data);
+    }
+    else
+    {
+        detail::visitor_image_cast_so<T> visit(offset, scaling);
+        return visit(data);
+    }
+}
+
 MAPNIK_DECL image_any image_cast(image_any const& data, image_dtype type, double offset, double scaling)
 {
     switch (type)
@@ -215,10 +320,24 @@ MAPNIK_DECL image_any image_cast(image_any const& data, image_dtype type, double
             return image_any(std::move(image_cast<image_rgba8>(data, offset, scaling)));
         case image_dtype_gray8:
             return image_any(std::move(image_cast<image_gray8>(data, offset, scaling)));
+        case image_dtype_gray8s:
+            return image_any(std::move(image_cast<image_gray8s>(data, offset, scaling)));
         case image_dtype_gray16:
             return image_any(std::move(image_cast<image_gray16>(data, offset, scaling)));
+        case image_dtype_gray16s:
+            return image_any(std::move(image_cast<image_gray16s>(data, offset, scaling)));
+        case image_dtype_gray32:
+            return image_any(std::move(image_cast<image_gray32>(data, offset, scaling)));
+        case image_dtype_gray32s:
+            return image_any(std::move(image_cast<image_gray32s>(data, offset, scaling)));
         case image_dtype_gray32f:
             return image_any(std::move(image_cast<image_gray32f>(data, offset, scaling)));
+        case image_dtype_gray64:
+            return image_any(std::move(image_cast<image_gray64>(data, offset, scaling)));
+        case image_dtype_gray64s:
+            return image_any(std::move(image_cast<image_gray64s>(data, offset, scaling)));
+        case image_dtype_gray64f:
+            return image_any(std::move(image_cast<image_gray64f>(data, offset, scaling)));
         case image_dtype_null:
             throw std::runtime_error("Can not cast a null image");
     }

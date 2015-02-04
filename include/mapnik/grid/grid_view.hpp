@@ -196,7 +196,7 @@ private:
     feature_type const& features_;
 };
 
-using grid_view = hit_grid_view<mapnik::image<mapnik::value_integer> >;
+using grid_view = hit_grid_view<mapnik::image<mapnik::value_integer_pixel> >;
 
 }
 

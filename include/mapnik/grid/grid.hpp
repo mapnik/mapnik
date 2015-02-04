@@ -49,8 +49,8 @@ template <typename T>
 class MAPNIK_DECL hit_grid
 {
 public:
-    using value_type = T;
-    using data_type = mapnik::image<value_type>;
+    using value_type = typename T::type;
+    using data_type = mapnik::image<T>;
     using lookup_type = std::string;
     // mapping between pixel id and key
     using feature_key_type = std::map<value_type, lookup_type>;
@@ -147,12 +147,12 @@ public:
         return data_;
     }
 
-    inline T const * raw_data() const
+    inline value_type const * raw_data() const
     {
         return data_.getData();
     }
 
-    inline T* raw_data()
+    inline value_type* raw_data()
     {
         return data_.getData();
     }
@@ -222,10 +222,9 @@ public:
             }
         }
     }
-
 };
 
-using grid = hit_grid<mapnik::value_integer>;
+using grid = hit_grid<mapnik::value_integer_pixel>;
 
 }
 #endif //MAPNIK_GRID_HPP

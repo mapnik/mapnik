@@ -171,10 +171,30 @@ template MAPNIK_DECL void scale_image_agg(image_rgba8 &, image_rgba8 const&, sca
 template MAPNIK_DECL void scale_image_agg(image_gray8 &, image_gray8 const&, scaling_method_e,
                               double, double , double, double , double);
 
+template MAPNIK_DECL void scale_image_agg(image_gray8s &, image_gray8s const&, scaling_method_e,
+                              double, double , double, double , double);
+
 template MAPNIK_DECL void scale_image_agg(image_gray16 &, image_gray16 const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray16s &, image_gray16s const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray32 &, image_gray32 const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray32s &, image_gray32s const&, scaling_method_e,
                               double, double , double, double , double);
 
 template MAPNIK_DECL void scale_image_agg(image_gray32f &, image_gray32f const&, scaling_method_e,
                               double, double , double, double , double);
 
+template MAPNIK_DECL void scale_image_agg(image_gray64 &, image_gray64 const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray64s &, image_gray64s const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray64f &, image_gray64f const&, scaling_method_e,
+                              double, double , double, double , double);
 }

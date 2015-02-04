@@ -110,20 +110,40 @@ MAPNIK_DECL void save_to_stream
     std::string const& type
 );
 
+// PREMULTIPLY ALPHA
+MAPNIK_DECL bool premultiply_alpha(image_any & image);
+
 template <typename T>
 MAPNIK_DECL bool premultiply_alpha(T & image);
+
+// DEMULTIPLY ALPHA
+MAPNIK_DECL bool demultiply_alpha(image_any & image);
 
 template <typename T>
 MAPNIK_DECL bool demultiply_alpha(T & image);
 
+// SET PREMULTIPLIED ALPHA
+MAPNIK_DECL void set_premultiplied_alpha(image_any & image, bool status);
+
 template <typename T>
 MAPNIK_DECL void set_premultiplied_alpha(T & image, bool status);
+
+// IS SOLID
+MAPNIK_DECL bool is_solid (image_any const& image);
+MAPNIK_DECL bool is_solid (image_view_any const& image);
 
 template <typename T>
 MAPNIK_DECL bool is_solid (T const& image);
 
+// SET ALPHA
+MAPNIK_DECL void set_alpha (image_any & image, float opacity);
+
 template <typename T>
 MAPNIK_DECL void set_alpha (T & image, float opacity);
+
+// SET GRAYSCALE TO ALPHA
+MAPNIK_DECL void set_grayscale_to_alpha (image_any & image);
+MAPNIK_DECL void set_grayscale_to_alpha (image_any & image, color const& c);
 
 template <typename T>
 MAPNIK_DECL void set_grayscale_to_alpha (T & image);
@@ -131,9 +151,13 @@ MAPNIK_DECL void set_grayscale_to_alpha (T & image);
 template <typename T>
 MAPNIK_DECL void set_grayscale_to_alpha (T & image, color const& c);
 
+// SET COLOR TO ALPHA
+MAPNIK_DECL void set_color_to_alpha (image_any & image, color const& c);
+
 template <typename T>
 MAPNIK_DECL void set_color_to_alpha (T & image, color const& c);
 
+// FILL
 template <typename T>
 MAPNIK_DECL void fill (image_any & data, T const&);
 
@@ -144,23 +168,52 @@ template <typename T>
 MAPNIK_DECL void fill (image_gray8 & data, T const&);
 
 template <typename T>
+MAPNIK_DECL void fill (image_gray8s & data, T const&);
+
+template <typename T>
 MAPNIK_DECL void fill (image_gray16 & data, T const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray16s & data, T const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray32 & data, T const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray32s & data, T const&);
 
 template <typename T>
 MAPNIK_DECL void fill (image_gray32f & data, T const&);
 
 template <typename T>
+MAPNIK_DECL void fill (image_gray64 & data, T const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray64s & data, T const&);
+
+template <typename T>
+MAPNIK_DECL void fill (image_gray64f & data, T const&);
+
+// SET RECTANGLE
+MAPNIK_DECL void set_rectangle (image_any & dst, image_any const& src, int x = 0, int y = 0);
+
+template <typename T>
 MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
 
+// CHECK BOUNDS
 template <typename T>
 MAPNIK_DECL bool check_bounds (T const& data, std::size_t x, std::size_t y)
 {
     return (x < static_cast<int>(data.width()) && y < static_cast<int>(data.height()));
 }
 
+// COMPOSITE_PIXEL
+MAPNIK_DECL void composite_pixel(image_any & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity );
+
 template <typename T>
 MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity );
 
+// SET PIXEL
 template <typename T>
 MAPNIK_DECL void set_pixel(image_any & data, std::size_t x, std::size_t y, T const& val);
 
@@ -171,11 +224,33 @@ template <typename T>
 MAPNIK_DECL void set_pixel(image_gray8 & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
+MAPNIK_DECL void set_pixel(image_gray8s & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
 MAPNIK_DECL void set_pixel(image_gray16 & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray16s & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray32 & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray32s & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
 MAPNIK_DECL void set_pixel(image_gray32f & data, std::size_t x, std::size_t y, T const& val);
 
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray64 & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray64s & data, std::size_t x, std::size_t y, T const& val);
+
+template <typename T>
+MAPNIK_DECL void set_pixel(image_gray64f & data, std::size_t x, std::size_t y, T const& val);
+
+// GET PIXEL
 template <typename T>
 MAPNIK_DECL T get_pixel(image_any const& data, std::size_t x, std::size_t y);
 
@@ -189,15 +264,72 @@ template <typename T>
 MAPNIK_DECL T get_pixel(image_gray8 const& data, std::size_t x, std::size_t y);
 
 template <typename T>
+MAPNIK_DECL T get_pixel(image_gray8s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
 MAPNIK_DECL T get_pixel(image_gray16 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray16s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray32 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray32s const& data, std::size_t x, std::size_t y);
 
 template <typename T>
 MAPNIK_DECL T get_pixel(image_gray32f const& data, std::size_t x, std::size_t y);
 
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray64 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray64s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_gray64f const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_rgba8 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray8 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray8s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray16 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray16s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray32 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray32s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray32f const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray64 const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray64s const& data, std::size_t x, std::size_t y);
+
+template <typename T>
+MAPNIK_DECL T get_pixel(image_view_gray64f const& data, std::size_t x, std::size_t y);
+
+// VIEW TO STRING
 MAPNIK_DECL void view_to_string (image_view_any const& view, std::ostringstream & ss);
 
+// CREATE VIEW
 MAPNIK_DECL image_view_any create_view (image_any const& data, unsigned x, unsigned y, unsigned w, unsigned h);
 
+// COMPARE
 template <typename T>
 MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold = 0, bool alpha = true);
 
@@ -277,83 +409,6 @@ void add_border(T & image)
     }
 }
 
-/*
-extern template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                                      std::string const&,
-                                                      std::string const&,
-                                                      rgba_palette const&);
-
-extern template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                                      std::string const&,
-                                                      std::string const&,
-                                                      rgba_palette const&);
-
-extern template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                                      std::string const&,
-                                                      std::string const&);
-
-extern template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                                      std::string const&,
-                                                      std::string const&);
-
-extern template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                                      std::string const&,
-                                                      rgba_palette const&);
-
-extern template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                                      std::string const&,
-                                                      rgba_palette const&);
-
-extern template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                                      std::string const&);
-
-extern template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                                      std::string const&);
-
-extern template MAPNIK_DECL void save_to_file<image_view_any>(image_view_any const&,
-                                                                    std::string const&,
-                                                                    std::string const&,
-                                                                    rgba_palette const&);
-
-extern template MAPNIK_DECL void save_to_file<image_view_any>(image_view_any const&,
-                                                                    std::string const&,
-                                                                    std::string const&);
-
-extern template MAPNIK_DECL void save_to_file<image_view_any>(image_view_any const&,
-                                                                    std::string const&,
-                                                                    rgba_palette const&);
-
-extern template MAPNIK_DECL void save_to_file<image_view_any>(image_view_any const&,
-                                                                    std::string const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_rgba8>(image_rgba8 const&,
-                                                               std::string const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_rgba8>(image_rgba8 const&,
-                                                               std::string const&,
-                                                               rgba_palette const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_view_rgba8> (image_view_rgba8 const&,
-                                                                             std::string const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_view_rgba8> (image_view_rgba8 const&,
-                                                                             std::string const&,
-                                                                             rgba_palette const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_any>(image_any const&,
-                                                               std::string const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_any>(image_any const&,
-                                                               std::string const&,
-                                                               rgba_palette const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_view_any> (image_view_any const&,
-                                                                             std::string const&);
-
-extern template MAPNIK_DECL std::string save_to_string<image_view_any> (image_view_any const&,
-                                                                             std::string const&,
-                                                                             rgba_palette const&);
-*/
 #ifdef _MSC_VER
 
 template MAPNIK_DECL void save_to_stream<image_rgba8>(

@@ -31,6 +31,7 @@ template <typename T>
 class image_view
 {
 public:
+    using pixel = typename T::pixel;
     using pixel_type = typename T::pixel_type;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
     
@@ -141,8 +142,15 @@ private:
 
 using image_view_rgba8 = image_view<image_rgba8>;
 using image_view_gray8 = image_view<image_gray8>;
+using image_view_gray8s = image_view<image_gray8s>;
 using image_view_gray16 = image_view<image_gray16>;
+using image_view_gray16s = image_view<image_gray16s>;
+using image_view_gray32 = image_view<image_gray32>;
+using image_view_gray32s = image_view<image_gray32s>;
 using image_view_gray32f = image_view<image_gray32f>;
+using image_view_gray64 = image_view<image_gray64>;
+using image_view_gray64s = image_view<image_gray64s>;
+using image_view_gray64f = image_view<image_gray64f>;
 
 } // end ns
 

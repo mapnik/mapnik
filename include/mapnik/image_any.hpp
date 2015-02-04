@@ -58,8 +58,15 @@ struct image_null
 using image_base = util::variant<image_null, 
                                       image_rgba8, 
                                       image_gray8, 
+                                      image_gray8s, 
                                       image_gray16, 
-                                      image_gray32f>;
+                                      image_gray16s, 
+                                      image_gray32, 
+                                      image_gray32s, 
+                                      image_gray32f,
+                                      image_gray64, 
+                                      image_gray64s, 
+                                      image_gray64f>;
 
 // Forward declaring
 struct image_any;

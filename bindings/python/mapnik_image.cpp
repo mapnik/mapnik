@@ -157,22 +157,19 @@ struct get_pixel_visitor
         throw std::runtime_error("Can not return a null image from a pixel (shouldn't have reached here)");
     }
 
-    PyObject* operator() (mapnik::image_rgba8 const& im)
+    template <typename T>
+    PyObject* operator() (T const& im)
     {
-        return PyInt_FromLong(mapnik::get_pixel<uint32_t>(im, x_, y_));
-    }
-
-    PyObject* operator() (mapnik::image_gray8 const& im)
-    {
-        return PyInt_FromLong(mapnik::get_pixel<uint8_t>(im, x_, y_));
-    }
-
-    PyObject* operator() (mapnik::image_gray16 const& im)
-    {
-        return PyInt_FromLong(mapnik::get_pixel<uint16_t>(im, x_, y_));
+        using pixel_type = typename T::pixel_type;
+        return PyInt_FromLong(mapnik::get_pixel<pixel_type>(im, x_, y_));
     }
     
     PyObject* operator() (mapnik::image_gray32f const& im)
+    {
+        return PyFloat_FromDouble(mapnik::get_pixel<double>(im, x_, y_));
+    }
+    
+    PyObject* operator() (mapnik::image_gray64f const& im)
     {
         return PyFloat_FromDouble(mapnik::get_pixel<double>(im, x_, y_));
     }
@@ -388,8 +385,15 @@ void export_image()
     enum_<mapnik::image_dtype>("ImageType")
         .value("rgba8", mapnik::image_dtype_rgba8)
         .value("gray8", mapnik::image_dtype_gray8)
+        .value("gray8s", mapnik::image_dtype_gray8s)
         .value("gray16", mapnik::image_dtype_gray16)
+        .value("gray16s", mapnik::image_dtype_gray16s)
+        .value("gray32", mapnik::image_dtype_gray32)
+        .value("gray32s", mapnik::image_dtype_gray32s)
         .value("gray32f", mapnik::image_dtype_gray32f)
+        .value("gray64", mapnik::image_dtype_gray64)
+        .value("gray64s", mapnik::image_dtype_gray64s)
+        .value("gray64f", mapnik::image_dtype_gray64f)
         ;
 
     class_<image_any,std::shared_ptr<image_any>, boost::noncopyable >("Image","This class represents a image.",init<int,int>())

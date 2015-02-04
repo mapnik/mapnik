@@ -132,6 +132,7 @@ private:
     std::size_t height_;
     boost::optional<box2d<double> > bbox_;
     unsigned bps_;
+    unsigned sample_format_;
     unsigned photometric_;
     unsigned bands_;
     unsigned planar_config_;
@@ -156,6 +157,7 @@ public:
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
     unsigned bits_per_sample() const { return bps_; }
+    unsigned sample_format() const { return sample_format_; }
     unsigned photometric() const { return photometric_; }
     bool is_tiled() const { return is_tiled_; }
     unsigned tile_width() const { return tile_width_; }
@@ -209,6 +211,7 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       width_(0),
       height_(0),
       bps_(0),
+      sample_format_(SAMPLEFORMAT_UINT),
       photometric_(0),
       bands_(1),
       planar_config_(PLANARCONFIG_CONTIG),
@@ -232,6 +235,7 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       width_(0),
       height_(0),
       bps_(0),
+      sample_format_(SAMPLEFORMAT_UINT),
       photometric_(0),
       bands_(1),
       planar_config_(PLANARCONFIG_CONTIG),
@@ -257,10 +261,12 @@ void tiff_reader<T>::init()
     if (!tif) throw image_reader_exception("Can't open tiff file");
 
     TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bps_);
+    TIFFGetField(tif,TIFFTAG_SAMPLEFORMAT,&sample_format_);
     TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photometric_);
     TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &bands_);
 
     MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "sample format: " << sample_format_;
     MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_;
     MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_;
 
@@ -491,67 +497,86 @@ image_any tiff_reader<T>::read(unsigned x0, unsigned y0, unsigned width, unsigne
         {
         case 8:
         {
-            return read_any_gray<image_gray8>(x0, y0, width, height);
-        }
-        case 16:
-        {
-            return read_any_gray<image_gray16>(x0, y0, width, height);
-        }
-        case 32:
-        {
-            return read_any_gray<image_gray32f>(x0, y0, width, height);
-        }
-        }
-    }
-// read PHOTOMETRIC_RGB expand using RGBA interface
-/*
-    case  PHOTOMETRIC_RGB:
-    {
-        switch (bps_)
-        {
-        case 8:
-        {
-            TIFF* tif = open(stream_);
-            if (tif)
+            switch (sample_format_)
             {
-                image_rgba8 data(width, height, true, premultiplied_alpha_);
-                std::size_t element_size = sizeof(detail::rgb8);
-                std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
-                const std::unique_ptr<detail::rgb8[]> scanline(new detail::rgb8[size_to_allocate]);
-                std::ptrdiff_t start_y = y0 - y0 % rows_per_strip_;
-                std::ptrdiff_t end_y = std::min(y0 + height, static_cast<unsigned>(height_));
-                std::ptrdiff_t start_x = x0;
-                std::ptrdiff_t end_x = std::min(x0 + width, static_cast<unsigned>(width_));
-                for  (std::size_t y = start_y; y < end_y; ++y)
-                {
-                    if (-1 != TIFFReadScanline(tif, scanline.get(), y))
-                    {
-                        if (y >= y0)
-                        {
-                            image_rgba8::pixel_type * row = data.getRow(y - y0);
-                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, detail::rgb8_to_rgba8());
-                        }
-                    }
-                }
-                return image_any(std::move(data));
+            case SAMPLEFORMAT_UINT:
+            {
+                return read_any_gray<image_gray8>(x0, y0, width, height);
             }
-            return image_any();
+            case SAMPLEFORMAT_INT:
+            {
+                return read_any_gray<image_gray8s>(x0, y0, width, height);
+            }
+            default:
+            {
+                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+            }
+            }
         }
         case 16:
         {
-            image_rgba8 data(width,height,true,premultiplied_alpha_);
-            read(x0, y0, data);
-            return image_any(std::move(data));
+            switch (sample_format_)
+            {
+            case SAMPLEFORMAT_UINT:
+            {
+                return read_any_gray<image_gray16>(x0, y0, width, height);
+            }
+            case SAMPLEFORMAT_INT:
+            {
+                return read_any_gray<image_gray16s>(x0, y0, width, height);
+            }
+            default:
+            {
+                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+            }
+            }
         }
         case 32:
         {
-            image_rgba8 data(width,height,true,premultiplied_alpha_);
-            read(x0, y0, data);
-            return image_any(std::move(data));
+            switch (sample_format_)
+            {
+            case SAMPLEFORMAT_UINT:
+            {
+                return read_any_gray<image_gray32>(x0, y0, width, height);
+            }
+            case SAMPLEFORMAT_INT:
+            {
+                return read_any_gray<image_gray32s>(x0, y0, width, height);
+            }
+            case SAMPLEFORMAT_IEEEFP:
+            {
+                return read_any_gray<image_gray32f>(x0, y0, width, height);
+            }
+            default:
+            {
+                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+            }
+            }
+        }
+        case 64:
+        {
+            switch (sample_format_)
+            {
+            case SAMPLEFORMAT_UINT:
+            {
+                return read_any_gray<image_gray64>(x0, y0, width, height);
+            }
+            case SAMPLEFORMAT_INT:
+            {
+                return read_any_gray<image_gray64s>(x0, y0, width, height);
+            }
+            case SAMPLEFORMAT_IEEEFP:
+            {
+                return read_any_gray<image_gray64f>(x0, y0, width, height);
+            }
+            default:
+            {
+                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+            }
+            }
         }
         }
     }
-*/
     default:
     {
         //PHOTOMETRIC_PALETTE = 3;

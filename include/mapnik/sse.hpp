@@ -20,41 +20,21 @@
  *
  *****************************************************************************/
 
-// mapnik
+#ifndef MAPNIK_SSE_HPP
+#define MAPNIK_SSE_HPP
 
-#include <mapnik/feature_style_processor_impl.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/image_any.hpp>
+#include <emmintrin.h>
+#include <xmmintrin.h>
 
-#if defined(GRID_RENDERER)
-#include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid.hpp>
-#endif
+#define ROUND_DOWN(x, s) ((x) & ~((s)-1))
 
-#if defined(HAVE_CAIRO)
-#include <cairo.h>
-#include <mapnik/cairo/cairo_renderer.hpp>
-#endif
-
-#if defined(SVG_RENDERER)
-#include <mapnik/svg/output/svg_renderer.hpp>
-#endif
-
-namespace mapnik
+typedef union 
 {
+    __m128i v;
+    int32_t i32[4];
+    uint32_t u32[4];
+    uint16_t u16[8];
+    uint8_t u8[16];
+} m128_int;
 
-#if defined(HAVE_CAIRO)
-template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr> >;
-#endif
-
-#if defined(SVG_RENDERER)
-template class MAPNIK_DECL feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
-#endif
-
-#if defined(GRID_RENDERER)
-template class MAPNIK_DECL feature_style_processor<grid_renderer<grid> >;
-#endif
-
-template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8> >;
-
-}
+#endif // MAPNIK_SSE_HPP

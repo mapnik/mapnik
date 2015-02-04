@@ -20,41 +20,22 @@
  *
  *****************************************************************************/
 
-// mapnik
+#ifndef MAPNIK_PIXEL_TYPES_HPP
+#define MAPNIK_PIXEL_TYPES_HPP
 
-#include <mapnik/feature_style_processor_impl.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/image_any.hpp>
+// std
+#include <cstdint>
 
-#if defined(GRID_RENDERER)
-#include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid.hpp>
-#endif
+struct rgba8_t { using type = std::uint32_t; };
+struct gray8_t { using type = std::uint8_t; };
+struct gray8s_t { using type = std::int8_t; };
+struct gray16_t { using type = std::uint16_t; };
+struct gray16s_t { using type = std::int16_t; };
+struct gray32_t { using type = std::uint32_t; };
+struct gray32s_t { using type = std::int32_t; };
+struct gray32f_t { using type = float; };
+struct gray64_t { using type = std::uint64_t; };
+struct gray64s_t { using type = std::int64_t; };
+struct gray64f_t { using type = double; };
 
-#if defined(HAVE_CAIRO)
-#include <cairo.h>
-#include <mapnik/cairo/cairo_renderer.hpp>
-#endif
-
-#if defined(SVG_RENDERER)
-#include <mapnik/svg/output/svg_renderer.hpp>
-#endif
-
-namespace mapnik
-{
-
-#if defined(HAVE_CAIRO)
-template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr> >;
-#endif
-
-#if defined(SVG_RENDERER)
-template class MAPNIK_DECL feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
-#endif
-
-#if defined(GRID_RENDERER)
-template class MAPNIK_DECL feature_style_processor<grid_renderer<grid> >;
-#endif
-
-template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8> >;
-
-}
+#endif // MAPNIK_PIXEL_TYPES_HPP
