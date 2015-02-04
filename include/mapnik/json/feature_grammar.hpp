@@ -104,7 +104,9 @@ struct feature_grammar :
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
     qi::rule<Iterator, json_value(), space_type> attribute_value;
-
+    qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_object;
+    qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_array;
+    // functions
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
     // error handler
