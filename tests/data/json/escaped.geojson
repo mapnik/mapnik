@@ -22,8 +22,8 @@
                 "double":1.1,
                 "boolean":true,
                 "NOM_FR":"Québec",
-                "object": {"value":{"type":"u'\u041c\u0430pni\u043a'","array": [3,0,"x"]}},
-                "array" : [ [ [1], ["deux"]],[[3,"four","\u4e94"]]]
+                "object": {"value":{"type":"\u041c\u0430pni\u043a","array": [3,0,"x"]}},
+                "array" : [ [ [1], ["deux"]],[["\u0442\u0440\u0438","four","\u4e94"]]]
             }
         }
     ]
