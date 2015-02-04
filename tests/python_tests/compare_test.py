@@ -31,6 +31,13 @@ def test_compare_rgba8():
     eq_(im.compare(im3,2),1)
     eq_(im.compare(im3,3),0)
 
+def test_compare_larger_image():
+    im = mapnik.Image(5,5)
+    im.set_pixel(0,0, mapnik.Color(254, 254, 254, 254))
+    im.set_pixel(4,4, mapnik.Color('white'))
+    im2 = mapnik.Image(5,5)
+    eq_(im2.compare(im,16), 2)
+
 def test_compare_dimensions():
     im = mapnik.Image(2,2)
     im2 = mapnik.Image(3,3)
