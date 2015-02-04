@@ -168,6 +168,7 @@ IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 static const char * text_upright_strings[] = {
     "auto",
+    "auto-down",
     "left",
     "right",
     "left_only",
