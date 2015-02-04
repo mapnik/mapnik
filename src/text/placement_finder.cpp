@@ -97,6 +97,10 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
     {
         return (std::fabs(normalize_angle(angle)) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
+    if (upright == UPRIGHT_AUTO_DOWN)
+    {
+        return (std::fabs(normalize_angle(angle)) < 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+    }
     if (upright == UPRIGHT_LEFT_ONLY)
     {
         return UPRIGHT_LEFT;
@@ -301,6 +305,12 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         {
             return false;
         }
+    }
+    else if (orientation == UPRIGHT_AUTO_DOWN)
+    {
+        // Try again with opposite orientation
+        begin.restore();
+        return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
     }
 
     for (box2d<double> const& box : bboxes)
