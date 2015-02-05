@@ -34,6 +34,7 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/text/placements/simple.hpp>
 #include <mapnik/text/placements/list.hpp>
+#include <mapnik/text/placements/combined.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
@@ -46,7 +47,6 @@
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/util/variant.hpp>
-#include <mapnik/util/variant_io.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -66,26 +66,18 @@ namespace mapnik
 using boost::property_tree::ptree;
 using boost::optional;
 
-void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool explicit_defaults)
+void serialize_simple_placement(ptree & node, text_placements_simple *simple, bool explicit_defaults )
 {
-    text_symbolizer_properties dfl;
-    p->defaults.to_xml(node, explicit_defaults, dfl);
-    // Known types:
-    //   - text_placements_dummy: no handling required
-    //   - text_placements_simple: positions string
-    //   - text_placements_list: list string
-
-    text_placements_simple *simple = dynamic_cast<text_placements_simple *>(p.get());
-    if (simple)
+    if(simple)
     {
-        set_attr(node, "placement-type", "simple");
         set_attr(node, "placements", simple->get_positions());
     }
+}
 
-    text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
-    if (list)
+void serialize_list_placement(ptree & node, text_placements_list *list, bool explicit_defaults )
+{
+    if(list)
     {
-        set_attr(node, "placement-type", "list");
         //dfl = last properties passed as default so only attributes that change are actually written
         text_symbolizer_properties *dfl = &(list->defaults);
         for (unsigned i=0; i < list->size(); ++i)
@@ -94,6 +86,52 @@ void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool 
             list->get(i).to_xml(placement_node, explicit_defaults, *dfl);
             dfl = &(list->get(i));
         }
+    }
+}
+
+void serialize_combined_placement(ptree & node, text_placements_combined *combined, bool explicit_defaults )
+{
+    if(combined)
+    {
+        //serialize the simple placement
+        text_placements_simple *simple = dynamic_cast<text_placements_simple *>(combined->get_simple_placement().get());
+        serialize_simple_placement(node, simple, explicit_defaults);
+        
+        //serialize the list placement
+        text_placements_list *list = dynamic_cast<text_placements_list *>(combined->get_list_placement().get());
+        serialize_list_placement(node, list , explicit_defaults);
+    }
+}
+    
+void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool explicit_defaults)
+{
+    text_symbolizer_properties dfl;
+    p->defaults.to_xml(node, explicit_defaults, dfl);
+    // Known types:
+    //   - text_placements_dummy: no handling required
+    //   - text_placements_simple: positions string
+    //   - text_placements_list: list string
+    //   - text_placements_combined: both list and simple placements strings
+
+    text_placements_simple *simple = dynamic_cast<text_placements_simple *>(p.get());
+    if (simple)
+    {
+        set_attr(node, "placement-type", "simple");
+        serialize_simple_placement(node, simple, explicit_defaults);
+    }
+
+    text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
+    if (list)
+    {
+        set_attr(node, "placement-type", "list");
+        serialize_list_placement(node, list, explicit_defaults);
+    }
+    
+    text_placements_combined* combined = dynamic_cast<text_placements_combined *>(p.get());
+    if(combined)
+    {
+        set_attr(node, "placement-type", "combined");
+        serialize_combined_placement(node, combined, explicit_defaults);
     }
 }
 

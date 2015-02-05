@@ -49,6 +49,7 @@ public:
         : text_placement_info(parent, scale_factor),
         state(0) {}
     bool next() const;
+    virtual void reset_state() { state = 0; }
 private:
     mutable unsigned state;
 };

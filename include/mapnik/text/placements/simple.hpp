@@ -60,6 +60,7 @@ public:
                                std::string const& evaluated_positions,
                                double scale_factor);
     bool next() const;
+    virtual void reset_state() {state = 0; position_state = 0;}
 protected:
     bool next_position_only() const;
     mutable unsigned state;
