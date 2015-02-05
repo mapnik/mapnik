@@ -220,6 +220,7 @@ source = Split(
     text/font_feature_settings.cpp
     text/formatting/base.cpp
     text/formatting/list.cpp
+    text/formatting/combined.cpp
     text/formatting/text.cpp
     text/formatting/format.cpp
     text/formatting/layout.cpp
