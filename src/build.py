@@ -220,7 +220,6 @@ source = Split(
     text/font_feature_settings.cpp
     text/formatting/base.cpp
     text/formatting/list.cpp
-    text/formatting/combined.cpp
     text/formatting/text.cpp
     text/formatting/format.cpp
     text/formatting/layout.cpp
@@ -230,6 +229,7 @@ source = Split(
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/simple.cpp
+    text/placements/combined.cpp
     group/group_layout_manager.cpp
     group/group_rule.cpp
     group/group_symbolizer_helper.cpp
