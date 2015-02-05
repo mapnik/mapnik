@@ -10,6 +10,12 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_another_compare():
+    im = mapnik.Image(5,5)
+    im2 = mapnik.Image(5,5)
+    im2.fill(mapnik.Color('rgba(255,255,255,0)'))
+    eq_(im.compare(im2,16), im.width() * im.height())
+
 def test_compare_rgba8():
     im = mapnik.Image(5,5,mapnik.ImageType.rgba8)
     im.fill(mapnik.Color(0,0,0,0))
@@ -31,7 +37,7 @@ def test_compare_rgba8():
     eq_(im.compare(im3,2),1)
     eq_(im.compare(im3,3),0)
 
-def test_compare_larger_image():
+def test_compare_2_image():
     im = mapnik.Image(5,5)
     im.set_pixel(0,0, mapnik.Color(254, 254, 254, 254))
     im.set_pixel(4,4, mapnik.Color('white'))

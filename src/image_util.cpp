@@ -2341,9 +2341,9 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
                 rgba = _mm_and_si128(rgba, mask);
                 rgba2 = _mm_and_si128(rgba2, mask);
                 __m128i abs = _mm_absdiff_epu8(rgba, rgba2);
-                __m128i compare = _mm_cmple_epu8(abs, m_thres);
+                __m128i compare = _mm_cmpgt_epu8(abs, m_thres);
                 __m128i comp2 = _mm_cmpeq_epi32(compare, _mm_setzero_si128());
-                sum = _mm_add_epi32(sum, _mm_and_si128(comp2, one));
+                sum = _mm_add_epi32(sum, _mm_andnot_si128(comp2, one));
             }
             for (; x < im1.width(); ++x)
             {
