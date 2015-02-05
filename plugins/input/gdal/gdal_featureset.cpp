@@ -335,15 +335,42 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                             }
                         }
                     }
-                    raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
-                                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
-                    if (raster_io_error == CE_Failure) {
-                        throw datasource_exception(CPLGetLastErrorMsg());
+
+                    /* Use dataset RasterIO in priority in 99.9% of the cases */
+                    if( red->GetBand() == 1 && green->GetBand() == 2 && blue->GetBand() == 3 )
+                    {
+                        int nBandsToRead = 3;
+                        if( alpha != NULL && alpha->GetBand() == 4 && !raster_has_nodata )
+                        {
+                            nBandsToRead = 4;
+                            alpha = NULL; // to avoid reading it again afterwards
+                        }
+                        raster_io_error = dataset_.RasterIO(GF_Read, x_off, y_off, width, height,
+                                                            image.getBytes(),
+                                                            image.width(), image.height(), GDT_Byte,
+                                                            nBandsToRead, NULL,
+                                                            4, 4 * image.width(), 1);
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
                     }
-                    raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 1,
-                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
-                    if (raster_io_error == CE_Failure) {
-                        throw datasource_exception(CPLGetLastErrorMsg());
+                    else
+                    {
+                        raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
+                                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
+                        raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 1,
+                                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
+                        raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 2,
+                                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
                     }
                     raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 2,
                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
