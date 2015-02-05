@@ -23,8 +23,7 @@
 #ifndef MAPNIK_PIXEL_TYPES_HPP
 #define MAPNIK_PIXEL_TYPES_HPP
 
-// std
-#include <cstdint>
+#include <mapnik/global.hpp>
 
 struct rgba8_t { using type = std::uint32_t; };
 struct gray8_t { using type = std::uint8_t; };

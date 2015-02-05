@@ -35,7 +35,6 @@
 #include <mapnik/util/conversions.hpp>
 
 // stl
-#include <cstdint>
 #include <map>
 #include <set>
 #include <cmath>
