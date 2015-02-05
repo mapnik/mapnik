@@ -383,13 +383,12 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         if( apply_nodata >= 0 && apply_nodata <= 255 )
                         {
                             int len = image.width() * image.height();
-                            GByte bNoData = (GByte)(apply_nodata + 0.5);
                             GByte* pabyBytes = (GByte*) image.getBytes();
                             for (int i = 0; i < len; ++i)
                             {
                                 // TODO - we assume here the nodata value for the red band applies to all bands
                                 // more details about this at http://trac.osgeo.org/gdal/ticket/2734
-                                if( pabyBytes[4*i] == bNoData )
+                                if (std::fabs(apply_nodata - pabyBytes[4*i]) < nodata_tolerance_)
                                     pabyBytes[4*i + 3] = 0;
                                 else
                                     pabyBytes[4*i + 3] = 255;
