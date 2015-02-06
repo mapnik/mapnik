@@ -18,8 +18,8 @@
                  2, "LINESTRING(0.8 0, 0 -0.8, -0.8 0, 0 0.8, 0.8 0)", "auto-down"
                  3, "LINESTRING(0.7 0, 0 -0.7, -0.7 0, 0 0.7, 0.7 0)", "left"
                  4, "LINESTRING(0.6 0, 0 -0.6, -0.6 0, 0 0.6, 0.6 0)", "right"
-                 5, "LINESTRING(0.5 0, 0 -0.5, -0.5 0, 0 0.5, 0.5 0)", "left_only"
-                 6, "LINESTRING(0.4 0, 0 -0.4, -0.4 0, 0 0.4, 0.4 0)", "right_only"
+                 5, "LINESTRING(0.5 0, 0 -0.5, -0.5 0, 0 0.5, 0.5 0)", "left-only"
+                 6, "LINESTRING(0.4 0, 0 -0.4, -0.4 0, 0 0.4, 0.4 0)", "right-only"
             </Parameter>
         </Datasource>
     </Layer>

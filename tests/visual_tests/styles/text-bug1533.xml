@@ -20,11 +20,11 @@
             <MarkersSymbolizer file="shape://arrow" placement="line" transform="scale(.5,.5)"/>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" upright="right" dy="10" allow-overlap="true">"right: --&gt;"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" upright="left" dy="-10" allow-overlap="true">"left: &lt;--"</TextSymbolizer>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" upright="left_only" allow-overlap="true"
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="line" upright="left-only" allow-overlap="true"
             placement-type="list">"left only &lt;--"
-                <Placement upright="right_only">"right only --&gt;"</Placement>
-                <Placement upright="right_only">"--&gt;"</Placement>
-                <Placement upright="left_only">"&lt;--"</Placement>
+                <Placement upright="right-only">"right only --&gt;"</Placement>
+                <Placement upright="right-only">"--&gt;"</Placement>
+                <Placement upright="left-only">"&lt;--"</Placement>
             </TextSymbolizer>
         </Rule>
     </Style>
