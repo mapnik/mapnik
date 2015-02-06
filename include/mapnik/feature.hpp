@@ -219,11 +219,6 @@ public:
         return geom_cont_[index];
     }
 
-    inline geometry_type& get_geometry(std::size_t index)
-    {
-        return geom_cont_[index];
-    }
-
     inline box2d<double> envelope() const
     {
         // TODO - cache this

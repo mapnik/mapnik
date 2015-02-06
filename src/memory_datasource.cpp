@@ -49,7 +49,7 @@ struct accumulate_extent
         auto size = feat->num_geometries();
         for (std::size_t i = 0; i < size; ++i)
         {
-            geometry_type & geom = feat->get_geometry(i);
+            geometry_type const& geom = feat->get_geometry(i);
             auto bbox = ::mapnik::envelope(geom);
             if ( first_ )
             {
