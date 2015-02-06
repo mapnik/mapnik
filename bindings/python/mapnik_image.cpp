@@ -38,7 +38,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_cast.hpp>
+#include <mapnik/image_copy.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_view_any.hpp>
@@ -137,9 +137,9 @@ void fill_double(mapnik::image_any & im, double val)
     mapnik::fill(im, val);
 }
 
-std::shared_ptr<image_any> cast(mapnik::image_any const& im, mapnik::image_dtype type, double offset, double scaling)
+std::shared_ptr<image_any> copy(mapnik::image_any const& im, mapnik::image_dtype type, double offset, double scaling)
 {
-    return std::make_shared<image_any>(std::move(mapnik::image_cast(im, type, offset, scaling)));
+    return std::make_shared<image_any>(std::move(mapnik::image_copy(im, type, offset, scaling)));
 }
 
 unsigned compare(mapnik::image_any const& im1, mapnik::image_any const& im2, double threshold, bool alpha)
@@ -427,7 +427,7 @@ void export_image()
            arg("threshold")=0.0,
            arg("alpha")=true
          ))
-        .def("cast",&cast,
+        .def("copy",&copy,
          ( arg("self"),
            arg("type"),
            arg("offset")=0.0,

@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_CAST_HPP
-#define MAPNIK_IMAGE_CAST_HPP
+#ifndef MAPNIK_IMAGE_COPY_HPP
+#define MAPNIK_IMAGE_COPY_HPP
 
 #include <mapnik/image_any.hpp>
 #include <mapnik/config.hpp>
@@ -30,43 +30,43 @@ namespace mapnik
 {
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_any const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_any const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_rgba8 const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_rgba8 const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray8 const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray8 const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray8s const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray8s const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray16 const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray16 const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray16s const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray16s const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray32 const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray32 const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray32s const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray32s const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray32f const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray32f const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray64 const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray64 const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray64s const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray64s const&, double offset = 0.0, double scaling = 1.0);
 
 template <typename T>
-MAPNIK_DECL T image_cast(image_gray64f const&, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL T image_copy(image_gray64f const&, double offset = 0.0, double scaling = 1.0);
 
-MAPNIK_DECL image_any image_cast(image_any const&, image_dtype type, double offset = 0.0, double scaling = 1.0);
+MAPNIK_DECL image_any image_copy(image_any const&, image_dtype type, double offset = 0.0, double scaling = 1.0);
 
 } // end mapnik ns
 
-#endif // MAPNIK_IMAGE_CAST_HPP
+#endif // MAPNIK_IMAGE_COPY_HPP
