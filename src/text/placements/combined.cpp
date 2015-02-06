@@ -67,7 +67,6 @@ text_placements_ptr text_placements_combined::from_xml(xml_node const& xml, font
     
 text_placement_info_combined::text_placement_info_combined(text_placements_combined const* parent, double scale_factor, text_placement_info_ptr simple_placement_info, text_placement_info_ptr list_placement_info)
 : text_placement_info(parent, scale_factor),
-  parent_(parent),
   simple_placement_info_(simple_placement_info),
   list_placement_info_(list_placement_info)
 {
@@ -84,30 +83,35 @@ bool text_placement_info_combined::next() const
     //logic to get the next combined point placement
     if(simple_placement_info_ && list_placement_info_)
     {
+        //try the simple placement first
         if(simple_placement_info_->next())
         {
-            properties.format_defaults.text_size = simple_placement_info_->properties.format_defaults.text_size;
-            properties.layout_defaults.dir = simple_placement_info_->properties.layout_defaults.dir;
+            apply_simple_placement();
         }
-        else if(list_placement_info_->next())
+        else if(list_placement_info_->next()) //try the list placement options
         {
-            //simple reset state
+            //simple placement needs to reset state
             simple_placement_info_->reset_state();
             simple_placement_info_->properties = list_placement_info_->properties;
             properties = list_placement_info_->properties;
-            if(simple_placement_info_->next())
+            if(simple_placement_info_->next()) //re-apply the simple placement
             {
-                properties.format_defaults.text_size = simple_placement_info_->properties.format_defaults.text_size;
-                properties.layout_defaults.dir = simple_placement_info_->properties.layout_defaults.dir;
+                apply_simple_placement();
             }
         }
         else
         {
             return false;
         }
-         return true;
+        return true;
     }
     return false;
+}
+    
+void text_placement_info_combined::apply_simple_placement() const
+{
+    properties.format_defaults.text_size = simple_placement_info_->properties.format_defaults.text_size;
+    properties.layout_defaults.dir = simple_placement_info_->properties.layout_defaults.dir;
 }
     
 }//namespace

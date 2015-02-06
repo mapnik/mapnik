@@ -59,9 +59,10 @@ namespace mapnik {
         bool next() const;
         virtual void reset_state();
     private:
-        text_placements_combined const* parent_;
         text_placement_info_ptr simple_placement_info_;
         text_placement_info_ptr list_placement_info_;
+        
+        void apply_simple_placement() const;
     };
     
 } //namespace
