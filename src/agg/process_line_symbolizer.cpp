@@ -182,7 +182,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         {
             if (geom.size() > 1)
             {
-                converter.apply(geom);
+                vertex_adapter va(geom);
+                converter.apply(va);
             }
         }
     }
@@ -209,7 +210,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         {
             if (geom.size() > 1)
             {
-                converter.apply(geom);
+                vertex_adapter va(geom);
+                converter.apply(va);
             }
         }
 

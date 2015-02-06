@@ -39,14 +39,24 @@ namespace boost { namespace spirit { namespace traits {
 template <>
 struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
 
+template <>
+struct is_container<mapnik::vertex_adapter const> : mpl::true_ {} ;
+
 // make gcc and darwin toolsets happy.
 template <>
 struct is_container<mapnik::geometry_container const> : mpl::false_ {} ;
 
+//
 template <>
 struct container_iterator<mapnik::geometry_type const>
 {
     using type = mapnik::util::path_iterator<mapnik::geometry_type>;
+};
+
+template <>
+struct container_iterator<mapnik::vertex_adapter const>
+{
+    using type = mapnik::util::path_iterator<mapnik::vertex_adapter>;
 };
 
 template <>
@@ -60,12 +70,32 @@ struct begin_container<mapnik::geometry_type const>
 };
 
 template <>
+struct begin_container<mapnik::vertex_adapter const>
+{
+    static mapnik::util::path_iterator<mapnik::vertex_adapter>
+    call (mapnik::vertex_adapter const& g)
+    {
+        return mapnik::util::path_iterator<mapnik::vertex_adapter>(g);
+    }
+};
+
+template <>
 struct end_container<mapnik::geometry_type const>
 {
     static mapnik::util::path_iterator<mapnik::geometry_type>
     call (mapnik::geometry_type const&)
     {
         return mapnik::util::path_iterator<mapnik::geometry_type>();
+    }
+};
+
+template <>
+struct end_container<mapnik::vertex_adapter const>
+{
+    static mapnik::util::path_iterator<mapnik::vertex_adapter>
+    call (mapnik::vertex_adapter const&)
+    {
+        return mapnik::util::path_iterator<mapnik::vertex_adapter>();
     }
 };
 

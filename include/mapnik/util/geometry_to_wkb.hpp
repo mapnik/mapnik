@@ -238,17 +238,17 @@ template<typename GeometryType>
 wkb_buffer_ptr to_wkb(GeometryType const& g, wkbByteOrder byte_order )
 {
     wkb_buffer_ptr wkb;
-
-    switch (g.type())
+    vertex_adapter va(g);
+    switch (va.type())
     {
     case mapnik::geometry_type::types::Point:
-        wkb = to_point_wkb(g, byte_order);
+        wkb = to_point_wkb(va, byte_order);
         break;
     case mapnik::geometry_type::types::LineString:
-        wkb = to_line_string_wkb(g, byte_order);
+        wkb = to_line_string_wkb(va, byte_order);
         break;
     case mapnik::geometry_type::types::Polygon:
-        wkb = to_polygon_wkb(g, byte_order);
+        wkb = to_polygon_wkb(va, byte_order);
         break;
     default:
         break;

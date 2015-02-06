@@ -200,7 +200,7 @@ public:
                 {
                     for (unsigned i=0; i<paths.size(); ++i)
                     {
-                        mapnik::box2d<double> const& bbox = paths[i].envelope();
+                        mapnik::box2d<double> const& bbox = ::mapnik::envelope(paths[i]);
                         if (bbox.valid())
                         {
                             if (first)
@@ -288,13 +288,14 @@ public:
                     {
                         for (unsigned i=0; i<paths.size(); ++i)
                         {
+                            auto b = ::mapnik::envelope(paths[i]);
                             if (i==0)
                             {
-                                bbox = paths[i].envelope();
+                                bbox = b;
                             }
                             else
                             {
-                                bbox.expand_to_include(paths[i].envelope());
+                                bbox.expand_to_include(b);
                             }
                         }
                     }
@@ -374,7 +375,7 @@ public:
                 {
                     for (unsigned i=0; i<paths.size(); ++i)
                     {
-                        mapnik::box2d<double> const& bbox = paths[i].envelope();
+                        mapnik::box2d<double> const& bbox = ::mapnik::envelope(paths[i]);
                         if (bbox.valid())
                         {
                             const int type_oid = rs->column_type(1);

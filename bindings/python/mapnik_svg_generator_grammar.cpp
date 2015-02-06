@@ -26,3 +26,4 @@
 
 using sink_type = std::back_insert_iterator<std::string>;
 template struct mapnik::svg::svg_path_generator<sink_type, mapnik::geometry_type>;
+template struct mapnik::svg::svg_path_generator<sink_type, mapnik::vertex_adapter>;

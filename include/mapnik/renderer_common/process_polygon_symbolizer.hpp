@@ -62,7 +62,8 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     {
         if (geom.size() > 2)
         {
-            converter.apply(geom);
+            vertex_adapter va(geom);
+            converter.apply(va);
         }
     }
 

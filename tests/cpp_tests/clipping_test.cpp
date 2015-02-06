@@ -46,10 +46,11 @@ std::string dump_path(T & path)
 }
 
 std::string clip_line(mapnik::box2d<double> const& bbox,
-                      mapnik::geometry_type & geom)
+                      mapnik::geometry_type const& geom)
 {
-    using line_clipper = agg::conv_clip_polyline<mapnik::geometry_type>;
-    line_clipper clipped(geom);
+    using line_clipper = agg::conv_clip_polyline<mapnik::vertex_adapter>;
+    mapnik::vertex_adapter va(geom);
+    line_clipper clipped(va);
     clipped.clip_box(bbox.minx(),bbox.miny(),bbox.maxx(),bbox.maxy());
     return dump_path(clipped);
 }

@@ -70,8 +70,8 @@ struct largest_bbox_first
 {
     bool operator() (geometry_type const* g0, geometry_type const* g1) const
     {
-        box2d<double> b0 = g0->envelope();
-        box2d<double> b1 = g1->envelope();
+        box2d<double> b0 = ::mapnik::envelope(*g0);
+        box2d<double> b1 = ::mapnik::envelope(*g1);
         return b0.width()*b0.height() > b1.width()*b1.height();
     }
 };
@@ -89,7 +89,7 @@ void base_symbolizer_helper::initialize_geometries() const
         {
             if (minimum_path_length > 0)
             {
-                box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
+                box2d<double> gbox = t_.forward(::mapnik::envelope(geom), prj_trans_);
                 if (gbox.width() < minimum_path_length)
                 {
                     continue;
@@ -129,12 +129,13 @@ void base_symbolizer_helper::initialize_points() const
     for (auto * geom_ptr : geometries_to_process_)
     {
         geometry_type const& geom = *geom_ptr;
+        vertex_adapter va(geom);
         if (how_placed == VERTEX_PLACEMENT)
         {
-            geom.rewind(0);
-            for(unsigned i = 0; i < geom.size(); ++i)
+            va.rewind(0);
+            for(unsigned i = 0; i < va.size(); ++i)
             {
-                geom.vertex(&label_x, &label_y);
+                va.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);
                 t_.forward(&label_x, &label_y);
                 points_.emplace_back(label_x, label_y);
@@ -147,15 +148,15 @@ void base_symbolizer_helper::initialize_points() const
             // https://github.com/mapnik/mapnik/issues/1350
             if (geom.type() == geometry_type::types::LineString)
             {
-                success = label::middle_point(geom, label_x,label_y);
+                success = label::middle_point(va, label_x,label_y);
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                success = label::centroid(geom, label_x, label_y);
+                success = label::centroid(va, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
-                success = label::interior_position(geom, label_x, label_y);
+                success = label::interior_position(va, label_x, label_y);
             }
             else
             {
@@ -227,8 +228,8 @@ bool text_symbolizer_helper::next_line_placement() const
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
         }
-
-        converter_.apply(**geo_itr_);
+        vertex_adapter va(**geo_itr_);
+        converter_.apply(va);
         if (adapter_.status())
         {
             //Found a placement

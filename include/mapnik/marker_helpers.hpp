@@ -194,7 +194,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
     std::size_t geom_count = feature.paths().size();
     if (geom_count == 1)
     {
-        converter.apply(const_cast<geometry_type&>(feature.paths()[0]));
+        vertex_adapter va(feature.paths()[0]);
+        converter.apply(va);
     }
     else if (geom_count > 1)
     {
@@ -211,7 +212,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 pt.move_to(x, y);
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();
-                converter.apply(pt);
+                vertex_adapter va(pt);
+                converter.apply(va);
             }
         }
         else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
@@ -223,7 +225,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             geometry_type const* largest = 0;
             for (geometry_type const& geom : feature.paths())
             {
-                const box2d<double>& env = geom.envelope();
+                vertex_adapter va(geom);
+                const box2d<double>& env = va.envelope();
                 double area = env.width() * env.height();
                 if (area > maxarea)
                 {
@@ -233,7 +236,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             }
             if (largest)
             {
-                converter.apply(const_cast<geometry_type&>(*largest));
+                vertex_adapter va(*largest);
+                converter.apply(va);
             }
         }
         else
@@ -244,7 +248,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             }
             for (geometry_type const& path : feature.paths())
             {
-                converter.apply(const_cast<geometry_type&>(path));
+                vertex_adapter va(path);
+                converter.apply(va);
             }
         }
     }

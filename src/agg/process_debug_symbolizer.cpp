@@ -72,9 +72,10 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
             double x;
             double y;
             double z = 0;
-            geom.rewind(0);
+            vertex_adapter va(geom);
+            va.rewind(0);
             unsigned cmd = 1;
-            while ((cmd = geom.vertex(&x, &y)) != mapnik::SEG_END)
+            while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
             {
                 if (cmd == SEG_CLOSE) continue;
                 prj_trans.backward(x,y,z);

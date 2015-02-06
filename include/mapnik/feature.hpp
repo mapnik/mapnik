@@ -233,13 +233,13 @@ public:
         {
             if (first)
             {
-                box2d<double> box = geom.envelope();
+                box2d<double> box = ::mapnik::envelope(geom);
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
                 first = false;
             }
             else
             {
-                result.expand_to_include(geom.envelope());
+                result.expand_to_include(::mapnik::envelope(geom));
             }
         }
         return result;

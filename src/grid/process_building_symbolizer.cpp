@@ -56,7 +56,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-    using path_type = transform_path_adapter<view_transform,geometry_type>;
+    using path_type = transform_path_adapter<view_transform, vertex_adapter>;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
@@ -71,23 +71,29 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 
     render_building_symbolizer(
         feature, height,
-        [&](geometry_type &faces) {
-            path_type faces_path (common_.t_,faces,prj_trans);
+        [&](geometry_type const& faces)
+        {
+            vertex_adapter va(faces);
+            path_type faces_path (common_.t_,va,prj_trans);
             ras_ptr->add_path(faces_path);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
         },
-        [&](geometry_type &frame) {
-            path_type path(common_.t_,frame,prj_trans);
+        [&](geometry_type const& frame)
+        {
+            vertex_adapter va(frame);
+            path_type path(common_.t_,va,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
         },
-        [&](geometry_type &roof) {
-            path_type roof_path (common_.t_,roof,prj_trans);
+        [&](geometry_type const& roof)
+        {
+            vertex_adapter va(roof);
+            path_type roof_path (common_.t_,va,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);

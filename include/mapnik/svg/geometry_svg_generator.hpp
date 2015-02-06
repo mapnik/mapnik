@@ -54,7 +54,7 @@
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type
-using path_type = mapnik::transform_path_adapter<mapnik::view_transform, mapnik::geometry_type>;
+using path_type = mapnik::transform_path_adapter<mapnik::view_transform, mapnik::vertex_adapter>;
 
 template <>
 struct is_container<path_type const> : mpl::true_ {} ;
@@ -118,6 +118,20 @@ namespace mapnik { namespace svg {
             return coord;
         }
     };
+
+    template <>
+    struct get_first<mapnik::geometry_type>
+    {
+        using geometry_type = mapnik::geometry_type;
+        using result_type = typename geometry_type::value_type const;
+        result_type operator() (geometry_type const& geom) const
+        {
+            typename geometry_type::value_type coord;
+            std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
+            return coord;
+        }
+    };
+
 
     template <typename T>
     struct coordinate_policy : karma::real_policies<T>
