@@ -300,7 +300,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             begin.restore();
             return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
         }
-        // upright==left_only or right_only and more than 50% of characters upside down => no placement
+        // upright==left-only or right-only and more than 50% of characters upside down => no placement
         else if (orientation == UPRIGHT_LEFT_ONLY || orientation == UPRIGHT_RIGHT_ONLY)
         {
             return false;

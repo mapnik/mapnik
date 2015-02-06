@@ -30,6 +30,7 @@
 #include <bitset>
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
 
 namespace mapnik {
 
@@ -176,9 +177,11 @@ public:
      * */
     void from_string(std::string const& str)
     {
+        std::string str_copy(str);
+        std::replace(str_copy.begin(), str_copy.end(), '_', '-');
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
-            if (str == our_strings_[i])
+            if (str_copy == our_strings_[i])
             {
                 value_ = static_cast<ENUM>(i);
                 return;

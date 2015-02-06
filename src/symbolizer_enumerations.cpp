@@ -35,7 +35,7 @@ IMPLEMENT_ENUM( line_cap_e, line_cap_strings )
 
 static const char * line_join_strings[] = {
     "miter",
-    "miter_revert",
+    "miter-revert",
     "round",
     "bevel",
     ""
@@ -171,8 +171,8 @@ static const char * text_upright_strings[] = {
     "auto-down",
     "left",
     "right",
-    "left_only",
-    "right_only",
+    "left-only",
+    "right-only",
     ""
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
