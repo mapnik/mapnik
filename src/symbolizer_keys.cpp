@@ -24,12 +24,8 @@
 #include <mapnik/color.hpp>
 #include <mapnik/simplify.hpp>
 
-// boost
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/algorithm/string/replace.hpp>  // for replace
-#pragma GCC diagnostic pop
+// stl
+#include <algorithm>
 
 namespace mapnik {
 
@@ -170,7 +166,7 @@ property_meta_type const& get_meta(mapnik::keys key)
 mapnik::keys get_key(std::string const& name)
 {
     std::string name_copy(name);
-    boost::algorithm::replace_all(name_copy,"_","-");
+    std::replace(name_copy.begin(), name_copy.end(), '_', '-');
     for (unsigned i=0; i< const_max_key ; ++i)
     {
         property_meta_type const& item = key_meta[i];
