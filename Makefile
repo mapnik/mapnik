@@ -44,7 +44,6 @@ clean:
 	@find ./ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./ -name "*.a" -exec rm {} \;
-	@find ./ -name "*.pyc" -exec rm {} \;
 	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
 
 distclean:
