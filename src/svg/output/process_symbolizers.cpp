@@ -97,7 +97,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
-        for (auto & geom : feature.paths())
+        for (auto const& geom : feature.paths())
         {
             if(geom.size() > 0)
             {

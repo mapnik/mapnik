@@ -112,7 +112,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    for ( geometry_type & geom : feature.paths())
+    for ( geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 2)
         {
