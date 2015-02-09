@@ -16,13 +16,13 @@ def test_image_16_8_simple():
     im.set_pixel(0,1, 999)
     im.set_pixel(1,0, 5)
     im.set_pixel(1,1, 2)
-    im2 = im.cast(mapnik.ImageType.gray8)
+    im2 = im.copy(mapnik.ImageType.gray8)
     eq_(im2.get_pixel(0,0), 255)
     eq_(im2.get_pixel(0,1), 255)
     eq_(im2.get_pixel(1,0), 5)
     eq_(im2.get_pixel(1,1), 2)
     # Cast back!
-    im = im2.cast(mapnik.ImageType.gray16)
+    im = im2.copy(mapnik.ImageType.gray16)
     eq_(im.get_pixel(0,0), 255)
     eq_(im.get_pixel(0,1), 255)
     eq_(im.get_pixel(1,0), 5)
@@ -34,7 +34,7 @@ def test_image_32f_8_simple():
     im.set_pixel(0,1, -23.4)
     im.set_pixel(1,0, 120.6)
     im.set_pixel(1,1, 360.2)
-    im2 = im.cast(mapnik.ImageType.gray8)
+    im2 = im.copy(mapnik.ImageType.gray8)
     eq_(im2.get_pixel(0,0), 120)
     eq_(im2.get_pixel(0,1), 0)
     eq_(im2.get_pixel(1,0), 120) # Notice this is truncated!
@@ -57,13 +57,13 @@ def test_image_16_8_scale_and_offset():
     im.set_pixel(1,1, 615)
     offset = 255
     scaling = 3
-    im2 = im.cast(mapnik.ImageType.gray8, offset, scaling)
+    im2 = im.copy(mapnik.ImageType.gray8, offset, scaling)
     eq_(im2.get_pixel(0,0), 0)
     eq_(im2.get_pixel(0,1), 1)
     eq_(im2.get_pixel(1,0), 255)
     eq_(im2.get_pixel(1,1), 120)
     # pixels will be a little off due to offsets in reverting!
-    im3 = im2.cast(mapnik.ImageType.gray16)
+    im3 = im2.copy(mapnik.ImageType.gray16)
     eq_(im3.get_pixel(0,0), 255) # Rounding error with ints
     eq_(im3.get_pixel(0,1), 258) # same
     eq_(im3.get_pixel(1,0), 1020) # The other one was way out of range for our scale/offset
@@ -77,12 +77,12 @@ def test_image_16_32f_scale_and_offset():
     im.set_pixel(1,1, 615)
     offset = 255
     scaling = 3.2
-    im2 = im.cast(mapnik.ImageType.gray32f, offset, scaling)
+    im2 = im.copy(mapnik.ImageType.gray32f, offset, scaling)
     eq_(im2.get_pixel(0,0), 0.3125)
     eq_(im2.get_pixel(0,1), 0.9375)
     eq_(im2.get_pixel(1,0), -79.6875)
     eq_(im2.get_pixel(1,1), 112.5)
-    im3 = im2.cast(mapnik.ImageType.gray16)
+    im3 = im2.copy(mapnik.ImageType.gray16)
     eq_(im3.get_pixel(0,0), 256) 
     eq_(im3.get_pixel(0,1), 258)
     eq_(im3.get_pixel(1,0), 0) 
