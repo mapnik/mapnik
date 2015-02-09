@@ -191,21 +191,22 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                 std::get<1>(*itr).to_string().c_str()));
                       }
 
-                      using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
+                      using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
-                        mapnik::geometry_type & geom = feat->get_geometry(i);
-                        path_type path(t,geom,prj_trans);
-                        if (geom.size() > 0)
+                        mapnik::geometry_type const& geom = feat->get_geometry(i);
+                        mapnik::vertex_adapter va(geom);
+                        path_type path(t,va,prj_trans);
+                        if (va.size() > 0)
                         {
                            QPainterPath qpath;
                            double x,y;
-                           path.vertex(&x,&y);
+                           va.vertex(&x,&y);
                            qpath.moveTo(x,y);
                            for (unsigned j = 1; j < geom.size(); ++j)
                            {
-                              path.vertex(&x,&y);
+                              va.vertex(&x,&y);
                               qpath.lineTo(x,y);
                            }
                            QPainter painter(&pix_);
