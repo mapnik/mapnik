@@ -66,6 +66,10 @@ BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
 BOOST_MIN_VERSION = '1.47'
 #CAIRO_MIN_VERSION = '1.8.0'
 
+HARFBUZZ_MIN_VERSION = (0, 9, 34)
+HARFBUZZ_MIN_VERSION_STRING = "%s.%s.%s" % HARFBUZZ_MIN_VERSION
+
+
 DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
 
@@ -84,6 +88,7 @@ pretty_dep_names = {
     'webp':'WEBP C library | configure with WEBP_LIBS & WEBP_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
     'harfbuzz':'HarfBuzz text shaping library | configure with HB_LIBS & HB_INCLUDES',
+    'harfbuzz-min-version':'HarfBuzz >= %s (required for font-feature-settings support)' % HARFBUZZ_MIN_VERSION_STRING,
     'z':'Z compression library | more info: http://www.zlib.net/',
     'm':'Basic math library, part of C++ stlib',
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
@@ -902,6 +907,35 @@ int main()
     color_print(1,'\nFound insufficient icu version... %s' % result)
     return False
 
+def harfbuzz_version(context):
+    ret = context.TryRun("""
+
+#include "harfbuzz/hb.h"
+#include <iostream>
+
+int main()
+{
+    std::cout << HB_VERSION_ATLEAST(%s, %s, %s) << ";" << HB_VERSION_STRING;
+    return 0;
+}
+
+""" % HARFBUZZ_MIN_VERSION, '.cpp')
+    # hack to avoid printed output
+    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
+    context.did_show_result=1
+    result = ret[1].strip()
+    if not result:
+        context.Result('error, could not get version from hb.h')
+        return False
+
+    items = result.split(';')
+    if items[0] == '1':
+        color_print(4,'found: HarfBuzz %s' % items[1])
+        return True
+
+    color_print(1,'\nHarfbuzz >= %s required but found ... %s' % (HARFBUZZ_MIN_VERSION_STRING,items[1]))
+    return False
+
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
         # re-order icu libs to ensure linux linker is happy
@@ -1022,6 +1056,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'get_pkg_lib'           : get_pkg_lib,
                'rollback_option'       : rollback_option,
                'icu_at_least_four_two' : icu_at_least_four_two,
+               'harfbuzz_version'      : harfbuzz_version,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
                'supports_cxx11'        : supports_cxx11,
@@ -1207,7 +1242,7 @@ if not preconfigured:
     ]
 
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
-        REQUIRED_LIBSHEADERS.append(['freetype','ft2build.h',True,'C'])
+        REQUIRED_LIBSHEADERS.insert(0,['freetype','ft2build.h',True,'C'])
         if env.get('FREETYPE_INCLUDES'):
             inc_path = env['FREETYPE_INCLUDES']
             env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1230,7 +1265,7 @@ if not preconfigured:
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
     if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
-        REQUIRED_LIBSHEADERS.append(['libxml2','libxml/parser.h',True,'C'])
+        REQUIRED_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
         if env.get('XML2_INCLUDES'):
             inc_path = env['XML2_INCLUDES']
             env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1312,12 +1347,15 @@ if not preconfigured:
                 else:
                     color_print(4, 'Could not find optional header or shared library for %s' % libname)
                     env['SKIPPED_DEPS'].append(libname)
-
-    if not env['HOST']:
-        if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-            if not conf.icu_at_least_four_two():
-                # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
-                env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+            else:
+                if libname == env['ICU_LIB_NAME']:
+                    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+                        if not conf.icu_at_least_four_two():
+                            # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
+                            env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+                elif libname == 'harfbuzz':
+                    if not conf.harfbuzz_version():
+                        env['MISSING_DEPS'].append('harfbuzz-min-version')
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')

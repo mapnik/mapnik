@@ -14,14 +14,15 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
 
     # Shapefile initialization
     def test_shapefile_init():
-        s = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
-
-        e = s.envelope()
-
+        ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
+        e = ds.envelope()
         assert_almost_equal(e.minx, -11121.6896651, places=7)
         assert_almost_equal(e.miny, -724724.216526, places=6)
         assert_almost_equal(e.maxx, 2463000.67866, places=5)
         assert_almost_equal(e.maxy, 1649661.267, places=3)
+        meta = ds.describe()
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
+        eq_('+proj=lcc' in meta['proj4'],True)
 
     # Shapefile properties
     def test_shapefile_properties():
@@ -35,6 +36,8 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         eq_(f['NAME_EN'], u'Quebec')
         eq_(f['Shape_Area'], 1512185733150.0)
         eq_(f['Shape_Leng'], 19218883.724300001)
+        meta = ds.describe()
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
         # NOTE: encoding is latin1 but gdal >= 1.9 should now expose utf8 encoded features
         # See SHAPE_ENCODING for overriding: http://gdal.org/ogr/drv_shapefile.html
         # Failure for the NOM_FR field is expected for older gdal
@@ -68,6 +71,9 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         eq_(e.miny,-1)
         eq_(e.maxx,1)
         eq_(e.maxy,1)
+        meta = ds.describe()
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
+        eq_('+proj=merc' in meta['proj4'],True)
 
     def test_ogr_reading_gpx_waypoint():
         ds = mapnik.Ogr(file='../data/gpx/empty.gpx',layer='waypoints')
@@ -76,6 +82,9 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         eq_(e.miny,48)
         eq_(e.maxx,-122)
         eq_(e.maxy,48)
+        meta = ds.describe()
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_('+proj=longlat' in meta['proj4'],True)
 
     def test_ogr_empty_data_should_not_throw():
         default_logging_severity = mapnik.logger.get_severity()
@@ -89,6 +98,9 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
             eq_(e.maxx,0)
             eq_(e.maxy,0)
         mapnik.logger.set_severity(default_logging_severity)
+        meta = ds.describe()
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_('+proj=longlat' in meta['proj4'],True)
 
     # disabled because OGR prints an annoying error: ERROR 1: Invalid Point object. Missing 'coordinates' member.
     #def test_handling_of_null_features():
