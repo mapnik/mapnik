@@ -34,7 +34,6 @@ inline bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(wkt);
-    //vertex_adapter va(geom);
     static const mapnik::wkt::wkt_generator<sink_type, mapnik::geometry_type> generator(true);
     return boost::spirit::karma::generate(sink, generator, geom);
 }

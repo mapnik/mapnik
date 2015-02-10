@@ -66,7 +66,6 @@ struct get_first
     result_type operator() (Geometry const& geom) const
     {
         typename Geometry::value_type coord;
-        //geom.rewind(0);
         std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
         return coord;
     }

@@ -49,7 +49,6 @@ public:
     using container_type = Container<coord_type>;
     using value_type = typename container_type::value_type;
     using size_type = typename container_type::size_type;
-//private:
     container_type cont_;
     types type_;
 public:
