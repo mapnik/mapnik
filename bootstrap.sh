@@ -123,8 +123,8 @@ SAMPLE_INPUT_PLUGINS = True
 
 function setup_runtime_settings() {
     local MASON_LINKED_ABS=$(pwd)/mason_packages/.link
-    export PROJ_LIB=${MASON_LINKED_ABS}/share/proj/
-    export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1/
+    export PROJ_LIB=${MASON_LINKED_ABS}/share/proj
+    export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1
     export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal
 }
 
