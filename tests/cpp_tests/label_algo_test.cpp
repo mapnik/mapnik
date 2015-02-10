@@ -19,24 +19,29 @@ int main(int argc, char** argv)
         // reused these for simplicity
         double x,y;
 
-        // single point
         mapnik::geometry_type pt(mapnik::geometry_type::types::Point);
+        // single point
         pt.move_to(10,10);
-        BOOST_TEST( mapnik::label::centroid(pt, x, y) );
-        BOOST_TEST( x == 10 );
-        BOOST_TEST( y == 10 );
-
+        {
+            mapnik::vertex_adapter va(pt);
+            BOOST_TEST( mapnik::label::centroid(va, x, y) );
+            BOOST_TEST( x == 10 );
+            BOOST_TEST( y == 10 );
+        }
         // two points
         pt.move_to(20,20);
-        BOOST_TEST( mapnik::label::centroid(pt, x, y) );
-        BOOST_TEST_EQ( x, 15 );
-        BOOST_TEST_EQ( y, 15 );
-
+        {
+            mapnik::vertex_adapter va(pt);
+            BOOST_TEST( mapnik::label::centroid(va, x, y) );
+            BOOST_TEST_EQ( x, 15 );
+            BOOST_TEST_EQ( y, 15 );
+        }
         // line with two verticies
         mapnik::geometry_type line(mapnik::geometry_type::types::LineString);
         line.move_to(0,0);
         line.line_to(50,50);
-        BOOST_TEST( mapnik::label::centroid(line, x, y) );
+        mapnik::vertex_adapter va(line);
+        BOOST_TEST( mapnik::label::centroid(va, x, y) );
         BOOST_TEST( x == 25 );
         BOOST_TEST( y == 25 );
 
@@ -44,17 +49,23 @@ int main(int argc, char** argv)
         // MULTIPOLYGON(((-52 40,-60 32,-68 40,-60 48,-52 40)),((-60 50,-80 30,-100 49.9999999999999,-80.0000000000001 70,-60 50)),((-52 60,-60 52,-68 60,-60 68,-52 60)))
 
         // hit tests
-        mapnik::geometry_type pt_hit(mapnik::geometry_type::types::Point);
-        pt_hit.move_to(10,10);
-        BOOST_TEST( mapnik::label::hit_test(pt_hit, 10, 10, 0.1) );
-        BOOST_TEST( !mapnik::label::hit_test(pt_hit, 9, 9, 0) );
-        BOOST_TEST( mapnik::label::hit_test(pt_hit, 9, 9, 1.5) );
-        mapnik::geometry_type line_hit(mapnik::geometry_type::types::LineString);
-        line_hit.move_to(0,0);
-        line_hit.line_to(50,50);
-        BOOST_TEST( mapnik::label::hit_test(line_hit, 0, 0, 0.001) );
-        BOOST_TEST( !mapnik::label::hit_test(line_hit, 1, 1, 0) );
-        BOOST_TEST( mapnik::label::hit_test(line_hit, 1, 1, 1.001) );
+        {
+            mapnik::geometry_type pt_hit(mapnik::geometry_type::types::Point);
+            pt_hit.move_to(10,10);
+            mapnik::vertex_adapter va(pt_hit);
+            BOOST_TEST( mapnik::label::hit_test(va, 10, 10, 0.1) );
+            BOOST_TEST( !mapnik::label::hit_test(va, 9, 9, 0) );
+            BOOST_TEST( mapnik::label::hit_test(va, 9, 9, 1.5) );
+        }
+        {
+            mapnik::geometry_type line_hit(mapnik::geometry_type::types::LineString);
+            line_hit.move_to(0,0);
+            line_hit.line_to(50,50);
+            mapnik::vertex_adapter va(line_hit);
+            BOOST_TEST( mapnik::label::hit_test(va, 0, 0, 0.001) );
+            BOOST_TEST( !mapnik::label::hit_test(va, 1, 1, 0) );
+            BOOST_TEST( mapnik::label::hit_test(va, 1, 1, 1.001) );
+        }
     }
     catch (std::exception const & ex)
     {

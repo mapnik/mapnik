@@ -61,12 +61,13 @@ pixel_position_list const& group_symbolizer_helper::get()
     }
     else
     {
-        for (auto const& geom : geometries_to_process_)
+        for (auto const* geom : geometries_to_process_)
         {
             // TODO to support clipped geometries this needs to use
             // vertex_converters
-            using path_type = transform_path_adapter<view_transform,geometry_type>;
-            path_type path(t_, *geom, prj_trans_);
+            using path_type = transform_path_adapter<view_transform,vertex_adapter>;
+            vertex_adapter va(*geom);
+            path_type path(t_, va, prj_trans_);
             find_line_placements(path);
         }
     }

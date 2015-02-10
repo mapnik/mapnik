@@ -79,8 +79,8 @@ public:
                 {
                     for (std::size_t i=0; i<(*pos_)->num_geometries();++i)
                     {
-                        geometry_type & geom = (*pos_)->get_geometry(i);
-                        if (bbox_.intersects(geom.envelope()))
+                        geometry_type const& geom = (*pos_)->get_geometry(i);
+                        if (bbox_.intersects(::mapnik::envelope(geom)))
                         {
                             return *pos_++;
                         }

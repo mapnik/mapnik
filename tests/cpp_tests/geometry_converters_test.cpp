@@ -71,9 +71,10 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
         throw std::runtime_error("Failed to parse WKT");
     }
 
-    for (geometry_type & geom : p)
+    for (geometry_type const& geom : p)
     {
-        converter.apply(geom);
+        vertex_adapter va(geom);
+        converter.apply(va);
     }
 
     using sink_type = std::back_insert_iterator<std::string>;
@@ -113,9 +114,10 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
         throw std::runtime_error("Failed to parse WKT");
     }
 
-    for (geometry_type & geom : p)
+    for (geometry_type const& geom : p)
     {
-        converter.apply(geom);
+        vertex_adapter va(geom);
+        converter.apply(va);
     }
 
     using sink_type = std::back_insert_iterator<std::string>;

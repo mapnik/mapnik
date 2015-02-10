@@ -80,7 +80,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
-    using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
+    using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
     using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
 
     agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(),
@@ -140,7 +140,8 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
         double y0 = 0;
         if (feature.num_geometries() > 0)
         {
-            clipped_geometry_type clipped(feature.get_geometry(0));
+            vertex_adapter va(feature.get_geometry(0));
+            clipped_geometry_type clipped(va);
             clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
             path_type path(common_.t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
@@ -167,11 +168,12 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    for ( geometry_type & geom : feature.paths())
+    for ( geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 2)
         {
-            converter.apply(geom);
+            vertex_adapter va(geom);
+            converter.apply(va);
         }
     }
     agg::scanline_u8 sl;

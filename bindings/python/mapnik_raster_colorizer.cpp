@@ -55,23 +55,33 @@ void add_stop(raster_colorizer_ptr & rc, colorizer_stop & stop)
 {
     rc->add_stop(stop);
 }
-void add_stop2(raster_colorizer_ptr & rc, float v) {
+
+void add_stop2(raster_colorizer_ptr & rc, float v)
+{
     colorizer_stop stop(v, rc->get_default_mode(), rc->get_default_color());
     rc->add_stop(stop);
 }
-void add_stop3(raster_colorizer_ptr &rc, float v, color c) {
+
+void add_stop3(raster_colorizer_ptr &rc, float v, color c)
+{
     colorizer_stop stop(v, rc->get_default_mode(), c);
     rc->add_stop(stop);
 }
-void add_stop4(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m) {
+
+void add_stop4(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m)
+{
     colorizer_stop stop(v, m, rc->get_default_color());
     rc->add_stop(stop);
 }
-void add_stop5(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m, color c) {
+
+void add_stop5(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m, color c)
+{
     colorizer_stop stop(v, m, c);
     rc->add_stop(stop);
 }
-mapnik::color get_color(raster_colorizer_ptr &rc, float value) {
+
+mapnik::color get_color(raster_colorizer_ptr &rc, float value)
+{
     unsigned rgba = rc->get_color(value);
     unsigned r = (rgba & 0xff);
     unsigned g = (rgba >> 8 ) & 0xff;
@@ -84,6 +94,7 @@ colorizer_stops const& get_stops(raster_colorizer_ptr & rc)
 {
     return rc->get_stops();
 }
+
 }
 
 void export_raster_colorizer()

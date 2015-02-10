@@ -40,9 +40,10 @@ public:
 
     bool pass(feature_impl & feature)
     {
-        for (geometry_type & geom : feature.paths())
+        for (geometry_type const& geom : feature.paths())
         {
-            if (label::hit_test(geom, x_,y_,tol_))
+            vertex_adapter va(geom);
+            if (label::hit_test(va, x_,y_,tol_))
                 return true;
         }
         return false;

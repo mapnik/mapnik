@@ -102,20 +102,21 @@ std::shared_ptr<mapnik::geometry_container> from_geojson_impl(std::string const&
     return paths;
 }
 
-mapnik::box2d<double> envelope_impl(mapnik::geometry_container & p)
+mapnik::box2d<double> envelope_impl2(mapnik::geometry_container & p)
 {
     mapnik::box2d<double> b;
     bool first = true;
     for (mapnik::geometry_type const& geom : p)
     {
+        auto bbox = ::mapnik::envelope(geom);
         if (first)
         {
-            b = geom.envelope();
+            b = bbox;
             first=false;
         }
         else
         {
-            b.expand_to_include(geom.envelope());
+            b.expand_to_include(bbox);
         }
     }
     return b;
@@ -211,13 +212,17 @@ std::string to_geojson2(mapnik::geometry_container const& geom)
 std::string to_svg(mapnik::geometry_type const& geom)
 {
     std::string svg;
-    if (!mapnik::util::to_svg(svg,geom))
+    if (!mapnik::util::to_svg(svg, geom))
     {
         throw std::runtime_error("Generate SVG failed");
     }
     return svg;
 }
 
+mapnik::box2d<double> envelope_impl(mapnik::geometry_type const& geom)
+{
+    return ::mapnik::envelope(geom);
+}
 /*
 // https://github.com/mapnik/mapnik/issues/1437
 std::string to_svg2( mapnik::geometry_container const& geom)
@@ -249,7 +254,7 @@ void export_geometry()
 
     using mapnik::geometry_type;
     class_<mapnik::geometry_type, std::shared_ptr<mapnik::geometry_type>, boost::noncopyable>("Geometry2d",no_init)
-        .def("envelope",&mapnik::geometry_type::envelope)
+        .def("envelope",&envelope_impl)
         // .def("__str__",&mapnik::geometry_type::to_string)
         .def("type",&mapnik::geometry_type::type)
         .def("to_wkb",&to_wkb)
@@ -262,7 +267,7 @@ void export_geometry()
     class_<mapnik::geometry_container, std::shared_ptr<mapnik::geometry_container>, boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &mapnik::geometry_container::size)
-        .def("envelope",envelope_impl)
+        .def("envelope",envelope_impl2)
         .def("add_wkt",add_wkt_impl)
         .def("add_wkb",add_wkb_impl)
         .def("add_geojson",add_geojson_impl)

@@ -391,7 +391,7 @@ void pgsql2sqlite(Connection conn,
                             && feat.num_geometries() > 0)
                         {
                             geometry_type const& geom=feat.get_geometry(0);
-                            box2d<double> bbox = geom.envelope();
+                            box2d<double> bbox = ::mapnik::envelope(geom);
                             if (bbox.valid())
                             {
                                 sqlite::record_type rec;
