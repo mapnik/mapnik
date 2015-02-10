@@ -61,7 +61,7 @@ function install_mason_deps() {
 
 function setup_nose() {
     if [[ ! -d $(pwd)/nose-1.3.4 ]]; then
-        wget -q https://pypi.python.org/packages/source/n/nose/nose-1.3.4.tar.gz
+        curl -s -O https://pypi.python.org/packages/source/n/nose/nose-1.3.4.tar.gz
         tar -xzf nose-1.3.4.tar.gz
     fi
     export PYTHONPATH=$(pwd)/nose-1.3.4:${PYTHONPATH}
