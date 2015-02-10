@@ -902,6 +902,36 @@ int main()
     color_print(1,'\nFound insufficient icu version... %s' % result)
     return False
 
+def harfbuzz_version(context):
+    min_version = (0, 9, 34)
+    ret = context.TryRun("""
+
+#include "harfbuzz/hb.h"
+#include <iostream>
+
+int main()
+{
+    std::cout << HB_VERSION_ATLEAST(%s, %s, %s) << ";" << HB_VERSION_STRING;
+    return 0;
+}
+
+""" % min_version, '.cpp')
+    # hack to avoid printed output
+    context.Message('Checking for HarfBuzz version >= %s.%s.%s... ' % min_version)
+    context.did_show_result=1
+    result = ret[1].strip()
+    if not result:
+        context.Result('error, could not get version from hb.h')
+        return False
+
+    items = result.split(';')
+    if items[0] == '1':
+        color_print(4,'found: HarfBuzz %s' % items[1])
+        return True
+
+    color_print(1,'\nFound insufficient HarfBuzz version... %s' % items[1])
+    return False
+
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
         # re-order icu libs to ensure linux linker is happy
@@ -1022,6 +1052,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'get_pkg_lib'           : get_pkg_lib,
                'rollback_option'       : rollback_option,
                'icu_at_least_four_two' : icu_at_least_four_two,
+               'harfbuzz_version'      : harfbuzz_version,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
                'supports_cxx11'        : supports_cxx11,
@@ -1318,6 +1349,9 @@ if not preconfigured:
             if not conf.icu_at_least_four_two():
                 # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
                 env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+
+    if not conf.harfbuzz_version():
+        env['MISSING_DEPS'].append('harfbuzz')
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
