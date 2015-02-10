@@ -32,6 +32,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -365,6 +366,13 @@ void ogr_datasource::init(mapnik::parameters const& params)
             }
         }
     }
+    mapnik::parameters & extra_params = desc_.get_extra_parameters();
+    OGRSpatialReference * srs_ref = layer->GetSpatialRef();
+    char * srs_output = NULL;
+    if (srs_ref && srs_ref->exportToProj4( &srs_output ) == OGRERR_NONE ) {
+        extra_params["proj4"] = mapnik::util::trim_copy(srs_output);
+    }
+    CPLFree(srs_output);
 }
 
 const char * ogr_datasource::name()
