@@ -66,6 +66,10 @@ BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
 BOOST_MIN_VERSION = '1.47'
 #CAIRO_MIN_VERSION = '1.8.0'
 
+HARFBUZZ_MIN_VERSION = (0, 9, 34)
+HARFBUZZ_MIN_VERSION_STRING = "%s.%s.%s" % HARFBUZZ_MIN_VERSION
+
+
 DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
 
@@ -84,6 +88,7 @@ pretty_dep_names = {
     'webp':'WEBP C library | configure with WEBP_LIBS & WEBP_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
     'harfbuzz':'HarfBuzz text shaping library | configure with HB_LIBS & HB_INCLUDES',
+    'harfbuzz-min-version':'HarfBuzz >= %s (required for font-feature-settings support)' % HARFBUZZ_MIN_VERSION_STRING,
     'z':'Z compression library | more info: http://www.zlib.net/',
     'm':'Basic math library, part of C++ stlib',
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
@@ -903,7 +908,6 @@ int main()
     return False
 
 def harfbuzz_version(context):
-    min_version = (0, 9, 34)
     ret = context.TryRun("""
 
 #include "harfbuzz/hb.h"
@@ -915,9 +919,9 @@ int main()
     return 0;
 }
 
-""" % min_version, '.cpp')
+""" % HARFBUZZ_MIN_VERSION, '.cpp')
     # hack to avoid printed output
-    context.Message('Checking for HarfBuzz version >= %s.%s.%s... ' % min_version)
+    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
     context.did_show_result=1
     result = ret[1].strip()
     if not result:
@@ -929,7 +933,7 @@ int main()
         color_print(4,'found: HarfBuzz %s' % items[1])
         return True
 
-    color_print(1,'\nFound insufficient HarfBuzz version... %s' % items[1])
+    color_print(1,'\nHarfbuzz >= %s required but found ... %s' % (HARFBUZZ_MIN_VERSION_STRING,items[1]))
     return False
 
 def boost_regex_has_icu(context):
@@ -1238,7 +1242,7 @@ if not preconfigured:
     ]
 
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
-        REQUIRED_LIBSHEADERS.append(['freetype','ft2build.h',True,'C'])
+        REQUIRED_LIBSHEADERS.insert(0,['freetype','ft2build.h',True,'C'])
         if env.get('FREETYPE_INCLUDES'):
             inc_path = env['FREETYPE_INCLUDES']
             env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1261,7 +1265,7 @@ if not preconfigured:
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
     if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
-        REQUIRED_LIBSHEADERS.append(['libxml2','libxml/parser.h',True,'C'])
+        REQUIRED_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
         if env.get('XML2_INCLUDES'):
             inc_path = env['XML2_INCLUDES']
             env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1343,15 +1347,15 @@ if not preconfigured:
                 else:
                     color_print(4, 'Could not find optional header or shared library for %s' % libname)
                     env['SKIPPED_DEPS'].append(libname)
-
-    if not env['HOST']:
-        if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-            if not conf.icu_at_least_four_two():
-                # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
-                env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
-
-    if not conf.harfbuzz_version():
-        env['MISSING_DEPS'].append('harfbuzz')
+            else:
+                if libname == env['ICU_LIB_NAME']:
+                    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+                        if not conf.icu_at_least_four_two():
+                            # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
+                            env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+                elif libname == 'harfbuzz':
+                    if not conf.harfbuzz_version():
+                        env['MISSING_DEPS'].append('harfbuzz-min-version')
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
