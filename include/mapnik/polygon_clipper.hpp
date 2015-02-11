@@ -67,7 +67,9 @@ struct polygon_clipper
     polygon_clipper(box2d<double> const& clip_box, Geometry & geom)
         :state_(clip),
          clip_box_(clip_box),
-         geom_(geom)
+         geom_(geom),
+         output_(),
+         output_adapter_(output_)
     {
         init();
     }
@@ -86,7 +88,7 @@ struct polygon_clipper
 
     void rewind(unsigned path_id)
     {
-        if (state_ == clip) output_.rewind(path_id);
+        if (state_ == clip) output_adapter_.rewind(path_id);
         else geom_.rewind(path_id);
     }
 
@@ -95,7 +97,7 @@ struct polygon_clipper
         switch (state_)
         {
         case clip:
-            return output_.vertex(x,y);
+            return output_adapter_.vertex(x,y);
         case no_clip:
             return geom_.vertex(x,y);
         case ignore:
@@ -230,6 +232,7 @@ private:
     box2d<double> clip_box_;
     Geometry & geom_;
     mapnik::geometry_type output_;
+    mapnik::vertex_adapter output_adapter_;
 
 };
 
