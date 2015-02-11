@@ -29,14 +29,16 @@
 
 // stl
 #include <fstream>
+#include <cstdlib>
 
-void render(mapnik::geometry_type & geom,
+void render(mapnik::geometry_type const& geom,
             mapnik::box2d<double> const& extent,
             std::string const& name)
 {
-    using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
+    using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
+    mapnik::vertex_adapter va(geom);
     mapnik::image_32 im(256,256);
     im.set_background(mapnik::color("white"));
     mapnik::box2d<double> padded_extent = extent;
@@ -49,13 +51,11 @@ void render(mapnik::geometry_type & geom,
     ren.color(agg::rgba8(127,127,127,255));
     agg::rasterizer_scanline_aa<> ras;
     mapnik::proj_transform prj_trans(mapnik::projection("+init=epsg:4326"),mapnik::projection("+init=epsg:4326"));
-    geom.rewind(0);
-    path_type path(tr,geom,prj_trans);
+    path_type path(tr,va,prj_trans);
     ras.add_path(path);
     agg::scanline_u8 sl;
     agg::render_scanlines(ras, sl, ren);
     mapnik::save_to_file(im.data(),name);
-    geom.rewind(0);
 }
 
 class test1 : public benchmark::test_case
@@ -64,7 +64,7 @@ class test1 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    using conv_clip = agg::conv_clip_polygon<mapnik::geometry_type>;
+    using conv_clip = agg::conv_clip_polygon<mapnik::vertex_adapter>;
     test1(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -85,8 +85,9 @@ public:
             std::clog << "paths.size() != 1\n";
             return false;
         }
-        mapnik::geometry_type & geom = paths[0];
-        conv_clip clipped(geom);
+        mapnik::geometry_type const& geom = paths[0];
+        mapnik::vertex_adapter va(geom);
+        conv_clip clipped(va);
         clipped.clip_box(
                     extent_.minx(),
                     extent_.miny(),
@@ -100,12 +101,13 @@ public:
         }
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        if (!mapnik::util::exists(expect))
+        auto env = mapnik::envelope(geom);
+        if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
         {
             std::clog << "generating expected image: " << expect << "\n";
-            render(geom2,geom.envelope(),expect);
+            render(geom2,env,expect);
         }
-        render(geom2,geom.envelope(),actual);
+        render(geom2,env,actual);
         return benchmark::compare_images(actual,expect);
     }
     bool operator()() const
@@ -117,9 +119,10 @@ public:
         }
         for (unsigned i=0;i<iterations_;++i)
         {
-            for (mapnik::geometry_type & geom : paths)
+            for (mapnik::geometry_type const& geom : paths)
             {
-                conv_clip clipped(geom);
+                mapnik::vertex_adapter va(geom);
+                conv_clip clipped(va);
                 clipped.clip_box(
                             extent_.minx(),
                             extent_.miny(),
@@ -140,7 +143,7 @@ class test2 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    using poly_clipper = agg::conv_clipper<mapnik::geometry_type, agg::path_storage>;
+    using poly_clipper = agg::conv_clipper<mapnik::vertex_adapter, agg::path_storage>;
     test2(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -167,8 +170,9 @@ public:
             std::clog << "paths.size() != 1\n";
             return false;
         }
-        mapnik::geometry_type & geom = paths[0];
-        poly_clipper clipped(geom,ps,
+        mapnik::geometry_type const& geom = paths[0];
+        mapnik::vertex_adapter va(geom);
+        poly_clipper clipped(va,ps,
                              agg::clipper_and,
                              agg::clipper_non_zero,
                              agg::clipper_non_zero,
@@ -182,12 +186,13 @@ public:
         }
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        if (!mapnik::util::exists(expect))
+        auto env = mapnik::envelope(geom);
+        if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
         {
             std::clog << "generating expected image: " << expect << "\n";
-            render(geom2,geom.envelope(),expect);
+            render(geom2,env,expect);
         }
-        render(geom2,geom.envelope(),actual);
+        render(geom2,env,actual);
         return benchmark::compare_images(actual,expect);
     }
     bool operator()() const
@@ -205,9 +210,10 @@ public:
         ps.close_polygon();
         for (unsigned i=0;i<iterations_;++i)
         {
-            for (mapnik::geometry_type & geom : paths)
+            for (mapnik::geometry_type const& geom : paths)
             {
-                poly_clipper clipped(geom,ps,
+                mapnik::vertex_adapter va(geom);
+                poly_clipper clipped(va,ps,
                                      agg::clipper_and,
                                      agg::clipper_non_zero,
                                      agg::clipper_non_zero,
@@ -228,7 +234,7 @@ class test3 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    using poly_clipper = mapnik::polygon_clipper<mapnik::geometry_type>;
+    using poly_clipper = mapnik::polygon_clipper<mapnik::vertex_adapter>;
     test3(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -249,8 +255,9 @@ public:
             std::clog << "paths.size() != 1\n";
             return false;
         }
-        mapnik::geometry_type & geom = paths[0];
-        poly_clipper clipped(extent_, geom);
+        mapnik::geometry_type const& geom = paths[0];
+        mapnik::vertex_adapter va(geom);
+        poly_clipper clipped(extent_, va);
         unsigned cmd;
         double x,y;
         mapnik::geometry_type geom2(mapnik::geometry_type::types::Polygon);
@@ -259,12 +266,13 @@ public:
         }
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        if (!mapnik::util::exists(expect))
+        auto env = mapnik::envelope(geom);
+        if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
         {
             std::clog << "generating expected image: " << expect << "\n";
-            render(geom2,geom.envelope(),expect);
+            render(geom2,env,expect);
         }
-        render(geom2,geom.envelope(),actual);
+        render(geom2,env,actual);
         return benchmark::compare_images(actual,expect);
     }
     bool operator()() const
@@ -276,9 +284,10 @@ public:
         }
         for (unsigned i=0;i<iterations_;++i)
         {
-            for ( mapnik::geometry_type & geom : paths)
+            for ( mapnik::geometry_type const& geom : paths)
             {
-                poly_clipper clipped(extent_, geom);
+                mapnik::vertex_adapter va(geom);
+                poly_clipper clipped(extent_, va);
                 unsigned cmd;
                 double x,y;
                 while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {}
