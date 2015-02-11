@@ -1180,6 +1180,8 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         put(sym, keys::file , parse_path(file));
         optional<halo_rasterizer_e> halo_rasterizer_ = node.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
         if (halo_rasterizer_) put(sym, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
+        set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::halo_comp_op, node);
+        set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::halo_transform, node);
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
