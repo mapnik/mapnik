@@ -91,8 +91,8 @@ class path_iterator<geometry_type>
 
 public:
     using path_type = mapnik::geometry_type;
-    using value_type = typename std::tuple<unsigned, double, double>;
-    using size_type = typename path_type::size_type;
+    using value_type = std::tuple<unsigned, double, double>;
+    using size_type = path_type::size_type;
     path_iterator()
         : v_(mapnik::SEG_END,0,0),
           vertices_()

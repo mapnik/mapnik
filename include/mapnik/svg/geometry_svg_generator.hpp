@@ -123,10 +123,10 @@ namespace mapnik { namespace svg {
     struct get_first<mapnik::geometry_type>
     {
         using geometry_type = mapnik::geometry_type;
-        using result_type = typename geometry_type::value_type const;
+        using result_type = geometry_type::value_type const;
         result_type operator() (geometry_type const& geom) const
         {
-            typename geometry_type::value_type coord;
+            geometry_type::value_type coord;
             std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
             return coord;
         }
