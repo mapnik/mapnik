@@ -73,6 +73,11 @@ function make_config() {
     export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
     export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
     export PATH="${MASON_LINKED_REL}/bin":${PATH}
+    if [[ $(uname -s) == 'Darwin' ]]; then
+        export PATH_REPLACE="/Users/travis/build/mapbox/mason/mason_packages:./mason_packages"
+    else
+        export PATH_REPLACE="/home/travis/build/mapbox/mason/mason_packages:./mason_packages"
+    fi
 
     echo "
 CXX = '$CXX'
@@ -84,7 +89,7 @@ INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
 PKG_CONFIG_PATH = '${MASON_LINKED_REL}/lib/pkgconfig'
 PATH_REMOVE = '/usr:/usr/local'
-PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
+PATH_REPLACE = '${PATH_REPLACE}'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
 BOOST_LIBS = '${MASON_LINKED_REL}/lib'
 ICU_INCLUDES = '${MASON_LINKED_REL}/include'
