@@ -392,9 +392,10 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
   double ytmp = 0.0;
   unsigned count = 0;
 
-  while (start!=end)
+  while (start != end)
   {
-    typename Iter::value_type const& path = *start++;
+    typename Iter::value_type const& geom = *start++;
+    vertex_adapter path(geom);
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END) continue;

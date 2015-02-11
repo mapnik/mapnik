@@ -66,17 +66,18 @@ void render_point_symbolizer(point_symbolizer const &sym,
         for (std::size_t i=0; i<feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
+            vertex_adapter va(geom);
             double x;
             double y;
             double z=0;
             if (placement == CENTROID_POINT_PLACEMENT)
             {
-                if (!label::centroid(geom, x, y))
+                if (!label::centroid(va, x, y))
                     return;
             }
             else
             {
-                if (!label::interior_position(geom ,x, y))
+                if (!label::interior_position(va ,x, y))
                     return;
             }
 
@@ -101,4 +102,4 @@ void render_point_symbolizer(point_symbolizer const &sym,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP

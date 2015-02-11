@@ -144,11 +144,12 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     converter.set<affine_transform_tag>(); // optional affine transform
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    for (geometry_type & geom : feature.paths())
+    for (geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 1)
         {
-            converter.apply(geom);
+            vertex_adapter va(geom);
+            converter.apply(va);
         }
     }
 }

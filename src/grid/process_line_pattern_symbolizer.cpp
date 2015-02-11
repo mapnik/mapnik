@@ -130,11 +130,12 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     converter.set<stroke_tag>(); //always stroke
 
-    for (geometry_type & geom : feature.paths())
+    for (geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 1)
         {
-            converter.apply(geom);
+            vertex_adapter va(geom);
+            converter.apply(va);
         }
     }
 

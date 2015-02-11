@@ -44,19 +44,21 @@ struct accumulate_extent
     accumulate_extent(box2d<double> & ext)
         : ext_(ext),first_(true) {}
 
-    void operator() (feature_ptr feat)
+    void operator() (feature_ptr const& feat)
     {
-        for (std::size_t i=0;i<feat->num_geometries();++i)
+        auto size = feat->num_geometries();
+        for (std::size_t i = 0; i < size; ++i)
         {
-            geometry_type & geom = feat->get_geometry(i);
+            geometry_type const& geom = feat->get_geometry(i);
+            auto bbox = ::mapnik::envelope(geom);
             if ( first_ )
             {
                 first_ = false;
-                ext_ = geom.envelope();
+                ext_ = bbox;
             }
             else
             {
-                ext_.expand_to_include(geom.envelope());
+                ext_.expand_to_include(bbox);
             }
         }
     }

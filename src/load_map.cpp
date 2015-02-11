@@ -65,10 +65,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/algorithm/string.hpp>
-#pragma GCC diagnostic pop
+
+// stl
+#include <algorithm>
 
 // agg
 #include "agg_trans_affine.h"
@@ -1271,10 +1270,10 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
         if (mode)
         {
             std::string mode_string = *mode;
-            if (boost::algorithm::find_first(mode_string,"_"))
+            if (mode_string.find('_') != std::string::npos)
             {
                 MAPNIK_LOG_ERROR(raster_symbolizer) << "'mode' values using \"_\" are deprecated and will be removed in Mapnik 3.x, use \"-\"instead";
-                boost::algorithm::replace_all(mode_string,"_","-");
+                std::replace(mode_string.begin(), mode_string.end(), '_', '-');
             }
             put(raster_sym, keys::mode, mode_string);
         }
@@ -1603,7 +1602,7 @@ void map_parser::ensure_exists(std::string const& file_path)
     if (marker_cache::instance().is_uri(file_path))
         return;
     // validate that the filename exists if it is not a dynamic PathExpression
-    if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))
+    if (file_path.find('[') == std::string::npos && file_path.find(']') == std::string::npos)
     {
         if (!mapnik::util::exists(file_path))
         {

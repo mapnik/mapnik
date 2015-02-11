@@ -102,11 +102,12 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     if (has_dash) converter.set<dash_tag>();
     converter.set<stroke_tag>(); //always stroke
 
-    for ( geometry_type & geom : feature.paths())
+    for ( geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 1)
         {
-            converter.apply(geom);
+            vertex_adapter va(geom);
+            converter.apply(va);
         }
     }
 

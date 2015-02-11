@@ -24,7 +24,8 @@ void simplify(std::string const& wkt_in, double tolerance, std::string const& me
         throw std::runtime_error("Failed to parse WKT");
     }
     //setup the generalization
-    mapnik::simplify_converter<mapnik::geometry_type> generalizer(multi_input.front());
+    mapnik::vertex_adapter va(multi_input.front());
+    mapnik::simplify_converter<mapnik::vertex_adapter> generalizer(va);
     generalizer.set_simplify_algorithm(mapnik::simplify_algorithm_from_string(method).get());
     generalizer.set_simplify_tolerance(tolerance);
     //suck the vertices back out of it

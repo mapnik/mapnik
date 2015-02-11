@@ -390,9 +390,9 @@ struct vertex_converter : private util::noncopyable
                      double scale_factor)
         : disp_(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor) {}
 
-    void apply(geometry_type & geom)
+    void apply(vertex_adapter & geom)
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<geometry_type>(disp_, geom);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<vertex_adapter>(disp_, geom);
     }
 
     template <typename Converter>

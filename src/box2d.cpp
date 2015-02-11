@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/util/trim.hpp>
 
 // stl
 #include <stdexcept>

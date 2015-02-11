@@ -61,7 +61,7 @@ function install_mason_deps() {
 
 function setup_nose() {
     if [[ ! -d $(pwd)/nose-1.3.4 ]]; then
-        wget -q https://pypi.python.org/packages/source/n/nose/nose-1.3.4.tar.gz
+        curl -s -O https://pypi.python.org/packages/source/n/nose/nose-1.3.4.tar.gz
         tar -xzf nose-1.3.4.tar.gz
     fi
     export PYTHONPATH=$(pwd)/nose-1.3.4:${PYTHONPATH}
@@ -73,6 +73,11 @@ function make_config() {
     export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
     export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
     export PATH="${MASON_LINKED_REL}/bin":${PATH}
+    if [[ $(uname -s) == 'Darwin' ]]; then
+        export PATH_REPLACE="/Users/travis/build/mapbox/mason/mason_packages:./mason_packages"
+    else
+        export PATH_REPLACE="/home/travis/build/mapbox/mason/mason_packages:./mason_packages"
+    fi
 
     echo "
 CXX = '$CXX'
@@ -84,7 +89,7 @@ INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
 PKG_CONFIG_PATH = '${MASON_LINKED_REL}/lib/pkgconfig'
 PATH_REMOVE = '/usr:/usr/local'
-PATH_REPLACE = '/Users/travis/build/mapbox/mason/mason_packages:./mason_packages'
+PATH_REPLACE = '${PATH_REPLACE}'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
 BOOST_LIBS = '${MASON_LINKED_REL}/lib'
 ICU_INCLUDES = '${MASON_LINKED_REL}/include'
@@ -123,8 +128,8 @@ SAMPLE_INPUT_PLUGINS = True
 
 function setup_runtime_settings() {
     local MASON_LINKED_ABS=$(pwd)/mason_packages/.link
-    export PROJ_LIB=${MASON_LINKED_ABS}/share/proj/
-    export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1/
+    export PROJ_LIB=${MASON_LINKED_ABS}/share/proj
+    export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1
     export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal
 }
 

@@ -79,7 +79,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-    using path_type = transform_path_adapter<view_transform, geometry_type>;
+    using path_type = transform_path_adapter<view_transform, vertex_adapter>;
 
     bool process_path = false;
     // process each symbolizer to collect its (path) information.
@@ -97,11 +97,12 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
-        for (auto & geom : feature.paths())
+        for (auto const& geom : feature.paths())
         {
             if(geom.size() > 0)
             {
-                path_type path(common_.t_, geom, prj_trans);
+                vertex_adapter va(geom);
+                path_type path(common_.t_, va, prj_trans);
                 generate_path(generator_.output_iterator_, path, path_attributes_);
             }
         }
