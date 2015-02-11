@@ -29,7 +29,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/interprocess/mapped_region.hpp>
 // mapnik
 #include <mapnik/boolean.hpp>
 #include <mapnik/unicode.hpp>
@@ -50,7 +49,10 @@
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 #include <mapnik/util/boost_geometry_adapters.hpp> // boost.geometry - register box2d<double>
 
+#if defined(SHAPE_MEMORY_MAPPED_FILE)
+#include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -131,7 +133,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
     else
     {
         cache_features_ = *params.get<mapnik::boolean_type>("cache_features", true);
-#if 0
+#if defined(SHAPE_MEMORY_MAPPED_FILE)
         mapnik::util::file file(filename_);
         if (!file.open())
         {
