@@ -80,7 +80,7 @@ private:
     const path_type *vertices_;
 };
 
-// specialization for mapnik::geometry_type - vertex interfacce has been removed
+// specialization for mapnik::geometry_type - vertex interface has been removed
 template <>
 class path_iterator<geometry_type>
     : public boost::iterator_facade< path_iterator<geometry_type>,
@@ -95,7 +95,8 @@ public:
     using size_type = path_type::size_type;
     path_iterator()
         : v_(mapnik::SEG_END,0,0),
-          vertices_()
+          vertices_(),
+          pos_(0)
     {}
 
     explicit path_iterator(path_type const& vertices)
