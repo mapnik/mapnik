@@ -1,14 +1,11 @@
 #include "bench_framework.hpp"
 #include "compare_images.hpp"
-#include "agg_conv_clip_polygon.h"
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/wkt/wkt_grammar_impl.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/fs.hpp>
