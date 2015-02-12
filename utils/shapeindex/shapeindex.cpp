@@ -192,31 +192,40 @@ int main (int argc,char** argv)
                 double y=shp.read_double();
                 // skip z
                 shp.read_double();
-                //skip m if exists
-                if ( content_length == 8 + 36)
+                // According to ESRI shapefile doc
+                // A PointZ consists of a triplet of double-precision coordinates in the order X, Y, Z plus a
+                // measure.
+                // PointZ
+                // {
+                //     Double X // X coordinate
+                //     Double Y // Y coordinate
+                //     Double Z // Z coordinate
+                //     Double M // Measure
+                // }
+                // But OGR creates shapefiles with M missing so we need skip M only if present
+                // NOTE: content_length is in 16-bit words
+                if ( content_length == 18)
                 {
                     shp.read_double();
                 }
                 item_ext=box2d<double>(x,y,x,y);
-            }
 
+            }
             else
             {
                 shp.read_envelope(item_ext);
                 shp.skip(2*content_length-4*8-4);
             }
-
             tree.insert(offset,item_ext);
-            if (verbose) {
+            if (verbose)
+            {
                 clog << "record number " << record_number << " box=" << item_ext << endl;
             }
 
             pos+=4+content_length;
             ++count;
 
-            if (pos>=file_length) {
-                break;
-            }
+            if (pos >= file_length) break;
         }
 
         clog << " number shapes=" << count << endl;
