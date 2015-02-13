@@ -73,7 +73,7 @@ namespace mapnik { namespace sql_utils {
             {
                 table_name=table_name.substr(idx);
             }
-            idx = table_name.find_first_of(" )");
+            idx = table_name.find_first_of(", )");
             if (idx != std::string::npos)
             {
                 table_name = table_name.substr(0,idx);
