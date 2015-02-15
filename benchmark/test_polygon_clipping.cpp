@@ -93,6 +93,7 @@ public:
                     extent_.maxy());
         unsigned cmd;
         double x,y;
+        clipped.rewind(0);
         mapnik::geometry_type geom2(mapnik::geometry_type::types::Polygon);
         while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
             geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
@@ -130,6 +131,10 @@ public:
                             extent_.maxy());
                 unsigned cmd;
                 double x,y;
+                // NOTE: this rewind is critical otherwise
+                // agg_conv_adapter_vpgen will give garbage
+                // values for the first vertex
+                clipped.rewind(0);
                 while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
                     count++;
                 }
