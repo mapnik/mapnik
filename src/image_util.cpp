@@ -1676,7 +1676,20 @@ struct visitor_get_pixel
     {
         if (check_bounds(data, x_, y_))
         {
-            return static_cast<T1>(data(x_, y_));
+            T1 val;
+            try
+            {
+                val = numeric_cast<T1>(data(x_,y_));
+            }
+            catch(negative_overflow&)
+            {
+                val = std::numeric_limits<T1>::min();
+            }
+            catch(positive_overflow&) 
+            {
+                val = std::numeric_limits<T1>::max();
+            }
+            return val;
         }
         else
         {

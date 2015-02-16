@@ -285,10 +285,24 @@ inline image_any create_image_any(int width,
     {
       case image_dtype_gray8:
         return image_any(std::move(image_gray8(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray8s:
+        return image_any(std::move(image_gray8s(width, height, initialize, premultiplied, painted)));
       case image_dtype_gray16:
         return image_any(std::move(image_gray16(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray16s:
+        return image_any(std::move(image_gray16s(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray32:
+        return image_any(std::move(image_gray32(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray32s:
+        return image_any(std::move(image_gray32s(width, height, initialize, premultiplied, painted)));
       case image_dtype_gray32f:
         return image_any(std::move(image_gray32f(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray64:
+        return image_any(std::move(image_gray64(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray64s:
+        return image_any(std::move(image_gray64s(width, height, initialize, premultiplied, painted)));
+      case image_dtype_gray64f:
+        return image_any(std::move(image_gray64f(width, height, initialize, premultiplied, painted)));
       case image_dtype_null:
         return image_any(std::move(image_null()));
       case image_dtype_rgba8:

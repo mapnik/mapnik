@@ -125,8 +125,89 @@ def test_set_and_get_pixel():
     eq_(c0_pre.b, c1.b)
     eq_(c0_pre.a, c1.a)
 
+def test_pixel_gray8():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray8)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), 0)
+
+def test_pixel_gray8s():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray8s)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), -v)
+
+def test_pixel_gray16():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray16)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), 0)
+
+def test_pixel_gray16s():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray16s)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), -v)
+
+def test_pixel_gray32():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray32)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), 0)
+
+def test_pixel_gray32s():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray32s)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), -v)
+
+def test_pixel_gray64():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray64)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), 0)
+
+def test_pixel_gray64s():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray64s)
+    val_list = range(20)
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        eq_(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        eq_(im.get_pixel(0,0), -v)
+
 def test_pixel_floats():
     im = mapnik.Image(4,4,mapnik.ImageType.gray32f)
+    val_list = [0.9, 0.99, 0.999, 0.9999, 0.99999, 1, 1.0001, 1.001, 1.01, 1.1]
+    for v in val_list:
+        im.set_pixel(0,0, v)
+        assert_almost_equal(im.get_pixel(0,0), v)
+        im.set_pixel(0,0, -v)
+        assert_almost_equal(im.get_pixel(0,0), -v)
+
+def test_pixel_doubles():
+    im = mapnik.Image(4,4,mapnik.ImageType.gray64f)
     val_list = [0.9, 0.99, 0.999, 0.9999, 0.99999, 1, 1.0001, 1.001, 1.01, 1.1]
     for v in val_list:
         im.set_pixel(0,0, v)

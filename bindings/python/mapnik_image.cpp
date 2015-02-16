@@ -156,13 +156,6 @@ struct get_pixel_visitor
     {
         throw std::runtime_error("Can not return a null image from a pixel (shouldn't have reached here)");
     }
-
-    template <typename T>
-    PyObject* operator() (T const& im)
-    {
-        using pixel_type = typename T::pixel_type;
-        return PyInt_FromLong(mapnik::get_pixel<pixel_type>(im, x_, y_));
-    }
     
     PyObject* operator() (mapnik::image_gray32f const& im)
     {
@@ -174,6 +167,13 @@ struct get_pixel_visitor
         return PyFloat_FromDouble(mapnik::get_pixel<double>(im, x_, y_));
     }
 
+    template <typename T>
+    PyObject* operator() (T const& im)
+    {
+        using pixel_type = typename T::pixel_type;
+        return PyInt_FromLong(mapnik::get_pixel<pixel_type>(im, x_, y_));
+    }
+    
   private:
     unsigned x_;
     unsigned y_;
