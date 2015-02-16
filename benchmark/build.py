@@ -8,6 +8,7 @@ test_env = env.Clone()
 
 test_env['LIBS'] = [env['MAPNIK_NAME']]
 test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
+test_env.AppendUnique(LIBS='mapnik-wkt')
 if env['PLATFORM'] == 'Linux':
     test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(LIBS='rt')
@@ -34,7 +35,7 @@ benchmarks = [
     #"test_to_double.cpp",
     #"test_to_int.cpp",
     #"test_utf_encoding.cpp"
-    #"test_polygon_clipping.cpp",
+    "test_polygon_clipping.cpp",
     #"test_polygon_clipping_rendering.cpp",
     "test_proj_transform1.cpp",
     "test_expression_parse.cpp",

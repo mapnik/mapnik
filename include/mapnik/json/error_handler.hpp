@@ -34,7 +34,7 @@ struct error_handler
 {
     using result_type = void;
     void operator() (
-        Iterator, Iterator last,
+        Iterator, Iterator,
         Iterator err_pos, boost::spirit::info const& what) const
     {
         std::stringstream s;

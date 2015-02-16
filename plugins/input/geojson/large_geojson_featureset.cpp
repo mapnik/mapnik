@@ -23,8 +23,8 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/geometry_grammar_impl.hpp>
-#include <mapnik/json/feature_grammar_impl.hpp>
+#include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/utils.hpp>
 // stl
 #include <string>
@@ -62,9 +62,10 @@ mapnik::feature_ptr large_geojson_featureset::next()
         std::vector<char> json;
         json.resize(size);
         std::fread(json.data(), size, 1, file_.get());
-        using chr_iterator_type = std::vector<char>::const_iterator;
-        chr_iterator_type start = json.begin();
-        chr_iterator_type end = json.end();
+
+        using chr_iterator_type = char const*;
+        chr_iterator_type start = json.data();
+        chr_iterator_type end = start + json.size();
 
         static const mapnik::transcoder tr("utf8");
         static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);

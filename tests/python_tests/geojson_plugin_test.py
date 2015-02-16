@@ -4,6 +4,10 @@
 from nose.tools import eq_,assert_almost_equal
 from utilities import execution_path, run_all
 import os, mapnik
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -35,6 +39,12 @@ if 'geojson' in mapnik.DatasourceCache.plugin_names():
         eq_(f['boolean'], True)
         eq_(f['NOM_FR'], u'Qu\xe9bec')
         eq_(f['NOM_FR'], u'Québec')
+        eq_(f['array'], u'[[[1],["deux"]],[["\\u0442\\u0440\\u0438","four","\\u4e94"]]]')
+        array = json.loads(f['array'])
+        eq_(array,[[[1], [u'deux']], [[u'\u0442\u0440\u0438', u'four', u'\u4e94']]])
+        eq_(f['object'], u'{"value":{"type":"\\u041c\\u0430pni\\u043a","array":[3,0,"x"]}}')
+        object = json.loads(f['object'])
+        eq_(object,{u'value': {u'array': [3, 0, u'x'], u'type': u'\u041c\u0430pni\u043a'}})
 
         ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.geojson')
         f = ds.all_features()[0]
@@ -51,6 +61,56 @@ if 'geojson' in mapnik.DatasourceCache.plugin_names():
         eq_(f['boolean'], True)
         eq_(f['NOM_FR'], u'Qu\xe9bec')
         eq_(f['NOM_FR'], u'Québec')
+        eq_(f['array'], u'[[[1],["deux"]],[["\\u0442\\u0440\\u0438","four","\\u4e94"]]]')
+        array = json.loads(f['array'])
+        eq_(array,[[[1], [u'deux']], [[u'\u0442\u0440\u0438', u'four', u'\u4e94']]])
+        eq_(f['object'], u'{"value":{"type":"\\u041c\\u0430pni\\u043a","array":[3,0,"x"]}}')
+        object = json.loads(f['object'])
+        eq_(object,{u'value': {u'array': [3, 0, u'x'], u'type': u'\u041c\u0430pni\u043a'}})
+
+    def test_large_geojson_properties():
+        ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.geojson',cache_features = False)
+        f = ds.features_at_point(ds.envelope().center()).features[0]
+        eq_(len(ds.fields()),9)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+
+        eq_(f['name'], u'Test')
+        eq_(f['int'], 1)
+        eq_(f['description'], u'Test: \u005C')
+        eq_(f['spaces'], u'this has spaces')
+        eq_(f['double'], 1.1)
+        eq_(f['boolean'], True)
+        eq_(f['NOM_FR'], u'Qu\xe9bec')
+        eq_(f['NOM_FR'], u'Québec')
+        eq_(f['array'], u'[[[1],["deux"]],[["\\u0442\\u0440\\u0438","four","\\u4e94"]]]')
+        array = json.loads(f['array'])
+        eq_(array,[[[1], [u'deux']], [[u'\u0442\u0440\u0438', u'four', u'\u4e94']]])
+        eq_(f['object'], u'{"value":{"type":"\\u041c\\u0430pni\\u043a","array":[3,0,"x"]}}')
+        object = json.loads(f['object'])
+        eq_(object,{u'value': {u'array': [3, 0, u'x'], u'type': u'\u041c\u0430pni\u043a'}})
+
+        ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.geojson')
+        f = ds.all_features()[0]
+        eq_(len(ds.fields()),9)
+
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+
+        eq_(f['name'], u'Test')
+        eq_(f['int'], 1)
+        eq_(f['description'], u'Test: \u005C')
+        eq_(f['spaces'], u'this has spaces')
+        eq_(f['double'], 1.1)
+        eq_(f['boolean'], True)
+        eq_(f['NOM_FR'], u'Qu\xe9bec')
+        eq_(f['NOM_FR'], u'Québec')
+        eq_(f['array'], u'[[[1],["deux"]],[["\\u0442\\u0440\\u0438","four","\\u4e94"]]]')
+        array = json.loads(f['array'])
+        eq_(array,[[[1], [u'deux']], [[u'\u0442\u0440\u0438', u'four', u'\u4e94']]])
+        eq_(f['object'], u'{"value":{"type":"\\u041c\\u0430pni\\u043a","array":[3,0,"x"]}}')
+        object = json.loads(f['object'])
+        eq_(object,{u'value': {u'array': [3, 0, u'x'], u'type': u'\u041c\u0430pni\u043a'}})
 
     def test_geojson_from_in_memory_string():
         # will silently fail since it is a geometry and needs to be a featurecollection.
