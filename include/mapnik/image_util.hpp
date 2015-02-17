@@ -409,35 +409,6 @@ void add_border(T & image)
     }
 }
 
-#ifdef _MSC_VER
-
-template MAPNIK_DECL void save_to_stream<image_rgba8>(
-    image_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type,
-    rgba_palette const& palette
-);
-
-template MAPNIK_DECL void save_to_stream<image_rgba8>(
-    image_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type
-);
-
-template MAPNIK_DECL void save_to_stream<image_view_rgba8> (
-    image_view_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type,
-    rgba_palette const& palette
-);
-
-template MAPNIK_DECL void save_to_stream<image_view_rgba8> (
-    image_view_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type
-);
-#endif
-
 }
 
 #endif // MAPNIK_IMAGE_UTIL_HPP

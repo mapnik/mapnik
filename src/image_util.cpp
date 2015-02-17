@@ -613,7 +613,7 @@ struct visitor_set_alpha
 
     void operator() (image_rgba8 & data)
     {
-        using pixel_type = typename image_rgba8::pixel_type;
+        using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
         {
             pixel_type* row_to =  data.getRow(y);
@@ -689,7 +689,7 @@ struct visitor_set_grayscale_to_alpha
 {
     void operator() (image_rgba8 & data)
     {
-        using pixel_type = typename image_rgba8::pixel_type;
+        using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
         {
             pixel_type* row_from = data.getRow(y);
@@ -722,7 +722,7 @@ struct visitor_set_grayscale_to_alpha_c
 
     void operator() (image_rgba8 & data)
     {
-        using pixel_type = typename image_rgba8::pixel_type;
+        using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
         {
             pixel_type* row_from = data.getRow(y);
@@ -834,7 +834,7 @@ struct visitor_set_color_to_alpha
 
     void operator() (image_rgba8 & data)
     {
-        using pixel_type = typename image_rgba8::pixel_type;
+        using pixel_type = image_rgba8::pixel_type;
         for (unsigned y = 0; y < data.height(); ++y)
         {
             pixel_type* row_from = data.getRow(y);
@@ -942,7 +942,7 @@ struct visitor_fill<color>
     
     void operator() (image_rgba8 & data)
     {
-        using pixel_type = typename image_rgba8::pixel_type;
+        using pixel_type = image_rgba8::pixel_type;
         pixel_type val = static_cast<pixel_type>(val_.rgba());
         data.set(val);
         data.set_premultiplied(val_.get_premultiplied());
@@ -1198,7 +1198,7 @@ struct visitor_set_rectangle
 
     void operator()(image_rgba8 & dst)
     {
-        using pixel_type = typename image_rgba8::pixel_type;
+        using pixel_type = image_rgba8::pixel_type;
         image_rgba8 src = util::get<image_rgba8>(src_);
         box2d<int> ext0(0,0,dst.width(),dst.height());
         box2d<int> ext1(x0_,y0_,x0_+src.width(),y0_+src.height());
