@@ -202,7 +202,7 @@ MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
 
 // CHECK BOUNDS
 template <typename T>
-MAPNIK_DECL bool check_bounds (T const& data, std::size_t x, std::size_t y)
+inline bool check_bounds (T const& data, std::size_t x, std::size_t y)
 {
     return (x < static_cast<int>(data.width()) && y < static_cast<int>(data.height()));
 }
