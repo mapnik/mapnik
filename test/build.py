@@ -23,6 +23,9 @@ else:
         test_env.PrependUnique(CPPPATH=test_env['CAIRO_CPPPATHS'])
         test_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     test_env.PrependUnique(CPPPATH=['./'])
+    if test_env['PLATFORM'] == 'Linux':
+        test_env['LINKFLAGS'].append('-pthread')
+    test_env.AppendUnique(LIBS='boost_program_options%s' % env['BOOST_APPEND'])
     test_env_local = test_env.Clone()
 
 
@@ -38,6 +41,18 @@ else:
     for standalone in glob.glob('./standalone/*cpp'):
         test_program = test_env_local.Program(standalone.replace('.cpp','-bin'), source=standalone)
         Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
+
+    # visual tests
+    source = Split(
+        """
+        visual/config.cpp
+        visual/report.cpp
+        visual/runner.cpp
+        visual/run.cpp
+        """
+        )
+    test_program = test_env_local.Program('visual/run', source=source)
+    Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
 
     # build locally if installing
     if 'install' in COMMAND_LINE_TARGETS:
