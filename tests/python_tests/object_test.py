@@ -69,8 +69,8 @@ def test_line_symbolizer():
 def test_line_symbolizer_stroke_reference():
     l = mapnik.LineSymbolizer(mapnik.Color('green'),0.1)
     l.stroke.add_dash(.1,.1)
-    l.stroke.add_dash(.1,.1)
-    eq_(l.stroke.get_dashes(), [(.1,.1),(.1,.1)])
+    l.stroke.add_dash(4,4)
+    eq_(l.stroke.get_dashes(), [(.1,.1),(4,4)])
     eq_(l.stroke.color,mapnik.Color('green'))
     eq_(l.stroke.opacity,1.0)
     assert_almost_equal(l.stroke.width,0.1)
@@ -88,6 +88,9 @@ def test_stroke_dash_api():
 
 def test_text_symbolizer():
     s = mapnik.TextSymbolizer()
+    eq_(s.orientation,None)
+    s.orientation = mapnik.Expression('45');
+    eq_(str(s.orientation),str(mapnik.Expression('45')))
     eq_(s.comp_op,mapnik.CompositeOp.src_over)
     eq_(s.clip,True)
     eq_(s.halo_rasterizer,mapnik.halo_rasterizer.FULL)
