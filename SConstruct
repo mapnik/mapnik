@@ -113,7 +113,7 @@ PLUGINS = { # plugins with external dependencies
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
             # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
-            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
+            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'clntsh','lang':'C++'},
             'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
 

@@ -31,6 +31,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/make_unique.hpp>
 
 // ogr
 #include "occi_featureset.hpp"

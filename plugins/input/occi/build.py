@@ -36,7 +36,7 @@ plugin_sources = Split(
   """ % locals()
 )
 
-libraries = [ 'clntsh' ]
+libraries = [ 'clntsh', 'occi' ]
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append(env['ICU_LIB_NAME'])
 
