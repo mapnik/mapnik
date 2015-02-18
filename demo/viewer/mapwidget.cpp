@@ -178,48 +178,51 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
 
                if (fs)
                {
-                  feature_ptr feat  = fs->next();
-                  if (feat)
-                  {
+                   feature_ptr feat  = fs->next();
+                   if (feat)
+                   {
 
-                      feature_kv_iterator itr(*feat,true);
-                      feature_kv_iterator end(*feat);
+// FIXME
+#if 0
+                       feature_kv_iterator itr(*feat,true);
+                       feature_kv_iterator end(*feat);
 
-                      for ( ;itr!=end; ++itr)
-                      {
-                          info.push_back(QPair<QString,QString>(QString(std::get<0>(*itr).c_str()),
-                                                                std::get<1>(*itr).to_string().c_str()));
-                      }
+                       for ( ;itr!=end; ++itr)
+                       {
+                           info.push_back(QPair<QString,QString>(QString(std::get<0>(*itr).c_str()),
+                                                                 std::get<1>(*itr).to_string().c_str()));
+                       }
 
-                      using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
+                       using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
 
-                     for  (unsigned i=0; i<feat->num_geometries();++i)
-                     {
-                        mapnik::geometry_type const& geom = feat->get_geometry(i);
-                        mapnik::vertex_adapter va(geom);
-                        path_type path(t,va,prj_trans);
-                        if (va.size() > 0)
-                        {
-                           QPainterPath qpath;
-                           double x,y;
-                           va.vertex(&x,&y);
-                           qpath.moveTo(x,y);
-                           for (unsigned j = 1; j < geom.size(); ++j)
+                       for  (unsigned i=0; i<feat->num_geometries();++i)
+                       {
+                           mapnik::geometry_type const& geom = feat->get_geometry(i);
+                           mapnik::vertex_adapter va(geom);
+                           path_type path(t,va,prj_trans);
+                           if (va.size() > 0)
                            {
-                              va.vertex(&x,&y);
-                              qpath.lineTo(x,y);
+                               QPainterPath qpath;
+                               double x,y;
+                               va.vertex(&x,&y);
+                               qpath.moveTo(x,y);
+                               for (unsigned j = 1; j < geom.size(); ++j)
+                               {
+                                   va.vertex(&x,&y);
+                                   qpath.lineTo(x,y);
+                               }
+                               QPainter painter(&pix_);
+                               QPen pen(QColor(255,0,0,96));
+                               pen.setWidth(3);
+                               pen.setCapStyle(Qt::RoundCap);
+                               pen.setJoinStyle(Qt::RoundJoin);
+                               painter.setPen(pen);
+                               painter.drawPath(qpath);
+                               update();
                            }
-                           QPainter painter(&pix_);
-                           QPen pen(QColor(255,0,0,96));
-                           pen.setWidth(3);
-                           pen.setCapStyle(Qt::RoundCap);
-                           pen.setJoinStyle(Qt::RoundJoin);
-                           painter.setPen(pen);
-                           painter.drawPath(qpath);
-                           update();
-                        }
-                     }
-                  }
+               }
+#endif
+               }
                }
 
                if (info.size() > 0)
@@ -530,8 +533,8 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
-
-#ifdef HAVE_CAIRO
+// FIXME
+#if 0 //def HAVE_CAIRO
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
     mapnik::cairo_ptr cairo = mapnik::create_context(image_surface);

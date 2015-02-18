@@ -209,6 +209,14 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
             converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
         // FIXME
+
+        mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
+        if (geometry.is<mapnik::new_geometry::line_string>())
+        {
+            mapnik::new_geometry::line_string const& line = mapnik::util::get<mapnik::new_geometry::line_string>(geometry);
+            mapnik::new_geometry::line_string_vertex_adapter va(line);
+            converter.apply(va);
+        }
         /*
         for (geometry_type const& geom : feature.paths())
         {

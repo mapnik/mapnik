@@ -40,6 +40,7 @@
 #include <ostream>                      // for basic_ostream, operator<<, etc
 #include <sstream>                      // for basic_stringstream
 #include <stdexcept>                    // for out_of_range
+#include <iostream>
 
 namespace mapnik {
 
@@ -206,6 +207,7 @@ public:
     inline box2d<double> envelope() const
     {
         box2d<double> result;
+        std::cerr << "ENVELOPE" << std::endl;
         return result;
     }
 

@@ -90,24 +90,23 @@ void shape_io::read_bbox(shape_file::record_type & record, mapnik::box2d<double>
     bbox.init(lox, loy, hix, hiy);
 }
 
-void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry_container & geom)
+mapnik::new_geometry::geometry shape_io::read_polyline(shape_file::record_type & record)
 {
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
+
     if (num_parts == 1)
     {
-        std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+
+        mapnik::new_geometry::line_string line;
         record.skip(4);
-        double x = record.read_double();
-        double y = record.read_double();
-        line->move_to(x, y);
-        for (int i = 1; i < num_points; ++i)
+        for (int i = 0; i < num_points; ++i)
         {
-            x = record.read_double();
-            y = record.read_double();
-            line->line_to(x, y);
+            double x = record.read_double();
+            double y = record.read_double();
+            line.add_coord(x, y);
         }
-        geom.push_back(line.release());
+        return std::move(mapnik::new_geometry::geometry(std::move(line)));
     }
     else
     {
@@ -118,9 +117,9 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
         }
 
         int start, end;
+        mapnik::new_geometry::multi_line_string multi_line;
         for (int k = 0; k < num_parts; ++k)
         {
-            std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
             start = parts[k];
             if (k == num_parts - 1)
             {
@@ -131,18 +130,16 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
                 end = parts[k + 1];
             }
 
-            double x = record.read_double();
-            double y = record.read_double();
-            line->move_to(x, y);
-
-            for (int j = start + 1; j < end; ++j)
+            mapnik::new_geometry::line_string line;
+            for (int j = start; j < end; ++j)
             {
-                x = record.read_double();
-                y = record.read_double();
-                line->line_to(x, y);
+                double x = record.read_double();
+                double y = record.read_double();
+                line.add_coord(x, y);
             }
-            geom.push_back(line.release());
+            multi_line.push_back(std::move(line));
         }
+        return std::move(mapnik::new_geometry::geometry(std::move(multi_line)));
     }
 }
 
@@ -160,8 +157,11 @@ bool is_clockwise(T const& points, int start, int end)
     return ( area < 0.0) ? true : false;
 }
 
-void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_container & geom)
+mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & record)
 {
+// FIXME
+    return std::move(mapnik::new_geometry::geometry(mapnik::new_geometry::polygon3()));
+#if 0
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
     std::vector<int> parts(num_parts);
@@ -182,7 +182,8 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
         points.emplace_back(x,y);
     }
 
-    std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
+    //std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
+    mapnik::new_geometry::polygon3 poly;
     for (int k = 0; k < num_parts; ++k)
     {
         int start = parts[k];
@@ -208,4 +209,5 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
         poly->close_path();
     }
     geom.push_back(poly.release());
+#endif
 }

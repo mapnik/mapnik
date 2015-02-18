@@ -88,9 +88,11 @@ feature_ptr shape_featureset<filterT>::next()
             double y = record.read_double();
             if (!filter_.pass(mapnik::box2d<double>(x,y,x,y)))
                 continue;
-            std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-            point->move_to(x, y);
-            feature->paths().push_back(point.release());
+            //std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
+            //point->move_to(x, y);
+            //feature->paths().push_back(point.release());
+            mapnik::new_geometry::point pt(x, y);
+            feature->set_geometry(std::move(pt));
             break;
         }
         case shape_io::shape_multipoint:
@@ -100,14 +102,18 @@ feature_ptr shape_featureset<filterT>::next()
             shape_io::read_bbox(record, feature_bbox_);
             if (!filter_.pass(feature_bbox_)) continue;
             int num_points = record.read_ndr_integer();
+            mapnik::new_geometry::multi_point multi_pt;
             for (int i = 0; i < num_points; ++i)
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-                point->move_to(x, y);
-                feature->paths().push_back(point.release());
+                mapnik::new_geometry::point pt(x, y);
+                //std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
+                //point->move_to(x, y);
+                //feature->paths().push_back(point.release());
+                multi_pt.push_back(std::move(pt));
             }
+            feature->set_geometry(std::move(multi_pt));
             break;
         }
 
@@ -117,7 +123,12 @@ feature_ptr shape_featureset<filterT>::next()
         {
             shape_io::read_bbox(record, feature_bbox_);
             if (!filter_.pass(feature_bbox_)) continue;
-            shape_io::read_polyline(record, feature->paths());
+            mapnik::new_geometry::geometry && geometry = shape_io::read_polyline(record);
+            if (geometry.is<mapnik::new_geometry::line_string>())
+            {
+                auto const& line = mapnik::util::get<mapnik::new_geometry::line_string>(geometry);
+            }
+            feature->set_geometry(std::move(geometry));
             break;
         }
         case shape_io::shape_polygon:
@@ -126,7 +137,7 @@ feature_ptr shape_featureset<filterT>::next()
         {
             shape_io::read_bbox(record, feature_bbox_);
             if (!filter_.pass(feature_bbox_)) continue;
-            shape_io::read_polygon(record, feature->paths());
+            //shape_io::read_polygon(record, feature->paths());
             break;
         }
         default :

@@ -196,7 +196,7 @@ struct polygon : vertex_sequence
     }
 };
 
-typedef mapnik::util::variant< point,line_string, polygon, polygon2, polygon3> geometry;
+typedef mapnik::util::variant< point,line_string, polygon3, multi_point, multi_line_string, multi_polygon> geometry;
 
 struct point_vertex_adapter
 {
