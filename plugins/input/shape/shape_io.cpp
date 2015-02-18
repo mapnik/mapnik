@@ -146,44 +146,32 @@ mapnik::new_geometry::geometry shape_io::read_polyline(shape_file::record_type &
 }
 
 template <typename T>
-bool is_clockwise(T const& points, int start, int end)
+bool is_clockwise(T const& ring)
 {
-    int num_points = end - start;
     double area = 0.0;
+    std::size_t num_points = ring.size();
     for (int i = 0; i < num_points; ++i)
     {
-        auto const& p0 = points[start + i];
-        auto const& p1 = points[start + (i + 1) % num_points];
-        area += std::get<0>(p0) * std::get<1>(p1) - std::get<1>(p0) * std::get<0>(p1);
+        auto const& p0 = ring[i];
+        auto const& p1 = ring[(i + 1) % num_points];
+        area += p0.x * p1.y - p0.y * p1.x;
     }
     return ( area < 0.0) ? true : false;
 }
 
 mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & record)
 {
-// FIXME
-    return std::move(mapnik::new_geometry::geometry(mapnik::new_geometry::polygon3()));
-#if 0
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
-    std::vector<int> parts(num_parts);
 
-    using points_cont = std::vector<std::tuple<double,double> >;
-    points_cont points;
-    points.reserve(num_points);
+    std::vector<int> parts(num_parts);
 
     for (int i = 0; i < num_parts; ++i)
     {
         parts[i] = record.read_ndr_integer();
     }
 
-    for (int k = 0; k < num_points; ++k)
-    {
-        double x = record.read_double();
-        double y = record.read_double();
-        points.emplace_back(x,y);
-    }
-
+    mapnik::new_geometry::multi_polygon multi_poly;
     mapnik::new_geometry::polygon3 poly;
     for (int k = 0; k < num_parts; ++k)
     {
@@ -191,24 +179,33 @@ mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & 
         int end;
         if (k == num_parts - 1) end = num_points;
         else end = parts[k + 1];
-        auto const& pt = points[start];
-        double x = std::get<0>(pt);
-        double y = std::get<1>(pt);
-        if ( k > 0 && is_clockwise(points, start, end))
+        mapnik::new_geometry::linear_ring ring;
+        ring.reserve(end - start);
+        for (int j = start; j < end; ++j)
         {
-            geom.push_back(poly.release());
-            poly.reset(new geometry_type(mapnik::geometry_type::types::Polygon));
+            double x = record.read_double();
+            double y = record.read_double();
+            ring.emplace_back(x, y);
         }
-        poly->move_to(x, y);
-        for (int j = start + 1; j < end; ++j)
+        if (k == 0)
         {
-            auto const& pt = points[j];
-            x = std::get<0>(pt);
-            y = std::get<1>(pt);
-            poly->line_to(x, y);
+            poly.set_exterior_ring(std::move(ring));
         }
-        poly->close_path();
+        else if (is_clockwise(ring))
+        {
+            multi_poly.emplace_back(std::move(poly));
+            poly.interior_rings.clear();
+            poly.set_exterior_ring(std::move(ring));
+        }
+        else
+        {
+            poly.add_hole(std::move(ring));
+        }
     }
-    geom.push_back(poly.release());
-#endif
+    if (multi_poly.size() > 0)
+    {
+        std::cerr << "multi_polygon" << std::endl;
+        return std::move(mapnik::new_geometry::geometry(std::move(multi_poly)));
+    }
+    return std::move(mapnik::new_geometry::geometry(std::move(poly)));
 }

@@ -147,8 +147,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         {
             shape_io::read_bbox(record, feature_bbox_);
             if (!filter_.pass(feature_bbox_)) continue;
-            // FIXME
-            //shape_io::read_polygon(record,feature->paths());
+            feature->set_geometry(shape_io::read_polygon(record));
             break;
         }
         default :

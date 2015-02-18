@@ -57,21 +57,27 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     converter.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-    // FIXME
-    /*
-    for (geometry_type const& geom : feature.paths())
+
+    mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
+    if (geometry.is<mapnik::new_geometry::polygon3>())
     {
-        if (geom.size() > 2)
+        auto const& poly = mapnik::util::get<mapnik::new_geometry::polygon3>(geometry);
+        mapnik::new_geometry::polygon_vertex_adapter_3 va(poly);
+        converter.apply(va);
+    }
+    else if (geometry.is<mapnik::new_geometry::multi_polygon>())
+    {
+        auto const& multi_polygon = mapnik::util::get<mapnik::new_geometry::multi_polygon>(geometry);
+        for (auto const& poly : multi_polygon)
         {
-            vertex_adapter va(geom);
+            mapnik::new_geometry::polygon_vertex_adapter_3 va(poly);
             converter.apply(va);
         }
     }
-    */
     color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);
     fill_func(fill, opacity);
 }
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP
