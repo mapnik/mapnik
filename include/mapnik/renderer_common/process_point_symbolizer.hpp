@@ -63,6 +63,8 @@ void render_point_symbolizer(point_symbolizer const &sym,
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common.scale_factor_);
 
+        // FIXME
+        /*
         for (std::size_t i=0; i<feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
@@ -97,6 +99,7 @@ void render_point_symbolizer(point_symbolizer const &sym,
                     common.detector_->insert(label_ext);
             }
         }
+        */
     }
 }
 

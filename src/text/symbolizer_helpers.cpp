@@ -80,6 +80,8 @@ void base_symbolizer_helper::initialize_geometries() const
 {
     bool largest_box_only = text_props_->largest_bbox_only;
     double minimum_path_length = text_props_->minimum_path_length;
+    // FIXME
+    /*
     for ( auto const& geom :  feature_.paths())
     {
         // don't bother with empty geometries
@@ -99,7 +101,7 @@ void base_symbolizer_helper::initialize_geometries() const
         // TODO - calculate length here as well
         geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
     }
-
+    */
     if (largest_box_only)
     {
         geometries_to_process_.sort(largest_bbox_first());

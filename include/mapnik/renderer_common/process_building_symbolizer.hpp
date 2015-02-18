@@ -37,6 +37,8 @@ void render_building_symbolizer(mapnik::feature_impl &feature,
                                 double height,
                                 F1 face_func, F2 frame_func, F3 roof_func)
 {
+    // FIXME
+    /*
     for (auto const& geom : feature.paths())
     {
         if (geom.size() > 2)
@@ -111,6 +113,7 @@ void render_building_symbolizer(mapnik::feature_impl &feature,
             roof_func(*roof);
         }
     }
+    */
 }
 
 } // namespace mapnik

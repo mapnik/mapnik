@@ -135,6 +135,8 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     converter.set<affine_transform_tag>(); // optional affine transform
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
+    // FIXME
+    /*
     for (geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 1)
@@ -143,6 +145,7 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
             converter.apply(va);
         }
     }
+    */
 }
 
 template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,

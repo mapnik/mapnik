@@ -178,6 +178,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
+        // FIXME
+        /*
         for (geometry_type const& geom : feature.paths())
         {
             if (geom.size() > 1)
@@ -186,6 +188,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                 converter.apply(va);
             }
         }
+        */
     }
     else
     {
@@ -205,7 +208,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (has_key(sym, keys::stroke_dasharray))
             converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
-
+        // FIXME
+        /*
         for (geometry_type const& geom : feature.paths())
         {
             if (geom.size() > 1)
@@ -214,7 +218,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                 converter.apply(va);
             }
         }
-
+        */
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));

@@ -54,14 +54,15 @@ struct geometry_type_attribute
     V value(F const& f) const
     {
         mapnik::value_integer type = 0;
-        for (auto const& geom : f.paths())
-        {
-            if (type != 0 && geom.type() != type)
-            {
-                return value_integer(4); // Collection
-            }
-            type = geom.type();
-        }
+        //for (auto const& geom : f.paths())
+        //{
+        //    if (type != 0 && geom.type() != type)
+        //    {
+        //        return value_integer(4); // Collection
+        //   }
+        //    type = geom.type();
+        //}
+        // FIXME
         return type;
     }
 };

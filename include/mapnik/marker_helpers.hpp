@@ -191,6 +191,8 @@ void setup_transform_scaling(agg::trans_affine & tr,
 template <typename Converter>
 void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, symbolizer_base const& sym)
 {
+    // FIXME
+    /*
     std::size_t geom_count = feature.paths().size();
     if (geom_count == 1)
     {
@@ -253,6 +255,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             }
         }
     }
+    */
 }
 
 }

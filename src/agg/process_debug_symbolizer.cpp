@@ -67,6 +67,8 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
+        // FIXME
+        /*
         for (auto const& geom : feature.paths())
         {
             double x;
@@ -87,6 +89,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
                 pixmap_.setPixel(x+1,y-1,0xff0000ff);
             }
         }
+        */
     }
 }
 

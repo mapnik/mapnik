@@ -98,6 +98,8 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                   simplify_tag, smooth_tag,
                                                   offset_transform_tag>;
                     vertex_converter_type converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
+                    // FIXME
+                    /*
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -106,6 +108,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                         else if (type == geometry_type::types::LineString)
                             converter.template set<clip_line_tag>();
                     }
+                    */
                     converter.template set<transform_tag>(); //always transform
                     if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
                     converter.template set<affine_transform_tag>(); // optional affine transform
@@ -142,6 +145,8 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                   simplify_tag, smooth_tag,
                                                   offset_transform_tag>;
                     vertex_converter_type converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
+                    // FIXME
+                    /*
                     if (clip && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -150,6 +155,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                         else if (type == geometry_type::types::LineString)
                             converter.template set<clip_line_tag>();
                     }
+                    */
                     converter.template set<transform_tag>(); //always transform
                     if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
                     converter.template set<affine_transform_tag>(); // optional affine transform
@@ -186,6 +192,8 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                               offset_transform_tag>;
                 vertex_converter_type converter(clip_box, rasterizer_dispatch, sym,common.t_,prj_trans,geom_tr,feature,common.vars_,common.scale_factor_);
 
+                // FIXME
+                /*
                 if (clip && feature.paths().size() > 0) // optional clip (default: true)
                 {
                     geometry_type::types type = feature.paths()[0].type();
@@ -194,6 +202,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                     else if (type == geometry_type::types::LineString)
                         converter.template set<clip_line_tag>();
                 }
+                */
                 converter.template set<transform_tag>(); //always transform
                 if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
                 converter.template set<affine_transform_tag>(); // optional affine transform

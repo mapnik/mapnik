@@ -138,6 +138,8 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     {
         double x0 = 0;
         double y0 = 0;
+        // FIXME
+        /*
         if (feature.num_geometries() > 0)
         {
             vertex_adapter va(feature.get_geometry(0));
@@ -146,6 +148,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
             path_type path(common_.t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
+        */
         offset_x = unsigned(current_buffer_->width() - x0);
         offset_y = unsigned(current_buffer_->height() - y0);
     }
@@ -168,6 +171,8 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
+    // FIXME
+    /*
     for ( geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 2)
@@ -176,6 +181,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
             converter.apply(va);
         }
     }
+    */
     agg::scanline_u8 sl;
     ras_ptr->filling_rule(agg::fill_even_odd);
     agg::render_scanlines(*ras_ptr, sl, rp);

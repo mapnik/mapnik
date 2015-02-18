@@ -28,8 +28,8 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+#include <mapnik/geometry_impl.hpp>
+//#include <mapnik/geometry_container.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
@@ -103,9 +103,8 @@ public:
         : id_(id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
-        geom_cont_(),
-        raster_()
-        {}
+        geom_(mapnik::util::no_init()),
+        raster_() {}
 
     inline mapnik::value_integer id() const { return id_;}
 
@@ -194,49 +193,19 @@ public:
         return ctx_;
     }
 
-    inline geometry_container const& paths() const
+    inline void set_geometry(new_geometry::geometry && geom)
     {
-        return geom_cont_;
+        geom_ = std::move(geom);
     }
 
-    inline geometry_container & paths()
+    inline new_geometry::geometry const& get_geometry() const
     {
-        return geom_cont_;
-    }
-
-    inline void add_geometry(geometry_type * geom)
-    {
-        geom_cont_.push_back(geom);
-    }
-
-    inline std::size_t num_geometries() const
-    {
-        return geom_cont_.size();
-    }
-
-    inline geometry_type const& get_geometry(std::size_t index) const
-    {
-        return geom_cont_[index];
+        return geom_;
     }
 
     inline box2d<double> envelope() const
     {
-        // TODO - cache this
         box2d<double> result;
-        bool first = true;
-        for (auto const& geom : geom_cont_)
-        {
-            if (first)
-            {
-                box2d<double> box = ::mapnik::envelope(geom);
-                result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
-                first = false;
-            }
-            else
-            {
-                result.expand_to_include(::mapnik::envelope(geom));
-            }
-        }
         return result;
     }
 
@@ -287,7 +256,7 @@ private:
     mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
-    geometry_container geom_cont_;
+    new_geometry::geometry geom_;
     raster_ptr raster_;
 };
 

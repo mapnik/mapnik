@@ -57,7 +57,8 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     converter.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-
+    // FIXME
+    /*
     for (geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 2)
@@ -66,7 +67,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
             converter.apply(va);
         }
     }
-
+    */
     color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);
     fill_func(fill, opacity);
 }

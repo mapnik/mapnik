@@ -46,6 +46,8 @@ struct accumulate_extent
 
     void operator() (feature_ptr const& feat)
     {
+        // FIXME
+        /*
         auto size = feat->num_geometries();
         for (std::size_t i = 0; i < size; ++i)
         {
@@ -61,6 +63,7 @@ struct accumulate_extent
                 ext_.expand_to_include(bbox);
             }
         }
+        */
     }
 
     box2d<double> & ext_;

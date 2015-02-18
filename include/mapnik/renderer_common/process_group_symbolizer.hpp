@@ -340,7 +340,8 @@ void render_group_symbolizer(group_symbolizer const& sym,
         }
 
         // add a single point geometry at pixel origin
-        sub_feature->add_geometry(origin_point(prj_trans, common));
+        // FIXME
+//sub_feature->add_geometry(origin_point(prj_trans, common));
 
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())

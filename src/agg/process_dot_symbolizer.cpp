@@ -83,7 +83,8 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     ren.color(agg::rgba8_pre(fill.red(), fill.green(), fill.blue(), int(fill.alpha() * opacity)));
     agg::ellipse el(0,0,rx,ry);
     unsigned num_steps = el.num_steps();
-
+    // FIXME
+    /*
     for (geometry_type const& geom : feature.paths())
     {
         double x,y,z = 0;
@@ -100,6 +101,7 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
             agg::render_scanlines(*ras_ptr, sl, ren);
         }
     }
+    */
 }
 
 template void agg_renderer<image_32>::process(dot_symbolizer const&,

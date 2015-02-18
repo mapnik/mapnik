@@ -40,12 +40,15 @@ public:
 
     bool pass(feature_impl & feature)
     {
+        // FIXME
+        /*
         for (geometry_type const& geom : feature.paths())
         {
             vertex_adapter va(geom);
             if (label::hit_test(va, x_,y_,tol_))
                 return true;
         }
+        */
         return false;
     }
 

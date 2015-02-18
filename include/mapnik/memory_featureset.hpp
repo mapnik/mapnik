@@ -77,6 +77,8 @@ public:
                 }
                 else
                 {
+                    // FIXME
+                    /*
                     for (std::size_t i=0; i<(*pos_)->num_geometries();++i)
                     {
                         geometry_type const& geom = (*pos_)->get_geometry(i);
@@ -85,6 +87,7 @@ public:
                             return *pos_++;
                         }
                     }
+                    */
                 }
                 ++pos_;
             }
