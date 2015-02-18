@@ -178,17 +178,22 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        // FIXME
-        /*
-        for (geometry_type const& geom : feature.paths())
+        mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
+        if (geometry.is<mapnik::new_geometry::line_string>())
         {
-            if (geom.size() > 1)
-            {
-                vertex_adapter va(geom);
-                converter.apply(va);
-            }
+            auto const& line = mapnik::util::get<mapnik::new_geometry::line_string>(geometry);
+            mapnik::new_geometry::line_string_vertex_adapter va(line);
+            converter.apply(va);
         }
-        */
+        else if (geometry.is<mapnik::new_geometry::multi_line_string>())
+        {
+           auto const& multi_line = mapnik::util::get<mapnik::new_geometry::multi_line_string>(geometry);
+           for (auto const& line : multi_line)
+           {
+               mapnik::new_geometry::line_string_vertex_adapter va(line);
+               converter.apply(va);
+           }
+        }
     }
     else
     {
@@ -208,29 +213,24 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (has_key(sym, keys::stroke_dasharray))
             converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
-        // FIXME
 
         mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
         if (geometry.is<mapnik::new_geometry::line_string>())
         {
-            mapnik::new_geometry::line_string const& line = mapnik::util::get<mapnik::new_geometry::line_string>(geometry);
+            auto const& line = mapnik::util::get<mapnik::new_geometry::line_string>(geometry);
             mapnik::new_geometry::line_string_vertex_adapter va(line);
             converter.apply(va);
         }
-        else
+        else if (geometry.is<mapnik::new_geometry::multi_line_string>())
         {
-            std::cerr << "FIXME" << std::endl;
+           auto const& multi_line = mapnik::util::get<mapnik::new_geometry::multi_line_string>(geometry);
+           for (auto const& line : multi_line)
+           {
+               mapnik::new_geometry::line_string_vertex_adapter va(line);
+               converter.apply(va);
+           }
         }
-        /*
-        for (geometry_type const& geom : feature.paths())
-        {
-            if (geom.size() > 1)
-            {
-                vertex_adapter va(geom);
-                converter.apply(va);
-            }
-        }
-        */
+
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));

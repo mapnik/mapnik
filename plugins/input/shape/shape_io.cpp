@@ -184,7 +184,6 @@ mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & 
         points.emplace_back(x,y);
     }
 
-    //std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
     mapnik::new_geometry::polygon3 poly;
     for (int k = 0; k < num_parts; ++k)
     {
