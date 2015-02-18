@@ -102,18 +102,15 @@ feature_ptr shape_featureset<filterT>::next()
             shape_io::read_bbox(record, feature_bbox_);
             if (!filter_.pass(feature_bbox_)) continue;
             int num_points = record.read_ndr_integer();
-            mapnik::new_geometry::multi_point multi_pt;
+            mapnik::new_geometry::multi_point multi_point;
             for (int i = 0; i < num_points; ++i)
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                mapnik::new_geometry::point pt(x, y);
-                //std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-                //point->move_to(x, y);
-                //feature->paths().push_back(point.release());
-                multi_pt.push_back(std::move(pt));
+                mapnik::new_geometry::point point(x, y);
+                multi_point.push_back(std::move(point));
             }
-            feature->set_geometry(std::move(multi_pt));
+            feature->set_geometry(std::move(multi_point));
             break;
         }
 
