@@ -102,8 +102,8 @@ struct line_string : vertex_sequence
     line_string() = default;
     line_string (line_string && other) = default ;
     line_string& operator=(line_string &&) = default;
-    line_string (line_string const& ) = default;
-    line_string& operator=(line_string const&) = default;
+    line_string (line_string const& ) = delete;
+    line_string& operator=(line_string const&) = delete;
     inline std::size_t num_points() const { return data.size(); }
     inline void clear() { data.clear();}
     inline void resize(std::size_t new_size) { data.resize(new_size);}

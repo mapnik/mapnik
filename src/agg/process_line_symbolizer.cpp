@@ -217,6 +217,10 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
             mapnik::new_geometry::line_string_vertex_adapter va(line);
             converter.apply(va);
         }
+        else
+        {
+            std::cerr << "FIXME" << std::endl;
+        }
         /*
         for (geometry_type const& geom : feature.paths())
         {

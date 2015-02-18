@@ -138,8 +138,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         {
             shape_io::read_bbox(record, feature_bbox_);
             if (!filter_.pass(feature_bbox_)) continue;
-            mapnik::new_geometry::geometry && geometry = shape_io::read_polyline(record);
-            feature->set_geometry(std::move(geometry));
+            feature->set_geometry(shape_io::read_polyline(record));
             break;
         }
         case shape_io::shape_polygon:
