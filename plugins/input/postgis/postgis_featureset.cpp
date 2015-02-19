@@ -41,7 +41,6 @@
 #include <string>
 #include <memory>
 
-using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
 using mapnik::feature_factory;
@@ -123,8 +122,8 @@ feature_ptr postgis_featureset::next()
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
 
-        if (!geometry_utils::from_wkb(feature->paths(), data, size))
-            continue;
+        mapnik::new_geometry::geometry geometry = geometry_utils::from_wkb(data, size);
+        feature->set_geometry(std::move(geometry));
 
         totalGeomSize_ += size;
         unsigned num_attrs = ctx_->size() + 1;
