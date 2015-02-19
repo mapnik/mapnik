@@ -20,6 +20,9 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_GEOMETRY_IMPL_HPP
+#define MAPNIK_GEOMETRY_IMPL_HPP
+
 #include <vector>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/vertex.hpp>
@@ -469,3 +472,5 @@ struct vertex_processor
 };
 
 }}
+
+#endif //MAPNIK_GEOMETRY_IMPL_HPP
