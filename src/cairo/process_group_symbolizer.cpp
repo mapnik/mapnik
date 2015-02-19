@@ -77,7 +77,7 @@ struct thunk_renderer
                                      thunk.opacity_);
     }
 
-    void operator()(raster_marker_render_thunk<image_rgba8> const &thunk) const
+    void operator()(raster_marker_render_thunk const& thunk) const
     {
         cairo_save_restore guard(context_);
         context_.set_operator(thunk.comp_op_);

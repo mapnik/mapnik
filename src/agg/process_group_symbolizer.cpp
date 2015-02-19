@@ -94,7 +94,7 @@ struct thunk_renderer<image_rgba8>
         render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(), offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
     }
 
-    void operator()(raster_marker_render_thunk<image_rgba8> const &thunk) const
+    void operator()(raster_marker_render_thunk const &thunk) const
     {
         using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>; // comp blender
         using buf_type = agg::rendering_buffer;

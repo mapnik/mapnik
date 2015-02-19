@@ -46,7 +46,7 @@ class MAPNIK_DECL marker_cache :
 private:
     marker_cache();
     ~marker_cache();
-    bool insert_marker(std::string const& key, marker & path);
+    bool insert_marker(std::string const& key, marker && path);
     boost::unordered_map<std::string, mapnik::marker> marker_cache_;
     bool insert_svg(std::string const& name, std::string const& svg_string);
     boost::unordered_map<std::string,std::string> svg_cache_;

@@ -105,7 +105,7 @@ struct thunk_renderer
         pixmap_.add_feature(feature_);
     }
 
-    void operator()(raster_marker_render_thunk<image_rgba8> const &thunk) const
+    void operator()(raster_marker_render_thunk const &thunk) const
     {
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
