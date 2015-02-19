@@ -88,11 +88,7 @@ feature_ptr shape_featureset<filterT>::next()
             double y = record.read_double();
             if (!filter_.pass(mapnik::box2d<double>(x,y,x,y)))
                 continue;
-            //std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-            //point->move_to(x, y);
-            //feature->paths().push_back(point.release());
-            mapnik::new_geometry::point pt(x, y);
-            feature->set_geometry(std::move(pt));
+            feature->set_geometry(mapnik::new_geometry::point(x,y));
             break;
         }
         case shape_io::shape_multipoint:
@@ -107,8 +103,7 @@ feature_ptr shape_featureset<filterT>::next()
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                mapnik::new_geometry::point point(x, y);
-                multi_point.push_back(std::move(point));
+                multi_point.emplace_back(mapnik::new_geometry::point(x, y));
             }
             feature->set_geometry(std::move(multi_point));
             break;

@@ -204,7 +204,6 @@ mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & 
     }
     if (multi_poly.size() > 0)
     {
-        std::cerr << "multi_polygon" << std::endl;
         return std::move(mapnik::new_geometry::geometry(std::move(multi_poly)));
     }
     return std::move(mapnik::new_geometry::geometry(std::move(poly)));

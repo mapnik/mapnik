@@ -104,11 +104,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         {
             double x = record.read_double();
             double y = record.read_double();
-            mapnik::new_geometry::point point(x, y);
-            //std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-            //point->move_to(x, y);
-            //feature->paths().push_back(point.release());
-            feature->set_geometry(std::move(point));
+            feature->set_geometry(mapnik::new_geometry::point(x,y));
             break;
         }
         case shape_io::shape_multipoint:
@@ -123,11 +119,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                mapnik::new_geometry::point point(x, y);
-                //std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-                //point->move_to(x, y);
-                //feature->paths().push_back(point.release());
-                multi_point.emplace_back(point);
+                multi_point.emplace_back(mapnik::new_geometry::point(x, y));
             }
             feature->set_geometry(std::move(multi_point));
             break;
