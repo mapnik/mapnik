@@ -202,7 +202,7 @@ MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
 
 // CHECK BOUNDS
 template <typename T>
-MAPNIK_DECL bool check_bounds (T const& data, std::size_t x, std::size_t y)
+inline bool check_bounds (T const& data, std::size_t x, std::size_t y)
 {
     return (x < static_cast<int>(data.width()) && y < static_cast<int>(data.height()));
 }
@@ -408,35 +408,6 @@ void add_border(T & image)
         image(image.width()-1,y) = 0xffff0000; // blue
     }
 }
-
-#ifdef _MSC_VER
-
-template MAPNIK_DECL void save_to_stream<image_rgba8>(
-    image_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type,
-    rgba_palette const& palette
-);
-
-template MAPNIK_DECL void save_to_stream<image_rgba8>(
-    image_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type
-);
-
-template MAPNIK_DECL void save_to_stream<image_view_rgba8> (
-    image_view_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type,
-    rgba_palette const& palette
-);
-
-template MAPNIK_DECL void save_to_stream<image_view_rgba8> (
-    image_view_rgba8 const& image,
-    std::ostream & stream,
-    std::string const& type
-);
-#endif
 
 }
 
