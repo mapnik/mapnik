@@ -201,7 +201,7 @@ struct symbolizer_icon
     {
         // FIXME!
         /*
-          std::shared_ptr<mapnik::image_data_rgba8> symbol = sym.get_image();
+          std::shared_ptr<mapnik::image_rgba8> symbol = sym.get_image();
           if (symbol)
           {
           QImage image(symbol->getBytes(),

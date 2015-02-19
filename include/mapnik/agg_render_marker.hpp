@@ -66,7 +66,7 @@ void render_vector_marker(SvgRenderer & svg_renderer, RasterizerType & ras, Rend
 }
 
 template <typename RendererType, typename RasterizerType>
-void render_raster_marker(RendererType renb, RasterizerType & ras, image_data_rgba8 const& src,
+void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 const& src,
                           agg::trans_affine const& tr, double opacity,
                           float scale_factor, bool snap_to_pixels)
 {
@@ -81,7 +81,7 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_data_rg
         && (std::fabs(0.0 - tr.shx) < agg::affine_epsilon)
         && (std::fabs(1.0 - tr.sy) < agg::affine_epsilon))
     {
-        agg::rendering_buffer src_buffer((unsigned char *)src.getBytes(),src.width(),src.height(),src.width() * 4);
+        agg::rendering_buffer src_buffer((unsigned char *)src.getBytes(),src.width(),src.height(),src.getRowSize());
         pixfmt_pre pixf_mask(src_buffer);
         if (snap_to_pixels)
         {
@@ -125,7 +125,7 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_data_rg
         agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                          src.width(),
                                          src.height(),
-                                         src.width()*4);
+                                         src.getRowSize());
         pixfmt_pre pixf(marker_buf);
         img_accessor_type ia(pixf);
         agg::trans_affine final_tr(p, 0, 0, width, height);

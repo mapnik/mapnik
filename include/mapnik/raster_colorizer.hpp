@@ -40,7 +40,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
  // boost
 #include <boost/optional.hpp>
 // boost
@@ -198,7 +198,7 @@ public:
     colorizer_stops const& get_stops() const { return stops_; }
 
     template <typename T>
-    void colorize(image_data_rgba8 & out, T const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
+    void colorize(image_rgba8 & out, T const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!

@@ -57,13 +57,35 @@ void export_color ()
                       "and an alpha value.\n"
                       "All values between 0 and 255.\n")
         )
+        .def(init<int,int,int,int,bool>(
+                      ( arg("r"), arg("g"), arg("b"), arg("a"), arg("premultiplied") ),
+                      "Creates a new color from its RGB components\n"
+                      "and an alpha value.\n"
+                      "All values between 0 and 255.\n")
+        )
         .def(init<int,int,int>(
                  ( arg("r"), arg("g"), arg("b") ),
                  "Creates a new color from its RGB components.\n"
                  "All values between 0 and 255.\n")
             )
+        .def(init<uint32_t>(
+                 ( arg("val") ),
+                 "Creates a new color from an unsigned integer.\n"
+                 "All values between 0 and 2^32-1\n")
+            )
+        .def(init<uint32_t, bool>(
+                 ( arg("val"), arg("premultiplied") ),
+                 "Creates a new color from an unsigned integer.\n"
+                 "All values between 0 and 2^32-1\n")
+            )
         .def(init<std::string>(
                  ( arg("color_string") ),
+                 "Creates a new color from its CSS string representation.\n"
+                 "The string may be a CSS color name (e.g. 'blue')\n"
+                 "or a hex color string (e.g. '#0000ff').\n")
+            )
+        .def(init<std::string, bool>(
+                 ( arg("color_string"), arg("premultiplied") ),
                  "Creates a new color from its CSS string representation.\n"
                  "The string may be a CSS color name (e.g. 'blue')\n"
                  "or a hex color string (e.g. '#0000ff').\n")
@@ -92,6 +114,10 @@ void export_color ()
         .def(self != self)
         .def_pickle(color_pickle_suite())
         .def("__str__",&color::to_string)
+        .def("set_premultiplied",&color::set_premultiplied)
+        .def("get_premultiplied",&color::get_premultiplied)
+        .def("premultiply",&color::premultiply)
+        .def("demultiply",&color::demultiply)
         .def("packed",&color::rgba)
         .def("to_hex_string",&color::to_hex_string,
              "Returns the hexadecimal representation of this color.\n"

@@ -152,6 +152,7 @@ source = Split(
     miniz_png.cpp
     color.cpp
     conversions.cpp
+    image_copy.cpp
     image_compositing.cpp
     image_scaling.cpp
     box2d.cpp
@@ -170,10 +171,14 @@ source = Split(
     font_set.cpp
     function_call.cpp
     gradient.cpp
-    graphics.cpp
     parse_path.cpp
     image_reader.cpp
+    cairo_io.cpp
     image_util.cpp
+    image_util_jpeg.cpp
+    image_util_png.cpp
+    image_util_tiff.cpp
+    image_util_webp.cpp
     layer.cpp
     map.cpp
     load_map.cpp

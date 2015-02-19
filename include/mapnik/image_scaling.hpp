@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 
 // stl
 #include <iosfwd>

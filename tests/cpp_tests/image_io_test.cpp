@@ -1,7 +1,6 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
-#include <mapnik/graphics.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/fs.hpp>
@@ -46,17 +45,7 @@ int main(int argc, char** argv)
 
     try
     {
-        mapnik::image_32 im(-10,-10); // should throw rather than overflow
-        BOOST_TEST( im.width() < 10 ); // should not get here, but if we did this test should fail
-    }
-    catch (std::exception const& ex)
-    {
-        BOOST_TEST( true ); // should hit bad alloc here
-    }
-
-    try
-    {
-        mapnik::image_data_rgba8 im(-10,-10); // should throw rather than overflow
+        mapnik::image_rgba8 im(-10,-10); // should throw rather than overflow
         BOOST_TEST( im.width() < 10 ); // should not get here, but if we did this test should fail
     }
     catch (std::exception const& ex)
@@ -68,7 +57,7 @@ int main(int argc, char** argv)
         mapnik::cairo_surface_ptr image_surface(
             cairo_image_surface_create(CAIRO_FORMAT_ARGB32,256,257),
             mapnik::cairo_surface_closer());
-        mapnik::image_data_rgba8 im_data(cairo_image_surface_get_width(&*image_surface), cairo_image_surface_get_height(&*image_surface));
+        mapnik::image_rgba8 im_data(cairo_image_surface_get_width(&*image_surface), cairo_image_surface_get_height(&*image_surface));
         im_data.set(1);
         BOOST_TEST( (unsigned)im_data(0,0) == unsigned(1) );
         // Should set back to fully transparent

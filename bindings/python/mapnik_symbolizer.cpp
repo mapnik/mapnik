@@ -43,7 +43,6 @@
 #include <mapnik/path_expression.hpp>
 #include "mapnik_enumeration.hpp"
 #include "mapnik_svg.hpp"
-#include <mapnik/graphics.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/marker_cache.hpp> // for known_svg_prefix_

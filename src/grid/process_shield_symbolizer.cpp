@@ -70,7 +70,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
         {
             render_marker(feature,
                           glyphs->marker_pos(),
-                          *(glyphs->marker()->marker),
+                          glyphs->marker()->marker,
                           glyphs->marker()->transform,
                           opacity, comp_op);
         }

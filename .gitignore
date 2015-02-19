@@ -5,6 +5,7 @@
 *.os
 *.so
 *.a
+*.swp
 *.dylib
 plugins/input/*.input
 plugins/input/templates/*.input

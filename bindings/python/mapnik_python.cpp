@@ -99,9 +99,9 @@ void export_logger();
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
@@ -136,12 +136,16 @@ void clear_cache()
 #endif
 }
 
-#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+#if defined(HAVE_CAIRO)
+#include <mapnik/cairo_io.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
+#include <cairo.h>
+#endif
+
+#if defined(HAVE_PYCAIRO)
 #include <boost/python/type_id.hpp>
 #include <boost/python/converter/registry.hpp>
 #include <pycairo.h>
-#include <cairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
 static void *extract_surface(PyObject* op)
 {
@@ -188,19 +192,129 @@ bool python_thread::thread_support = true;
 #endif
 boost::thread_specific_ptr<PyThreadState> python_thread::state;
 
+struct agg_renderer_visitor_1
+{
+    agg_renderer_visitor_1(mapnik::Map const& m, double scale_factor, unsigned offset_x, unsigned offset_y)
+        : m_(m), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y) {}
+    
+    template <typename T>
+    void operator() (T & pixmap)
+    {
+        throw std::runtime_error("This image type is not currently supported for rendering.");
+    }
+
+  private:
+    mapnik::Map const& m_;
+    double scale_factor_;
+    unsigned offset_x_;
+    unsigned offset_y_;
+};
+
+template <>
+void agg_renderer_visitor_1::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
+{
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,pixmap,scale_factor_,offset_x_, offset_y_);
+    ren.apply();
+}
+
+struct agg_renderer_visitor_2
+{
+    agg_renderer_visitor_2(mapnik::Map const &m, std::shared_ptr<mapnik::label_collision_detector4> detector,
+                 double scale_factor, unsigned offset_x, unsigned offset_y)
+        : m_(m), detector_(detector), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y) {}
+    
+    template <typename T>
+    void operator() (T & pixmap)
+    {
+        throw std::runtime_error("This image type is not currently supported for rendering.");
+    }
+
+  private:
+    mapnik::Map const& m_;
+    std::shared_ptr<mapnik::label_collision_detector4> detector_;
+    double scale_factor_;
+    unsigned offset_x_;
+    unsigned offset_y_;
+};
+
+template <>
+void agg_renderer_visitor_2::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
+{
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,pixmap,detector_, scale_factor_,offset_x_, offset_y_);
+    ren.apply();
+}
+
+struct agg_renderer_visitor_3
+{
+    agg_renderer_visitor_3(mapnik::Map const& m, mapnik::request const& req, mapnik::attributes const& vars,
+                 double scale_factor, unsigned offset_x, unsigned offset_y)
+        : m_(m), req_(req), vars_(vars), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y) {}
+    
+    template <typename T>
+    void operator() (T & pixmap)
+    {
+        throw std::runtime_error("This image type is not currently supported for rendering.");
+    }
+
+  private:
+    mapnik::Map const& m_;
+    mapnik::request const& req_;
+    mapnik::attributes const& vars_;
+    double scale_factor_;
+    unsigned offset_x_;
+    unsigned offset_y_;
+
+};
+
+template <>
+void agg_renderer_visitor_3::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
+{
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,req_, vars_, pixmap, scale_factor_, offset_x_, offset_y_);
+    ren.apply();
+}
+
+struct agg_renderer_visitor_4
+{
+    agg_renderer_visitor_4(mapnik::Map const& m, double scale_factor, unsigned offset_x, unsigned offset_y,
+                 mapnik::layer const& layer, std::set<std::string>& names)
+        : m_(m), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y),
+          layer_(layer), names_(names) {}
+    
+    template <typename T>
+    void operator() (T & pixmap)
+    {
+        throw std::runtime_error("This image type is not currently supported for rendering.");
+    }
+
+  private:
+    mapnik::Map const& m_;
+    double scale_factor_;
+    unsigned offset_x_;
+    unsigned offset_y_;
+    mapnik::layer const& layer_;
+    std::set<std::string> & names_;
+};
+
+template <>
+void agg_renderer_visitor_4::operator()<mapnik::image_rgba8> (mapnik::image_rgba8 & pixmap)
+{
+    mapnik::agg_renderer<mapnik::image_rgba8> ren(m_,pixmap,scale_factor_,offset_x_, offset_y_);
+    ren.apply(layer_, names_);
+}
+
+
 void render(mapnik::Map const& map,
-            mapnik::image_32& image,
+            mapnik::image_any& image,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
             unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
-    ren.apply();
+    mapnik::util::apply_visitor(agg_renderer_visitor_1(map, scale_factor, offset_x, offset_y), image);
 }
 
 void render_with_vars(mapnik::Map const& map,
-            mapnik::image_32& image,
+            mapnik::image_any& image,
             boost::python::dict const& d,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
@@ -210,25 +324,23 @@ void render_with_vars(mapnik::Map const& map,
     mapnik::request req(map.width(),map.height(),map.get_current_extent());
     req.set_buffer_size(map.buffer_size());
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,req,vars,image,scale_factor,offset_x,offset_y);
-    ren.apply();
+    mapnik::util::apply_visitor(agg_renderer_visitor_3(map, req, vars, scale_factor, offset_x, offset_y), image);
 }
 
 void render_with_detector(
     mapnik::Map const& map,
-    mapnik::image_32 &image,
+    mapnik::image_any &image,
     std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector,scale_factor,offset_x,offset_y);
-    ren.apply();
+    mapnik::util::apply_visitor(agg_renderer_visitor_2(map, detector, scale_factor, offset_x, offset_y), image);
 }
 
 void render_layer2(mapnik::Map const& map,
-                   mapnik::image_32& image,
+                   mapnik::image_any& image,
                    unsigned layer_idx,
                    double scale_factor,
                    unsigned offset_x,
@@ -245,9 +357,8 @@ void render_layer2(mapnik::Map const& map,
 
     python_unblock_auto_block b;
     mapnik::layer const& layer = layers[layer_idx];
-    mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x,offset_y);
     std::set<std::string> names;
-    ren.apply(layer,names);
+    mapnik::util::apply_visitor(agg_renderer_visitor_4(map, scale_factor, offset_x, offset_y, layer, names), image);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -350,9 +461,9 @@ void render_tile_to_file(mapnik::Map const& map,
                          std::string const& file,
                          std::string const& format)
 {
-    mapnik::image_32 image(width,height);
+    mapnik::image_any image(width,height);
     render(map,image,1.0,offset_x, offset_y);
-    mapnik::save_to_file(image.data(),file,format);
+    mapnik::save_to_file(image,file,format);
 }
 
 void render_to_file1(mapnik::Map const& map,
@@ -385,9 +496,9 @@ void render_to_file1(mapnik::Map const& map,
     }
     else
     {
-        mapnik::image_32 image(map.width(),map.height());
+        mapnik::image_any image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image.data(),filename,format);
+        mapnik::save_to_file(image,filename,format);
     }
 }
 
@@ -404,9 +515,9 @@ void render_to_file2(mapnik::Map const& map,std::string const& filename)
     }
     else
     {
-        mapnik::image_32 image(map.width(),map.height());
+        mapnik::image_any image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image.data(),filename);
+        mapnik::save_to_file(image,filename);
     }
 }
 
@@ -442,9 +553,9 @@ void render_to_file3(mapnik::Map const& map,
     }
     else
     {
-        mapnik::image_32 image(map.width(),map.height());
+        mapnik::image_any image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
-        mapnik::save_to_file(image.data(),filename,format);
+        mapnik::save_to_file(image,filename,format);
     }
 }
 
@@ -724,7 +835,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render", &render, render_overloads(
             "\n"
-            "Render Map to an AGG image_32 using offsets\n"
+            "Render Map to an AGG image_any using offsets\n"
             "\n"
             "Usage:\n"
             ">>> from mapnik import Map, Image, render, load_map\n"
@@ -741,7 +852,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render_with_detector", &render_with_detector, render_with_detector_overloads(
             "\n"
-            "Render Map to an AGG image_32 using a pre-constructed detector.\n"
+            "Render Map to an AGG image_any using a pre-constructed detector.\n"
             "\n"
             "Usage:\n"
             ">>> from mapnik import Map, Image, LabelCollisionDetector, render_with_detector, load_map\n"

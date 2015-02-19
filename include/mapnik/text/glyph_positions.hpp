@@ -50,18 +50,20 @@ struct glyph_position
 
 struct marker_info
 {
-    marker_info() : marker(), transform() {}
-    marker_info(marker_ptr _marker, agg::trans_affine const& _transform) :
+    //marker_info() : marker(), transform() {}
+    marker_info(marker const& _marker, agg::trans_affine const& _transform) :
         marker(_marker), transform(_transform) {}
-    marker_ptr marker;
+    marker const& marker;
     agg::trans_affine transform;
 };
+
 using marker_info_ptr = std::shared_ptr<marker_info>;
 
 /** Stores positions of glphys.
  *
  * The actual glyphs and their format are stored in text_layout.
  */
+
 class glyph_positions
 {
 public:

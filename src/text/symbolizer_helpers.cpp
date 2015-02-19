@@ -302,13 +302,13 @@ void text_symbolizer_helper::init_marker() const
 {
     std::string filename = mapnik::get<std::string,keys::file>(sym_, feature_, vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
-    if (!marker) return;
+    mapnik::marker const& marker = marker_cache::instance().find(filename, true);
+    if (marker.is<marker_null>()) return;
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
     if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
-    double width = (*marker)->width();
-    double height = (*marker)->height();
+    double width = marker.width();
+    double height = marker.height();
     double px0 = - 0.5 * width;
     double py0 = - 0.5 * height;
     double px1 = 0.5 * width;
@@ -329,7 +329,7 @@ void text_symbolizer_helper::init_marker() const
     value_double shield_dy = mapnik::get<value_double, keys::shield_dy>(sym_, feature_, vars_);
     pixel_position marker_displacement;
     marker_displacement.set(shield_dx,shield_dy);
-    finder_.set_marker(std::make_shared<marker_info>(*marker, trans), bbox, unlock_image, marker_displacement);
+    finder_.set_marker(std::make_shared<marker_info>(marker, trans), bbox, unlock_image, marker_displacement);
 }
 
 

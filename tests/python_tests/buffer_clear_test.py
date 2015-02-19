@@ -13,7 +13,7 @@ def test_clearing_image_data():
     bytes = im.tostring()
     eq_(im.tostring(),bytes)
     # set background, then clear
-    im.background = mapnik.Color('green')
+    im.fill(mapnik.Color('green'))
     eq_(im.tostring()!=bytes,True)
     # clear image, should now equal original
     im.clear()

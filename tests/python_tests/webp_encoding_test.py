@@ -82,7 +82,7 @@ if mapnik.has_webp():
 
             for opt in opts:
                 im = mapnik.Image(256,256)
-                im.background = mapnik.Color('green')
+                im.fill(mapnik.Color('green'))
                 expected = gen_filepath('solid',opt)
                 actual = os.path.join(tmp_dir,os.path.basename(expected))
                 if generate or not os.path.exists(expected):
@@ -123,7 +123,7 @@ if mapnik.has_webp():
         try:
             # create partial transparency image
             im = mapnik.Image(256,256)
-            im.background = mapnik.Color('rgba(255,255,255,.5)')
+            im.fill(mapnik.Color('rgba(255,255,255,.5)'))
             c2 = mapnik.Color('rgba(255,255,0,.2)')
             c3 = mapnik.Color('rgb(0,255,255)')
             for y in range(0,im.height()/2):

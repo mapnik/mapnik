@@ -120,7 +120,7 @@ struct thunk_renderer
         render_raster_marker(ren, ras_, thunk.src_, feature_, offset_tr, thunk.opacity_);
         pixmap_.add_feature(feature_);
     }
-
+    
     void operator()(text_render_thunk const &thunk) const
     {
         text_renderer_type ren(pixmap_, thunk.comp_op_, common_.scale_factor_);
@@ -135,7 +135,7 @@ struct thunk_renderer
                 {
                     ren_.render_marker(feature_,
                                        glyphs->marker_pos(),
-                                       *(glyphs->marker()->marker),
+                                       glyphs->marker()->marker,
                                        glyphs->marker()->transform,
                                        thunk.opacity_, thunk.comp_op_);
                 }

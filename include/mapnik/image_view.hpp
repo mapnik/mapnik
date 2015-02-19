@@ -23,12 +23,15 @@
 #ifndef MAPNIK_IMAGE_VIEW_HPP
 #define MAPNIK_IMAGE_VIEW_HPP
 
+#include <mapnik/image.hpp>
+
 namespace mapnik {
 
 template <typename T>
 class image_view
 {
 public:
+    using pixel = typename T::pixel;
     using pixel_type = typename T::pixel_type;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
     
@@ -84,6 +87,10 @@ public:
     {
         return height_;
     }
+    inline const pixel_type& operator() (std::size_t i, std::size_t j) const
+    {
+        return data_(i,j);
+    }
 
     inline unsigned getSize() const
     {
@@ -110,6 +117,21 @@ public:
         return data_;
     }
 
+    inline bool get_premultiplied() const
+    {
+        return data_.get_premultiplied();
+    }
+
+    inline double get_offset() const
+    {
+        return data_.get_offset();
+    }
+
+    inline double get_scaling() const
+    {
+        return data_.get_scaling();
+    }
+
 private:
     unsigned x_;
     unsigned y_;
@@ -117,6 +139,19 @@ private:
     unsigned height_;
     T const& data_;
 };
-}
+
+using image_view_rgba8 = image_view<image_rgba8>;
+using image_view_gray8 = image_view<image_gray8>;
+using image_view_gray8s = image_view<image_gray8s>;
+using image_view_gray16 = image_view<image_gray16>;
+using image_view_gray16s = image_view<image_gray16s>;
+using image_view_gray32 = image_view<image_gray32>;
+using image_view_gray32s = image_view<image_gray32s>;
+using image_view_gray32f = image_view<image_gray32f>;
+using image_view_gray64 = image_view<image_gray64>;
+using image_view_gray64s = image_view<image_gray64s>;
+using image_view_gray64f = image_view<image_gray64f>;
+
+} // end ns
 
 #endif // MAPNIK_IMAGE_VIEW_HPP

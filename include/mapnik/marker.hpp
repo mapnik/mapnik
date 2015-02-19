@@ -24,11 +24,13 @@
 #define MAPNIK_MARKER_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/util/variant.hpp>
 
 // agg
 #include "agg_array.h"
@@ -45,97 +47,169 @@ namespace mapnik
 using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
 using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;
 using svg_path_ptr = std::shared_ptr<svg_storage_type>;
-using image_ptr = std::shared_ptr<image_data_rgba8>;
-/**
- * A class to hold either vector or bitmap marker data. This allows these to be treated equally
- * in the image caches and most of the render paths.
- */
-class marker: private util::noncopyable
+using image_ptr = std::shared_ptr<image_any>;
+
+struct marker_rgba8
 {
 public:
-    marker()
+    marker_rgba8() 
+        : bitmap_data_(4,4,true,true)
     {
         // create default OGC 4x4 black pixel
-        bitmap_data_ = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_rgba8>(4,4));
-        (*bitmap_data_)->set(0xff000000);
+        bitmap_data_.set(0xff000000);
     }
 
-    marker(boost::optional<mapnik::image_ptr> const& data)
+    marker_rgba8(image_rgba8 const & data)
         : bitmap_data_(data) {}
+    
+    marker_rgba8(image_rgba8 && data)
+        : bitmap_data_(std::move(data)) {}
 
-    marker(boost::optional<mapnik::svg_path_ptr> const& data)
-        : vector_data_(data) {}
+    marker_rgba8(marker_rgba8 const& rhs)
+        : bitmap_data_(rhs.bitmap_data_) {}
 
-    marker(marker const& rhs)
-        : bitmap_data_(rhs.bitmap_data_),
-          vector_data_(rhs.vector_data_) {}
+    marker_rgba8(marker_rgba8 && rhs) noexcept
+        : bitmap_data_(std::move(rhs.bitmap_data_)) {}
 
     box2d<double> bounding_box() const
     {
-        if (is_vector())
-        {
-            return (*vector_data_)->bounding_box();
-        }
-        if (is_bitmap())
-        {
-            double width = (*bitmap_data_)->width();
-            double height = (*bitmap_data_)->height();
-            return box2d<double>(0, 0, width, height);
-        }
-        return box2d<double>();
+        double width = bitmap_data_.width();
+        double height = bitmap_data_.height();
+        return box2d<double>(0, 0, width, height);
     }
 
-    inline double width() const
+    inline std::size_t width() const
     {
-        if (is_bitmap())
-        {
-            return (*bitmap_data_)->width();
-        }
-        else if (is_vector())
-        {
-            return (*vector_data_)->bounding_box().width();
-        }
-        return 0;
-    }
-    inline double height() const
-    {
-        if (is_bitmap())
-        {
-            return (*bitmap_data_)->height();
-        }
-        else if (is_vector())
-        {
-            return (*vector_data_)->bounding_box().height();
-        }
-        return 0;
+        return bitmap_data_.width();
     }
 
-    inline bool is_bitmap() const
+    inline std::size_t height() const
     {
-        return !!bitmap_data_;
+        return bitmap_data_.height();
     }
 
-    inline bool is_vector() const
-    {
-        return !!vector_data_;
-    }
-
-    boost::optional<mapnik::image_ptr> get_bitmap_data() const
+    image_rgba8 const& get_data() const
     {
         return bitmap_data_;
     }
 
-    boost::optional<mapnik::svg_path_ptr> get_vector_data() const
+private:
+    image_rgba8 bitmap_data_;
+};
+
+struct marker_svg
+{
+public:
+    marker_svg() { }
+
+    marker_svg(mapnik::svg_path_ptr data)
+        : vector_data_(data) {}
+
+    marker_svg(marker_svg const& rhs)
+        : vector_data_(rhs.vector_data_) {}
+
+    marker_svg(marker_svg && rhs) noexcept
+        : vector_data_(rhs.vector_data_) {}
+
+    box2d<double> bounding_box() const
+    {
+        return vector_data_->bounding_box();
+    }
+
+    inline double width() const
+    {
+        return vector_data_->bounding_box().width();
+    }
+    inline double height() const
+    {
+        return vector_data_->bounding_box().height();
+    }
+
+    mapnik::svg_path_ptr get_data() const
     {
         return vector_data_;
     }
 
 private:
-    boost::optional<mapnik::image_ptr> bitmap_data_;
-    boost::optional<mapnik::svg_path_ptr> vector_data_;
+    mapnik::svg_path_ptr vector_data_;
 
 };
 
-}
+struct marker_null 
+{
+public:
+    box2d<double> bounding_box() const
+    {
+        return box2d<double>();
+    }
+    inline double width() const
+    {
+        return 0;
+    }
+    inline double height() const
+    {
+        return 0;
+    }
+};
+
+using marker_base = util::variant<marker_svg, 
+                                  marker_rgba8,
+                                  marker_null>;
+namespace detail {
+
+struct get_marker_bbox_visitor
+{
+    template <typename T>
+    box2d<double> operator()(T & data) const
+    {
+        return data.bounding_box();
+    }
+};
+
+struct get_marker_width_visitor
+{
+    template <typename T>
+    double operator()(T const& data) const
+    {
+        return static_cast<double>(data.width());
+    }
+};
+
+struct get_marker_height_visitor
+{
+    template <typename T>
+    double operator()(T const& data) const
+    {
+        return static_cast<double>(data.height());
+    }
+};
+
+} // end detail ns
+
+struct marker : marker_base
+{
+    marker() = default;
+
+    template <typename T>
+    marker(T && data) noexcept
+        : marker_base(std::move(data)) {}
+
+    double width() const
+    {
+        return util::apply_visitor(detail::get_marker_width_visitor(),*this);
+    }
+
+    double height() const
+    {
+        return util::apply_visitor(detail::get_marker_height_visitor(),*this);
+    }
+
+    box2d<double> bounding_box() const
+    {
+        return util::apply_visitor(detail::get_marker_bbox_visitor(),*this);
+    }
+};
+
+} // end mapnik ns
 
 #endif // MAPNIK_MARKER_HPP

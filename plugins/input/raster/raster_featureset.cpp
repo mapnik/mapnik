@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/image_reader.hpp>
@@ -43,7 +43,7 @@
 using mapnik::query;
 using mapnik::image_reader;
 using mapnik::feature_ptr;
-using mapnik::image_data_rgba8;
+using mapnik::image_rgba8;
 using mapnik::raster;
 using mapnik::feature_factory;
 
@@ -114,9 +114,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                             rem.maxx() + x_off + width,
                                                             rem.maxy() + y_off + height);
                         intersect = t.backward(feature_raster_extent);
-                        mapnik::image_data_any data = reader->read(x_off, y_off, width, height);
+                        mapnik::image_any data = reader->read(x_off, y_off, width, height);
                         mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, std::move(data), 1.0);
-                        raster->premultiplied_alpha_ = reader->premultiplied_alpha();
                         feature->set_raster(raster);
                     }
                 }
