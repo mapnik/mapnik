@@ -92,6 +92,7 @@ public:
                     extent_.maxy());
         unsigned cmd;
         double x,y;
+        clipped.rewind(0);
         mapnik::geometry_type geom2(mapnik::geometry_type::types::Polygon);
         while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
             geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
@@ -114,9 +115,10 @@ public:
         {
             throw std::runtime_error("Failed to parse WKT");
         }
-        unsigned count = 0;
+        bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
+            unsigned count = 0;
             for (mapnik::geometry_type const& geom : paths)
             {
                 mapnik::vertex_adapter va(geom);
@@ -128,16 +130,19 @@ public:
                             extent_.maxy());
                 unsigned cmd;
                 double x,y;
+                // NOTE: this rewind is critical otherwise
+                // agg_conv_adapter_vpgen will give garbage
+                // values for the first vertex
+                clipped.rewind(0);
                 while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
                     count++;
                 }
             }
-        }
-        // TODO - sometimes this is 310001: what is causing that?
-        unsigned expected_count = 310002;
-        bool valid = (count == expected_count);
-        if (!valid) {
-            std::clog << "test1: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+            unsigned expected_count = 31;
+            if (count != expected_count) {
+                std::clog << "test1: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+                valid = false;
+            }
         }
         return valid;
     }
@@ -214,9 +219,10 @@ public:
         ps.line_to(extent_.maxx(), extent_.maxy());
         ps.line_to(extent_.maxx(), extent_.miny());
         ps.close_polygon();
-        unsigned count = 0;
+        bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
+            unsigned count = 0;
             for (mapnik::geometry_type const& geom : paths)
             {
                 mapnik::vertex_adapter va(geom);
@@ -232,11 +238,11 @@ public:
                     count++;
                 }
             }
-        }
-        unsigned expected_count = 290000;
-        bool valid = (count == expected_count);
-        if (!valid) {
-            std::clog << "test2: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+            unsigned expected_count = 29;
+            if (count != expected_count) {
+                std::clog << "test1: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+                valid = false;
+            }
         }
         return valid;
     }
@@ -296,9 +302,10 @@ public:
         {
             throw std::runtime_error("Failed to parse WKT");
         }
-        unsigned count = 0;
+        bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
+            unsigned count = 0;
             for ( mapnik::geometry_type const& geom : paths)
             {
                 mapnik::vertex_adapter va(geom);
@@ -309,11 +316,11 @@ public:
                     count++;
                 }
             }
-        }
-        unsigned expected_count = 310000;
-        bool valid = (count == expected_count);
-        if (!valid) {
-            std::clog << "test3: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+            unsigned expected_count = 31;
+            if (count != expected_count) {
+                std::clog << "test1: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+                valid = false;
+            }
         }
         return valid;
     }
