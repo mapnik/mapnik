@@ -108,10 +108,16 @@ struct line_string : vertex_sequence
     line_string (line_string const& ) = delete;
     line_string& operator=(line_string const&) = delete;
     inline std::size_t num_points() const { return data.size(); }
+    inline std::size_t size() const { return data.size(); } // TODO - remove
+
     inline void clear() { data.clear();}
     inline void resize(std::size_t new_size) { data.resize(new_size);}
     inline void push_back(value_type const& val) { data.push_back(val);}
     void add_coord(double x, double y)
+    {
+        data.emplace_back(x,y);
+    }
+    void emplace_back(double x, double y) // TODO - remove
     {
         data.emplace_back(x,y);
     }
@@ -133,8 +139,8 @@ struct polygon2
     }
 };
 
+//struct linear_ring : line_string {};
 using linear_ring = std::vector<point>;
-
 struct polygon3
 {
     linear_ring exterior_ring;
