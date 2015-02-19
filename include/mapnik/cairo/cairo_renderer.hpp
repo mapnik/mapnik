@@ -47,7 +47,7 @@ class feature_impl;
 class feature_type_style;
 class label_collision_detector4;
 class layer;
-class marker;
+struct marker;
 class proj_transform;
 class request;
 struct pixel_position;

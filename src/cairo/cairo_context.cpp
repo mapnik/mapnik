@@ -32,57 +32,6 @@
 #include <valarray>
 namespace mapnik {
 
-namespace detail {
-
-struct visitor_context_add_image_1
-{
-    visitor_context_add_image_1(cairo_context & context, double x, double y, double opacity)
-        : context_(context), x_(x), y_(y), opacity_(opacity) {}
-
-    template <typename T>
-    void operator() (T & data)
-    {
-        throw std::runtime_error("Cairo currently does not support this image data type.");
-    }
-
-  private:
-    cairo_context & context_;
-    double x_;
-    double y_; 
-    double opacity_;
-};
-
-template <>
-void visitor_context_add_image_1::operator()<image_rgba8> (image_rgba8 & data)
-{
-    context_.add_image(x_, y_, data, opacity_);
-}
-
-struct visitor_context_add_image_2
-{
-    visitor_context_add_image_2(cairo_context & context, agg::trans_affine const& tr, double opacity)
-        : context_(context), tr_(tr), opacity_(opacity) {}
-
-    template <typename T>
-    void operator() (T & data)
-    {
-        throw std::runtime_error("Cairo currently does not support this image data type.");
-    }
-
-  private:
-    cairo_context & context_;
-    agg::trans_affine const& tr_;
-    double opacity_;
-};
-
-template <>
-void visitor_context_add_image_2::operator()<image_rgba8> (image_rgba8 & data)
-{
-    context_.add_image(tr_, data, opacity_);
-}
-
-} // end detail ns
-
 cairo_face::cairo_face(std::shared_ptr<font_library> const& library, face_ptr const& face)
     : face_(face)
 {
@@ -388,17 +337,7 @@ void cairo_context::set_gradient(cairo_gradient const& pattern, const box2d<doub
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_image(double x, double y, image_any & data, double opacity)
-{
-    util::apply_visitor(detail::visitor_context_add_image_1(*this,x,y,opacity), data);
-}
-
-void cairo_context::add_image(agg::trans_affine const& tr, image_any & data, double opacity)
-{
-    util::apply_visitor(detail::visitor_context_add_image_2(*this,tr,opacity), data);
-}
-
-void cairo_context::add_image(double x, double y, image_rgba8 & data, double opacity)
+void cairo_context::add_image(double x, double y, image_rgba8 const& data, double opacity)
 {
     cairo_pattern pattern(data);
     pattern.set_origin(x, y);
@@ -409,7 +348,7 @@ void cairo_context::add_image(double x, double y, image_rgba8 & data, double opa
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_image(agg::trans_affine const& tr, image_rgba8 & data, double opacity)
+void cairo_context::add_image(agg::trans_affine const& tr, image_rgba8 const& data, double opacity)
 {
     cairo_pattern pattern(data);
     if (!tr.is_identity())

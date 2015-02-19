@@ -64,7 +64,7 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
     {
         if (glyphs->marker())
             render_marker(glyphs->marker_pos(),
-                          *(glyphs->marker()->marker),
+                          glyphs->marker()->marker,
                           glyphs->marker()->transform,
                           opacity, comp_op);
         ren.render(*glyphs);

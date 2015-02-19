@@ -108,6 +108,48 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1>
     setup(m);
 }
 
+template <typename buffer_type>
+struct setup_agg_bg_visitor
+{
+    setup_agg_bg_visitor(buffer_type & pixmap,
+                         renderer_common const& common,
+                         composite_mode_e mode,
+                         double opacity)
+        :  pixmap_(pixmap),
+           common_(common),
+           mode_(mode),
+           opacity_(opacity) {}
+
+    void operator() (marker_null const&) {}
+    
+    void operator() (marker_svg const&) {}
+    
+    void operator() (marker_rgba8 const& marker)
+    {
+        mapnik::image_rgba8 const& bg_image = marker.get_data();
+        int w = bg_image.width();
+        int h = bg_image.height();
+        if ( w > 0 && h > 0)
+        {
+            // repeat background-image both vertically and horizontally
+            unsigned x_steps = static_cast<unsigned>(std::ceil(common_.width_/double(w)));
+            unsigned y_steps = static_cast<unsigned>(std::ceil(common_.height_/double(h)));
+            for (unsigned x=0;x<x_steps;++x)
+            {
+                for (unsigned y=0;y<y_steps;++y)
+                {
+                    composite(pixmap_, bg_image, mode_, opacity_, x*w, y*h);
+                }
+            }
+        }
+    }
+  private:
+    buffer_type & pixmap_;
+    renderer_common const& common_;
+    composite_mode_e mode_;
+    double opacity_;
+};
+
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::setup(Map const &m)
 {
@@ -133,26 +175,12 @@ void agg_renderer<T0,T1>::setup(Map const &m)
     if (image_filename)
     {
         // NOTE: marker_cache returns premultiplied image, if needed
-        boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
-        if (bg_marker && (*bg_marker)->is_bitmap())
-        {
-            mapnik::image_ptr bg_image = *(*bg_marker)->get_bitmap_data();
-            int w = bg_image->width();
-            int h = bg_image->height();
-            if ( w > 0 && h > 0)
-            {
-                // repeat background-image both vertically and horizontally
-                unsigned x_steps = static_cast<unsigned>(std::ceil(common_.width_/double(w)));
-                unsigned y_steps = static_cast<unsigned>(std::ceil(common_.height_/double(h)));
-                for (unsigned x=0;x<x_steps;++x)
-                {
-                    for (unsigned y=0;y<y_steps;++y)
-                    {
-                        composite(pixmap_,util::get<buffer_type>(*bg_image), m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h);
-                    }
-                }
-            }
-        }
+        mapnik::marker const& bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
+        setup_agg_bg_visitor<buffer_type> visitor(pixmap_,
+                                     common_,
+                                     m.background_image_comp_op(),
+                                     m.background_image_opacity());
+        util::apply_visitor(visitor, bg_marker);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
@@ -305,86 +333,128 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
-                                    marker const& marker,
-                                    agg::trans_affine const& tr,
-                                    double opacity,
-                                    composite_mode_e comp_op)
+template <typename buffer_type>
+struct agg_render_marker_visitor
 {
-    using color_type = agg::rgba8;
-    using order_type = agg::order_rgba;
-    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
-    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
-    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
-    using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-    using svg_attribute_type = agg::pod_bvector<mapnik::svg::path_attributes>;
+    agg_render_marker_visitor(renderer_common & common,
+                              buffer_type * current_buffer,
+                              std::unique_ptr<rasterizer> const& ras_ptr, 
+                              gamma_method_enum & gamma_method,
+                              double & gamma,
+                              pixel_position const& pos,
+                              agg::trans_affine const& tr,
+                              double opacity,
+                              composite_mode_e comp_op)
+        : common_(common),
+          current_buffer_(current_buffer),
+          ras_ptr_(ras_ptr),
+          gamma_method_(gamma_method),
+          gamma_(gamma),
+          pos_(pos),
+          tr_(tr),
+          opacity_(opacity),
+          comp_op_(comp_op) {}
 
-    ras_ptr->reset();
-    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
-    {
-        ras_ptr->gamma(agg::gamma_power());
-        gamma_method_ = GAMMA_POWER;
-        gamma_ = 1.0;
-    }
-    agg::scanline_u8 sl;
-    agg::rendering_buffer buf(current_buffer_->getBytes(),
-                              current_buffer_->width(),
-                              current_buffer_->height(),
-                              current_buffer_->getRowSize());
-    pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
-    renderer_base renb(pixf);
+    void operator() (marker_null const&) {}
 
-    if (marker.is_vector())
+    void operator() (marker_svg const& marker)
     {
-        box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
+        using color_type = agg::rgba8;
+        using order_type = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+        using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+        using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+        using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
+        using svg_attribute_type = agg::pod_bvector<mapnik::svg::path_attributes>;
+
+        ras_ptr_->reset();
+        if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+        {
+            ras_ptr_->gamma(agg::gamma_power());
+            gamma_method_ = GAMMA_POWER;
+            gamma_ = 1.0;
+        }
+        agg::scanline_u8 sl;
+        agg::rendering_buffer buf(current_buffer_->getBytes(),
+                                  current_buffer_->width(),
+                                  current_buffer_->height(),
+                                  current_buffer_->getRowSize());
+        pixfmt_comp_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(comp_op_));
+        renderer_base renb(pixf);
+        
+        box2d<double> const& bbox = marker.get_data()->bounding_box();
         coord<double,2> c = bbox.center();
         // center the svg marker on '0,0'
         agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
         // apply symbol transformation to get to map space
-        mtx *= tr;
+        mtx *= tr_;
         mtx *= agg::trans_affine_scaling(common_.scale_factor_);
         // render the marker at the center of the marker box
-        mtx.translate(pos.x, pos.y);
+        mtx.translate(pos_.x, pos_.y);
         using namespace mapnik::svg;
-        vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
+        vertex_stl_adapter<svg_path_storage> stl_storage(marker.get_data()->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_agg<svg_path_adapter,
                          svg_attribute_type,
                          renderer_type,
                          pixfmt_comp_type> svg_renderer(svg_path,
-                                                        (*marker.get_vector_data())->attributes());
+                                                        marker.get_data()->attributes());
 
         // https://github.com/mapnik/mapnik/issues/1316
         // https://github.com/mapnik/mapnik/issues/1866
         mtx.tx = std::floor(mtx.tx+.5);
         mtx.ty = std::floor(mtx.ty+.5);
-        svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
+        svg_renderer.render(*ras_ptr_, sl, renb, mtx, opacity_, bbox);
     }
-    else
+
+    void operator() (marker_rgba8 const& marker)
     {
-        double width = (*marker.get_bitmap_data())->width();
-        double height = (*marker.get_bitmap_data())->height();
+        using color_type = agg::rgba8;
+        using order_type = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+        using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+        using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+        using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
+        using svg_attribute_type = agg::pod_bvector<mapnik::svg::path_attributes>;
+
+        ras_ptr_->reset();
+        if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+        {
+            ras_ptr_->gamma(agg::gamma_power());
+            gamma_method_ = GAMMA_POWER;
+            gamma_ = 1.0;
+        }
+        agg::scanline_u8 sl;
+        agg::rendering_buffer buf(current_buffer_->getBytes(),
+                                  current_buffer_->width(),
+                                  current_buffer_->height(),
+                                  current_buffer_->getRowSize());
+        pixfmt_comp_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(comp_op_));
+        renderer_base renb(pixf);
+        
+        double width = marker.width();
+        double height = marker.height();
         if (std::fabs(1.0 - common_.scale_factor_) < 0.001
-            && (std::fabs(1.0 - tr.sx) < agg::affine_epsilon)
-            && (std::fabs(0.0 - tr.shy) < agg::affine_epsilon)
-            && (std::fabs(0.0 - tr.shx) < agg::affine_epsilon)
-            && (std::fabs(1.0 - tr.sy) < agg::affine_epsilon))
+            && (std::fabs(1.0 - tr_.sx) < agg::affine_epsilon)
+            && (std::fabs(0.0 - tr_.shy) < agg::affine_epsilon)
+            && (std::fabs(0.0 - tr_.shx) < agg::affine_epsilon)
+            && (std::fabs(1.0 - tr_.sy) < agg::affine_epsilon))
         {
             double cx = 0.5 * width;
             double cy = 0.5 * height;
-            composite(*current_buffer_, util::get<buffer_type>(**marker.get_bitmap_data()),
-                      comp_op, opacity,
-                      std::floor(pos.x - cx + .5),
-                      std::floor(pos.y - cy + .5));
+            composite(*current_buffer_, marker.get_data(),
+                      comp_op_, opacity_,
+                      std::floor(pos_.x - cx + .5),
+                      std::floor(pos_.y - cy + .5));
         }
         else
         {
 
             double p[8];
-            double x0 = pos.x - 0.5 * width;
-            double y0 = pos.y - 0.5 * height;
+            double x0 = pos_.x - 0.5 * width;
+            double y0 = pos_.y - 0.5 * height;
             p[0] = x0;         p[1] = y0;
             p[2] = x0 + width; p[3] = y0;
             p[4] = x0 + width; p[5] = y0 + height;
@@ -392,27 +462,27 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
 
             agg::trans_affine marker_tr;
 
-            marker_tr *= agg::trans_affine_translation(-pos.x,-pos.y);
-            marker_tr *= tr;
+            marker_tr *= agg::trans_affine_translation(-pos_.x,-pos_.y);
+            marker_tr *= tr_;
             marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
-            marker_tr *= agg::trans_affine_translation(pos.x,pos.y);
+            marker_tr *= agg::trans_affine_translation(pos_.x,pos_.y);
 
             marker_tr.transform(&p[0], &p[1]);
             marker_tr.transform(&p[2], &p[3]);
             marker_tr.transform(&p[4], &p[5]);
             marker_tr.transform(&p[6], &p[7]);
 
-            ras_ptr->move_to_d(p[0],p[1]);
-            ras_ptr->line_to_d(p[2],p[3]);
-            ras_ptr->line_to_d(p[4],p[5]);
-            ras_ptr->line_to_d(p[6],p[7]);
+            ras_ptr_->move_to_d(p[0],p[1]);
+            ras_ptr_->line_to_d(p[2],p[3]);
+            ras_ptr_->line_to_d(p[4],p[5]);
+            ras_ptr_->line_to_d(p[6],p[7]);
 
 
             agg::span_allocator<color_type> sa;
             agg::image_filter_bilinear filter_kernel;
             agg::image_filter_lut filter(filter_kernel, false);
 
-            buffer_type const& src = util::get<buffer_type>(**marker.get_bitmap_data());
+            buffer_type const& src = marker.get_data();
             agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                              src.width(),
                                              src.height(),
@@ -431,10 +501,41 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
             final_tr.ty = std::floor(final_tr.ty+.5);
             interpolator_type interpolator(final_tr);
             span_gen_type sg(ia, interpolator, filter);
-            renderer_type rp(renb,sa, sg, unsigned(opacity*255));
-            agg::render_scanlines(*ras_ptr, sl, rp);
+            renderer_type rp(renb,sa, sg, unsigned(opacity_*255));
+            agg::render_scanlines(*ras_ptr_, sl, rp);
         }
     }
+
+  private:
+    renderer_common & common_;
+    buffer_type * current_buffer_;
+    std::unique_ptr<rasterizer> const& ras_ptr_;
+    gamma_method_enum & gamma_method_;
+    double & gamma_;
+    pixel_position const& pos_;
+    agg::trans_affine const& tr_;
+    double opacity_;
+    composite_mode_e comp_op_;
+
+};
+
+template <typename T0, typename T1>
+void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
+                                    marker const& marker,
+                                    agg::trans_affine const& tr,
+                                    double opacity,
+                                    composite_mode_e comp_op)
+{
+    agg_render_marker_visitor<buffer_type> visitor(common_,
+                                                   current_buffer_,
+                                                   ras_ptr, 
+                                                   gamma_method_,
+                                                   gamma_,
+                                                   pos,
+                                                   tr,
+                                                   opacity,
+                                                   comp_op);
+    util::apply_visitor(visitor, marker);
 }
 
 template <typename T0, typename T1>

@@ -121,21 +121,6 @@ struct thunk_renderer
         pixmap_.add_feature(feature_);
     }
     
-    void operator()(raster_marker_render_thunk<image_gray8> const &thunk) const
-    {
-        throw std::runtime_error("Rendering of this image_gray8 type is not supported currently by the image_rgba8 renderer");
-    }
-
-    void operator()(raster_marker_render_thunk<image_gray16> const &thunk) const
-    {
-        throw std::runtime_error("Rendering of this image_gray16 type is not supported currently by the image_rgba8 renderer");
-    }
-
-    void operator()(raster_marker_render_thunk<image_gray32f> const &thunk) const
-    {
-        throw std::runtime_error("Rendering of this image_gray32f type is not supported currently by the image_rgba8 renderer");
-    }
-
     void operator()(text_render_thunk const &thunk) const
     {
         text_renderer_type ren(pixmap_, thunk.comp_op_, common_.scale_factor_);
@@ -150,7 +135,7 @@ struct thunk_renderer
                 {
                     ren_.render_marker(feature_,
                                        glyphs->marker_pos(),
-                                       *(glyphs->marker()->marker),
+                                       glyphs->marker()->marker,
                                        glyphs->marker()->transform,
                                        thunk.opacity_, thunk.comp_op_);
                 }

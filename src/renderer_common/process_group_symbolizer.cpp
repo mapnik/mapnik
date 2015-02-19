@@ -40,107 +40,7 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
 {}
 
 template <>
-raster_marker_render_thunk<image_rgba8>::raster_marker_render_thunk(image_rgba8 & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray8>::raster_marker_render_thunk(image_gray8 & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray8s>::raster_marker_render_thunk(image_gray8s & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray16>::raster_marker_render_thunk(image_gray16 & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray16s>::raster_marker_render_thunk(image_gray16s & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray32>::raster_marker_render_thunk(image_gray32 & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray32s>::raster_marker_render_thunk(image_gray32s & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray32f>::raster_marker_render_thunk(image_gray32f & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray64>::raster_marker_render_thunk(image_gray64 & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray64s>::raster_marker_render_thunk(image_gray64s & src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-template <>
-raster_marker_render_thunk<image_gray64f>::raster_marker_render_thunk(image_gray64f & src,
+raster_marker_render_thunk<image_rgba8>::raster_marker_render_thunk(image_rgba8 const& src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -195,43 +95,10 @@ private:
     render_thunk_list & thunks_;
 };
 
-struct visitor_push_thunk
-{
-    visitor_push_thunk(render_thunk_list & thunks,
-                       agg::trans_affine const& marker_tr, 
-                       double opacity, 
-                       composite_mode_e comp_op, 
-                       bool snap_to_pixels)
-        : thunks_(thunks),
-          marker_tr_(marker_tr),
-          opacity_(opacity),
-          comp_op_(comp_op),
-          snap_to_pixels_(snap_to_pixels) {}
-    
-    void operator() (image_null &)
-    {
-        throw std::runtime_error("Push thunk does not support null images");
-    }
-
-    template <typename T>
-    void operator() (T & data)
-    {
-        raster_marker_render_thunk<T> thunk(data, marker_tr_, opacity_, comp_op_, snap_to_pixels_);
-        thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
-    }
-
-  private:
-    render_thunk_list & thunks_;
-    agg::trans_affine const& marker_tr_; 
-    double opacity_;
-    composite_mode_e comp_op_;
-    bool snap_to_pixels_;
-};
-
 template <typename Detector, typename RendererContext>
 struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 {
-    raster_marker_thunk_dispatch(image_any & src,
+    raster_marker_thunk_dispatch(image_rgba8 const& src,
                                  agg::trans_affine const& marker_trans,
                                  symbolizer_base const& sym,
                                  Detector & detector,
@@ -249,7 +116,8 @@ struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
-        util::apply_visitor(visitor_push_thunk(thunks_, marker_tr, opacity, comp_op_, snap_to_pixels_), this->src_);
+        raster_marker_render_thunk<image_rgba8> thunk(this->src_, marker_tr, opacity, comp_op_, snap_to_pixels_);
+        thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
     }
 
 private:

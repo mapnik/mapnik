@@ -35,13 +35,14 @@ namespace mapnik {
 
 // fwd decl
 struct rasterizer;
-class marker;
+struct marker_svg;
 
 template <typename T>
-std::shared_ptr<T> render_pattern(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity);
+void render_pattern(rasterizer & ras,
+                    marker_svg const& marker,
+                    agg::trans_affine const& tr,
+                    double opacity,
+                    T & image);
 
 } // namespace mapnik
 

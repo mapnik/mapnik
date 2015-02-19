@@ -50,10 +50,10 @@ struct glyph_position
 
 struct marker_info
 {
-    marker_info() : marker(), transform() {}
-    marker_info(marker_ptr _marker, agg::trans_affine const& _transform) :
+    //marker_info() : marker(), transform() {}
+    marker_info(marker const& _marker, agg::trans_affine const& _transform) :
         marker(_marker), transform(_transform) {}
-    marker_ptr marker;
+    marker const& marker;
     agg::trans_affine transform;
 };
 

@@ -36,31 +36,52 @@
 namespace mapnik
 {
 
-namespace detail
+struct cairo_renderer_process_visitor_l
 {
+    cairo_renderer_process_visitor_l(renderer_common const& common,
+                                   line_pattern_symbolizer const& sym,
+                                   mapnik::feature_impl & feature,
+                                   unsigned & width,
+                                   unsigned & height)
+        : common_(common),
+          sym_(sym),
+          feature_(feature),
+          width_(width),
+          height_(height) {}
 
-struct visitor_create_pattern
-{
-    visitor_create_pattern(float opacity)
-        : opacity_(opacity) {}
-
-    template <typename T>
-    std::shared_ptr<cairo_pattern> operator() (T & data)
+    std::shared_ptr<cairo_pattern> operator() (mapnik::marker_null const&) 
     {
-        throw std::runtime_error("This data type is not supported by cairo rendering in mapnik.");
+        throw std::runtime_error("This should not have been reached.");    
+    }
+
+    std::shared_ptr<cairo_pattern> operator() (mapnik::marker_svg const& marker)
+    {
+        double opacity = get<value_double, keys::opacity>(sym_, feature_, common_.vars_);
+        mapnik::rasterizer ras;
+        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+        auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
+        mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
+        render_pattern<image_rgba8>(ras, marker, image_tr, 1.0, image);
+        width_ = image.width();
+        height_ = image.height();
+        return std::make_shared<cairo_pattern>(image, opacity);
+    }
+
+    std::shared_ptr<cairo_pattern> operator() (mapnik::marker_rgba8 const& marker)
+    {
+        double opacity = get<value_double, keys::opacity>(sym_, feature_, common_.vars_);
+        return std::make_shared<cairo_pattern>(marker.get_data(), opacity);
     }
 
   private:
-    float opacity_;
+    renderer_common const& common_;
+    line_pattern_symbolizer const& sym_;
+    mapnik::feature_impl & feature_;
+    unsigned & width_;
+    unsigned & height_;
 };
-
-template <>
-std::shared_ptr<cairo_pattern> visitor_create_pattern::operator()<image_rgba8> (image_rgba8 & data)
-{
-    return std::make_shared<cairo_pattern>(data, opacity_);
-}
-
-} // end detail ns
 
 template <typename T>
 void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
@@ -74,39 +95,29 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
     value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
-    boost::optional<marker_ptr> marker;
-    if ( !filename.empty() )
+    if (filename.empty())
     {
-        marker = marker_cache::instance().find(filename, true);
+        return;
     }
-    if (!marker || !(*marker)) return;
 
-    unsigned width = (*marker)->width();
-    unsigned height = (*marker)->height();
+    mapnik::marker const& marker = marker_cache::instance().find(filename, true);
+    
+    if (marker.is<mapnik::marker_null>()) return;
+
+    unsigned width = marker.width();
+    unsigned height = marker.height();
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
-    std::shared_ptr<cairo_pattern> pattern;
-    std::shared_ptr<image_rgba8> image = nullptr;
     // TODO - re-implement at renderer level like polygon_pattern symbolizer
-    double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
-    if ((*marker)->is_bitmap())
-    {
-        pattern = util::apply_visitor(detail::visitor_create_pattern(opacity), **((*marker)->get_bitmap_data()));
-        context_.set_line_width(height);
-    }
-    else
-    {
-        mapnik::rasterizer ras;
-        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
-        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        image = render_pattern<image_rgba8>(ras, **marker, image_tr, 1.0);
-        pattern = std::make_unique<cairo_pattern>(*image, opacity);
-        width = image->width();
-        height = image->height();
-        context_.set_line_width(height);
-    }
+    cairo_renderer_process_visitor_l visit(common_,
+                                           sym,
+                                           feature,
+                                           width,
+                                           height);
+    std::shared_ptr<cairo_pattern> pattern = util::apply_visitor(visit, marker);
+    
+    context_.set_line_width(height);
 
     pattern->set_extend(CAIRO_EXTEND_REPEAT);
     pattern->set_filter(CAIRO_FILTER_BILINEAR);

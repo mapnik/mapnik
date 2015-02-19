@@ -124,7 +124,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
-    raster_markers_rasterizer_dispatch(image_any & src,
+    raster_markers_rasterizer_dispatch(image_rgba8 const& src,
                                        agg::trans_affine const& marker_trans,
                                        symbolizer_base const& sym,
                                        Detector & detector,
@@ -149,7 +149,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     {
         // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts 
         // the destination pixel type required.   
-        render_raster_marker(renb_, ras_, util::get<image_rgba8>(this->src_), marker_tr, opacity, this->scale_factor_, snap_to_pixels_);
+        render_raster_marker(renb_, ras_, this->src_, marker_tr, opacity, this->scale_factor_, snap_to_pixels_);
     }
 
 private:

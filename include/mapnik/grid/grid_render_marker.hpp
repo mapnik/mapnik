@@ -41,7 +41,7 @@ namespace mapnik {
 template <typename RendererType, typename RasterizerType>
 void render_raster_marker(RendererType ren,
                           RasterizerType & ras,
-                          image_rgba8 & src,
+                          image_rgba8 const& src,
                           mapnik::feature_impl const& feature,
                           agg::trans_affine const& marker_tr,
                           double opacity)

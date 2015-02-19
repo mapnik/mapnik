@@ -37,36 +37,48 @@
 namespace mapnik
 {
 
-namespace detail
+struct cairo_renderer_process_visitor_p
 {
+    cairo_renderer_process_visitor_p(cairo_context & context,
+                                   agg::trans_affine & image_tr,
+                                   unsigned offset_x,
+                                   unsigned offset_y,
+                                   float opacity)
+        : context_(context), 
+          image_tr_(image_tr),
+          offset_x_(offset_x), 
+          offset_y_(offset_y), 
+          opacity_(opacity) {}
 
-struct visitor_set_pattern
-{
-    visitor_set_pattern(cairo_context & context, unsigned offset_x, unsigned offset_y, float opacity)
-        : context_(context), offset_x_(offset_x), offset_y_(offset_y), opacity_(opacity) {}
+    void operator() (marker_null const&) {}
 
-    template <typename T>
-    void operator() (T & data)
+    void operator() (marker_svg const& marker)
     {
-        throw std::runtime_error("This data type is not supported by cairo rendering in mapnik.");
+        mapnik::rasterizer ras;
+        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr_;
+        mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
+        render_pattern<image_rgba8>(ras, marker, image_tr_, 1.0, image);
+        cairo_pattern pattern(image, opacity_);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(offset_x_, offset_y_);
+        context_.set_pattern(pattern);
     }
+
+    void operator() (marker_rgba8 const& marker)
+    {
+        cairo_pattern pattern(marker.get_data(), opacity_);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(offset_x_, offset_y_);
+        context_.set_pattern(pattern);
+    }
+
   private:
     cairo_context & context_;
+    agg::trans_affine & image_tr_;
     unsigned offset_x_;
     unsigned offset_y_;
     float opacity_;
 };
-
-template <>
-void visitor_set_pattern::operator()<image_rgba8> (image_rgba8 & data)
-{
-    cairo_pattern pattern(data, opacity_);
-    pattern.set_extend(CAIRO_EXTEND_REPEAT);
-    pattern.set_origin(offset_x_, offset_y_);
-    context_.set_pattern(pattern);
-}
-
-} // end detail ns
 
 template <typename T>
 void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
@@ -86,8 +98,8 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
 
-    boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
-    if (!marker || !(*marker)) return;
+    mapnik::marker const& marker = mapnik::marker_cache::instance().find(filename,true);
+    if (marker.is<mapnik::marker_null>()) return;
 
     unsigned offset_x=0;
     unsigned offset_y=0;
@@ -113,19 +125,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         offset_y = std::abs(clip_box.height() - y0);
     }
 
-    if ((*marker)->is_bitmap())
-    {
-        util::apply_visitor(detail::visitor_set_pattern(context_, offset_x, offset_y, opacity), **((*marker)->get_bitmap_data()));
-    }
-    else
-    {
-        mapnik::rasterizer ras;
-        std::shared_ptr<image_rgba8> image = render_pattern<image_rgba8>(ras, **marker, image_tr, 1.0); //
-        cairo_pattern pattern(*image, opacity);
-        pattern.set_extend(CAIRO_EXTEND_REPEAT);
-        pattern.set_origin(offset_x, offset_y);
-        context_.set_pattern(pattern);
-    }
+    util::apply_visitor(cairo_renderer_process_visitor_p(context_, image_tr, offset_x, offset_y, opacity), marker);
 
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);

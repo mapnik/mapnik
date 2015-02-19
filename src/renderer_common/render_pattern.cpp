@@ -38,149 +38,36 @@
 namespace mapnik {
 
 template <>
-std::shared_ptr<image_rgba8> render_pattern<image_rgba8>(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity)
+void render_pattern<image_rgba8>(rasterizer & ras,
+                                 marker_svg const& marker,
+                                 agg::trans_affine const& tr,
+                                 double opacity,
+                                 image_rgba8 & image)
 {
     using pixfmt = agg::pixfmt_rgba32_pre;
     using renderer_base = agg::renderer_base<pixfmt>;
     using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
     agg::scanline_u8 sl;
 
-    mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box() * tr;
+    mapnik::box2d<double> const& bbox = marker.bounding_box() * tr;
     mapnik::coord<double,2> c = bbox.center();
     agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
-    std::shared_ptr<mapnik::image_rgba8> image = std::make_shared<mapnik::image_rgba8>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
+    agg::rendering_buffer buf(image.getBytes(), image.width(), image.height(), image.getRowSize());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
-    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
+    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
     mapnik::svg::svg_path_adapter svg_path(stl_storage);
     mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
                                   agg::pod_bvector<mapnik::svg::path_attributes>,
                                   renderer_solid,
                                   pixfmt > svg_renderer(svg_path,
-                                                        (*marker.get_vector_data())->attributes());
+                                                        marker.get_data()->attributes());
 
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
-    return image;
 }
-
-template <>
-std::shared_ptr<image_null> render_pattern<image_null>(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity)
-{
-    throw std::runtime_error("Can not return image_null type from render pattern");
-}
-/*
-template <>
-std::shared_ptr<image_gray8> render_pattern<image_gray8>(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity)
-{
-    using pixfmt = agg::pixfmt_gray8_pre;
-    using renderer_base = agg::renderer_base<pixfmt>;
-    using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
-    agg::scanline_u8 sl;
-
-    mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box() * tr;
-    mapnik::coord<double,2> c = bbox.center();
-    agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
-    mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
-    mtx = tr * mtx;
-
-    std::shared_ptr<mapnik::image_gray8> image = std::make_shared<mapnik::image_gray8>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
-    pixfmt pixf(buf);
-    renderer_base renb(pixf);
-
-    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
-    mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
-                                  agg::pod_bvector<mapnik::svg::path_attributes>,
-                                  renderer_solid,
-                                  pixfmt > svg_renderer(svg_path,
-                                                        (*marker.get_vector_data())->attributes());
-
-    svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
-    return image;
-}
-
-template <>
-std::shared_ptr<image_gray16> render_pattern<image_gray16>(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity)
-{
-    using pixfmt = agg::pixfmt_gray16_pre;
-    using renderer_base = agg::renderer_base<pixfmt>;
-    using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
-    agg::scanline_u8 sl;
-
-    mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box() * tr;
-    mapnik::coord<double,2> c = bbox.center();
-    agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
-    mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
-    mtx = tr * mtx;
-
-    std::shared_ptr<mapnik::image_gray16> image = std::make_shared<mapnik::image_gray16>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
-    pixfmt pixf(buf);
-    renderer_base renb(pixf);
-
-    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
-    mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
-                                  agg::pod_bvector<mapnik::svg::path_attributes>,
-                                  renderer_solid,
-                                  pixfmt > svg_renderer(svg_path,
-                                                        (*marker.get_vector_data())->attributes());
-
-    svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
-    return image;
-}
-
-template <>
-std::shared_ptr<image_gray32f> render_pattern<image_gray32f>(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity)
-{
-    using pixfmt = agg::pixfmt_gray32_pre;
-    using renderer_base = agg::renderer_base<pixfmt>;
-    using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
-    agg::scanline_u8 sl;
-
-    mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box() * tr;
-    mapnik::coord<double,2> c = bbox.center();
-    agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
-    mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
-    mtx = tr * mtx;
-
-    std::shared_ptr<mapnik::image_gray32f> image = std::make_shared<mapnik::image_gray32f>(bbox.width(), bbox.height());
-    agg::rendering_buffer buf(image->getBytes(), image->width(), image->height(), image->getRowSize());
-    pixfmt pixf(buf);
-    renderer_base renb(pixf);
-
-    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
-    mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
-                                  agg::pod_bvector<mapnik::svg::path_attributes>,
-                                  renderer_solid,
-                                  pixfmt > svg_renderer(svg_path,
-                                                        (*marker.get_vector_data())->attributes());
-
-    svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
-    return image;
-}
-*/
 
 } // namespace mapnik

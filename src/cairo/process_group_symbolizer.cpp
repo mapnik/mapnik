@@ -100,7 +100,7 @@ struct thunk_renderer
                 if (glyphs->marker())
                 {
                     ren_.render_marker(glyphs->marker_pos(),
-                                       *(glyphs->marker()->marker),
+                                       glyphs->marker()->marker,
                                        glyphs->marker()->transform,
                                        thunk.opacity_, thunk.comp_op_);
                 }
