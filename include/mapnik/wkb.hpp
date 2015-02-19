@@ -24,8 +24,7 @@
 #define MAPNIK_WKB_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+#include <mapnik/geometry_impl.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
@@ -53,11 +52,11 @@ class MAPNIK_DECL geometry_utils : private util::noncopyable
 {
 public:
 
-    static bool from_wkb(mapnik::geometry_container& paths,
-                          const char* wkb,
-                          unsigned size,
-                          wkbFormat format = wkbGeneric);
+    static mapnik::new_geometry::geometry from_wkb(const char* wkb,
+                                                   unsigned size,
+                                                   wkbFormat format = wkbGeneric);
 };
+
 }
 
 #endif // MAPNIK_WKB_HPP
