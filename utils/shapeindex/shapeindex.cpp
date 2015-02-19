@@ -110,18 +110,18 @@ int main (int argc,char** argv)
     clog << "max tree depth:" << depth << endl;
     clog << "split ratio:" << ratio << endl;
 
-    vector<string>::const_iterator itr = shape_files.begin();
-    if (itr == shape_files.end())
+    //vector<string>::const_iterator itr = shape_files.begin();
+    if (shape_files.size() == 0)
     {
         clog << "no shape files to index" << endl;
         return 0;
     }
-    while (itr != shape_files.end())
+    for (auto const& filename : shape_files)
     {
-        clog << "processing " << *itr << endl;
-        std::string shapename (*itr++);
+        clog << "processing " << filename << endl;
+        std::string shapename (filename);
         boost::algorithm::ireplace_last(shapename,".shp","");
-        std::string shapename_full (shapename+".shp");
+        std::string shapename_full (shapename + ".shp");
 
         if (! mapnik::util::exists (shapename_full))
         {
@@ -207,7 +207,7 @@ int main (int argc,char** argv)
                 //     Double Z // Z coordinate
                 //     Double M // Measure
                 // }
-                // But OGR creates shapefiles with M missing so we need skip M only if present
+                // But OGR creates shapefiles with M missing so we need to skip M only if present
                 // NOTE: content_length is in 16-bit words
                 if ( content_length == 18)
                 {
