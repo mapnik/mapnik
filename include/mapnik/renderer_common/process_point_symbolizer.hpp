@@ -63,26 +63,30 @@ void render_point_symbolizer(point_symbolizer const &sym,
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common.scale_factor_);
 
-        // FIXME
-        /*
-        for (std::size_t i=0; i<feature.num_geometries(); ++i)
-        {
-            geometry_type const& geom = feature.get_geometry(i);
-            vertex_adapter va(geom);
-            double x;
-            double y;
-            double z=0;
-            if (placement == CENTROID_POINT_PLACEMENT)
-            {
-                if (!label::centroid(va, x, y))
-                    return;
-            }
-            else
-            {
-                if (!label::interior_position(va ,x, y))
-                    return;
-            }
+        // FIXME - refactor and support other than point geometry
 
+        mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
+        if (geometry.is<mapnik::new_geometry::point>())
+        {
+            mapnik::new_geometry::point const& point = mapnik::util::get<mapnik::new_geometry::point>(geometry);
+            //mapnik::new_geometry::point_vertex_adapter va(point);
+            //double x;
+            //double y;
+            //double z=0;
+
+            //if (placement == CENTROID_POINT_PLACEMENT)
+            //{
+            //    if (!label::centroid(va, x, y))
+            //        return;
+            //}
+            //else
+            //{
+            //    if (!label::interior_position(va ,x, y))
+            //        return;
+            //}
+            double x = point.x;
+            double y = point.y;
+            double z = 0;
             prj_trans.backward(x,y,z);
             common.t_.forward(&x,&y);
             label_ext.re_center(x,y);
@@ -99,7 +103,6 @@ void render_point_symbolizer(point_symbolizer const &sym,
                     common.detector_->insert(label_ext);
             }
         }
-        */
     }
 }
 
