@@ -25,14 +25,11 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
-#include <mapnik/coord_array.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
 {
-
-using CoordinateArray = coord_array<coord2d>;
 
 struct wkb_reader : util::noncopyable
 {
@@ -221,15 +218,17 @@ private:
         return d;
     }
 
-    template <bool Z = false, bool M = false>
-    void read_coords(CoordinateArray& ar)
+    template <typename Ring, bool Z = false, bool M = false>
+    void read_coords(Ring & ring, std::size_t num_points)
     {
-        if (! needSwap_)
+        double x,y;
+        if (!needSwap_)
         {
-            for (auto & coord : ar)
+            for (std::size_t i = 0; i < num_points; ++i)
             {
-                read_double_ndr(wkb_ + pos_, coord.x);
-                read_double_ndr(wkb_ + pos_ + 8, coord.y);
+                read_double_ndr(wkb_ + pos_, x);
+                read_double_ndr(wkb_ + pos_ + 8, y);
+                ring.emplace_back(x,y);
                 pos_ += 16; // skip XY
                 if (Z) pos_ += 8;
                 if (M) pos_ += 8;
@@ -237,10 +236,11 @@ private:
         }
         else
         {
-            for (auto & coord : ar)
+            for (std::size_t i = 0; i < num_points; ++i)
             {
-                read_double_xdr(wkb_ + pos_, coord.x);
-                read_double_xdr(wkb_ + pos_ + 8, coord.y);
+                read_double_xdr(wkb_ + pos_, x);
+                read_double_xdr(wkb_ + pos_ + 8, y);
+                ring.emplace_back(x,y);
                 pos_ += 16; // skip XY
                 if (Z) pos_ += 8;
                 if (M) pos_ += 8;
@@ -279,14 +279,8 @@ private:
         int num_points = read_integer();
         if (num_points > 0)
         {
-            CoordinateArray ar(num_points);
-            read_coords<M, Z>(ar);
-
             line.reserve(num_points);
-            for (int i = 0; i < num_points; ++i)
-            {
-                line.add_coord(ar[i].x, ar[i].y);
-            }
+            read_coords<mapnik::new_geometry::line_string, M, Z>(line, num_points);
         }
         return line;
     }
@@ -322,12 +316,7 @@ private:
             if (num_points > 0)
             {
                 ring.reserve(num_points);
-                CoordinateArray ar(num_points);
-                read_coords<M, Z>(ar);
-                for (int j = 0; j < num_points ; ++j)
-                {
-                    ring.emplace_back(ar[j].x, ar[j].y);
-                }
+                read_coords<mapnik::new_geometry::linear_ring, M, Z>(ring, num_points);
             }
             if ( i == 0) poly.set_exterior_ring(std::move(ring));
             else poly.add_hole(std::move(ring));
