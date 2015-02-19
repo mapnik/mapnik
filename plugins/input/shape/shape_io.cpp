@@ -202,8 +202,9 @@ mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & 
             poly.add_hole(std::move(ring));
         }
     }
-    if (multi_poly.size() > 0)
+    if (multi_poly.size() > 0) // multi
     {
+        multi_poly.emplace_back(std::move(poly));
         return std::move(mapnik::new_geometry::geometry(std::move(multi_poly)));
     }
     return std::move(mapnik::new_geometry::geometry(std::move(poly)));
