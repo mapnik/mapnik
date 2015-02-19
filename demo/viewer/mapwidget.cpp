@@ -534,7 +534,7 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
 // FIXME
-#if 0 //def HAVE_CAIRO
+#ifdef HAVE_CAIRO
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
     mapnik::cairo_ptr cairo = mapnik::create_context(image_surface);

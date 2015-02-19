@@ -118,6 +118,8 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
+// FIXME
+#if 0
 
     for (auto const& geom : feature.paths())
     {
@@ -127,6 +129,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
             converter.apply(va);
         }
     }
+#endif
 }
 
 template void cairo_renderer<cairo_ptr>::process(line_pattern_symbolizer const&,

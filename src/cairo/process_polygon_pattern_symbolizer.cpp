@@ -66,7 +66,8 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     {
         double x0 = 0.0;
         double y0 = 0.0;
-
+// FIXME
+#if 0
         if (feature.num_geometries() > 0)
         {
             using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
@@ -80,6 +81,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         }
         offset_x = std::abs(clip_box.width() - x0);
         offset_y = std::abs(clip_box.height() - y0);
+#endif
     }
 
     if ((*marker)->is_bitmap())
@@ -112,6 +114,8 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
+// FIXME
+#if 0
     for ( geometry_type const& geom : feature.paths())
     {
         if (geom.size() > 2)
@@ -120,6 +124,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             converter.apply(va);
         }
     }
+#endif
     // fill polygon
     context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
     context_.fill();

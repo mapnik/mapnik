@@ -80,6 +80,8 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
+// FIXME
+#if 0
         for (auto const& geom : feature.paths())
         {
             double x;
@@ -100,6 +102,7 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
                 context_.stroke();
             }
         }
+#endif
     }
 }
 
