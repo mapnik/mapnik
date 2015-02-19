@@ -39,8 +39,7 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
       comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
 {}
 
-template <>
-raster_marker_render_thunk<image_rgba8>::raster_marker_render_thunk(image_rgba8 const& src,
+raster_marker_render_thunk::raster_marker_render_thunk(image_rgba8 const& src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -116,7 +115,7 @@ struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
-        raster_marker_render_thunk<image_rgba8> thunk(this->src_, marker_tr, opacity, comp_op_, snap_to_pixels_);
+        raster_marker_render_thunk thunk(this->src_, marker_tr, opacity, comp_op_, snap_to_pixels_);
         thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
     }
 
