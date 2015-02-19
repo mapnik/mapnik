@@ -109,7 +109,7 @@ bool marker_cache::insert_svg(std::string const& name, std::string const& svg_st
     return false;
 }
 
-bool marker_cache::insert_marker(std::string const& uri, mapnik::marker & path)
+bool marker_cache::insert_marker(std::string const& uri, mapnik::marker && path)
 {
 #ifdef MAPNIK_THREADSAFE
     mapnik::scoped_lock lock(mutex_);
