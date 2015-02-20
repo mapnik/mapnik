@@ -80,7 +80,7 @@ pretty_dep_names = {
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
+    'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
@@ -93,6 +93,7 @@ pretty_dep_names = {
     'm':'Basic math library, part of C++ stlib',
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
     'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
+    'pq':'libpq library (postgres client) | try setting PG_CONFIG SCons option or configure with PG_LIBS & PG_INCLUDES',
     'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option or avoid the need for xml2-config command by configuring with XML2_LIBS & XML2_INCLUDES',
     'libxml2':'libxml2 library | try setting XML2_CONFIG SCons option to point to location of xml2-config program or configure with XML2_LIBS & XML2_INCLUDES',
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
@@ -360,6 +361,8 @@ opts.AddVariables(
     BoolVariable('PROJ', 'Build Mapnik with proj4 support to enable transformations between many different projections', 'True'),
     PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    ('PG_INCLUDES', 'Search path for libpq (postgres client) include files', ''),
+    ('PG_LIBS', 'Search path for libpq (postgres client) library files', ''),
     ('FREETYPE_INCLUDES', 'Search path for Freetype include files', ''),
     ('FREETYPE_LIBS', 'Search path for Freetype library files', ''),
     ('XML2_INCLUDES', 'Search path for libxml2 include files', ''),
@@ -1476,7 +1479,22 @@ if not preconfigured:
                             else:
                                 details['lib'] = libname
                 elif plugin == 'postgis' or plugin == 'pgraster':
-                    conf.parse_pg_config('PG_CONFIG')
+                    if env.get('PG_LIBS') or env.get('PG_INCLUDES'):
+                        libname = details['lib']
+                        if env.get('PG_INCLUDES'):
+                            inc_path = env['PG_INCLUDES']
+                            env.AppendUnique(CPPPATH = fix_path(inc_path))
+                        if env.get('PG_LIBS'):
+                            lib_path = env['PG_LIBS']
+                            env.AppendUnique(LIBPATH = fix_path(lib_path))
+                        if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                            env['SKIPPED_DEPS'].append(libname)
+                            if libname in env['LIBS']:
+                                 env['LIBS'].remove(libname)
+                        else:
+                            details['lib'] = libname
+                    else:
+                        conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
                     if conf.ogr_enabled():
                         if conf.parse_config('GDAL_CONFIG',checks='--libs'):
