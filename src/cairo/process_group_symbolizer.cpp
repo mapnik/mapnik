@@ -77,7 +77,7 @@ struct thunk_renderer
                                      thunk.opacity_);
     }
 
-    void operator()(raster_marker_render_thunk const &thunk) const
+    void operator()(raster_marker_render_thunk const& thunk) const
     {
         cairo_save_restore guard(context_);
         context_.set_operator(thunk.comp_op_);
@@ -100,7 +100,7 @@ struct thunk_renderer
                 if (glyphs->marker())
                 {
                     ren_.render_marker(glyphs->marker_pos(),
-                                       *(glyphs->marker()->marker),
+                                       glyphs->marker()->marker,
                                        glyphs->marker()->transform,
                                        thunk.opacity_, thunk.comp_op_);
                 }
@@ -111,7 +111,7 @@ struct thunk_renderer
     template <typename T0>
     void operator()(T0 const &) const
     {
-        // TODO: warning if unimplemented?
+        throw std::runtime_error("Rendering of this type is not supported by the cairo renderer.");
     }
 
 private:

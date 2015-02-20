@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/palette.hpp>
 #include <mapnik/miniz_png.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 
 // miniz
@@ -361,11 +361,11 @@ const mz_uint8 PNGWriter::IEND_tpl[] = {
     'I', 'E', 'N', 'D'      // "IEND"
 };
 
-template void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
-template void PNGWriter::writeIDAT<image_view<image_data_gray8> >(image_view<image_data_gray8> const& image);
-template void PNGWriter::writeIDAT<image_data_rgba8>(image_data_rgba8 const& image);
-template void PNGWriter::writeIDAT<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
-template void PNGWriter::writeIDATStripAlpha<image_data_rgba8>(image_data_rgba8 const& image);
-template void PNGWriter::writeIDATStripAlpha<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
+template void PNGWriter::writeIDAT<image_gray8>(image_gray8 const& image);
+template void PNGWriter::writeIDAT<image_view_gray8>(image_view_gray8 const& image);
+template void PNGWriter::writeIDAT<image_rgba8>(image_rgba8 const& image);
+template void PNGWriter::writeIDAT<image_view_rgba8>(image_view_rgba8 const& image);
+template void PNGWriter::writeIDATStripAlpha<image_rgba8>(image_rgba8 const& image);
+template void PNGWriter::writeIDATStripAlpha<image_view_rgba8>(image_view_rgba8 const& image);
 
 }}

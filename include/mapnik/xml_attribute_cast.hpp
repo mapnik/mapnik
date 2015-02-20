@@ -25,6 +25,7 @@
 
 //mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/boolean.hpp>
@@ -87,14 +88,14 @@ struct do_xml_attribute_cast<int>
 #ifdef BIGINT
 // specialization for long long
 template <>
-struct do_xml_attribute_cast<long long>
+struct do_xml_attribute_cast<mapnik::value_integer>
 {
-    static inline boost::optional<long long> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::value_integer> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         int result;
         if (mapnik::util::string2int(source, result))
-            return boost::optional<long long>(result);
-        return boost::optional<long long>();
+            return boost::optional<mapnik::value_integer>(result);
+        return boost::optional<mapnik::value_integer>();
     }
 };
 

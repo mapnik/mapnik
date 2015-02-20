@@ -25,10 +25,13 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/pixel_types.hpp>
+
 // stl
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
 
 namespace mapnik {
 
@@ -116,45 +119,70 @@ struct image_dimensions
 }
 
 template <typename T, std::size_t max_size = 65535>
-class image_data
+class image
 {
 public:
-    using pixel_type = T;
+    using pixel = T;
+    using pixel_type = typename T::type;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-
-    image_data(int width, int height, bool initialize = true)
+private:
+    detail::image_dimensions<max_size> dimensions_;
+    detail::buffer buffer_;
+    pixel_type *pData_;
+    double offset_;
+    double scaling_;
+    bool premultiplied_alpha_;
+    bool painted_;
+public:
+    image(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false)
         : dimensions_(width, height),
           buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          offset_(0.0),
+          scaling_(1.0),
+          premultiplied_alpha_(premultiplied),
+          painted_(painted)
     {
         if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
     }
 
-    image_data(image_data<pixel_type> const& rhs)
+    image(image<T> const& rhs)
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          offset_(rhs.offset_),
+          scaling_(rhs.scaling_),
+          premultiplied_alpha_(rhs.premultiplied_alpha_),
+          painted_(rhs.painted_)
     {}
 
-    image_data(image_data<pixel_type> && rhs) noexcept
+    image(image<T> && rhs) noexcept
         : dimensions_(std::move(rhs.dimensions_)),
-        buffer_(std::move(rhs.buffer_)),
-        pData_(reinterpret_cast<pixel_type*>(buffer_.data()))
+          buffer_(std::move(rhs.buffer_)),
+          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+          offset_(rhs.offset_),
+          scaling_(rhs.scaling_),
+          premultiplied_alpha_(rhs.premultiplied_alpha_),
+          painted_(rhs.painted_)
     {
         rhs.dimensions_ = { 0, 0 };
         rhs.pData_ = nullptr;
     }
 
-    image_data<pixel_type>& operator=(image_data<pixel_type> rhs)
+    image<T>& operator=(image<T> rhs)
     {
         swap(rhs);
         return *this;
     }
 
-    void swap(image_data<pixel_type> & rhs)
+    void swap(image<T> & rhs)
     {
         std::swap(dimensions_, rhs.dimensions_);
         std::swap(buffer_, rhs.buffer_);
+        std::swap(offset_, rhs.offset_);
+        std::swap(scaling_, rhs.scaling_);
+        std::swap(premultiplied_alpha_, rhs.premultiplied_alpha_);
+        std::swap(painted_, rhs.painted_);
     }
 
     inline pixel_type& operator() (std::size_t i, std::size_t j)
@@ -241,16 +269,80 @@ public:
         std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
     }
 
-private:
-    detail::image_dimensions<max_size> dimensions_;
-    detail::buffer buffer_;
-    pixel_type *pData_;
+    inline double get_offset() const
+    {
+        return offset_;
+    }
+
+    inline void set_offset(double set)
+    {
+        offset_ = set;
+    }
+
+    inline double get_scaling() const
+    {
+        return scaling_;
+    }
+
+    inline void set_scaling(double set)
+    {
+        if (set != 0.0)
+        {
+            scaling_ = set;
+            return;
+        }
+        std::clog << "Can not set scaling to 0.0, offset not set." << std::endl;
+    }
+
+    inline bool get_premultiplied() const
+    {
+        return premultiplied_alpha_;
+    }
+
+    inline void set_premultiplied(bool set)
+    {
+        premultiplied_alpha_ = set;
+    }
+
+    inline void painted(bool painted)
+    {
+        painted_ = painted;
+    }
+
+    inline bool painted() const
+    {
+        return painted_;
+    }
 };
 
-using image_data_rgba8 = image_data<std::uint32_t>;
-using image_data_gray8 = image_data<std::uint8_t> ;
-using image_data_gray16 = image_data<std::int16_t>;
-using image_data_gray32f = image_data<float>;
-}
+using image_rgba8 = image<rgba8_t>;
+using image_gray8 = image<gray8_t>;
+using image_gray8s = image<gray8s_t>;
+using image_gray16 = image<gray16_t>;
+using image_gray16s = image<gray16s_t>;
+using image_gray32 = image<gray32_t>;
+using image_gray32s = image<gray32s_t>;
+using image_gray32f = image<gray32f_t>;
+using image_gray64 = image<gray64_t>;
+using image_gray64s = image<gray64s_t>;
+using image_gray64f = image<gray64f_t>;
+
+enum image_dtype : std::uint8_t
+{
+    image_dtype_rgba8 = 0,
+    image_dtype_gray8,
+    image_dtype_gray8s,
+    image_dtype_gray16,
+    image_dtype_gray16s,
+    image_dtype_gray32,
+    image_dtype_gray32s,
+    image_dtype_gray32f,
+    image_dtype_gray64,
+    image_dtype_gray64s,
+    image_dtype_gray64f,
+    image_dtype_null
+};
+
+} // end ns
 
 #endif // MAPNIK_IMAGE_DATA_HPP

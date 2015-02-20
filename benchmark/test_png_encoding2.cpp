@@ -3,7 +3,7 @@
 
 class test : public benchmark::test_case
 {
-    std::shared_ptr<image_32> im_;
+    std::shared_ptr<image_rgba8> im_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params) {
@@ -13,14 +13,14 @@ public:
         {
             throw mapnik::image_reader_exception("Failed to load: " + filename);
         }
-        im_ = std::make_shared<image_32>(reader->width(),reader->height());
-        reader->read(0,0,im_->data());
+        im_ = std::make_shared<image_rgba8>(reader->width(),reader->height());
+        reader->read(0,0,*im_);
     }
     bool validate() const
     {
         std::string expected("./benchmark/data/multicolor-hextree-expected.png");
         std::string actual("./benchmark/data/multicolor-hextree-actual.png");
-        mapnik::save_to_file(im_->data(),actual, "png8:m=h:z=1");
+        mapnik::save_to_file(*im_,actual, "png8:m=h:z=1");
         return benchmark::compare_images(actual,expected);
     }
     bool operator()() const
@@ -28,7 +28,7 @@ public:
         std::string out;
         for (std::size_t i=0;i<iterations_;++i) {
             out.clear();
-            out = mapnik::save_to_string(im_->data(),"png8:m=h:z=1");
+            out = mapnik::save_to_string(*im_,"png8:m=h:z=1");
         }
     }
     return true;

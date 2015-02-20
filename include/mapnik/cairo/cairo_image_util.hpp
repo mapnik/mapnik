@@ -25,7 +25,7 @@
 #define MAPNIK_CAIRO_IMAGE_UTIL_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/cairo/cairo_context.hpp> // for cairo_surface_ptr
 
 // stl
@@ -33,7 +33,7 @@
 
 namespace mapnik {
 
-static inline void cairo_image_to_rgba8(mapnik::image_data_rgba8 & data,
+static inline void cairo_image_to_rgba8(mapnik::image_rgba8 & data,
                                         cairo_surface_ptr const& surface)
 {
     if (cairo_image_surface_get_format(&*surface) != CAIRO_FORMAT_ARGB32)

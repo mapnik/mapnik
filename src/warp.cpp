@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_scaling_traits.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/box2d.hpp>
@@ -53,12 +53,12 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
                  box2d<double> const& target_ext, box2d<double> const& source_ext,
                  double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method, double filter_factor)
 {
-    using image_data_type = T;
-    using pixel_type = typename image_data_type::pixel_type;
-    using pixfmt_pre = typename detail::agg_scaling_traits<image_data_type>::pixfmt_pre;
-    using color_type = typename detail::agg_scaling_traits<image_data_type>::color_type;
+    using image_type = T;
+    using pixel_type = typename image_type::pixel_type;
+    using pixfmt_pre = typename detail::agg_scaling_traits<image_type>::pixfmt_pre;
+    using color_type = typename detail::agg_scaling_traits<image_type>::color_type;
     using renderer_base = agg::renderer_base<pixfmt_pre>;
-    using interpolator_type = typename detail::agg_scaling_traits<image_data_type>::interpolator_type;
+    using interpolator_type = typename detail::agg_scaling_traits<image_type>::interpolator_type;
 
     constexpr std::size_t pixel_size = sizeof(pixel_type);
 
@@ -70,8 +70,8 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
     std::size_t mesh_nx = std::ceil(source.width()/double(mesh_size) + 1);
     std::size_t mesh_ny = std::ceil(source.height()/double(mesh_size) + 1);
 
-    image_data<double> xs(mesh_nx, mesh_ny);
-    image_data<double> ys(mesh_nx, mesh_ny);
+    image_gray64f xs(mesh_nx, mesh_ny, false);
+    image_gray64f ys(mesh_nx, mesh_ny, false);
 
     // Precalculate reprojected mesh
     for(std::size_t j = 0; j < mesh_ny; ++j)
@@ -138,13 +138,13 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
                 interpolator_type interpolator(tr);
                 if (scaling_method == SCALING_NEAR)
                 {
-                    using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_filter;
+                    using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_filter;
                     span_gen_type sg(ia, interpolator);
                     agg::render_scanlines_bin(rasterizer, scanline, rb, sa, sg);
                 }
                 else
                 {
-                    using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_resample_affine;
+                    using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_resample_affine;
                     agg::image_filter_lut filter;
                     detail::set_scaling_method(filter, scaling_method, filter_factor);
                     span_gen_type sg(ia, interpolator, filter);
@@ -172,16 +172,16 @@ struct warp_image_visitor
           scaling_method_(scaling_method),
         filter_factor_(filter_factor) {}
 
-    void operator() (image_data_null const&) {}
+    void operator() (image_null const&) {}
 
     template <typename T>
     void operator() (T const& source)
     {
-        using image_data_type = T;
+        using image_type = T;
         //source and target image data types must match
-        if (target_raster_.data_.template is<image_data_type>())
+        if (target_raster_.data_.template is<image_type>())
         {
-            image_data_type & target = util::get<image_data_type>(target_raster_.data_);
+            image_type & target = util::get<image_type>(target_raster_.data_);
             warp_image (target, source, prj_trans_, target_raster_.ext_, source_ext_,
                         offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
         }
@@ -210,16 +210,16 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     util::apply_visitor(warper, source.data_);
 }
 
-template MAPNIK_DECL void warp_image (image_data_rgba8&, image_data_rgba8 const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_rgba8&, image_rgba8 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
-template MAPNIK_DECL void warp_image (image_data_gray8&, image_data_gray8 const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_gray8&, image_gray8 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
-template MAPNIK_DECL void warp_image (image_data_gray16&, image_data_gray16 const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_gray16&, image_gray16 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
-template MAPNIK_DECL void warp_image (image_data_gray32f&, image_data_gray32f const&, proj_transform const&,
+template MAPNIK_DECL void warp_image (image_gray32f&, image_gray32f const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
 
 

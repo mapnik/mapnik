@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GRID_VIEW_HPP
 #define MAPNIK_GRID_VIEW_HPP
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
@@ -196,7 +196,7 @@ private:
     feature_type const& features_;
 };
 
-using grid_view = hit_grid_view<mapnik::image_data<mapnik::value_integer> >;
+using grid_view = hit_grid_view<mapnik::image<mapnik::value_integer_pixel> >;
 
 }
 

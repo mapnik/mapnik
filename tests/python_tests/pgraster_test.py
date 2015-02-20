@@ -3,13 +3,12 @@
 from nose.tools import eq_,assert_almost_equal
 import atexit
 import time
-from utilities import execution_path, run_all
+from utilities import execution_path, run_all, side_by_side_image
 from subprocess import Popen, PIPE
 import os, mapnik
 import sys
 import re
 from binascii import hexlify
-
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-pgraster-test-db'
 POSTGIS_TEMPLATE_DBNAME = 'template_postgis'
@@ -109,6 +108,20 @@ def drop_imported(tabname, overview):
   if overview:
     for of in overview.split(','):
       psql_run('DROP TABLE IF EXISTS "o_' + of + '_' + tabname + '";')
+
+def compare_images(expected,im):
+  if not os.path.exists(expected) or os.environ.get('UPDATE'):
+    print 'generating expected image %s' % expected
+    im.save(expected,'png32')
+  expected_im = mapnik.Image.open(expected)
+  diff = expected.replace('.png','-diff.png')
+  if len(im.tostring("png32")) != len(expected_im.tostring("png32")):
+    compared = side_by_side_image(expected_im, im)
+    compared.save(diff)
+    assert False,'images do not match, check diff at %s' % diff
+  else:
+    if os.path.exists(diff): os.unlink(diff)
+  return True
 
 if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         and createdb_and_dropdb_on_path() \
@@ -268,7 +281,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
-      #im.save('/tmp/xfull.png') # for debugging
+      expected = 'images/support/pgraster/%s-%s-%s-%s-box1.png' % (lyr.name,lbl,overview,clip)
+      compare_images(expected,im)
       # no data
       eq_(hexlify(im.view(3,3,1,1).tostring()), '00000000')
       eq_(hexlify(im.view(250,250,1,1).tostring()), '00000000') 
@@ -287,10 +301,12 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       newenv = mapnik.Box2d(166,-105,191,-77)
       mm.zoom_to_box(newenv)
       t0 = time.time() # we want wall time to include IO waits
+      im = mapnik.Image(mm.width, mm.height)
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
-      #im.save('/tmp/xtenth.png') # for debugging
+      expected = 'images/support/pgraster/%s-%s-%s-%s-box2.png' % (lyr.name,lbl,overview,clip)
+      compare_images(expected,im)
       # no data
       eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
       eq_(hexlify(im.view(200,40,1,1).tostring()), '00000000')
@@ -369,7 +385,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
-      #im.save('/tmp/xfull.png') # for debugging
+      expected = 'images/support/pgraster/%s-%s-%s-%s-%s-box1.png' % (lyr.name,tnam,lbl,overview,clip)
+      compare_images(expected,im)
       # no data
       eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
       eq_(hexlify(im.view(128,16,1,1).tostring()), '00000000')
@@ -386,10 +403,12 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
                             -12328997.49148983,4508957.34625536)
       mm.zoom_to_box(newenv)
       t0 = time.time() # we want wall time to include IO waits
+      im = mapnik.Image(mm.width, mm.height)
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
-      #im.save('/tmp/xtenth.png') # for debugging
+      expected = 'images/support/pgraster/%s-%s-%s-%s-%s-box2.png' % (lyr.name,tnam,lbl,overview,clip)
+      compare_images(expected,im)
       # no data
       eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
       eq_(hexlify(im.view(128,16,1,1).tostring()), '00000000')
@@ -483,7 +502,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
-      #im.save('/tmp/xfull.png') # for debugging
+      expected = 'images/support/pgraster/%s-%s-%s-%s.png' % (lyr.name,lbl,pixtype,value)
+      compare_images(expected,im)
       h = format(value, '02x')
       hex_v = h+h+h+'ff'
       h = format(val_a, '02x')
@@ -597,6 +617,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
+      expected = 'images/support/pgraster/%s-%s-%s-%s.png' % (lyr.name,lbl,pixtype,value)
+      compare_images(expected,im)
 
     def test_data_2bui_subquery():
       _test_data_subquery('data_2bui_subquery', '2BUI', 3)
@@ -702,7 +724,8 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       mapnik.render(mm, im)
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
-      im.save('/tmp/xfull.png') # for debugging
+      expected = 'images/support/pgraster/%s-%s-%s-%s-%s-%s-%s-%s-%s.png' % (lyr.name,lbl, pixtype, r, g, b, a, g1, b1)
+      compare_images(expected,im)
       hex_v = format(r << 24 | g  << 16 | b  << 8 | a, '08x')
       hex_a = format(r << 24 | g1 << 16 | b  << 8 | a, '08x')
       hex_b = format(r << 24 | g  << 16 | b1 << 8 | a, '08x')

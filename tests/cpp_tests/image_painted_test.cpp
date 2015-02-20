@@ -6,7 +6,6 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/expression.hpp>
@@ -60,8 +59,8 @@ int main(int argc, char** argv)
 
         m.zoom_all();
 
-        image_32 image(m.width(), m.height());
-        agg_renderer<image_32> ren(m, image);
+        image_rgba8 image(m.width(), m.height());
+        agg_renderer<image_rgba8> ren(m, image);
         ren.apply();
 
         BOOST_TEST_EQ(image.painted(), true);

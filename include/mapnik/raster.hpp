@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
  // boost
@@ -37,20 +37,17 @@ class raster : private util::noncopyable
 {
 public:
     box2d<double> ext_;
-    image_data_any data_;
+    image_any data_;
     double filter_factor_;
-    bool premultiplied_alpha_;
     boost::optional<double> nodata_;
 
     template <typename ImageData>
     raster(box2d<double> const& ext,
            ImageData && data,
-           double filter_factor,
-           bool premultiplied_alpha = false)
+           double filter_factor)
         : ext_(ext),
           data_(std::move(data)),
-          filter_factor_(filter_factor),
-          premultiplied_alpha_(premultiplied_alpha) {}
+          filter_factor_(filter_factor) {}
 
     void set_nodata(double nodata)
     {

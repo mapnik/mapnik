@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_scaling_traits.hpp>
 // does not handle alpha correctly
@@ -107,12 +107,12 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
     // "Yes, you need to use premultiplied images only. Only in this case the simple weighted averaging works correctly in the image fitering."
     // http://permalink.gmane.org/gmane.comp.graphics.agg/3443
-    using image_data_type = T;
-    using pixel_type = typename image_data_type::pixel_type;
-    using pixfmt_pre = typename detail::agg_scaling_traits<image_data_type>::pixfmt_pre;
-    using color_type = typename detail::agg_scaling_traits<image_data_type>::color_type;
-    using img_src_type = typename detail::agg_scaling_traits<image_data_type>::img_src_type;
-    using interpolator_type = typename detail::agg_scaling_traits<image_data_type>::interpolator_type;
+    using image_type = T;
+    using pixel_type = typename image_type::pixel_type;
+    using pixfmt_pre = typename detail::agg_scaling_traits<image_type>::pixfmt_pre;
+    using color_type = typename detail::agg_scaling_traits<image_type>::color_type;
+    using img_src_type = typename detail::agg_scaling_traits<image_type>::img_src_type;
+    using interpolator_type = typename detail::agg_scaling_traits<image_type>::interpolator_type;
     using renderer_base_pre = agg::renderer_base<pixfmt_pre>;
     constexpr std::size_t pixel_size = sizeof(pixel_type);
 
@@ -150,13 +150,13 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
 
     if (scaling_method == SCALING_NEAR)
     {
-        using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_filter;
+        using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_filter;
         span_gen_type sg(img_src, interpolator);
         agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
     }
     else
     {
-        using span_gen_type = typename detail::agg_scaling_traits<image_data_type>::span_image_resample_affine;
+        using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_resample_affine;
         agg::image_filter_lut filter;
         detail::set_scaling_method(filter, scaling_method, filter_factor);
         span_gen_type sg(img_src, interpolator, filter);
@@ -165,16 +165,36 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
 
 }
 
-template MAPNIK_DECL void scale_image_agg(image_data_rgba8 &, image_data_rgba8 const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_rgba8 &, image_rgba8 const&, scaling_method_e,
                               double, double , double, double , double);
 
-template MAPNIK_DECL void scale_image_agg(image_data_gray8 &, image_data_gray8 const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_gray8 &, image_gray8 const&, scaling_method_e,
                               double, double , double, double , double);
 
-template MAPNIK_DECL void scale_image_agg(image_data_gray16 &, image_data_gray16 const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_gray8s &, image_gray8s const&, scaling_method_e,
                               double, double , double, double , double);
 
-template MAPNIK_DECL void scale_image_agg(image_data_gray32f &, image_data_gray32f const&, scaling_method_e,
+template MAPNIK_DECL void scale_image_agg(image_gray16 &, image_gray16 const&, scaling_method_e,
                               double, double , double, double , double);
 
+template MAPNIK_DECL void scale_image_agg(image_gray16s &, image_gray16s const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray32 &, image_gray32 const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray32s &, image_gray32s const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray32f &, image_gray32f const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray64 &, image_gray64 const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray64s &, image_gray64s const&, scaling_method_e,
+                              double, double , double, double , double);
+
+template MAPNIK_DECL void scale_image_agg(image_gray64f &, image_gray64f const&, scaling_method_e,
+                              double, double , double, double , double);
 }

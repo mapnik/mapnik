@@ -36,7 +36,8 @@
 #include <mapnik/request.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
+#include <mapnik/image_any.hpp>
 // stl
 #include <memory>
 
@@ -50,10 +51,9 @@ namespace mapnik {
   class feature_type_style;
   class label_collision_detector4;
   class layer;
-  class marker;
+  struct marker;
   class proj_transform;
   struct rasterizer;
-  class image_32;
 }
 
 namespace mapnik {
@@ -171,7 +171,7 @@ private:
     void setup(Map const& m);
 };
 
-extern template class MAPNIK_DECL agg_renderer<image_32>;
+extern template class MAPNIK_DECL agg_renderer<image_rgba8>;
 
 } // namespace mapnik
 

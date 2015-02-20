@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/make_unique.hpp>
-#include <mapnik/graphics.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -58,7 +58,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
+    agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->getRowSize());
     agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
 
@@ -115,8 +115,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
         });
 }
 
-template void agg_renderer<image_32>::process(building_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(building_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
-
 }

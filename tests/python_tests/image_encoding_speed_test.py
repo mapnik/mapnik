@@ -86,7 +86,7 @@ def do_encoding():
         def solid():
             return eval('image.tostring("%s")' % c)
         solid_im = mapnik.Image(512,512)
-        solid_im.background = mapnik.Color("#f2efe9")
+        solid_im.fill(mapnik.Color("#f2efe9"))
         for c in combinations:
             t = Timer(solid)
             run(solid,solid_im,c,t)

@@ -85,9 +85,8 @@ public:
     unsigned height() const final;
     boost::optional<box2d<double> > bounding_box() const final;
     inline bool has_alpha() const final { return false; }
-    inline bool premultiplied_alpha() const final { return true; }
-    void read(unsigned x,unsigned y,image_data_rgba8& image) final;
-    image_data_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
+    void read(unsigned x,unsigned y,image_rgba8& image) final;
+    image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
 private:
     void init();
     static void on_error(j_common_ptr cinfo);
@@ -266,7 +265,7 @@ boost::optional<box2d<double> > jpeg_reader<T>::bounding_box() const
 }
 
 template <typename T>
-void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_data_rgba8& image)
+void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
 {
     stream_.clear();
     stream_.seekg(0, std::ios_base::beg);
@@ -321,11 +320,11 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_data_rgba8& image)
 }
 
 template <typename T>
-image_data_any jpeg_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
+image_any jpeg_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
 {
-    image_data_rgba8 data(width,height);
+    image_rgba8 data(width,height, true, true);
     read(x, y, data);
-    return image_data_any(std::move(data));
+    return image_any(std::move(data));
 }
 
 }

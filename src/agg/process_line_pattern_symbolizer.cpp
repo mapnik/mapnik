@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/graphics.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
@@ -52,103 +52,206 @@
 
 namespace mapnik {
 
+template <typename buffer_type>
+struct agg_renderer_process_visitor_l
+{
+    agg_renderer_process_visitor_l(renderer_common & common,
+                                 buffer_type & pixmap,
+                                 buffer_type * current_buffer,
+                                 std::unique_ptr<rasterizer> const& ras_ptr,
+                                 line_pattern_symbolizer const& sym,
+                                 mapnik::feature_impl & feature,
+                                 proj_transform const& prj_trans)
+        : common_(common),
+          pixmap_(pixmap),
+          current_buffer_(current_buffer),
+          ras_ptr_(ras_ptr),
+          sym_(sym),
+          feature_(feature),
+          prj_trans_(prj_trans) {}
+
+    void operator() (marker_null const&) {}
+
+    void operator() (marker_svg const& marker)
+    {
+        using color = agg::rgba8;
+        using order = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+        using pattern_filter_type = agg::pattern_filter_bilinear_rgba8;
+        using pattern_type = agg::line_image_pattern<pattern_filter_type>;
+        using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+        using renderer_base = agg::renderer_base<pixfmt_type>;
+        using renderer_type = agg::renderer_outline_image<renderer_base, pattern_type>;
+        using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
+
+        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, common_.vars_);
+        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
+        auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
+        image_rgba8 image(bbox_image.width(), bbox_image.height());
+        render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
+
+        value_bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);
+        value_double offset = get<value_double, keys::offset>(sym_, feature_, common_.vars_);
+        value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
+        value_double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
+
+        agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->getRowSize());
+        pixfmt_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
+        renderer_base ren_base(pixf);
+        agg::pattern_filter_bilinear_rgba8 filter;
+
+        pattern_source source(image, opacity);
+        pattern_type pattern (filter,source);
+        renderer_type ren(ren_base, pattern);
+        rasterizer_type ras(ren);
+
+        agg::trans_affine tr;
+        auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
+        if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
+
+        box2d<double> clip_box = clipping_extent(common_);
+        if (clip)
+        {
+            double padding = (double)(common_.query_extent_.width()/pixmap_.width());
+            double half_stroke = marker.width()/2.0;
+            if (half_stroke > 1)
+                padding *= half_stroke;
+            if (std::fabs(offset) > 0)
+                padding *= std::fabs(offset) * 1.2;
+            padding *= common_.scale_factor_;
+            clip_box.pad(padding);
+        }
+
+        vertex_converter<rasterizer_type, clip_line_tag, transform_tag,
+                         affine_transform_tag,
+                         simplify_tag,smooth_tag,
+                         offset_transform_tag>
+            converter(clip_box,ras,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+
+        if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
+        converter.set<transform_tag>(); //always transform
+        if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+        if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+#if 0 // FIXME
+        for (geometry_type const& geom : feature_.paths())
+        {
+            if (geom.size() > 1)
+            {
+                vertex_adapter va(geom);
+                converter.apply(va);
+            }
+        }
+#endif
+    }
+
+    void operator() (marker_rgba8 const& marker)
+    {
+        using color = agg::rgba8;
+        using order = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+        using pattern_filter_type = agg::pattern_filter_bilinear_rgba8;
+        using pattern_type = agg::line_image_pattern<pattern_filter_type>;
+        using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+        using renderer_base = agg::renderer_base<pixfmt_type>;
+        using renderer_type = agg::renderer_outline_image<renderer_base, pattern_type>;
+        using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
+
+        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, common_.vars_);
+        mapnik::image_rgba8 const& image = marker.get_data();
+
+        value_bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);
+        value_double offset = get<value_double, keys::offset>(sym_, feature_, common_.vars_);
+        value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
+        value_double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
+
+        agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->getRowSize());
+        pixfmt_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
+        renderer_base ren_base(pixf);
+        agg::pattern_filter_bilinear_rgba8 filter;
+
+        pattern_source source(image, opacity);
+        pattern_type pattern (filter,source);
+        renderer_type ren(ren_base, pattern);
+        rasterizer_type ras(ren);
+
+        agg::trans_affine tr;
+        auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
+        if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
+
+        box2d<double> clip_box = clipping_extent(common_);
+        if (clip)
+        {
+            double padding = (double)(common_.query_extent_.width()/pixmap_.width());
+            double half_stroke = marker.width()/2.0;
+            if (half_stroke > 1)
+                padding *= half_stroke;
+            if (std::fabs(offset) > 0)
+                padding *= std::fabs(offset) * 1.2;
+            padding *= common_.scale_factor_;
+            clip_box.pad(padding);
+        }
+
+        vertex_converter<rasterizer_type, clip_line_tag, transform_tag,
+                         affine_transform_tag,
+                         simplify_tag,smooth_tag,
+                         offset_transform_tag>
+            converter(clip_box,ras,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+
+        if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
+        converter.set<transform_tag>(); //always transform
+        if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+        if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+#if 0 // FIXME
+        for (geometry_type const& geom : feature_.paths())
+        {
+            if (geom.size() > 1)
+            {
+                vertex_adapter va(geom);
+                converter.apply(va);
+            }
+        }
+#endif
+    }
+
+  private:
+    renderer_common & common_;
+    buffer_type & pixmap_;
+    buffer_type * current_buffer_;
+    std::unique_ptr<rasterizer> const& ras_ptr_;
+    line_pattern_symbolizer const& sym_;
+    mapnik::feature_impl & feature_;
+    proj_transform const& prj_trans_;
+};
+
 template <typename T0, typename T1>
 void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
 
-    using color = agg::rgba8;
-    using order = agg::order_rgba;
-    using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
-    using pattern_filter_type = agg::pattern_filter_bilinear_rgba8;
-    using pattern_type = agg::line_image_pattern<pattern_filter_type>;
-    using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
-    using renderer_base = agg::renderer_base<pixfmt_type>;
-    using renderer_type = agg::renderer_outline_image<renderer_base, pattern_type>;
-    using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
 
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> marker_ptr = marker_cache::instance().find(filename, true);
-    if (!marker_ptr || !(*marker_ptr)) return;
-    boost::optional<image_ptr> pat;
-    // TODO - re-implement at renderer level like polygon_pattern symbolizer
-    value_double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
-    if ((*marker_ptr)->is_bitmap())
-    {
-        pat = (*marker_ptr)->get_bitmap_data();
-    }
-    else
-    {
-        agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
-        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
-        pat = render_pattern(*ras_ptr, **marker_ptr, image_tr, 1.0);
-    }
-
-    if (!pat) return;
-
-    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
-    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
-    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
-    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
-
-    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
-    pixfmt_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
-    renderer_base ren_base(pixf);
-    agg::pattern_filter_bilinear_rgba8 filter;
-
-    pattern_source source(*(*pat), opacity);
-    pattern_type pattern (filter,source);
-    renderer_type ren(ren_base, pattern);
-    rasterizer_type ras(ren);
-
-    agg::trans_affine tr;
-    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
-
-    box2d<double> clip_box = clipping_extent(common_);
-    if (clip)
-    {
-        double padding = (double)(common_.query_extent_.width()/pixmap_.width());
-        double half_stroke = (*marker_ptr)->width()/2.0;
-        if (half_stroke > 1)
-            padding *= half_stroke;
-        if (std::fabs(offset) > 0)
-            padding *= std::fabs(offset) * 1.2;
-        padding *= common_.scale_factor_;
-        clip_box.pad(padding);
-    }
-
-    vertex_converter<rasterizer_type, clip_line_tag, transform_tag,
-                     affine_transform_tag,
-                     simplify_tag,smooth_tag,
-                     offset_transform_tag>
-        converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
-
-    if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
-    converter.set<transform_tag>(); //always transform
-    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
-    converter.set<affine_transform_tag>(); // optional affine transform
-    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
-    // FIXME
-    /*
-    for (geometry_type const& geom : feature.paths())
-    {
-        if (geom.size() > 1)
-        {
-            vertex_adapter va(geom);
-            converter.apply(va);
-        }
-    }
-    */
+    mapnik::marker const & marker = marker_cache::instance().find(filename, true);
+    agg_renderer_process_visitor_l<buffer_type> visitor(common_,
+                                         pixmap_,
+                                         current_buffer_,
+                                         ras_ptr,
+                                         sym,
+                                         feature,
+                                         prj_trans);
+    util::apply_visitor(visitor, marker);
 }
 
-template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(line_pattern_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

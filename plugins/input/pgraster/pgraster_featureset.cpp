@@ -38,7 +38,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/global.hpp> // for int2net

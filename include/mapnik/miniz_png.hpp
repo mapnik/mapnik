@@ -32,7 +32,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 
 /* miniz.c porting issues:
@@ -83,12 +83,12 @@ private:
     static const unsigned char IEND_tpl[];
 };
 
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_gray8> >(image_view<image_data_gray8> const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_data_rgba8>(image_data_rgba8 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_data_rgba8>(image_data_rgba8 const& image);
-extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_gray8>(image_gray8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view_gray8>(image_view_gray8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_rgba8>(image_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDAT<image_view_rgba8>(image_view_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_rgba8>(image_rgba8 const& image);
+extern template MAPNIK_DECL void PNGWriter::writeIDATStripAlpha<image_view_rgba8>(image_view_rgba8 const& image);
 
 }}
 

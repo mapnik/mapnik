@@ -25,11 +25,10 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/box2d.hpp>
@@ -52,15 +51,15 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
 {
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](image_data_rgba8 & target, composite_mode_e comp_op, double opacity,
+        [&](image_rgba8 & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
-            composite(current_buffer_->data(), target,
-                      comp_op, opacity, start_x, start_y, false);
+            composite(*current_buffer_, target,
+                      comp_op, opacity, start_x, start_y);
         }
     );
 }
 
-template void agg_renderer<image_32>::process(raster_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(raster_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

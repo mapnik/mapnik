@@ -42,7 +42,6 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/graphics.hpp>
 
 // agg
 #include <agg_trans_affine.h>
@@ -130,13 +129,13 @@ struct vector_marker_render_thunk  : util::noncopyable
 
 struct raster_marker_render_thunk  : util::noncopyable
 {
-    image_data_rgba8 & src_;
+    image_rgba8 const& src_;
     agg::trans_affine tr_;
     double opacity_;
     composite_mode_e comp_op_;
     bool snap_to_pixels_;
 
-    raster_marker_render_thunk(image_data_rgba8 & src,
+    raster_marker_render_thunk(image_rgba8 const& src,
                                agg::trans_affine const& marker_trans,
                                double opacity,
                                composite_mode_e comp_op,

@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/pixel_types.hpp>
 
 // icu
 #include <unicode/uversion.h> // for U_NAMESPACE_QUALIFIER
@@ -42,9 +43,13 @@ namespace mapnik  {
 
 #ifdef BIGINT
 //using value_integer = boost::long_long_type;
-using value_integer = long long;
+//using value_integer = long long;
+using value_integer = std::int64_t;
+using value_integer_pixel = gray64s_t;
 #else
-using value_integer = int;
+//using value_integer = int;
+using value_integer = std::int32_t;
+using value_integer_pixel = gray32s_t;
 #endif
 
 using value_double = double;

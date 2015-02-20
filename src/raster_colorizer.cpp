@@ -123,12 +123,12 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 }
 
 template <typename T>
-void raster_colorizer::colorize(image_data_rgba8 & out, T const& in,
+void raster_colorizer::colorize(image_rgba8 & out, T const& in,
                                 boost::optional<double> const& nodata,
                                 feature_impl const& f) const
 {
-    using image_data_type = T;
-    using pixel_type = typename image_data_type::pixel_type;
+    using image_type = T;
+    using pixel_type = typename image_type::pixel_type;
     // TODO: assuming in/out have the same width/height for now
     std::uint32_t * out_data = out.getData();
     pixel_type const* in_data = in.getData();
@@ -286,13 +286,34 @@ unsigned raster_colorizer::get_color(float value) const
 }
 
 
-template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray8 const& in,
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray8 const& in,
                                 boost::optional<double>const& nodata,
                                 feature_impl const& f) const;
-template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray16 const& in,
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray8s const& in,
                                 boost::optional<double>const& nodata,
                                 feature_impl const& f) const;
-template void raster_colorizer::colorize(image_data_rgba8 & out, image_data_gray32f const& in,
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray16 const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray16s const& in,
+                                boost::optional<double>const& nodata,
+                                feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray32 const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray32s const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray32f const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray64 const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray64s const& in,
+                                         boost::optional<double>const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8 & out, image_gray64f const& in,
                                          boost::optional<double>const& nodata,
                                          feature_impl const& f) const;
 
