@@ -67,23 +67,20 @@ function setup_nose() {
     export PYTHONPATH=$(pwd)/nose-1.3.4:${PYTHONPATH}
 }
 
+MASON_LINKED_ABS=$(pwd)/mason_packages/.link
+MASON_LINKED_REL=./mason_packages/.link
+
 function make_config() {
-    local MASON_LINKED_REL=./mason_packages/.link
-    export C_INCLUDE_PATH="${MASON_LINKED_REL}/include"
-    export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
-    export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
-    export PATH="${MASON_LINKED_REL}/bin":${PATH}
     if [[ $(uname -s) == 'Darwin' ]]; then
-        export PATH_REPLACE="/Users/travis/build/mapbox/mason/mason_packages:./mason_packages"
+        local PATH_REPLACE="/Users/travis/build/mapbox/mason/mason_packages:./mason_packages"
     else
-        export PATH_REPLACE="/home/travis/build/mapbox/mason/mason_packages:./mason_packages"
+        local PATH_REPLACE="/home/travis/build/mapbox/mason/mason_packages:./mason_packages"
     fi
 
     echo "
 CXX = '$CXX'
 CC = '$CC'
 CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
-CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
@@ -127,7 +124,6 @@ SAMPLE_INPUT_PLUGINS = True
 }
 
 function setup_runtime_settings() {
-    local MASON_LINKED_ABS=$(pwd)/mason_packages/.link
     export PROJ_LIB=${MASON_LINKED_ABS}/share/proj
     export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1
     export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal

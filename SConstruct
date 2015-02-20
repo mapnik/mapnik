@@ -142,6 +142,9 @@ def init_environment(env):
 env = Environment(ENV=os.environ)
 init_environment(env)
 
+def fix_path(path):
+    return os.path.abspath(path)
+
 def color_print(color,text,newline=True):
     # 1 - red
     # 2 - green
@@ -678,8 +681,8 @@ def parse_pg_config(context, config):
     if ret:
         lib_path = call('%s --libdir' % env[config])
         inc_path = call('%s --includedir' % env[config])
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
         lpq = env['PLUGINS']['postgis']['lib']
         env.Append(LIBS = lpq)
     else:
@@ -780,8 +783,8 @@ def FindBoost(context, prefixes, thread_flag):
             env['BOOST_APPEND'] = '-'.join(append_params)
         msg += '\nFound boost lib name extension: %s' % env['BOOST_APPEND']
 
-    env.AppendUnique(CPPPATH = os.path.realpath(env['BOOST_INCLUDES']))
-    env.AppendUnique(LIBPATH = os.path.realpath(env['BOOST_LIBS']))
+    env.AppendUnique(CPPPATH = fix_path(env['BOOST_INCLUDES']))
+    env.AppendUnique(LIBPATH = fix_path(env['BOOST_LIBS']))
     if env['COLOR_PRINT']:
         msg = "\033[94m%s\033[0m" % (msg)
     ret = context.Result(msg)
@@ -1161,7 +1164,7 @@ if not preconfigured:
     # install prefix is a pre-pended base location to
     # re-route the install and only intended for package building
     # we normalize to ensure no trailing slash and proper pre-pending to the absolute prefix
-    install_prefix = os.path.normpath(os.path.realpath(env['DESTDIR'])) + os.path.realpath(env['PREFIX'])
+    install_prefix = os.path.normpath(fix_path(env['DESTDIR'])) + fix_path(env['PREFIX'])
     env['INSTALL_PREFIX'] = strip_first(install_prefix,'//','/')
     # all values from above based on install_prefix
     # if env['DESTDIR'] == '/' these should be unchanged
@@ -1179,11 +1182,11 @@ if not preconfigured:
        env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}${MAPNIK_NAME}${SHLIBSUFFIX}'
 
     if env['PKG_CONFIG_PATH']:
-        env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
+        env['ENV']['PKG_CONFIG_PATH'] = fix_path(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
 
     if env['PATH']:
-        env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
+        env['ENV']['PATH'] = fix_path(env['PATH']) + ':' + env['ENV']['PATH']
 
     if env['SYSTEM_FONTS']:
         if not os.path.isdir(env['SYSTEM_FONTS']):
@@ -1232,8 +1235,8 @@ if not preconfigured:
     for required in ('ICU', 'SQLITE', 'HB'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
 
     REQUIRED_LIBSHEADERS = [
         ['z', 'zlib.h', True,'C'],
@@ -1245,10 +1248,10 @@ if not preconfigured:
         REQUIRED_LIBSHEADERS.insert(0,['freetype','ft2build.h',True,'C'])
         if env.get('FREETYPE_INCLUDES'):
             inc_path = env['FREETYPE_INCLUDES']
-            env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+            env.AppendUnique(CPPPATH = fix_path(inc_path))
         if env.get('FREETYPE_LIBS'):
             lib_path = env['FREETYPE_LIBS']
-            env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+            env.AppendUnique(LIBPATH = fix_path(lib_path))
     elif conf.parse_config('FREETYPE_CONFIG'):
         # check if freetype links to bz2
         if env['RUNTIME_LINK'] == 'static':
@@ -1268,10 +1271,10 @@ if not preconfigured:
         REQUIRED_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
         if env.get('XML2_INCLUDES'):
             inc_path = env['XML2_INCLUDES']
-            env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+            env.AppendUnique(CPPPATH = fix_path(inc_path))
         if env.get('XML2_LIBS'):
             lib_path = env['XML2_LIBS']
-            env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+            env.AppendUnique(LIBPATH = fix_path(lib_path))
     elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
         env['HAS_LIBXML2'] = True
     else:
@@ -1288,8 +1291,8 @@ if not preconfigured:
         OPTIONAL_LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C','-DHAVE_JPEG'])
         inc_path = env['%s_INCLUDES' % 'JPEG']
         lib_path = env['%s_LIBS' % 'JPEG']
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['jpeg'])
 
@@ -1297,8 +1300,8 @@ if not preconfigured:
         OPTIONAL_LIBSHEADERS.append(['proj', 'proj_api.h', False,'C','-DMAPNIK_USE_PROJ4'])
         inc_path = env['%s_INCLUDES' % 'PROJ']
         lib_path = env['%s_LIBS' % 'PROJ']
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['proj'])
 
@@ -1306,8 +1309,8 @@ if not preconfigured:
         OPTIONAL_LIBSHEADERS.append(['png', 'png.h', False,'C','-DHAVE_PNG'])
         inc_path = env['%s_INCLUDES' % 'PNG']
         lib_path = env['%s_LIBS' % 'PNG']
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['png'])
 
@@ -1315,8 +1318,8 @@ if not preconfigured:
         OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
         inc_path = env['%s_INCLUDES' % 'WEBP']
         lib_path = env['%s_LIBS' % 'WEBP']
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['webp'])
 
@@ -1324,8 +1327,8 @@ if not preconfigured:
         OPTIONAL_LIBSHEADERS.append(['tiff', 'tiff.h', False,'C','-DHAVE_TIFF'])
         inc_path = env['%s_INCLUDES' % 'TIFF']
         lib_path = env['%s_LIBS' % 'TIFF']
-        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
-        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['tiff'])
 
@@ -1493,8 +1496,8 @@ if not preconfigured:
                     # to the beginning of the path list even if they already exist
                     incpath = env['%s_INCLUDES' % details['path']]
                     libpath = env['%s_LIBS' % details['path']]
-                    env.PrependUnique(CPPPATH = os.path.realpath(incpath),delete_existing=True)
-                    env.PrependUnique(LIBPATH = os.path.realpath(libpath),delete_existing=True)
+                    env.PrependUnique(CPPPATH = fix_path(incpath),delete_existing=True)
+                    env.PrependUnique(LIBPATH = fix_path(libpath),delete_existing=True)
                     if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                         env.Replace(**backup)
                         env['SKIPPED_DEPS'].append(details['lib'])
@@ -1542,8 +1545,8 @@ if not preconfigured:
         if env['PGSQL2SQLITE']:
             if 'sqlite3' not in env['LIBS']:
                 env.AppendUnique(LIBS='sqlite3')
-                env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
-                env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
+                env.AppendUnique(CPPPATH = fix_path(env['SQLITE_INCLUDES']))
+                env.AppendUnique(LIBPATH = fix_path(env['SQLITE_LIBS']))
             if 'pq' not in env['LIBS']:
                 if not conf.parse_pg_config('PG_CONFIG'):
                     env['PGSQL2SQLITE'] = False
@@ -1563,11 +1566,11 @@ if not preconfigured:
         if env['CAIRO_LIBS'] or env['CAIRO_INCLUDES']:
             c_inc = env['CAIRO_INCLUDES']
             if env['CAIRO_LIBS']:
-                env["CAIRO_LIBPATHS"].append(os.path.realpath(env['CAIRO_LIBS']))
+                env["CAIRO_LIBPATHS"].append(fix_path(env['CAIRO_LIBS']))
                 if not env['CAIRO_INCLUDES']:
                     c_inc = env['CAIRO_LIBS'].replace('lib','',1)
             if c_inc:
-                c_inc = os.path.normpath(os.path.realpath(env['CAIRO_INCLUDES']))
+                c_inc = os.path.normpath(fix_path(env['CAIRO_INCLUDES']))
                 if c_inc.endswith('include'):
                     c_inc = os.path.dirname(c_inc)
                 env["CAIRO_CPPPATHS"].extend(
@@ -1718,7 +1721,7 @@ if not preconfigured:
     if env['MISSING_DEPS']:
         # if required dependencies are missing, print warnings and then let SCons finish without building or saving local config
         color_print(1,'\nExiting... the following required dependencies were not found:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['MISSING_DEPS']]))
-        color_print(1,"\nSee '%s' for details on possible problems." % (os.path.realpath(SCONS_LOCAL_LOG)))
+        color_print(1,"\nSee '%s' for details on possible problems." % (fix_path(SCONS_LOCAL_LOG)))
         if env['SKIPPED_DEPS']:
             color_print(4,'\nAlso, these OPTIONAL dependencies were not found:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
         color_print(4,"\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'" % SCONS_LOCAL_CONFIG)
@@ -1850,7 +1853,7 @@ if not preconfigured:
             # ugly hack needed until we have env specific conf
             backup = env.Clone().Dictionary()
             for pyinc in env['PYTHON_INCLUDES']:
-                env.AppendUnique(CPPPATH = os.path.realpath(pyinc))
+                env.AppendUnique(CPPPATH = fix_path(pyinc))
 
             if not conf.CheckHeader(header='Python.h',language='C'):
                 color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
@@ -1916,11 +1919,11 @@ if not HELP_REQUESTED:
     env['create_uninstall_target'] = create_uninstall_target
 
     if env['PKG_CONFIG_PATH']:
-        env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
+        env['ENV']['PKG_CONFIG_PATH'] = fix_path(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
 
     if env['PATH']:
-        env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
+        env['ENV']['PATH'] = fix_path(env['PATH']) + ':' + env['ENV']['PATH']
 
     if env['PATH_REMOVE']:
         for p in env['PATH_REMOVE'].split(':'):
