@@ -140,8 +140,7 @@ public:
         case wkbMultiPolygon:
             return std::move(mapnik::new_geometry::geometry(read_multipolygon()));
         case wkbGeometryCollection:
-            throw std::runtime_error("GeometryCollection");
-            break; // TODO: should we drop geometry collection ?
+            return std::move(mapnik::new_geometry::geometry(read_collection()));
         case wkbPointZ:
         case wkbPointM:
             return std::move(mapnik::new_geometry::geometry(read_point<true>()));
@@ -175,13 +174,11 @@ public:
         case wkbGeometryCollectionZ:
         case wkbGeometryCollectionM:
         case wkbGeometryCollectionZM:
-            // TODO ??
-            throw std::runtime_error("GeometryCollection Z|M|ZM");
-            break;
+            return std::move(mapnik::new_geometry::geometry(read_collection()));
         default:
             break;
         }
-        throw std::runtime_error("Uknown");
+        throw std::runtime_error("Uknown WKB geometry type");
     }
 
 private:
@@ -336,6 +333,18 @@ private:
         }
         return multi_poly;
     }
+
+    mapnik::new_geometry::geometry_collection read_collection()
+    {
+        int num_geometries = read_integer();
+        mapnik::new_geometry::geometry_collection collection;
+        for (int i = 0; i < num_geometries; ++i)
+        {
+            pos_ += 1; // skip byte order
+            collection.push_back(std::move(read()));
+         }
+        return collection;
+     }
 
     std::string wkb_geometry_type_string(int type)
     {
