@@ -46,7 +46,6 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback>::feature_colle
         qi::_r1_type _r1;
         qi::_r2_type _r2;
         qi::_r3_type _r3;
-        using phoenix::push_back;
         using phoenix::construct;
         using phoenix::new_;
         using phoenix::val;
