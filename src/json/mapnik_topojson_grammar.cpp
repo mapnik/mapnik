@@ -19,10 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
+#if 0 // FIXME
 #include <mapnik/feature.hpp>
 #include <mapnik/json/topojson_grammar_impl.hpp>
 #include <string>
 
 using iterator_type = std::string::const_iterator;
 template struct mapnik::topojson::topojson_grammar<iterator_type> ;
+#endif

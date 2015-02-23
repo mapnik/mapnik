@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
+#if 0 // FIXME
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_container.hpp>
 #include <mapnik/json/feature_generator_grammar_impl.hpp>
@@ -33,3 +33,4 @@ template struct mapnik::json::properties_generator_grammar<sink_type, mapnik::fe
 template struct mapnik::json::feature_generator_grammar<sink_type, mapnik::feature_impl>;
 template struct mapnik::json::geometry_generator_grammar<sink_type, mapnik::geometry_type>;
 template struct mapnik::json::multi_geometry_generator_grammar<sink_type, mapnik::geometry_container>;
+#endif

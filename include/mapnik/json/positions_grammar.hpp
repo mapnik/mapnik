@@ -41,18 +41,17 @@
 // stl
 #include <tuple>
 
-namespace mapnik { namespace json {
-
-struct empty {};
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::new_geometry::point,
     (double, x)
     (double, y)
-    )
+)
 
-//BOOST_FUSION_ADAPT_STRUCT(
-//    mapnik::new_geometry::
+namespace mapnik { namespace json {
+
+struct empty {};
+
 using position = mapnik::new_geometry::point;
 using positions = std::vector<position>;
 using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;

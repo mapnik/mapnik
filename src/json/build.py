@@ -29,7 +29,7 @@ if 'g++' in env['CXX']:
 
 name = "mapnik-json"
 lib = lib_env.StaticLibrary(name, glob('./' + '*.cpp'), LIBS=[])
-#target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], env.subst('${LIBPREFIX}%s${LIBSUFFIX}' % name))
-#result = env.InstallAs(target=target, source=lib)
-#env.Alias(target='install', source=result)
-#env['create_uninstall_target'](env, target)
+target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], env.subst('${LIBPREFIX}%s${LIBSUFFIX}' % name))
+result = env.InstallAs(target=target, source=lib)
+env.Alias(target='install', source=result)
+env['create_uninstall_target'](env, target)

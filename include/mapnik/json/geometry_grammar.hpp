@@ -24,13 +24,11 @@
 #define MAPNIK_GEOMETRY_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>  // for geometry_type
-#include <mapnik/vertex.hpp>  // for CommandType
+#include <mapnik/geometry_impl.hpp>  // for geometry_type
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/geometry_util.hpp>
-#include <mapnik/geometry_container.hpp>
 
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
@@ -42,14 +40,13 @@ namespace qi = boost::spirit::qi;
 
 template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct geometry_grammar :
-        qi::grammar<Iterator,void(mapnik::geometry_container& )
-        , space_type>
+        qi::grammar<Iterator, mapnik::new_geometry::geometry() ,space_type>
 {
     geometry_grammar();
-    qi::rule<Iterator,void(mapnik::geometry_container& ), space_type> start;
-    qi::rule<Iterator, qi::locals<int, mapnik::json::coordinates>, void(mapnik::geometry_container& ), space_type> geometry;
+    qi::rule<Iterator, mapnik::new_geometry::geometry(), space_type> start;
+    qi::rule<Iterator, qi::locals<int, mapnik::json::coordinates>, mapnik::new_geometry::geometry(), space_type> geometry;
     qi::symbols<char, int> geometry_type_dispatch;
-    qi::rule<Iterator,void(mapnik::geometry_container& ),space_type> geometry_collection;
+    qi::rule<Iterator, mapnik::new_geometry::geometry(), space_type> geometry_collection;
     positions_grammar<Iterator> coordinates;
     boost::phoenix::function<create_geometry_impl> create_geometry;
     // error handler
