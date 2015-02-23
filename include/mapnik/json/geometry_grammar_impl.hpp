@@ -52,8 +52,8 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     qi::eps_type eps;
     using qi::fail;
     using qi::on_error;
-
-    start = geometry.alias() ;// | geometry_collection(_r1);
+    using phoenix::push_back;
+    start = geometry  | geometry_collection;
 
     geometry = (lit('{')[_a = 0 ]
                 >> (-lit(',') >> lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1]
@@ -63,14 +63,14 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
         | lit("null")
         ;
 
-    //geometry_collection = (lit('{')
-    //                       >> (-lit(',') >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
-    //                           ^
-    //                           -lit(',') >> lit("\"geometries\"") >> lit(':')
-    //                           >> lit('[') >> geometry(_r1) % lit(',') >> lit(']'))
-    //                       >> lit('}'))
-    //    | lit("null")
-    //    ;
+    geometry_collection = (lit('{')
+                           >> (-lit(',') >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
+                               ^
+                               -lit(',') >> lit("\"geometries\"") >> lit(':')
+                               >> lit('[') >> geometry[push_back(_val, _1)] % lit(',') >> lit(']'))
+                           >> lit('}'))
+        | lit("null")
+        ;
 
     geometry_type_dispatch.add
         ("\"Point\"",1)
