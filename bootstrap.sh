@@ -67,23 +67,20 @@ function setup_nose() {
     export PYTHONPATH=$(pwd)/nose-1.3.4:${PYTHONPATH}
 }
 
+MASON_LINKED_ABS=$(pwd)/mason_packages/.link
+MASON_LINKED_REL=./mason_packages/.link
+
 function make_config() {
-    local MASON_LINKED_REL=./mason_packages/.link
-    export C_INCLUDE_PATH="${MASON_LINKED_REL}/include"
-    export CPLUS_INCLUDE_PATH="${MASON_LINKED_REL}/include"
-    export LIBRARY_PATH="${MASON_LINKED_REL}/lib"
-    export PATH="${MASON_LINKED_REL}/bin":${PATH}
     if [[ $(uname -s) == 'Darwin' ]]; then
-        export PATH_REPLACE="/Users/travis/build/mapbox/mason/mason_packages:./mason_packages"
+        local PATH_REPLACE="/Users/travis/build/mapbox/mason/mason_packages:./mason_packages"
     else
-        export PATH_REPLACE="/home/travis/build/mapbox/mason/mason_packages:./mason_packages"
+        local PATH_REPLACE="/home/travis/build/mapbox/mason/mason_packages:./mason_packages"
     fi
 
     echo "
 CXX = '$CXX'
 CC = '$CC'
 CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
-CUSTOM_LDFLAGS = '-L${MASON_LINKED_REL}/lib'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
@@ -106,6 +103,8 @@ WEBP_INCLUDES = '${MASON_LINKED_REL}/include'
 WEBP_LIBS = '${MASON_LINKED_REL}/lib'
 PROJ_INCLUDES = '${MASON_LINKED_REL}/include'
 PROJ_LIBS = '${MASON_LINKED_REL}/lib'
+PG_INCLUDES = '${MASON_LINKED_REL}/include'
+PG_LIBS = '${MASON_LINKED_REL}/lib'
 FREETYPE_INCLUDES = '${MASON_LINKED_REL}/include/freetype2'
 FREETYPE_LIBS = '${MASON_LINKED_REL}/lib'
 XML2_INCLUDES = '${MASON_LINKED_REL}/include/libxml2'
@@ -127,7 +126,6 @@ SAMPLE_INPUT_PLUGINS = True
 }
 
 function setup_runtime_settings() {
-    local MASON_LINKED_ABS=$(pwd)/mason_packages/.link
     export PROJ_LIB=${MASON_LINKED_ABS}/share/proj
     export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1
     export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal
