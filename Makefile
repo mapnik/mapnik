@@ -12,7 +12,7 @@ all: mapnik
 install:
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
-mapnik:
+src/json/libmapnik-json.a:
 	# we first build memory intensive files with -j2
 	$(PYTHON) scons/scons.py -j2 \
 		--config=cache --implicit-cache --max-drift=1 \
@@ -29,6 +29,8 @@ mapnik:
 		src/grid/process_group_symbolizer.os \
 		src/cairo/process_markers_symbolizer.os \
 		src/cairo/process_group_symbolizer.os \
+
+mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 

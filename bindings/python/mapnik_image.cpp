@@ -152,26 +152,16 @@ struct get_pixel_visitor
     get_pixel_visitor(unsigned x, unsigned y)
         : x_(x), y_(y) {}
 
-    PyObject* operator() (mapnik::image_null const&)
+    object operator() (mapnik::image_null const&)
     {
         throw std::runtime_error("Can not return a null image from a pixel (shouldn't have reached here)");
     }
     
-    PyObject* operator() (mapnik::image_gray32f const& im)
-    {
-        return PyFloat_FromDouble(mapnik::get_pixel<double>(im, x_, y_));
-    }
-    
-    PyObject* operator() (mapnik::image_gray64f const& im)
-    {
-        return PyFloat_FromDouble(mapnik::get_pixel<double>(im, x_, y_));
-    }
-
     template <typename T>
-    PyObject* operator() (T const& im)
+    object operator() (T const& im)
     {
         using pixel_type = typename T::pixel_type;
-        return PyInt_FromLong(mapnik::get_pixel<pixel_type>(im, x_, y_));
+        return object(mapnik::get_pixel<pixel_type>(im, x_, y_));
     }
     
   private:
@@ -179,26 +169,24 @@ struct get_pixel_visitor
     unsigned y_;
 };
 
-PyObject* get_pixel(mapnik::image_any const& im, unsigned x, unsigned y)
+object get_pixel(mapnik::image_any const& im, unsigned x, unsigned y, bool get_color)
 {
     if (x < static_cast<unsigned>(im.width()) && y < static_cast<unsigned>(im.height()))
     {
-        return mapnik::util::apply_visitor(get_pixel_visitor(x, y), im);
+        if (get_color) 
+        {
+            return object(
+                mapnik::get_pixel<mapnik::color>(im, x, y)
+            );
+        }
+        else
+        {
+            return mapnik::util::apply_visitor(get_pixel_visitor(x, y), im);
+        }
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
     boost::python::throw_error_already_set();
-    return 0;
-}
-
-mapnik::color get_pixel_color(mapnik::image_any const& im, unsigned x, unsigned y)
-{
-    if (x < static_cast<unsigned>(im.width()) && y < static_cast<unsigned>(im.height()))
-    {
-        return mapnik::get_pixel<mapnik::color>(im, x, y);
-    }
-    PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
-    boost::python::throw_error_already_set();
-    return 0;
+    return object();
 }
 
 void set_pixel_color(mapnik::image_any & im, unsigned x, unsigned y, mapnik::color const& c)
@@ -447,8 +435,12 @@ void export_image()
         .def("set_pixel",&set_pixel_color)
         .def("set_pixel",&set_pixel_double)
         .def("set_pixel",&set_pixel_int)
-        .def("get_pixel",&get_pixel)
-        .def("get_pixel_color",&get_pixel_color)
+        .def("get_pixel",&get_pixel,
+             ( arg("self"),
+               arg("x"),
+               arg("y"),
+               arg("get_color")=false
+             ))
         .def("clear",&clear)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 
