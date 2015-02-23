@@ -123,7 +123,13 @@ struct multi_line_string : std::vector<line_string> {};
 struct multi_polygon : std::vector<polygon3> {};
 struct geometry_collection;
 
-typedef mapnik::util::variant< point,line_string, polygon3, multi_point, multi_line_string, multi_polygon, mapnik::util::recursive_wrapper<geometry_collection> > geometry;
+typedef mapnik::util::variant<point,
+                              line_string,
+                              polygon3,
+                              multi_point,
+                              multi_line_string,
+                              multi_polygon,
+                              mapnik::util::recursive_wrapper<geometry_collection> > geometry;
 
 struct geometry_collection : std::vector<geometry> {};
 
