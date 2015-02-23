@@ -41,25 +41,18 @@ mapnik::feature_ptr hello_featureset::next()
         mapnik::coord2d center = box_.center();
 
         // create a new point geometry
-        mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::geometry_type::types::Point);
-
-        // we use path type geometries in Mapnik to fit nicely with AGG and Cairo
-        // here we stick an x,y pair into the geometry using move_to()
-        pt->move_to(center.x,center.y);
-
-        // add the geometry to the feature
-        feature->add_geometry(pt);
+        feature->set_geometry(mapnik::new_geometry::point(center.x,center.y));
 
         // A feature usually will have just one geometry of a given type
-        // but mapnik does support many geometries per feature of any type
+        // but mapnik supports many geometries per feature of any type
         // so here we draw a line around the point
-        mapnik::geometry_type * line = new mapnik::geometry_type(mapnik::geometry_type::types::LineString);
-        line->move_to(box_.minx(),box_.miny());
-        line->line_to(box_.minx(),box_.maxy());
-        line->line_to(box_.maxx(),box_.maxy());
-        line->line_to(box_.maxx(),box_.miny());
-        line->line_to(box_.minx(),box_.miny());
-        feature->add_geometry(line);
+        mapnik::new_geometry::line_string line;
+        line.reserve(4);
+        line.add_coord(box_.minx(),box_.maxy());
+        line.add_coord(box_.maxx(),box_.maxy());
+        line.add_coord(box_.maxx(),box_.miny());
+        line.add_coord(box_.minx(),box_.miny());
+        feature->set_geometry(std::move(line));
 
         // return the feature!
         return feature;
