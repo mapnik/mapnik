@@ -28,28 +28,28 @@
 namespace mapnik { namespace json {
 
 // geometries
-template <typename Path>
+template <typename Geometry>
 struct create_point
 {
-    explicit create_point(Path & path)
-        : path_(path) {}
+    explicit create_point(Geometry & geom)
+        : geom_(geom) {}
 
     void operator() (position const& pos) const
     {
         mapnik::new_geometry::point point(pos.x, pos.y);
-        path_ = std::move(point);
+        geom_ = std::move(point);
     }
 
     template <typename T>
     void operator()(T const&) const {} // no-op - shouldn't get here
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_linestring
 {
-    explicit create_linestring(Path & path)
-        : path_(path) {}
+    explicit create_linestring(Geometry & geom)
+        : geom_(geom) {}
 
     void operator() (positions const& ring) const
     {
@@ -62,21 +62,21 @@ struct create_linestring
             {
                 line.emplace_back(std::move(pt));
             }
-            path_ = std::move(line);
+            geom_ = std::move(line);
         }
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_polygon
 {
-    explicit create_polygon(Path & path)
-        : path_(path) {}
+    explicit create_polygon(Geometry & geom)
+        : geom_(geom) {}
 
     void operator() (std::vector<positions> const& rings) const
     {
@@ -98,21 +98,21 @@ struct create_polygon
             else poly.add_hole(std::move(ring));
         }
 
-        path_ = std::move(poly);
+        geom_ = std::move(poly);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
 // multi-geometries
-template <typename Path>
+template <typename Geometry>
 struct create_multipoint
 {
-    explicit create_multipoint(Path & path)
-        : path_(path) {}
+    explicit create_multipoint(Geometry & geom)
+        : geom_(geom) {}
 
     void operator() (positions const& points) const
     {
@@ -122,20 +122,20 @@ struct create_multipoint
         {
             multi_point.emplace_back(std::move(pos));
         }
-        path_ = std::move(multi_point);
+        geom_ = std::move(multi_point);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_multilinestring
 {
-    explicit create_multilinestring(Path & path)
-        : path_(path) {}
+    explicit create_multilinestring(Geometry & geom)
+        : geom_(geom) {}
 
     void operator() (std::vector<positions> const& rings) const
     {
@@ -152,20 +152,20 @@ struct create_multilinestring
             }
             multi_line.emplace_back(std::move(line));
         }
-        path_ = std::move(multi_line);
+        geom_ = std::move(multi_line);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_multipolygon
 {
-    explicit create_multipolygon(Path & path)
-        : path_(path) {}
+    explicit create_multipolygon(Geometry & geom)
+        : geom_(geom) {}
 
     void operator()(std::vector<std::vector<positions> > const& rings_array) const
     {
@@ -191,40 +191,40 @@ struct create_multipolygon
                 else poly.add_hole(std::move(ring));
             }
         }
-        path_ = std::move(multi_poly);
+        geom_ = std::move(multi_poly);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
 struct create_geometry_impl
 {
     using result_type = void;
-    template <typename T0>
-    void operator() (T0 & path, int type, mapnik::json::coordinates const& coords) const
+    template <typename Geometry>
+    void operator() (Geometry & geom, int type, mapnik::json::coordinates const& coords) const
     {
         switch (type)
         {
         case 1 ://Point
-            util::apply_visitor(create_point<T0>(path), coords);
+            util::apply_visitor(create_point<Geometry>(geom), coords);
             break;
         case 2 ://LineString
-           util::apply_visitor(create_linestring<T0>(path), coords);
+           util::apply_visitor(create_linestring<Geometry>(geom), coords);
            break;
         case 3 ://Polygon
-            util::apply_visitor(create_polygon<T0>(path), coords);
+            util::apply_visitor(create_polygon<Geometry>(geom), coords);
             break;
         case 4 ://MultiPoint
-            util::apply_visitor(create_multipoint<T0>(path), coords);
+            util::apply_visitor(create_multipoint<Geometry>(geom), coords);
             break;
         case 5 ://MultiLineString
-            util::apply_visitor(create_multilinestring<T0>(path), coords);
+            util::apply_visitor(create_multilinestring<Geometry>(geom), coords);
             break;
         case 6 ://MultiPolygon
-            util::apply_visitor(create_multipolygon<T0>(path), coords);
+            util::apply_visitor(create_multipolygon<Geometry>(geom), coords);
             break;
         default:
             break;
