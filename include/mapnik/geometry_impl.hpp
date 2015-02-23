@@ -88,7 +88,7 @@ struct line_string : std::vector<point>
     line_string() = default;
     line_string (line_string && other) = default ;
     line_string& operator=(line_string &&) = default;
-    line_string (line_string const& ) = delete;
+    line_string (line_string const& ) = default;
     line_string& operator=(line_string const&) = delete;
     inline std::size_t num_points() const { return size(); }
     inline void add_coord(double x, double y) { emplace_back(x,y);}
