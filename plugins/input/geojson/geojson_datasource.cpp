@@ -41,7 +41,6 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
-#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/make_unique.hpp>
@@ -291,6 +290,9 @@ const char * geojson_datasource::name()
 boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry_type() const
 {
     boost::optional<mapnik::datasource::geometry_t> result;
+    return result; // FIXME
+
+#if 0
     int multi_type = 0;
     if (cache_features_)
     {
@@ -358,6 +360,7 @@ boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry
         }
     }
     return result;
+#endif //
 }
 
 mapnik::datasource::datasource_t geojson_datasource::type() const
