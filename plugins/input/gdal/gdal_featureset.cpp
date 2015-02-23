@@ -80,7 +80,6 @@ gdal_featureset::~gdal_featureset()
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << &dataset_;
 
-    GDALClose(&dataset_);
 }
 
 feature_ptr gdal_featureset::next()
@@ -376,7 +375,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     raster_nodata = red->GetNoDataValue(&raster_has_nodata);
                     GDALColorTable *color_table = red->GetColorTable();
                     bool has_nodata = nodata_value_ || raster_has_nodata;
-                    if (has_nodata && !color_table)
+
+                    // we can deduce the alpha channel from nodata in the Byte case
+                    // by reusing the reading of R,G,B bands directly
+                    if (has_nodata && !color_table && red->GetRasterDataType() != GDT_Byte)
                     {
                         double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
                         // read the data in and create an alpha channel from the nodata values
@@ -402,20 +404,62 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                             }
                         }
                     }
-                    raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
-                                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
-                    if (raster_io_error == CE_Failure) {
-                        throw datasource_exception(CPLGetLastErrorMsg());
+
+                    /* Use dataset RasterIO in priority in 99.9% of the cases */
+                    if( red->GetBand() == 1 && green->GetBand() == 2 && blue->GetBand() == 3 )
+                    {
+                        int nBandsToRead = 3;
+                        if( alpha != NULL && alpha->GetBand() == 4 && !raster_has_nodata )
+                        {
+                            nBandsToRead = 4;
+                            alpha = NULL; // to avoid reading it again afterwards
+                        }
+                        raster_io_error = dataset_.RasterIO(GF_Read, x_off, y_off, width, height,
+                                                            image.getBytes(),
+                                                            image.width(), image.height(), GDT_Byte,
+                                                            nBandsToRead, NULL,
+                                                            4, 4 * image.width(), 1);
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
                     }
-                    raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 1,
-                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
-                    if (raster_io_error == CE_Failure) {
-                        throw datasource_exception(CPLGetLastErrorMsg());
+                    else
+                    {
+                        raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
+                                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
+                        raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 1,
+                                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
+                        raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 2,
+                                                        image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                        if (raster_io_error == CE_Failure) {
+                            throw datasource_exception(CPLGetLastErrorMsg());
+                        }
                     }
-                    raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 2,
-                                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
-                    if (raster_io_error == CE_Failure) {
-                        throw datasource_exception(CPLGetLastErrorMsg());
+
+                    // In the case we skipped initializing the alpha channel
+                    if (has_nodata && !color_table && red->GetRasterDataType() == GDT_Byte)
+                    {
+                        double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
+                        if( apply_nodata >= 0 && apply_nodata <= 255 )
+                        {
+                            int len = image.width() * image.height();
+                            GByte* pabyBytes = (GByte*) image.getBytes();
+                            for (int i = 0; i < len; ++i)
+                            {
+                                // TODO - we assume here the nodata value for the red band applies to all bands
+                                // more details about this at http://trac.osgeo.org/gdal/ticket/2734
+                                if (std::fabs(apply_nodata - pabyBytes[4*i]) < nodata_tolerance_)
+                                    pabyBytes[4*i + 3] = 0;
+                                else
+                                    pabyBytes[4*i + 3] = 255;
+                            }
+                        }
                     }
                 }
                 else if (grey)
