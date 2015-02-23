@@ -27,7 +27,7 @@
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/box2d.hpp>
-
+#include <mapnik/geometry_impl.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -42,7 +42,7 @@
 
 namespace mapnik { namespace json {
 
-using position = std::tuple<double,double>;
+using position = mapnik::new_geometry::point;
 using boxes = std::vector<std::pair<box2d<double>, std::pair<std::size_t, std::size_t>>>;
 
 namespace qi = boost::spirit::qi;
@@ -55,8 +55,8 @@ struct calculate_bounding_box_impl
     {
         if (pos)
         {
-            double x = std::get<0>(*pos);
-            double y = std::get<1>(*pos);
+            double x = pos->x;
+            double y = pos->y;
             if (!bbox.valid())
             {
                 bbox.init(x, y, x, y); //TODO: add init(x,y) convinience method
