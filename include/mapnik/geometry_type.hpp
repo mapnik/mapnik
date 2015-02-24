@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,14 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_TO_DS_TYPE
-#define MAPNIK_GEOMETRY_TO_DS_TYPE
+#ifndef MAPNIK_GEOMETRY_TYPE_HPP
+#define MAPNIK_GEOMETRY_TYPE_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_types.hpp>
 
-// boost
-#include <boost/optional.hpp>
-
-namespace mapnik { namespace util {
-
-namespace detail {
+namespace mapnik { namespace new_geometry { namespace detail {
 
 struct geometry_type
 {
@@ -56,7 +51,6 @@ struct geometry_type
         return mapnik::new_geometry::geometry_types::Polygon;
     }
 
-    // multi
     mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_point const&) const
     {
         return mapnik::new_geometry::geometry_types::MultiPoint;
@@ -79,7 +73,7 @@ struct geometry_type
 };
 } // detail
 
-static mapnik::new_geometry::geometry_type(mapnik::new_geometry::geometry const& geom)
+static mapnik::new_geometry::geometry_types geometry_type(mapnik::new_geometry::geometry const& geom)
 {
     return detail::geometry_type()(geom);
 }
@@ -87,4 +81,4 @@ static mapnik::new_geometry::geometry_type(mapnik::new_geometry::geometry const&
 }}
 
 
-#endif // MAPNIK_GEOMETRY_TO_DS_TYPE
+#endif // MAPNIK_GEOMETRY_TYPE_HPP
