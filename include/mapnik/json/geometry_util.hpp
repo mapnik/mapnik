@@ -80,7 +80,7 @@ struct create_polygon
 
     void operator() (std::vector<positions> const& rings) const
     {
-        mapnik::new_geometry::polygon3 poly;
+        mapnik::new_geometry::polygon poly;
         std::size_t num_rings = rings.size();
         if (num_rings > 1)
             poly.interior_rings.reserve(num_rings - 1);
@@ -173,7 +173,7 @@ struct create_multipolygon
         multi_poly.reserve(rings_array.size());
         for (auto const& rings : rings_array)
         {
-            mapnik::new_geometry::polygon3 poly;
+            mapnik::new_geometry::polygon poly;
             std::size_t num_rings = rings.size();
             if ( num_rings > 1)
                 poly.interior_rings.reserve(num_rings - 1);

@@ -55,7 +55,7 @@ struct geometry_envelope
         return bbox;
     }
 
-    bbox_type operator() (mapnik::new_geometry::polygon3 const& poly) const
+    bbox_type operator() (mapnik::new_geometry::polygon const& poly) const
     {
         return (*this) (static_cast<mapnik::new_geometry::line_string>(poly.exterior_ring));
     }

@@ -171,9 +171,9 @@ struct interior_rings<mapnik::new_geometry::polygon2>
 };
 
 
-// mapnik::new_geometry::polygon3
+// mapnik::new_geometry::polygon
 
-template<> struct tag<mapnik::new_geometry::polygon3>
+template<> struct tag<mapnik::new_geometry::polygons>
 {
     using type = polygon_tag;
 };
@@ -196,52 +196,52 @@ template<> struct tag<mapnik::new_geometry::multi_polygon>
 };
 
 // ring
-template<> struct ring_const_type<mapnik::new_geometry::polygon3>
+template<> struct ring_const_type<mapnik::new_geometry::polygons>
 {
     using type =  mapnik::new_geometry::linear_ring const&;
 };
 
-template<> struct ring_mutable_type<mapnik::new_geometry::polygon3>
+template<> struct ring_mutable_type<mapnik::new_geometry::polygon>
 {
     using type = mapnik::new_geometry::linear_ring&;
 };
 
 // interior
-template<> struct interior_const_type<mapnik::new_geometry::polygon3>
+template<> struct interior_const_type<mapnik::new_geometry::polygon>
 {
     using type = std::vector<mapnik::new_geometry::linear_ring> const&;
 };
 
-template<> struct interior_mutable_type<mapnik::new_geometry::polygon3>
+template<> struct interior_mutable_type<mapnik::new_geometry::polygon>
 {
     using type = std::vector<mapnik::new_geometry::linear_ring>&;
 };
 
 // exterior
 template<>
-struct exterior_ring<mapnik::new_geometry::polygon3>
+struct exterior_ring<mapnik::new_geometry::polygon>
 {
-    static mapnik::new_geometry::linear_ring& get(mapnik::new_geometry::polygon3 & p)
+    static mapnik::new_geometry::linear_ring& get(mapnik::new_geometry::polygon & p)
     {
         return p.exterior_ring;
     }
 
-    static mapnik::new_geometry::linear_ring const& get(mapnik::new_geometry::polygon3 const& p)
+    static mapnik::new_geometry::linear_ring const& get(mapnik::new_geometry::polygon const& p)
     {
         return p.exterior_ring;
     }
 };
 
 template<>
-struct interior_rings<mapnik::new_geometry::polygon3>
+struct interior_rings<mapnik::new_geometry::polygon>
 {
     using holes_type = std::vector<mapnik::new_geometry::linear_ring>;
-    static holes_type&  get(mapnik::new_geometry::polygon3 & p)
+    static holes_type&  get(mapnik::new_geometry::polygon & p)
     {
         return p.interior_rings;
     }
 
-    static holes_type const& get(mapnik::new_geometry::polygon3 const& p)
+    static holes_type const& get(mapnik::new_geometry::polygon const& p)
     {
         return p.interior_rings;
     }

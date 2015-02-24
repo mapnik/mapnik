@@ -85,7 +85,7 @@ struct line_string : std::vector<point>
 
 struct linear_ring : line_string {};
 
-struct polygon3
+struct polygon
 {
     linear_ring exterior_ring;
     std::vector<linear_ring> interior_rings;
@@ -108,12 +108,12 @@ struct polygon3
 
 struct multi_point : line_string {};
 struct multi_line_string : std::vector<line_string> {};
-struct multi_polygon : std::vector<polygon3> {};
+struct multi_polygon : std::vector<polygon> {};
 struct geometry_collection;
 
 typedef mapnik::util::variant<point,
                               line_string,
-                              polygon3,
+                              polygon,
                               multi_point,
                               multi_line_string,
                               multi_polygon,
@@ -186,7 +186,7 @@ struct line_string_vertex_adapter
 
 struct polygon_vertex_adapter_3
 {
-    polygon_vertex_adapter_3(polygon3 const& poly)
+    polygon_vertex_adapter_3(polygon const& poly)
         : poly_(poly),
           rings_itr_(0),
           rings_end_(poly_.interior_rings.size() + 1),
@@ -232,7 +232,7 @@ struct polygon_vertex_adapter_3
         return mapnik::SEG_END;
     }
 private:
-    polygon3 const& poly_;
+    polygon const& poly_;
     mutable std::size_t rings_itr_;
     mutable std::size_t rings_end_;
     mutable std::size_t current_index_;

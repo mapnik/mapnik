@@ -51,7 +51,7 @@ struct geometry_type
         return mapnik::new_geometry::geometry_types::LineString;
     }
 
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::polygon3 const&) const
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::polygon const&) const
     {
         return mapnik::new_geometry::geometry_types::Polygon;
     }

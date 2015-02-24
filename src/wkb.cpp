@@ -297,10 +297,10 @@ private:
     }
 
     template <bool M = false, bool Z = false>
-    mapnik::new_geometry::polygon3 read_polygon()
+    mapnik::new_geometry::polygon read_polygon()
     {
         int num_rings = read_integer();
-        mapnik::new_geometry::polygon3 poly;
+        mapnik::new_geometry::polygon poly;
         if (num_rings > 1)
         {
             poly.interior_rings.reserve(num_rings - 1);

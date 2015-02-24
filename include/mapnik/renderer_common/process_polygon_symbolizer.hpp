@@ -59,9 +59,9 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
     mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
-    if (geometry.is<mapnik::new_geometry::polygon3>())
+    if (geometry.is<mapnik::new_geometry::polygon>())
     {
-        auto const& poly = mapnik::util::get<mapnik::new_geometry::polygon3>(geometry);
+        auto const& poly = mapnik::util::get<mapnik::new_geometry::polygon>(geometry);
         mapnik::new_geometry::polygon_vertex_adapter_3 va(poly);
         converter.apply(va);
     }

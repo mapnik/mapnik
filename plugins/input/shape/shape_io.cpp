@@ -172,7 +172,7 @@ mapnik::new_geometry::geometry shape_io::read_polygon(shape_file::record_type & 
     }
 
     mapnik::new_geometry::multi_polygon multi_poly;
-    mapnik::new_geometry::polygon3 poly;
+    mapnik::new_geometry::polygon poly;
     for (int k = 0; k < num_parts; ++k)
     {
         int start = parts[k];
