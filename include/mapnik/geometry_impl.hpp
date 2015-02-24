@@ -37,16 +37,16 @@
 
 namespace mapnik { namespace new_geometry {
 
-static const std::uint8_t geometry_bits = 7;
-
 enum geometry_types : std::uint8_t
 {
-    Unknown = 0x00,
-    Point =   0x01,
-    LineString = 0x02,
-    Polygon = 0x03,
-    PolygonExterior = Polygon,
-    PolygonInterior = Polygon | ( 1 << geometry_bits)
+    Unknown = 0,
+    Point =   1,
+    LineString = 2,
+    Polygon = 3,
+    MultiPoint = 4,
+    MultiLineString = 5,
+    MultiPolygon = 6,
+    GeometryCollection = 7,
 };
 
 struct point
@@ -118,7 +118,7 @@ struct polygon3
     }
 };
 
-struct multi_point : std::vector<point> {};
+struct multi_point : line_string {};
 struct multi_line_string : std::vector<line_string> {};
 struct multi_polygon : std::vector<polygon3> {};
 struct geometry_collection;

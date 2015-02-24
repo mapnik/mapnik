@@ -38,7 +38,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+
 #include <mapnik/wkt/wkt_factory.hpp> // from_wkt
 #include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/json/geometry_parser.hpp> // from_geojson

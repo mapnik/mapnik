@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+
 #include <mapnik/wkt/wkt_grammar.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
 #include <boost/spirit/include/karma.hpp>

@@ -25,38 +25,68 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/geometry_impl.hpp>
+
+//#include <mapnik/datasource.hpp>
 
 // boost
 #include <boost/optional.hpp>
 
 namespace mapnik { namespace util {
 
-    static inline void to_ds_type(mapnik::geometry_container const& paths,
-                    boost::optional<mapnik::datasource::geometry_t> & result)
+namespace detail {
+
+struct geometry_type
+{
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::geometry const& geom) const
     {
-        if (paths.size() == 1)
-        {
-            result.reset(static_cast<mapnik::datasource::geometry_t>(paths.front().type()));
-        }
-        else if (paths.size() > 1)
-        {
-            int multi_type = 0;
-            for (auto const& geom : paths)
-            {
-                int type = static_cast<int>(geom.type());
-                if (multi_type > 0 && multi_type != type)
-                {
-                    result.reset(datasource::Collection);
-                }
-                multi_type = type;
-                result.reset(static_cast<mapnik::datasource::geometry_t>(type));
-            }
-        }
+        return mapnik::util::apply_visitor(*this, geom);
     }
 
-    }}
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::point const&) const
+    {
+        return mapnik::new_geometry::geometry_types::Point;
+    }
+
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::line_string const&) const
+    {
+        return mapnik::new_geometry::geometry_types::LineString;
+    }
+
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::polygon3 const&) const
+    {
+        return mapnik::new_geometry::geometry_types::Polygon;
+    }
+
+    // multi
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_point const&) const
+    {
+        return mapnik::new_geometry::geometry_types::MultiPoint;
+    }
+
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_line_string const&) const
+    {
+        return mapnik::new_geometry::geometry_types::MultiLineString;
+    }
+
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_polygon const&) const
+    {
+        return mapnik::new_geometry::geometry_types::MultiPolygon;
+    }
+
+    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::geometry_collection const&) const
+    {
+        return mapnik::new_geometry::geometry_types::GeometryCollection;
+    }
+};
+} // detail
+
+static mapnik::new_geometry::geometry_type(mapnik::new_geometry::geometry const& geom)
+{
+    return detail::geometry_type()(geom);
+}
+
+}}
 
 
 #endif // MAPNIK_GEOMETRY_TO_DS_TYPE

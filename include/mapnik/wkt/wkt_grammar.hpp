@@ -33,7 +33,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+
 #include <mapnik/vertex.hpp>
 
 namespace mapnik { namespace wkt {

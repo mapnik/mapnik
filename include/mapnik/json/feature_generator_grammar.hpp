@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry_container.hpp>
+
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/json/properties_generator_grammar.hpp>
 

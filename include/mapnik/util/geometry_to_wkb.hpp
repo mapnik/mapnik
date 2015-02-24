@@ -27,7 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+
 #include <mapnik/vertex.hpp>
 
 // stl

@@ -29,7 +29,8 @@
 #include <mapnik/value.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry_impl.hpp>
-//#include <mapnik/geometry_container.hpp>
+#include <mapnik/geometry_envelope.hpp>
+//
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
@@ -206,9 +207,7 @@ public:
 
     inline box2d<double> envelope() const
     {
-        box2d<double> result;
-        std::cerr << "ENVELOPE" << std::endl;
-        return result;
+        return mapnik::new_geometry::envelope(geom_);
     }
 
     inline raster_ptr const& get_raster() const
