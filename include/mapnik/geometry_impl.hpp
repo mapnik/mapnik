@@ -184,9 +184,9 @@ struct line_string_vertex_adapter
 
 };
 
-struct polygon_vertex_adapter_3
+struct polygon_vertex_adapter
 {
-    polygon_vertex_adapter_3(polygon const& poly)
+    polygon_vertex_adapter(polygon const& poly)
         : poly_(poly),
           rings_itr_(0),
           rings_end_(poly_.interior_rings.size() + 1),

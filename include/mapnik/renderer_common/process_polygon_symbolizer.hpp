@@ -62,7 +62,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     if (geometry.is<mapnik::new_geometry::polygon>())
     {
         auto const& poly = mapnik::util::get<mapnik::new_geometry::polygon>(geometry);
-        mapnik::new_geometry::polygon_vertex_adapter_3 va(poly);
+        mapnik::new_geometry::polygon_vertex_adapter va(poly);
         converter.apply(va);
     }
     else if (geometry.is<mapnik::new_geometry::multi_polygon>())
@@ -70,7 +70,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
         auto const& multi_polygon = mapnik::util::get<mapnik::new_geometry::multi_polygon>(geometry);
         for (auto const& poly : multi_polygon)
         {
-            mapnik::new_geometry::polygon_vertex_adapter_3 va(poly);
+            mapnik::new_geometry::polygon_vertex_adapter va(poly);
             converter.apply(va);
         }
     }

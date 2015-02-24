@@ -49,9 +49,9 @@ struct vertex_processor
     }
 
     auto operator() (polygon const& poly) const
-        -> typename std::result_of<processor_type(polygon_vertex_adapter_3 const&)>::type
+        -> typename std::result_of<processor_type(polygon_vertex_adapter const&)>::type
     {
-        polygon_vertex_adapter_3 va(poly);
+        polygon_vertex_adapter va(poly);
         return proc_(va);
     }
 
