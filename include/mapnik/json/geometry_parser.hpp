@@ -34,14 +34,14 @@
 
 namespace mapnik { namespace json {
 
-inline bool from_geojson(std::string const& json, geometry_container & paths)
+inline bool from_geojson(std::string const& json, mapnik::new_geometry::geometry & geom)
 {
     using namespace boost::spirit;
     static const geometry_grammar<char const*> g;
     ascii::space_type space;
     char const* start = json.c_str();
     char const* end = start + json.length();
-    return qi::phrase_parse(start, end, (g)(boost::phoenix::ref(paths)), space);
+    return qi::phrase_parse(start, end, g, space, geom);
 }
 
 }}
