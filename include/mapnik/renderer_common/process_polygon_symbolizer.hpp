@@ -25,9 +25,11 @@
 
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 namespace mapnik {
 
@@ -58,22 +60,11 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
-    mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
-    if (geometry.is<mapnik::new_geometry::polygon>())
-    {
-        auto const& poly = mapnik::util::get<mapnik::new_geometry::polygon>(geometry);
-        mapnik::new_geometry::polygon_vertex_adapter va(poly);
-        converter.apply(va);
-    }
-    else if (geometry.is<mapnik::new_geometry::multi_polygon>())
-    {
-        auto const& multi_polygon = mapnik::util::get<mapnik::new_geometry::multi_polygon>(geometry);
-        for (auto const& poly : multi_polygon)
-        {
-            mapnik::new_geometry::polygon_vertex_adapter va(poly);
-            converter.apply(va);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
+
     color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);
     fill_func(fill, opacity);
 }

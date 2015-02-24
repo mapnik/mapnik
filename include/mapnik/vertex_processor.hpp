@@ -31,31 +31,59 @@ template <typename T>
 struct vertex_processor
 {
     using processor_type = T;
-    vertex_processor(processor_type const& proc)
+    vertex_processor(processor_type& proc)
         : proc_(proc) {}
 
-    auto operator() (point const& pt) const
-        -> typename std::result_of<processor_type(point_vertex_adapter const&)>::type
+    void operator() (point const& pt)
     {
         point_vertex_adapter va(pt);
         return proc_(va);
     }
 
-    auto operator() (line_string const& line)
-        -> typename std::result_of<processor_type(line_string_vertex_adapter const&)>::type
+    void operator() (line_string const& line)
     {
         line_string_vertex_adapter va(line);
         return proc_(va);
     }
 
-    auto operator() (polygon const& poly) const
-        -> typename std::result_of<processor_type(polygon_vertex_adapter const&)>::type
+    void operator() (polygon const& poly)
     {
         polygon_vertex_adapter va(poly);
         return proc_(va);
     }
 
-    processor_type const& proc_;
+    void operator() (multi_point const& multi_pt)
+    {
+        for (auto const& pt : multi_pt)
+        {
+            point_vertex_adapter va(pt);
+            proc_(va);
+        }
+    }
+
+    void operator() (multi_line_string const& multi_line)
+    {
+        for (auto const& line : multi_line)
+        {
+            line_string_vertex_adapter va(line);
+            proc_(va);
+        }
+    }
+
+    void operator() (multi_polygon const& multi_poly)
+    {
+        for ( auto const& poly : multi_poly)
+        {
+            polygon_vertex_adapter va(poly);
+            proc_(va);
+        }
+    }
+
+    void operator() (geometry_collection const& collection)
+    {
+        // no-op
+    }
+    processor_type & proc_;
 };
 
 }}
