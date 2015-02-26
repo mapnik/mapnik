@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,107 +36,70 @@ namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator, typename Geometry>
 geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar()
-  : geometry_generator_grammar::base_type(coordinates)
+    : geometry_generator_grammar::base_type(start)
 {
-    boost::spirit::karma::uint_type uint_;
-    boost::spirit::bool_type bool_;
     boost::spirit::karma::_val_type _val;
     boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::lit_type lit;
     boost::spirit::karma::_a_type _a;
     boost::spirit::karma::_r1_type _r1;
-    boost::spirit::karma::eps_type eps;
-    boost::spirit::karma::string_type kstring;
-
-    coordinates =  point | linestring | polygon
-        ;
-
-    point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
-        << point_coord [_1 = _first(_val)]
-        ;
-
-    linestring = &uint_(mapnik::geometry_type::types::LineString)[_1 = _type(_val)]
-        << lit('[')
-        << coords
-        << lit(']')
-        ;
-
-    polygon = &uint_(mapnik::geometry_type::types::Polygon)[_1 = _type(_val)]
-        << lit('[')
-        << coords2
-        << lit("]]")
-        ;
-
-    point_coord = &uint_
-        << lit('[')
-        << coordinate << lit(',') << coordinate
-        << lit(']')
-        ;
-
-    polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
-                       << kstring[ if_ (_r1 > 1u) [_1 = "],["]
-                                         .else_[_1 = '[' ]]
-                       |
-                       &uint_(mapnik::SEG_LINETO)
-                       << lit(',')) << lit('[') << coordinate << lit(',') << coordinate << lit(']')
-        ;
-
-    coords2 %= *polygon_coord(_a)
-        ;
-
-    coords = point_coord % lit(',')
-        ;
-}
-
-template <typename OutputIterator, typename GeometryContainer>
-multi_geometry_generator_grammar<OutputIterator, GeometryContainer>::multi_geometry_generator_grammar()
-  : multi_geometry_generator_grammar::base_type(start)
-{
-    boost::spirit::karma::uint_type uint_;
-    boost::spirit::bool_type bool_;
-    boost::spirit::karma::_val_type _val;
-    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::_r2_type _r2;
     boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::_a_type _a;
-    boost::spirit::karma::eps_type eps;
-    boost::spirit::karma::string_type kstring;
+    boost::spirit::karma::uint_type uint_;
 
     geometry_types.add
-        (mapnik::geometry_type::types::Point,"\"Point\"")
-        (mapnik::geometry_type::types::LineString,"\"LineString\"")
-        (mapnik::geometry_type::types::Polygon,"\"Polygon\"")
-        (mapnik::geometry_type::types::Point + 3,"\"MultiPoint\"")
-        (mapnik::geometry_type::types::LineString + 3,"\"MultiLineString\"")
-        (mapnik::geometry_type::types::Polygon + 3,"\"MultiPolygon\"")
+        (mapnik::new_geometry::geometry_types::Point,"\"Point\"")
+        (mapnik::new_geometry::geometry_types::LineString,"\"LineString\"")
+        (mapnik::new_geometry::geometry_types::Polygon,"\"Polygon\"")
+        (mapnik::new_geometry::geometry_types::MultiPoint,"\"MultiPoint\"")
+        (mapnik::new_geometry::geometry_types::MultiLineString,"\"MultiLineString\"")
+        (mapnik::new_geometry::geometry_types::MultiPolygon,"\"MultiPolygon\"")
+        (mapnik::new_geometry::geometry_types::GeometryCollection,"\"GeometryCollection\"")
         ;
 
-    start %= ( eps(boost::phoenix::at_c<1>(_a))[_a = multi_type_(_val)]
-               << lit("{\"type\":\"GeometryCollection\",\"geometries\":[")
-               << geometry_collection << lit("]}")
-               |
-               geometry)
+    start = geometry.alias()
         ;
 
-    geometry_collection = -(geometry2 % lit(','))
-        ;
-
-    geometry = ( &bool_(true)[_1 = not_empty_(_val)] << lit("{\"type\":")
-                 << geometry_types[_1 = boost::phoenix::at_c<0>(_a)][_a = multi_type_(_val)]
-                 << lit(",\"coordinates\":")
-                 << kstring[ boost::phoenix::if_ (boost::phoenix::at_c<0>(_a) > 3u) [_1 = '['].else_[_1 = ""]]
-                 << coordinates
-                 << kstring[ boost::phoenix::if_ (boost::phoenix::at_c<0>(_a) > 3u) [_1 = ']'].else_[_1 = ""]]
-                 << lit('}')) | lit("null")
-        ;
-
-    geometry2 = lit("{\"type\":")
-        << geometry_types[_1 = _a][_a = type_(_val)]
+    geometry = lit("{\"type\":")
+        << geometry_types[_1 = _a][_a = geometry_type(_val)]
         << lit(",\"coordinates\":")
-        << path
+        << coordinates(_a,_val)
         << lit('}')
         ;
 
-    coordinates %= path % lit(',')
+    coordinates = (&uint_(new_geometry::geometry_types::Point)[_1 = _r1] << point[_1 = extract_point(_r2)])
+        |
+        (&uint_(new_geometry::geometry_types::LineString)[_1 = _r1] << linestring[_1 = extract_linestring(_r2)])
+        |
+        (&uint_(new_geometry::geometry_types::Polygon)[_1 = _r1] << polygon[_1 = extract_polygon(_r2)])
+        |
+        (&uint_(new_geometry::geometry_types::MultiPoint)[_1 = _r1] << multi_point[_1 = extract_multipoint(_r2)])
+        |
+        (&uint_(new_geometry::geometry_types::MultiLineString)[_1 = _r1] << multi_linestring[_1 = extract_multilinestring(_r2)])
+        |
+        (&uint_(new_geometry::geometry_types::MultiPolygon)[_1 = _r1] << multi_polygon[_1 = extract_multipolygon(_r2)])
+        //|
+        //(&uint_(new_geometry::geometry_types::GeometryCollection)[_1 = _r1] << geometry_collection)[_1 = extract_collection(_r2)])
+        ;
+
+    point = lit('[') << coordinate[_1 = get_x(_val)] << lit(',') << coordinate[_1 = get_y(_val)] << lit(']')
+        ;
+
+    linestring = lit('[') << point % lit(',') << lit(']')
+        ;
+
+    polygon = lit('[') << linestring << *(lit(',') << linestring) << lit(']')
+        ;
+
+    multi_point = lit('[') << point % lit(',') << lit(']')
+        ;
+
+    multi_linestring = lit('[') << linestring % lit(',') << lit(']')
+        ;
+
+    multi_polygon = lit('[') << polygon % lit(',') << lit(']')
+        ;
+
+    geometry_collection = lit("{\"type\":\"GeometryCollection\",\"geometries\":[") /*<< geometry % lit(',')*/ << lit("]}")
         ;
 }
 
