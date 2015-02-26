@@ -1,0 +1,21 @@
+<Map srs="+proj=merc +datum=WGS84 +over">
+<Parameters>
+    <Parameter name="sizes">512,512</Parameter>
+</Parameters>
+<Style name="poly">
+  <Rule>
+    <PolygonSymbolizer/>
+    <MarkersSymbolizer allow-overlap="true" multi-policy="each" ignore-placement="true" width="30" stroke-width="0"/>
+    <MarkersSymbolizer allow-overlap="true" multi-policy="largest" fill="red" ignore-placement="true" width="20" stroke-width="0"/>
+    <MarkersSymbolizer allow-overlap="true" multi-policy="each" fill="yellow" ignore-placement="true" width="10" stroke-width="0"/>
+    <TextSymbolizer allow-overlap="true" halo-radius="2" dy="-20" face-name="DejaVu Sans Book">label</TextSymbolizer>
+  </Rule>
+</Style>
+<Layer name="poly" srs="+proj=merc +datum=WGS84 +over">
+    <StyleName>poly</StyleName>
+    <Datasource>
+       <Parameter name="type">csv</Parameter>
+       <Parameter name="file">../data/issue_2062.csv</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
