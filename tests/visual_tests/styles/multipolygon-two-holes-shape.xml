@@ -15,8 +15,7 @@
     <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>polygon</StyleName>
         <Datasource>
-            <Parameter name="type">ogr</Parameter>
-            <Parameter name="layer_by_index">0</Parameter>
+            <Parameter name="type">shape</Parameter>
             <Parameter name="file">../../data/shp/poly-multihole.shp</Parameter>
         </Datasource>
     </Layer>
