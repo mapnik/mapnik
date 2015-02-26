@@ -57,11 +57,12 @@ void cairo_renderer<T>::process(shield_symbolizer const& sym,
     placements_list const &placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
     {
-        if (glyphs->marker()) {
+        marker_info_ptr mark = glyphs->get_marker();
+        if (mark) {
             pixel_position pos = glyphs->marker_pos();
             render_marker(pos,
-                          glyphs->marker()->marker,
-                          glyphs->marker()->transform,
+                          mark->marker_,
+                          mark->transform_,
                           opacity);
         }
         context_.add_text(*glyphs, face_manager_, comp_op, halo_comp_op, common_.scale_factor_);

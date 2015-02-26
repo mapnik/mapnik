@@ -122,11 +122,12 @@ struct thunk_renderer<image_rgba8>
             offset_,
             [&] (glyph_positions_ptr glyphs)
             {
-                if (glyphs->marker())
+                marker_info_ptr mark = glyphs->get_marker();
+                if (mark)
                 {
                     ren_.render_marker(glyphs->marker_pos(),
-                                       glyphs->marker()->marker,
-                                       glyphs->marker()->transform,
+                                       mark->marker_,
+                                       mark->transform_,
                                        thunk.opacity_, thunk.comp_op_);
                 }
                 ren.render(*glyphs);

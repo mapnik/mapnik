@@ -62,11 +62,14 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
     placements_list const& placements = helper.get();
     for (glyph_positions_ptr glyphs : placements)
     {
-        if (glyphs->marker())
+        marker_info_ptr mark = glyphs->get_marker();
+        if (mark)
+        {
             render_marker(glyphs->marker_pos(),
-                          glyphs->marker()->marker,
-                          glyphs->marker()->transform,
+                          mark->marker_,
+                          mark->transform_,
                           opacity, comp_op);
+        }
         ren.render(*glyphs);
     }
 }

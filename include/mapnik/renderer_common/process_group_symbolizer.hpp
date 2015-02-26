@@ -240,7 +240,7 @@ void render_offset_placements(placements_list const& placements,
         glyphs->set_base_point(base_point + offset);
 
         // update the position of any marker
-        marker_info_ptr marker_info = glyphs->marker();
+        marker_info_ptr marker_info = glyphs->get_marker();
         pixel_position marker_pos = glyphs->marker_pos();
         if (marker_info)
         {
