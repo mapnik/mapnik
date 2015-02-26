@@ -73,7 +73,7 @@ struct geometry_type
 };
 } // detail
 
-static mapnik::new_geometry::geometry_types geometry_type(mapnik::new_geometry::geometry const& geom)
+static inline mapnik::new_geometry::geometry_types geometry_type(mapnik::new_geometry::geometry const& geom)
 {
     return detail::geometry_type()(geom);
 }
