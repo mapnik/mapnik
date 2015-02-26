@@ -77,7 +77,7 @@ struct line_string : std::vector<point>
     line_string (line_string && other) = default ;
     line_string& operator=(line_string &&) = default;
     line_string (line_string const& ) = default;
-    line_string& operator=(line_string const&) = delete;
+    line_string& operator=(line_string const&) = default;
     inline std::size_t num_points() const { return size(); }
     inline void add_coord(double x, double y) { emplace_back(x,y);}
 };
@@ -111,13 +111,13 @@ struct multi_line_string : std::vector<line_string> {};
 struct multi_polygon : std::vector<polygon> {};
 struct geometry_collection;
 
-typedef mapnik::util::variant<point,
-                              line_string,
-                              polygon,
-                              multi_point,
-                              multi_line_string,
-                              multi_polygon,
-                              mapnik::util::recursive_wrapper<geometry_collection> > geometry;
+using geometry = mapnik::util::variant<point,
+                                       line_string,
+                                       polygon,
+                                       multi_point,
+                                       multi_line_string,
+                                       multi_polygon,
+                                       mapnik::util::recursive_wrapper<geometry_collection> >;
 
 struct geometry_collection : std::vector<geometry> {};
 
