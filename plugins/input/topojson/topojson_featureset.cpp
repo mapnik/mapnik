@@ -38,15 +38,9 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/adaptor/sliced.hpp>
 #include <boost/geometry.hpp>
-#include <boost/geometry/algorithms/simplify.hpp>
-#include <boost/geometry/geometries/register/point.hpp>
-#include <boost/geometry/geometries/register/linestring.hpp>
 #pragma GCC diagnostic pop
 
 #include "topojson_featureset.hpp"
-
-BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::topojson::coordinate, double, boost::geometry::cs::cartesian, x, y)
-BOOST_GEOMETRY_REGISTER_LINESTRING(std::vector<mapnik::topojson::coordinate>)
 
 namespace mapnik { namespace topojson {
 
@@ -217,23 +211,18 @@ struct feature_generator
                     processed_coords.emplace_back(coordinate{x,y});
                 }
 
-
-                // simplify
-                std::vector<mapnik::topojson::coordinate> simplified(processed_coords.size());
-                boost::geometry::simplify(processed_coords, simplified, 2);
-
                 using namespace boost::adaptors;
 
                 if (reverse)
                 {
-                    for (auto const& c : simplified | reversed | sliced(0, simplified.size()-1))
+                    for (auto const& c : processed_coords | reversed | sliced(0, processed_coords.size()-1))
                     {
                         linear_ring.emplace_back(c.x, c.y);
                     }
                 }
                 else
                 {
-                    for (auto const& c : simplified | sliced(0, simplified.size()-1))
+                    for (auto const& c : processed_coords | sliced(0, processed_coords.size()-1))
                     {
                         linear_ring.emplace_back(c.x, c.y);
                     }
