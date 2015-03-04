@@ -136,7 +136,7 @@ namespace boost { namespace spirit { namespace traits {
         using type = mapnik::new_geometry::geometry_collection const&;
         static type pre(mapnik::new_geometry::geometry const& geom)
         {
-            return mapnik::util::get<mapnik::util::recursive_wrapper<mapnik::new_geometry::geometry_collection>>(geom);
+            return mapnik::util::get<mapnik::new_geometry::geometry_collection>(geom);
         }
     };
 
