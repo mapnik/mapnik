@@ -308,6 +308,7 @@ struct feature_generator
                     polygon.add_hole(std::move(linear_ring));
                 }
             }
+            boost::geometry::correct(polygon);
             multi_polygon.push_back(std::move(polygon));
         }
         feature->set_geometry(std::move(multi_polygon));
