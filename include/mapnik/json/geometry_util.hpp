@@ -24,6 +24,9 @@
 #define MAPNIK_JSON_GEOMETRY_UTIL_HPP
 
 #include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_adapters.hpp>
+// boost.geometry
+#include <boost/geometry/algorithms/correct.hpp>
 
 namespace mapnik { namespace json {
 
@@ -97,7 +100,8 @@ struct create_polygon
             if (i == 0) poly.set_exterior_ring(std::move(ring));
             else poly.add_hole(std::move(ring));
         }
-
+        // correct oriantations etc
+        boost::geometry::correct(poly);
         geom_ = std::move(poly);
     }
 

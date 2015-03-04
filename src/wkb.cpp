@@ -27,6 +27,9 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/geometry_adapters.hpp>
+// boost.geometry
+#include <boost/geometry/algorithms/correct.hpp>
 
 namespace mapnik
 {
@@ -318,6 +321,8 @@ private:
             if ( i == 0) poly.set_exterior_ring(std::move(ring));
             else poly.add_hole(std::move(ring));
         }
+        // correct orientations etc
+        boost::geometry::correct(poly);
         return poly;
     }
 
