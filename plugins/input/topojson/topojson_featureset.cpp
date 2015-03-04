@@ -25,6 +25,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/geometry_adapters.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -36,7 +37,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/range/adaptor/reversed.hpp>
-#include <boost/range/adaptor/sliced.hpp>
 #include <boost/geometry.hpp>
 #pragma GCC diagnostic pop
 
@@ -215,14 +215,14 @@ struct feature_generator
 
                 if (reverse)
                 {
-                    for (auto const& c : processed_coords | reversed | sliced(0, processed_coords.size()-1))
+                    for (auto const& c : processed_coords | reversed)
                     {
                         linear_ring.emplace_back(c.x, c.y);
                     }
                 }
                 else
                 {
-                    for (auto const& c : processed_coords | sliced(0, processed_coords.size()-1))
+                    for (auto const& c : processed_coords)
                     {
                         linear_ring.emplace_back(c.x, c.y);
                     }
@@ -238,7 +238,7 @@ struct feature_generator
                 polygon.add_hole(std::move(linear_ring));
             }
         }
-
+        boost::geometry::correct(polygon);
         feature->set_geometry(std::move(polygon));
         assign_properties(*feature, poly, tr_);
         return feature;
@@ -253,7 +253,6 @@ struct feature_generator
 
         for (auto const& poly : multi_poly.polygons)
         {
-            //std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
             bool first = true;
             mapnik::new_geometry::polygon polygon;
             if (poly.size() > 1) polygon.interior_rings.reserve(poly.size() - 1);
@@ -286,14 +285,14 @@ struct feature_generator
 
                     if (reverse)
                     {
-                        for (auto const& c : (processed_coords | reversed | sliced(0,processed_coords.size() - 1)))
+                        for (auto const& c : (processed_coords | reversed))
                         {
                             linear_ring.add_coord(c.x, c.y);
                         }
                     }
                     else
                     {
-                        for (auto const& c : processed_coords | sliced(0,processed_coords.size() - 1))
+                        for (auto const& c : processed_coords)
                         {
                             linear_ring.add_coord(c.x, c.y);
                         }
