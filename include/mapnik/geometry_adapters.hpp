@@ -43,29 +43,28 @@ namespace boost {
 template <>
 struct range_iterator<mapnik::new_geometry::line_string>
 {
-    using type = mapnik::new_geometry::line_string::iterator_type;
+    using type = mapnik::new_geometry::line_string::iterator;
 };
 
 template <>
 struct range_const_iterator<mapnik::new_geometry::line_string>
 {
-    using type = mapnik::new_geometry::line_string::const_iterator_type;
+    using type = mapnik::new_geometry::line_string::const_iterator;
 };
 
-inline mapnik::new_geometry::line_string::iterator_type
+inline mapnik::new_geometry::line_string::iterator
 range_begin(mapnik::new_geometry::line_string & line) {return line.begin();}
 
-inline mapnik::new_geometry::line_string::iterator_type
+inline mapnik::new_geometry::line_string::iterator
 range_end(mapnik::new_geometry::line_string & line) {return line.end();}
 
-inline mapnik::new_geometry::line_string::const_iterator_type
+inline mapnik::new_geometry::line_string::const_iterator
 range_begin(mapnik::new_geometry::line_string const& line) {return line.begin();}
 
-inline mapnik::new_geometry::line_string::const_iterator_type
+inline mapnik::new_geometry::line_string::const_iterator
 range_end(mapnik::new_geometry::line_string const& line) {return line.end();}
 
 
-// register polygon
 namespace geometry { namespace traits {
 
 template<> struct tag<mapnik::new_geometry::bounding_box> { using type = box_tag; };
@@ -107,88 +106,31 @@ struct tag<mapnik::new_geometry::line_string>
     using type = ring_tag;
 };
 
-// polygon 2
-template<> struct tag<mapnik::new_geometry::polygon2>
-{
-    using type = polygon_tag;
-};
-
-// ring
-template<> struct ring_const_type<mapnik::new_geometry::polygon2>
-{
-    using type =  mapnik::new_geometry::line_string::cont_type const&;
-};
-
-template<> struct ring_mutable_type<mapnik::new_geometry::polygon2>
-{
-    using type = mapnik::new_geometry::line_string::cont_type&;
-};
-
-// interior
-template<> struct interior_const_type<mapnik::new_geometry::polygon2>
-{
-    using rings_type = std::vector<mapnik::new_geometry::line_string::cont_type>;
-    using type = boost::iterator_range<rings_type::const_iterator> const;
-};
-
-template<> struct interior_mutable_type<mapnik::new_geometry::polygon2>
-{
-    using rings_type = std::vector<mapnik::new_geometry::line_string::cont_type>;
-    using type = boost::iterator_range<rings_type::iterator>;
-};
-
-// exterior
-template<>
-struct exterior_ring<mapnik::new_geometry::polygon2>
-{
-    static mapnik::new_geometry::line_string::cont_type& get(mapnik::new_geometry::polygon2 & p)
-    {
-        return p.rings.front();
-    }
-
-    static mapnik::new_geometry::line_string::cont_type const& get(mapnik::new_geometry::polygon2 const& p)
-    {
-        return p.rings.front();
-    }
-};
-
-template<>
-struct interior_rings<mapnik::new_geometry::polygon2>
-{
-    using ring_iterator = std::vector<mapnik::new_geometry::line_string::cont_type>::iterator;
-    using const_ring_iterator = std::vector<mapnik::new_geometry::line_string::cont_type>::const_iterator;
-    using holes_type = boost::iterator_range<ring_iterator>;
-    using const_holes_type = boost::iterator_range<const_ring_iterator>;
-    static holes_type get(mapnik::new_geometry::polygon2 & p)
-    {
-        return boost::make_iterator_range(p.rings.begin() + 1, p.rings.end());
-    }
-
-    static const_holes_type get(mapnik::new_geometry::polygon2 const& p)
-    {
-       return boost::make_iterator_range(p.rings.begin() + 1, p.rings.end());
-    }
-};
-
 
 // mapnik::new_geometry::polygon
-
-template<> struct tag<mapnik::new_geometry::polygons>
+template<>
+struct tag<mapnik::new_geometry::polygon>
 {
     using type = polygon_tag;
 };
 
+template <>
+struct point_order<mapnik::new_geometry::linear_ring>
+{
+    static const order_selector value = counterclockwise;
+};
 
-template<> struct tag<mapnik::new_geometry::multi_point>
+template<>
+struct tag<mapnik::new_geometry::multi_point>
 {
     using type = multi_point_tag;
 };
 
-template<> struct tag<mapnik::new_geometry::multi_line_string>
+template<>
+struct tag<mapnik::new_geometry::multi_line_string>
 {
     using type = multi_linestring_tag;
 };
-
 
 template<> struct tag<mapnik::new_geometry::multi_polygon>
 {
@@ -196,7 +138,7 @@ template<> struct tag<mapnik::new_geometry::multi_polygon>
 };
 
 // ring
-template<> struct ring_const_type<mapnik::new_geometry::polygons>
+template<> struct ring_const_type<mapnik::new_geometry::polygon>
 {
     using type =  mapnik::new_geometry::linear_ring const&;
 };
