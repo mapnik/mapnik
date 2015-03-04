@@ -503,7 +503,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     {
         mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
         ren.apply();
-        QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+        QImage image((uchar*)buf.getData(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
     //catch (mapnik::config_error & ex)
