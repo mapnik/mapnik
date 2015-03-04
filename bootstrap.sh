@@ -71,6 +71,7 @@ function install_mason_deps() {
     install expat 2.1.0 libexpat &
     install pixman 0.32.6 libpixman-1 &
     install cairo 1.12.18 libcairo &
+    install geowave-jace 0.8.7 &
     wait
 }
 
@@ -95,7 +96,6 @@ RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
 PKG_CONFIG_PATH = '${MASON_LINKED_REL}/lib/pkgconfig'
-PATH_REMOVE = '/usr:/usr/local'
 PATH_REPLACE = '${PATH_REPLACE}'
 BOOST_INCLUDES = '${MASON_LINKED_REL}/include'
 BOOST_LIBS = '${MASON_LINKED_REL}/lib'
@@ -124,6 +124,12 @@ CAIRO_INCLUDES = '${MASON_LINKED_REL}/include'
 CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
 SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
 SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
+JAVA_INCLUDE_PATH = '${JAVA_HOME}/include'
+JAVA_INCLUDE_PATH2 = '${JAVA_HOME}/include/linux'
+JAVA_JVM_LIB = '${JAVA_HOME}/jre/lib/amd64/server'
+GEOWAVE_INCLUDES = '${MASON_LINKED_REL}/include'
+GEOWAVE_LIBS = '${MASON_LINKED_REL}/lib'
+GEOWAVE_RUNTIME_JAR = '${MASON_LINKED_ABS}/bin/geowave-jace.jar'
 BENCHMARK = True
 CPP_TESTS = True
 PGSQL2SQLITE = True
