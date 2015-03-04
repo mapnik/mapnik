@@ -41,22 +41,12 @@ struct point
 {
     point() {}
     point(double x_, double y_)
-        : x(x_),y(y_) {}
+        : x(x_), y(y_)
+    {}
 
-    point(point const& other)
-        : x(other.x),
-          y(other.y) {}
-
+    point(point const& other) = default;
     point(point && other) noexcept = default;
-
-    point & operator=(point const& other)
-    {
-        if (this == &other) return *this;
-        point tmp(other);
-        std::swap(x, tmp.x);
-        std::swap(y, tmp.y);
-        return *this;
-    }
+    point & operator=(point const& other) = default;
     double x;
     double y;
 };
