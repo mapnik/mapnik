@@ -1,0 +1,22 @@
+<Map
+    background-color="#000"
+    srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Parameters>
+        <Parameter name="sizes">300,300</Parameter>
+    </Parameters>
+
+    <Style name="polygon">
+        <Rule>
+            <PolygonSymbolizer fill="#800000" />
+            <LineSymbolizer stroke="#ff0000" stroke-width="2" offset="4" />
+        </Rule>
+    </Style>
+
+    <Layer name="bug" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>polygon</StyleName>
+        <Datasource>
+            <Parameter name="type">shape</Parameter>
+            <Parameter name="file">../../data/shp/poly-multihole.shp</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

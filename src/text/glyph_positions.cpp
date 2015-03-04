@@ -34,7 +34,7 @@ namespace mapnik
 glyph_positions::glyph_positions()
     : data_(),
       base_point_(),
-      marker_(),
+      marker_info_(),
       marker_pos_(),
       bbox_() {}
 
@@ -68,15 +68,15 @@ void glyph_positions::set_base_point(pixel_position const& base_point)
     base_point_ = base_point;
 }
 
-void glyph_positions::set_marker(marker_info_ptr marker, pixel_position const& marker_pos)
+void glyph_positions::set_marker(marker_info_ptr mark, pixel_position const& marker_pos)
 {
-    marker_ = marker;
+    marker_info_ = mark;
     marker_pos_ = marker_pos;
 }
 
-marker_info_ptr glyph_positions::marker() const
+marker_info_ptr glyph_positions::get_marker() const
 {
-    return marker_;
+    return marker_info_;
 }
 
 pixel_position const& glyph_positions::marker_pos() const

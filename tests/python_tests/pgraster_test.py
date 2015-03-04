@@ -110,6 +110,7 @@ def drop_imported(tabname, overview):
       psql_run('DROP TABLE IF EXISTS "o_' + of + '_' + tabname + '";')
 
 def compare_images(expected,im):
+  expected = os.path.join(os.path.dirname(expected),os.path.basename(expected).replace(':','_'))
   if not os.path.exists(expected) or os.environ.get('UPDATE'):
     print 'generating expected image %s' % expected
     im.save(expected,'png32')

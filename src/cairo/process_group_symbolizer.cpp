@@ -97,11 +97,12 @@ struct thunk_renderer
             offset_,
             [&] (glyph_positions_ptr glyphs)
             {
-                if (glyphs->marker())
+                marker_info_ptr mark = glyphs->get_marker();
+                if (mark)
                 {
                     ren_.render_marker(glyphs->marker_pos(),
-                                       glyphs->marker()->marker,
-                                       glyphs->marker()->transform,
+                                       mark->marker_,
+                                       mark->transform_,
                                        thunk.opacity_, thunk.comp_op_);
                 }
                 context_.add_text(*glyphs, face_manager_, src_over, src_over, common_.scale_factor_);
