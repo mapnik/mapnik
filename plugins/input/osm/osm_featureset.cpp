@@ -64,7 +64,7 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         double lat = static_cast<osm_node*>(cur_item)->lat;
         double lon = static_cast<osm_node*>(cur_item)->lon;
-        std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
+        std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::new_geometry::geometry_types::Point);
         point->move_to(lon, lat);
         feature->add_geometry(point.release());
     }
@@ -82,10 +82,10 @@ feature_ptr osm_featureset<filterT>::next()
 
         if (!cur_item) return feature_ptr();
         feature = feature_factory::create(ctx_, cur_item->id);
-        mapnik::geometry_type::types geom_type = mapnik::geometry_type::types::LineString;
+        mapnik::geometry_type::types geom_type = mapnik::new_geometry::geometry_types::LineString;
         if (static_cast<osm_way*>(cur_item)->is_polygon())
         {
-            geom_type = mapnik::geometry_type::types::Polygon;
+            geom_type = mapnik::new_geometry::geometry_types::Polygon;
         }
         std::unique_ptr<geometry_type> geom = std::make_unique<geometry_type>(geom_type);
 

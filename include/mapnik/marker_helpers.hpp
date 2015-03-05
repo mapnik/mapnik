@@ -25,7 +25,8 @@
 
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_type.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression_node.hpp>
@@ -37,7 +38,9 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -191,16 +194,23 @@ void setup_transform_scaling(agg::trans_affine & tr,
 template <typename Converter>
 void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, symbolizer_base const& sym)
 {
-    // FIXME
-    /*
-    std::size_t geom_count = feature.paths().size();
-    if (geom_count == 1)
+    using vertex_converter_type = Converter;
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+
+    auto const& geom = feature.get_geometry();
+    new_geometry::geometry_types type = new_geometry::geometry_type(geom);
+
+    if (type == new_geometry::geometry_types::Point
+        || new_geometry::geometry_types::LineString
+        || new_geometry::geometry_types::Polygon)
     {
-        vertex_adapter va(feature.paths()[0]);
-        converter.apply(va);
+        apply_vertex_converter_type apply(converter);
+        mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
-    else if (geom_count > 1)
+    else //if (geom_count > 1)
     {
+#if 0
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
         marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
 
@@ -254,8 +264,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 converter.apply(va);
             }
         }
+#endif
     }
-    */
 }
 
 }

@@ -614,7 +614,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
+                std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::new_geometry::geometry_types::Point);
                 point->move_to(pt.x, pt.y);
                 feature->add_geometry(point.release());
                 feature->put_new("value",value);

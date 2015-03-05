@@ -79,7 +79,7 @@ void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature)
 
 void ogr_converter::convert_point(OGRPoint* geom, feature_ptr feature)
 {
-    std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
+    std::unique_ptr<geometry_type> point(new geometry_type(mapnik::new_geometry::geometry_types::Point));
     point->move_to(geom->getX(), geom->getY());
     feature->paths().push_back(point.release());
 }
@@ -87,7 +87,7 @@ void ogr_converter::convert_point(OGRPoint* geom, feature_ptr feature)
 void ogr_converter::convert_linestring(OGRLineString* geom, feature_ptr feature)
 {
     int num_points = geom->getNumPoints();
-    std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+    std::unique_ptr<geometry_type> line(new geometry_type(mapnik::new_geometry::geometry_types::LineString));
     line->move_to(geom->getX(0), geom->getY(0));
     for (int i = 1; i < num_points; ++i)
     {
@@ -108,7 +108,7 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
         capacity += interior->getNumPoints();
     }
 
-    std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
+    std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::new_geometry::geometry_types::Polygon));
 
     poly->move_to(exterior->getX(0), exterior->getY(0));
     for (int i = 1; i < num_points; ++i)

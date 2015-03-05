@@ -27,6 +27,7 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/geometry_types.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -133,6 +134,12 @@ struct point_vertex_adapter
     {
         first_ = true;
     }
+
+    inline geometry_types type () const
+    {
+        return geometry_types::Point;
+    }
+
     point const& pt_;
     mutable bool first_;
 };
@@ -168,6 +175,12 @@ struct line_string_vertex_adapter
     {
         current_index_ = 0;
     }
+
+    inline geometry_types type () const
+    {
+        return geometry_types::LineString;
+    }
+
     line_string const& line_;
     mutable std::size_t current_index_;
     const std::size_t end_index_;
@@ -221,6 +234,12 @@ struct polygon_vertex_adapter
         }
         return mapnik::SEG_END;
     }
+
+    inline geometry_types type () const
+    {
+        return geometry_types::Polygon;
+    }
+
 private:
     polygon const& poly_;
     mutable std::size_t rings_itr_;

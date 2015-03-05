@@ -45,9 +45,6 @@
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
 
-// boost
-
-
 // stl
 #include <string>
 #include <cmath>

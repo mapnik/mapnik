@@ -27,6 +27,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp> // for container stuff
+#include <mapnik/geometry_impl.hpp>
 #include <mapnik/view_transform.hpp> // for container stuff
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/util/path_iterator.hpp>

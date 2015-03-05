@@ -24,6 +24,7 @@
 #define MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
 
 #include <mapnik/geom_util.hpp>
+#include <mapnik/geometry_types.hpp>
 
 #include "agg_basics.h"
 #include "agg_trans_affine.h"
@@ -76,7 +77,7 @@ public:
             return false;
         }
 
-        if (locator_.type() == mapnik::geometry_type::types::LineString)
+        if (locator_.type() == new_geometry::geometry_types::LineString)
         {
             if (!label::middle_point(locator_, x, y))
             {

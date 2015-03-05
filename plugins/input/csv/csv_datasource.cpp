@@ -809,7 +809,7 @@ void csv_datasource::parse_csv(T & stream,
             {
                 if (parsed_x && parsed_y)
                 {
-                    mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::geometry_type::types::Point);
+                    mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::new_geometry::geometry_types::Point);
                     pt->move_to(x,y);
                     feature->add_geometry(pt);
                     features_.push_back(feature);

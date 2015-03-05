@@ -139,7 +139,7 @@ wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::geometry_type::types::Point);
+    int type = static_cast<int>(mapnik::new_geometry::geometry_types::Point);
     write(ss,type,4,byte_order);
     double x = 0;
     double y = 0;
@@ -159,7 +159,7 @@ wkb_buffer_ptr to_line_string_wkb( GeometryType const& g, wkbByteOrder byte_orde
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::geometry_type::types::LineString);
+    int type = static_cast<int>(mapnik::new_geometry::geometry_types::LineString);
     write(ss,type,4,byte_order);
     write(ss,num_points,4,byte_order);
     double x = 0;
@@ -209,7 +209,7 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::geometry_type::types::Polygon);
+    int type = static_cast<int>(mapnik::new_geometry::geometry_types::Polygon);
     write(ss,type,4,byte_order);
     write(ss,num_rings,4,byte_order);
 
@@ -235,13 +235,13 @@ wkb_buffer_ptr to_wkb(GeometryType const& g, wkbByteOrder byte_order )
     vertex_adapter va(g);
     switch (va.type())
     {
-    case mapnik::geometry_type::types::Point:
+    case mapnik::new_geometry::geometry_types::Point:
         wkb = to_point_wkb(va, byte_order);
         break;
-    case mapnik::geometry_type::types::LineString:
+    case mapnik::new_geometry::geometry_types::LineString:
         wkb = to_line_string_wkb(va, byte_order);
         break;
-    case mapnik::geometry_type::types::Polygon:
+    case mapnik::new_geometry::geometry_types::Polygon:
         wkb = to_polygon_wkb(va, byte_order);
         break;
     default:

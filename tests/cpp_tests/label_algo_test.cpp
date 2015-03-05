@@ -19,7 +19,7 @@ int main(int argc, char** argv)
         // reused these for simplicity
         double x,y;
 
-        mapnik::geometry_type pt(mapnik::geometry_type::types::Point);
+        mapnik::geometry_type pt(mapnik::new_geometry::geometry_types::Point);
         // single point
         pt.move_to(10,10);
         {
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
             BOOST_TEST_EQ( y, 15 );
         }
         // line with two verticies
-        mapnik::geometry_type line(mapnik::geometry_type::types::LineString);
+        mapnik::geometry_type line(mapnik::new_geometry::geometry_types::LineString);
         line.move_to(0,0);
         line.line_to(50,50);
         mapnik::vertex_adapter va(line);
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 
         // hit tests
         {
-            mapnik::geometry_type pt_hit(mapnik::geometry_type::types::Point);
+            mapnik::geometry_type pt_hit(mapnik::new_geometry::geometry_types::Point);
             pt_hit.move_to(10,10);
             mapnik::vertex_adapter va(pt_hit);
             BOOST_TEST( mapnik::label::hit_test(va, 10, 10, 0.1) );
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
             BOOST_TEST( mapnik::label::hit_test(va, 9, 9, 1.5) );
         }
         {
-            mapnik::geometry_type line_hit(mapnik::geometry_type::types::LineString);
+            mapnik::geometry_type line_hit(mapnik::new_geometry::geometry_types::LineString);
             line_hit.move_to(0,0);
             line_hit.line_to(50,50);
             mapnik::vertex_adapter va(line_hit);

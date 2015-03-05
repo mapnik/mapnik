@@ -29,6 +29,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
+#include <mapnik/geometry_type.hpp>
 
 namespace mapnik {
 
@@ -114,16 +115,15 @@ struct render_marker_symbolizer_visitor
                                             feature_,
                                             common_.vars_,
                                             common_.scale_factor_);
-#if 0 // FIXME
-            if (clip && feature_.paths().size() > 0) // optional clip (default: true)
+            if (clip) // optional clip (default: true)
             {
-                geometry_type::types type = feature_.paths()[0].type();
-                if (type == geometry_type::types::Polygon)
+                new_geometry::geometry_types type = new_geometry::geometry_type(feature_.get_geometry());
+                if (type == new_geometry::geometry_types::Polygon)
                     converter.template set<clip_poly_tag>();
-                else if (type == geometry_type::types::LineString)
+                else if (type == new_geometry::geometry_types::LineString)
                     converter.template set<clip_line_tag>();
             }
-#endif
+
             converter.template set<transform_tag>(); //always transform
             if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
             converter.template set<affine_transform_tag>(); // optional affine transform
@@ -168,16 +168,15 @@ struct render_marker_symbolizer_visitor
                                             feature_,
                                             common_.vars_,
                                             common_.scale_factor_);
-#if 0 // FIXME
-            if (clip && feature_.paths().size() > 0) // optional clip (default: true)
+            if (clip) // optional clip (default: true)
             {
-                geometry_type::types type = feature_.paths()[0].type();
-                if (type == geometry_type::types::Polygon)
+                new_geometry::geometry_types type = new_geometry::geometry_type(feature_.get_geometry());
+                if (type == new_geometry::geometry_types::Polygon)
                     converter.template set<clip_poly_tag>();
-                else if (type == geometry_type::types::LineString)
+                else if (type == new_geometry::geometry_types::LineString)
                     converter.template set<clip_line_tag>();
             }
-#endif
+
             converter.template set<transform_tag>(); //always transform
             if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
             converter.template set<affine_transform_tag>(); // optional affine transform

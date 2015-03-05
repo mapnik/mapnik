@@ -27,8 +27,8 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/geometry.hpp> // for geometry_type::types (TODO: avoid this interdependence)
-
+//#include <mapnik/geometry.hpp> // for geometry_type::types (TODO: avoid this interdependence)
+#include <mapnik/geometry_types.hpp>
 // stl
 #include <cmath>
 #include <vector>
@@ -377,6 +377,7 @@ bool centroid(PathType & path, double & x, double & y)
 }
 
 // Compute centroid over a set of paths
+#if 0
 template <typename Iter>
 bool centroid_geoms(Iter start, Iter end, double & x, double & y)
 {
@@ -445,6 +446,8 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
   return true;
 }
 
+#endif
+
 template <typename PathType>
 bool hit_test(PathType & path, double x, double y, double tol)
 {
@@ -460,7 +463,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         return false;
     }
     unsigned count = 0;
-    mapnik::geometry_type::types geom_type = static_cast<mapnik::geometry_type::types>(path.type());
+    mapnik::new_geometry::geometry_types geom_type = static_cast<mapnik::new_geometry::geometry_types>(path.type());
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         if (command == SEG_CLOSE)
@@ -476,7 +479,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         }
         switch(geom_type)
         {
-        case mapnik::geometry_type::types::Polygon:
+        case mapnik::new_geometry::geometry_types::Polygon:
         {
             if ((((y1 <= y) && (y < y0)) ||
                  ((y0 <= y) && (y < y1))) &&
@@ -484,7 +487,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
                 inside=!inside;
             break;
         }
-        case mapnik::geometry_type::types::LineString:
+        case mapnik::new_geometry::geometry_types::LineString:
         {
             double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
             if (distance < tol)
