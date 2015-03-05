@@ -1283,10 +1283,11 @@ if not preconfigured:
     else:
         env['MISSING_DEPS'].append('libxml2')
 
-    if conf.CheckHasDlfcn():
-        env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
-    else:
-        env['SKIPPED_DEPS'].extend(['dlfcn'])
+    if not env['HOST']:
+        if conf.CheckHasDlfcn():
+            env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
+        else:
+            env['SKIPPED_DEPS'].extend(['dlfcn'])
 
     OPTIONAL_LIBSHEADERS = []
 
@@ -1340,7 +1341,7 @@ if not preconfigured:
         conf.prioritize_paths(silent=True)
 
     # test for C++11 support, which is required
-    if not conf.supports_cxx11():
+    if not env['HOST'] and not conf.supports_cxx11():
         color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler to at least g++ 4.7 (ideally 4.8)")
         Exit(1)
 
