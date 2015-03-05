@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_centroid.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression_node.hpp>
@@ -47,7 +48,7 @@
 
 // boost
 #include <boost/optional.hpp>
-
+#include <boost/geometry/algorithms/centroid.hpp>
 // stl
 #include <memory>
 #include <type_traits> // remove_reference
@@ -208,23 +209,21 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
-    else //if (geom_count > 1)
+    else if (type != new_geometry::geometry_types::GeometryCollection) // multi geometries
     {
-#if 0
+
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
         marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
 
         if (placement == MARKER_POINT_PLACEMENT &&
             multi_policy == MARKER_WHOLE_MULTI)
         {
-            double x, y;
-            if (label::centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y))
+            new_geometry::point pt;
+            if (new_geometry::centroid(geom, pt))
             {
-                geometry_type pt(geometry_type::types::Point);
-                pt.move_to(x, y);
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();
-                vertex_adapter va(pt);
+                new_geometry::point_vertex_adapter va(pt);
                 converter.apply(va);
             }
         }
@@ -233,38 +232,42 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         {
             // Only apply to path with largest envelope area
             // TODO: consider using true area for polygon types
-            double maxarea = 0;
-            geometry_type const* largest = 0;
-            for (geometry_type const& geom : feature.paths())
+            if (type == new_geometry::geometry_types::MultiPolygon)
             {
-                vertex_adapter va(geom);
-                const box2d<double>& env = va.envelope();
-                double area = env.width() * env.height();
-                if (area > maxarea)
+                new_geometry::multi_polygon multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
+                double maxarea = 0;
+                new_geometry::polygon const* largest = 0;
+                for (new_geometry::polygon const& poly : multi_poly)
                 {
-                    maxarea = area;
-                    largest = &geom;
+                    box2d<double> bbox = new_geometry::envelope(poly);
+                    new_geometry::polygon_vertex_adapter va(poly);
+                    double area = bbox.width() * bbox.height();
+                    if (area > maxarea)
+                    {
+                        maxarea = area;
+                        largest = &poly;
+                    }
+                }
+                if (largest)
+                {
+                    new_geometry::polygon_vertex_adapter va(*largest);
+                    converter.apply(va);
                 }
             }
-            if (largest)
-            {
-                vertex_adapter va(*largest);
-                converter.apply(va);
-            }
         }
-        else
+        else if (type == new_geometry::geometry_types::MultiPolygon)
         {
             if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            for (geometry_type const& path : feature.paths())
+            new_geometry::multi_polygon multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
+            for (auto const& poly : multi_poly)
             {
-                vertex_adapter va(path);
+                new_geometry::polygon_vertex_adapter va(poly);
                 converter.apply(va);
             }
         }
-#endif
     }
 }
 
