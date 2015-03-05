@@ -632,7 +632,9 @@ public:
     }
 
     // get<T>()
-    template<typename T, typename std::enable_if<(detail::direct_type<T, Types...>::index != detail::invalid_value)>::type* = nullptr>
+    template<typename T, typename std::enable_if<
+                         (detail::direct_type<T, Types...>::index != detail::invalid_value)
+                         >::type* = nullptr>
     VARIANT_INLINE T& get()
     {
         if (type_index == detail::direct_type<T, Types...>::index)
