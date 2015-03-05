@@ -259,7 +259,7 @@ class _Projection(Projection,_injector):
 class _Feature(Feature,_injector):
     __geo_interface__ = property(lambda self: json.loads(self.to_geojson()))
 
-class _Path(Path,_injector):
+class _Geometry(Geometry,_injector):
     __geo_interface__ = property(lambda self: json.loads(self.to_geojson()))
 
 class _Datasource(Datasource,_injector):

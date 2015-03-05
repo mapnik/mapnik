@@ -105,7 +105,7 @@ boost::python::dict describe(std::shared_ptr<mapnik::datasource> const& ds)
     mapnik::layer_descriptor ld = ds->get_descriptor();
     description["type"] = ds->type();
     description["name"] = ld.get_name();
-    description["geometry_type"] = ds->get_geometry_type();
+    description["geometry_type"] = "FIXME";//ds->get_geometry_type();
     description["encoding"] = ld.get_encoding();
     for (auto const& param : ld.get_extra_parameters()) {
         description[param.first] = param.second;
@@ -186,7 +186,7 @@ void export_datasource()
     class_<datasource,std::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
         .def("type",&datasource::type)
-        .def("geometry_type",&datasource::get_geometry_type)
+        //.def("geometry_type",&datasource::get_geometry_type)
         .def("describe",&describe)
         .def("envelope",&datasource::envelope)
         .def("features",&datasource::features)

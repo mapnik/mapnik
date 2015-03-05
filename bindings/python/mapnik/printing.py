@@ -17,7 +17,7 @@ see the documentation of mapnik.printing.PDFPrinter() for options
 """
 from __future__ import absolute_import
 
-from . import render, Map, Box2d, Layer, Feature, Projection, Coord, Style, Geometry2d
+from . import render, Map, Box2d, Layer, Feature, Projection, Coord, Style, Geometry
 import math
 import os
 import tempfile
