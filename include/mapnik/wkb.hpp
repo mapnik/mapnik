@@ -41,11 +41,18 @@ namespace mapnik
  * the Open Geospatial Consortium (OGC) and described in their Simple Feature
  * Access and Coordinate Transformation Service specifications.
  */
+
 enum wkbFormat : std::uint8_t
 {
     wkbAuto=1,
     wkbGeneric=2,
     wkbSpatiaLite=3
+};
+
+enum wkbByteOrder : std::uint8_t
+{
+    wkbXDR=0,
+    wkbNDR=1
 };
 
 class MAPNIK_DECL geometry_utils : private util::noncopyable

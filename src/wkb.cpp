@@ -37,12 +37,6 @@ namespace mapnik
 struct wkb_reader : util::noncopyable
 {
 private:
-    enum wkbByteOrder
-    {
-        wkbXDR=0,
-        wkbNDR=1
-    };
-
     const char* wkb_;
     std::size_t size_;
     std::size_t pos_;

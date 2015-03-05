@@ -56,12 +56,6 @@ std::string to_hex(const char* blob, unsigned size)
     return s.str();
 }
 
-enum wkbByteOrder : std::uint8_t {
-    wkbXDR=0,
-    wkbNDR=1
-};
-
-
 inline void reverse_bytes(char size, char *address)
 {
     char * first = address;
