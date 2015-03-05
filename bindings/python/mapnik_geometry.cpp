@@ -42,6 +42,10 @@
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry_is_valid.hpp>
+#include <mapnik/geometry_is_simple.hpp>
+#include <mapnik/geometry_correct.hpp>
+
 //#include <mapnik/wkt/wkt_factory.hpp> // from_wkt
 //#include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/json/geometry_parser.hpp> // from_geojson
@@ -232,6 +236,21 @@ mapnik::box2d<double> geometry_envelope_impl(mapnik::new_geometry::geometry cons
     return mapnik::new_geometry::envelope(geom);
 }
 
+bool geometry_is_valid_impl(mapnik::new_geometry::geometry const& geom)
+{
+    return mapnik::new_geometry::is_valid(geom);
+}
+
+bool geometry_is_simple_impl(mapnik::new_geometry::geometry const& geom)
+{
+    return mapnik::new_geometry::is_simple(geom);
+}
+
+void geometry_correct_impl(mapnik::new_geometry::geometry & geom)
+{
+    mapnik::new_geometry::correct(geom);
+}
+
 /*
 // https://github.com/mapnik/mapnik/issues/1437
 std::string to_svg2( mapnik::geometry_container const& geom)
@@ -273,6 +292,9 @@ void export_geometry()
         .staticmethod("from_geojson")
         // .def("__str__",&mapnik::geometry_type::to_string)
         .def("type",&geometry_type_impl)
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
+        .def("correct", &geometry_correct_impl)
         //.def("to_wkb",&to_wkb)
         //.def("to_wkt",&to_wkt)
         .def("to_geojson",&to_geojson_impl)
