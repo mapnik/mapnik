@@ -1362,7 +1362,7 @@ if not preconfigured:
                             env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
                 elif libname == 'harfbuzz':
                     if not conf.harfbuzz_version():
-                        env['MISSING_DEPS'].append('harfbuzz-min-version')
+                        env['SKIPPED_DEPS'].append('harfbuzz-min-version')
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
