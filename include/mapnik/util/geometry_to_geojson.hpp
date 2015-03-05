@@ -34,18 +34,9 @@ inline bool to_geojson(std::string & json, mapnik::new_geometry::geometry const&
     using sink_type = std::back_insert_iterator<std::string>;
     static const mapnik::json::geometry_generator_grammar<sink_type, mapnik::new_geometry::geometry> grammar;
     sink_type sink(json);
-    return boost::spirit::karma::generate(sink, grammar, boost::phoenix::cref(geom));
-}
-
-/*
-inline bool to_geojson(std::string & json, mapnik::geometry_container const& geom)
-{
-    using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::json::multi_geometry_generator_grammar<sink_type, mapnik::geometry_container> grammar;
-    sink_type sink(json);
     return boost::spirit::karma::generate(sink, grammar, geom);
 }
-*/
+
 }}
 
 #endif // MAPNIK_GEOMETRY_TO_GEOJSON_HPP
