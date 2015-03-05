@@ -28,27 +28,16 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/geometry_type.hpp>
-
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
 #include <boost/spirit/home/karma/domain.hpp>
 #pragma GCC diagnostic pop
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::new_geometry::point,
-    (double, x)
-    (double, y))
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::new_geometry::polygon,
-    (mapnik::new_geometry::linear_ring const&, exterior_ring)
-    (std::vector<mapnik::new_geometry::linear_ring> const& , interior_rings))
 
 namespace boost { namespace spirit { namespace traits {
 

@@ -28,6 +28,7 @@
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -35,18 +36,10 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #pragma GCC diagnostic pop
 
 // stl
 #include <tuple>
-
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::new_geometry::point,
-    (double, x)
-    (double, y)
-)
 
 namespace mapnik { namespace json {
 
