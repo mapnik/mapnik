@@ -50,7 +50,7 @@ void process_rgba8_jpeg(T const& image, std::string const& t, std::ostream & str
 {
 #if defined(HAVE_JPEG)
     int quality = 85;
-    std::string val = t.substr(4);
+    std::string val = t.substr(5);
     if (!val.empty())
     {
         if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
