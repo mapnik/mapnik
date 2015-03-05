@@ -78,7 +78,7 @@ struct put_property
 
 struct set_geometry_impl
 {
-    using result_type =  void; //mapnik::geometry_container&;
+    using result_type =  void;
     template <typename T0, typename T1>
     result_type operator() (T0 & feature, T1 && geom) const
     {
