@@ -10,6 +10,12 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_type():
+    im = mapnik.Image(256, 256)
+    eq_(im.get_type(), mapnik.ImageType.rgba8)
+    im = mapnik.Image(256, 256, mapnik.ImageType.gray8)
+    eq_(im.get_type(), mapnik.ImageType.gray8)
+
 def test_image_premultiply():
     im = mapnik.Image(256,256)
     eq_(im.premultiplied(),False)

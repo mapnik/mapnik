@@ -33,6 +33,7 @@ class image_view
 public:
     using pixel = typename T::pixel;
     using pixel_type = typename T::pixel_type;
+    static const image_dtype dtype = T::dtype;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
     
     image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data)
@@ -130,6 +131,11 @@ public:
     inline double get_scaling() const
     {
         return data_.get_scaling();
+    }
+    
+    inline image_dtype get_dtype() const
+    {
+        return dtype;
     }
 
 private:

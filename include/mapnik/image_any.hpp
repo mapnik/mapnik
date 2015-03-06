@@ -31,6 +31,7 @@ namespace mapnik {
 struct image_null
 {   
     using pixel_type = uint8_t;
+    static const image_dtype dtype = image_dtype_null;
     unsigned char const* getBytes() const { return nullptr; }
     unsigned char* getBytes() { return nullptr;}
     unsigned getSize() const { return 0; }
@@ -40,6 +41,7 @@ struct image_null
     bool painted() const { return false; }
     double get_offset() const { return 0.0; }
     void set_offset(double) {}
+    image_dtype get_dtype() const { return dtype; }
     double get_scaling() const { return 1.0; }
     void set_scaling(double) {}
     bool get_premultiplied() const { return false; }
@@ -85,6 +87,15 @@ struct get_bytes_visitor
     unsigned char* operator()(T & data)
     {
         return data.getBytes();
+    }
+};
+
+struct get_dtype_visitor
+{
+    template <typename T>
+    image_dtype operator()(T & data)
+    {
+        return data.get_dtype();
     }
 };
 
@@ -261,6 +272,11 @@ struct image_any : image_base
     double get_scaling() const
     {
         return util::apply_visitor(detail::get_scaling_visitor(),*this);
+    }
+
+    image_dtype get_dtype() const
+    {
+        return util::apply_visitor(detail::get_dtype_visitor(),*this);
     }
 
     void set_offset(double val)

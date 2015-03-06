@@ -94,7 +94,17 @@ struct visitor_image_copy_so
 
     T0 operator() (T0 const& src)
     {
-        return T0(src);
+        if (offset_ == src.get_offset() && scaling_ == src.get_scaling())
+        {
+            return T0(src);
+        }
+        else
+        {
+            T0 dst(src);
+            dst.set_scaling(scaling_); 
+            dst.set_offset(offset_); 
+            return T0(std::move(dst));
+        }
     }
     
     template <typename T1>
