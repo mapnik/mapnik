@@ -28,6 +28,9 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_centroid.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/debug.hpp>
@@ -68,11 +71,11 @@ base_symbolizer_helper::base_symbolizer_helper(
 
 struct largest_bbox_first
 {
-    bool operator() (geometry_type const* g0, geometry_type const* g1) const
+    bool operator() (new_geometry::geometry const* g0, new_geometry::geometry const* g1) const
     {
-        box2d<double> b0 = ::mapnik::envelope(*g0);
-        box2d<double> b1 = ::mapnik::envelope(*g1);
-        return b0.width()*b0.height() > b1.width()*b1.height();
+        box2d<double> b0 = new_geometry::envelope(*g0);
+        box2d<double> b1 = new_geometry::envelope(*g1);
+        return b0.width() * b0.height() > b1.width() * b1.height();
     }
 };
 
@@ -80,14 +83,31 @@ void base_symbolizer_helper::initialize_geometries() const
 {
     bool largest_box_only = text_props_->largest_bbox_only;
     double minimum_path_length = text_props_->minimum_path_length;
-    // FIXME
+
+    new_geometry::geometry const& geom = feature_.get_geometry();
+    new_geometry::geometry_types type = new_geometry::geometry_type(geom);
+    if (type == new_geometry::geometry_types::Polygon)
+    {
+        if (minimum_path_length > 0)
+        {
+            box2d<double> gbox = t_.forward(new_geometry::envelope(geom), prj_trans_);
+            if (gbox.width() >= minimum_path_length)
+            {
+                geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
+            }
+        }
+    }
+    else
+    {
+        geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
+    }
     /*
     for ( auto const& geom :  feature_.paths())
     {
         // don't bother with empty geometries
         if (geom.size() == 0) continue;
-        mapnik::geometry_type::types type = geom.type();
-        if (type == geometry_type::types::Polygon)
+        mapnik::new_geometry::geometry::types type = geom.type();
+        if (type == new_geometry::geometry::types::Polygon)
         {
             if (minimum_path_length > 0)
             {
@@ -99,7 +119,7 @@ void base_symbolizer_helper::initialize_geometries() const
             }
         }
         // TODO - calculate length here as well
-        geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
+        geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
     }
     */
     if (largest_box_only)
@@ -130,10 +150,11 @@ void base_symbolizer_helper::initialize_points() const
 
     for (auto * geom_ptr : geometries_to_process_)
     {
-        geometry_type const& geom = *geom_ptr;
-        vertex_adapter va(geom);
+        new_geometry::geometry const& geom = *geom_ptr;
+        //vertex_adapter va(geom);
         if (how_placed == VERTEX_PLACEMENT)
         {
+#if 0
             va.rewind(0);
             for(unsigned i = 0; i < va.size(); ++i)
             {
@@ -142,23 +163,30 @@ void base_symbolizer_helper::initialize_points() const
                 t_.forward(&label_x, &label_y);
                 points_.emplace_back(label_x, label_y);
             }
+#endif
         }
         else
         {
             // https://github.com/mapnik/mapnik/issues/1423
             bool success = false;
             // https://github.com/mapnik/mapnik/issues/1350
-            if (geom.type() == geometry_type::types::LineString)
+            auto type = new_geometry::geometry_type(geom);
+            new_geometry::point label_pos;
+            if (type == new_geometry::geometry_types::LineString)
             {
+                auto const& line = mapnik::util::get<new_geometry::line_string>(geom);
+                new_geometry::line_string_vertex_adapter va(line);
                 success = label::middle_point(va, label_x,label_y);
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                success = label::centroid(va, label_x, label_y);
+                new_geometry::centroid(geom,label_pos);
+                success = true;
+                //success = label::centroid(va, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
-                success = label::interior_position(va, label_x, label_y);
+                //success = label::interior_position(va, label_x, label_y);
             }
             else
             {
@@ -166,9 +194,9 @@ void base_symbolizer_helper::initialize_points() const
             }
             if (success)
             {
-                prj_trans_.backward(label_x, label_y, z);
-                t_.forward(&label_x, &label_y);
-                points_.emplace_back(label_x, label_y);
+                prj_trans_.backward(label_pos.x, label_pos.y, z);
+                t_.forward(&label_pos.x, &label_pos.y);
+                points_.emplace_back(label_pos.x, label_pos.y);
             }
         }
     }
@@ -230,16 +258,22 @@ bool text_symbolizer_helper::next_line_placement() const
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
         }
-        vertex_adapter va(**geo_itr_);
-        converter_.apply(va);
-        if (adapter_.status())
+
+        auto type = new_geometry::geometry_type(**geo_itr_);
+        if (type == new_geometry::LineString) // ??
         {
-            //Found a placement
-            geo_itr_ = geometries_to_process_.erase(geo_itr_);
-            return true;
+            auto const& line = util::get<new_geometry::line_string>(**geo_itr_);
+            new_geometry::line_string_vertex_adapter va(line);
+            converter_.apply(va);
+            if (adapter_.status())
+            {
+                //Found a placement
+                geo_itr_ = geometries_to_process_.erase(geo_itr_);
+                return true;
+            }
+            // No placement for this geometry. Keep it in geometries_to_process_ for next try.
+            ++geo_itr_;
         }
-        // No placement for this geometry. Keep it in geometries_to_process_ for next try.
-        ++geo_itr_;
     }
     return false;
 }

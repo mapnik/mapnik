@@ -66,9 +66,11 @@ pixel_position_list const& group_symbolizer_helper::get()
             // TODO to support clipped geometries this needs to use
             // vertex_converters
             using path_type = transform_path_adapter<view_transform,vertex_adapter>;
+#if 0 // FIXME
             vertex_adapter va(*geom);
             path_type path(t_, va, prj_trans_);
             find_line_placements(path);
+#endif
         }
     }
 
