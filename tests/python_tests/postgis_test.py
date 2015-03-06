@@ -283,6 +283,16 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(meta['encoding'],u'UTF8')
         eq_(meta['geometry_type'],mapnik.DataGeometryType.Polygon)
 
+    def test_bad_connection():
+        try:
+            ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                                table='test',
+                                max_size=20,
+                                geometry_field='geom',
+                                user="rolethatdoesnotexist")
+        except Exception, e:
+            assert 'role "rolethatdoesnotexist" does not exist' in str(e)
+
     def test_empty_db():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
         fs = ds.featureset()
@@ -844,7 +854,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
             fs = ds_bad.featureset()
             for feature in fs:
                 pass
-        except RuntimeError:
+        except RuntimeError, e:
+            assert 'invalid input syntax for integer' in str(e)
             failed = True
 
         eq_(failed,True)
@@ -907,7 +918,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
             mapnik.render_to_file(map1,'/tmp/mapnik-postgis-test-map1.png', 'png')
             # Test must fail if error was not raised just above
             eq_(False,True)
-        except RuntimeError:
+        except RuntimeError, e:
+            assert 'invalid input syntax for integer' in str(e)
             pass
         # This used to raise an exception before correction of issue 2042
         mapnik.render_to_file(map2,'/tmp/mapnik-postgis-test-map2.png', 'png')
