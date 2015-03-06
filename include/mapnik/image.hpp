@@ -340,7 +340,8 @@ enum image_dtype : std::uint8_t
     image_dtype_gray64,
     image_dtype_gray64s,
     image_dtype_gray64f,
-    image_dtype_null
+    image_dtype_null,
+    IMAGE_DTYPE_MAX
 };
 
 } // end ns

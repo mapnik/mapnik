@@ -306,6 +306,7 @@ inline image_any create_image_any(int width,
       case image_dtype_null:
         return image_any(std::move(image_null()));
       case image_dtype_rgba8:
+      case IMAGE_DTYPE_MAX:
       default:
         return image_any(std::move(image_rgba8(width, height, initialize, premultiplied, painted)));
     }

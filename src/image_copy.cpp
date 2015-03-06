@@ -340,6 +340,10 @@ MAPNIK_DECL image_any image_copy(image_any const& data, image_dtype type, double
             return image_any(std::move(image_copy<image_gray64f>(data, offset, scaling)));
         case image_dtype_null:
             throw std::runtime_error("Can not cast a null image");
+        case IMAGE_DTYPE_MAX:
+        default:
+            throw std::runtime_error("Can not cast unknown type");
+
     }
     throw std::runtime_error("Unknown image type passed");
 }
