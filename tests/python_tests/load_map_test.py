@@ -53,7 +53,7 @@ def test_can_parse_xml_with_deprecated_properties():
         except RuntimeError, e:
             # only test datasources that we have installed
             if not 'Could not create datasource' in str(e) \
-               and not 'Bad connection' in str(e):
+               and not 'could not connect' in str(e):
                 failures.append('Failed to load valid map %s (%s)' % (filename,e))
     eq_(len(failures),0,'\n'+'\n'.join(failures))
     mapnik.logger.set_severity(default_logging_severity)
@@ -73,7 +73,7 @@ def test_good_files():
         except RuntimeError, e:
             # only test datasources that we have installed
             if not 'Could not create datasource' in str(e) \
-               and not 'Bad connection' in str(e):
+               and not 'could not connect' in str(e):
                 failures.append('Failed to load valid map %s (%s)' % (filename,e))
     eq_(len(failures),0,'\n'+'\n'.join(failures))
 
