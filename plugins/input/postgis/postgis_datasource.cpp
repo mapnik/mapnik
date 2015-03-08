@@ -159,6 +159,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 geometry_table_ = geometry_table_.substr(0);
             }
 
+            // NOTE: geometry_table_ how should ideally be a table name, but
+            // there are known edge cases where this will break down and
+            // geometry_table_ may even be empty: https://github.com/mapnik/mapnik/issues/2718
+
             // If we do not know both the geometry_field and the srid
             // then first attempt to fetch the geometry name from a geometry_columns entry.
             // This will return no records if we are querying a bogus table returned
@@ -166,7 +170,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             // the table parameter references a table, view, or subselect not
             // registered in the geometry columns.
             geometryColumn_ = geometry_field_;
-            if (geometryColumn_.empty() || srid_ == 0)
+            if (!geometry_table_.empty() && (geometryColumn_.empty() || srid_ == 0))
             {
 #ifdef MAPNIK_STATS
                 mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column)");
@@ -223,12 +227,20 @@ postgis_datasource::postgis_datasource(parameters const& params)
             // If we still do not know the srid then we can try to fetch
             // it from the 'geometry_table_' parameter, which should work even if it is
             // a subselect as long as we know the geometry_field to query
-            if (! geometryColumn_.empty() && srid_ <= 0)
+            if (!geometryColumn_.empty() && srid_ <= 0)
             {
                 std::ostringstream s;
 
-                s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM "
-                  << populate_tokens(geometry_table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
+                s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
+                if (!geometry_table_.empty())
+                {
+                    s << geometry_table_;
+                }
+                else
+                {
+                    s << populate_tokens(table_);
+                }
+                s << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
 
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
