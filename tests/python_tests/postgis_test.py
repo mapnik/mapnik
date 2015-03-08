@@ -1170,6 +1170,42 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(meta.get('key_field'),"gid")
         eq_(meta['geometry_type'],None)
 
+    # currently needs manual `geometry_table` passed
+    # to avoid misparse of `geometry_table`
+    # in the future ideally this would not need manual  `geometry_table`
+    # https://github.com/mapnik/mapnik/issues/2718
+    # currently `bogus` would be picked automatically for geometry_table
+    def test_broken_parsing_of_comments():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
+             (select * FROM test) AS data
+             -- select this from bogus''',
+                            geometry_table='test')
+        fs = ds.featureset()
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Collection)
+
+    # same
+    # to avoid misparse of `geometry_table`
+    # in the future ideally this would not need manual  `geometry_table`
+    # https://github.com/mapnik/mapnik/issues/2718
+    # currently nothing would be picked automatically for geometry_table
+    def test_broken_parsing_of_comments():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
+             (select * FROM test) AS data
+             -- select this from bogus.''',
+                            geometry_table='test')
+        fs = ds.featureset()
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
+
+        meta = ds.describe()
+        eq_(meta['srid'],4326)
+        eq_(meta['geometry_type'],mapnik.DataGeometryType.Collection)
+
 
     atexit.register(postgis_takedown)
 
