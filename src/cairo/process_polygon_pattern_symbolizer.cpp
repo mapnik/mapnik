@@ -29,10 +29,12 @@
 #include <mapnik/cairo/cairo_render_vector.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 namespace mapnik
 {
@@ -44,10 +46,10 @@ struct cairo_renderer_process_visitor_p
                                    unsigned offset_x,
                                    unsigned offset_y,
                                    float opacity)
-        : context_(context), 
+        : context_(context),
           image_tr_(image_tr),
-          offset_x_(offset_x), 
-          offset_y_(offset_y), 
+          offset_x_(offset_x),
+          offset_y_(offset_y),
           opacity_(opacity) {}
 
     void operator() (marker_null const&) {}
@@ -132,27 +134,24 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
+    using vertex_converter_type = vertex_converter<cairo_context,
+                                                   clip_poly_tag,
+                                                   transform_tag,
+                                                   affine_transform_tag,
+                                                   simplify_tag,
+                                                   smooth_tag>;
 
-    vertex_converter<cairo_context,clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>
-        converter(clip_box, context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
-
+    vertex_converter_type converter(clip_box, context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-// FIXME
-#if 0
-    for ( geometry_type const& geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            vertex_adapter va(geom);
-            converter.apply(va);
-        }
-    }
-#endif
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
     // fill polygon
     context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
     context_.fill();
