@@ -34,22 +34,26 @@ struct vertex_processor
     vertex_processor(processor_type& proc)
         : proc_(proc) {}
 
+    void operator() (geometry const& geom)
+    {
+        util::apply_visitor(*this, geom);
+    }
     void operator() (point const& pt)
     {
         point_vertex_adapter va(pt);
-        return proc_(va);
+        proc_(va);
     }
 
     void operator() (line_string const& line)
     {
         line_string_vertex_adapter va(line);
-        return proc_(va);
+        proc_(va);
     }
 
     void operator() (polygon const& poly)
     {
         polygon_vertex_adapter va(poly);
-        return proc_(va);
+        proc_(va);
     }
 
     void operator() (multi_point const& multi_pt)
@@ -81,7 +85,10 @@ struct vertex_processor
 
     void operator() (geometry_collection const& collection)
     {
-        // no-op
+        for (auto const& geom : collection)
+        {
+            operator()(geom);
+        }
     }
     processor_type & proc_;
 };
