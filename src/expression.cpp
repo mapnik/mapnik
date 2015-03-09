@@ -45,18 +45,15 @@ expression_ptr parse_expression(std::string const& str)
     {
         r = boost::spirit::qi::phrase_parse(itr, end, g, space, *node);
     }
+    catch (boost::spirit::qi::expectation_failure<std::string::const_iterator> const& ex)
+    {
+        // no need to show "boost::spirit::qi::expectation_failure" which is a std::runtime_error
+        throw config_error("Failed to parse expression: \"" + str + "\"");
+    }
     catch (std::exception const& ex)
     {
-        if (std::string("boost::spirit::qi::expectation_failure") == std::string(ex.what()))
-        {
-            // no need to show "boost::spirit::qi::expectation_failure" which is a std::runtime_error
-            throw config_error("Failed to parse expression: \"" + str + "\"");
-        }
-        else
-        {
-            // show "Could not initialize ICU resources" from boost::regex which is a std::runtime_error
-            throw config_error(std::string(ex.what()) + " for expression: \"" + str + "\"");
-        }
+        // show "Could not initialize ICU resources" from boost::regex which is a std::runtime_error
+        throw config_error(std::string(ex.what()) + " for expression: \"" + str + "\"");
     }
     if (r && itr == end)
     {
