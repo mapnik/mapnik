@@ -28,7 +28,6 @@
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_centroid.hpp>
-#include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/expression_evaluator.hpp>
@@ -48,7 +47,6 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/geometry/algorithms/centroid.hpp>
 // stl
 #include <memory>
 #include <type_traits> // remove_reference
