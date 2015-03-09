@@ -52,6 +52,7 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Igor Podolskiy
 * Reid Priedhorsky
 * Brian Quinion
+* Even Rouault
 * Marcin Rudowski
 * Sandro Santilli
 * Christopher Schmidt

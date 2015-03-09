@@ -46,16 +46,32 @@ jpeg_saver::jpeg_saver(std::ostream & stream, std::string const& t):
     stream_(stream), t_(t) {}
 
 template <typename T>
-void process_rgba8_jpeg(T const& image, std::string const& t, std::ostream & stream)
+void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & stream)
 {
 #if defined(HAVE_JPEG)
     int quality = 85;
-    std::string val = t.substr(4);
-    if (!val.empty())
+    //std::string val = type.substr(4);
+    if (type != "jpeg")
     {
-        if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
+        boost::char_separator<char> sep(":");
+        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+        for (auto const& t : tokens)
         {
-            throw ImageWriterException("invalid jpeg quality: '" + val + "'");
+            if (t == "jpeg")
+            {
+                continue;
+            }
+            else if (boost::algorithm::starts_with(t, "quality="))
+            {
+                std::string val = t.substr(8);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
+                    {
+                        throw ImageWriterException("invalid jpeg quality: '" + val + "'");
+                    }
+                }
+            }
         }
     }
     save_as_jpeg(stream, quality, image);

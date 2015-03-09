@@ -251,7 +251,7 @@ if env['PLUGIN_LINKING'] == 'static':
     lib_env.AppendUnique(CPPPATH='../plugins/')
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
-        if details['lib'] in env['LIBS'] or not details['lib']:
+        if not details['lib'] or details['lib'] in env['LIBS']:
             plugin_env = SConscript('../plugins/input/%s/build.py' % plugin)
             if not plugin_env:
                 print("Notice: no 'plugin_env' variable found for plugin: '%s'" % plugin)

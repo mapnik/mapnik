@@ -69,6 +69,15 @@ struct get_view_size_visitor
     }
 };
 
+struct get_view_dtype_visitor
+{
+    template <typename T>
+    image_dtype operator()(T const& data) const
+    {
+        return data.get_dtype();
+    }
+};
+
 struct get_view_row_size_visitor
 {
     template <typename T>
@@ -147,6 +156,11 @@ struct image_view_any : image_view_base
     double get_scaling() const
     { 
         return util::apply_visitor(detail::get_view_scaling_visitor(),*this);
+    }
+
+    image_dtype get_dtype() const
+    { 
+        return util::apply_visitor(detail::get_view_dtype_visitor(),*this);
     }
 };
 

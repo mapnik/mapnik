@@ -58,7 +58,7 @@ public:
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nConnection string: '";
+            err_msg += "Connection string: '";
             err_msg += connection_str;
             err_msg += "'\n";
             MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: creation failed, closing connection - " << this;
@@ -71,7 +71,7 @@ public:
         if ( ! ok ) {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nConnection string: '";
+            err_msg += "Connection string: '";
             err_msg += connection_str;
             err_msg += "'\n";
             close();
@@ -127,7 +127,7 @@ public:
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nin executeQuery Full sql was: '";
+            err_msg += "in executeQuery Full sql was: '";
             err_msg += sql;
             err_msg += "'\n";
             if ( result ) PQclear(result);
@@ -142,12 +142,19 @@ public:
         std::string status;
         if (conn_)
         {
-            if ( isOK() ) return PQerrorMessage(conn_);
-            else return "Bad connection";
+            char * err_msg = PQerrorMessage(conn_);
+            if (err_msg == nullptr)
+            {
+                status = "Bad connection\n";
+            }
+            else
+            {
+                status = std::string(err_msg);
+            }
         }
         else
         {
-            status = "Uninitialized connection";
+            status = "Uninitialized connection\n";
         }
         return status;
     }
@@ -167,7 +174,7 @@ public:
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nin executeAsyncQuery Full sql was: '";
+            err_msg += "in executeAsyncQuery Full sql was: '";
             err_msg += sql;
             err_msg += "'\n";
             clearAsyncResult(PQgetResult(conn_));
@@ -191,7 +198,7 @@ public:
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nin getNextAsyncResult";
+            err_msg += "in getNextAsyncResult";
             clearAsyncResult(result);
             // We need to guarde against losing the connection
             // (i.e db restart) so here we invalidate the full connection
@@ -208,7 +215,7 @@ public:
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nin getAsyncResult";
+            err_msg += "in getAsyncResult";
             clearAsyncResult(result);
             // We need to be guarded against losing the connection
             // (i.e db restart), we invalidate the full connection

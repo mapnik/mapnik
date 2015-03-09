@@ -176,18 +176,19 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
 namespace {
 using base_iterator_type = char const*;
-const mapnik::transcoder tr("utf8");
-const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> fc_grammar(tr);
+const mapnik::transcoder geojson_datasource_static_tr("utf8");
+const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> geojson_datasource_static_fc_grammar(geojson_datasource_static_tr);
+const mapnik::json::feature_grammar<base_iterator_type, mapnik::feature_impl> geojson_datasource_static_feature_grammar(geojson_datasource_static_tr);
+const mapnik::json::extract_bounding_box_grammar<base_iterator_type> geojson_datasource_static_bbox_grammar;
 }
 
 template <typename Iterator>
 void geojson_datasource::initialise_index(Iterator start, Iterator end)
 {
     mapnik::json::boxes boxes;
-    mapnik::json::extract_bounding_box_grammar<Iterator> bbox_grammar;
     boost::spirit::ascii::space_type space;
     Iterator itr = start;
-    if (!boost::spirit::qi::phrase_parse(itr, end, (bbox_grammar)(boost::phoenix::ref(boxes)) , space))
+    if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
     {
         throw mapnik::datasource_exception("GeoJSON Plugin: could not parse: '" + filename_ + "'");
     }
@@ -207,10 +208,8 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             Iterator end = itr + geometry_index.second;
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            static const mapnik::transcoder tr("utf8");
-            static const mapnik::json::feature_grammar<Iterator, mapnik::feature_impl> grammar(tr);
             boost::spirit::ascii::space_type space;
-            if (!boost::spirit::qi::phrase_parse(itr, end, (grammar)(boost::phoenix::ref(*feature)), space))
+            if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
@@ -237,7 +236,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
 
     mapnik::json::default_feature_callback callback(features_);
 
-    bool result = boost::spirit::qi::phrase_parse(start, end, (fc_grammar)
+    bool result = boost::spirit::qi::phrase_parse(start, end, (geojson_datasource_static_fc_grammar)
                                                   (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
                                                   space);
     if (!result)

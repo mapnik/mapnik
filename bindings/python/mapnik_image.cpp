@@ -222,6 +222,11 @@ void set_pixel_int(mapnik::image_any & im, unsigned x, unsigned y, int val)
     mapnik::set_pixel(im, x, y, val);
 }
 
+unsigned get_type(mapnik::image_any & im)
+{
+    return im.get_dtype();
+}
+
 std::shared_ptr<image_any> open_from_file(std::string const& filename)
 {
     boost::optional<std::string> type = type_from_filename(filename);
@@ -441,6 +446,7 @@ void export_image()
                arg("y"),
                arg("get_color")=false
              ))
+        .def("get_type",&get_type)
         .def("clear",&clear)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 

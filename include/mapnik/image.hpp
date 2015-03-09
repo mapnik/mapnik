@@ -124,6 +124,7 @@ class image
 public:
     using pixel = T;
     using pixel_type = typename T::type;
+    static const image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
     detail::image_dimensions<max_size> dimensions_;
@@ -313,6 +314,11 @@ public:
     {
         return painted_;
     }
+
+    inline image_dtype get_dtype()  const
+    {
+        return dtype;
+    }
 };
 
 using image_rgba8 = image<rgba8_t>;
@@ -326,22 +332,6 @@ using image_gray32f = image<gray32f_t>;
 using image_gray64 = image<gray64_t>;
 using image_gray64s = image<gray64s_t>;
 using image_gray64f = image<gray64f_t>;
-
-enum image_dtype : std::uint8_t
-{
-    image_dtype_rgba8 = 0,
-    image_dtype_gray8,
-    image_dtype_gray8s,
-    image_dtype_gray16,
-    image_dtype_gray16s,
-    image_dtype_gray32,
-    image_dtype_gray32s,
-    image_dtype_gray32f,
-    image_dtype_gray64,
-    image_dtype_gray64s,
-    image_dtype_gray64f,
-    image_dtype_null
-};
 
 } // end ns
 

@@ -94,7 +94,17 @@ struct visitor_image_copy_so
 
     T0 operator() (T0 const& src)
     {
-        return T0(src);
+        if (offset_ == src.get_offset() && scaling_ == src.get_scaling())
+        {
+            return T0(src);
+        }
+        else
+        {
+            T0 dst(src);
+            dst.set_scaling(scaling_); 
+            dst.set_offset(offset_); 
+            return T0(std::move(dst));
+        }
     }
     
     template <typename T1>
@@ -340,6 +350,10 @@ MAPNIK_DECL image_any image_copy(image_any const& data, image_dtype type, double
             return image_any(std::move(image_copy<image_gray64f>(data, offset, scaling)));
         case image_dtype_null:
             throw std::runtime_error("Can not cast a null image");
+        case IMAGE_DTYPE_MAX:
+        default:
+            throw std::runtime_error("Can not cast unknown type");
+
     }
     throw std::runtime_error("Unknown image type passed");
 }
