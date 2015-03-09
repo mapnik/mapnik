@@ -43,10 +43,10 @@ public:
           height_(height),
           data_(data)
     {
-        if (x_ >= data_.width()) x_=data_.width()-1;
-        if (y_ >= data_.height()) y_=data_.height()-1;
-        if (x_ + width_ > data_.width()) width_= data_.width() - x_;
-        if (y_ + height_ > data_.height()) height_= data_.height() - y_;
+        if (x_ >= data_.width() && data_.width() > 0) x_ = data_.width() - 1;
+        if (y_ >= data_.height() && data.height() > 0) y_ = data_.height() - 1;
+        if (x_ + width_ > data_.width()) width_ = data_.width() - x_;
+        if (y_ + height_ > data_.height()) height_ = data_.height() - y_;
     }
 
     ~image_view() {}
