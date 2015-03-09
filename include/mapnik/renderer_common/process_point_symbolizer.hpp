@@ -23,13 +23,13 @@
 #ifndef MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP
 #define MAPNIK_RENDERER_COMMON_PROCESS_POINT_SYMBOLIZER_HPP
 
-#include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/geometry_centroid.hpp>
 
 namespace mapnik {
 
@@ -63,45 +63,34 @@ void render_point_symbolizer(point_symbolizer const &sym,
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common.scale_factor_);
 
-        // FIXME - refactor and support other than point geometry
-
         mapnik::new_geometry::geometry const& geometry = feature.get_geometry();
-        if (geometry.is<mapnik::new_geometry::point>())
+        mapnik::new_geometry::point pt;
+        if (placement == CENTROID_POINT_PLACEMENT)
         {
-            mapnik::new_geometry::point const& point = mapnik::util::get<mapnik::new_geometry::point>(geometry);
-            //mapnik::new_geometry::point_vertex_adapter va(point);
-            //double x;
-            //double y;
-            //double z=0;
+            if (!new_geometry::centroid(geometry, pt)) return;
+        }
+        //else
+        //{
+        //    if (!label::interior_position(va ,x, y))
+        //        return;
+        //}
+        double x = pt.x;
+        double y = pt.y;
+        double z = 0;
+        prj_trans.backward(x,y,z);
+        common.t_.forward(&x,&y);
+        label_ext.re_center(x,y);
+        if (allow_overlap ||
+            common.detector_->has_placement(label_ext))
+        {
 
-            //if (placement == CENTROID_POINT_PLACEMENT)
-            //{
-            //    if (!label::centroid(va, x, y))
-            //        return;
-            //}
-            //else
-            //{
-            //    if (!label::interior_position(va ,x, y))
-            //        return;
-            //}
-            double x = point.x;
-            double y = point.y;
-            double z = 0;
-            prj_trans.backward(x,y,z);
-            common.t_.forward(&x,&y);
-            label_ext.re_center(x,y);
-            if (allow_overlap ||
-                common.detector_->has_placement(label_ext))
-            {
+            render_marker(pixel_position(x, y),
+                          mark,
+                          tr,
+                          opacity);
 
-                render_marker(pixel_position(x, y),
-                              mark,
-                              tr,
-                              opacity);
-
-                if (!ignore_placement)
-                    common.detector_->insert(label_ext);
-            }
+            if (!ignore_placement)
+                common.detector_->insert(label_ext);
         }
     }
 }
