@@ -40,7 +40,7 @@ namespace mapnik
 // fwd declare
 class boolean_type;
 
-using value_holder_base = util::variant<value_null,value_integer,value_double,std::string>;
+using value_holder_base = util::variant<value_null,value_integer,value_double,std::string,value_bool>;
 
 struct value_holder : value_holder_base
 {
@@ -86,6 +86,12 @@ boost::optional<value_integer> parameters::get(std::string const& key) const;
 template MAPNIK_DECL
 boost::optional<value_integer> parameters::get(std::string const& key,
                                    value_integer const& default_opt_value) const;
+
+template MAPNIK_DECL
+boost::optional<value_bool> parameters::get(std::string const& key) const;
+template MAPNIK_DECL
+boost::optional<value_bool> parameters::get(std::string const& key,
+                                         value_bool const& default_opt_value) const;
 
 template MAPNIK_DECL
 boost::optional<mapnik::boolean_type> parameters::get(std::string const& key) const;
