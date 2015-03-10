@@ -30,9 +30,11 @@
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
@@ -74,8 +76,8 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
     }
 
-    vertex_converter<grid_rasterizer, clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag>
-        converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+    using vertex_converter_type = vertex_converter<grid_rasterizer, clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag>;
+    vertex_converter_type converter(common_.query_extent_,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
@@ -83,14 +85,11 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    for ( geometry_type const& geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            vertex_adapter va(geom);
-            converter.apply(va);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
+
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
