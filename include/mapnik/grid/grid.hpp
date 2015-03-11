@@ -61,7 +61,6 @@ private:
     unsigned height_;
     std::string key_;
     data_type data_;
-    unsigned int resolution_;
     std::string id_name_;
     bool painted_;
     std::set<std::string> names_;
@@ -71,7 +70,7 @@ private:
 
 public:
 
-    hit_grid(int width, int height, std::string const& key, unsigned int resolution);
+    hit_grid(int width, int height, std::string const& key);
 
     hit_grid(hit_grid<T> const& rhs);
 
@@ -126,16 +125,6 @@ public:
         key_ = key;
     }
 
-    inline unsigned int get_resolution() const
-    {
-        return resolution_;
-    }
-
-    inline void set_resolution(unsigned int res)
-    {
-        resolution_ = res;
-    }
-
     inline data_type const& data() const
     {
         return data_;
@@ -164,7 +153,7 @@ public:
     inline mapnik::grid_view get_view(unsigned x, unsigned y, unsigned w, unsigned h)
     {
         return mapnik::grid_view(x,y,w,h,
-                                 data_,key_,id_name_,resolution_,names_,f_keys_,features_);
+                                 data_,key_,id_name_,names_,f_keys_,features_);
     }
 
 private:
