@@ -22,6 +22,7 @@
 
 #include <mapnik/config.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
@@ -43,7 +44,7 @@ wkt_grammar<Iterator>::wkt_grammar()
     qi::no_case_type no_case;
     qi::double_type double_;
     qi::_1_type _1;
-
+    qi::_a_type _a;
     using boost::phoenix::construct;
     using boost::phoenix::at_c;
     geometry_tagged_text = point_tagged_text(_r1)
