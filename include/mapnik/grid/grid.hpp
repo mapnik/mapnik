@@ -96,12 +96,12 @@ public:
 
     void add_feature(mapnik::feature_impl const& feature);
 
-    inline void add_property_name(std::string const& name)
+    inline void add_field(std::string const& name)
     {
         names_.insert(name);
     }
 
-    inline std::set<std::string> const& property_names() const
+    inline std::set<std::string> const& get_fields() const
     {
         return names_;
     }

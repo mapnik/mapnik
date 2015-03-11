@@ -157,7 +157,7 @@ public:
         return data_.getBytes();
     }
 
-    inline std::set<std::string> const& property_names() const
+    inline std::set<std::string> const& get_fields() const
     {
         return names_;
     }
