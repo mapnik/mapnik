@@ -45,6 +45,7 @@
 #include <mapnik/geometry_is_valid.hpp>
 #include <mapnik/geometry_is_simple.hpp>
 #include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry_centroid.hpp>
 
 #include <mapnik/wkt/wkt_factory.hpp> // from_wkt
 //#include <mapnik/util/geometry_to_wkt.hpp>
@@ -245,6 +246,13 @@ void geometry_correct_impl(mapnik::new_geometry::geometry & geom)
     mapnik::new_geometry::correct(geom);
 }
 
+mapnik::new_geometry::point geometry_centroid_impl(mapnik::new_geometry::geometry const& geom)
+{
+    mapnik::new_geometry::point pt;
+    mapnik::new_geometry::centroid(geom, pt);
+    return pt;
+}
+
 /*
 // https://github.com/mapnik/mapnik/issues/1437
 std::string to_svg2( mapnik::geometry_container const& geom)
@@ -279,6 +287,13 @@ void export_geometry()
         ;
 
     using mapnik::new_geometry::geometry;
+    using mapnik::new_geometry::point;
+
+    class_<point>("Point", init<double, double>((arg("x"), arg("y")),
+                                                "Constructs a new Point object\n"))
+        .add_property("x", &point::x, "X coordinate")
+        .add_property("y", &point::y, "Y coordinate")
+        ;
 
     class_<geometry, std::shared_ptr<geometry>, boost::noncopyable>("Geometry",no_init)
         .def("envelope",&geometry_envelope_impl)
@@ -293,12 +308,14 @@ void export_geometry()
         .def("is_valid", &geometry_is_valid_impl)
         .def("is_simple", &geometry_is_simple_impl)
         .def("correct", &geometry_correct_impl)
+        .def("centroid",&geometry_centroid_impl)
         //.def("to_wkb",&to_wkb)
         //.def("to_wkt",&to_wkt)
         .def("to_geojson",&to_geojson_impl)
         //.def("to_svg",&to_svg)
         // TODO add other geometry_type methods
         ;
+
 
     //class_<mapnik::geometry_container, std::shared_ptr<mapnik::geometry_container>, boost::noncopyable>("Path")
     //    .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
