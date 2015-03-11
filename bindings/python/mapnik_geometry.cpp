@@ -93,13 +93,19 @@ namespace {
 //    return paths;
 //}
 
-//std::shared_ptr<mapnik::geometry_container> from_wkb_impl(std::string const& wkb)
-//{
-//    std::shared_ptr<mapnik::geometry_container> paths = std::make_shared<mapnik::geometry_container>();
-//    if (!mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size()))
-//        throw std::runtime_error("Failed to parse WKB");
-//    return paths;
-//}
+std::shared_ptr<mapnik::new_geometry::geometry> from_wkb_impl(std::string const& wkb)
+{
+    std::shared_ptr<mapnik::new_geometry::geometry> geom = std::make_shared<mapnik::new_geometry::geometry>();
+    try
+    {
+        *geom = std::move(mapnik::geometry_utils::from_wkb(wkb.c_str(), wkb.size()));
+    }
+    catch (...)
+    {
+        throw std::runtime_error("Failed to parse WKB");
+    }
+    return geom;
+}
 
 std::shared_ptr<mapnik::new_geometry::geometry> from_wkt_impl(std::string const& wkt)
 {
@@ -278,8 +284,10 @@ void export_geometry()
         .def("envelope",&geometry_envelope_impl)
         .def("from_geojson", from_geojson_impl)
         .def("from_wkt", from_wkt_impl)
+        .def("from_wkb", from_wkb_impl)
         .staticmethod("from_geojson")
         .staticmethod("from_wkt")
+        .staticmethod("from_wkb")
         // .def("__str__",&mapnik::geometry_type::to_string)
         .def("type",&geometry_type_impl)
         .def("is_valid", &geometry_is_valid_impl)
