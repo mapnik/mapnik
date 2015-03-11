@@ -45,4 +45,4 @@ script:
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - if [[ ${COVERAGE} == true ]]; then cpp-coveralls --exclude benchmark --exclude deps --exclude scons --exclude tests --exclude demo --exclude docs --exclude fonts --exclude utils; fi;
- - if [[ ${COVERAGE} != true ]]; then make bench fi;
+ - if [[ ${COVERAGE} != true ]]; then make bench; fi;
