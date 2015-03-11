@@ -272,6 +272,7 @@ void export_geometry()
     using namespace boost::python;
 
     implicitly_convertible<mapnik::new_geometry::point, mapnik::new_geometry::geometry>();
+    implicitly_convertible<mapnik::new_geometry::line_string, mapnik::new_geometry::geometry>();
 
     enum_<mapnik::new_geometry::geometry_types>("GeometryType")
         .value("Point",mapnik::new_geometry::geometry_types::Point)
@@ -290,11 +291,18 @@ void export_geometry()
 
     using mapnik::new_geometry::geometry;
     using mapnik::new_geometry::point;
+    using mapnik::new_geometry::line_string;
 
     class_<point>("Point", init<double, double>((arg("x"), arg("y")),
                                                 "Constructs a new Point object\n"))
         .add_property("x", &point::x, "X coordinate")
         .add_property("y", &point::y, "Y coordinate")
+        .def("to_geojson",&to_geojson_impl)
+        ;
+
+    class_<line_string>("LineString", init<>(
+                      "Constructs a new LineString object\n"))
+        .def("add_coord", &line_string::add_coord, "Adds coord")
         .def("to_geojson",&to_geojson_impl)
         ;
 
