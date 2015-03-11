@@ -18,7 +18,7 @@
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">geojson</Parameter>
-            <Parameter name="file">../data/long-line.geojson</Parameter>
+            <Parameter name="file">../data/landuse.geojson</Parameter>
         </Datasource>
     </Layer>
 
