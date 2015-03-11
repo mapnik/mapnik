@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-#if 0 // FIXME
 #include <mapnik/wkt/wkt_grammar_impl.hpp>
 #include <string>
 
 namespace mapnik { namespace wkt {
-using iterator_type = std::string::const_iterator;
-template struct wkt_collection_grammar<iterator_type>;
-}}
 
-#endif
+using iterator_type = std::string::const_iterator;
+template struct wkt_grammar<iterator_type>;
+
+}}
