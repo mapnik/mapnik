@@ -3,6 +3,8 @@
 #include <mapnik/params.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/geometry_is_valid.hpp>
+#include <mapnik/geometry_is_simple.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <vector>
 #include <algorithm>
@@ -62,17 +64,17 @@ int main(int argc, char** argv)
     mapnik::context_ptr ctx(new mapnik::context_type);
     mapnik::feature_ptr feature = mapnik::feature_factory::create(ctx, 1);
 
-    // test of parsing wks geometries
+    // test of parsing wkb geometries
     try {
-        
-        // spatialite blob
-        BOOST_TEST(
-            mapnik::geometry_utils::from_wkb(feature->paths(),
-                                             (const char*)sp_valid_blob,
-                                             sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
-                                             mapnik::wkbSpatiaLite)
-        );
 
+        // spatialite blob
+
+        mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
+                                                                               sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
+                                                                               mapnik::wkbSpatiaLite);
+        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
+
+#if 0 // FIXME
         BOOST_TEST(
             mapnik::geometry_utils::from_wkb(feature->paths(),
                                              (const char*)sp_valid_blob,
@@ -108,7 +110,8 @@ int main(int argc, char** argv)
                                              sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
                                              mapnik::wkbGeneric) == false
         );
-        
+#endif
+
     } catch (std::exception const& ex) {
         BOOST_TEST(false);
         std::clog << "threw: " << ex.what() << "\n";

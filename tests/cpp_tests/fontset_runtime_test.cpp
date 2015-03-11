@@ -49,9 +49,10 @@ int main(int argc, char** argv)
         mapnik::transcoder tr("utf-8");
         mapnik::value_unicode_string ustr = tr.transcode("hello world!");
         feature->put("name",ustr);
-        auto pt = std::make_unique<mapnik::geometry_type>(mapnik::new_geometry::geometry_types::Point);
-        pt->move_to(128,128);
-        feature->add_geometry(pt.release());
+        //auto pt = std::make_unique<mapnik::geometry_type>(mapnik::new_geometry::geometry_types::Point);
+        //pt->move_to(128,128);
+        mapnik::new_geometry::point pt(128,128);
+        feature->set_geometry(std::move(pt));
 
         mapnik::parameters params;
         params["type"]="memory";
