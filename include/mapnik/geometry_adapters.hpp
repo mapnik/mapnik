@@ -103,9 +103,8 @@ struct indexed_access<mapnik::new_geometry::bounding_box, max_corner, 1>
 template<>
 struct tag<mapnik::new_geometry::line_string>
 {
-    using type = ring_tag;
+    using type = linestring_tag;
 };
-
 
 // mapnik::new_geometry::polygon
 template<>
