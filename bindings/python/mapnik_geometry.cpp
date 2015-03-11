@@ -46,7 +46,7 @@
 #include <mapnik/geometry_is_simple.hpp>
 #include <mapnik/geometry_correct.hpp>
 
-//#include <mapnik/wkt/wkt_factory.hpp> // from_wkt
+#include <mapnik/wkt/wkt_factory.hpp> // from_wkt
 //#include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/json/geometry_parser.hpp> // from_geojson
 #include <mapnik/util/geometry_to_geojson.hpp>
@@ -101,6 +101,14 @@ namespace {
 //    return paths;
 //}
 
+std::shared_ptr<mapnik::new_geometry::geometry> from_wkt_impl(std::string const& wkt)
+{
+    std::shared_ptr<mapnik::new_geometry::geometry> geom = std::make_shared<mapnik::new_geometry::geometry>();
+    if (!mapnik::from_wkt(wkt, *geom))
+        throw std::runtime_error("Failed to parse WKT geometry");
+    return geom;
+}
+
 std::shared_ptr<mapnik::new_geometry::geometry> from_geojson_impl(std::string const& json)
 {
     std::shared_ptr<mapnik::new_geometry::geometry> geom = std::make_shared<mapnik::new_geometry::geometry>();
@@ -108,26 +116,6 @@ std::shared_ptr<mapnik::new_geometry::geometry> from_geojson_impl(std::string co
         throw std::runtime_error("Failed to parse geojson geometry");
     return geom;
 }
-
-//mapnik::box2d<double> envelope_impl2(mapnik::geometry_container & p)
-//{
-//    mapnik::box2d<double> b;
-//   bool first = true;
-//   for (mapnik::geometry_type const& geom : p)
-//   {
-//       auto bbox = ::mapnik::envelope(geom);
-//       if (first)
-//       {
-//           b = bbox;
-//           first=false;
-//       }
-//       else
-//        {
-//            b.expand_to_include(bbox);
-//       }
-//   }
-//   return b;
-//}
 
 }
 
@@ -289,7 +277,9 @@ void export_geometry()
     class_<geometry, std::shared_ptr<geometry>, boost::noncopyable>("Geometry",no_init)
         .def("envelope",&geometry_envelope_impl)
         .def("from_geojson", from_geojson_impl)
+        .def("from_wkt", from_wkt_impl)
         .staticmethod("from_geojson")
+        .staticmethod("from_wkt")
         // .def("__str__",&mapnik::geometry_type::to_string)
         .def("type",&geometry_type_impl)
         .def("is_valid", &geometry_is_valid_impl)

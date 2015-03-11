@@ -24,7 +24,7 @@
 #define MAPNIK_WKT_FACTORY_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_impl.hpp>
 
 #include <mapnik/wkt/wkt_grammar.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
@@ -35,16 +35,17 @@
 
 namespace mapnik {
 
-inline bool from_wkt(std::string const& wkt, mapnik::geometry_container & paths)
+inline bool from_wkt(std::string const& wkt, mapnik::new_geometry::geometry & geom)
 {
     using namespace boost::spirit;
-    static const mapnik::wkt::wkt_collection_grammar<std::string::const_iterator> g;
+    static const mapnik::wkt::wkt_grammar<std::string::const_iterator> g;
     ascii::space_type space;
     std::string::const_iterator first = wkt.begin();
     std::string::const_iterator last =  wkt.end();
-    return qi::phrase_parse(first, last, g, space, paths);
+    return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(geom)), space);
 }
 
+#if 0 // FIXME
 inline bool to_wkt(mapnik::geometry_container const& paths, std::string& wkt)
 {
     using sink_type = std::back_insert_iterator<std::string>;
@@ -52,7 +53,7 @@ inline bool to_wkt(mapnik::geometry_container const& paths, std::string& wkt)
     sink_type sink(wkt);
     return boost::spirit::karma::generate(sink, generator, paths);
 }
-
+#endif
 
 }
 
