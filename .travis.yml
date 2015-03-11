@@ -9,6 +9,9 @@ matrix:
   include:
     - os: osx
       compiler: clang
+      env: JOBS=12 COVERAGE=true
+    - os: osx
+      compiler: clang
       env: JOBS=12
     - os: linux
       compiler: clang
@@ -17,6 +20,9 @@ matrix:
       compiler: gcc
       env: JOBS=6
 
+before_install:
+ - export COVERAGE=${COVERAGE:-false}
+
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then psql -U postgres -c 'create database template_postgis;' -U postgres; psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres; fi;
 
@@ -24,8 +30,10 @@ script:
  - source bootstrap.sh
  - wget https://gist.githubusercontent.com/springmeyer/0833fa43794838889139/raw/build_pycairo.sh && chmod +x build_pycairo.sh && ./build_pycairo.sh
  - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages:${PYTHONPATH}
+ - if [[ ${COVERAGE} == true ]]; then pip install cpp-coveralls; export LDFLAGS='--coverage'; export CFLAGS='--coverage'; export CXXFLAGS='--coverage'; fi
  - ./configure
  - make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
+ - if [[ ${COVERAGE} == true ]]; then cpp-coveralls --exclude benchmark --exclude deps --exclude scons --exclude tests --exclude demo --exclude docs --exclude fonts --exclude utils; fi;
  - make bench
