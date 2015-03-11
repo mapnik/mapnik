@@ -30,7 +30,7 @@ script:
  - source bootstrap.sh
  - wget https://gist.githubusercontent.com/springmeyer/0833fa43794838889139/raw/build_pycairo.sh && chmod +x build_pycairo.sh && ./build_pycairo.sh
  - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages:${PYTHONPATH}
- - if [[ ${COVERAGE} == true ]]; then pip install cpp-coveralls; fi;
+ - if [[ ${COVERAGE} == true ]]; then pip install --install-option="--prefix=$(pwd)/mason_packages/.link/lib/python2.7/site-packages" cpp-coveralls; fi;
  - if [[ ${COVERAGE} == true ]]; then ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True; else ./configure; fi;
  - make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
