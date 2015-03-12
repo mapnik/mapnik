@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,124 +22,80 @@
 
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
-#include <mapnik/util/path_iterator.hpp>
-#include <mapnik/util/container_adapter.hpp>
+#include <mapnik/util/spirit_transform_attribute.hpp>
+// boost
+#include <boost/spirit/include/phoenix.hpp>
 
 namespace mapnik { namespace wkt {
 
-template <typename T>
-std::tuple<unsigned,bool> detail::multi_geometry_type<T>::operator() (T const& geom) const
-{
-    using geometry_container = T;
-    unsigned type = 0u;
-    bool collection = false;
-
-    typename geometry_container::const_iterator itr = geom.begin();
-    typename geometry_container::const_iterator end = geom.end();
-
-    for ( ; itr != end; ++itr)
-    {
-        if (type != 0 && itr->type() != type)
-        {
-            collection = true;
-            break;
-        }
-        type = itr->type();
-    }
-    return std::tuple<unsigned,bool>(type, collection);
-}
-
 template <typename OutputIterator, typename Geometry>
-wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
-    : wkt_generator::base_type(wkt)
+wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
+    : wkt_generator_grammar::base_type(geometry)
 {
+    boost::spirit::karma::_val_type _val;
+    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::_a_type _a;
+    boost::spirit::karma::lit_type lit;
     boost::spirit::karma::uint_type uint_;
-    boost::spirit::karma::_val_type _val;
-    boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::_a_type _a;
-    boost::spirit::karma::_b_type _b;
-    boost::spirit::karma::_c_type _c;
-    boost::spirit::karma::_r1_type _r1;
     boost::spirit::karma::eps_type eps;
-    boost::spirit::karma::string_type kstring;
 
-    wkt = point | linestring | polygon
+    geometry = geometry_dispatch.alias()
         ;
 
-    point = &uint_(mapnik::new_geometry::geometry_types::Point)[_1 = _type(_val)]
-        << kstring[ phoenix::if_ (single) [_1 = "Point("]
-                   .else_[_1 = "("]]
-        << point_coord [_1 = _first(_val)] << lit(')')
+    geometry_dispatch = eps[_a = geometry_type(_val)] <<
+        (&uint_(new_geometry::geometry_types::Point)[_1 = _a]
+         << point)
+        |
+        (&uint_(new_geometry::geometry_types::LineString)[_1 = _a]
+         << linestring )
+        |
+        (&uint_(new_geometry::geometry_types::Polygon)[_1 = _a]
+         << polygon )
+        |
+        (&uint_(new_geometry::geometry_types::MultiPoint)[_1 = _a]
+         << multi_point)
+        |
+        (&uint_(new_geometry::geometry_types::MultiLineString)[_1 = _a]
+         << multi_linestring)
+        |
+        (&uint_(new_geometry::geometry_types::MultiPolygon)[_1 = _a]
+         << multi_polygon)
+        |
+        (&uint_(new_geometry::geometry_types::GeometryCollection)[_1 = _a]
+         << geometry_collection)
         ;
 
-    linestring = &uint_(mapnik::new_geometry::geometry_types::LineString)[_1 = _type(_val)]
-        << kstring[ phoenix::if_ (single) [_1 = "LineString("]
-                   .else_[_1 = "("]]
-        << coords
-        << lit(')')
+    point = lit("POINT(") << point_coord << lit(")")
         ;
-
-    polygon = &uint_(mapnik::new_geometry::geometry_types::Polygon)[_1 = _type(_val)]
-        << kstring[ phoenix::if_ (single) [_1 = "Polygon("]
-                   .else_[_1 = "("]]
-        << coords2
-        << lit("))")
+    linestring = lit("LINESTRING(") << linestring_coord << lit(")")
         ;
-
-    point_coord = &uint_ << coordinate << lit(' ') << coordinate
+    polygon = lit("POLYGON(") << polygon_coord << lit(")")
         ;
-
-    polygon_coord %= ( &uint_(mapnik::SEG_MOVETO)
-                       << eps[_r1 += 1][_a  = _x(_val)][ _b = _y(_val)]
-                       << kstring[ if_ (_r1 > 1u) [_1 = "),("]
-                                  .else_[_1 = "("]]
-                       |
-                       &uint_(mapnik::SEG_LINETO)
-                       << lit(',') << eps[_a = _x(_val)][_b = _y(_val)]
-        )
-        << coordinate[_1 = _a]
-        << lit(' ')
-        << coordinate[_1 = _b]
+    multi_point = lit("MULTIPOINT(") << multi_point_coord << lit(")")
         ;
-
-    coords2 %= *polygon_coord(_a,_b,_c)
+    multi_linestring = lit("MULTILINESTRING") << multi_linestring_coord << lit(")")
         ;
-
-    coords = point_coord % lit(',')
+    multi_polygon = lit("MULTIPOLYGON(") << multi_polygon_coord << lit(")")
         ;
-}
-
-template <typename OutputIterator, typename GeometryContainer>
-wkt_multi_generator<OutputIterator, GeometryContainer>::wkt_multi_generator()
-    : wkt_multi_generator::base_type(wkt)
-{
-    boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::eps_type eps;
-    boost::spirit::karma::_val_type _val;
-    boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::_a_type _a;
-
-    geometry_types.add
-        (mapnik::new_geometry::geometry_types::Point,"Point")
-        (mapnik::new_geometry::geometry_types::LineString,"LineString")
-        (mapnik::new_geometry::geometry_types::Polygon,"Polygon")
+    geometry_collection = lit("GEOMETRYCOLLECTION(") << geometries  << lit(")")
         ;
-
-    wkt =  eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)]
-        << lit("GeometryCollection(") << geometry << lit(")")
-        | eps(is_multi(_val)) << lit("Multi") << geometry_types[_1 = phoenix::at_c<0>(_a)]
-        << "(" << multi_geometry << ")"
-        |  geometry
+    point_coord = coordinate << lit(' ') << coordinate
         ;
-
-    geometry =  -(single_geometry % lit(','))
+    linestring_coord = point_coord % lit(',')
         ;
-
-    single_geometry = geometry_types[_1 = _type(_val)] << path
+    polygon_coord = lit('(') << exterior_ring_coord << lit(')') << interior_ring_coord
         ;
-
-    multi_geometry = -(path % lit(','))
+    exterior_ring_coord = linestring_coord.alias()
+        ;
+    interior_ring_coord =  *(lit(",(") << exterior_ring_coord << lit(')'))
+        ;
+    multi_point_coord = linestring_coord.alias()
+        ;
+    multi_linestring_coord = linestring_coord % lit(',')
+        ;
+    multi_polygon_coord = polygon_coord % lit(',')
+        ;
+    geometries =  geometry % lit(',')
         ;
 
 }
