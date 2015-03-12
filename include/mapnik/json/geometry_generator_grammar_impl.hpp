@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/json/geometry_generator_grammar.hpp>
+#include <mapnik/util/spirit_transform_attribute.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
