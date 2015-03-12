@@ -30,6 +30,10 @@ script:
  - source bootstrap.sh
  - wget https://gist.githubusercontent.com/springmeyer/0833fa43794838889139/raw/build_pycairo.sh && chmod +x build_pycairo.sh && ./build_pycairo.sh
  - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages:${PYTHONPATH}
+ - if [[ ${COVERAGE} == true ]]; then ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True; else ./configure; fi;
+ - make
+ - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
+ - make test
  - if [[ ${COVERAGE} == true ]]; then
       brew update;
       brew install pyenv;
@@ -40,9 +44,5 @@ script:
       pip install cpp-coveralls;
       pyenv rehash;
      fi;
- - if [[ ${COVERAGE} == true ]]; then ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True; else ./configure; fi;
- - make
- - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
- - make test
  - if [[ ${COVERAGE} == true ]]; then cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude tests --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
  - if [[ ${COVERAGE} != true ]]; then make bench; fi;
