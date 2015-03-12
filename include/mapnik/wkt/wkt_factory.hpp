@@ -45,15 +45,13 @@ inline bool from_wkt(std::string const& wkt, mapnik::new_geometry::geometry & ge
     return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(geom)), space);
 }
 
-#if 0 // FIXME
-inline bool to_wkt(mapnik::geometry_container const& paths, std::string& wkt)
+inline bool to_wkt(std::string & wkt,  mapnik::new_geometry::geometry const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::wkt::wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::new_geometry::geometry> generator;
     sink_type sink(wkt);
-    return boost::spirit::karma::generate(sink, generator, paths);
+    return boost::spirit::karma::generate(sink, generator, geom);
 }
-#endif
 
 }
 
