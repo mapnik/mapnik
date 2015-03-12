@@ -108,6 +108,7 @@ struct agg_renderer_process_visitor_l
         pattern_source source(image, opacity);
         pattern_type pattern (filter,source);
         renderer_type ren(ren_base, pattern);
+        ren.clip_box(0,0,common_.width_,common_.height_);
         rasterizer_type ras(ren);
 
         agg::trans_affine tr;
@@ -176,6 +177,7 @@ struct agg_renderer_process_visitor_l
         pattern_source source(image, opacity);
         pattern_type pattern (filter,source);
         renderer_type ren(ren_base, pattern);
+        ren.clip_box(0,0,common_.width_,common_.height_);
         rasterizer_type ras(ren);
 
         agg::trans_affine tr;

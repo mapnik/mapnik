@@ -67,8 +67,8 @@ void export_grid()
     class_<mapnik::grid,std::shared_ptr<mapnik::grid> >(
         "Grid",
         "This class represents a feature hitgrid.",
-        init<int,int,std::string,unsigned>(
-            ( boost::python::arg("width"), boost::python::arg("height"),boost::python::arg("key")="__id__", boost::python::arg("resolution")=1 ),
+        init<int,int,std::string>(
+            ( boost::python::arg("width"), boost::python::arg("height"),boost::python::arg("key")="__id__"),
             "Create a mapnik.Grid object\n"
             ))
         .def("painted",&painted)
