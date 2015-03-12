@@ -21,7 +21,7 @@
                 "spaces":"this has spaces",
                 "double":1.1,
                 "boolean":true,
-                "NOM_FR":"Québec",
+                "NOM_FR":"Qu\u00e9bec",
                 "object": {"value":{"type":"\u041c\u0430pni\u043a","array": [3,0,"x"]}},
                 "array" : [ [ [1], ["deux"]],[["\u0442\u0440\u0438","four","\u4e94"]]]
             }

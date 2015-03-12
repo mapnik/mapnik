@@ -44,5 +44,5 @@ script:
  - make
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
- - if [[ ${COVERAGE} == true ]]; then cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude benchmark --exclude deps --exclude scons --exclude tests --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
+ - if [[ ${COVERAGE} == true ]]; then cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude tests --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
  - if [[ ${COVERAGE} != true ]]; then make bench; fi;

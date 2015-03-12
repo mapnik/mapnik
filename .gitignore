@@ -1,4 +1,7 @@
 .DS_Store
+*.gcov
+*.gcda
+*.gcno
 *~
 *.o
 *.pyc
@@ -14,6 +17,8 @@ bindings/python/mapnik/paths.py
 config.cache
 config.log
 config.py
+mason_packages/
+.mason/
 .sconf_temp/
 .sconsign.dblite
 demo/viewer/viewer.ini
