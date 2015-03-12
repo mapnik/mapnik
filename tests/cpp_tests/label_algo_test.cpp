@@ -3,7 +3,6 @@
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_centroid.hpp>
-//#include <mapnik/geom_util.hpp>
 #include <vector>
 #include <algorithm>
 
