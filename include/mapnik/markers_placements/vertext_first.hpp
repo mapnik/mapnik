@@ -69,6 +69,10 @@ public:
         if (agg::is_line_to(this->locator_.vertex(&x1, &y1)))
         {
             angle = std::atan2(y1 - y0, x1 - x0);
+            if (!this->set_direction(angle))
+            {
+                return false;
+            }
         }
 
         box2d<double> box = this->perform_transform(angle, x, y);

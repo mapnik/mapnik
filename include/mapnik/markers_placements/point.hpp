@@ -25,6 +25,7 @@
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/geometry_types.hpp>
+#include <mapnik/util/math.hpp>
 
 #include "agg_basics.h"
 #include "agg_trans_affine.h"
@@ -39,6 +40,7 @@ struct markers_placement_params
     double max_error;
     bool allow_overlap;
     bool avoid_edges;
+    direction_enum direction;
 };
 
 template <typename Locator, typename Detector>
@@ -141,6 +143,36 @@ protected:
         result.expand_to_include(xB, yB);
         result.expand_to_include(xD, yD);
         return result;
+    }
+
+    bool set_direction(double & angle)
+    {
+        switch (params_.direction)
+        {
+            case DIRECTION_UP:
+                angle = .0;
+                return true;
+            case DIRECTION_DOWN:
+                angle = M_PI;
+                return true;
+            case DIRECTION_AUTO:
+                angle = (std::fabs(util::normalize_angle(angle)) > 0.5 * M_PI) ? (angle + M_PI) : angle;
+                return true;
+            case DIRECTION_AUTO_DOWN:
+                angle = (std::fabs(util::normalize_angle(angle)) < 0.5 * M_PI) ? (angle + M_PI) : angle;
+                return true;
+            case DIRECTION_LEFT:
+                angle += M_PI;
+                return true;
+            case DIRECTION_LEFT_ONLY:
+                angle += M_PI;
+                return std::fabs(util::normalize_angle(angle)) < 0.5 * M_PI;
+            case DIRECTION_RIGHT_ONLY:
+                return std::fabs(util::normalize_angle(angle)) < 0.5 * M_PI;
+            case DIRECTION_RIGHT:
+            default:
+                return true;
+        }
     }
 };
 
