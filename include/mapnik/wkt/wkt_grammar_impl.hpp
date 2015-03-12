@@ -97,6 +97,10 @@ wkt_grammar<Iterator>::wkt_grammar()
                        >> point_text % lit(',')
                        >> lit(')'))
         |
+        (lit('(')
+         >> point % lit(',')
+         >> lit(')'))
+        |
         empty_set
         ;
 
