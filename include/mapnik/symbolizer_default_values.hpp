@@ -329,6 +329,13 @@ struct symbolizer_default<marker_multi_policy_enum, keys::markers_multipolicy>
     static marker_multi_policy_enum value() { return  MARKER_EACH_MULTI; }
 };
 
+// direction
+template <>
+struct symbolizer_default<direction_enum, keys::direction>
+{
+    static direction_enum value() { return DIRECTION_RIGHT; }
+};
+
 // placement
 
 // colorizer

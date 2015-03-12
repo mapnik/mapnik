@@ -30,6 +30,7 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex_cache.hpp>
+#include <mapnik/util/math.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
@@ -95,11 +96,11 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
 {
     if (upright == UPRIGHT_AUTO)
     {
-        return (std::fabs(normalize_angle(angle)) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        return (std::fabs(util::normalize_angle(angle)) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     if (upright == UPRIGHT_AUTO_DOWN)
     {
-        return (std::fabs(normalize_angle(angle)) < 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        return (std::fabs(util::normalize_angle(angle)) < 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     if (upright == UPRIGHT_LEFT_ONLY)
     {
@@ -260,10 +261,12 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     }
                     current_cluster = glyph.char_index;
                     // Only calculate new angle at the start of each cluster!
-                    angle = normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
+                    // Y axis is inverted.
+                    // See note about coordinate systems in placement_finder::find_point_placement().
+                    angle = -util::normalize_angle(off_pp.angle(sign * layout.cluster_width(current_cluster)));
                     rot.init(angle);
                     if ((text_props_->max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
-                        std::fabs(normalize_angle(angle-last_cluster_angle)) > text_props_->max_char_angle_delta)
+                        std::fabs(util::normalize_angle(angle - last_cluster_angle)) > text_props_->max_char_angle_delta)
                     {
                         return false;
                     }
@@ -326,21 +329,6 @@ void placement_finder::path_move_dx(vertex_cache & pp, double dx)
 {
     vertex_cache::state state = pp.save_state();
     if (!pp.move(dx)) pp.restore_state(state);
-}
-
-double placement_finder::normalize_angle(double angle)
-{
-    while (angle >= M_PI)
-    {
-        angle -= 2.0 * M_PI;
-    }
-    while (angle < -M_PI)
-    {
-        angle += 2.0 * M_PI;
-    }
-    // y axis is inverted.
-    // See note about coordinate systems in placement_finder::find_point_placement().
-    return -angle;
 }
 
 double placement_finder::get_spacing(double path_length, double layout_width) const

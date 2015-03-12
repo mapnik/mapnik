@@ -153,6 +153,9 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "upright",  [](enumeration_wrapper e)
                         {return enumeration<text_upright_enum,text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();},
                         property_types::target_upright},
+    property_meta_type{ "direction",  [](enumeration_wrapper e)
+                        {return enumeration<direction_enum,direction_enum_MAX>(direction_enum(e.value)).as_string();},
+                        property_types::target_direction},
     property_meta_type{ "avoid-edges",nullptr, property_types::target_bool },
     property_meta_type{ "font-feature-settings", nullptr, property_types::target_font_feature_settings },
 

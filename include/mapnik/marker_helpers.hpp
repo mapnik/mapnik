@@ -90,7 +90,8 @@ struct vector_markers_dispatch : util::noncopyable
         coord2d center = src_->bounding_box().center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine tr = recenter * marker_trans_;
-        markers_placement_params params { src_->bounding_box(), tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
+        direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
+        markers_placement_params params { src_->bounding_box(), tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
         markers_placement_finder<T, Detector> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;
@@ -147,7 +148,8 @@ struct raster_markers_dispatch : util::noncopyable
         value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
         value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
         box2d<double> bbox(0,0, src_.width(),src_.height());
-        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges };
+        direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
+        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
         markers_placement_finder<T, label_collision_detector4> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;

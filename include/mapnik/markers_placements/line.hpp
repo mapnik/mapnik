@@ -97,6 +97,10 @@ public:
                     x = pos.x;
                     y = pos.y;
                     angle = path_.current_segment_angle();
+                    if (!this->set_direction(angle))
+                    {
+                        continue;
+                    }
                     box2d<double> box = this->perform_transform(angle, x, y);
                     if ((this->params_.avoid_edges && !this->detector_.extent().contains(box))
                         || (!this->params_.allow_overlap && !this->detector_.has_placement(box)))
