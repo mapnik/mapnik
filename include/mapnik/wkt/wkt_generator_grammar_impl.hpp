@@ -73,7 +73,7 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
         ;
     multi_point = lit("MULTIPOINT(") << multi_point_coord << lit(")")
         ;
-    multi_linestring = lit("MULTILINESTRING") << multi_linestring_coord << lit(")")
+    multi_linestring = lit("MULTILINESTRING(") << multi_linestring_coord << lit(")")
         ;
     multi_polygon = lit("MULTIPOLYGON(") << multi_polygon_coord << lit(")")
         ;
@@ -91,9 +91,9 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
         ;
     multi_point_coord = linestring_coord.alias()
         ;
-    multi_linestring_coord = linestring_coord % lit(',')
+    multi_linestring_coord = (lit('(') << linestring_coord  << lit(')')) % lit(',')
         ;
-    multi_polygon_coord = polygon_coord % lit(',')
+    multi_polygon_coord = (lit('(') << polygon_coord << lit(')')) % lit(',')
         ;
     geometries =  geometry % lit(',')
         ;
