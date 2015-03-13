@@ -28,7 +28,7 @@
 namespace mapnik {
 
 template <typename T>
-class image_view
+class MAPNIK_DECL image_view
 {
 public:
     using pixel = typename T::pixel;

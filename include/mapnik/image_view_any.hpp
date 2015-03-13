@@ -40,81 +40,6 @@ using image_view_base = util::variant<image_view_rgba8,
                                       image_view_gray64s,
                                       image_view_gray64f>;
 
-namespace detail {
-
-struct get_view_width_visitor
-{
-    template <typename T>
-    std::size_t operator()(T const& data) const
-    {
-        return data.width();
-    }
-};
-
-struct get_view_height_visitor
-{
-    template <typename T>
-    std::size_t operator()(T const& data) const
-    {
-        return data.height();
-    }
-};
-
-struct get_view_size_visitor
-{
-    template <typename T>
-    unsigned operator()(T const& data) const
-    {
-        return data.getSize();
-    }
-};
-
-struct get_view_dtype_visitor
-{
-    template <typename T>
-    image_dtype operator()(T const& data) const
-    {
-        return data.get_dtype();
-    }
-};
-
-struct get_view_row_size_visitor
-{
-    template <typename T>
-    unsigned operator()(T const& data) const
-    {
-        return data.getRowSize();
-    }
-};
-
-struct get_view_premultiplied_visitor
-{
-    template <typename T>
-    bool operator()(T const& data) const
-    {
-        return data.get_premultiplied();
-    }
-};
-
-struct get_view_offset_visitor
-{
-    template <typename T>
-    double operator()(T const& data) const
-    {
-        return data.get_offset();
-    }
-};
-
-struct get_view_scaling_visitor
-{
-    template <typename T>
-    double operator()(T const& data) const
-    {
-        return data.get_scaling();
-    }
-};
-} // namespace detail
-
 struct image_view_any : image_view_base
 {
     image_view_any() = default;
@@ -123,47 +48,16 @@ struct image_view_any : image_view_base
     image_view_any(T && data) noexcept
         : image_view_base(std::move(data)) {}
 
-    std::size_t width() const
-    {
-        return util::apply_visitor(detail::get_view_width_visitor(),*this);
-    }
-
-    std::size_t height() const
-    {
-        return util::apply_visitor(detail::get_view_height_visitor(),*this);
-    }
-
-    unsigned getSize() const
-    {
-        return util::apply_visitor(detail::get_view_size_visitor(),*this);
-    }
-
-    unsigned getRowSize() const
-    {
-        return util::apply_visitor(detail::get_view_row_size_visitor(),*this);
-    }
-
-    bool get_premultiplied() const
-    { 
-        return util::apply_visitor(detail::get_view_premultiplied_visitor(),*this);
-    }
-
-    double get_offset() const
-    { 
-        return util::apply_visitor(detail::get_view_offset_visitor(),*this);
-    }
-
-    double get_scaling() const
-    { 
-        return util::apply_visitor(detail::get_view_scaling_visitor(),*this);
-    }
-
-    image_dtype get_dtype() const
-    { 
-        return util::apply_visitor(detail::get_view_dtype_visitor(),*this);
-    }
+    std::size_t width() const;
+    std::size_t height() const;
+    unsigned getSize() const;
+    unsigned getRowSize() const;
+    bool get_premultiplied() const;
+    double get_offset() const;
+    double get_scaling() const;
+    image_dtype get_dtype() const;
 };
 
-}
+} // end mapnik ns
 
 #endif // MAPNIK_IMAGE_VIEW_ANY_HPP

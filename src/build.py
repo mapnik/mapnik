@@ -176,6 +176,7 @@ source = Split(
     cairo_io.cpp
     image.cpp
     image_view.cpp
+    image_view_any.cpp
     image_any.cpp
     image_null.cpp
     image_util.cpp
