@@ -34,8 +34,43 @@
 
 namespace mapnik {
 
-template <typename T, std::size_t max_size>
-image<T,max_size>::image()
+namespace detail {
+
+// IMAGE_DIMENSIONS
+template <std::size_t max_size>
+image_dimensions<max_size>::image_dimensions(int width, int height)
+    : width_(width),
+      height_(height)
+{
+    if (width < 0 || static_cast<std::size_t>(width) > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
+    if (height < 0 || static_cast<std::size_t>(height) > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
+}
+
+template <std::size_t max_size>
+image_dimensions<max_size>& image_dimensions<max_size>::operator= (image_dimensions rhs)
+{
+    std::swap(width_, rhs.width_);
+    std::swap(height_, rhs.height_);
+    return *this;
+}
+
+template <std::size_t max_size>
+std::size_t image_dimensions<max_size>::width() const
+{
+    return width_;
+}
+
+template <std::size_t max_size>
+std::size_t image_dimensions<max_size>::height() const
+{
+    return height_;
+}
+
+} // end detail ns
+
+// IMAGE
+template <typename T>
+image<T>::image()
     : dimensions_(0,0),
       buffer_(0),
       pData_(nullptr),
@@ -45,8 +80,8 @@ image<T,max_size>::image()
       painted_(false) 
 {}
 
-template <typename T, std::size_t max_size>
-image<T,max_size>::image(int width, int height, bool initialize, bool premultiplied, bool painted)
+template <typename T>
+image<T>::image(int width, int height, bool initialize, bool premultiplied, bool painted)
         : dimensions_(width, height),
           buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -61,8 +96,8 @@ image<T,max_size>::image(int width, int height, bool initialize, bool premultipl
     }
 }
 
-template <typename T, std::size_t max_size>
-image<T,max_size>::image(image<T> const& rhs)
+template <typename T>
+image<T>::image(image<T> const& rhs)
         : dimensions_(rhs.dimensions_),
           buffer_(rhs.buffer_),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -72,8 +107,8 @@ image<T,max_size>::image(image<T> const& rhs)
           painted_(rhs.painted_)
 {}
 
-template <typename T, std::size_t max_size>
-image<T,max_size>::image(image<T> && rhs) noexcept
+template <typename T>
+image<T>::image(image<T> && rhs) noexcept
         : dimensions_(std::move(rhs.dimensions_)),
           buffer_(std::move(rhs.buffer_)),
           pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
@@ -86,15 +121,15 @@ image<T,max_size>::image(image<T> && rhs) noexcept
     rhs.pData_ = nullptr;
 }
 
-template <typename T, std::size_t max_size>
-image<T>& image<T,max_size>::operator=(image<T> rhs)
+template <typename T>
+image<T>& image<T>::operator=(image<T> rhs)
 {
     swap(rhs);
     return *this;
 }
 
-template <typename T, std::size_t max_size>
-void image<T,max_size>::swap(image<T> & rhs)
+template <typename T>
+void image<T>::swap(image<T> & rhs)
 {
     std::swap(dimensions_, rhs.dimensions_);
     std::swap(buffer_, rhs.buffer_);
@@ -104,134 +139,134 @@ void image<T,max_size>::swap(image<T> & rhs)
     std::swap(painted_, rhs.painted_);
 }
 
-template <typename T, std::size_t max_size>
-inline typename image<T,max_size>::pixel_type& image<T,max_size>::operator() (std::size_t i, std::size_t j)
+template <typename T>
+inline typename image<T>::pixel_type& image<T>::operator() (std::size_t i, std::size_t j)
 {
     assert(i < dimensions_.width() && j < dimensions_.height());
     return pData_[j * dimensions_.width() + i];
 }
 
-template <typename T, std::size_t max_size>
-inline const typename image<T,max_size>::pixel_type& image<T,max_size>::operator() (std::size_t i, std::size_t j) const
+template <typename T>
+inline const typename image<T>::pixel_type& image<T>::operator() (std::size_t i, std::size_t j) const
 {
     assert(i < dimensions_.width() && j < dimensions_.height());
     return pData_[j * dimensions_.width() + i];
 }
 
-template <typename T, std::size_t max_size>
-inline std::size_t image<T,max_size>::width() const
+template <typename T>
+inline std::size_t image<T>::width() const
 {
     return dimensions_.width();
 }
 
-template <typename T, std::size_t max_size>
-inline std::size_t image<T,max_size>::height() const
+template <typename T>
+inline std::size_t image<T>::height() const
 {
     return dimensions_.height();
 }
 
-template <typename T, std::size_t max_size>
-inline unsigned image<T,max_size>::getSize() const
+template <typename T>
+inline unsigned image<T>::getSize() const
 {
     return dimensions_.height() * dimensions_.width() * pixel_size;
 }
     
-template <typename T, std::size_t max_size>
-inline unsigned image<T,max_size>::getRowSize() const
+template <typename T>
+inline unsigned image<T>::getRowSize() const
 {
     return dimensions_.width() * pixel_size;
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::set(pixel_type const& t)
+template <typename T>
+inline void image<T>::set(pixel_type const& t)
 {
     std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), t);
 }
 
-template <typename T, std::size_t max_size>
-inline const typename image<T,max_size>::pixel_type* image<T,max_size>::getData() const
+template <typename T>
+inline const typename image<T>::pixel_type* image<T>::getData() const
 {
     return pData_;
 }
 
-template <typename T, std::size_t max_size>
-inline typename image<T,max_size>::pixel_type* image<T,max_size>::getData()
+template <typename T>
+inline typename image<T>::pixel_type* image<T>::getData()
 {
     return pData_;
 }
 
-template <typename T, std::size_t max_size>
-inline const unsigned char* image<T,max_size>::getBytes() const
+template <typename T>
+inline const unsigned char* image<T>::getBytes() const
 {
     return buffer_.data();
 }
 
-template <typename T, std::size_t max_size>
-inline unsigned char* image<T,max_size>::getBytes()
+template <typename T>
+inline unsigned char* image<T>::getBytes()
 {
     return buffer_.data();
 }
 
-template <typename T, std::size_t max_size>
-inline const typename image<T,max_size>::pixel_type* image<T,max_size>::getRow(std::size_t row) const
+template <typename T>
+inline const typename image<T>::pixel_type* image<T>::getRow(std::size_t row) const
 {
     return pData_ + row * dimensions_.width();
 }
 
-template <typename T, std::size_t max_size>
-inline const typename image<T,max_size>::pixel_type* image<T,max_size>::getRow(std::size_t row, std::size_t x0) const
+template <typename T>
+inline const typename image<T>::pixel_type* image<T>::getRow(std::size_t row, std::size_t x0) const
 {
     return pData_ + row * dimensions_.width() + x0;
 }
 
-template <typename T, std::size_t max_size>
-inline typename image<T,max_size>::pixel_type* image<T,max_size>::getRow(std::size_t row)
+template <typename T>
+inline typename image<T>::pixel_type* image<T>::getRow(std::size_t row)
 {
     return pData_ + row * dimensions_.width();
 }
 
-template <typename T, std::size_t max_size>
-inline typename image<T,max_size>::pixel_type* image<T,max_size>::getRow(std::size_t row, std::size_t x0)
+template <typename T>
+inline typename image<T>::pixel_type* image<T>::getRow(std::size_t row, std::size_t x0)
 {
     return pData_ + row * dimensions_.width() + x0;
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::setRow(std::size_t row, pixel_type const* buf, std::size_t size)
+template <typename T>
+inline void image<T>::setRow(std::size_t row, pixel_type const* buf, std::size_t size)
 {
     assert(row < dimensions_.height());
     assert(size <= dimensions_.width());
     std::copy(buf, buf + size, pData_ + row * dimensions_.width());
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
+template <typename T>
+inline void image<T>::setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
 {
     assert(row < dimensions_.height());
     assert ((x1 - x0) <= dimensions_.width() );
     std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
 }
 
-template <typename T, std::size_t max_size>
-inline double image<T,max_size>::get_offset() const
+template <typename T>
+inline double image<T>::get_offset() const
 {
     return offset_;
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::set_offset(double set)
+template <typename T>
+inline void image<T>::set_offset(double set)
 {
     offset_ = set;
 }
 
-template <typename T, std::size_t max_size>
-inline double image<T,max_size>::get_scaling() const
+template <typename T>
+inline double image<T>::get_scaling() const
 {
     return scaling_;
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::set_scaling(double set)
+template <typename T>
+inline void image<T>::set_scaling(double set)
 {
     if (set != 0.0)
     {
@@ -241,32 +276,32 @@ inline void image<T,max_size>::set_scaling(double set)
     std::clog << "Can not set scaling to 0.0, offset not set." << std::endl;
 }
 
-template <typename T, std::size_t max_size>
-inline bool image<T,max_size>::get_premultiplied() const
+template <typename T>
+inline bool image<T>::get_premultiplied() const
 {
     return premultiplied_alpha_;
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::set_premultiplied(bool set)
+template <typename T>
+inline void image<T>::set_premultiplied(bool set)
 {
     premultiplied_alpha_ = set;
 }
 
-template <typename T, std::size_t max_size>
-inline void image<T,max_size>::painted(bool painted)
+template <typename T>
+inline void image<T>::painted(bool painted)
 {
     painted_ = painted;
 }
 
-template <typename T, std::size_t max_size>
-inline bool image<T,max_size>::painted() const
+template <typename T>
+inline bool image<T>::painted() const
 {
     return painted_;
 }
 
-template <typename T, std::size_t max_size>
-inline image_dtype image<T,max_size>::get_dtype()  const
+template <typename T>
+inline image_dtype image<T>::get_dtype()  const
 {
     return dtype;
 }

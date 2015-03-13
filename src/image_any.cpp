@@ -153,7 +153,7 @@ struct set_scaling_visitor
 
 } // namespace detail
 
-image_any::image_any(int width,
+MAPNIK_DECL image_any::image_any(int width,
                      int height,
                      image_dtype type,
                      bool initialize, 
@@ -161,102 +161,73 @@ image_any::image_any(int width,
                      bool painted)
     : image_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
 
-template <typename T>
-image_any::image_any(T && data) noexcept
-    : image_base(std::move(data)) {}
-
-template image_any::image_any(image_null && data) noexcept;
-template image_any::image_any(image_rgba8 && data) noexcept;
-template image_any::image_any(image_gray8 && data) noexcept;
-template image_any::image_any(image_gray8s && data) noexcept;
-template image_any::image_any(image_gray16 && data) noexcept;
-template image_any::image_any(image_gray16s && data) noexcept;
-template image_any::image_any(image_gray32 && data) noexcept;
-template image_any::image_any(image_gray32s && data) noexcept;
-template image_any::image_any(image_gray32f && data) noexcept;
-template image_any::image_any(image_gray64 && data) noexcept;
-template image_any::image_any(image_gray64s && data) noexcept;
-template image_any::image_any(image_gray64f && data) noexcept;
-template image_any::image_any(image_null const& data) noexcept;
-template image_any::image_any(image_rgba8 const& data) noexcept;
-template image_any::image_any(image_gray8 const& data) noexcept;
-template image_any::image_any(image_gray8s const& data) noexcept;
-template image_any::image_any(image_gray16 const& data) noexcept;
-template image_any::image_any(image_gray16s const& data) noexcept;
-template image_any::image_any(image_gray32 const& data) noexcept;
-template image_any::image_any(image_gray32s const& data) noexcept;
-template image_any::image_any(image_gray32f const& data) noexcept;
-template image_any::image_any(image_gray64 const& data) noexcept;
-template image_any::image_any(image_gray64s const& data) noexcept;
-template image_any::image_any(image_gray64f const& data) noexcept;
-
-unsigned char const* image_any::getBytes() const
+MAPNIK_DECL unsigned char const* image_any::getBytes() const
 {
     return util::apply_visitor(detail::get_bytes_visitor_const(),*this);
 }
 
-unsigned char* image_any::getBytes()
+MAPNIK_DECL unsigned char* image_any::getBytes()
 {
     return util::apply_visitor(detail::get_bytes_visitor(),*this);
 }
 
-std::size_t image_any::width() const
+MAPNIK_DECL std::size_t image_any::width() const
 {
     return util::apply_visitor(detail::get_width_visitor(),*this);
 }
 
-std::size_t image_any::height() const
+MAPNIK_DECL std::size_t image_any::height() const
 {
     return util::apply_visitor(detail::get_height_visitor(),*this);
 }
 
-bool image_any::get_premultiplied() const
+MAPNIK_DECL bool image_any::get_premultiplied() const
 {
     return util::apply_visitor(detail::get_premultiplied_visitor(),*this);
 }
 
-bool image_any::painted() const
+MAPNIK_DECL bool image_any::painted() const
 {
     return util::apply_visitor(detail::get_painted_visitor(),*this);
 }
 
-unsigned image_any::getSize() const
+MAPNIK_DECL unsigned image_any::getSize() const
 {
     return util::apply_visitor(detail::get_any_size_visitor(),*this);
 }
 
-unsigned image_any::getRowSize() const
+MAPNIK_DECL unsigned image_any::getRowSize() const
 {
     return util::apply_visitor(detail::get_any_row_size_visitor(),*this);
 }
 
-double image_any::get_offset() const
+MAPNIK_DECL double image_any::get_offset() const
 {
     return util::apply_visitor(detail::get_offset_visitor(),*this);
 }
 
-double image_any::get_scaling() const
+MAPNIK_DECL double image_any::get_scaling() const
 {
     return util::apply_visitor(detail::get_scaling_visitor(),*this);
 }
 
-image_dtype image_any::get_dtype() const
+MAPNIK_DECL image_dtype image_any::get_dtype() const
 {
     return util::apply_visitor(detail::get_dtype_visitor(),*this);
 }
 
-void image_any::set_offset(double val)
+MAPNIK_DECL void image_any::set_offset(double val)
 {
     util::apply_visitor(detail::set_offset_visitor(val),*this);
 }
 
-void image_any::set_scaling(double val)
+MAPNIK_DECL void image_any::set_scaling(double val)
 {
     util::apply_visitor(detail::set_scaling_visitor(val),*this);
 }
 
 
-image_any create_image_any(int width, 
+MAPNIK_DECL image_any create_image_any(int width, 
                            int height,
                            image_dtype type, 
                            bool initialize, 

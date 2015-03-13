@@ -175,6 +175,7 @@ source = Split(
     image_reader.cpp
     cairo_io.cpp
     image.cpp
+    image_view.cpp
     image_any.cpp
     image_null.cpp
     image_util.cpp

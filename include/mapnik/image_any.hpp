@@ -42,7 +42,7 @@ using image_base = util::variant<image_null,
                                       image_gray64f>;
 
 
-struct image_any : image_base
+struct MAPNIK_DECL image_any : image_base
 {
     image_any() = default;
 
@@ -54,7 +54,8 @@ struct image_any : image_base
               bool painted = false);
 
     template <typename T>
-    image_any(T && data) noexcept;
+    image_any(T && data) noexcept
+    : image_base(std::move(data)) {}
 
     unsigned char const* getBytes() const;
     unsigned char* getBytes();

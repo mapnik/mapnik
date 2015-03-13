@@ -26,6 +26,9 @@
 #include <mapnik/image.hpp>
 #include <mapnik/pixel_types.hpp>
 
+//stl
+#include <stdexcept>
+
 namespace mapnik
 {
 

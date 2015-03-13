@@ -25,11 +25,12 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/image.hpp>
-#include <mapnik/image_any.hpp>
-#include <mapnik/image_view.hpp>
-#include <mapnik/image_view_any.hpp>
-#include <mapnik/color.hpp>
+#include <mapnik/pixel_types.hpp>
+//#include <mapnik/image.hpp>
+//#include <mapnik/image_any.hpp>
+//#include <mapnik/image_view.hpp>
+//#include <mapnik/image_view_any.hpp>
+//#include <mapnik/color.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -46,6 +47,11 @@ namespace mapnik {
 
 // fwd declares
 class rgba_palette;
+struct image_any;
+template <typename T> class image;
+struct image_view_any;
+template <typename T> class image_view;
+class color;
 
 class ImageWriterException : public std::exception
 {
@@ -162,37 +168,37 @@ template <typename T>
 MAPNIK_DECL void fill (image_any & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_rgba8 & data, T const&);
+MAPNIK_DECL void fill (image<rgba8_t> & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray8 & data, T const&);
+MAPNIK_DECL void fill (image<gray8_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray8s & data, T const&);
+MAPNIK_DECL void fill (image<gray8s_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray16 & data, T const&);
+MAPNIK_DECL void fill (image<gray16_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray16s & data, T const&);
+MAPNIK_DECL void fill (image<gray16s_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray32 & data, T const&);
+MAPNIK_DECL void fill (image<gray32_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray32s & data, T const&);
+MAPNIK_DECL void fill (image<gray32s_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray32f & data, T const&);
+MAPNIK_DECL void fill (image<gray32f_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray64 & data, T const&);
+MAPNIK_DECL void fill (image<gray64_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray64s & data, T const&);
+MAPNIK_DECL void fill (image<gray64s_t>  & data, T const&);
 
 template <typename T>
-MAPNIK_DECL void fill (image_gray64f & data, T const&);
+MAPNIK_DECL void fill (image<gray64f_t> & data, T const&);
 
 // SET RECTANGLE
 MAPNIK_DECL void set_rectangle (image_any & dst, image_any const& src, int x = 0, int y = 0);
@@ -218,37 +224,37 @@ template <typename T>
 MAPNIK_DECL void set_pixel(image_any & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_rgba8 & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<rgba8_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray8 & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray8_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray8s & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray8s_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray16 & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray16_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray16s & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray16s_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray32 & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray32_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray32s & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray32s_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray32f & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray32f_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray64 & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray64_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray64s & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray64s_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image_gray64f & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray64f_t>  & data, std::size_t x, std::size_t y, T const& val);
 
 // GET PIXEL
 template <typename T>
@@ -258,70 +264,70 @@ template <typename T>
 MAPNIK_DECL T get_pixel(image_view_any const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_rgba8 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<rgba8_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray8 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray8_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray8s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray8s_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray16 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray16_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray16s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray16s_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray32 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray32_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray32s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray32s_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray32f const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray32f_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray64 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray64_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray64s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray64s_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_gray64f const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image<gray64f_t> const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_rgba8 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<rgba8_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray8 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray8_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray8s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray8s_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray16 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray16_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray16s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray16s_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray32 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray32_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray32s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray32s_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray32f const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray32f_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray64 const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray64_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray64s const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray64s_t> > const& data, std::size_t x, std::size_t y);
 
 template <typename T>
-MAPNIK_DECL T get_pixel(image_view_gray64f const& data, std::size_t x, std::size_t y);
+MAPNIK_DECL T get_pixel(image_view<image<gray64f_t> > const& data, std::size_t x, std::size_t y);
 
 // VIEW TO STRING
 MAPNIK_DECL void view_to_string (image_view_any const& view, std::ostringstream & ss);

@@ -24,60 +24,28 @@
 #define MAPNIK_IMAGE_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/pixel_types.hpp>
-
-// stl
-#include <algorithm>
-#include <stdexcept>
 
 namespace mapnik {
 
 namespace detail {
 
-struct buffer
+struct MAPNIK_DECL buffer
 {
-    explicit buffer(std::size_t size)
-        : size_(size),
-          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
-    {}
+    explicit buffer(std::size_t size);
+    buffer(buffer && rhs) noexcept;
+    buffer(buffer const& rhs);
+    ~buffer();
 
-    buffer(buffer && rhs) noexcept
-        : size_(std::move(rhs.size_)),
-          data_(std::move(rhs.data_))
-    {
-        rhs.size_ = 0;
-        rhs.data_ = nullptr;
-    }
+    buffer& operator=(buffer rhs);
+    bool operator!() const;
 
-    buffer(buffer const& rhs)
-        : size_(rhs.size_),
-          data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
-    {
-        if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
-    }
-
-    buffer& operator=(buffer rhs)
-    {
-        swap(rhs);
-        return *this;
-    }
-
-    void swap(buffer & rhs)
-    {
-        std::swap(size_, rhs.size_);
-        std::swap(data_, rhs.data_);
-    }
-
-    inline bool operator!() const { return (data_ == nullptr)? false : true; }
-    ~buffer()
-    {
-        ::operator delete(data_);
-    }
-
-    inline unsigned char* data() { return data_; }
-    inline unsigned char const* data() const { return data_; }
-    inline std::size_t size() const { return size_; }
+    void swap(buffer & rhs);
+    unsigned char* data();
+    unsigned char const* data() const;
+    std::size_t size() const;
+private:
     std::size_t size_;
     unsigned char* data_;
 
@@ -86,37 +54,20 @@ struct buffer
 template <std::size_t max_size>
 struct image_dimensions
 {
-    image_dimensions(int width, int height)
-        : width_(width),
-          height_(height)
-    {
-        if (width < 0 || static_cast<std::size_t>(width) > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
-        if (height < 0 || static_cast<std::size_t>(height) > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
-    }
-
+    image_dimensions(int width, int height);
     image_dimensions(image_dimensions const& other) = default;
     image_dimensions(image_dimensions && other) = default;
-    image_dimensions& operator= (image_dimensions rhs)
-    {
-        std::swap(width_, rhs.width_);
-        std::swap(height_, rhs.height_);
-        return *this;
-    }
-    std::size_t width() const
-    {
-        return width_;
-    }
-    std::size_t height() const
-    {
-        return height_;
-    }
+    image_dimensions& operator= (image_dimensions rhs);
+    std::size_t width() const;
+    std::size_t height() const;
+private:
     std::size_t width_;
     std::size_t height_;
 };
 
 } // end ns detail
 
-template <typename T, std::size_t max_size = 65535>
+template <typename T>
 class image
 {
 public:
@@ -125,7 +76,7 @@ public:
     static const image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
-    detail::image_dimensions<max_size> dimensions_;
+    detail::image_dimensions<65535> dimensions_;
     detail::buffer buffer_;
     pixel_type *pData_;
     double offset_;
