@@ -234,7 +234,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             // TODO: consider using true area for polygon types
             if (type == new_geometry::geometry_types::MultiPolygon)
             {
-                new_geometry::multi_polygon multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
+                new_geometry::multi_polygon const& multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
                 double maxarea = 0;
                 new_geometry::polygon const* largest = 0;
                 for (new_geometry::polygon const& poly : multi_poly)
@@ -261,7 +261,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            new_geometry::multi_polygon multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
+            new_geometry::multi_polygon const& multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
             for (auto const& poly : multi_poly)
             {
                 new_geometry::polygon_vertex_adapter va(poly);
