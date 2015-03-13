@@ -29,15 +29,12 @@
 #include <mapnik/util/noncopyable.hpp>       // for noncopyable
 #include <mapnik/rule.hpp>              // for rule, symbolizers
 #include <mapnik/box2d.hpp>     // for box2d
-#include <mapnik/color.hpp>     // for color
 #include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/request.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
-#include <mapnik/image.hpp>
-#include <mapnik/image_any.hpp>
 // stl
 #include <memory>
 
@@ -51,9 +48,12 @@ namespace mapnik {
   class feature_type_style;
   class label_collision_detector4;
   class layer;
+  class color;
   struct marker;
   class proj_transform;
   struct rasterizer;
+  struct rgba8_t;
+  template<typename T> class image;
 }
 
 namespace mapnik {
@@ -171,7 +171,7 @@ private:
     void setup(Map const& m);
 };
 
-extern template class MAPNIK_DECL agg_renderer<image_rgba8>;
+extern template class MAPNIK_DECL agg_renderer<image<rgba8_t>>;
 
 } // namespace mapnik
 

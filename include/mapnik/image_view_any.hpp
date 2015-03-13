@@ -40,7 +40,7 @@ using image_view_base = util::variant<image_view_rgba8,
                                       image_view_gray64s,
                                       image_view_gray64f>;
 
-struct image_view_any : image_view_base
+struct MAPNIK_DECL image_view_any : image_view_base
 {
     image_view_any() = default;
 
