@@ -68,13 +68,13 @@ struct vector_markers_dispatch : util::noncopyable
                             double scale_factor,
                             feature_impl & feature,
                             attributes const& vars)
-    : src_(src),
-        marker_trans_(marker_trans),
-        sym_(sym),
-        detector_(detector),
-        feature_(feature),
-        vars_(vars),
-        scale_factor_(scale_factor)
+        : src_(src),
+          marker_trans_(marker_trans),
+          sym_(sym),
+          detector_(detector),
+          feature_(feature),
+          vars_(vars),
+          scale_factor_(scale_factor)
     {}
 
     virtual ~vector_markers_dispatch() {}
