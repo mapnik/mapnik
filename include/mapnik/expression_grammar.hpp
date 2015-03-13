@@ -29,7 +29,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
-
+#include <mapnik/geometry_types.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -109,15 +109,18 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
-struct geometry_types : qi::symbols<char,mapnik::value_integer>
+struct geometry_types : qi::symbols<char, new_geometry::geometry_types>
 {
     geometry_types()
     {
         add
-            ("point",1)
-            ("linestring", 2)
-            ("polygon",3)
-            ("collection",4)
+            ("point",new_geometry::geometry_types::Point)
+            ("linestring", new_geometry::geometry_types::LineString)
+            ("polygon",new_geometry::geometry_types::Polygon)
+            ("multipoint",new_geometry::geometry_types::MultiPoint)
+            ("multilinestring",new_geometry::geometry_types::MultiLineString)
+            ("multipolygon",new_geometry::geometry_types::MultiPolygon)
+            ("geometrycollection",new_geometry::geometry_types::GeometryCollection)
             ;
     }
 };
