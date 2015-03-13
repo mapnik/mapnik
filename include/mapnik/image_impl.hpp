@@ -129,6 +129,12 @@ image<T>& image<T>::operator=(image<T> rhs)
 }
 
 template <typename T>
+image<T> const& image<T>::operator=(image<T> const& rhs) const
+{
+    return rhs;
+}
+
+template <typename T>
 void image<T>::swap(image<T> & rhs)
 {
     std::swap(dimensions_, rhs.dimensions_);
