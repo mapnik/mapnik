@@ -203,8 +203,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
     new_geometry::geometry_types type = new_geometry::geometry_type(geom);
 
     if (type == new_geometry::geometry_types::Point
-        || new_geometry::geometry_types::LineString
-        || new_geometry::geometry_types::Polygon)
+        || type == new_geometry::geometry_types::LineString
+        || type == new_geometry::geometry_types::Polygon)
     {
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
