@@ -33,11 +33,11 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_impl.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
-#include <mapnik/util/geometry_to_ds_type.hpp>
+//#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
@@ -540,9 +540,10 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-
-                        if (mapnik::from_wkt(value, feature->paths()))
+                        mapnik::new_geometry::geometry geom;
+                        if (mapnik::from_wkt(value, geom))
                         {
+                            feature->set_geometry(std::move(geom));
                             parsed_wkt = true;
                         }
                         else
@@ -576,8 +577,10 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-                        if (mapnik::json::from_geojson(value, feature->paths()))
+                        mapnik::new_geometry::geometry geom;
+                        if (mapnik::json::from_geojson(value, geom))
                         {
+                            feature->set_geometry(std::move(geom));
                             parsed_json = true;
                         }
                         else
@@ -809,9 +812,8 @@ void csv_datasource::parse_csv(T & stream,
             {
                 if (parsed_x && parsed_y)
                 {
-                    mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::new_geometry::geometry_types::Point);
-                    pt->move_to(x,y);
-                    feature->add_geometry(pt);
+                    mapnik::new_geometry::point pt(x,y);
+                    feature->set_geometry(std::move(pt));
                     features_.push_back(feature);
                     null_geom = false;
                     if (!extent_initialized_)
@@ -926,6 +928,7 @@ mapnik::box2d<double> csv_datasource::envelope() const
     return extent_;
 }
 
+/*
 boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
 {
     boost::optional<mapnik::datasource::geometry_t> result;
@@ -947,7 +950,7 @@ boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_typ
     }
     return result;
 }
-
+*/
 mapnik::layer_descriptor csv_datasource::get_descriptor() const
 {
     return desc_;
