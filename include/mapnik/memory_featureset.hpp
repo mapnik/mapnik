@@ -78,7 +78,6 @@ public:
                 }
                 else
                 {
-
                     new_geometry::geometry const& geom = (*pos_)->get_geometry();
                     if (bbox_.intersects(new_geometry::envelope(geom)))
                     {
