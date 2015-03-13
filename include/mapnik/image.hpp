@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_DATA_HPP
-#define MAPNIK_IMAGE_DATA_HPP
+#ifndef MAPNIK_IMAGE_HPP
+#define MAPNIK_IMAGE_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -29,9 +29,7 @@
 
 // stl
 #include <algorithm>
-#include <cassert>
 #include <stdexcept>
-#include <iostream>
 
 namespace mapnik {
 
@@ -116,7 +114,7 @@ struct image_dimensions
     std::size_t height_;
 };
 
-}
+} // end ns detail
 
 template <typename T, std::size_t max_size = 65535>
 class image
@@ -135,192 +133,46 @@ private:
     bool premultiplied_alpha_;
     bool painted_;
 public:
-    image(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false)
-        : dimensions_(width, height),
-          buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          offset_(0.0),
-          scaling_(1.0),
-          premultiplied_alpha_(premultiplied),
-          painted_(painted)
-    {
-        if (pData_ && initialize) std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), 0);
-    }
+    image();
+    image(int width, 
+          int height, 
+          bool initialize = true, 
+          bool premultiplied = false, 
+          bool painted = false);
+    image(image<T> const& rhs);
+    image(image<T> && rhs) noexcept;
+    image<T>& operator=(image<T> rhs);
 
-    image(image<T> const& rhs)
-        : dimensions_(rhs.dimensions_),
-          buffer_(rhs.buffer_),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          offset_(rhs.offset_),
-          scaling_(rhs.scaling_),
-          premultiplied_alpha_(rhs.premultiplied_alpha_),
-          painted_(rhs.painted_)
-    {}
-
-    image(image<T> && rhs) noexcept
-        : dimensions_(std::move(rhs.dimensions_)),
-          buffer_(std::move(rhs.buffer_)),
-          pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-          offset_(rhs.offset_),
-          scaling_(rhs.scaling_),
-          premultiplied_alpha_(rhs.premultiplied_alpha_),
-          painted_(rhs.painted_)
-    {
-        rhs.dimensions_ = { 0, 0 };
-        rhs.pData_ = nullptr;
-    }
-
-    image<T>& operator=(image<T> rhs)
-    {
-        swap(rhs);
-        return *this;
-    }
-
-    void swap(image<T> & rhs)
-    {
-        std::swap(dimensions_, rhs.dimensions_);
-        std::swap(buffer_, rhs.buffer_);
-        std::swap(offset_, rhs.offset_);
-        std::swap(scaling_, rhs.scaling_);
-        std::swap(premultiplied_alpha_, rhs.premultiplied_alpha_);
-        std::swap(painted_, rhs.painted_);
-    }
-
-    inline pixel_type& operator() (std::size_t i, std::size_t j)
-    {
-        assert(i < dimensions_.width() && j < dimensions_.height());
-        return pData_[j * dimensions_.width() + i];
-    }
-    inline const pixel_type& operator() (std::size_t i, std::size_t j) const
-    {
-        assert(i < dimensions_.width() && j < dimensions_.height());
-        return pData_[j * dimensions_.width() + i];
-    }
-    inline std::size_t width() const
-    {
-        return dimensions_.width();
-    }
-    inline std::size_t height() const
-    {
-        return dimensions_.height();
-    }
-    inline unsigned getSize() const
-    {
-        return dimensions_.height() * dimensions_.width() * pixel_size;
-    }
-    inline unsigned getRowSize() const
-    {
-        return dimensions_.width() * pixel_size;
-    }
-    inline void set(pixel_type const& t)
-    {
-        std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), t);
-    }
-
-    inline const pixel_type* getData() const
-    {
-        return pData_;
-    }
-
-    inline pixel_type* getData()
-    {
-        return pData_;
-    }
-
-    inline const unsigned char* getBytes() const
-    {
-        return buffer_.data();
-    }
-
-    inline unsigned char* getBytes()
-    {
-        return buffer_.data();
-    }
-
-    inline const pixel_type* getRow(std::size_t row) const
-    {
-        return pData_ + row * dimensions_.width();
-    }
-
-    inline const pixel_type* getRow(std::size_t row, std::size_t x0) const
-    {
-        return pData_ + row * dimensions_.width() + x0;
-    }
-
-    inline pixel_type* getRow(std::size_t row)
-    {
-        return pData_ + row * dimensions_.width();
-    }
-
-    inline pixel_type* getRow(std::size_t row, std::size_t x0)
-    {
-        return pData_ + row * dimensions_.width() + x0;
-    }
-
-    inline void setRow(std::size_t row, pixel_type const* buf, std::size_t size)
-    {
-        assert(row < dimensions_.height());
-        assert(size <= dimensions_.width());
-        std::copy(buf, buf + size, pData_ + row * dimensions_.width());
-    }
-    inline void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
-    {
-        assert(row < dimensions_.height());
-        assert ((x1 - x0) <= dimensions_.width() );
-        std::copy(buf, buf + (x1 - x0), pData_ + row * dimensions_.width() + x0);
-    }
-
-    inline double get_offset() const
-    {
-        return offset_;
-    }
-
-    inline void set_offset(double set)
-    {
-        offset_ = set;
-    }
-
-    inline double get_scaling() const
-    {
-        return scaling_;
-    }
-
-    inline void set_scaling(double set)
-    {
-        if (set != 0.0)
-        {
-            scaling_ = set;
-            return;
-        }
-        std::clog << "Can not set scaling to 0.0, offset not set." << std::endl;
-    }
-
-    inline bool get_premultiplied() const
-    {
-        return premultiplied_alpha_;
-    }
-
-    inline void set_premultiplied(bool set)
-    {
-        premultiplied_alpha_ = set;
-    }
-
-    inline void painted(bool painted)
-    {
-        painted_ = painted;
-    }
-
-    inline bool painted() const
-    {
-        return painted_;
-    }
-
-    inline image_dtype get_dtype()  const
-    {
-        return dtype;
-    }
+    void swap(image<T> & rhs);
+    pixel_type& operator() (std::size_t i, std::size_t j);
+    const pixel_type& operator() (std::size_t i, std::size_t j) const;
+    std::size_t width() const;
+    std::size_t height() const;
+    unsigned getSize() const;
+    unsigned getRowSize() const;
+    void set(pixel_type const& t);
+    const pixel_type* getData() const;
+    pixel_type* getData();
+    const unsigned char* getBytes() const;
+    unsigned char* getBytes();
+    const pixel_type* getRow(std::size_t row) const;
+    const pixel_type* getRow(std::size_t row, std::size_t x0) const;
+    pixel_type* getRow(std::size_t row);
+    pixel_type* getRow(std::size_t row, std::size_t x0);
+    void setRow(std::size_t row, pixel_type const* buf, std::size_t size);
+    void setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf);
+    double get_offset() const;
+    void set_offset(double set);
+    double get_scaling() const;
+    void set_scaling(double set);
+    bool get_premultiplied() const;
+    void set_premultiplied(bool set);
+    void painted(bool painted);
+    bool painted() const;
+    image_dtype get_dtype() const;
 };
 
+using image_null = image<null_t>;
 using image_rgba8 = image<rgba8_t>;
 using image_gray8 = image<gray8_t>;
 using image_gray8s = image<gray8s_t>;
@@ -333,6 +185,6 @@ using image_gray64 = image<gray64_t>;
 using image_gray64s = image<gray64s_t>;
 using image_gray64f = image<gray64f_t>;
 
-} // end ns
+} // end ns mapnik
 
-#endif // MAPNIK_IMAGE_DATA_HPP
+#endif // MAPNIK_IMAGE_HPP
