@@ -10,6 +10,7 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/polygon_clipper.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/color.hpp>
 // agg
 #include "agg_conv_clip_polygon.h"
 // clipper

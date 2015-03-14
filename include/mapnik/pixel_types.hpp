@@ -44,6 +44,7 @@ enum image_dtype : std::uint8_t
     IMAGE_DTYPE_MAX
 };
 
+struct null_t { using type = std::uint8_t;  static const image_dtype id = image_dtype_null; };
 struct rgba8_t { using type = std::uint32_t;  static const image_dtype id = image_dtype_rgba8; };
 struct gray8_t { using type = std::uint8_t;   static const image_dtype id = image_dtype_gray8; };
 struct gray8s_t { using type = std::int8_t;   static const image_dtype id = image_dtype_gray8s; };
