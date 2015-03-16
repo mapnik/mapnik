@@ -24,12 +24,12 @@
 #include <iostream>
 #include <string>
 
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_impl.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/geometry_to_wkb.hpp>
-
-
 
 
 int main (int argc, char ** argv )
@@ -81,21 +81,17 @@ int main (int argc, char ** argv )
         while(f)
         {
             std::cerr << *f << std::endl;
-            mapnik::geometry_container const& paths = f->paths();
-            for (mapnik::geometry_type const& geom : paths)
+            mapnik::new_geometry::geometry const& geom = f->get_geometry();
+            // NDR
             {
-                // NDR
-                {
-                    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::util::wkbNDR);
-                    std::cerr << mapnik::util::to_hex(wkb->buffer(),wkb->size()) << std::endl;
-                }
-                // XDR
-                {
-                    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::util::wkbXDR);
-                    std::cerr << mapnik::util::to_hex(wkb->buffer(),wkb->size()) << std::endl;
-                }
+                mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::wkbNDR);
+                std::cerr << mapnik::util::detail::to_hex(wkb->buffer(),wkb->size()) << std::endl;
             }
-
+            // XDR
+            {
+                mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::wkbXDR);
+                std::cerr << mapnik::util::detail::to_hex(wkb->buffer(),wkb->size()) << std::endl;
+            }
             f = fs->next();
         }
     }
