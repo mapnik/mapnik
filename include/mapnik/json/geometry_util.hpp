@@ -194,6 +194,7 @@ struct create_multipolygon
                 if (i == 0) poly.set_exterior_ring(std::move(ring));
                 else poly.add_hole(std::move(ring));
             }
+            multi_poly.emplace_back(std::move(poly));
         }
         geom_ = std::move(multi_poly);
     }
