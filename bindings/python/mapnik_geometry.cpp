@@ -50,6 +50,7 @@
 #include <mapnik/wkt/wkt_factory.hpp> // from_wkt/to_wkt
 #include <mapnik/json/geometry_parser.hpp> // from_geojson
 #include <mapnik/util/geometry_to_geojson.hpp> // to_geojson
+#include <mapnik/util/geometry_to_wkb.hpp> // to_wkb
 //#include <mapnik/util/geometry_to_svg.hpp>
 #include <mapnik/wkb.hpp>
 
@@ -58,7 +59,6 @@
 #include <stdexcept>
 
 namespace {
-
 
 std::shared_ptr<mapnik::new_geometry::geometry> from_wkb_impl(std::string const& wkb)
 {
@@ -99,43 +99,24 @@ inline std::string boost_version()
     return s.str();
 }
 
-//PyObject* to_wkb(mapnik::geometry_type const& geom, mapnik::util::wkbByteOrder byte_order)
-//{
-//   mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
-//   if (wkb)
-//   {
-//       return
-//#if PY_VERSION_HEX >= 0x03000000
-//            ::PyBytes_FromStringAndSize
-//#else
-//            ::PyString_FromStringAndSize
-//#endif
-//            ((const char*)wkb->buffer(),wkb->size());
-//    }
-//    else
-//    {
-//        Py_RETURN_NONE;
-//    }
-//}
-
-//PyObject* to_wkb2( mapnik::geometry_container const& p, mapnik::util::wkbByteOrder byte_order)
-//{
-//    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(p,byte_order);
-//    if (wkb)
-//    {
-//        return
-//#if PY_VERSION_HEX >= 0x03000000
-//            ::PyBytes_FromStringAndSize
-//#else
-//            ::PyString_FromStringAndSize
-//#endif
-//            ((const char*)wkb->buffer(),wkb->size());
-//    }
-//    else
-//    {
-//        Py_RETURN_NONE;
-//    }
-//}
+PyObject* to_wkb(mapnik::new_geometry::geometry const& geom, mapnik::wkbByteOrder byte_order)
+{
+    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
+    if (wkb)
+    {
+        return
+#if PY_VERSION_HEX >= 0x03000000
+            ::PyBytes_FromStringAndSize
+#else
+            ::PyString_FromStringAndSize
+#endif
+            ((const char*)wkb->buffer(),wkb->size());
+    }
+    else
+    {
+        Py_RETURN_NONE;
+    }
+}
 
 std::string to_geojson_impl(mapnik::new_geometry::geometry const& geom)
 {
@@ -243,7 +224,7 @@ void export_geometry()
         .def("is_simple", &geometry_is_simple_impl)
         .def("correct", &geometry_correct_impl)
         .def("centroid",&geometry_centroid_impl)
-        //.def("to_wkb",&to_wkb)
+        .def("to_wkb",&to_wkb)
         .def("to_wkt",&to_wkt_impl)
         .def("to_geojson",&to_geojson_impl)
         //.def("to_svg",&to_svg)
