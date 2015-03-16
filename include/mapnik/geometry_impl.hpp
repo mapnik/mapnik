@@ -195,7 +195,8 @@ struct polygon_vertex_adapter
           rings_end_(poly_.interior_rings.size() + 1),
           current_index_(0),
           end_index_((rings_itr_ < rings_end_) ? poly_.exterior_ring.size() : 0),
-          start_loop_(true) {}
+          start_loop_(true),
+          close_loop_(false) {}
 
     void rewind(unsigned) const
     {
@@ -204,10 +205,16 @@ struct polygon_vertex_adapter
         current_index_ = 0;
         end_index_ = (rings_itr_ < rings_end_) ? poly_.exterior_ring.size() : 0;
         start_loop_ = true;
+        close_loop_ = false;
     }
 
-    unsigned vertex(double*x, double*y) const
+    unsigned vertex(double* x, double* y) const
     {
+        if (close_loop_)
+        {
+            close_loop_ = false;
+            return SEG_CLOSE;
+        }
         if (rings_itr_ == rings_end_)
             return mapnik::SEG_END;
         if (current_index_ < end_index_)
@@ -220,6 +227,11 @@ struct polygon_vertex_adapter
             {
                 start_loop_= false;
                 return mapnik::SEG_MOVETO;
+            }
+            if (current_index_ == end_index_)
+            {
+                close_loop_ = true;
+                //return mapnik::SEG_CLOSE;
             }
             return mapnik::SEG_LINETO;
         }
@@ -247,6 +259,7 @@ private:
     mutable std::size_t current_index_;
     mutable std::size_t end_index_;
     mutable bool start_loop_;
+    mutable bool close_loop_;
 };
 
 }}
