@@ -134,53 +134,39 @@ def test_wkb_parsing():
     eq_(count,len(path))
 
 def test_geojson_parsing():
-    path = mapnik.Path()
+    geometries = []
     count = 0
     for j in geojson:
-        count += j[0]
-        path.add_geojson(j[1])
-    eq_(count,len(path))
+        count += 1
+        geometries.append(mapnik.Geometry.from_geojson(j[1]))
+    eq_(count,len(geometries))
 
 def test_geojson_parsing_reversed():
-    path = mapnik.Path()
-    path2 = mapnik.Path()
-    count = 0
     for idx,j in enumerate(geojson_reversed):
-        count += j[0]
-        path.add_geojson(j[1])
-        path2.add_geojson(geojson[idx][1])
-        eq_(path.to_geojson(),path2.to_geojson())
-    eq_(count,len(path))
-
+        g1 = mapnik.Geometry.from_geojson(j[1])
+        g2 = mapnik.Geometry.from_geojson(geojson[idx][1])
+        eq_(g1.to_geojson(), g2.to_geojson())
 
 # http://geojson.org/geojson-spec.html#positions
 def test_geojson_point_positions():
     input_json = '{"type":"Point","coordinates":[30,10]}'
-
-    path = mapnik.Path()
-    path.add_geojson(input_json)
-    eq_(path.to_geojson(),input_json)
-
-    path = mapnik.Path()
+    geom = mapnik.Geometry.from_geojson(input_json)
+    eq_(geom.to_geojson(),input_json)
     # should ignore all but the first two
-    path.add_geojson('{"type":"Point","coordinates":[30,10,50,50,50,50]}')
-    eq_(path.to_geojson(),input_json)
+    geom = mapnik.Geometry.from_geojson('{"type":"Point","coordinates":[30,10,50,50,50,50]}')
+    eq_(geom.to_geojson(),input_json)
 
 def test_geojson_point_positions2():
     input_json = '{"type":"LineString","coordinates":[[30,10],[10,30],[40,40]]}'
+    geom = mapnik.Geometry.from_geojson(input_json)
+    eq_(geom.to_geojson(),input_json)
 
-    path = mapnik.Path()
-    path.add_geojson(input_json)
-    eq_(path.to_geojson(),input_json)
-
-    path = mapnik.Path()
     # should ignore all but the first two
-    path.add_geojson('{"type":"LineString","coordinates":[[30.0,10.0,0,0,0],[10.0,30.0,0,0,0],[40.0,40.0,0,0,0]]}')
-    eq_(path.to_geojson(),input_json)
+    geom = mapnik.Geometry.from_geojson('{"type":"LineString","coordinates":[[30.0,10.0,0,0,0],[10.0,30.0,0,0,0],[40.0,40.0,0,0,0]]}')
+    eq_(geom.to_geojson(),input_json)
 
 def compare_wkb_from_wkt(wkt,num=None):
-
-    paths = mapnik.Path.from_wkt(wkt)
+    geom = mapnik.Geometry.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
     f = mapnik.Feature(mapnik.Context(),1)
@@ -243,11 +229,9 @@ def compare_wkt_from_wkt(wkt,num=None):
         eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
 def compare_wkt_to_geojson(idx,wkt,num=None):
-    paths = mapnik.Path.from_wkt(wkt)
+    geom = mapnik.Geometry.from_wkt(wkt)
     # ensure both have same result
-    if num:
-        eq_(len(paths),num)
-    gj = paths.to_geojson()
+    gj = geom.to_geojson()
     eq_(len(gj) > 1,True)
     a = json.loads(gj)
     e = json.loads(geojson[idx][1])
