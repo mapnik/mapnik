@@ -204,7 +204,7 @@ wkb_buffer_ptr polygon_wkb( new_geometry::polygon const& poly, wkbByteOrder byte
 
 wkb_buffer_ptr multi_point_wkb( new_geometry::multi_point const& multi_pt, wkbByteOrder byte_order)
 {
-    std::size_t size = 1 + 4 + (1 + 4 + 8 * 2) * multi_pt.size() ; // byteOrder + wkbType + Point.size * num_points
+    std::size_t size = 1 + 4 + 4 + (1 + 4 + 8 * 2) * multi_pt.size() ; // byteOrder + wkbType + num_point + Point.size * num_points
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
@@ -254,10 +254,10 @@ struct geometry_to_wkb
 
     // multi/collection
 
-    //result_type operator() (new_geometry::multi_point const& multi_pt) const
-    //{
-    //    return multi_point_wkb(multi_pt, byte_order_);
-    //}
+    result_type operator() (new_geometry::multi_point const& multi_pt) const
+    {
+        return multi_point_wkb(multi_pt, byte_order_);
+    }
 
     template <typename Geometry>
     result_type operator() (Geometry const& geom) const
