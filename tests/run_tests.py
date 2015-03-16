@@ -8,7 +8,6 @@ except ImportError as e:
     sys.stderr.write("Unable to run python tests: the third party 'nose' module is required\nTo install 'nose' do:\n\tsudo pip install nose (or on debian systems: apt-get install python-nose): %s\n" % e)
     sys.exit(1)
     
-from python_tests.utilities import TodoPlugin
 from nose.plugins.doctests import Doctest
 
 import nose, sys, os, getopt
@@ -50,6 +49,7 @@ def main():
         # Allow python to find libraries for testing on the buildbot
         sys.path.insert(0, os.path.join(prefix, "lib/python%s/site-packages" % sys.version[:3]))
 
+    from python_tests.utilities import TodoPlugin
     import mapnik
 
     if not quiet:
