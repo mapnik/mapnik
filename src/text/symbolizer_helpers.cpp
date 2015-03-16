@@ -86,6 +86,7 @@ void base_symbolizer_helper::initialize_geometries() const
 
     new_geometry::geometry const& geom = feature_.get_geometry();
     new_geometry::geometry_types type = new_geometry::geometry_type(geom);
+    // FIXME: how to handle MultiLinePolygon
     if (type == new_geometry::geometry_types::Polygon)
     {
         if (minimum_path_length > 0)
@@ -96,32 +97,16 @@ void base_symbolizer_helper::initialize_geometries() const
                 geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
             }
         }
+        else
+        {
+            geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
+        }
     }
     else
     {
         geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
     }
-    /*
-    for ( auto const& geom :  feature_.paths())
-    {
-        // don't bother with empty geometries
-        if (geom.size() == 0) continue;
-        mapnik::new_geometry::geometry::types type = geom.type();
-        if (type == new_geometry::geometry::types::Polygon)
-        {
-            if (minimum_path_length > 0)
-            {
-                box2d<double> gbox = t_.forward(::mapnik::envelope(geom), prj_trans_);
-                if (gbox.width() < minimum_path_length)
-                {
-                    continue;
-                }
-            }
-        }
-        // TODO - calculate length here as well
-        geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
-    }
-    */
+    // FIXME: return early if geometries_to_process_.empty() ?
     if (largest_box_only)
     {
         geometries_to_process_.sort(largest_bbox_first());
@@ -172,6 +157,7 @@ void base_symbolizer_helper::initialize_points() const
             // https://github.com/mapnik/mapnik/issues/1350
             auto type = new_geometry::geometry_type(geom);
             new_geometry::point label_pos;
+            // FIXME: how to handle MultiLineString?
             if (type == new_geometry::geometry_types::LineString)
             {
                 auto const& line = mapnik::util::get<new_geometry::line_string>(geom);
