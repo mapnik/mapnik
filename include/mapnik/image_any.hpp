@@ -24,6 +24,7 @@
 #define MAPNIK_IMAGE_ANY_HPP
 
 #include <mapnik/image.hpp>
+#include <mapnik/image_null.hpp>
 #include <mapnik/util/variant.hpp>
 
 namespace mapnik {

@@ -1,4 +1,3 @@
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -21,9 +20,12 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_IMAGE_NULL_HPP
+#define MAPNIK_IMAGE_NULL_HPP
+
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/image.hpp>
+//#include <mapnik/image.hpp>
 #include <mapnik/pixel_types.hpp>
 
 //stl
@@ -49,12 +51,13 @@ public:
     image(image<null_t> const& rhs) {}
     image(image<null_t> && rhs) noexcept {}
 
-    void swap(image<null_t> & rhs) {}
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
     unsigned getSize() const { return 0; }
     unsigned getRowSize() const { return 0; }
     void set(pixel_type const& t) { throw std::runtime_error("Can not set values for null image"); }
+    pixel_type& operator() (std::size_t i, std::size_t j) { throw std::runtime_error("Can not get or set values for null image"); }
+    const pixel_type& operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get or set values for null image"); }
     const unsigned char* getBytes() const { return nullptr; }
     unsigned char* getBytes() {return nullptr; }
     double get_offset() const { return 0.0; }
@@ -69,3 +72,5 @@ public:
 };
 
 } // end ns mapnik
+
+#endif // MAPNIK_IMAGE_NULL_HPP
