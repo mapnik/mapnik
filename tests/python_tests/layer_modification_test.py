@@ -2,7 +2,7 @@
 
 import os
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import mapnik
 
 def setup():

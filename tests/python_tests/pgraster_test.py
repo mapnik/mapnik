@@ -4,7 +4,7 @@ from nose.tools import *
 import atexit
 import cProfile, pstats, io
 import time
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
@@ -20,7 +20,7 @@ DEBUG_OUTPUT=False
 
 def log(msg):
     if DEBUG_OUTPUT:
-      print msg
+      print(msg)
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -45,8 +45,8 @@ def psql_can_connect():
     try:
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (connection)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (connection)')
         return False
 
 def psql_run(cmd):
@@ -63,8 +63,8 @@ def raster2pgsql_on_path():
     try:
         call('raster2pgsql')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (raster2pgsql)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (raster2pgsql)')
         return False
 
 def createdb_and_dropdb_on_path():
@@ -76,8 +76,8 @@ def createdb_and_dropdb_on_path():
         call('createdb --help')
         call('dropdb --help')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (createdb/dropdb)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (createdb/dropdb)')
         return False
 
 def postgis_setup():
@@ -743,7 +743,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
 def enabled(tname):
   enabled = len(sys.argv) < 2 or tname in sys.argv
   if not enabled:
-    print "Skipping " + tname + " as not explicitly enabled"
+    print("Skipping " + tname + " as not explicitly enabled")
   return enabled
 
 if __name__ == "__main__":

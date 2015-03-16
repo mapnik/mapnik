@@ -5,7 +5,7 @@ import sys
 import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 
 def setup():

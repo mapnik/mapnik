@@ -5,7 +5,7 @@ import sys
 import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -118,7 +118,7 @@ def do_encoding():
         percent_reduction = s[4]
         name = s[3]
         size = s[4]
-        print 'min: %sms | avg: %sms | total: %sms | len: %s <-- %s' % (min_,avg,elapsed,size,name)
+        print('min: %sms | avg: %sms | total: %sms | len: %s <-- %s' % (min_,avg,elapsed,size,name))
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 from nose.tools import *
 import os,sys
 import mapnik
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 try:
     import json
 except ImportError:

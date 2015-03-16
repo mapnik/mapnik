@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import os, mapnik
 
 def setup():
@@ -11,7 +11,7 @@ def setup():
 
 def test_that_datasources_exist():
     if len(mapnik.DatasourceCache.plugin_names()) == 0:
-        print '***NOTICE*** - no datasource plugins have been loaded'
+        print('***NOTICE*** - no datasource plugins have been loaded')
 
 # adapted from raster_symboliser_test#test_dataraster_query_point
 def test_vrt_referring_to_missing_files():
@@ -34,7 +34,7 @@ def test_vrt_referring_to_missing_files():
         # Should RuntimeError here
         try:
             _map.query_point(0, x, y).features
-        except RuntimeError, e:
+        except RuntimeError as e:
             eq_("this_file_should_not_exist.tif' does not exist in the file system" in str(e), True)
         else:
             assert False
@@ -144,7 +144,7 @@ def test_hit_grid():
         hit_list = '|'.join(rle_encode(fg))
         eq_(hit_list[:16],'730:|2:Greenland')
         eq_(hit_list[-12:],'1:Chile|812:')
-    except RuntimeError, e:
+    except RuntimeError as e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(str(e))

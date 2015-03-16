@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 from subprocess import Popen, PIPE, STDOUT
 import os
 

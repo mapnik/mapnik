@@ -4,7 +4,7 @@
 import glob
 import sys
 from nose.tools import *
-from utilities import execution_path
+from .utilities import execution_path
 
 import os, mapnik
 
@@ -37,9 +37,9 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
             if visual:
                 try:
                     ds = mapnik.Datasource(type='csv',file=csv,strict=True)
-                    print '\x1b[33mfailed\x1b[0m',csv
+                    print('\x1b[33mfailed\x1b[0m',csv)
                 except Exception:
-                    print '\x1b[1;32m✓ \x1b[0m', csv
+                    print('\x1b[1;32m✓ \x1b[0m', csv)
 
     def test_good_files(visual=False):
         good_files = glob.glob("../data/csv/*.*")
@@ -49,9 +49,9 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
             if visual:
                 try:
                     ds = mapnik.Datasource(type='csv',file=csv)
-                    print '\x1b[1;32m✓ \x1b[0m', csv
+                    print('\x1b[1;32m✓ \x1b[0m', csv)
                 except Exception:
-                    print '\x1b[33mfailed\x1b[0m',csv
+                    print('\x1b[33mfailed\x1b[0m',csv)
 
     def test_lon_lat_detection(**kwargs):
         ds = get_csv_ds('lon_lat.csv')

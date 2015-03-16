@@ -3,7 +3,7 @@
 import itertools
 import unittest
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 import mapnik
 from binascii import unhexlify

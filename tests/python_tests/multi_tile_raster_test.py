@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all, contains_word
+from .utilities import execution_path, run_all, contains_word
 import os, mapnik
 
 def setup():

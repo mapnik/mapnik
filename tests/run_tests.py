@@ -4,7 +4,7 @@ import sys
 
 try:
     import nose
-except ImportError, e:
+except ImportError as e:
     sys.stderr.write("Unable to run python tests: the third party 'nose' module is required\nTo install 'nose' do:\n\tsudo pip install nose (or on debian systems: apt-get install python-nose): %s\n" % e)
     sys.exit(1)
     
@@ -20,7 +20,7 @@ def usage():
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hvqp:", ["help", "prefix="])
-    except getopt.GetoptError,err:
+    except getopt.GetoptError as err:
         print(str(err))
         usage()
         sys.exit(2)

@@ -2,8 +2,8 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path, run_all, Todo
-from utilities import get_unique_colors, pixel2channels, side_by_side_image
+from .utilities import execution_path, run_all, Todo
+from .utilities import get_unique_colors, pixel2channels, side_by_side_image
 import mapnik
 
 def setup():
@@ -19,7 +19,7 @@ def debug_image(image,step=2):
         for y in range(0,image.height(),step):
             pixel = image.get_pixel(x,y)
             red,green,blue,alpha = pixel2channels(pixel)
-            print "rgba(%s,%s,%s,%s) at %s,%s" % (red,green,blue,alpha,x,y)
+            print("rgba(%s,%s,%s,%s) at %s,%s" % (red,green,blue,alpha,x,y))
 
 def replace_style(m, name, style):
     m.remove_style(name)
@@ -53,7 +53,7 @@ def validate_pixels_are_not_premultiplied2(image):
             #each value of the color channels will never be bigger than that of the alpha channel.
             if alpha > 0:
                 if red > 0 and red > alpha:
-                    print 'red: %s, a: %s' % (red,alpha)
+                    print('red: %s, a: %s' % (red,alpha))
                     looks_not_multiplied = True
     return looks_not_multiplied
 
@@ -94,7 +94,7 @@ def test_compare_images():
             fails.append('%s not validly demultiplied' % (name))
         a.save(actual,"png32")
         if not os.path.exists(expected):
-            print 'generating expected test image: %s' % expected
+            print('generating expected test image: %s' % expected)
             a.save(expected,"png32")
         expected_im = mapnik.Image.open(expected)
         # compare them
@@ -168,7 +168,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             expected = 'images/style-comp-op/' + name + '.png'
             im.save(actual,"png32")
             if not os.path.exists(expected):
-                print 'generating expected test image: %s' % expected
+                print('generating expected test image: %s' % expected)
                 im.save(expected,"png32")
             expected_im = mapnik.Image.open(expected)
             # compare them

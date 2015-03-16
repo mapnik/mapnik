@@ -5,7 +5,7 @@
 # import math
 # import mapnik
 # import sys
-# from utilities import execution_path, run_all
+# from .utilities import execution_path, run_all
 # from nose.tools import *
 
 # def setup():

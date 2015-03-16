@@ -1,6 +1,6 @@
 #encoding: utf8
 import mapnik
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 from nose.tools import *
 
 def test_add_feature():

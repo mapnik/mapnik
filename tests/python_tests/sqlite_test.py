@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 import os, mapnik
 
@@ -140,7 +140,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
                 eq_(feature[str(k)],v)
             except:
                 #import pdb;pdb.set_trace()
-                print 'invalid key/v %s/%s for: %s' % (k,v,feature)
+                print('invalid key/v %s/%s for: %s' % (k,v,feature))
 
     def test_attachdb_with_sql_join_count():
         ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',

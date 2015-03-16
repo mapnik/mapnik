@@ -5,7 +5,7 @@ from nose.tools import *
 import mapnik
 import random
 import math
-from utilities import run_all, assert_box2d_almost_equal
+from .utilities import run_all, assert_box2d_almost_equal
 
 # Tests that exercise map projections.
 

@@ -3,7 +3,7 @@
 from nose.tools import *
 import atexit
 import time
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
@@ -37,8 +37,8 @@ def psql_can_connect():
     try:
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (connection)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (connection)')
         return False
 
 def shp2pgsql_on_path():
@@ -49,8 +49,8 @@ def shp2pgsql_on_path():
     try:
         call('shp2pgsql')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (shp2pgsql)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (shp2pgsql)')
         return False
 
 def createdb_and_dropdb_on_path():
@@ -62,8 +62,8 @@ def createdb_and_dropdb_on_path():
         call('createdb --help')
         call('dropdb --help')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (createdb/dropdb)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (createdb/dropdb)')
         return False
 
 insert_table_1 = """
@@ -538,7 +538,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                                 table='asdfasdfasdfasdfasdf',
                                 max_size=20)
             fs = ds.all_features()
-        except Exception, e:
+        except Exception as e:
             eq_('in executeQuery' in str(e),True)
 
     def test_threaded_create2(NUM_THREADS=10):
@@ -678,7 +678,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def test_exception_message_reporting():
         try:
             ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
-        except Exception, e:
+        except Exception as e:
             eq_(e.message != 'unidentifiable C++ exception', True)
 
     def test_null_id_field():

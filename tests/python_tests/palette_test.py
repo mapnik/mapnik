@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import os, mapnik
 
 def setup():

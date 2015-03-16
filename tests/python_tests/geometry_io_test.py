@@ -2,7 +2,7 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import mapnik
 from binascii import unhexlify
 
