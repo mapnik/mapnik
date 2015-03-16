@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import mapnik
+from unittest import TestCase
 
 try:
     import json
@@ -35,14 +36,8 @@ def compare(actual, expected, alpha=True):
     im2 = mapnik.Image.open(expected)
     pixels = im1.width() * im1.height()
     delta_pixels = (im2.width() * im2.height()) - pixels
-    #diff = 0
     if delta_pixels != 0:
         return delta_pixels
-    #for x in range(0,im1.width(),2):
-    #    for y in range(0,im1.height(),2):
-    #        if compare_pixels(im1.get_pixel(x,y),im2.get_pixel(x,y),alpha=alpha):
-    #            diff += 1
-    #return diff
     return im1.compare(im2, 0, alpha)
 
 def compare_grids(actual, expected, threshold=0, alpha=True):
@@ -57,21 +52,27 @@ def compare_grids(actual, expected, threshold=0, alpha=True):
         return 99999999
     grid1 = im1['grid']
     grid2 = im2['grid']
-    # dimensions must be exact
-    width1 = len(grid1[0])
-    width2 = len(grid2[0])
-    if not width1 == width2:
-        return 99999999
-    height1 = len(grid1)
-    height2 = len(grid2)
-    if not height1 == height2:
-        return 99999999
-    diff = 0;
-    for y in range(0,height1-1):
-        row1 = grid1[y]
-        row2 = grid2[y]
-        width = min(len(row1),len(row2))
-        for w in range(0,width):
-            if row1[w] != row2[w]:
-                diff += 1
-    return diff
+    try:
+        assertSequenceEqual(grid1, grid2)
+        return 0
+    except:
+        # dimensions must be exact
+        width1 = len(grid1[0])
+        width2 = len(grid2[0])
+        if not width1 == width2:
+            return 99999999
+        height1 = len(grid1)
+        height2 = len(grid2)
+        if not height1 == height2:
+            return 99999999
+        diff = 0;
+        for y in range(0,height1-1):
+            row1 = grid1[y]
+            row2 = grid2[y]
+            if row1 == row2:
+                continue;
+            #width = min(len(row1),len(row2))
+            for w in range(0,width1):
+                if row1[w] != row2[w]:
+                    diff += 1
+        return diff

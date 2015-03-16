@@ -28,7 +28,6 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_util_jpeg.hpp>
 #include <mapnik/image.hpp>
-#include <mapnik/image_any.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/util/conversions.hpp>
 
@@ -37,7 +36,6 @@
 
 // stl
 #include <string>
-#include <iostream>
 
 namespace mapnik
 {
