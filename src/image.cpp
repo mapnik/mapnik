@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/image.hpp>
+#include <mapnik/image_null.hpp>
 #include <mapnik/image_impl.hpp>
 #include <mapnik/pixel_types.hpp>
 

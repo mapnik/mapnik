@@ -312,19 +312,6 @@ inline image_dtype image<T>::get_dtype()  const
     return dtype;
 }
 
-/*
-using image_rgba8 = image<rgba8_t>;
-using image_gray8 = image<gray8_t>;
-using image_gray8s = image<gray8s_t>;
-using image_gray16 = image<gray16_t>;
-using image_gray16s = image<gray16s_t>;
-using image_gray32 = image<gray32_t>;
-using image_gray32s = image<gray32s_t>;
-using image_gray32f = image<gray32f_t>;
-using image_gray64 = image<gray64_t>;
-using image_gray64s = image<gray64s_t>;
-using image_gray64f = image<gray64f_t>;
-*/
 } // end ns
 
 #endif // MAPNIK_IMAGE_IMPL_HPP
