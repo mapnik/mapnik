@@ -25,6 +25,8 @@
 
 #include <mapnik/segment.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry.hpp>
 
 #include <algorithm>
@@ -32,88 +34,101 @@
 
 namespace mapnik {
 
+namespace detail {
+
 template <typename F1, typename F2, typename F3>
-void render_building_symbolizer(mapnik::feature_impl &feature,
+void make_building(new_geometry::polygon const& poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
+{
+    const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
+    const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+    std::deque<segment_t> face_segments;
+    double x0 = 0;
+    double y0 = 0;
+    double x,y;
+    new_geometry::polygon_vertex_adapter va(poly);
+    va.rewind(0);
+    for (unsigned cm = va.vertex(&x, &y); cm != SEG_END;
+         cm = va.vertex(&x, &y))
+    {
+        if (cm == SEG_MOVETO)
+        {
+            frame->move_to(x,y);
+        }
+        else if (cm == SEG_LINETO)
+        {
+            frame->line_to(x,y);
+            face_segments.push_back(segment_t(x0,y0,x,y));
+        }
+        else if (cm == SEG_CLOSE)
+        {
+            frame->close_path();
+        }
+        x0 = x;
+        y0 = y;
+    }
+
+    std::sort(face_segments.begin(),face_segments.end(), y_order);
+    for (auto const& seg : face_segments)
+    {
+        const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+        faces->move_to(std::get<0>(seg),std::get<1>(seg));
+        faces->line_to(std::get<2>(seg),std::get<3>(seg));
+        faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
+        faces->line_to(std::get<0>(seg),std::get<1>(seg) + height);
+
+        face_func(*faces);
+        //
+        frame->move_to(std::get<0>(seg),std::get<1>(seg));
+        frame->line_to(std::get<0>(seg),std::get<1>(seg)+height);
+    }
+
+    va.rewind(0);
+    for (unsigned cm = va.vertex(&x, &y); cm != SEG_END;
+         cm = va.vertex(&x, &y))
+    {
+        if (cm == SEG_MOVETO)
+        {
+            frame->move_to(x,y+height);
+            roof->move_to(x,y+height);
+        }
+        else if (cm == SEG_LINETO)
+        {
+            frame->line_to(x,y+height);
+            roof->line_to(x,y+height);
+        }
+        else if (cm == SEG_CLOSE)
+        {
+            frame->close_path();
+            roof->close_path();
+        }
+    }
+
+    frame_func(*frame);
+    roof_func(*roof);
+}
+
+} // ns detail
+
+template <typename F1, typename F2, typename F3>
+void render_building_symbolizer(mapnik::feature_impl const& feature,
                                 double height,
                                 F1 face_func, F2 frame_func, F3 roof_func)
 {
-    // FIXME
-    /*
-    for (auto const& geom : feature.paths())
+
+    auto const& geom = feature.get_geometry();
+    if (geom.is<new_geometry::polygon>())
     {
-        if (geom.size() > 2)
+        auto const& poly = geom.get<new_geometry::polygon>();
+        detail::make_building(poly, height, face_func, frame_func, roof_func);
+    }
+    else if (geom.is<new_geometry::multi_polygon>())
+    {
+        auto const& multi_poly = geom.get<new_geometry::multi_polygon>();
+        for (auto const& poly : multi_poly)
         {
-
-            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
-            std::deque<segment_t> face_segments;
-            double x0 = 0;
-            double y0 = 0;
-            double x,y;
-            vertex_adapter va(geom);
-            va.rewind(0);
-            for (unsigned cm = va.vertex(&x, &y); cm != SEG_END;
-                 cm = va.vertex(&x, &y))
-            {
-                if (cm == SEG_MOVETO)
-                {
-                    frame->move_to(x,y);
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    frame->line_to(x,y);
-                    face_segments.push_back(segment_t(x0,y0,x,y));
-                }
-                else if (cm == SEG_CLOSE)
-                {
-                    frame->close_path();
-                }
-                x0 = x;
-                y0 = y;
-            }
-
-            std::sort(face_segments.begin(),face_segments.end(), y_order);
-            for (auto const& seg : face_segments)
-            {
-                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
-                faces->move_to(std::get<0>(seg),std::get<1>(seg));
-                faces->line_to(std::get<2>(seg),std::get<3>(seg));
-                faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
-                faces->line_to(std::get<0>(seg),std::get<1>(seg) + height);
-
-                face_func(*faces);
-                //
-                frame->move_to(std::get<0>(seg),std::get<1>(seg));
-                frame->line_to(std::get<0>(seg),std::get<1>(seg)+height);
-
-            }
-
-            va.rewind(0);
-            for (unsigned cm = va.vertex(&x, &y); cm != SEG_END;
-                 cm = va.vertex(&x, &y))
-            {
-                if (cm == SEG_MOVETO)
-                {
-                    frame->move_to(x,y+height);
-                    roof->move_to(x,y+height);
-                }
-                else if (cm == SEG_LINETO)
-                {
-                    frame->line_to(x,y+height);
-                    roof->line_to(x,y+height);
-                }
-                else if (cm == SEG_CLOSE)
-                {
-                    frame->close_path();
-                    roof->close_path();
-                }
-            }
-
-            frame_func(*frame);
-            roof_func(*roof);
+            detail::make_building(poly, height, face_func, frame_func, roof_func);
         }
     }
-    */
 }
 
 } // namespace mapnik
