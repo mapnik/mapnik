@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
+from .utilities import advance_iterator
 
 import os, mapnik
 
@@ -20,7 +21,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             attachdb='scratch@qgis_spatiallite.sqlite'
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['pkuid'],1)
 
     def test_attachdb_with_multiple_files():
@@ -36,7 +37,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try :
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         # the above should not throw but will result in no features
@@ -50,7 +51,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             attachdb='scratch@qgis_spatiallite.sqlite'
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['pkuid'],1)
 
     def test_attachdb_with_index():
@@ -67,7 +68,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try :
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -86,7 +87,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try:
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -100,7 +101,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat', 'ISO3:1', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
         eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float', 'str', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'])
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature.id(),1)
         expected = {
           1995:0,
@@ -140,7 +141,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
                 eq_(feature[str(k)],v)
             except:
                 #import pdb;pdb.set_trace()
-                print 'invalid key/v %s/%s for: %s' % (k,v,feature)
+                print('invalid key/v %s/%s for: %s' % (k,v,feature))
 
     def test_attachdb_with_sql_join_count():
         ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
@@ -212,7 +213,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             table='world_merc',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['OGC_FID'],1)
         eq_(feature['fips'],u'AC')
         eq_(feature['iso2'],u'AG')
@@ -230,7 +231,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             table='(select * from world_merc)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['OGC_FID'],1)
         eq_(feature['fips'],u'AC')
         eq_(feature['iso2'],u'AG')
@@ -248,7 +249,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             table='(select OGC_FID,GEOMETRY from world_merc)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['OGC_FID'],1)
         eq_(len(feature),1)
 
@@ -256,7 +257,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             table='(select GEOMETRY,OGC_FID,fips from world_merc)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['OGC_FID'],1)
         eq_(feature['fips'],u'AC')
 
@@ -267,7 +268,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         #    key_field='aliased_id'
         #    )
         #fs = ds.featureset()
-        #feature = fs.next()
+        #feature = advance_iterator(fs)
         #eq_(feature['aliased_id'],1)
         #eq_(feature['fips'],u'AC')
 
@@ -275,7 +276,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             table='(select GEOMETRY,OGC_FID,OGC_FID as rowid,fips from world_merc)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['rowid'],1)
         eq_(feature['fips'],u'AC')
 
@@ -286,7 +287,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try:
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -313,7 +314,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try :
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -325,7 +326,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try :
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -337,7 +338,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try :
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -378,11 +379,11 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(ds.fields(),['OGC_FID','id','bigint'])
         eq_(ds.field_types(),['int','int','int'])
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),1)
         eq_(feat['OGC_FID'],1)
         eq_(feat['bigint'],2147483648)
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),2)
         eq_(feat['OGC_FID'],2)
         eq_(feat['bigint'],922337203685477580)
@@ -391,7 +392,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
     def test_null_id_field():
         # silence null key warning: https://github.com/mapnik/mapnik/issues/1889
         default_logging_severity = mapnik.logger.get_severity()
-        mapnik.logger.set_severity(mapnik.severity_type.None)
+        mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
         # form up an in-memory test db
         wkb = '010100000000000000000000000000000000000000'
         # note: the osm_id should be declared INTEGER PRIMARY KEY
@@ -410,7 +411,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.featureset()
         feature = None
         try :
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)

@@ -3,7 +3,7 @@
 from nose.tools import *
 import os,sys
 import mapnik
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 try:
     import json
 except ImportError:
@@ -74,7 +74,7 @@ chars = [
  {
    "name":"alert",
    "test":"string with \a quote",
-   "json":'{"type":"Feature","id":1,"geometry":null,"properties":{"name":"string with \u0007 quote"}}'
+   "json":'{"type":"Feature","id":1,"geometry":null,"properties":{"name":"string with \\u0007 quote"}}'
  }
 ]
 

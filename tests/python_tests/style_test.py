@@ -3,7 +3,7 @@
 
 import os
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import mapnik
 
 def test_style_init():

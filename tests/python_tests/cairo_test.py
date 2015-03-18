@@ -4,7 +4,7 @@ import os
 import shutil
 import mapnik
 from nose.tools import eq_
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -90,7 +90,7 @@ if mapnik.has_pycairo():
         draw_neatline(m,context)
         surface.finish()
         if not os.path.exists(expected_cairo_file) or os.environ.get('UPDATE'):
-            print 'generated expected cairo surface file %s' % expected_cairo_file
+            print('generated expected cairo surface file %s' % expected_cairo_file)
             shutil.copy(test_cairo_file,expected_cairo_file)
         diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
         msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
@@ -109,7 +109,7 @@ if mapnik.has_pycairo():
         draw_neatline(m,context)
         surface.finish()
         if not os.path.exists(expected_cairo_file) or os.environ.get('UPDATE'):
-            print 'generated expected cairo surface file %s' % expected_cairo_file
+            print('generated expected cairo surface file %s' % expected_cairo_file)
             shutil.copy(test_cairo_file,expected_cairo_file)
         diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
         msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
@@ -133,14 +133,14 @@ if mapnik.has_pycairo():
         im.save(reduced_color_image,'png8')
         surface.finish()
         if not os.path.exists(expected_cairo_file) or os.environ.get('UPDATE'):
-            print 'generated expected cairo surface file %s' % expected_cairo_file
+            print('generated expected cairo surface file %s' % expected_cairo_file)
             shutil.copy(test_cairo_file,expected_cairo_file)
         diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
         msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
         eq_( diff < 500, True, msg)
         os.remove(test_cairo_file)
         if not os.path.exists(expected_cairo_file2) or os.environ.get('UPDATE'):
-            print 'generated expected cairo surface file %s' % expected_cairo_file2
+            print('generated expected cairo surface file %s' % expected_cairo_file2)
             shutil.copy(reduced_color_image,expected_cairo_file2)
         diff = abs(os.stat(expected_cairo_file2).st_size-os.stat(reduced_color_image).st_size)
         msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,reduced_color_image,'tests/python_tests/'+ expected_cairo_file2)
@@ -159,7 +159,7 @@ if mapnik.has_pycairo():
                     mapnik.render(m, surface)
                     surface.finish()
                     if not os.path.exists(expected_cairo_file) or os.environ.get('UPDATE'):
-                        print 'generated expected cairo surface file %s' % expected_cairo_file
+                        print('generated expected cairo surface file %s' % expected_cairo_file)
                         shutil.copy(test_cairo_file,expected_cairo_file)
                     diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
                     msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
@@ -170,7 +170,7 @@ if mapnik.has_pycairo():
                     os.remove(test_cairo_file)
                     return True
                 else:
-                    print 'skipping cairo.%s test since surface is not available' % type.upper()
+                    print('skipping cairo.%s test since surface is not available' % type.upper())
                     return True
 
         def test_pycairo_svg_surface1():

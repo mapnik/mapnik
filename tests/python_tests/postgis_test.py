@@ -3,10 +3,15 @@
 from nose.tools import *
 import atexit
 import time
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
+from .utilities import decode_text
+from .utilities import advance_iterator
 from subprocess import Popen, PIPE
 import os, mapnik
-from Queue import Queue
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 import threading
 
 
@@ -21,6 +26,7 @@ def setup():
 
 def call(cmd,silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    stderr = decode_text(stderr)
     if not stderr:
         return stdin.strip()
     elif not silent and 'ERROR' in stderr or 'could not connect to server' in stderr:
@@ -37,8 +43,8 @@ def psql_can_connect():
     try:
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (connection)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (connection)')
         return False
 
 def shp2pgsql_on_path():
@@ -49,8 +55,8 @@ def shp2pgsql_on_path():
     try:
         call('shp2pgsql')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (shp2pgsql)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (shp2pgsql)')
         return False
 
 def createdb_and_dropdb_on_path():
@@ -62,8 +68,8 @@ def createdb_and_dropdb_on_path():
         call('createdb --help')
         call('dropdb --help')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (createdb/dropdb)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (createdb/dropdb)')
         return False
 
 insert_table_1 = """
@@ -228,7 +234,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def test_feature():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc')
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['gid'],1)
         eq_(feature['fips'],u'AC')
         eq_(feature['iso2'],u'AG')
@@ -246,7 +252,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def test_subquery():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select * from world_merc) as w')
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['gid'],1)
         eq_(feature['fips'],u'AC')
         eq_(feature['iso2'],u'AG')
@@ -263,7 +269,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select gid,geom,fips as _fips from world_merc) as w')
         fs = ds.featureset()
-        feature = fs.next()
+        feature = advance_iterator(fs)
         eq_(feature['gid'],1)
         eq_(feature['_fips'],u'AC')
         eq_(len(feature),2)
@@ -274,7 +280,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         fs = ds.featureset()
         feature = None
         try:
-            feature = fs.next()
+            feature = advance_iterator(fs)
         except StopIteration:
             pass
         eq_(feature,None)
@@ -309,45 +315,45 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next()['manual_id'],0)
-        eq_(fs.next()['manual_id'],1)
-        eq_(fs.next()['manual_id'],1000)
-        eq_(fs.next()['manual_id'],-1000)
-        eq_(fs.next()['manual_id'],2147483647)
-        eq_(fs.next()['manual_id'],-2147483648)
+        eq_(advance_iterator(fs)['manual_id'],0)
+        eq_(advance_iterator(fs)['manual_id'],1)
+        eq_(advance_iterator(fs)['manual_id'],1000)
+        eq_(advance_iterator(fs)['manual_id'],-1000)
+        eq_(advance_iterator(fs)['manual_id'],2147483647)
+        eq_(advance_iterator(fs)['manual_id'],-2147483648)
 
         fs = ds.featureset()
-        eq_(fs.next().id(),0)
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),1000)
-        eq_(fs.next().id(),-1000)
-        eq_(fs.next().id(),2147483647)
-        eq_(fs.next().id(),-2147483648)
+        eq_(advance_iterator(fs).id(),0)
+        eq_(advance_iterator(fs).id(),1)
+        eq_(advance_iterator(fs).id(),1000)
+        eq_(advance_iterator(fs).id(),-1000)
+        eq_(advance_iterator(fs).id(),2147483647)
+        eq_(advance_iterator(fs).id(),-2147483648)
 
     def test_auto_detection_will_fail_since_no_primary_key():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test3',
                             geometry_field='geom',
                             autodetect_key_field=False)
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['manual_id'],0)
         # will fail: https://github.com/mapnik/mapnik/issues/895
         #eq_(feat['non_id'],9223372036854775807)
-        eq_(fs.next()['manual_id'],1)
-        eq_(fs.next()['manual_id'],1000)
-        eq_(fs.next()['manual_id'],-1000)
-        eq_(fs.next()['manual_id'],2147483647)
-        eq_(fs.next()['manual_id'],-2147483648)
+        eq_(advance_iterator(fs)['manual_id'],1)
+        eq_(advance_iterator(fs)['manual_id'],1000)
+        eq_(advance_iterator(fs)['manual_id'],-1000)
+        eq_(advance_iterator(fs)['manual_id'],2147483647)
+        eq_(advance_iterator(fs)['manual_id'],-2147483648)
 
         # since no valid primary key will be detected the fallback
         # is auto-incrementing counter
         fs = ds.featureset()
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),2)
-        eq_(fs.next().id(),3)
-        eq_(fs.next().id(),4)
-        eq_(fs.next().id(),5)
-        eq_(fs.next().id(),6)
+        eq_(advance_iterator(fs).id(),1)
+        eq_(advance_iterator(fs).id(),2)
+        eq_(advance_iterator(fs).id(),3)
+        eq_(advance_iterator(fs).id(),4)
+        eq_(advance_iterator(fs).id(),5)
+        eq_(advance_iterator(fs).id(),6)
 
     @raises(RuntimeError)
     def test_auto_detection_will_fail_and_should_throw():
@@ -361,42 +367,42 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next()['manual_id'],0)
-        eq_(fs.next()['manual_id'],1)
-        eq_(fs.next()['manual_id'],1000)
-        eq_(fs.next()['manual_id'],-1000)
-        eq_(fs.next()['manual_id'],2147483647)
-        eq_(fs.next()['manual_id'],-2147483648)
+        eq_(advance_iterator(fs)['manual_id'],0)
+        eq_(advance_iterator(fs)['manual_id'],1)
+        eq_(advance_iterator(fs)['manual_id'],1000)
+        eq_(advance_iterator(fs)['manual_id'],-1000)
+        eq_(advance_iterator(fs)['manual_id'],2147483647)
+        eq_(advance_iterator(fs)['manual_id'],-2147483648)
 
         fs = ds.featureset()
-        eq_(fs.next().id(),0)
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),1000)
-        eq_(fs.next().id(),-1000)
-        eq_(fs.next().id(),2147483647)
-        eq_(fs.next().id(),-2147483648)
+        eq_(advance_iterator(fs).id(),0)
+        eq_(advance_iterator(fs).id(),1)
+        eq_(advance_iterator(fs).id(),1000)
+        eq_(advance_iterator(fs).id(),-1000)
+        eq_(advance_iterator(fs).id(),2147483647)
+        eq_(advance_iterator(fs).id(),-2147483648)
 
     def test_disabled_auto_detection_and_subquery():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''(select geom, 'a'::varchar as name from test2) as t''',
                             geometry_field='geom',
                             autodetect_key_field=False)
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),1)
         eq_(feat['name'],'a')
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),2)
         eq_(feat['name'],'a')
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),3)
         eq_(feat['name'],'a')
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),4)
         eq_(feat['name'],'a')
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),5)
         eq_(feat['name'],'a')
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),6)
         eq_(feat['name'],'a')
 
@@ -405,20 +411,20 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next()['manual_id'],0)
-        eq_(fs.next()['manual_id'],1)
-        eq_(fs.next()['manual_id'],1000)
-        eq_(fs.next()['manual_id'],-1000)
-        eq_(fs.next()['manual_id'],2147483647)
-        eq_(fs.next()['manual_id'],-2147483648)
+        eq_(advance_iterator(fs)['manual_id'],0)
+        eq_(advance_iterator(fs)['manual_id'],1)
+        eq_(advance_iterator(fs)['manual_id'],1000)
+        eq_(advance_iterator(fs)['manual_id'],-1000)
+        eq_(advance_iterator(fs)['manual_id'],2147483647)
+        eq_(advance_iterator(fs)['manual_id'],-2147483648)
 
         fs = ds.featureset()
-        eq_(fs.next().id(),0)
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),1000)
-        eq_(fs.next().id(),-1000)
-        eq_(fs.next().id(),2147483647)
-        eq_(fs.next().id(),-2147483648)
+        eq_(advance_iterator(fs).id(),0)
+        eq_(advance_iterator(fs).id(),1)
+        eq_(advance_iterator(fs).id(),1000)
+        eq_(advance_iterator(fs).id(),-1000)
+        eq_(advance_iterator(fs).id(),2147483647)
+        eq_(advance_iterator(fs).id(),-2147483648)
 
     @raises(RuntimeError)
     def test_auto_detection_of_invalid_numeric_primary_key():
@@ -444,32 +450,32 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             key_field='manual_id',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next()['manual_id'],0)
-        eq_(fs.next()['manual_id'],1)
-        eq_(fs.next()['manual_id'],1000)
-        eq_(fs.next()['manual_id'],-1000)
-        eq_(fs.next()['manual_id'],2147483647)
-        eq_(fs.next()['manual_id'],-2147483648)
+        eq_(advance_iterator(fs)['manual_id'],0)
+        eq_(advance_iterator(fs)['manual_id'],1)
+        eq_(advance_iterator(fs)['manual_id'],1000)
+        eq_(advance_iterator(fs)['manual_id'],-1000)
+        eq_(advance_iterator(fs)['manual_id'],2147483647)
+        eq_(advance_iterator(fs)['manual_id'],-2147483648)
 
         fs = ds.featureset()
-        eq_(fs.next().id(),0)
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),1000)
-        eq_(fs.next().id(),-1000)
-        eq_(fs.next().id(),2147483647)
-        eq_(fs.next().id(),-2147483648)
+        eq_(advance_iterator(fs).id(),0)
+        eq_(advance_iterator(fs).id(),1)
+        eq_(advance_iterator(fs).id(),1000)
+        eq_(advance_iterator(fs).id(),-1000)
+        eq_(advance_iterator(fs).id(),2147483647)
+        eq_(advance_iterator(fs).id(),-2147483648)
 
     def test_numeric_type_feature_id_field():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test5',
                             geometry_field='geom',
                             autodetect_key_field=False)
         fs = ds.featureset()
-        eq_(fs.next()['manual_id'],-1)
-        eq_(fs.next()['manual_id'],1)
+        eq_(advance_iterator(fs)['manual_id'],-1)
+        eq_(advance_iterator(fs)['manual_id'],1)
 
         fs = ds.featureset()
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),2)
+        eq_(advance_iterator(fs).id(),1)
+        eq_(advance_iterator(fs).id(),2)
 
     def test_querying_table_with_mixed_case():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='"tableWithMixedCase"',
@@ -477,7 +483,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             autodetect_key_field=True)
         fs = ds.featureset()
         for id in range(1,5):
-            eq_(fs.next().id(),id)
+            eq_(advance_iterator(fs).id(),id)
 
     def test_querying_subquery_with_mixed_case():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(SeLeCt * FrOm "tableWithMixedCase") as MixedCaseQuery',
@@ -485,7 +491,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             autodetect_key_field=True)
         fs = ds.featureset()
         for id in range(1,5):
-            eq_(fs.next().id(),id)
+            eq_(advance_iterator(fs).id(),id)
 
     def test_bbox_token_in_subquery1():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
@@ -494,7 +500,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             autodetect_key_field=True)
         fs = ds.featureset()
         for id in range(1,5):
-            eq_(fs.next().id(),id)
+            eq_(advance_iterator(fs).id(),id)
 
     def test_bbox_token_in_subquery2():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
@@ -503,13 +509,13 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             autodetect_key_field=True)
         fs = ds.featureset()
         for id in range(1,5):
-            eq_(fs.next().id(),id)
+            eq_(advance_iterator(fs).id(),id)
 
     def test_empty_geom():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test7',
                             geometry_field='geom')
         fs = ds.featureset()
-        eq_(fs.next()['gid'],1)
+        eq_(advance_iterator(fs)['gid'],1)
 
     def create_ds():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
@@ -538,7 +544,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                                 table='asdfasdfasdfasdfasdf',
                                 max_size=20)
             fs = ds.all_features()
-        except Exception, e:
+        except Exception as e:
             eq_('in executeQuery' in str(e),True)
 
     def test_threaded_create2(NUM_THREADS=10):
@@ -555,11 +561,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(ds.fields(),['gid','int_field'])
         eq_(ds.field_types(),['int','int'])
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),1)
         eq_(feat['gid'],1)
         eq_(feat['int_field'],2147483648)
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),2)
         eq_(feat['gid'],2)
         eq_(feat['int_field'],922337203685477580)
@@ -578,13 +584,13 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                               table='(select ST_MakePoint(0,0) as g, pg_backend_pid() as p, 1 as v) as w',
                               geometry_field='g')
           fs = ds.featureset()
-          eq_(fs.next()['v'], 1)
+          eq_(advance_iterator(fs)['v'], 1)
 
     def test_null_comparision():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test9',
                             geometry_field='geom')
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['gid'],1)
         eq_(feat['name'],'name')
         eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),True)
@@ -598,7 +604,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
 
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['gid'],2)
         eq_(feat['name'],'')
         eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),False)
@@ -612,7 +618,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
 
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['gid'],3)
         eq_(feat['name'],None) # null
         eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),False)
@@ -631,7 +637,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test10',
                             geometry_field='geom')
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['gid'],1)
         eq_(feat['bool_field'],True)
         eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
@@ -645,7 +651,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
 
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['gid'],2)
         eq_(feat['bool_field'],False)
         eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
@@ -659,7 +665,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),False)
 
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['gid'],3)
         eq_(feat['bool_field'],None) # null
         eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
@@ -678,8 +684,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def test_exception_message_reporting():
         try:
             ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
-        except Exception, e:
-            eq_(e.message != 'unidentifiable C++ exception', True)
+        except Exception as e:
+            eq_(e.args[0] != 'unidentifiable C++ exception', True)
 
     def test_null_id_field():
         opts = {'type':'postgis',
@@ -688,8 +694,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                 'table':"(select null::bigint as osm_id, GeomFromEWKT('SRID=4326;POINT(0 0)') as geom) as tmp"}
         ds = mapnik.Datasource(**opts)
         fs = ds.featureset()
-        feat = fs.next()
-        eq_(feat.id(),1L)
+        feat = advance_iterator(fs)
+        eq_(feat.id(),1)
         eq_(feat['osm_id'],None)
 
     @raises(StopIteration)
@@ -701,7 +707,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                 'table':"(select null::bigint as osm_id, GeomFromEWKT('SRID=4326;POINT(0 0)') as geom) as tmp"}
         ds = mapnik.Datasource(**opts)
         fs = ds.featureset()
-        feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
+        feat = advance_iterator(fs) ## should throw since key_field is null: StopIteration: No more features.
 
     def test_psql_error_should_not_break_connection_pool():
         # Bad request, will trigger an error when returning result
@@ -795,7 +801,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(ds.field_types(),['int', 'int', 'str'])
         fs = ds.featureset()
         # Point (2d)
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),1)
         eq_(feat['gid'],1)
         eq_(feat['dim'],2)
@@ -804,7 +810,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         # PointZ
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),2)
         eq_(feat['gid'],2)
         eq_(feat['dim'],3)
@@ -813,7 +819,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         # PointM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),3)
         eq_(feat['gid'],3)
         eq_(feat['dim'],3)
@@ -822,7 +828,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         # PointZM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),4)
         eq_(feat['gid'],4)
         eq_(feat['dim'],4)
@@ -831,7 +837,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         # MultiPoint
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),5)
         eq_(feat['gid'],5)
         eq_(feat['dim'],2)
@@ -841,7 +847,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         eq_(geoms[1].to_wkt(),'Point(1 1)')
         # MultiPointZ
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),6)
         eq_(feat['gid'],6)
         eq_(feat['dim'],3)
@@ -851,7 +857,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         eq_(geoms[1].to_wkt(),'Point(1 1)')
         # MultiPointM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),7)
         eq_(feat['gid'],7)
         eq_(feat['dim'],3)
@@ -861,7 +867,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         eq_(geoms[1].to_wkt(),'Point(1 1)')
         # MultiPointZM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),8)
         eq_(feat['gid'],8)
         eq_(feat['dim'],4)
@@ -871,7 +877,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Point(0 0)')
         eq_(geoms[1].to_wkt(),'Point(1 1)')
         # LineString
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),9)
         eq_(feat['gid'],9)
         eq_(feat['dim'],2)
@@ -880,7 +886,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         # LineStringZ
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),10)
         eq_(feat['gid'],10)
         eq_(feat['dim'],3)
@@ -889,7 +895,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         # LineStringM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),11)
         eq_(feat['gid'],11)
         eq_(feat['dim'],3)
@@ -898,7 +904,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         # LineStringZM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),12)
         eq_(feat['gid'],12)
         eq_(feat['dim'],4)
@@ -907,7 +913,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         # Polygon
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),13)
         eq_(feat['gid'],13)
         eq_(feat['name'],'Polygon')
@@ -915,7 +921,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # PolygonZ
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),14)
         eq_(feat['gid'],14)
         eq_(feat['name'],'PolygonZ')
@@ -923,7 +929,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # PolygonM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),15)
         eq_(feat['gid'],15)
         eq_(feat['name'],'PolygonM')
@@ -931,7 +937,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # PolygonZM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),16)
         eq_(feat['gid'],16)
         eq_(feat['name'],'PolygonZM')
@@ -939,7 +945,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(len(geoms),1)
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # MultiLineString
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),17)
         eq_(feat['gid'],17)
         eq_(feat['name'],'MultiLineString')
@@ -948,7 +954,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
         # MultiLineStringZ
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),18)
         eq_(feat['gid'],18)
         eq_(feat['name'],'MultiLineStringZ')
@@ -957,7 +963,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
         # MultiLineStringM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),19)
         eq_(feat['gid'],19)
         eq_(feat['name'],'MultiLineStringM')
@@ -966,7 +972,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
         # MultiLineStringZM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),20)
         eq_(feat['gid'],20)
         eq_(feat['name'],'MultiLineStringZM')
@@ -975,7 +981,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
         eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
         # MultiPolygon
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),21)
         eq_(feat['gid'],21)
         eq_(feat['name'],'MultiPolygon')
@@ -984,7 +990,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # MultiPolygonZ
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),22)
         eq_(feat['gid'],22)
         eq_(feat['name'],'MultiPolygonZ')
@@ -993,7 +999,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # MultiPolygonM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),23)
         eq_(feat['gid'],23)
         eq_(feat['name'],'MultiPolygonM')
@@ -1002,7 +1008,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
         # MultiPolygonZM
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),24)
         eq_(feat['gid'],24)
         eq_(feat['name'],'MultiPolygonZM')

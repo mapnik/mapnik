@@ -1,7 +1,7 @@
 #coding=utf8
 import os
 import mapnik
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 from nose.tools import *
 
 def setup():

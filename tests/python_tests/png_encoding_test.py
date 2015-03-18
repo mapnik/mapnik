@@ -3,7 +3,7 @@
 
 import os, mapnik
 from nose.tools import eq_
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -50,7 +50,7 @@ if mapnik.has_png():
             expected = gen_filepath('solid',opt)
             actual = os.path.join(tmp_dir,os.path.basename(expected))
             if generate or not os.path.exists(expected):
-              print 'generating expected image %s' % expected
+              print('generating expected image %s' % expected)
               im.save(expected,opt)
             else:
               im.save(actual,opt)
@@ -64,7 +64,7 @@ if mapnik.has_png():
             expected = gen_filepath('blank',opt)
             actual = os.path.join(tmp_dir,os.path.basename(expected))
             if generate or not os.path.exists(expected):
-              print 'generating expected image %s' % expected
+              print('generating expected image %s' % expected)
               im.save(expected,opt)
             else:
               im.save(actual,opt)
@@ -78,7 +78,7 @@ if mapnik.has_png():
             expected = gen_filepath('aerial_rgba',opt)
             actual = os.path.join(tmp_dir,os.path.basename(expected))
             if generate or not os.path.exists(expected):
-              print 'generating expected image %s' % expected
+              print('generating expected image %s' % expected)
               im.save(expected,opt)
             else:
               im.save(actual,opt)
@@ -92,11 +92,11 @@ if mapnik.has_png():
         im.background = mapnik.Color('rgba(255,255,255,.5)')
         c2 = mapnik.Color('rgba(255,255,0,.2)')
         c3 = mapnik.Color('rgb(0,255,255)')
-        for y in range(0,im.height()/2):
-            for x in range(0,im.width()/2):
+        for y in range(0,im.height()//2):
+            for x in range(0,im.width()//2):
                 im.set_pixel(x,y,c2)
-        for y in range(im.height()/2,im.height()):
-            for x in range(im.width()/2,im.width()):
+        for y in range(im.height()//2,im.height()):
+            for x in range(im.width()//2,im.width()):
                 im.set_pixel(x,y,c3)
 
         t0 = tmp_dir + 'white0.png'

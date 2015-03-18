@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import os, mapnik
+from .utilities import advance_iterator
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -51,7 +52,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         m.maximum_extent = merc_bounds
         m.zoom_all()
         fs = m.query_point(0,-11012435.5376, 4599674.6134) # somewhere in kansas
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.attributes['NAME_FORMA'],u'United States of America')
 
     def test_map_query_works2():
@@ -69,7 +70,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         assert_almost_equal(e.maxx, 179.999999975, places=7)
         assert_almost_equal(e.maxy, 192.048603789, places=7)
         fs = m.query_point(0,-98.9264, 38.1432) # somewhere in kansas
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.attributes['NAME'],u'United States')
 
     def test_map_query_in_pixels_works1():
@@ -79,7 +80,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         m.maximum_extent = merc_bounds
         m.zoom_all()
         fs = m.query_map_point(0,55,100) # somewhere in middle of us
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.attributes['NAME_FORMA'],u'United States of America')
 
     def test_map_query_in_pixels_works2():
@@ -96,7 +97,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         assert_almost_equal(e.maxx, 179.999999975, places=7)
         assert_almost_equal(e.maxy, 192.048603789, places=7)
         fs = m.query_map_point(0,55,100) # somewhere in Canada
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.attributes['NAME'],u'Canada')
 
 if __name__ == "__main__":

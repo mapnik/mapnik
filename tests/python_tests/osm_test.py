@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import os, mapnik
+from .utilities import advance_iterator
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -40,10 +41,10 @@ if 'osm' in mapnik.DatasourceCache.plugin_names():
         eq_(ds.fields(),['bigint', 'highway', 'junction', 'note'])
         eq_(ds.field_types(),['str', 'str', 'str', 'str'])
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),4294968186)
         eq_(feat['bigint'], None)
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat['bigint'],'9223372036854775807')
 
 

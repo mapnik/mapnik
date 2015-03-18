@@ -4,10 +4,16 @@ from nose.tools import *
 import atexit
 import cProfile, pstats, io
 import time
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
+from .utilities import decode_text
+from .utilities import advance_iterator
+from .utilities import binary
 from subprocess import Popen, PIPE
 import os, mapnik
-from Queue import Queue
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 import threading
 import sys
 import re
@@ -20,7 +26,7 @@ DEBUG_OUTPUT=False
 
 def log(msg):
     if DEBUG_OUTPUT:
-      print msg
+      print(msg)
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -29,6 +35,7 @@ def setup():
 
 def call(cmd,silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    stderr = decode_text(stderr)
     if not stderr:
         return stdin.strip()
     elif not silent and 'ERROR' in stderr or 'could not connect to server' in stderr:
@@ -45,8 +52,8 @@ def psql_can_connect():
     try:
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (connection)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (connection)')
         return False
 
 def psql_run(cmd):
@@ -63,8 +70,8 @@ def raster2pgsql_on_path():
     try:
         call('raster2pgsql')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (raster2pgsql)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (raster2pgsql)')
         return False
 
 def createdb_and_dropdb_on_path():
@@ -76,8 +83,8 @@ def createdb_and_dropdb_on_path():
         call('createdb --help')
         call('dropdb --help')
         return True
-    except RuntimeError, e:
-        print 'Notice: skipping postgis tests (createdb/dropdb)'
+    except RuntimeError as e:
+        print('Notice: skipping postgis tests (createdb/dropdb)')
         return False
 
 def postgis_setup():
@@ -128,7 +135,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         band=1,use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['rid'],1)
       lyr = mapnik.Layer('dataraster_16bsi')
       lyr.datasource = ds
@@ -170,18 +177,18 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       # no data
-      eq_(im.view(1,1,1,1).tostring(), '\x00\x00\x00\x00') 
-      eq_(im.view(255,255,1,1).tostring(), '\x00\x00\x00\x00') 
-      eq_(im.view(195,116,1,1).tostring(), '\x00\x00\x00\x00') 
+      eq_(im.view(1,1,1,1).tostring(), binary('\x00\x00\x00\x00'))
+      eq_(im.view(255,255,1,1).tostring(), binary('\x00\x00\x00\x00'))
+      eq_(im.view(195,116,1,1).tostring(), binary('\x00\x00\x00\x00'))
       # A0A0A0
-      eq_(im.view(100,120,1,1).tostring(), '\xa0\xa0\xa0\xff')
-      eq_(im.view( 75, 80,1,1).tostring(), '\xa0\xa0\xa0\xff')
+      eq_(im.view(100,120,1,1).tostring(), binary('\xa0\xa0\xa0\xff'))
+      eq_(im.view( 75, 80,1,1).tostring(), binary('\xa0\xa0\xa0\xff'))
       # 808080
-      eq_(im.view( 74,170,1,1).tostring(), '\x80\x80\x80\xff')
-      eq_(im.view( 30, 50,1,1).tostring(), '\x80\x80\x80\xff')
+      eq_(im.view( 74,170,1,1).tostring(), binary('\x80\x80\x80\xff'))
+      eq_(im.view( 30, 50,1,1).tostring(), binary('\x80\x80\x80\xff'))
       # 404040
-      eq_(im.view(190, 70,1,1).tostring(), '\x40\x40\x40\xff')
-      eq_(im.view(140,170,1,1).tostring(), '\x40\x40\x40\xff')
+      eq_(im.view(190, 70,1,1).tostring(), binary('\x40\x40\x40\xff'))
+      eq_(im.view(140,170,1,1).tostring(), binary('\x40\x40\x40\xff'))
 
       # Now zoom over a portion of the env (1/10)
       newenv = mapnik.Box2d(273663,4024478,330738,4072303)
@@ -191,16 +198,16 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
       # nodata
-      eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(200,254,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(255,255,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(200,254,1,1).tostring()), binary('00000000'))
       # A0A0A0
-      eq_(hexlify(im.view(90,232,1,1).tostring()), 'a0a0a0ff')
-      eq_(hexlify(im.view(96,245,1,1).tostring()), 'a0a0a0ff')
+      eq_(hexlify(im.view(90,232,1,1).tostring()), binary('a0a0a0ff'))
+      eq_(hexlify(im.view(96,245,1,1).tostring()), binary('a0a0a0ff'))
       # 808080
-      eq_(hexlify(im.view(1,1,1,1).tostring()), '808080ff') 
-      eq_(hexlify(im.view(128,128,1,1).tostring()), '808080ff') 
+      eq_(hexlify(im.view(1,1,1,1).tostring()), binary('808080ff'))
+      eq_(hexlify(im.view(128,128,1,1).tostring()), binary('808080ff'))
       # 404040
-      eq_(hexlify(im.view(255, 0,1,1).tostring()), '404040ff')
+      eq_(hexlify(im.view(255, 0,1,1).tostring()), binary('404040ff'))
 
     def _test_dataraster_16bsi(lbl, tilesize, constraint, overview):
       import_raster('../data/raster/dataraster-small.tif', 'dataRaster', tilesize, constraint, overview)
@@ -233,7 +240,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['rid'],1)
       lyr = mapnik.Layer('rgba_8bui')
       lyr.datasource = ds
@@ -269,13 +276,13 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       # no data
-      eq_(hexlify(im.view(3,3,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(250,250,1,1).tostring()), '00000000') 
+      eq_(hexlify(im.view(3,3,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(250,250,1,1).tostring()), binary('00000000'))
       # full opaque river color
-      eq_(hexlify(im.view(175,118,1,1).tostring()), 'b9d8f8ff') 
+      eq_(hexlify(im.view(175,118,1,1).tostring()), binary('b9d8f8ff'))
       # half-transparent pixel
       pxstr = hexlify(im.view(122,138,1,1).tostring())
-      apat = ".*(..)$"
+      apat = binary(".*(..)$")
       match = re.match(apat, pxstr)
       assert match, 'pixel ' + pxstr + ' does not match pattern ' + apat
       alpha = match.group(1)
@@ -291,13 +298,13 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
       #im.save('/tmp/xtenth.png') # for debugging
       # no data
-      eq_(hexlify(im.view(255,255,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(200,40,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(255,255,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(200,40,1,1).tostring()), binary('00000000'))
       # full opaque river color
-      eq_(hexlify(im.view(100,168,1,1).tostring()), 'b9d8f8ff')
+      eq_(hexlify(im.view(100,168,1,1).tostring()), binary('b9d8f8ff'))
       # half-transparent pixel
       pxstr = hexlify(im.view(122,138,1,1).tostring())
-      apat = ".*(..)$"
+      apat = binary(".*(..)$")
       match = re.match(apat, pxstr)
       assert match, 'pixel ' + pxstr + ' does not match pattern ' + apat
       alpha = match.group(1)
@@ -333,7 +340,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['rid'],1)
       lyr = mapnik.Layer('rgba_8bui')
       lyr.datasource = ds
@@ -370,16 +377,16 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       # no data
-      eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(128,16,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(250,16,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(3,240,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(128,240,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(250,240,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(3,16,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(128,16,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(250,16,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(3,240,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(128,240,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(250,240,1,1).tostring()), binary('00000000'))
       # dark brown
-      eq_(hexlify(im.view(174,39,1,1).tostring()), 'c3a698ff') 
+      eq_(hexlify(im.view(174,39,1,1).tostring()), binary('c3a698ff'))
       # dark gray
-      eq_(hexlify(im.view(195,132,1,1).tostring()), '575f62ff') 
+      eq_(hexlify(im.view(195,132,1,1).tostring()), binary('575f62ff'))
       # Now zoom over a portion of the env (1/10)
       newenv = mapnik.Box2d(-12329035.7652168, 4508926.651484220, \
                             -12328997.49148983,4508957.34625536)
@@ -390,17 +397,17 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:1/10')
       #im.save('/tmp/xtenth.png') # for debugging
       # no data
-      eq_(hexlify(im.view(3,16,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(128,16,1,1).tostring()), '00000000')
-      eq_(hexlify(im.view(250,16,1,1).tostring()), '00000000')
+      eq_(hexlify(im.view(3,16,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(128,16,1,1).tostring()), binary('00000000'))
+      eq_(hexlify(im.view(250,16,1,1).tostring()), binary('00000000'))
       # black
-      eq_(hexlify(im.view(3,42,1,1).tostring()), '000000ff')
-      eq_(hexlify(im.view(3,134,1,1).tostring()), '000000ff')
-      eq_(hexlify(im.view(3,244,1,1).tostring()), '000000ff')
+      eq_(hexlify(im.view(3,42,1,1).tostring()), binary('000000ff'))
+      eq_(hexlify(im.view(3,134,1,1).tostring()), binary('000000ff'))
+      eq_(hexlify(im.view(3,244,1,1).tostring()), binary('000000ff'))
       # gray
-      eq_(hexlify(im.view(135,157,1,1).tostring()), '4e555bff')
+      eq_(hexlify(im.view(135,157,1,1).tostring()), binary('4e555bff'))
       # brown
-      eq_(hexlify(im.view(195,223,1,1).tostring()), 'f2cdbaff')
+      eq_(hexlify(im.view(195,223,1,1).tostring()), binary('f2cdbaff'))
 
     def _test_rgb_8bui(lbl, tilesize, constraint, overview):
       tnam = 'nodataedge'
@@ -433,7 +440,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       # 13 | v | b | v |
       #    +---+---+---+
       #
-      val_a = value/3;
+      val_a = value//3;
       val_b = val_a*2;
       sql = "(select 3 as i, " \
             " ST_SetValues(" \
@@ -457,7 +464,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         raster_field='"R"', use_overviews=1,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['i'],3)
       lyr = mapnik.Layer('grayscale_subquery')
       lyr.datasource = ds
@@ -484,11 +491,11 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
-      hex_v = h+h+h+'ff'
+      hex_v = binary(h+h+h+'ff')
       h = format(val_a, '02x')
-      hex_a = h+h+h+'ff'
+      hex_a = binary(h+h+h+'ff')
       h = format(val_b, '02x')
-      hex_b = h+h+h+'ff'
+      hex_b = binary(h+h+h+'ff')
       eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
@@ -540,7 +547,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       # 13 | v | b | v |
       #    +---+---+---+
       #
-      val_a = value/3;
+      val_a = value//3;
       val_b = val_a*2;
       sql = "(select 3 as i, " \
             " ST_SetValues(" \
@@ -565,7 +572,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         raster_field='R', use_overviews=0 if overview else 0,
         band=1, prescale_rasters=rescale, clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['i'],3)
       lyr = mapnik.Layer('data_subquery')
       lyr.datasource = ds
@@ -598,9 +605,9 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
-      hex_v = '0000ffff'
-      hex_a = 'ff0000ff'
-      hex_b = '00ff00ff'
+      hex_v = binary('0000ffff')
+      hex_a = binary('ff0000ff')
+      hex_b = binary('00ff00ff')
       eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
@@ -690,7 +697,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         raster_field='r', use_overviews=0 if overview else 0,
         prescale_rasters=rescale, clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['i'],3)
       lyr = mapnik.Layer('rgba_subquery')
       lyr.datasource = ds
@@ -716,9 +723,9 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       im.save('/tmp/xfull.png') # for debugging
-      hex_v = format(r << 24 | g  << 16 | b  << 8 | a, '08x')
-      hex_a = format(r << 24 | g1 << 16 | b  << 8 | a, '08x')
-      hex_b = format(r << 24 | g  << 16 | b1 << 8 | a, '08x')
+      hex_v = binary(format(r << 24 | g  << 16 | b  << 8 | a, '08x'))
+      hex_a = binary(format(r << 24 | g1 << 16 | b  << 8 | a, '08x'))
+      hex_b = binary(format(r << 24 | g  << 16 | b1 << 8 | a, '08x'))
       eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
@@ -743,7 +750,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
 def enabled(tname):
   enabled = len(sys.argv) < 2 or tname in sys.argv
   if not enabled:
-    print "Skipping " + tname + " as not explicitly enabled"
+    print("Skipping " + tname + " as not explicitly enabled")
   return enabled
 
 if __name__ == "__main__":

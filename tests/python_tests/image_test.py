@@ -5,8 +5,10 @@ import sys
 import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
+if sys.version_info[0] > 2:
+    buffer = memoryview
 
 def setup():
     # All of the paths used are relative, if we run the tests

@@ -2,7 +2,7 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 import mapnik
 from binascii import unhexlify
 
@@ -206,14 +206,14 @@ def test_wkt_simple():
     for wkt in wkts:
         try:
             compare_wkt_from_wkt(wkt[1],wkt[0])
-        except RuntimeError, e:
+        except RuntimeError as e:
             raise RuntimeError('%s %s' % (e, wkt))
 
 def test_wkb_simple():
     for wkt in wkts:
         try:
             compare_wkb_from_wkt(wkt[1],wkt[0])
-        except RuntimeError, e:
+        except RuntimeError as e:
             raise RuntimeError('%s %s' % (e, wkt))
 
 def test_wkt_to_geojson():
@@ -222,7 +222,7 @@ def test_wkt_to_geojson():
         try:
             idx += 1
             compare_wkt_to_geojson(idx,wkt[1],wkt[0])
-        except RuntimeError, e:
+        except RuntimeError as e:
             raise RuntimeError('%s %s' % (e, wkt))
 
 @raises(IndexError)

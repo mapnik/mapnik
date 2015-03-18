@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from .utilities import execution_path, run_all
 
 import os, sys, glob, mapnik
 
@@ -10,7 +10,7 @@ default_logging_severity = mapnik.logger.get_severity()
 def setup():
     # make the tests silent to suppress unsupported params from harfbuzz tests
     # TODO: remove this after harfbuzz branch merges
-    mapnik.logger.set_severity(mapnik.severity_type.None)
+    mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
@@ -20,7 +20,7 @@ def teardown():
 
 def test_broken_files():
     default_logging_severity = mapnik.logger.get_severity()
-    mapnik.logger.set_severity(mapnik.severity_type.None)
+    mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
     broken_files = glob.glob("../data/broken_maps/*.xml")
     # Add a filename that doesn't exist 
     broken_files.append("../data/broken/does_not_exist.xml")
@@ -49,7 +49,7 @@ def test_good_files():
             mapnik.load_map(m, filename, strict)
             base_path = os.path.dirname(filename)
             mapnik.load_map_from_string(m,open(filename,'rb').read(),strict,base_path)
-        except RuntimeError, e:
+        except RuntimeError as e:
             # only test datasources that we have installed
             if not 'Could not create datasource' in str(e):
                 failures.append('Failed to load valid map (%s)!' % filename)
