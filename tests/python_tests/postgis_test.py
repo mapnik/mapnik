@@ -695,7 +695,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         ds = mapnik.Datasource(**opts)
         fs = ds.featureset()
         feat = advance_iterator(fs)
-        eq_(feat.id(),1L)
+        eq_(feat.id(),1)
         eq_(feat['osm_id'],None)
 
     @raises(StopIteration)

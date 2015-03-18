@@ -440,7 +440,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       # 13 | v | b | v |
       #    +---+---+---+
       #
-      val_a = value/3;
+      val_a = value//3;
       val_b = val_a*2;
       sql = "(select 3 as i, " \
             " ST_SetValues(" \
@@ -547,7 +547,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       # 13 | v | b | v |
       #    +---+---+---+
       #
-      val_a = value/3;
+      val_a = value//3;
       val_b = val_a*2;
       sql = "(select 3 as i, " \
             " ST_SetValues(" \

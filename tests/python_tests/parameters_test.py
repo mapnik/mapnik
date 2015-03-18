@@ -7,6 +7,9 @@ from nose.tools import *
 from .utilities import execution_path, run_all
 import mapnik
 
+if sys.version_info[0] > 2:
+    sys.maxint = sys.maxsize
+
 def setup():
     os.chdir(execution_path('.'))
 

@@ -4,6 +4,11 @@
 from nose.tools import *
 from .utilities import run_all
 import mapnik
+import sys
+
+if sys.version_info[0] > 2:
+    unicode = str
+    long = int
 
 if hasattr(mapnik,'Expression'):
     mapnik.Filter = mapnik.Expression
