@@ -99,7 +99,7 @@ inline std::string boost_version()
     return s.str();
 }
 
-PyObject* to_wkb(mapnik::new_geometry::geometry const& geom, mapnik::wkbByteOrder byte_order)
+PyObject* to_wkb_impl(mapnik::new_geometry::geometry const& geom, mapnik::wkbByteOrder byte_order)
 {
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
     if (wkb)
@@ -163,6 +163,16 @@ void geometry_correct_impl(mapnik::new_geometry::geometry & geom)
     mapnik::new_geometry::correct(geom);
 }
 
+void polygon_set_exterior_impl(mapnik::new_geometry::polygon & poly, mapnik::new_geometry::linear_ring const& ring)
+{
+    poly.exterior_ring = ring; // copy
+}
+
+void polygon_add_hole_impl(mapnik::new_geometry::polygon & poly, mapnik::new_geometry::linear_ring const& ring)
+{
+    poly.interior_rings.push_back(ring); // copy
+}
+
 mapnik::new_geometry::point geometry_centroid_impl(mapnik::new_geometry::geometry const& geom)
 {
     mapnik::new_geometry::point pt;
@@ -177,7 +187,7 @@ void export_geometry()
 
     implicitly_convertible<mapnik::new_geometry::point, mapnik::new_geometry::geometry>();
     implicitly_convertible<mapnik::new_geometry::line_string, mapnik::new_geometry::geometry>();
-
+    implicitly_convertible<mapnik::new_geometry::polygon, mapnik::new_geometry::geometry>();
     enum_<mapnik::new_geometry::geometry_types>("GeometryType")
         .value("Point",mapnik::new_geometry::geometry_types::Point)
         .value("LineString",mapnik::new_geometry::geometry_types::LineString)
@@ -196,18 +206,45 @@ void export_geometry()
     using mapnik::new_geometry::geometry;
     using mapnik::new_geometry::point;
     using mapnik::new_geometry::line_string;
+    using mapnik::new_geometry::linear_ring;
+    using mapnik::new_geometry::polygon;
 
     class_<point>("Point", init<double, double>((arg("x"), arg("y")),
                                                 "Constructs a new Point object\n"))
         .add_property("x", &point::x, "X coordinate")
         .add_property("y", &point::y, "Y coordinate")
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
         .def("to_geojson",&to_geojson_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
         ;
 
     class_<line_string>("LineString", init<>(
                       "Constructs a new LineString object\n"))
         .def("add_coord", &line_string::add_coord, "Adds coord")
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
         .def("to_geojson",&to_geojson_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
+        ;
+
+    class_<linear_ring>("LinearRing", init<>(
+                            "Constructs a new LinearRtring object\n"))
+        .def("add_coord", &linear_ring::add_coord, "Adds coord")
+        ;
+
+    class_<polygon>("Polygon", init<>(
+                        "Constructs a new Polygon object\n"))
+        .add_property("exterior_ring", &polygon::exterior_ring , "Exterior ring")
+        .def("add_hole", &polygon_add_hole_impl, "Add interior ring")
+        .def("num_rings", polygon_set_exterior_impl, "Number of rings (at least 1)")
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
+        .def("to_geojson",&to_geojson_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
         ;
 
     class_<geometry, std::shared_ptr<geometry>, boost::noncopyable>("Geometry",no_init)
@@ -224,7 +261,7 @@ void export_geometry()
         .def("is_simple", &geometry_is_simple_impl)
         .def("correct", &geometry_correct_impl)
         .def("centroid",&geometry_centroid_impl)
-        .def("to_wkb",&to_wkb)
+        .def("to_wkb",&to_wkb_impl)
         .def("to_wkt",&to_wkt_impl)
         .def("to_geojson",&to_geojson_impl)
         //.def("to_svg",&to_svg)
