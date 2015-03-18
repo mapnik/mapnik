@@ -5,6 +5,7 @@ import atexit
 import cProfile, pstats, io
 import time
 from .utilities import execution_path, run_all
+from .utilities import decode_text
 from .utilities import advance_iterator
 from subprocess import Popen, PIPE
 import os, mapnik
@@ -30,6 +31,7 @@ def setup():
 
 def call(cmd,silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    stderr = decode_text(stderr)
     if not stderr:
         return stdin.strip()
     elif not silent and 'ERROR' in stderr or 'could not connect to server' in stderr:
