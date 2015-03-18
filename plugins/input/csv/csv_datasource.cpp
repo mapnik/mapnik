@@ -34,10 +34,10 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry_correct.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
-//#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
@@ -543,6 +543,9 @@ void csv_datasource::parse_csv(T & stream,
                         mapnik::new_geometry::geometry geom;
                         if (mapnik::from_wkt(value, geom))
                         {
+                            // correct orientations etc
+                            mapnik::new_geometry::correct(geom);
+                            // set geometry
                             feature->set_geometry(std::move(geom));
                             parsed_wkt = true;
                         }
@@ -928,29 +931,6 @@ mapnik::box2d<double> csv_datasource::envelope() const
     return extent_;
 }
 
-/*
-boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
-{
-    boost::optional<mapnik::datasource::geometry_t> result;
-    int multi_type = 0;
-    unsigned num_features = features_.size();
-    for (unsigned i = 0; i < num_features && i < 5; ++i)
-    {
-        mapnik::util::to_ds_type(features_[i]->paths(),result);
-        if (result)
-        {
-            int type = static_cast<int>(*result);
-            if (multi_type > 0 && multi_type != type)
-            {
-                result.reset(mapnik::datasource::Collection);
-                return result;
-            }
-            multi_type = type;
-        }
-    }
-    return result;
-}
-*/
 mapnik::layer_descriptor csv_datasource::get_descriptor() const
 {
     return desc_;

@@ -31,6 +31,7 @@
 #include <mapnik/geometry_impl.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_centroid.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/debug.hpp>
@@ -43,7 +44,37 @@
 //agg
 #include "agg_conv_clip_polyline.h"
 
-namespace mapnik {
+namespace mapnik { namespace detail {
+
+template <typename Points>
+struct apply_vertex_placement
+{
+    apply_vertex_placement(Points & points, view_transform const& tr, proj_transform const& prj_trans)
+        : points_(points),
+          tr_(tr),
+          prj_trans_(prj_trans) {}
+
+    template <typename Adapter>
+    void operator() (Adapter const& va) const
+    {
+        double label_x, label_y, z = 0;
+        va.rewind(0);
+        for (auto cmd = va.vertex(&label_x, &label_y); cmd != SEG_END;)
+        {
+            if (cmd != SEG_CLOSE)
+            {
+                prj_trans_.backward(label_x, label_y, z);
+                tr_.forward(&label_x, &label_y);
+                points_.emplace_back(label_x, label_y);
+            }
+        }
+    }
+    Points & points_;
+    view_transform const& tr_;
+    proj_transform const& prj_trans_;
+};
+
+} // ns detail
 
 base_symbolizer_helper::base_symbolizer_helper(
         symbolizer_base const& sym,
@@ -136,9 +167,11 @@ void base_symbolizer_helper::initialize_points() const
     for (auto * geom_ptr : geometries_to_process_)
     {
         new_geometry::geometry const& geom = *geom_ptr;
-        //vertex_adapter va(geom);
         if (how_placed == VERTEX_PLACEMENT)
         {
+            using apply_vertex_placement = detail::apply_vertex_placement<std::list<pixel_position> >;
+            apply_vertex_placement apply(points_, t_, prj_trans_);
+            util::apply_visitor(new_geometry::vertex_processor<apply_vertex_placement>(apply), geom);
 #if 0
             va.rewind(0);
             for(unsigned i = 0; i < va.size(); ++i)
@@ -156,7 +189,7 @@ void base_symbolizer_helper::initialize_points() const
             bool success = false;
             // https://github.com/mapnik/mapnik/issues/1350
             auto type = new_geometry::geometry_type(geom);
-            new_geometry::point label_pos;
+
             // FIXME: how to handle MultiLineString?
             if (type == new_geometry::geometry_types::LineString)
             {
@@ -166,8 +199,12 @@ void base_symbolizer_helper::initialize_points() const
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                new_geometry::centroid(geom,label_pos);
+                new_geometry::point pt;
+                new_geometry::centroid(geom, pt);
+                label_x = pt.x;
+                label_y = pt.y;
                 success = true;
+
                 //success = label::centroid(va, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
@@ -180,9 +217,9 @@ void base_symbolizer_helper::initialize_points() const
             }
             if (success)
             {
-                prj_trans_.backward(label_pos.x, label_pos.y, z);
-                t_.forward(&label_pos.x, &label_pos.y);
-                points_.emplace_back(label_pos.x, label_pos.y);
+                prj_trans_.backward(label_x, label_y, z);
+                t_.forward(&label_x, &label_y);
+                points_.emplace_back(label_x, label_y);
             }
         }
     }
