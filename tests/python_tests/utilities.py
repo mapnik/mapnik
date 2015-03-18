@@ -7,6 +7,9 @@ from nose.tools import assert_almost_equal
 import os, sys, inspect, traceback
 import mapnik
 
+if sys.version_info[0] > 2:
+    xrange = range
+
 def execution_path(filename):
     return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
 
@@ -57,7 +60,7 @@ def get_unique_colors(im):
             if pixel not in pixels:
                  pixels.append(pixel)
     pixels = sorted(pixels)
-    return map(pixel2rgba,pixels)
+    return list(map(pixel2rgba,pixels))
 
 def run_all(iterable):
     failed = 0

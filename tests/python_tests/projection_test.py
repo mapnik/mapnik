@@ -5,7 +5,11 @@ from nose.tools import *
 import mapnik
 import random
 import math
+import sys
 from .utilities import run_all, assert_box2d_almost_equal
+
+if sys.version_info[0] > 2:
+    xrange = range
 
 # Tests that exercise map projections.
 
