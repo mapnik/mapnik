@@ -2,6 +2,7 @@
 
 from nose.tools import *
 from .utilities import execution_path, run_all
+from .utilities import advance_iterator
 from Queue import Queue
 import threading
 
@@ -128,7 +129,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         # ensure we can read this data back out properly with mapnik
         ds = mapnik.Datasource(**{'type':'sqlite','file':test_db, 'table':'point_table'})
         fs = ds.featureset()
-        feat = fs.next()
+        feat = advance_iterator(fs)
         eq_(feat.id(),1)
         eq_(feat['name'],'test point')
         geoms = feat.geometries()

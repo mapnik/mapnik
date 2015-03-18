@@ -5,6 +5,7 @@ import atexit
 import cProfile, pstats, io
 import time
 from .utilities import execution_path, run_all
+from .utilities import advance_iterator
 from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
@@ -128,7 +129,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         band=1,use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['rid'],1)
       lyr = mapnik.Layer('dataraster_16bsi')
       lyr.datasource = ds
@@ -233,7 +234,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['rid'],1)
       lyr = mapnik.Layer('rgba_8bui')
       lyr.datasource = ds
@@ -333,7 +334,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         use_overviews=1 if overview else 0,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['rid'],1)
       lyr = mapnik.Layer('rgba_8bui')
       lyr.datasource = ds
@@ -457,7 +458,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         raster_field='"R"', use_overviews=1,
         prescale_rasters=rescale,clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['i'],3)
       lyr = mapnik.Layer('grayscale_subquery')
       lyr.datasource = ds
@@ -565,7 +566,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         raster_field='R', use_overviews=0 if overview else 0,
         band=1, prescale_rasters=rescale, clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['i'],3)
       lyr = mapnik.Layer('data_subquery')
       lyr.datasource = ds
@@ -690,7 +691,7 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
         raster_field='r', use_overviews=0 if overview else 0,
         prescale_rasters=rescale, clip_rasters=clip)
       fs = ds.featureset()
-      feature = fs.next()
+      feature = advance_iterator(fs)
       eq_(feature['i'],3)
       lyr = mapnik.Layer('rgba_subquery')
       lyr.datasource = ds
