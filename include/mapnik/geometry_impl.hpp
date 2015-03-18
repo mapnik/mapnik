@@ -262,6 +262,45 @@ private:
     mutable bool close_loop_;
 };
 
+template <typename T>
+struct vertex_adapter_traits{};
+
+template <>
+struct vertex_adapter_traits<point>
+{
+    using type = point_vertex_adapter;
+};
+
+template <>
+struct vertex_adapter_traits<line_string>
+{
+    using type = line_string_vertex_adapter;
+};
+
+template <>
+struct vertex_adapter_traits<polygon>
+{
+    using type = polygon_vertex_adapter;
+};
+
+template <>
+struct vertex_adapter_traits<multi_point>
+{
+    using type = point_vertex_adapter;
+};
+
+template <>
+struct vertex_adapter_traits<multi_line_string>
+{
+    using type = line_string_vertex_adapter;
+};
+
+template <>
+struct vertex_adapter_traits<multi_polygon>
+{
+    using type = polygon_vertex_adapter;
+};
+
 }}
 
 #endif //MAPNIK_GEOMETRY_IMPL_HPP
