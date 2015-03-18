@@ -74,7 +74,7 @@ chars = [
  {
    "name":"alert",
    "test":"string with \a quote",
-   "json":'{"type":"Feature","id":1,"geometry":null,"properties":{"name":"string with \u0007 quote"}}'
+   "json":'{"type":"Feature","id":1,"geometry":null,"properties":{"name":"string with \\u0007 quote"}}'
  }
 ]
 
