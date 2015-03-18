@@ -491,11 +491,11 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
-      hex_v = h+h+h+'ff'
+      hex_v = binary(h+h+h+'ff')
       h = format(val_a, '02x')
-      hex_a = h+h+h+'ff'
+      hex_a = binary(h+h+h+'ff')
       h = format(val_b, '02x')
-      hex_b = h+h+h+'ff'
+      hex_b = binary(h+h+h+'ff')
       eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
@@ -605,9 +605,9 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       #im.save('/tmp/xfull.png') # for debugging
       h = format(value, '02x')
-      hex_v = '0000ffff'
-      hex_a = 'ff0000ff'
-      hex_b = '00ff00ff'
+      hex_v = binary('0000ffff')
+      hex_a = binary('ff0000ff')
+      hex_b = binary('00ff00ff')
       eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
@@ -723,9 +723,9 @@ if 'pgraster' in mapnik.DatasourceCache.plugin_names() \
       lap = time.time() - t0
       log('T ' + str(lap) + ' -- ' + lbl + ' E:full')
       im.save('/tmp/xfull.png') # for debugging
-      hex_v = format(r << 24 | g  << 16 | b  << 8 | a, '08x')
-      hex_a = format(r << 24 | g1 << 16 | b  << 8 | a, '08x')
-      hex_b = format(r << 24 | g  << 16 | b1 << 8 | a, '08x')
+      hex_v = binary(format(r << 24 | g  << 16 | b  << 8 | a, '08x'))
+      hex_a = binary(format(r << 24 | g1 << 16 | b  << 8 | a, '08x'))
+      hex_b = binary(format(r << 24 | g  << 16 | b1 << 8 | a, '08x'))
       eq_(hexlify(im.view( 3, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view( 8, 3,1,1).tostring()), hex_v);
       eq_(hexlify(im.view(13, 3,1,1).tostring()), hex_v);
