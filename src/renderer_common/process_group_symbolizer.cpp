@@ -208,19 +208,4 @@ void render_thunk_extractor::update_box() const
     detector.clear();
 }
 
-geometry_type *origin_point(proj_transform const& prj_trans,
-                            renderer_common const& common)
-{
-    // note that we choose a point in the middle of the screen to
-    // try to ensure that we don't get edge artefacts due to any
-    // symbolizers with avoid-edges set: only the avoid-edges of
-    // the group symbolizer itself should matter.
-    double x = common.width_ / 2.0, y = common.height_ / 2.0, z = 0.0;
-    common.t_.backward(&x, &y);
-    prj_trans.forward(x, y, z);
-    geometry_type *geom = new geometry_type(geometry_type::Point);
-    geom->move_to(x, y);
-    return geom;
-}
-
 } // namespace mapnik
