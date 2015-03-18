@@ -22,6 +22,13 @@ def decode_text(data):
     else:
         return data
 
+def binary(data):
+    if sys.version_info[0] > 2:
+        import codecs
+        return codecs.latin_1_encode(data)[0]
+    else:
+        return data
+
 def execution_path(filename):
     return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
 

@@ -2,6 +2,7 @@
 
 from nose.tools import *
 from .utilities import execution_path, run_all, contains_word, get_unique_colors
+from .utilities import binary
 
 import os, mapnik
 
@@ -53,7 +54,7 @@ def test_dataraster_coloring():
         mapnik.render(_map, im)
         imdata = im.tostring()
         # we have some values in the [20,30) interval so check that they're colored
-        assert contains_word('\xff\xff\x00\xff', imdata)
+        assert contains_word(binary('\xff\xff\x00\xff'), imdata)
 
 def test_dataraster_query_point():
     srs = '+init=epsg:32630'
@@ -165,7 +166,7 @@ def test_raster_warping():
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
         imdata = im.tostring()
-        assert contains_word('\xff\xff\x00\xff', imdata)
+        assert contains_word(binary('\xff\xff\x00\xff'), imdata)
 
 def test_raster_warping_does_not_overclip_source():
     lyrSrs = "+init=epsg:32630"
@@ -191,7 +192,7 @@ def test_raster_warping_does_not_overclip_source():
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        assert im.view(0,200,1,1).tostring()=='\xff\xff\x00\xff'
+        assert im.view(0,200,1,1).tostring()==binary('\xff\xff\x00\xff')
 
 if __name__ == "__main__":
     setup()

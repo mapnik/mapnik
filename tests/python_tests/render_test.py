@@ -6,6 +6,7 @@ import tempfile
 import os, mapnik
 from nose.tools import *
 from .utilities import execution_path, run_all
+from .utilities import binary
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -21,7 +22,7 @@ def test_simplest_render():
     eq_(im.painted(),False)
     eq_(im.is_solid(),True)
     s = im.tostring()
-    eq_(s, 256 * 256 * '\x00\x00\x00\x00')
+    eq_(s, 256 * 256 * binary('\x00\x00\x00\x00'))
 
 def test_render_image_to_string():
     im = mapnik.Image(256, 256)
@@ -29,7 +30,7 @@ def test_render_image_to_string():
     eq_(im.painted(),False)
     eq_(im.is_solid(),True)
     s = im.tostring()
-    eq_(s, 256 * 256 * '\x00\x00\x00\xff')
+    eq_(s, 256 * 256 * binary('\x00\x00\x00\xff'))
 
 def test_non_solid_image():
     im = mapnik.Image(256, 256)

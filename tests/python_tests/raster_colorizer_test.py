@@ -3,6 +3,7 @@ import os
 import mapnik
 from .utilities import execution_path, run_all
 from nose.tools import *
+import sys
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -81,7 +82,10 @@ def test_get_color_linear():
 def test_stop_label():
     stop = mapnik.ColorizerStop(1, mapnik.COLORIZER_LINEAR, mapnik.Color('red'))
     assert not stop.label
-    label = u"32º C".encode('utf8')
+    if sys.version_info[0] > 2:
+        label = u"32º C"
+    else:
+        label = u"32º C".encode('utf8')
     stop.label = label
     assert stop.label == label, stop.label
 

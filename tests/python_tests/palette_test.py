@@ -4,6 +4,7 @@
 from nose.tools import *
 from .utilities import execution_path, run_all
 import os, mapnik
+from .utilities import binary
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -23,7 +24,7 @@ def test_reading_palettes():
     act = open('../data/palettes/palette256.act','rb')
     palette = mapnik.Palette(act.read(),'act')
     eq_(palette.to_string(),expected_256);
-    palette = mapnik.Palette('\xff\x00\xff\xff\xff\xff', 'rgb')
+    palette = mapnik.Palette(binary('\xff\x00\xff\xff\xff\xff'), 'rgb')
     eq_(palette.to_string(),expected_rgb);
 
 if 'shape' in mapnik.DatasourceCache.plugin_names():
