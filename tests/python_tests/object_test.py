@@ -395,7 +395,7 @@ def test_map_init_from_string():
         m.base = 'foo'
         mapnik.load_map_from_string(m, map_string, True, ".")
         eq_(m.base, '.')
-    except RuntimeError, e:
+    except RuntimeError as e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(e)

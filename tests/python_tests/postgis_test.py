@@ -685,7 +685,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         try:
             ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
         except Exception as e:
-            eq_(e.message != 'unidentifiable C++ exception', True)
+            eq_(e.args[0] != 'unidentifiable C++ exception', True)
 
     def test_null_id_field():
         opts = {'type':'postgis',

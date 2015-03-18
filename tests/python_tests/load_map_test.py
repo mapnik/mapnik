@@ -49,7 +49,7 @@ def test_good_files():
             mapnik.load_map(m, filename, strict)
             base_path = os.path.dirname(filename)
             mapnik.load_map_from_string(m,open(filename,'rb').read(),strict,base_path)
-        except RuntimeError, e:
+        except RuntimeError as e:
             # only test datasources that we have installed
             if not 'Could not create datasource' in str(e):
                 failures.append('Failed to load valid map (%s)!' % filename)
