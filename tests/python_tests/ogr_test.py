@@ -73,7 +73,7 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
 
     def test_ogr_empty_data_should_not_throw():
         default_logging_severity = mapnik.logger.get_severity()
-        mapnik.logger.set_severity(mapnik.severity_type.None)
+        mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
         # use logger to silence expected warnings
         for layer in ['routes', 'tracks', 'route_points', 'track_points']:
             ds = mapnik.Ogr(file='../data/gpx/empty.gpx',layer=layer)

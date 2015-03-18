@@ -392,7 +392,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
     def test_null_id_field():
         # silence null key warning: https://github.com/mapnik/mapnik/issues/1889
         default_logging_severity = mapnik.logger.get_severity()
-        mapnik.logger.set_severity(mapnik.severity_type.None)
+        mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
         # form up an in-memory test db
         wkb = '010100000000000000000000000000000000000000'
         # note: the osm_id should be declared INTEGER PRIMARY KEY

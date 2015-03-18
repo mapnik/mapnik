@@ -7,7 +7,7 @@ def test_logger_init():
     eq_(mapnik.severity_type.Debug,0)
     eq_(mapnik.severity_type.Warn,1)
     eq_(mapnik.severity_type.Error,2)
-    eq_(mapnik.severity_type.None,3)
+    eq_(getattr(mapnik.severity_type, 'None'),3)
     default = mapnik.logger.get_severity()
     mapnik.logger.set_severity(mapnik.severity_type.Debug)
     eq_(mapnik.logger.get_severity(),mapnik.severity_type.Debug)

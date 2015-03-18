@@ -10,7 +10,7 @@ default_logging_severity = mapnik.logger.get_severity()
 def setup():
     # make the tests silent to suppress unsupported params from harfbuzz tests
     # TODO: remove this after harfbuzz branch merges
-    mapnik.logger.set_severity(mapnik.severity_type.None)
+    mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
@@ -20,7 +20,7 @@ def teardown():
 
 def test_broken_files():
     default_logging_severity = mapnik.logger.get_severity()
-    mapnik.logger.set_severity(mapnik.severity_type.None)
+    mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
     broken_files = glob.glob("../data/broken_maps/*.xml")
     # Add a filename that doesn't exist 
     broken_files.append("../data/broken/does_not_exist.xml")

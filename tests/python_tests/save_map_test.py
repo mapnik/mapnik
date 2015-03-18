@@ -11,7 +11,7 @@ default_logging_severity = mapnik.logger.get_severity()
 def setup():
     # make the tests silent to suppress unsupported params from harfbuzz tests
     # TODO: remove this after harfbuzz branch merges
-    mapnik.logger.set_severity(mapnik.severity_type.None)
+    mapnik.logger.set_severity(getattr(mapnik.severity_type, 'None'))
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
