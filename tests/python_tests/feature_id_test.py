@@ -22,7 +22,7 @@ def compare_shape_between_mapnik_and_ogr(shapefile,query=None):
             fs1 = ds1.featureset()
             fs2 = ds2.featureset()
         count = 0;
-        for feat1,feat2 in itertools.izip(fs1,fs2):
+        for feat1,feat2 in zip(fs1,fs2):
             count += 1
             eq_(feat1.id(),feat2.id(),
                 '%s : ogr feature id %s "%s" does not equal shapefile feature id %s "%s"'

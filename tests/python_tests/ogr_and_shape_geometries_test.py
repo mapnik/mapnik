@@ -28,7 +28,7 @@ if 'shape' in plugins and 'ogr' in plugins:
         fs2 = ds2.featureset()
         count = 0;
         import itertools
-        for feat1,feat2 in itertools.izip(fs1, fs2):
+        for feat1,feat2 in zip(fs1, fs2):
             count += 1
             eq_(str(feat1),str(feat2))
             # TODO - revisit this: https://github.com/mapnik/mapnik/issues/1093

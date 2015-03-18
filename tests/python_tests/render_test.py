@@ -153,7 +153,7 @@ def test_render_points():
         'merc': '+proj=merc +datum=WGS84 +k=1.0 +units=m +over +no_defs',
         'utm': '+proj=utm +zone=54 +datum=WGS84'
         }
-    for projdescr in projs.iterkeys():
+    for projdescr in iter(projs):
         m = mapnik.Map(1000, 500, projs[projdescr])
         m.append_style('places_labels',s)
         m.layers.append(lyr)

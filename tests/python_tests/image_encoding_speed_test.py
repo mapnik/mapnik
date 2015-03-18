@@ -110,7 +110,7 @@ def do_encoding():
             t = Timer(aerial_24)
             run(aerial_24,aerial_24_im,c,t)
 
-    for key, value in sorted(sortable.iteritems(), key=lambda (k,v): (v,k)):
+    for key, value in sorted(iter(sortable.items()), key=lambda k_v: (k_v[1],k_v[0])):
         s = results[key]
         min_ = str(s[0])[:6]
         avg = str(s[1])[:6]
