@@ -3,7 +3,10 @@
 from nose.tools import *
 from .utilities import execution_path, run_all
 from .utilities import advance_iterator
-from Queue import Queue
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 import threading
 
 import os, mapnik

@@ -10,7 +10,10 @@ from .utilities import advance_iterator
 from .utilities import binary
 from subprocess import Popen, PIPE
 import os, mapnik
-from Queue import Queue
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 import threading
 import sys
 import re
