@@ -68,49 +68,37 @@ int main(int argc, char** argv)
     try {
 
         // spatialite blob
-
         mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                                                sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                                                mapnik::wkbSpatiaLite);
         BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
 
-#if 0 // FIXME
-        BOOST_TEST(
-            mapnik::geometry_utils::from_wkb(feature->paths(),
-                                             (const char*)sp_valid_blob,
-                                             sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
-                                             mapnik::wkbAuto)
-        );
+        geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
+                                                sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
+                                                mapnik::wkbAuto);
+        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
 
-        BOOST_TEST(
-            mapnik::geometry_utils::from_wkb(feature->paths(),
-                                             (const char*)sp_invalid_blob,
-                                             sizeof(sp_invalid_blob) / sizeof(sp_invalid_blob[0]),
-                                             mapnik::wkbAuto) == false
-        );
 
+
+        BOOST_TEST_THROWS(mapnik::geometry_utils::from_wkb((const char*)sp_invalid_blob,
+                                                           sizeof(sp_invalid_blob) / sizeof(sp_invalid_blob[0]),
+                                                           mapnik::wkbAuto), std::exception);
         // sqlite generic wkb blob
-        BOOST_TEST(
-            mapnik::geometry_utils::from_wkb(feature->paths(),
-                                             (const char*)sq_valid_blob,
-                                             sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
-                                             mapnik::wkbGeneric)
-        );
 
-        BOOST_TEST(
-            mapnik::geometry_utils::from_wkb(feature->paths(),
-                                             (const char*)sq_valid_blob,
-                                             sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
-                                             mapnik::wkbAuto)
-        );
+        geom = mapnik::geometry_utils::from_wkb((const char*)sq_valid_blob,
+                                                sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
+                                                mapnik::wkbGeneric);
+        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
 
-        BOOST_TEST(
-            mapnik::geometry_utils::from_wkb(feature->paths(),
-                                             (const char*)sq_invalid_blob,
-                                             sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
-                                             mapnik::wkbGeneric) == false
-        );
-#endif
+        geom = mapnik::geometry_utils::from_wkb( (const char*)sq_valid_blob,
+                                                 sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
+                                                 mapnik::wkbAuto);
+
+        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
+
+        BOOST_TEST_THROWS(mapnik::geometry_utils::from_wkb((const char*)sq_invalid_blob,
+                                                           sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
+                                                           mapnik::wkbGeneric), std::exception);
 
     } catch (std::exception const& ex) {
         BOOST_TEST(false);
