@@ -8,7 +8,7 @@ try:
 except ImportError:
     from queue import Queue
 import threading
-
+import sys
 import os, mapnik
 import sqlite3
 
@@ -149,9 +149,12 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(feat_id,1)
         name = result[2]
         eq_(name,'test point')
-        geom_wkb_blob = result[1]
-        eq_(str(geom_wkb_blob),geoms.to_wkb(mapnik.wkbByteOrder.NDR))
-        new_geom = mapnik.Path.from_wkb(str(geom_wkb_blob))
+        if sys.version_info[0] > 2:
+            geom_wkb_blob = bytes(result[1])
+        else:
+            geom_wkb_blob = str(result[1])
+        eq_(geom_wkb_blob,geoms.to_wkb(mapnik.wkbByteOrder.NDR))
+        new_geom = mapnik.Path.from_wkb(geom_wkb_blob)
         eq_(new_geom.to_wkt(),geoms.to_wkt())
 
         # cleanup
