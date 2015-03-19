@@ -38,7 +38,7 @@ template <>
 class image<null_t>
 {
 public:
-    using pixel_type = typename null_t::type;
+    using pixel_type = null_t::type;
     static const image_dtype dtype = null_t::id;
 private:
 public:
