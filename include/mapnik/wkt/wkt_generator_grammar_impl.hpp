@@ -39,30 +39,40 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
     boost::spirit::karma::uint_type uint_;
     boost::spirit::karma::eps_type eps;
 
+    empty.add
+        (new_geometry::geometry_types::Point, "POINT EMPTY")
+        (new_geometry::geometry_types::LineString, "LINESTRING EMPTY")
+        (new_geometry::geometry_types::Polygon, "POLYGON EMPTY")
+        (new_geometry::geometry_types::MultiPoint, "MULTIPOINT EMPTY")
+        (new_geometry::geometry_types::MultiLineString, "MULTILINESTRING EMPTY")
+        (new_geometry::geometry_types::MultiPolygon, "MULTIPOLYGON EMPTY")
+        (new_geometry::geometry_types::GeometryCollection, "GEOMETRYCOLLECTION EMPTY")
+        ;
+
     geometry = geometry_dispatch.alias()
         ;
 
     geometry_dispatch = eps[_a = geometry_type(_val)] <<
         (&uint_(new_geometry::geometry_types::Point)[_1 = _a]
-         << point)
+         << (point | empty[_1 = _a]))
         |
         (&uint_(new_geometry::geometry_types::LineString)[_1 = _a]
-         << linestring )
+         << (linestring | empty[_1 = _a]))
         |
         (&uint_(new_geometry::geometry_types::Polygon)[_1 = _a]
-         << polygon )
+         << (polygon | empty[_1 = _a]))
         |
         (&uint_(new_geometry::geometry_types::MultiPoint)[_1 = _a]
-         << multi_point)
+         << ( multi_point | empty[_1 = _a]))
         |
         (&uint_(new_geometry::geometry_types::MultiLineString)[_1 = _a]
-         << multi_linestring)
+         << (multi_linestring | empty[_1 = _a]))
         |
         (&uint_(new_geometry::geometry_types::MultiPolygon)[_1 = _a]
-         << multi_polygon)
+         << (multi_polygon | empty[_1 = _a]))
         |
         (&uint_(new_geometry::geometry_types::GeometryCollection)[_1 = _a]
-         << geometry_collection)
+         << (geometry_collection | empty[_1 = _a]))
         ;
 
     point = lit("POINT(") << point_coord << lit(")")

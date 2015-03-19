@@ -112,6 +112,7 @@ struct wkt_generator_grammar :
     karma::rule<OutputIterator, new_geometry::geometry const& ()> geometry_collection;
     karma::rule<OutputIterator, new_geometry::geometry_collection const& ()> geometries;
     boost::phoenix::function<detail::get_type<Geometry> > geometry_type;
+    karma::symbols<mapnik::new_geometry::geometry_types, char const*> empty;
     //
     karma::real_generator<double, detail::wkt_coordinate_policy<double> > coordinate;
 };
