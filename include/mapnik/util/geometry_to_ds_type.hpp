@@ -26,7 +26,8 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry_impl.hpp>
-
+#include <mapnik/datasource.hpp>
+#include <mapnik/util/variant.hpp>
 // boost
 #include <boost/optional.hpp>
 
@@ -34,54 +35,48 @@ namespace mapnik { namespace util {
 
 namespace detail {
 
-struct geometry_type
+struct datasource_geometry_type
 {
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::geometry const& geom) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::point const&) const
     {
-        return mapnik::util::apply_visitor(*this, geom);
+        return mapnik::datasource::Point;
     }
 
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::point const&) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::line_string const&) const
     {
-        return mapnik::new_geometry::geometry_types::Point;
+        return mapnik::datasource::LineString;
     }
 
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::line_string const&) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::polygon const&) const
     {
-        return mapnik::new_geometry::geometry_types::LineString;
+        return mapnik::datasource::Polygon;
     }
 
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::polygon const&) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::multi_point const&) const
     {
-        return mapnik::new_geometry::geometry_types::Polygon;
+        return mapnik::datasource::Point;
     }
 
-    // multi
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_point const&) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::multi_line_string const&) const
     {
-        return mapnik::new_geometry::geometry_types::MultiPoint;
+        return mapnik::datasource::LineString;
     }
 
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_line_string const&) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::multi_polygon const&) const
     {
-        return mapnik::new_geometry::geometry_types::MultiLineString;
+        return mapnik::datasource::Polygon;
     }
 
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::multi_polygon const&) const
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::geometry_collection const&) const
     {
-        return mapnik::new_geometry::geometry_types::MultiPolygon;
-    }
-
-    mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::geometry_collection const&) const
-    {
-        return mapnik::new_geometry::geometry_types::GeometryCollection;
+        return mapnik::datasource::Collection;
     }
 };
 } // detail
 
-static mapnik::new_geometry::geometry_type(mapnik::new_geometry::geometry const& geom)
+static void to_ds_type(mapnik::new_geometry::geometry const& geom, boost::optional<mapnik::datasource::geometry_t> & result)
 {
-    return detail::geometry_type()(geom);
+    result = util::apply_visitor(detail::datasource_geometry_type(), geom);
 }
 
 }}

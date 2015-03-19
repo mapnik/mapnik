@@ -41,6 +41,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value_types.hpp>
 
 // stl
@@ -934,6 +935,28 @@ mapnik::box2d<double> csv_datasource::envelope() const
 mapnik::layer_descriptor csv_datasource::get_descriptor() const
 {
     return desc_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource::geometry_t> result;
+    int multi_type = 0;
+    unsigned num_features = features_.size();
+    for (unsigned i = 0; i < num_features && i < 5; ++i)
+    {
+        mapnik::util::to_ds_type(features_[i]->get_geometry(),result);
+        if (result)
+        {
+            int type = static_cast<int>(*result);
+            if (multi_type > 0 && multi_type != type)
+            {
+                result.reset(mapnik::datasource::Collection);
+                return result;
+            }
+            multi_type = type;
+        }
+    }
+    return result;
 }
 
 mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const

@@ -105,13 +105,13 @@ public:
      * @return The type of the datasource (Vector or Raster)
      */
     virtual datasource_t type() const = 0;
-
     virtual processor_context_ptr get_context(feature_style_context_map&) const { return processor_context_ptr(); }
-    virtual featureset_ptr features_with_context(query const& q,processor_context_ptr /*ctx*/) const
+    virtual featureset_ptr features_with_context(query const& q, processor_context_ptr /*ctx*/) const
     {
         // default implementation without context use features method
         return features(q);
     }
+    virtual boost::optional<geometry_t> get_geometry_type() const = 0;
     virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
     virtual box2d<double> envelope() const = 0;

@@ -62,7 +62,6 @@ public:
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-
 private:
     void init(shape_io& shape);
 
