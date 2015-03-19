@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/image.hpp>
+#include <mapnik/image_view.hpp>
 
 namespace mapnik {
 
