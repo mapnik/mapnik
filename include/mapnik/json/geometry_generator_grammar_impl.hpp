@@ -52,25 +52,25 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
 
     geometry_dispatch = eps[_a = geometry_type(_val)] <<
         (&uint_(new_geometry::geometry_types::Point)[_1 = _a]
-         << point)
+         << (point | lit("null")))
         |
         (&uint_(new_geometry::geometry_types::LineString)[_1 = _a]
-         << linestring )
+         << (linestring | lit("null")))
         |
         (&uint_(new_geometry::geometry_types::Polygon)[_1 = _a]
-         << polygon )
+         << (polygon | lit("null")))
         |
         (&uint_(new_geometry::geometry_types::MultiPoint)[_1 = _a]
-         << multi_point)
+         << (multi_point | lit("null")))
         |
         (&uint_(new_geometry::geometry_types::MultiLineString)[_1 = _a]
-         << multi_linestring)
+         << (multi_linestring | lit("null")))
         |
         (&uint_(new_geometry::geometry_types::MultiPolygon)[_1 = _a]
-         << multi_polygon)
-        |
+         << (multi_polygon | lit("null")))
+         |
         (&uint_(new_geometry::geometry_types::GeometryCollection)[_1 = _a]
-         << geometry_collection)
+         << (geometry_collection | lit("null")))
         ;
 
     point = lit("{\"type\":\"Point\",\"coordinates\":") << point_coord << lit("}")
