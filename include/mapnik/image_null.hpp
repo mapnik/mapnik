@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-//#include <mapnik/image.hpp>
 #include <mapnik/pixel_types.hpp>
 
 //stl
@@ -50,6 +49,10 @@ public:
           bool painted = false) {}
     image(image<null_t> const& rhs) {}
     image(image<null_t> && rhs) noexcept {}
+    image<null_t>& operator=(image<null_t> rhs) { return *this; }
+    image<null_t>const& operator=(image<null_t> const& rhs) const { return rhs; }
+    bool operator==(image<null_t> const& rhs) const { return true; }
+    bool operator<(image<null_t> const& rhs) const { return false; }
 
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
