@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/label_collision_detector.hpp>
@@ -49,6 +50,40 @@ inline void render_debug_box(cairo_context &context, box2d<double> const& b)
     context.close_path();
     context.stroke();
 }
+
+template <typename Context>
+struct apply_vertex_mode
+{
+    apply_vertex_mode(Context & context, view_transform const& t, proj_transform const& prj_trans)
+        : context_(context),
+          t_(t),
+          prj_trans_(prj_trans) {}
+
+    template <typename Adapter>
+    void operator() (Adapter const& va) const
+    {
+        double x;
+        double y;
+        double z = 0;
+        va.rewind(0);
+        unsigned cmd = SEG_END;
+        while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
+        {
+            if (cmd == SEG_CLOSE) continue;
+            prj_trans_.backward(x,y,z);
+            t_.forward(&x,&y);
+            context_.move_to(std::floor(x) - 0.5, std::floor(y) + 0.5);
+            context_.line_to(std::floor(x) + 1.5, std::floor(y) + 0.5);
+            context_.move_to(std::floor(x) + 0.5, std::floor(y) - 0.5);
+            context_.line_to(std::floor(x) + 0.5, std::floor(y) + 1.5);
+            context_.stroke();
+        }
+    }
+
+    Context & context_;
+    view_transform const& t_;
+    proj_transform const& prj_trans_;
+};
 
 } // anonymous namespace
 
@@ -80,29 +115,9 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
-// FIXME
-#if 0
-        for (auto const& geom : feature.paths())
-        {
-            double x;
-            double y;
-            double z = 0;
-            vertex_adapter va(geom);
-            va.rewind(0);
-            unsigned cmd = 1;
-            while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
-            {
-                if (cmd == SEG_CLOSE) continue;
-                prj_trans.backward(x,y,z);
-                common_.t_.forward(&x,&y);
-                context_.move_to(std::floor(x) - 0.5, std::floor(y) + 0.5);
-                context_.line_to(std::floor(x) + 1.5, std::floor(y) + 0.5);
-                context_.move_to(std::floor(x) + 0.5, std::floor(y) - 0.5);
-                context_.line_to(std::floor(x) + 0.5, std::floor(y) + 1.5);
-                context_.stroke();
-            }
-        }
-#endif
+        using apply_vertex_mode = apply_vertex_mode<cairo_context>;
+        apply_vertex_mode apply(context_, common_.t_, prj_trans);
+        util::apply_visitor(new_geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
     }
 }
 

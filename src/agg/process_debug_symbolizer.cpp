@@ -27,9 +27,11 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/vertex_processor.hpp>
 
 namespace mapnik {
 
+namespace {
 template <typename T>
 void draw_rect(T &pixmap, box2d<double> const& box)
 {
@@ -50,6 +52,42 @@ void draw_rect(T &pixmap, box2d<double> const& box)
     }
 }
 
+template <typename Pixmap>
+struct apply_vertex_mode
+{
+    apply_vertex_mode(Pixmap & pixmap, view_transform const& t, proj_transform const& prj_trans)
+        : pixmap_(pixmap),
+          t_(t),
+          prj_trans_(prj_trans) {}
+
+    template <typename Adapter>
+    void operator() (Adapter const& va) const
+    {
+        double x;
+        double y;
+        double z = 0;
+        va.rewind(0);
+        unsigned cmd = SEG_END;
+        while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
+        {
+            if (cmd == SEG_CLOSE) continue;
+            prj_trans_.backward(x,y,z);
+            t_.forward(&x,&y);
+            mapnik::set_pixel(pixmap_,x,y,0xff0000ff);
+            mapnik::set_pixel(pixmap_,x-1,y-1,0xff0000ff);
+            mapnik::set_pixel(pixmap_,x+1,y+1,0xff0000ff);
+            mapnik::set_pixel(pixmap_,x-1,y+1,0xff0000ff);
+            mapnik::set_pixel(pixmap_,x+1,y-1,0xff0000ff);
+        }
+    }
+
+    Pixmap & pixmap_;
+    view_transform const& t_;
+    proj_transform const& prj_trans_;
+};
+
+} // anonymous namespace
+
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
                               mapnik::feature_impl & feature,
@@ -69,29 +107,9 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
-        // FIXME
-        /*
-        for (auto const& geom : feature.paths())
-        {
-            double x;
-            double y;
-            double z = 0;
-            vertex_adapter va(geom);
-            va.rewind(0);
-            unsigned cmd = 1;
-            while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
-            {
-                if (cmd == SEG_CLOSE) continue;
-                prj_trans.backward(x,y,z);
-                common_.t_.forward(&x,&y);
-                mapnik::set_pixel(pixmap_,x,y,0xff0000ff);
-                mapnik::set_pixel(pixmap_,x-1,y-1,0xff0000ff);
-                mapnik::set_pixel(pixmap_,x+1,y+1,0xff0000ff);
-                mapnik::set_pixel(pixmap_,x-1,y+1,0xff0000ff);
-                mapnik::set_pixel(pixmap_,x+1,y-1,0xff0000ff);
-            }
-        }
-        */
+        using apply_vertex_mode = apply_vertex_mode<buffer_type>;
+        apply_vertex_mode apply(pixmap_, common_.t_, prj_trans);
+        util::apply_visitor(new_geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
     }
 }
 
