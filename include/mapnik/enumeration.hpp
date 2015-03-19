@@ -177,6 +177,8 @@ public:
      * */
     void from_string(std::string const& str)
     {
+        // TODO: Enum value strings with underscore are deprecated in Mapnik 3.x
+        // and support will be removed in Mapnik 4.x.
         std::string str_copy(str);
         std::replace(str_copy.begin(), str_copy.end(), '_', '-');
         for (unsigned i = 0; i < THE_MAX; ++i)
