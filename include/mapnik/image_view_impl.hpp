@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_VIEW_IMPL_HPP
-#define MAPNIK_IMAGE_VIEW_IMPL_HPP
-
 #include <mapnik/image.hpp>
 
 namespace mapnik {
@@ -149,5 +146,3 @@ inline image_dtype image_view<T>::get_dtype() const
 }
 
 } // end ns
-
-#endif // MAPNIK_IMAGE_VIEW_IMPL_HPP
