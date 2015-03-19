@@ -42,7 +42,7 @@ using image_view_base = util::variant<image_view_rgba8,
 
 struct MAPNIK_DECL image_view_any : image_view_base
 {
-    image_view_any() = default;
+    image_view_any() = delete;
 
     template <typename T>
     image_view_any(T && data) noexcept

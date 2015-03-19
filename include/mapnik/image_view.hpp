@@ -35,12 +35,14 @@ public:
     using pixel_type = typename T::pixel_type;
     static const image_dtype dtype = T::dtype;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-    
+    image_view() = delete;
     image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data);
     ~image_view();
-
+    
     image_view(image_view<T> const& rhs);
     image_view<T> & operator=(image_view<T> const& rhs);
+    bool operator==(image_view<T> const& rhs) const;
+    bool operator<(image_view<T> const& rhs) const;
 
     unsigned x() const;
     unsigned y() const;

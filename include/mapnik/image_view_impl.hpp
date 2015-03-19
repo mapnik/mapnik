@@ -63,6 +63,18 @@ image_view<T> & image_view<T>::operator=(image_view<T> const& rhs)
 }
 
 template <typename T>
+bool image_view<T>::operator==(image_view<T> const& rhs) const
+{
+    return rhs.data_.getBytes() == data_.getBytes();
+}
+
+template <typename T>
+bool image_view<T>::operator<(image_view<T> const& rhs) const
+{
+    return data_.getSize() < rhs.data_.getSize();
+}
+
+template <typename T>
 inline unsigned image_view<T>::x() const
 {
     return x_;
