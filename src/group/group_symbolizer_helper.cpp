@@ -171,10 +171,10 @@ bool group_symbolizer_helper::collision(box2d<double> const& box, value_unicode_
 {
     if (!detector_.extent().intersects(box)
             ||
-        (text_props_->avoid_edges && !query_extent_.contains(box))
+        (text_props_->avoid_edges && !dims_.contains(box))
             ||
         (text_props_->minimum_padding > 0 &&
-         !query_extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
+         !dims_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
             ||
         (!text_props_->allow_overlap &&
             ((repeat_key.length() == 0 && !detector_.has_placement(box, text_props_->margin * scale_factor_))
