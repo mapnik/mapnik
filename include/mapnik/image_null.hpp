@@ -34,7 +34,7 @@ namespace mapnik
 {
 
 template <>
-class image<null_t>
+class MAPNIK_DECL image<null_t>
 {
 public:
     using pixel_type = null_t::type;

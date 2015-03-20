@@ -195,6 +195,18 @@ void png_saver_pal::operator()<image_null> (image_null const& image) const
     throw ImageWriterException("null images not supported for png");
 }
 
+template<>
+void png_saver::operator()<image_view_null> (image_view_null const& image) const
+{
+    throw ImageWriterException("null image views not supported for png");
+}
+
+template<>
+void png_saver_pal::operator()<image_view_null> (image_view_null const& image) const
+{
+    throw ImageWriterException("null image views not supported for png");
+}
+
 template <typename T>
 void process_rgba8_png_pal(T const& image, 
                           std::string const& t,

@@ -35,7 +35,7 @@ public:
     using pixel_type = typename T::pixel_type;
     static const image_dtype dtype = T::dtype;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-    image_view() = delete;
+    
     image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data);
     ~image_view();
     
@@ -67,6 +67,7 @@ private:
     T const& data_;
 };
 
+using image_view_null = image_view<image_null>;
 using image_view_rgba8 = image_view<image_rgba8>;
 using image_view_gray8 = image_view<image_gray8>;
 using image_view_gray8s = image_view<image_gray8s>;

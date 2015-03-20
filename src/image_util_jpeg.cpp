@@ -96,6 +96,12 @@ void jpeg_saver::operator()<image_null> (image_null const& image) const
     throw ImageWriterException("Can not save a null image to jpeg");
 }
 
+template<>
+void jpeg_saver::operator()<image_view_null> (image_view_null const& image) const
+{
+    throw ImageWriterException("Can not save a null image to jpeg");
+}
+
 template <typename T>
 void jpeg_saver::operator() (T const& image) const
 {

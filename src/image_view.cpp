@@ -24,11 +24,13 @@
 // mapnik
 #include <mapnik/image_view.hpp>
 #include <mapnik/image_view_impl.hpp>
+#include <mapnik/image_view_null.hpp>
 #include <mapnik/pixel_types.hpp>
 
 namespace mapnik 
 {
 
+template class MAPNIK_DECL image_view<image_null>;
 template class MAPNIK_DECL image_view<image_rgba8>;
 template class MAPNIK_DECL image_view<image_gray8>;
 template class MAPNIK_DECL image_view<image_gray8s>;
