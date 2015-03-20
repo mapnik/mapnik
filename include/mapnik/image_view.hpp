@@ -28,7 +28,7 @@
 namespace mapnik {
 
 template <typename T>
-class MAPNIK_DECL image_view
+class image_view
 {
 public:
     using pixel = typename T::pixel;
@@ -38,9 +38,11 @@ public:
     
     image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data);
     ~image_view();
-
+    
     image_view(image_view<T> const& rhs);
     image_view<T> & operator=(image_view<T> const& rhs);
+    bool operator==(image_view<T> const& rhs) const;
+    bool operator<(image_view<T> const& rhs) const;
 
     unsigned x() const;
     unsigned y() const;
@@ -65,6 +67,7 @@ private:
     T const& data_;
 };
 
+using image_view_null = image_view<image_null>;
 using image_view_rgba8 = image_view<image_rgba8>;
 using image_view_gray8 = image_view<image_gray8>;
 using image_view_gray8s = image_view<image_gray8s>;

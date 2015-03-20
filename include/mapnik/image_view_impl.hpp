@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_VIEW_IMPL_HPP
-#define MAPNIK_IMAGE_VIEW_IMPL_HPP
-
 #include <mapnik/image.hpp>
+#include <mapnik/image_view.hpp>
 
 namespace mapnik {
 
@@ -62,6 +60,18 @@ image_view<T> & image_view<T>::operator=(image_view<T> const& rhs)
     height_ = rhs.height_;
     data_ = rhs.data_;
     return *this;
+}
+
+template <typename T>
+bool image_view<T>::operator==(image_view<T> const& rhs) const
+{
+    return rhs.data_.getBytes() == data_.getBytes();
+}
+
+template <typename T>
+bool image_view<T>::operator<(image_view<T> const& rhs) const
+{
+    return data_.getSize() < rhs.data_.getSize();
 }
 
 template <typename T>
@@ -149,5 +159,3 @@ inline image_dtype image_view<T>::get_dtype() const
 }
 
 } // end ns
-
-#endif // MAPNIK_IMAGE_VIEW_IMPL_HPP

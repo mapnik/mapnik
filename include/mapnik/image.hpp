@@ -68,7 +68,7 @@ private:
 } // end ns detail
 
 template <typename T>
-class MAPNIK_DECL image
+class image
 {
 public:
     using pixel = T;
@@ -94,6 +94,8 @@ public:
     image(image<T> && rhs) noexcept;
     image<T>& operator=(image<T> rhs);
     image<T>const& operator=(image<T> const& rhs) const;
+    bool operator==(image<T> const& rhs) const;
+    bool operator<(image<T> const& rhs) const;
 
     void swap(image<T> & rhs);
     pixel_type& operator() (std::size_t i, std::size_t j);

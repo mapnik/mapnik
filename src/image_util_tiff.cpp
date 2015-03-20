@@ -163,10 +163,17 @@ void handle_tiff_options(std::string const& type,
 
 tiff_saver::tiff_saver(std::ostream & stream, std::string const& t):
     stream_(stream), t_(t) {}
+
 template<>
 void tiff_saver::operator()<image_null> (image_null const& image) const
 {
     throw ImageWriterException("null images not supported");
+}
+
+template<>
+void tiff_saver::operator()<image_view_null> (image_view_null const& image) const
+{
+    throw ImageWriterException("null image views not supported");
 }
 
 template <typename T>

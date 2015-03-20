@@ -24,11 +24,13 @@
 #define MAPNIK_IMAGE_VIEW_ANY_HPP
 
 #include <mapnik/image_view.hpp>
+#include <mapnik/image_view_null.hpp>
 #include <mapnik/util/variant.hpp>
 
 namespace mapnik {
 
-using image_view_base = util::variant<image_view_rgba8,
+using image_view_base = util::variant<image_view_null,
+                                      image_view_rgba8,
                                       image_view_gray8,
                                       image_view_gray8s,
                                       image_view_gray16,

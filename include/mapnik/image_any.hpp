@@ -73,7 +73,7 @@ struct MAPNIK_DECL image_any : image_base
     void set_scaling(double val);
 };
 
-image_any create_image_any(int width, 
+MAPNIK_DECL image_any create_image_any(int width, 
                 int height, 
                 image_dtype type = image_dtype_rgba8,
                 bool initialize = true, 

@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/util/math.hpp>
+#include <mapnik/global.hpp>
 
 // stl
 #include <cmath>

@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_IMPL_HPP
-#define MAPNIK_IMAGE_IMPL_HPP
-
 // mapnik
 #include <mapnik/image.hpp>
 
@@ -132,6 +129,18 @@ template <typename T>
 image<T> const& image<T>::operator=(image<T> const& rhs) const
 {
     return rhs;
+}
+
+template <typename T>
+bool image<T>::operator==(image<T> const& rhs) const
+{
+    return rhs.getBytes() == getBytes();
+}
+
+template <typename T>
+bool image<T>::operator<(image<T> const& rhs) const
+{
+    return getSize() < rhs.getSize();
 }
 
 template <typename T>
@@ -314,4 +323,3 @@ inline image_dtype image<T>::get_dtype()  const
 
 } // end ns
 
-#endif // MAPNIK_IMAGE_IMPL_HPP
