@@ -258,6 +258,11 @@ wkb_buffer_ptr to_wkb(GeometryType const& g, wkbByteOrder byte_order )
 
 wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
 {
+    if (paths.size() < 1)
+    {
+        return nullptr;
+    }
+
     if (paths.size() == 1)
     {
         // single geometry
