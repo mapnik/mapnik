@@ -209,7 +209,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
-    else if (type != new_geometry::geometry_types::GeometryCollection) // multi geometries
+    else //if (type != new_geometry::geometry_types::GeometryCollection) // multi geometries/collection
     {
 
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
