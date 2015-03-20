@@ -68,7 +68,7 @@ private:
 } // end ns detail
 
 template <typename T>
-class MAPNIK_DECL image
+class image
 {
 public:
     using pixel = T;
