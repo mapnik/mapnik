@@ -38,6 +38,7 @@
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/renderer_common/pattern_alignment.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -85,8 +86,8 @@ struct agg_renderer_process_visitor_p
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
 
-        using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
-        using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
+        //using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
+        //using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
 
         agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->getRowSize());
@@ -143,16 +144,9 @@ struct agg_renderer_process_visitor_p
         {
             double x0 = 0;
             double y0 = 0;
-#if 0  // FIXME
-            if (feature_.num_geometries() > 0)
-            {
-                vertex_adapter va(feature_.get_geometry(0));
-                clipped_geometry_type clipped(va);
-                clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
-                path_type path(common_.t_,clipped,prj_trans_);
-                path.vertex(&x0,&y0);
-            }
-#endif
+            using apply_local_alignment = detail::apply_local_alignment;
+            apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
+            util::apply_visitor(new_geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
             offset_x = unsigned(current_buffer_->width() - x0);
             offset_y = unsigned(current_buffer_->height() - y0);
         }
@@ -252,16 +246,10 @@ struct agg_renderer_process_visitor_p
         {
             double x0 = 0;
             double y0 = 0;
-#if 0 // FIXME
-            if (feature_.num_geometries() > 0)
-            {
-                vertex_adapter va(feature_.get_geometry(0));
-                clipped_geometry_type clipped(va);
-                clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
-                path_type path(common_.t_,clipped,prj_trans_);
-                path.vertex(&x0,&y0);
-            }
-#endif
+            using apply_local_alignment = detail::apply_local_alignment;
+            apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
+            util::apply_visitor(new_geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
+
             offset_x = unsigned(current_buffer_->width() - x0);
             offset_y = unsigned(current_buffer_->height() - y0);
         }

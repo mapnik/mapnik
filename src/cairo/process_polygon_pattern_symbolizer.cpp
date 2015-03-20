@@ -35,6 +35,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/renderer_common/pattern_alignment.hpp>
 
 namespace mapnik
 {
@@ -111,22 +112,11 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     {
         double x0 = 0.0;
         double y0 = 0.0;
-// FIXME
-#if 0
-        if (feature.num_geometries() > 0)
-        {
-            using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
-            using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
-            vertex_adapter va(feature.get_geometry(0));
-            clipped_geometry_type clipped(va);
-            clipped.clip_box(clip_box.minx(), clip_box.miny(),
-                             clip_box.maxx(), clip_box.maxy());
-            path_type path(common_.t_, clipped, prj_trans);
-            path.vertex(&x0, &y0);
-        }
+        using apply_local_alignment = detail::apply_local_alignment;
+        apply_local_alignment apply(common_.t_, prj_trans, clip_box, x0, y0);
+        util::apply_visitor(new_geometry::vertex_processor<apply_local_alignment>(apply), feature.get_geometry());
         offset_x = std::abs(clip_box.width() - x0);
         offset_y = std::abs(clip_box.height() - y0);
-#endif
     }
 
     util::apply_visitor(cairo_renderer_process_visitor_p(context_, image_tr, offset_x, offset_y, opacity), marker);
