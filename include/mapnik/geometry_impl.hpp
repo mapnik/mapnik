@@ -91,6 +91,8 @@ struct polygon
         interior_rings.emplace_back(std::move(ring));
     }
 
+    inline bool empty() const { return exterior_ring.empty(); }
+
     inline std::size_t num_rings() const
     {
         return 1 + interior_rings.size();
