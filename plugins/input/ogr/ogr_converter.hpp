@@ -24,24 +24,29 @@
 #define OGR_CONVERTER_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/params.hpp>
+#include <mapnik/geometry_impl.hpp>
 
-// ogr
-#include <ogrsf_frmts.h>
+class OGRGeometry;
+class OGRGeometryCollection;
+class OGRLineString;
+class OGRMultiLineString;
+class OGRMultiPoint;
+class OGRMultiPolygon;
+class OGRPoint;
+class OGRPolygon;
 
 class ogr_converter
 {
 public:
 
-    static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
-    static void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
-    static void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
-    static void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
-    static void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
-    static void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
-    static void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
+    static mapnik::new_geometry::geometry convert_geometry (OGRGeometry* ogr_geom);
+    static mapnik::new_geometry::point convert_point (OGRPoint* ogr_geom);
+    static mapnik::new_geometry::multi_point convert_multipoint (OGRMultiPoint* ogr_geom);
+    static mapnik::new_geometry::line_string convert_linestring (OGRLineString* ogr_geom);
+    static mapnik::new_geometry::multi_line_string convert_multilinestring (OGRMultiLineString* ogr_geom);
+    static mapnik::new_geometry::polygon convert_polygon (OGRPolygon* ogr_geom);
+    static mapnik::new_geometry::multi_polygon convert_multipolygon (OGRMultiPolygon* ogr_geom);
+    static mapnik::new_geometry::geometry_collection convert_collection (OGRGeometryCollection* ogr_geom);
 };
 
 #endif // OGR_CONVERTER_HPP

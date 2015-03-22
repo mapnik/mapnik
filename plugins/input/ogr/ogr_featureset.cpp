@@ -101,7 +101,7 @@ feature_ptr ogr_featureset::next()
         OGRGeometry* geom = poFeature->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
         {
-            ogr_converter::convert_geometry(geom, feature);
+            feature->set_geometry(std::move(ogr_converter::convert_geometry(geom)));
         }
         else
         {
