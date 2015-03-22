@@ -34,6 +34,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/fs.hpp>
+#include <mapnik/geometry_empty.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -426,7 +427,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
     boost::optional<mapnik::datasource::geometry_t> result;
     if (dataset_)
     {
-        // finally, get geometry type by querying first feature
+        // get geometry type by querying first features
         std::ostringstream s;
         s << "SELECT " << geometry_field_
           << " FROM " << geometry_table_;
@@ -446,20 +447,22 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             const char* data = (const char*) rs->column_blob(0, size);
             if (data)
             {
-                mapnik::geometry_container paths;
-                if (mapnik::geometry_utils::from_wkb(paths, data, size, format_))
+
+                mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, format_);
+                if (mapnik::new_geometry::empty(geom))
                 {
-                    mapnik::util::to_ds_type(paths,result);
-                    if (result)
+                    continue;
+                }
+                mapnik::util::to_ds_type(geom,result);
+                if (result)
+                {
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
                     {
-                        int type = static_cast<int>(*result);
-                        if (multi_type > 0 && multi_type != type)
-                        {
-                            result.reset(mapnik::datasource::Collection);
-                            return result;
-                        }
-                        multi_type = type;
+                        result.reset(mapnik::datasource::Collection);
+                        return result;
                     }
+                    multi_type = type;
                 }
             }
         }

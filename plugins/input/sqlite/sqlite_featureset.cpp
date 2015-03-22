@@ -31,6 +31,8 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_envelope.hpp>
 
 // ogr
 #include "sqlite_featureset.hpp"
@@ -80,15 +82,20 @@ feature_ptr sqlite_featureset::next()
         }
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
-        if (!geometry_utils::from_wkb(feature->paths(), data, size, format_))
+        mapnik::new_geometry::geometry geom = geometry_utils::from_wkb(data, size, format_);
+        if (mapnik::new_geometry::empty(geom))
+        {
             continue;
+        }
 
         if (!spatial_index_)
         {
             // we are not using r-tree index, check if feature intersects bounding box
-            if (!bbox_.intersects(feature->envelope()))
+            box2d<double> bbox = mapnik::new_geometry::envelope(geom);
+            if (!bbox_.intersects(bbox))
                 continue;
         }
+        feature->set_geometry(std::move(geom));
 
         for (int i = 2; i < rs_->column_count(); ++i)
         {
