@@ -44,7 +44,6 @@ using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::view_transform;
-using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
@@ -614,9 +613,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::new_geometry::geometry_types::Point);
-                point->move_to(pt.x, pt.y);
-                feature->add_geometry(point.release());
+                feature->set_geometry(mapnik::new_geometry::point(pt.x,pt.y));
                 feature->put_new("value",value);
                 if (raster_has_nodata)
                 {
