@@ -29,6 +29,8 @@
 #include <mapnik/global.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_envelope.hpp>
 
 #include "connection_manager.hpp"
 #include "cursorresultset.hpp"
@@ -387,21 +389,18 @@ void pgsql2sqlite(Connection conn,
                     if (oid == geometry_oid)
                     {
                         mapnik::Feature feat(ctx,pkid);
-                        if (geometry_utils::from_wkb(feat.paths(),buf,size,wkbGeneric)
-                            && feat.num_geometries() > 0)
+                        mapnik::new_geometry::geometry geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
+                        if (!mapnik::new_geometry::empty(geom))
                         {
-                            geometry_type const& geom=feat.get_geometry(0);
-                            box2d<double> bbox = ::mapnik::envelope(geom);
+                            box2d<double> bbox = mapnik::new_geometry::envelope(geom);
                             if (bbox.valid())
                             {
                                 sqlite::record_type rec;
-
                                 rec.push_back(sqlite::value_type(pkid));
                                 rec.push_back(sqlite::value_type(bbox.minx()));
                                 rec.push_back(sqlite::value_type(bbox.maxx()));
                                 rec.push_back(sqlite::value_type(bbox.miny()));
                                 rec.push_back(sqlite::value_type(bbox.maxy()));
-
                                 spatial_index.insert_record(rec);
                                 empty_geom = false;
                             }
