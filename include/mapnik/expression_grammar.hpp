@@ -109,18 +109,19 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
-struct geometry_types : qi::symbols<char, new_geometry::geometry_types>
+struct geometry_types : qi::symbols<char, mapnik::value_integer>
 {
     geometry_types()
     {
         add
-            ("point",new_geometry::geometry_types::Point)
-            ("linestring", new_geometry::geometry_types::LineString)
-            ("polygon",new_geometry::geometry_types::Polygon)
-            ("multipoint",new_geometry::geometry_types::MultiPoint)
-            ("multilinestring",new_geometry::geometry_types::MultiLineString)
-            ("multipolygon",new_geometry::geometry_types::MultiPolygon)
-            ("geometrycollection",new_geometry::geometry_types::GeometryCollection)
+            ("unknown", static_cast<mapnik::value_integer>(new_geometry::geometry_types::Unknown))
+            ("point", static_cast<mapnik::value_integer>(new_geometry::geometry_types::Point))
+            ("linestring", static_cast<mapnik::value_integer>(new_geometry::geometry_types::LineString))
+            ("polygon",static_cast<mapnik::value_integer>(new_geometry::geometry_types::Polygon))
+            ("multipoint",static_cast<mapnik::value_integer>(new_geometry::geometry_types::MultiPoint))
+            ("multilinestring",static_cast<mapnik::value_integer>(new_geometry::geometry_types::MultiLineString))
+            ("multipolygon",static_cast<mapnik::value_integer>(new_geometry::geometry_types::MultiPolygon))
+            ("geometrycollection",static_cast<mapnik::value_integer>(new_geometry::geometry_types::GeometryCollection))
             ;
     }
 };

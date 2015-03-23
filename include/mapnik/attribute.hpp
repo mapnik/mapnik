@@ -53,7 +53,7 @@ struct geometry_type_attribute
     template <typename V, typename F>
     V value(F const& f) const
     {
-        return new_geometry::geometry_type(f.get_geometry());
+        return static_cast<mapnik::value_integer>(new_geometry::geometry_type(f.get_geometry()));
     }
 };
 
