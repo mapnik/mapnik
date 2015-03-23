@@ -189,6 +189,7 @@ void export_geometry()
     implicitly_convertible<mapnik::new_geometry::line_string, mapnik::new_geometry::geometry>();
     implicitly_convertible<mapnik::new_geometry::polygon, mapnik::new_geometry::geometry>();
     enum_<mapnik::new_geometry::geometry_types>("GeometryType")
+        .value("Unknown",mapnik::new_geometry::geometry_types::Unknown)
         .value("Point",mapnik::new_geometry::geometry_types::Point)
         .value("LineString",mapnik::new_geometry::geometry_types::LineString)
         .value("Polygon",mapnik::new_geometry::geometry_types::Polygon)
