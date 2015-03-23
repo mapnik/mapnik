@@ -33,7 +33,8 @@ struct geometry_type
 {
     mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::geometry const& geom) const
     {
-        return mapnik::util::apply_visitor(*this, geom);
+        // check geometry variant is initialised (valid)
+        return geom.valid() ? mapnik::util::apply_visitor(*this, geom) : mapnik::new_geometry::geometry_types::Unknown;
     }
 
     mapnik::new_geometry::geometry_types operator () (mapnik::new_geometry::point const&) const
