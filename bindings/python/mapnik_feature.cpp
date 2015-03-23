@@ -58,20 +58,10 @@ using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
-//mapnik::geometry_type const& (mapnik::feature_impl::*get_geometry_by_const_ref)(std::size_t) const = &mapnik::feature_impl::get_geometry;
-//mapnik::geometry_container const& (mapnik::feature_impl::*get_paths_by_const_ref)() const = &mapnik::feature_impl::paths;
-
-//void feature_add_geometries_from_wkb(mapnik::feature_impl & feature, std::string wkb)
-//{
-//    bool result = geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size());
-//    if (!result) throw std::runtime_error("Failed to parse WKB");
-//}
-
-//void feature_add_geometries_from_wkt(mapnik::feature_impl & feature, std::string const& wkt)
-//{
-//    bool result = mapnik::from_wkt(wkt, feature.paths());
-//    if (!result) throw std::runtime_error("Failed to parse WKT");
-//}
+void set_geometry_impl( mapnik::feature_impl & feature, mapnik::new_geometry::geometry const& geom)
+{
+    feature.set_geometry_copy(geom);
+}
 
 mapnik::feature_ptr from_geojson_impl(std::string const& json, mapnik::context_ptr const& ctx)
 {
@@ -233,12 +223,9 @@ void export_feature()
     class_<mapnik::feature_impl,std::shared_ptr<mapnik::feature_impl>,
         boost::noncopyable>("Feature",init<context_ptr,mapnik::value_integer>("Default ctor."))
         .def("id",&mapnik::feature_impl::id)
-        //.def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
-        //.def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
-        //.def("add_geometry", &mapnik::feature_impl::add_geometry)
-        //.def("num_geometries",&mapnik::feature_impl::num_geometries)
-        //.def("get_geometry", make_function(get_geometry_by_const_ref,return_value_policy<reference_existing_object>()))
-        //.def("geometries",make_function(get_paths_by_const_ref,return_value_policy<reference_existing_object>()))
+        .add_property("geometry",
+                      make_function(&mapnik::feature_impl::get_geometry,return_value_policy<reference_existing_object>()),
+                      &mapnik::feature_impl::set_geometry_copy)
         .def("envelope", &mapnik::feature_impl::envelope)
         .def("has_key", &mapnik::feature_impl::has_key)
         .add_property("attributes",&attributes)
