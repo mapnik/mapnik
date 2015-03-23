@@ -200,6 +200,11 @@ public:
         geom_ = std::move(geom);
     }
 
+    inline void set_geometry_copy(new_geometry::geometry const& geom)
+    {
+        geom_ = geom;
+    }
+
     inline new_geometry::geometry const& get_geometry() const
     {
         return geom_;
