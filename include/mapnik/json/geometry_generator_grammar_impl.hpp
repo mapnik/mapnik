@@ -68,9 +68,11 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
         |
         (&uint_(new_geometry::geometry_types::MultiPolygon)[_1 = _a]
          << (multi_polygon | lit("null")))
-         |
+        |
         (&uint_(new_geometry::geometry_types::GeometryCollection)[_1 = _a]
          << (geometry_collection | lit("null")))
+        |
+        lit("null")
         ;
 
     point = lit("{\"type\":\"Point\",\"coordinates\":") << point_coord << lit("}")
