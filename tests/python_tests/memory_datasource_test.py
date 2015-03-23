@@ -10,7 +10,7 @@ def test_add_feature():
     context.push('foo')
     feature = mapnik.Feature(context,1)
     feature['foo'] = 'bar'
-    feature.add_geometries_from_wkt('POINT(2 3)')
+    feature.geometry = mapnik.Geometry.from_wkt('POINT(2 3)')
     md.add_feature(feature)
     eq_(md.num_features(), 1)
 

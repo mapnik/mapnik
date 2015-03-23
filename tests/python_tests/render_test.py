@@ -123,12 +123,12 @@ def test_render_points():
     context.push('Name')
     f = mapnik.Feature(context,1)
     f['Name'] = 'Westernmost Point'
-    f.add_geometries_from_wkt('POINT (142.48 -38.38)')
+    f.geometry = mapnik.Geometry.from_wkt('POINT (142.48 -38.38)')
     ds.add_feature(f)
 
     f = mapnik.Feature(context,2)
     f['Name'] = 'Southernmost Point'
-    f.add_geometries_from_wkt('POINT (143.10 -38.60)')
+    f.geometry = mapnik.Geometry.from_wkt('POINT (143.10 -38.60)')
     ds.add_feature(f)
 
     # create layer/rule/style
@@ -144,8 +144,8 @@ def test_render_points():
     # latlon bounding box corners
     ul_lonlat = mapnik.Coord(142.30,-38.20)
     lr_lonlat = mapnik.Coord(143.40,-38.80)
-    # render for different projections 
-    projs = { 
+    # render for different projections
+    projs = {
         'google': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over',
         'latlon': '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs',
         'merc': '+proj=merc +datum=WGS84 +k=1.0 +units=m +over +no_defs',
@@ -165,7 +165,7 @@ def test_render_points():
         num_points_present = len(ds.all_features())
         svg = open(svg_file,'r').read()
         num_points_rendered = svg.count('<image ')
-        eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
+        eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr))
 
 @raises(RuntimeError)
 def test_render_with_scale_factor_zero_throws():
