@@ -43,6 +43,16 @@ public:
     {
         out_ << operand;
     }
+
+/// specialized visitor for boolean
+    void operator()(bool const & val) const
+    {
+        if (val) {
+            out_ << "true";
+        } else {
+            out_ << "false";
+        }
+    }
 private:
     Out & out_;
 };
