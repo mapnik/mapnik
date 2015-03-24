@@ -69,6 +69,7 @@ public:
     };
 
     enum geometry_t : std::uint8_t {
+        Unknown = 0,
         Point = 1,
         LineString = 2,
         Polygon = 3,

@@ -237,6 +237,11 @@ struct geometry_to_wkb
         return util::apply_visitor(*this, geom);
     }
 
+    result_type operator() (new_geometry::geometry_empty const&) const
+    {
+        return result_type();
+    }
+
     result_type operator() (new_geometry::point const& pt) const
     {
         return point_wkb(pt, byte_order_);

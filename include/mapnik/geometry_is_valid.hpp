@@ -40,6 +40,11 @@ struct geometry_is_valid
         return mapnik::util::apply_visitor(*this, geom);
     }
 
+    result_type operator() (geometry_empty const& ) const
+    {
+        return false;
+    }
+
     result_type operator() (geometry_collection const& collection) const
     {
         for (auto const& geom : collection)

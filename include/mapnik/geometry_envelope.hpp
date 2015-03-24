@@ -39,6 +39,11 @@ struct geometry_envelope
         return mapnik::util::apply_visitor(*this, geom);
     }
 
+    bbox_type operator() (mapnik::new_geometry::geometry_empty const&) const
+    {
+        return mapnik::box2d<double>();
+    }
+
     bbox_type operator() (mapnik::new_geometry::point const& pt) const
     {
         return mapnik::box2d<double>(pt.x, pt.y, pt.x, pt.y);

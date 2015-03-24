@@ -49,6 +49,11 @@ struct hit_test_visitor
        y_(y),
        tol_(tol) {}
 
+    bool operator() (new_geometry::geometry_empty const& ) const
+    {
+        return false;
+    }
+
     bool operator() (new_geometry::point const& geom) const
     {
         return distance(geom.x, geom.y, x_, y_) <= tol_;

@@ -103,8 +103,9 @@ struct multi_point : line_string {};
 struct multi_line_string : std::vector<line_string> {};
 struct multi_polygon : std::vector<polygon> {};
 struct geometry_collection;
-
-using geometry = mapnik::util::variant<point,
+struct geometry_empty {};
+using geometry = mapnik::util::variant<geometry_empty,
+                                       point,
                                        line_string,
                                        polygon,
                                        multi_point,

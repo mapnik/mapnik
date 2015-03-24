@@ -105,7 +105,7 @@ public:
         : id_(id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
-        geom_(mapnik::util::no_init()),
+        geom_(new_geometry::geometry_empty()),
         raster_() {}
 
     inline mapnik::value_integer id() const { return id_;}

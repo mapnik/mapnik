@@ -37,6 +37,11 @@ namespace detail {
 
 struct datasource_geometry_type
 {
+    mapnik::datasource::geometry_t operator () (mapnik::new_geometry::geometry_empty const&) const
+    {
+        return mapnik::datasource::Unknown;
+    }
+
     mapnik::datasource::geometry_t operator () (mapnik::new_geometry::point const&) const
     {
         return mapnik::datasource::Point;

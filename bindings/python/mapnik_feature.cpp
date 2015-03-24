@@ -58,11 +58,6 @@ using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
-void set_geometry_impl( mapnik::feature_impl & feature, mapnik::new_geometry::geometry const& geom)
-{
-    feature.set_geometry_copy(geom);
-}
-
 mapnik::feature_ptr from_geojson_impl(std::string const& json, mapnik::context_ptr const& ctx)
 {
     mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
