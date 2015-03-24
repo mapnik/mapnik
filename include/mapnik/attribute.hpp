@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 // stl
 #include <string>
 #include <unordered_map>
@@ -53,7 +53,7 @@ struct geometry_type_attribute
     template <typename V, typename F>
     V value(F const& f) const
     {
-        return static_cast<mapnik::value_integer>(new_geometry::geometry_type(f.get_geometry()));
+        return static_cast<mapnik::value_integer>(util::to_ds_type(f.get_geometry()));
     }
 };
 

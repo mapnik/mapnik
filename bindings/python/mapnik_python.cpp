@@ -196,7 +196,7 @@ struct agg_renderer_visitor_1
 {
     agg_renderer_visitor_1(mapnik::Map const& m, double scale_factor, unsigned offset_x, unsigned offset_y)
         : m_(m), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y) {}
-    
+
     template <typename T>
     void operator() (T & pixmap)
     {
@@ -222,7 +222,7 @@ struct agg_renderer_visitor_2
     agg_renderer_visitor_2(mapnik::Map const &m, std::shared_ptr<mapnik::label_collision_detector4> detector,
                  double scale_factor, unsigned offset_x, unsigned offset_y)
         : m_(m), detector_(detector), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y) {}
-    
+
     template <typename T>
     void operator() (T & pixmap)
     {
@@ -249,7 +249,7 @@ struct agg_renderer_visitor_3
     agg_renderer_visitor_3(mapnik::Map const& m, mapnik::request const& req, mapnik::attributes const& vars,
                  double scale_factor, unsigned offset_x, unsigned offset_y)
         : m_(m), req_(req), vars_(vars), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y) {}
-    
+
     template <typename T>
     void operator() (T & pixmap)
     {
@@ -279,7 +279,7 @@ struct agg_renderer_visitor_4
                  mapnik::layer const& layer, std::set<std::string>& names)
         : m_(m), scale_factor_(scale_factor), offset_x_(offset_x), offset_y_(offset_y),
           layer_(layer), names_(names) {}
-    
+
     template <typename T>
     void operator() (T & pixmap)
     {
@@ -1056,7 +1056,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();
     python_optional<mapnik::composite_mode_e>();
-    python_optional<mapnik::datasource::geometry_t>();
+    python_optional<mapnik::datasource_geometry_t>();
     python_optional<std::string>();
     python_optional<unsigned>();
     python_optional<double>();

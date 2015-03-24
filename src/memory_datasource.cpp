@@ -125,10 +125,10 @@ box2d<double> memory_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const
+boost::optional<datasource_geometry_t> memory_datasource::get_geometry_type() const
 {
     // TODO - detect this?
-    return datasource::Collection;
+    return datasource_geometry_t::Collection;
 }
 
 layer_descriptor memory_datasource::get_descriptor() const

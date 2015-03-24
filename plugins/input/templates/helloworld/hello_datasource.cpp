@@ -46,9 +46,9 @@ mapnik::box2d<double> hello_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> hello_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> hello_datasource::get_geometry_type() const
 {
-    return mapnik::datasource::Point;
+    return mapnik::datasource_geometry_t::Point;
 }
 
 mapnik::layer_descriptor hello_datasource::get_descriptor() const

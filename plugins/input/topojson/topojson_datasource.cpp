@@ -86,27 +86,27 @@ struct geometry_type_visitor
 {
     int operator() (mapnik::topojson::point const&) const
     {
-        return static_cast<int>(mapnik::datasource::Point);
+        return static_cast<int>(mapnik::datasource_geometry_t::Point);
     }
     int operator() (mapnik::topojson::multi_point const&) const
     {
-        return static_cast<int>(mapnik::datasource::Point);
+        return static_cast<int>(mapnik::datasource_geometry_t::Point);
     }
     int operator() (mapnik::topojson::linestring const&) const
     {
-        return static_cast<int>(mapnik::datasource::LineString);
+        return static_cast<int>(mapnik::datasource_geometry_t::LineString);
     }
     int operator() (mapnik::topojson::multi_linestring const&) const
     {
-        return static_cast<int>(mapnik::datasource::LineString);
+        return static_cast<int>(mapnik::datasource_geometry_t::LineString);
     }
     int operator() (mapnik::topojson::polygon const&) const
     {
-        return static_cast<int>(mapnik::datasource::Polygon);
+        return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
     int operator() (mapnik::topojson::multi_polygon const&) const
     {
-        return static_cast<int>(mapnik::datasource::Polygon);
+        return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
     int operator() (mapnik::topojson::invalid const&) const
     {
@@ -234,9 +234,9 @@ const char * topojson_datasource::name()
     return "topojson";
 }
 
-boost::optional<mapnik::datasource::geometry_t> topojson_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> topojson_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     std::size_t num_features = topo_.geometries.size();
     for (std::size_t i = 0; i < num_features && i < 5; ++i)
@@ -247,12 +247,12 @@ boost::optional<mapnik::datasource::geometry_t> topojson_datasource::get_geometr
         {
             if (multi_type > 0 && multi_type != type)
             {
-                result.reset(mapnik::datasource::Collection);
+                result.reset(mapnik::datasource_geometry_t::Collection);
                 return result;
             }
             else
             {
-                result.reset(static_cast<mapnik::datasource::geometry_t>(type));
+                result.reset(static_cast<mapnik::datasource_geometry_t>(type));
             }
             multi_type = type;
         }

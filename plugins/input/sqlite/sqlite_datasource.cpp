@@ -418,13 +418,13 @@ box2d<double> sqlite_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_type() const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::get_geometry_type");
 #endif
 
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
     if (dataset_)
     {
         // get geometry type by querying first features
@@ -453,13 +453,13 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
                 {
                     continue;
                 }
-                mapnik::util::to_ds_type(geom,result);
+                result = mapnik::util::to_ds_type(geom);
                 if (result)
                 {
                     int type = static_cast<int>(*result);
                     if (multi_type > 0 && multi_type != type)
                     {
-                        result.reset(mapnik::datasource::Collection);
+                        result.reset(mapnik::datasource_geometry_t::Collection);
                         return result;
                     }
                     multi_type = type;

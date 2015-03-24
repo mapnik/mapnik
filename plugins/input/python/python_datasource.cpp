@@ -163,9 +163,9 @@ mapnik::box2d<double> python_datasource::envelope() const
     return box;
 }
 
-boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> python_datasource::get_geometry_type() const
 {
-    using return_type = boost::optional<mapnik::datasource::geometry_t>;
+    using return_type = boost::optional<mapnik::datasource_geometry_t>;
 
     try
     {
@@ -182,7 +182,7 @@ boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_
             return return_type();
         }
         long geom_type_integer = boost::python::extract<long>(py_geometry_type);
-        return mapnik::datasource::geometry_t(geom_type_integer);
+        return mapnik::datasource_geometry_t(geom_type_integer);
     }
     catch ( boost::python::error_already_set )
     {

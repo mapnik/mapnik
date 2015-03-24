@@ -32,6 +32,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
+#include <mapnik/datasource_geometry_type.hpp>
 
 // stl
 #include <map>
@@ -66,14 +67,6 @@ public:
     enum datasource_t : std::uint8_t {
         Vector,
         Raster
-    };
-
-    enum geometry_t : std::uint8_t {
-        Unknown = 0,
-        Point = 1,
-        LineString = 2,
-        Polygon = 3,
-        Collection = 4
     };
 
     datasource (parameters const& params)
@@ -112,7 +105,7 @@ public:
         // default implementation without context use features method
         return features(q);
     }
-    virtual boost::optional<geometry_t> get_geometry_type() const = 0;
+    virtual boost::optional<datasource_geometry_t> get_geometry_type() const = 0;
     virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
     virtual box2d<double> envelope() const = 0;

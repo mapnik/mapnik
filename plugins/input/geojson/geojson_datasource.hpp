@@ -94,7 +94,7 @@ public:
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
-    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     template <typename Iterator>
     void parse_geojson(Iterator start, Iterator end);
     template <typename Iterator>

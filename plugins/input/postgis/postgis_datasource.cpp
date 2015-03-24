@@ -1033,9 +1033,9 @@ box2d<double> postgis_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
 
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
@@ -1070,17 +1070,17 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
                     g_type = rs->getValue("type");
                     if (boost::algorithm::contains(g_type, "line"))
                     {
-                        result.reset(mapnik::datasource::LineString);
+                        result.reset(mapnik::datasource_geometry_t::LineString);
                         return result;
                     }
                     else if (boost::algorithm::contains(g_type, "point"))
                     {
-                        result.reset(mapnik::datasource::Point);
+                        result.reset(mapnik::datasource_geometry_t::Point);
                         return result;
                     }
                     else if (boost::algorithm::contains(g_type, "polygon"))
                     {
-                        result.reset(mapnik::datasource::Polygon);
+                        result.reset(mapnik::datasource_geometry_t::Polygon);
                         return result;
                     }
                     else // geometry
@@ -1121,26 +1121,26 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
                     if (boost::algorithm::icontains(data, "line"))
                     {
                         g_type = "linestring";
-                        result.reset(mapnik::datasource::LineString);
+                        result.reset(mapnik::datasource_geometry_t::LineString);
                     }
                     else if (boost::algorithm::icontains(data, "point"))
                     {
                         g_type = "point";
-                        result.reset(mapnik::datasource::Point);
+                        result.reset(mapnik::datasource_geometry_t::Point);
                     }
                     else if (boost::algorithm::icontains(data, "polygon"))
                     {
                         g_type = "polygon";
-                        result.reset(mapnik::datasource::Polygon);
+                        result.reset(mapnik::datasource_geometry_t::Polygon);
                     }
                     else // geometry
                     {
-                        result.reset(mapnik::datasource::Collection);
+                        result.reset(mapnik::datasource_geometry_t::Collection);
                         return result;
                     }
                     if (! prev_type.empty() && g_type != prev_type)
                     {
-                        result.reset(mapnik::datasource::Collection);
+                        result.reset(mapnik::datasource_geometry_t::Collection);
                         return result;
                     }
                     prev_type = g_type;

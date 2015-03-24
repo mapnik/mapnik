@@ -29,7 +29,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
-#include <mapnik/geometry_types.hpp>
+//#include <mapnik/datasource.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -114,14 +114,10 @@ struct geometry_types : qi::symbols<char, mapnik::value_integer>
     geometry_types()
     {
         add
-            ("unknown", static_cast<mapnik::value_integer>(new_geometry::geometry_types::Unknown))
-            ("point", static_cast<mapnik::value_integer>(new_geometry::geometry_types::Point))
-            ("linestring", static_cast<mapnik::value_integer>(new_geometry::geometry_types::LineString))
-            ("polygon",static_cast<mapnik::value_integer>(new_geometry::geometry_types::Polygon))
-            ("multipoint",static_cast<mapnik::value_integer>(new_geometry::geometry_types::MultiPoint))
-            ("multilinestring",static_cast<mapnik::value_integer>(new_geometry::geometry_types::MultiLineString))
-            ("multipolygon",static_cast<mapnik::value_integer>(new_geometry::geometry_types::MultiPolygon))
-            ("geometrycollection",static_cast<mapnik::value_integer>(new_geometry::geometry_types::GeometryCollection))
+            ("point", 1)
+            ("linestring", 2)
+            ("polygon",3)
+            ("collection",4)
             ;
     }
 };

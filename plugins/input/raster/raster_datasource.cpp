@@ -171,9 +171,9 @@ mapnik::box2d<double> raster_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> raster_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> raster_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource::geometry_t>();
+    return boost::optional<mapnik::datasource_geometry_t>();
 }
 
 layer_descriptor raster_datasource::get_descriptor() const

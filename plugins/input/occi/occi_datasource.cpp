@@ -443,9 +443,9 @@ box2d<double> occi_datasource::envelope() const
 }
 
 
-boost::optional<mapnik::datasource::geometry_t> occi_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> occi_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource::geometry_t>();
+    return boost::optional<mapnik::datasource_geometry_t>();
 }
 
 layer_descriptor occi_datasource::get_descriptor() const
