@@ -26,7 +26,6 @@
 #include <mapnik/segment.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/geometry_impl.hpp>
-#include <mapnik/geometry_type.hpp>
 #include <mapnik/path.hpp>
 
 #include <algorithm>
@@ -39,8 +38,8 @@ namespace detail {
 template <typename F1, typename F2, typename F3>
 void make_building(new_geometry::polygon const& poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
 {
-    const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-    const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+    const std::unique_ptr<path_type> frame(new path_type(path_type::types::LineString));
+    const std::unique_ptr<path_type> roof(new path_type(path_type::types::Polygon));
     std::deque<segment_t> face_segments;
     double x0 = 0;
     double y0 = 0;
@@ -70,7 +69,7 @@ void make_building(new_geometry::polygon const& poly, double height, F1 const& f
     std::sort(face_segments.begin(),face_segments.end(), y_order);
     for (auto const& seg : face_segments)
     {
-        const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+        const std::unique_ptr<path_type> faces(new path_type(path_type::types::Polygon));
         faces->move_to(std::get<0>(seg),std::get<1>(seg));
         faces->line_to(std::get<2>(seg),std::get<3>(seg));
         faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);

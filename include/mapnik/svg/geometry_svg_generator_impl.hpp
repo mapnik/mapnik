@@ -29,8 +29,8 @@ namespace mapnik { namespace svg {
     namespace karma = boost::spirit::karma;
     namespace phoenix = boost::phoenix;
 
-    template <typename OutputIterator, typename Geometry>
-    svg_path_generator<OutputIterator,Geometry>::svg_path_generator()
+    template <typename OutputIterator, typename Path>
+    svg_path_generator<OutputIterator,Path>::svg_path_generator()
         : svg_path_generator::base_type(svg)
     {
         boost::spirit::karma::uint_type uint_;

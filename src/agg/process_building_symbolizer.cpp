@@ -54,7 +54,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using path_type = transform_path_adapter<view_transform, vertex_adapter>;
+    using transform_path_type = transform_path_adapter<view_transform, vertex_adapter>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
 
@@ -85,30 +85,30 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
 
     render_building_symbolizer(
         feature, height,
-        [&,r,g,b,a,opacity](geometry_type const& faces)
+        [&,r,g,b,a,opacity](path_type const& faces)
         {
             vertex_adapter va(faces);
-            path_type faces_path (this->common_.t_,va,prj_trans);
+            transform_path_type faces_path (this->common_.t_,va,prj_trans);
             ras_ptr->add_path(faces_path);
             ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
             this->ras_ptr->reset();
         },
-        [&,r,g,b,a,opacity](geometry_type const& frame)
+        [&,r,g,b,a,opacity](path_type const& frame)
         {
             vertex_adapter va(frame);
-            path_type path(common_.t_,va, prj_trans);
-            agg::conv_stroke<path_type> stroke(path);
+            transform_path_type path(common_.t_,va, prj_trans);
+            agg::conv_stroke<transform_path_type> stroke(path);
             stroke.width(common_.scale_factor_);
             ras_ptr->add_path(stroke);
             ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
         },
-        [&,r,g,b,a,opacity](geometry_type const& roof)
+        [&,r,g,b,a,opacity](path_type const& roof)
         {
             vertex_adapter va(roof);
-            path_type roof_path (common_.t_,va,prj_trans);
+            transform_path_type roof_path (common_.t_,va,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
             agg::render_scanlines(*ras_ptr, sl, ren);

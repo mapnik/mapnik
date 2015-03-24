@@ -28,12 +28,11 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-namespace mapnik {
+namespace mapnik { namespace detail {
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private util::noncopyable
+class path : private util::noncopyable
 {
-
 public:
     static const std::uint8_t geometry_bits = 7;
     enum types : std::uint8_t
@@ -53,11 +52,11 @@ public:
     types type_;
 public:
 
-    geometry()
+    path()
         : type_(Unknown)
     {}
 
-    explicit geometry(types type)
+    explicit path(types type)
         : type_(type)
     {}
 
@@ -106,31 +105,31 @@ public:
     }
 };
 
-namespace detail {
-template <typename Geometry>
+template <typename T>
 struct vertex_adapter : private util::noncopyable
 {
-    using size_type = typename Geometry::size_type;
-    using value_type = typename Geometry::value_type;
-    using types = typename Geometry::types;
+    using path_type = T;
+    using size_type = typename path_type::size_type;
+    using value_type = typename path_type::value_type;
+    using types = typename path_type::types;
 
-    vertex_adapter(Geometry const& geom)
-        : geom_(geom),
+    vertex_adapter(path_type const& path)
+        : path_(path),
           itr_(0) {}
 
     size_type size() const
     {
-        return geom_.size();
+        return path_.size();
     }
 
     unsigned vertex(double* x, double* y) const
     {
-        return geom_.cont_.get_vertex(itr_++,x,y);
+        return path_.cont_.get_vertex(itr_++,x,y);
     }
 
     unsigned vertex(std::size_t index, double* x, double* y) const
     {
-        return geom_.cont_.get_vertex(index, x, y);
+        return path_.cont_.get_vertex(index, x, y);
     }
 
     void rewind(unsigned ) const
@@ -140,7 +139,7 @@ struct vertex_adapter : private util::noncopyable
 
     types type() const
     {
-        return geom_.type();
+        return path_.type();
     }
 
     box2d<double> envelope() const
@@ -149,8 +148,8 @@ struct vertex_adapter : private util::noncopyable
         double x = 0;
         double y = 0;
         rewind(0);
-        size_type geom_size = size();
-        for (size_type i = 0; i < geom_size; ++i)
+        size_type path_size = size();
+        for (size_type i = 0; i < path_size; ++i)
         {
             unsigned cmd = vertex(&x,&y);
             if (cmd == SEG_CLOSE) continue;
@@ -165,20 +164,20 @@ struct vertex_adapter : private util::noncopyable
         }
         return result;
     }
-    Geometry const& geom_;
+    path_type const& path_;
     mutable size_type itr_;
 };
 }
 
-template <typename Geometry>
-box2d<double> envelope(Geometry const& geom)
+template <typename PathType>
+box2d<double> envelope(PathType const& path)
 {
-    detail::vertex_adapter<Geometry> va(geom);
+    detail::vertex_adapter<PathType> va(path);
     return va.envelope();
 }
 
-using geometry_type = geometry<double,vertex_vector>;
-using vertex_adapter = detail::vertex_adapter<geometry_type>;
+using path_type = detail::path<double,vertex_vector>;
+using vertex_adapter = detail::vertex_adapter<path_type>;
 
 }
 

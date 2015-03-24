@@ -45,16 +45,16 @@ std::string dump_path(T & path)
 }
 
 std::string clip_line(mapnik::box2d<double> const& bbox,
-                      mapnik::geometry_type const& geom)
+                      mapnik::path_type const& path)
 {
     using line_clipper = agg::conv_clip_polyline<mapnik::vertex_adapter>;
-    mapnik::vertex_adapter va(geom);
+    mapnik::vertex_adapter va(path);
     line_clipper clipped(va);
     clipped.clip_box(bbox.minx(),bbox.miny(),bbox.maxx(),bbox.maxy());
     return dump_path(clipped);
 }
 
-void parse_geom(mapnik::geometry_type & geom,
+void parse_geom(mapnik::path_type & path,
                 std::string const& geom_string) {
     std::vector<std::string> vertices;
     boost::split(vertices, geom_string, boost::is_any_of(","));
@@ -73,7 +73,7 @@ void parse_geom(mapnik::geometry_type & geom,
             && mapnik::util::string2double(commands[1],y)
             && mapnik::util::string2int(commands[2],c))
         {
-            geom.push_vertex(x,y,(mapnik::CommandType)c);
+            path.push_vertex(x,y,(mapnik::CommandType)c);
         }
         else
         {
@@ -112,11 +112,11 @@ int main(int argc, char** argv)
                 throw std::runtime_error(std::string("could not parse bbox '") + parts[0] + "'");
             }
             // second part is input geometry
-            mapnik::geometry_type geom;
-            parse_geom(geom,parts[1]);
-            //std::clog << dump_path(geom) << "\n";
+            mapnik::path_type path;
+            parse_geom(path, parts[1]);
+            //std::clog << dump_path(path) << "\n";
             // third part is expected, clipped geometry
-            BOOST_TEST_EQ(clip_line(bbox,geom),mapnik::util::trim_copy(parts[2]));
+            BOOST_TEST_EQ(clip_line(bbox, path),mapnik::util::trim_copy(parts[2]));
         }
         stream.close();
     }
