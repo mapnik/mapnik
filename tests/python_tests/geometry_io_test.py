@@ -260,21 +260,21 @@ def test_wkt_to_geojson():
         except RuntimeError, e:
             raise RuntimeError('%s %s' % (e, wkt))
 
-@raises(IndexError)
-def test_geometry_index_error():
-    wkt = 'Point (0 0)'
-    paths = mapnik.Path.from_wkt(wkt)
-    paths[3]
-    f = mapnik.Feature(mapnik.Context(),1)
-    f.add_geometries_from_wkt(wkt)
-    f.geometries()[3]
+#@raises(IndexError)
+#def test_geometry_index_error():
+#    wkt = 'Point (0 0)'
+#    paths = mapnik.Path.from_wkt(wkt)
+#    paths[3]
+#    f = mapnik.Feature(mapnik.Context(),1)
+#    f.add_geometries_from_wkt(wkt)
+#    f.geometries()[3]
 
-@raises(IndexError)
-def test_geometry_index_error2():
-    wkt = 'Point (0 0)'
-    f = mapnik.Feature(mapnik.Context(),1)
-    f.add_geometries_from_wkt(wkt)
-    f.geometries()[3]
+#@raises(IndexError)
+#def test_geometry_index_error2():
+#    wkt = 'Point (0 0)'
+#    f = mapnik.Feature(mapnik.Context(),1)
+#    f.add_geometries_from_wkt(wkt)
+#    f.geometries()[3]
 
 def test_wkt_rounding():
     # currently fails because we use output precision of 6 - should we make configurable? https://github.com/mapnik/mapnik/issues/1009

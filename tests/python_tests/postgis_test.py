@@ -682,7 +682,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def test_persist_connection_off():
         # NOTE: max_size should be equal or greater than
         #       the pool size. There's currently no API to
-        #       check nor set that size, but the current 
+        #       check nor set that size, but the current
         #       default is 20, so we use that value. See
         #       http://github.com/mapnik/mapnik/issues/863
         max_size = 20
@@ -945,216 +945,179 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feat['gid'],1)
         eq_(feat['dim'],2)
         eq_(feat['name'],'Point')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(feat.geometry.to_wkt(),'POINT(0 0)')
+
         # PointZ
         feat = fs.next()
         eq_(feat.id(),2)
         eq_(feat['gid'],2)
         eq_(feat['dim'],3)
         eq_(feat['name'],'PointZ')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(feat.geometry.to_wkt(),'POINT(0 0)')
+
         # PointM
         feat = fs.next()
         eq_(feat.id(),3)
         eq_(feat['gid'],3)
         eq_(feat['dim'],3)
         eq_(feat['name'],'PointM')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
+        eq_(feat.geometry.to_wkt(),'POINT(0 0)')
+
         # PointZM
         feat = fs.next()
         eq_(feat.id(),4)
         eq_(feat['gid'],4)
         eq_(feat['dim'],4)
         eq_(feat['name'],'PointZM')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
+
+        eq_(feat.geometry.to_wkt(),'POINT(0 0)')
         # MultiPoint
         feat = fs.next()
         eq_(feat.id(),5)
         eq_(feat['gid'],5)
         eq_(feat['dim'],2)
         eq_(feat['name'],'MultiPoint')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
-        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        eq_(feat.geometry.to_wkt(),'MULTIPOINT(0 0,1 1)')
+
         # MultiPointZ
         feat = fs.next()
         eq_(feat.id(),6)
         eq_(feat['gid'],6)
         eq_(feat['dim'],3)
         eq_(feat['name'],'MultiPointZ')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
-        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        eq_(feat.geometry.to_wkt(),'MULTIPOINT(0 0,1 1)')
+
         # MultiPointM
         feat = fs.next()
         eq_(feat.id(),7)
         eq_(feat['gid'],7)
         eq_(feat['dim'],3)
         eq_(feat['name'],'MultiPointM')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
-        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        eq_(feat.geometry.to_wkt(),'MULTIPOINT(0 0,1 1)')
+
         # MultiPointZM
         feat = fs.next()
         eq_(feat.id(),8)
         eq_(feat['gid'],8)
         eq_(feat['dim'],4)
         eq_(feat['name'],'MultiPointZM')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Point(0 0)')
-        eq_(geoms[1].to_wkt(),'Point(1 1)')
+        eq_(feat.geometry.to_wkt(),'MULTIPOINT(0 0,1 1)')
+
         # LineString
         feat = fs.next()
         eq_(feat.id(),9)
         eq_(feat['gid'],9)
         eq_(feat['dim'],2)
         eq_(feat['name'],'LineString')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(feat.geometry.to_wkt(),'LINESTRING(0 0,1 1)')
+
         # LineStringZ
         feat = fs.next()
         eq_(feat.id(),10)
         eq_(feat['gid'],10)
         eq_(feat['dim'],3)
         eq_(feat['name'],'LineStringZ')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(feat.geometry.to_wkt(),'LINESTRING(0 0,1 1)')
+
         # LineStringM
         feat = fs.next()
         eq_(feat.id(),11)
         eq_(feat['gid'],11)
         eq_(feat['dim'],3)
         eq_(feat['name'],'LineStringM')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(feat.geometry.to_wkt(),'LINESTRING(0 0,1 1)')
+
         # LineStringZM
         feat = fs.next()
         eq_(feat.id(),12)
         eq_(feat['gid'],12)
         eq_(feat['dim'],4)
         eq_(feat['name'],'LineStringZM')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
+        eq_(feat.geometry.to_wkt(),'LINESTRING(0 0,1 1)')
+
         # Polygon
         feat = fs.next()
         eq_(feat.id(),13)
         eq_(feat['gid'],13)
         eq_(feat['name'],'Polygon')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'POLYGON((0 0,1 1,2 2,0 0))')
+
         # PolygonZ
         feat = fs.next()
         eq_(feat.id(),14)
         eq_(feat['gid'],14)
         eq_(feat['name'],'PolygonZ')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'POLYGON((0 0,1 1,2 2,0 0))')
+
         # PolygonM
         feat = fs.next()
         eq_(feat.id(),15)
         eq_(feat['gid'],15)
         eq_(feat['name'],'PolygonM')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'POLYGON((0 0,1 1,2 2,0 0))')
+
         # PolygonZM
         feat = fs.next()
         eq_(feat.id(),16)
         eq_(feat['gid'],16)
         eq_(feat['name'],'PolygonZM')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'POLYGON((0 0,1 1,2 2,0 0))')
+
         # MultiLineString
         feat = fs.next()
         eq_(feat.id(),17)
         eq_(feat['gid'],17)
         eq_(feat['name'],'MultiLineString')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
-        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        eq_(feat.geometry.to_wkt(),'MULTILINESTRING((0 0,1 1),(2 2,3 3))')
+
         # MultiLineStringZ
         feat = fs.next()
         eq_(feat.id(),18)
         eq_(feat['gid'],18)
         eq_(feat['name'],'MultiLineStringZ')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
-        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        eq_(feat.geometry.to_wkt(),'MULTILINESTRING((0 0,1 1),(2 2,3 3))')
+
         # MultiLineStringM
         feat = fs.next()
         eq_(feat.id(),19)
         eq_(feat['gid'],19)
         eq_(feat['name'],'MultiLineStringM')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
-        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        eq_(feat.geometry.to_wkt(),'MULTILINESTRING((0 0,1 1),(2 2,3 3))')
+
         # MultiLineStringZM
         feat = fs.next()
         eq_(feat.id(),20)
         eq_(feat['gid'],20)
         eq_(feat['name'],'MultiLineStringZM')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'LineString(0 0,1 1)')
-        eq_(geoms[1].to_wkt(),'LineString(2 2,3 3)')
+        eq_(feat.geometry.to_wkt(),'MULTILINESTRING((0 0,1 1),(2 2,3 3))')
+
         # MultiPolygon
         feat = fs.next()
         eq_(feat.id(),21)
         eq_(feat['gid'],21)
         eq_(feat['name'],'MultiPolygon')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
-        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'MULTIPOLYGON(((0 0,1 1,2 2,0 0)),((0 0,1 1,2 2,0 0)))')
+
         # MultiPolygonZ
         feat = fs.next()
         eq_(feat.id(),22)
         eq_(feat['gid'],22)
         eq_(feat['name'],'MultiPolygonZ')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
-        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'MULTIPOLYGON(((0 0,1 1,2 2,0 0)),((0 0,1 1,2 2,0 0)))')
+
         # MultiPolygonM
         feat = fs.next()
         eq_(feat.id(),23)
         eq_(feat['gid'],23)
         eq_(feat['name'],'MultiPolygonM')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
-        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'MULTIPOLYGON(((0 0,1 1,2 2,0 0)),((0 0,1 1,2 2,0 0)))')
+
         # MultiPolygonZM
         feat = fs.next()
         eq_(feat.id(),24)
         eq_(feat['gid'],24)
         eq_(feat['name'],'MultiPolygonZM')
-        geoms = feat.geometries()
-        eq_(len(geoms),2)
-        eq_(geoms[0].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
-        eq_(geoms[1].to_wkt(),'Polygon((0 0,1 1,2 2,0 0))')
+        eq_(feat.geometry.to_wkt(),'MULTIPOLYGON(((0 0,1 1,2 2,0 0)),((0 0,1 1,2 2,0 0)))')
 
     def test_variable_in_subquery1():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''

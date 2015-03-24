@@ -91,22 +91,22 @@ if mapnik.has_grid_renderer():
         context.push('Name')
         f = mapnik.Feature(context,1)
         f['Name'] = 'South East'
-        f.add_geometries_from_wkt('POINT (143.10 -38.60)')
+        f.geometry = mapnik.Geometry.from_wkt('POINT (143.10 -38.60)')
         ds.add_feature(f)
 
         f = mapnik.Feature(context,2)
         f['Name'] = 'South West'
-        f.add_geometries_from_wkt('POINT (142.48 -38.60)')
+        f.geometry = mapnik.Geometry.from_wkt('POINT (142.48 -38.60)')
         ds.add_feature(f)
 
         f = mapnik.Feature(context,3)
         f['Name'] = 'North West'
-        f.add_geometries_from_wkt('POINT (142.48 -38.38)')
+        f.geometry = mapnik.Geometry.from_wkt('POINT (142.48 -38.38)')
         ds.add_feature(f)
 
         f = mapnik.Feature(context,4)
         f['Name'] = 'North East'
-        f.add_geometries_from_wkt('POINT (143.10 -38.38)')
+        f.geometry = mapnik.Geometry.from_wkt('POINT (143.10 -38.38)')
         ds.add_feature(f)
         s = mapnik.Style()
         r = mapnik.Rule()
@@ -206,7 +206,7 @@ if mapnik.has_grid_renderer():
         context.push('Name')
         f = mapnik.Feature(context,pixel_key)
         f['Name'] = str(pixel_key)
-        f.add_geometries_from_wkt('POLYGON ((0 0, 0 256, 256 256, 256 0, 0 0))')
+        f.geometry = mapnik.Geometry.from_wkt('POLYGON ((0 0, 0 256, 256 256, 256 0, 0 0))')
         ds.add_feature(f)
         s = mapnik.Style()
         r = mapnik.Rule()
@@ -270,7 +270,7 @@ if mapnik.has_grid_renderer():
         pixel_key = 1
         f = mapnik.Feature(context,pixel_key)
         f['Name'] = str(pixel_key)
-        f.add_geometries_from_wkt('LINESTRING (30 10, 10 30, 40 40)')
+        f.geometry = mapnik.Geometry.from_wkt('LINESTRING (30 10, 10 30, 40 40)')
         ds.add_feature(f)
         s = mapnik.Style()
         r = mapnik.Rule()
