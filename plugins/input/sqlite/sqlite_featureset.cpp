@@ -30,7 +30,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/geometry_envelope.hpp>
 
 // ogr
@@ -82,7 +82,7 @@ feature_ptr sqlite_featureset::next()
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
         mapnik::geometry::geometry geom = geometry_utils::from_wkb(data, size, format_);
-        if (mapnik::geometry::empty(geom))
+        if (mapnik::geometry::is_empty(geom))
         {
             continue;
         }

@@ -29,7 +29,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
-#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/geometry_envelope.hpp>
 
 #include "connection_manager.hpp"
@@ -390,7 +390,7 @@ void pgsql2sqlite(Connection conn,
                     {
                         mapnik::Feature feat(ctx,pkid);
                         mapnik::geometry::geometry geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
-                        if (!mapnik::geometry::empty(geom))
+                        if (!mapnik::geometry::is_empty(geom))
                         {
                             box2d<double> bbox = mapnik::geometry::envelope(geom);
                             if (bbox.valid())

@@ -36,7 +36,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/geometry_envelope.hpp>
 
 // boost
@@ -197,7 +197,7 @@ public:
             if (data)
             {
                 mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
-                if (!mapnik::geometry::empty(geom))
+                if (!mapnik::geometry::is_empty(geom))
                 {
                     mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                     if (bbox.valid())
@@ -281,7 +281,7 @@ public:
                 if (data)
                 {
                     mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
-                    if (!mapnik::geometry::empty(geom))
+                    if (!mapnik::geometry::is_empty(geom))
                     {
                         mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                         if (bbox.valid())
@@ -357,7 +357,7 @@ public:
             if (data)
             {
                 mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
-                if (!mapnik::geometry::empty(geom))
+                if (!mapnik::geometry::is_empty(geom))
                 {
                     mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                     if (bbox.valid())

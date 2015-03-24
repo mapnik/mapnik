@@ -29,7 +29,7 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
-struct geometry_empty
+struct geometry_is_empty
 {
     bool operator() (mapnik::geometry::geometry const& geom) const
     {
@@ -76,7 +76,7 @@ struct geometry_empty
 
 inline bool is_empty(mapnik::geometry::geometry const& geom)
 {
-    return detail::geometry_empty()(geom);
+    return detail::geometry_is_empty()(geom);
 }
 
 }}

@@ -34,7 +34,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -449,7 +449,7 @@ boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_t
             {
 
                 mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, format_);
-                if (mapnik::geometry::empty(geom))
+                if (mapnik::geometry::is_empty(geom))
                 {
                     continue;
                 }

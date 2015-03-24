@@ -44,6 +44,7 @@
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_is_valid.hpp>
 #include <mapnik/geometry_is_simple.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/geometry_centroid.hpp>
 
@@ -158,6 +159,11 @@ bool geometry_is_simple_impl(mapnik::geometry::geometry const& geom)
     return mapnik::geometry::is_simple(geom);
 }
 
+bool geometry_is_empty_impl(mapnik::geometry::geometry const& geom)
+{
+    return mapnik::geometry::is_empty(geom);
+}
+
 void geometry_correct_impl(mapnik::geometry::geometry & geom)
 {
     mapnik::geometry::correct(geom);
@@ -260,6 +266,7 @@ void export_geometry()
         .def("type",&geometry_type_impl)
         .def("is_valid", &geometry_is_valid_impl)
         .def("is_simple", &geometry_is_simple_impl)
+        .def("is_empty", &geometry_is_empty_impl)
         .def("correct", &geometry_correct_impl)
         .def("centroid",&geometry_centroid_impl)
         .def("to_wkb",&to_wkb_impl)
