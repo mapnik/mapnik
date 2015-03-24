@@ -110,7 +110,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         y = 48 # latitude
         wkt = 'POINT(%s %s)' % (x,y)
         # little endian wkb (mapnik will auto-detect and ready either little or big endian (XDR))
-        wkb = mapnik.Path.from_wkt(wkt).to_wkb(mapnik.wkbByteOrder.NDR)
+        wkb = mapnik.Geometry.from_wkt(wkt).to_wkb(mapnik.wkbByteOrder.NDR)
         values = (None,sqlite3.Binary(wkb),"test point")
         cur = conn.cursor()
         cur.execute('''INSERT into "point_table" (id,geometry,name) values (?,?,?)''',values)
@@ -139,9 +139,8 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         feat = fs.next()
         eq_(feat.id(),1)
         eq_(feat['name'],'test point')
-        geoms = feat.geometries()
-        eq_(len(geoms),1)
-        eq_(geoms.to_wkt(),'Point(-122 48)')
+        geom = feat.geometry;
+        eq_(geom.to_wkt(),'POINT(-122 48)')
         del ds
 
         # ensure it matches data read with just sqlite
@@ -156,9 +155,9 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         name = result[2]
         eq_(name,'test point')
         geom_wkb_blob = result[1]
-        eq_(str(geom_wkb_blob),geoms.to_wkb(mapnik.wkbByteOrder.NDR))
-        new_geom = mapnik.Path.from_wkb(str(geom_wkb_blob))
-        eq_(new_geom.to_wkt(),geoms.to_wkt())
+        eq_(str(geom_wkb_blob),geom.to_wkb(mapnik.wkbByteOrder.NDR))
+        new_geom = mapnik.Geometry.from_wkb(str(geom_wkb_blob))
+        eq_(new_geom.to_wkt(),geom.to_wkt())
         conn.close()
         os.unlink(test_db)
 
