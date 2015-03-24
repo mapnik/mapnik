@@ -5,7 +5,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/expression.hpp>

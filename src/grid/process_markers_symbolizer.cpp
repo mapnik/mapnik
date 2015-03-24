@@ -45,7 +45,6 @@ porting notes -->
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -165,8 +164,8 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
-        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts 
-        // the destination pixel type required.   
+        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts
+        // the destination pixel type required.
         render_raster_marker(RendererType(renb_), ras_, this->src_, this->feature_, marker_tr, opacity);
         if (!placed_)
         {

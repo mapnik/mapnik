@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_TO_GEOJSON_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/json/geometry_generator_grammar.hpp>
 
 namespace mapnik { namespace util {

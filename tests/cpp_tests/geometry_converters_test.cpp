@@ -11,7 +11,6 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>

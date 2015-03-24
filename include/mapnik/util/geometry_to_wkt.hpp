@@ -24,8 +24,6 @@
 #define MAPNIK_GEOMETRY_TO_WKT_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
-
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
 
 namespace mapnik { namespace util {

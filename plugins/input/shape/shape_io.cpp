@@ -30,7 +30,6 @@
 // boost
 
 using mapnik::datasource_exception;
-using mapnik::geometry_type;
 using mapnik::hit_test_first;
 const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";

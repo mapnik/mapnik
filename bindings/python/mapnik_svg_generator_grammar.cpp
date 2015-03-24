@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry.hpp>
 #include <mapnik/svg/geometry_svg_generator_impl.hpp>
 #include <string>
 

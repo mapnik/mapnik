@@ -31,7 +31,7 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/util/boost_geometry_adapters.hpp>
 
 // boost

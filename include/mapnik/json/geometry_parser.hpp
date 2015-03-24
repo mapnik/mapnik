@@ -24,7 +24,7 @@
 #define MAPNIK_JSON_GEOMETRY_PARSER_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+
 
 #include <mapnik/json/geometry_grammar.hpp>
 

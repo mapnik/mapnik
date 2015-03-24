@@ -34,7 +34,6 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/geometry_empty.hpp>

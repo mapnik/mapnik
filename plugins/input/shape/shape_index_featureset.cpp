@@ -42,7 +42,6 @@
 #include "shp_index.hpp"
 
 using mapnik::feature_factory;
-using mapnik::geometry_type;
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,

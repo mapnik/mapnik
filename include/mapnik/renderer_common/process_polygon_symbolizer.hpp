@@ -27,7 +27,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/feature.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 

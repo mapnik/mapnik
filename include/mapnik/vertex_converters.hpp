@@ -23,7 +23,6 @@
 #ifndef MAPNIK_VERTEX_CONVERTERS_HPP
 #define MAPNIK_VERTEX_CONVERTERS_HPP
 
-
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/attribute.hpp>
@@ -37,7 +36,7 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/geometry.hpp>
+
 // agg
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"

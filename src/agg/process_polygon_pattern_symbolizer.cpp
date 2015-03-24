@@ -86,9 +86,6 @@ struct agg_renderer_process_visitor_p
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
 
-        //using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
-        //using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
-
         agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->getRowSize());
         ras_ptr_->reset();
@@ -186,8 +183,6 @@ struct agg_renderer_process_visitor_p
 
     void operator() (marker_rgba8 const& marker)
     {
-        using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
-        using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
         using color = agg::rgba8;
         using order = agg::order_rgba;
         using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;

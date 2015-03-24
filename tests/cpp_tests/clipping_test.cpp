@@ -1,8 +1,7 @@
 // mapnik
-#include <mapnik/geometry.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
-
+#include <mapnik/path.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

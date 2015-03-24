@@ -1,6 +1,5 @@
 #include "bench_framework.hpp"
 #include "compare_images.hpp"
-#include <mapnik/geometry.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/view_transform.hpp>

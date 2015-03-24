@@ -24,7 +24,7 @@
 #define CONTAINER_ADAPTER_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+
 
 #include <mapnik/util/path_iterator.hpp>
 

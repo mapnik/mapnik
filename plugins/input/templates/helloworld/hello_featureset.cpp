@@ -1,6 +1,5 @@
 // mapnik
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/value_types.hpp>
 
 // boost

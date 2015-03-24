@@ -24,7 +24,6 @@
 #define SHAPE_IO_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 

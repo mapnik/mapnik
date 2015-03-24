@@ -27,7 +27,6 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
-//#include <mapnik/geometry.hpp> // for geometry_type::types (TODO: avoid this interdependence)
 #include <mapnik/geometry_types.hpp>
 // stl
 #include <cmath>

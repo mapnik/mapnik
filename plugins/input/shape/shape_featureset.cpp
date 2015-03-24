@@ -33,7 +33,6 @@
 #include "shape_featureset.hpp"
 #include "shape_utils.hpp"
 
-using mapnik::geometry_type;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 

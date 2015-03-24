@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-
+#include <mapnik/path.hpp>
 // boost
 #include <boost/iterator/iterator_facade.hpp>
 
