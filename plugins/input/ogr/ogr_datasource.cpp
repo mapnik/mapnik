@@ -405,16 +405,16 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
             {
             case wkbPoint:
             case wkbMultiPoint:
-                result.reset(mapnik::datasource::Point);
+                result.reset(mapnik::datasource_geometry_t::Point);
                 break;
             case wkbLinearRing:
             case wkbLineString:
             case wkbMultiLineString:
-                result.reset(mapnik::datasource::LineString);
+                result.reset(mapnik::datasource_geometry_t::LineString);
                 break;
             case wkbPolygon:
             case wkbMultiPolygon:
-                result.reset(mapnik::datasource::Polygon);
+                result.reset(mapnik::datasource_geometry_t::Polygon);
                 break;
             case wkbGeometryCollection:
                 result.reset(mapnik::datasource_geometry_t::Collection);
@@ -440,16 +440,16 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
                             {
                             case wkbPoint:
                             case wkbMultiPoint:
-                                result.reset(mapnik::datasource::Point);
+                                result.reset(mapnik::datasource_geometry_t::Point);
                                 break;
                             case wkbLinearRing:
                             case wkbLineString:
                             case wkbMultiLineString:
-                                result.reset(mapnik::datasource::LineString);
+                                result.reset(mapnik::datasource_geometry_t::LineString);
                                 break;
                             case wkbPolygon:
                             case wkbMultiPolygon:
-                                result.reset(mapnik::datasource::Polygon);
+                                result.reset(mapnik::datasource_geometry_t::Polygon);
                                 break;
                             case wkbGeometryCollection:
                                 result.reset(mapnik::datasource_geometry_t::Collection);
