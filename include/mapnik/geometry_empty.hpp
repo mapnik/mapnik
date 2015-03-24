@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GEOMETRY_EMPTY_HPP
 #define MAPNIK_GEOMETRY_EMPTY_HPP
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 namespace mapnik { namespace new_geometry {
 

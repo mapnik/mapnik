@@ -23,7 +23,7 @@
 #ifndef MAPNIK_UTIL_SPIRIT_TRANSFORM_ATTRIBUTE_HPP
 #define MAPNIK_UTIL_SPIRIT_TRANSFORM_ATTRIBUTE_HPP
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 namespace boost { namespace spirit { namespace traits {
 

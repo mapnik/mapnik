@@ -28,7 +28,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_centroid.hpp>
 #include <mapnik/vertex_processor.hpp>

@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GEOMETRY_IS_SIMPLE_HPP
 #define MAPNIK_GEOMETRY_IS_SIMPLE_HPP
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/is_simple.hpp>
 

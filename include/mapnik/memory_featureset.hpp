@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/featureset.hpp>
 #include <mapnik/datasource.hpp>

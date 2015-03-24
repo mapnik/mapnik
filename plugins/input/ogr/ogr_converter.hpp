@@ -24,7 +24,7 @@
 #define OGR_CONVERTER_HPP
 
 // mapnik
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 class OGRGeometry;
 class OGRGeometryCollection;

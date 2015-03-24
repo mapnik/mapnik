@@ -27,7 +27,7 @@
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/json/geometry_parser.hpp>

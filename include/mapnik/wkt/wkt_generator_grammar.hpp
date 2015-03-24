@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_fusion_adapted.hpp>
 

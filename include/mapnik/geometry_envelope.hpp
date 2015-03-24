@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GEOMETRY_ENVELOPE_HPP
 #define MAPNIK_GEOMETRY_ENVELOPE_HPP
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 
 namespace mapnik { namespace new_geometry {

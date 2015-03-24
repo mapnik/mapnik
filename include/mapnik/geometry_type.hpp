@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_TYPE_HPP
 
 // mapnik
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_types.hpp>
 
 namespace mapnik { namespace new_geometry { namespace detail {

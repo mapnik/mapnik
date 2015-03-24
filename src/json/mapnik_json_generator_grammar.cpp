@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 #include <mapnik/json/geometry_generator_grammar_impl.hpp>
 #include <mapnik/json/properties_generator_grammar_impl.hpp>

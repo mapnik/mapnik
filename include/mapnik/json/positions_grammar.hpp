@@ -27,7 +27,7 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push

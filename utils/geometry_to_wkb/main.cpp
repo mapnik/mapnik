@@ -24,7 +24,7 @@
 #include <iostream>
 #include <string>
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/datasource.hpp>

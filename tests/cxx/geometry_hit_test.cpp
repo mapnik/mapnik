@@ -1,7 +1,6 @@
-
 #include "catch.hpp"
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/geometry_correct.hpp>
 
@@ -11,19 +10,19 @@ SECTION("hit_test_filter") {
     using namespace mapnik::new_geometry;
     {
         geometry geom(point(0,0));
-        REQUIRE( mapnik::hit_test(geom,0,0,0) );        
+        REQUIRE( mapnik::hit_test(geom,0,0,0) );
     }
     {
         geometry geom(point(0,0));
-        REQUIRE( mapnik::hit_test(geom,1,0,1) );        
+        REQUIRE( mapnik::hit_test(geom,1,0,1) );
     }
     {
         geometry geom(point(0,0));
-        REQUIRE( mapnik::hit_test(geom,0,1,1) );        
+        REQUIRE( mapnik::hit_test(geom,0,1,1) );
     }
     {
         geometry geom(point(0,0));
-        REQUIRE( mapnik::hit_test(geom,1,1,1.5) );        
+        REQUIRE( mapnik::hit_test(geom,1,1,1.5) );
     }
     {
         line_string line;
@@ -31,17 +30,17 @@ SECTION("hit_test_filter") {
         line.add_coord(1,1);
         line.add_coord(2,2);
         geometry geom(line);
-        REQUIRE( mapnik::hit_test(geom,0,0,1.5) );        
+        REQUIRE( mapnik::hit_test(geom,0,0,1.5) );
     }
     {
-        line_string line;        
+        line_string line;
         line.add_coord(0,0);
         line.add_coord(1,1);
         line.add_coord(2,2);
         multi_line_string multi_line;
         multi_line.emplace_back(std::move(line));
         geometry geom(multi_line);
-        REQUIRE( mapnik::hit_test(geom,0,0,1.5) );        
+        REQUIRE( mapnik::hit_test(geom,0,0,1.5) );
     }
     {
         polygon poly;

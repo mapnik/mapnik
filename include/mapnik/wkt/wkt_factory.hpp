@@ -24,7 +24,7 @@
 #define MAPNIK_WKT_FACTORY_HPP
 
 // mapnik
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 #include <mapnik/wkt/wkt_grammar.hpp>
 #include <mapnik/wkt/wkt_generator_grammar.hpp>

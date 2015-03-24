@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/geometry_impl.hpp>  // for geometry_type
+#include <mapnik/geometry.hpp>  // for geometry_type
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/positions_grammar.hpp>

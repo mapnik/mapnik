@@ -23,7 +23,7 @@
 #ifndef MAPNIK_JSON_GEOMETRY_UTIL_HPP
 #define MAPNIK_JSON_GEOMETRY_UTIL_HPP
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 // boost.geometry
 #include <boost/geometry/algorithms/correct.hpp>

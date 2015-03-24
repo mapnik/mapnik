@@ -25,7 +25,7 @@
 //mapnik
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 namespace mapnik {
 

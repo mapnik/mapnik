@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 
 namespace mapnik {

@@ -24,7 +24,7 @@
 #ifndef MAPNIK_PATTERN_ALIGNMENT_HPP
 #define MAPNIK_PATTERN_ALIGNMENT_HPP
 
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 
 namespace mapnik { namespace detail {
 

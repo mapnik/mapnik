@@ -1,6 +1,6 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_centroid.hpp>
 #include <vector>

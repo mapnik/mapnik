@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/make_unique.hpp>
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/debug.hpp>

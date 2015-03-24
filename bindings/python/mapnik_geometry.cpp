@@ -39,7 +39,7 @@
 #pragma GCC diagnostic pop
 
 // mapnik
-#include <mapnik/geometry_impl.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_is_valid.hpp>
