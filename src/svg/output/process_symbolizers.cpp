@@ -97,15 +97,12 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
-        for (auto const& geom : feature.paths())
-        {
-            if(geom.size() > 0)
-            {
-                vertex_adapter va(geom);
-                path_type path(common_.t_, va, prj_trans);
-                generate_path(generator_.output_iterator_, path, path_attributes_);
-            }
-        }
+
+        // FIXME! needs generic adapter
+        //vertex_adapter va(geom);
+        //path_type path(common_.t_, va, prj_trans);
+        //generate_path(generator_.output_iterator_, path, path_attributes_);
+
         // set the previously collected values back to their defaults
         // for the feature that will be processed next.
         path_attributes_.reset();
