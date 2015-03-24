@@ -130,9 +130,10 @@ def test_geometry_type_eval():
 
     # COLLECTION = 4
     f = mapnik.Feature(context,0)
-    f.geometry = mapnik.Geometry.from_wkt('GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))')
-    eq_(expr.evaluate(f),7)
-    eq_(mapnik.Expression("[mapnik::geometry_type] = geometrycollection").evaluate(f),True)
+    geom = mapnik.Geometry.from_wkt('GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))')
+    f.geometry = geom;
+    eq_(expr.evaluate(f),4)
+    eq_(mapnik.Expression("[mapnik::geometry_type] = collection").evaluate(f),True)
 
 def test_regex_match():
     context = mapnik.Context()
