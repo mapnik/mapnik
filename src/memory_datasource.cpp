@@ -27,7 +27,7 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/boolean.hpp>
-// boost
+#include <mapnik/geometry_envelope.hpp>
 
 // stl
 #include <algorithm>
@@ -46,24 +46,17 @@ struct accumulate_extent
 
     void operator() (feature_ptr const& feat)
     {
-        // FIXME
-        /*
-        auto size = feat->num_geometries();
-        for (std::size_t i = 0; i < size; ++i)
+        auto const& geom = feat->get_geometry();
+        auto bbox = geometry::envelope(geom);
+        if ( first_ )
         {
-            geometry_type const& geom = feat->get_geometry(i);
-            auto bbox = ::mapnik::envelope(geom);
-            if ( first_ )
-            {
-                first_ = false;
-                ext_ = bbox;
-            }
-            else
-            {
-                ext_.expand_to_include(bbox);
-            }
+            first_ = false;
+            ext_ = bbox;
         }
-        */
+        else
+        {
+            ext_.expand_to_include(bbox);
+        }
     }
 
     box2d<double> & ext_;
