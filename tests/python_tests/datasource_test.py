@@ -155,8 +155,8 @@ def test_hit_grid():
                 if not added:
                     fg.append('')
         hit_list = '|'.join(rle_encode(fg))
-        eq_(hit_list[:16],'730:|2:Greenland')
-        eq_(hit_list[-12:],'1:Chile|812:')
+        eq_(hit_list[:16],'723:|9:Greenland')
+        eq_(hit_list[-12:],'9:Chile|747:')
     except RuntimeError, e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
