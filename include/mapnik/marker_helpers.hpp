@@ -197,19 +197,19 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
 {
     using vertex_converter_type = Converter;
     using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
-    using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
 
     auto const& geom = feature.get_geometry();
-    new_geometry::geometry_types type = new_geometry::geometry_type(geom);
+    geometry::geometry_types type = geometry::geometry_type(geom);
 
-    if (type == new_geometry::geometry_types::Point
-        || type == new_geometry::geometry_types::LineString
-        || type == new_geometry::geometry_types::Polygon)
+    if (type == geometry::geometry_types::Point
+        || type == geometry::geometry_types::LineString
+        || type == geometry::geometry_types::Polygon)
     {
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
-    else //if (type != new_geometry::geometry_types::GeometryCollection) // multi geometries/collection
+    else //if (type != geometry::geometry_types::GeometryCollection) // multi geometries/collection
     {
 
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
@@ -218,12 +218,12 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         if (placement == MARKER_POINT_PLACEMENT &&
             multi_policy == MARKER_WHOLE_MULTI)
         {
-            new_geometry::point pt;
-            if (new_geometry::centroid(geom, pt))
+            geometry::point pt;
+            if (geometry::centroid(geom, pt))
             {
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();
-                new_geometry::point_vertex_adapter va(pt);
+                geometry::point_vertex_adapter va(pt);
                 converter.apply(va);
             }
         }
@@ -232,15 +232,15 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         {
             // Only apply to path with largest envelope area
             // TODO: consider using true area for polygon types
-            if (type == new_geometry::geometry_types::MultiPolygon)
+            if (type == geometry::geometry_types::MultiPolygon)
             {
-                new_geometry::multi_polygon const& multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
+                geometry::multi_polygon const& multi_poly = mapnik::util::get<geometry::multi_polygon>(geom);
                 double maxarea = 0;
-                new_geometry::polygon const* largest = 0;
-                for (new_geometry::polygon const& poly : multi_poly)
+                geometry::polygon const* largest = 0;
+                for (geometry::polygon const& poly : multi_poly)
                 {
-                    box2d<double> bbox = new_geometry::envelope(poly);
-                    new_geometry::polygon_vertex_adapter va(poly);
+                    box2d<double> bbox = geometry::envelope(poly);
+                    geometry::polygon_vertex_adapter va(poly);
                     double area = bbox.width() * bbox.height();
                     if (area > maxarea)
                     {
@@ -250,21 +250,21 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 }
                 if (largest)
                 {
-                    new_geometry::polygon_vertex_adapter va(*largest);
+                    geometry::polygon_vertex_adapter va(*largest);
                     converter.apply(va);
                 }
             }
         }
-        else if (type == new_geometry::geometry_types::MultiPolygon)
+        else if (type == geometry::geometry_types::MultiPolygon)
         {
             if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            new_geometry::multi_polygon const& multi_poly = mapnik::util::get<new_geometry::multi_polygon>(geom);
+            geometry::multi_polygon const& multi_poly = mapnik::util::get<geometry::multi_polygon>(geom);
             for (auto const& poly : multi_poly)
             {
-                new_geometry::polygon_vertex_adapter va(poly);
+                geometry::polygon_vertex_adapter va(poly);
                 converter.apply(va);
             }
         }

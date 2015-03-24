@@ -105,7 +105,7 @@ public:
         : id_(id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
-        geom_(new_geometry::geometry_empty()),
+        geom_(geometry::geometry_empty()),
         raster_() {}
 
     inline mapnik::value_integer id() const { return id_;}
@@ -195,24 +195,24 @@ public:
         return ctx_;
     }
 
-    inline void set_geometry(new_geometry::geometry && geom)
+    inline void set_geometry(geometry::geometry && geom)
     {
         geom_ = std::move(geom);
     }
 
-    inline void set_geometry_copy(new_geometry::geometry const& geom)
+    inline void set_geometry_copy(geometry::geometry const& geom)
     {
         geom_ = geom;
     }
 
-    inline new_geometry::geometry const& get_geometry() const
+    inline geometry::geometry const& get_geometry() const
     {
         return geom_;
     }
 
     inline box2d<double> envelope() const
     {
-        return mapnik::new_geometry::envelope(geom_);
+        return mapnik::geometry::envelope(geom_);
     }
 
     inline raster_ptr const& get_raster() const
@@ -262,7 +262,7 @@ private:
     mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
-    new_geometry::geometry geom_;
+    geometry::geometry geom_;
     raster_ptr raster_;
 };
 

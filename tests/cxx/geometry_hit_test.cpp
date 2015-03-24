@@ -7,7 +7,7 @@
 TEST_CASE("geometry ops") {
 
 SECTION("hit_test_filter") {
-    using namespace mapnik::new_geometry;
+    using namespace mapnik::geometry;
     {
         geometry geom(point(0,0));
         REQUIRE( mapnik::hit_test(geom,0,0,0) );

@@ -81,8 +81,8 @@ feature_ptr sqlite_featureset::next()
         }
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
-        mapnik::new_geometry::geometry geom = geometry_utils::from_wkb(data, size, format_);
-        if (mapnik::new_geometry::empty(geom))
+        mapnik::geometry::geometry geom = geometry_utils::from_wkb(data, size, format_);
+        if (mapnik::geometry::empty(geom))
         {
             continue;
         }
@@ -90,7 +90,7 @@ feature_ptr sqlite_featureset::next()
         if (!spatial_index_)
         {
             // we are not using r-tree index, check if feature intersects bounding box
-            box2d<double> bbox = mapnik::new_geometry::envelope(geom);
+            box2d<double> bbox = mapnik::geometry::envelope(geom);
             if (!bbox_.intersects(bbox))
                 continue;
         }

@@ -18,22 +18,22 @@ int main(int argc, char** argv)
     try
     {
         // reused these for simplicity
-        mapnik::new_geometry::point centroid;
+        mapnik::geometry::point centroid;
         {
             // single point
-            mapnik::new_geometry::point pt(10,10);
-            BOOST_TEST( mapnik::new_geometry::centroid(pt, centroid));
+            mapnik::geometry::point pt(10,10);
+            BOOST_TEST( mapnik::geometry::centroid(pt, centroid));
             BOOST_TEST( pt.x == centroid.x);
             BOOST_TEST( pt.y == centroid.y);
         }
 
         // linestring with three consecutive verticies
         {
-            mapnik::new_geometry::line_string line;
+            mapnik::geometry::line_string line;
             line.add_coord(0, 0);
             line.add_coord(25, 25);
             line.add_coord(50, 50);
-            BOOST_TEST(mapnik::new_geometry::centroid(line, centroid));
+            BOOST_TEST(mapnik::geometry::centroid(line, centroid));
             BOOST_TEST( centroid.x == 25 );
             BOOST_TEST( centroid.y == 25 );
         }
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 #if 0
         // hit tests
         {
-            mapnik::geometry_type pt_hit(mapnik::new_geometry::geometry_types::Point);
+            mapnik::geometry_type pt_hit(mapnik::geometry::geometry_types::Point);
             pt_hit.move_to(10,10);
             mapnik::vertex_adapter va(pt_hit);
             BOOST_TEST( mapnik::label::hit_test(va, 10, 10, 0.1) );
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
             BOOST_TEST( mapnik::label::hit_test(va, 9, 9, 1.5) );
         }
         {
-            mapnik::geometry_type line_hit(mapnik::new_geometry::geometry_types::LineString);
+            mapnik::geometry_type line_hit(mapnik::geometry::geometry_types::LineString);
             line_hit.move_to(0,0);
             line_hit.line_to(50,50);
             mapnik::vertex_adapter va(line_hit);

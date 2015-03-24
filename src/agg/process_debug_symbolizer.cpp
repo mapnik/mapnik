@@ -109,7 +109,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     {
         using apply_vertex_mode = apply_vertex_mode<buffer_type>;
         apply_vertex_mode apply(pixmap_, common_.t_, prj_trans);
-        util::apply_visitor(new_geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
+        util::apply_visitor(geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
     }
 }
 

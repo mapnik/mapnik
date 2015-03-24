@@ -196,10 +196,10 @@ public:
             const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
-                mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
-                if (!mapnik::new_geometry::empty(geom))
+                mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
+                if (!mapnik::geometry::empty(geom))
                 {
-                    mapnik::box2d<double> bbox = mapnik::new_geometry::envelope(geom);
+                    mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                     if (bbox.valid())
                     {
                         if (first)
@@ -280,10 +280,10 @@ public:
                 const char* data = (const char*) rs->column_blob(0, size);
                 if (data)
                 {
-                    mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
-                    if (!mapnik::new_geometry::empty(geom))
+                    mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
+                    if (!mapnik::geometry::empty(geom))
                     {
-                        mapnik::box2d<double> bbox = mapnik::new_geometry::envelope(geom);
+                        mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                         if (bbox.valid())
                         {
                             ps.bind(bbox);
@@ -356,10 +356,10 @@ public:
             const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
-                mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
-                if (!mapnik::new_geometry::empty(geom))
+                mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
+                if (!mapnik::geometry::empty(geom))
                 {
-                    mapnik::box2d<double> bbox = mapnik::new_geometry::envelope(geom);
+                    mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                     if (bbox.valid())
                     {
                         const int type_oid = rs->column_type(1);

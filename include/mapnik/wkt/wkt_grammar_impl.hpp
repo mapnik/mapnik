@@ -131,7 +131,7 @@ wkt_grammar<Iterator>::wkt_grammar()
 
     // geometry collection text
     geometrycollection_text = (lit('(')
-                               >> ( eps[_a = construct<new_geometry::geometry>()]
+                               >> ( eps[_a = construct<geometry::geometry>()]
                                     >> geometry_tagged_text(_a)[move_part(_val,_a)] % lit(','))
                                >> lit(')'))
         |

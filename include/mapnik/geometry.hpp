@@ -36,7 +36,7 @@
 #include <cstddef>
 #include <utility>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 struct point
 {

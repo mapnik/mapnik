@@ -117,7 +117,7 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
     {
         using apply_vertex_mode = apply_vertex_mode<cairo_context>;
         apply_vertex_mode apply(context_, common_.t_, prj_trans);
-        util::apply_visitor(new_geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
+        util::apply_visitor(geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
     }
 }
 

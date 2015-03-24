@@ -389,10 +389,10 @@ void pgsql2sqlite(Connection conn,
                     if (oid == geometry_oid)
                     {
                         mapnik::Feature feat(ctx,pkid);
-                        mapnik::new_geometry::geometry geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
-                        if (!mapnik::new_geometry::empty(geom))
+                        mapnik::geometry::geometry geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
+                        if (!mapnik::geometry::empty(geom))
                         {
-                            box2d<double> bbox = mapnik::new_geometry::envelope(geom);
+                            box2d<double> bbox = mapnik::geometry::envelope(geom);
                             if (bbox.valid())
                             {
                                 sqlite::record_type rec;

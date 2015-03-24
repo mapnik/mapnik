@@ -59,7 +59,7 @@ class MAPNIK_DECL geometry_utils : private util::noncopyable
 {
 public:
 
-    static mapnik::new_geometry::geometry from_wkb(const char* wkb,
+    static mapnik::geometry::geometry from_wkb(const char* wkb,
                                                    unsigned size,
                                                    wkbFormat format = wkbGeneric);
 };

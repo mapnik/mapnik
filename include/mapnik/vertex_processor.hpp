@@ -25,7 +25,7 @@
 
 #include <mapnik/geometry.hpp>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 template <typename T>
 struct vertex_processor

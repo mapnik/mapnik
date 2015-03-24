@@ -68,7 +68,7 @@ public:
             return false;
         }
 
-        if (this->locator_.type() == new_geometry::geometry_types::Point)
+        if (this->locator_.type() == geometry::geometry_types::Point)
         {
             return markers_point_placement<Locator, Detector>::get_point(x, y, angle, ignore_placement);
         }

@@ -27,7 +27,7 @@
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/is_valid.hpp>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 namespace detail {
 
@@ -63,7 +63,7 @@ struct geometry_is_valid
 
 }
 
-inline bool is_valid(mapnik::new_geometry::geometry const& geom)
+inline bool is_valid(mapnik::geometry::geometry const& geom)
 {
     return detail::geometry_is_valid() (geom);
 }

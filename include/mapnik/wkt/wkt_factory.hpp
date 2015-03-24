@@ -35,7 +35,7 @@
 
 namespace mapnik {
 
-inline bool from_wkt(std::string const& wkt, mapnik::new_geometry::geometry & geom)
+inline bool from_wkt(std::string const& wkt, mapnik::geometry::geometry & geom)
 {
     using namespace boost::spirit;
     static const mapnik::wkt::wkt_grammar<std::string::const_iterator> g;
@@ -45,10 +45,10 @@ inline bool from_wkt(std::string const& wkt, mapnik::new_geometry::geometry & ge
     return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(geom)), space);
 }
 
-inline bool to_wkt(std::string & wkt,  mapnik::new_geometry::geometry const& geom)
+inline bool to_wkt(std::string & wkt,  mapnik::geometry::geometry const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::new_geometry::geometry> generator;
+    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::geometry::geometry> generator;
     sink_type sink(wkt);
     return boost::spirit::karma::generate(sink, generator, geom);
 }

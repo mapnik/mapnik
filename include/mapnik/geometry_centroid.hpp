@@ -27,7 +27,7 @@
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/centroid.hpp>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 namespace detail {
 
@@ -62,7 +62,7 @@ struct geometry_centroid
 
 }
 
-inline bool centroid(mapnik::new_geometry::geometry const& geom, point & pt)
+inline bool centroid(mapnik::geometry::geometry const& geom, point & pt)
 {
     return detail::geometry_centroid(pt) (geom);
 }

@@ -93,7 +93,7 @@ public:
         unsigned cmd;
         double x,y;
         clipped.rewind(0);
-        mapnik::geometry_type geom2(mapnik::new_geometry::geometry_types::Polygon);
+        mapnik::geometry_type geom2(mapnik::geometry::geometry_types::Polygon);
         while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
             geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
         }
@@ -191,7 +191,7 @@ public:
         clipped.rewind(0);
         unsigned cmd;
         double x,y;
-        mapnik::geometry_type geom2(mapnik::new_geometry::geometry_types::Polygon);
+        mapnik::geometry_type geom2(mapnik::geometry::geometry_types::Polygon);
         while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
             geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
         }
@@ -280,7 +280,7 @@ public:
         poly_clipper clipped(extent_, va);
         unsigned cmd;
         double x,y;
-        mapnik::geometry_type geom2(mapnik::new_geometry::geometry_types::Polygon);
+        mapnik::geometry_type geom2(mapnik::geometry::geometry_types::Polygon);
         while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
             geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
         }

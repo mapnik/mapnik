@@ -35,7 +35,7 @@ mapnik::feature_ptr hello_featureset::next()
         mapnik::coord2d center = box_.center();
 
         // create a new point geometry
-        feature->set_geometry(mapnik::new_geometry::point(center.x,center.y));
+        feature->set_geometry(mapnik::geometry::point(center.x,center.y));
 
         // return the feature!
         return feature;
@@ -53,7 +53,7 @@ mapnik::feature_ptr hello_featureset::next()
 
         // take the outer ring of the bbox that was used to query
         // to dynamically generate a fake line
-        mapnik::new_geometry::line_string line;
+        mapnik::geometry::line_string line;
         line.reserve(4);
         line.add_coord(box_.minx(),box_.maxy());
         line.add_coord(box_.maxx(),box_.maxy());

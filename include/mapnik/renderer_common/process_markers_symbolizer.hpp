@@ -117,10 +117,10 @@ struct render_marker_symbolizer_visitor
                                             common_.scale_factor_);
             if (clip) // optional clip (default: true)
             {
-                new_geometry::geometry_types type = new_geometry::geometry_type(feature_.get_geometry());
-                if (type == new_geometry::geometry_types::Polygon)
+                geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
+                if (type == geometry::geometry_types::Polygon)
                     converter.template set<clip_poly_tag>();
-                else if (type == new_geometry::geometry_types::LineString)
+                else if (type == geometry::geometry_types::LineString)
                     converter.template set<clip_line_tag>();
             }
 
@@ -170,10 +170,10 @@ struct render_marker_symbolizer_visitor
                                             common_.scale_factor_);
             if (clip) // optional clip (default: true)
             {
-                new_geometry::geometry_types type = new_geometry::geometry_type(feature_.get_geometry());
-                if (type == new_geometry::geometry_types::Polygon)
+                geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
+                if (type == geometry::geometry_types::Polygon)
                     converter.template set<clip_poly_tag>();
-                else if (type == new_geometry::geometry_types::LineString)
+                else if (type == geometry::geometry_types::LineString)
                     converter.template set<clip_line_tag>();
             }
 
@@ -235,10 +235,10 @@ struct render_marker_symbolizer_visitor
 
         if (clip) // optional clip (default: true)
         {
-            new_geometry::geometry_types type = new_geometry::geometry_type(feature_.get_geometry());
-            if (type == new_geometry::geometry_types::Polygon)
+            geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
+            if (type == geometry::geometry_types::Polygon)
                 converter.template set<clip_poly_tag>();
-            else if (type == new_geometry::geometry_types::LineString)
+            else if (type == geometry::geometry_types::LineString)
                 converter.template set<clip_line_tag>();
         }
         converter.template set<transform_tag>(); //always transform

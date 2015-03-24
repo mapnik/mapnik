@@ -462,7 +462,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         return false;
     }
     unsigned count = 0;
-    mapnik::new_geometry::geometry_types geom_type = static_cast<mapnik::new_geometry::geometry_types>(path.type());
+    mapnik::geometry::geometry_types geom_type = static_cast<mapnik::geometry::geometry_types>(path.type());
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         if (command == SEG_CLOSE)
@@ -478,7 +478,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
         }
         switch(geom_type)
         {
-        case mapnik::new_geometry::geometry_types::Polygon:
+        case mapnik::geometry::geometry_types::Polygon:
         {
             if ((((y1 <= y) && (y < y0)) ||
                  ((y0 <= y) && (y < y1))) &&
@@ -486,7 +486,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
                 inside=!inside;
             break;
         }
-        case mapnik::new_geometry::geometry_types::LineString:
+        case mapnik::geometry::geometry_types::LineString:
         {
             double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
             if (distance < tol)

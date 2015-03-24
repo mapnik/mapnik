@@ -63,7 +63,7 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         double lat = static_cast<osm_node*>(cur_item)->lat;
         double lon = static_cast<osm_node*>(cur_item)->lon;
-        feature->set_geometry(mapnik::new_geometry::point(lon,lat));
+        feature->set_geometry(mapnik::geometry::point(lon,lat));
     }
     else if (dataset_->current_item_is_way())
     {
@@ -81,7 +81,7 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         if (static_cast<osm_way*>(cur_item)->is_polygon())
         {
-            mapnik::new_geometry::linear_ring ring;
+            mapnik::geometry::linear_ring ring;
             for (unsigned int count = 0;
                  count < static_cast<osm_way*>(cur_item)->nodes.size();
                  count++)
@@ -89,13 +89,13 @@ feature_ptr osm_featureset<filterT>::next()
                 ring.add_coord(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
                                 static_cast<osm_way*>(cur_item)->nodes[count]->lat);
             }
-            mapnik::new_geometry::polygon geom;
+            mapnik::geometry::polygon geom;
             geom.set_exterior_ring(std::move(ring));
             feature->set_geometry(std::move(geom));
         }
         else
         {
-            mapnik::new_geometry::line_string geom;
+            mapnik::geometry::line_string geom;
             for (unsigned int count = 0;
                  count < static_cast<osm_way*>(cur_item)->nodes.size();
                  count++)

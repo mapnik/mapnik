@@ -26,7 +26,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 namespace detail {
 
@@ -34,22 +34,22 @@ struct geometry_envelope
 {
     using bbox_type = box2d<double>;
 
-    bbox_type operator() (mapnik::new_geometry::geometry const& geom) const
+    bbox_type operator() (mapnik::geometry::geometry const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    bbox_type operator() (mapnik::new_geometry::geometry_empty const&) const
+    bbox_type operator() (mapnik::geometry::geometry_empty const&) const
     {
         return mapnik::box2d<double>();
     }
 
-    bbox_type operator() (mapnik::new_geometry::point const& pt) const
+    bbox_type operator() (mapnik::geometry::point const& pt) const
     {
         return mapnik::box2d<double>(pt.x, pt.y, pt.x, pt.y);
     }
 
-    bbox_type operator() (mapnik::new_geometry::line_string const& line) const
+    bbox_type operator() (mapnik::geometry::line_string const& line) const
     {
         bbox_type bbox;
         for (auto const& pt : line)
@@ -60,17 +60,17 @@ struct geometry_envelope
         return bbox;
     }
 
-    bbox_type operator() (mapnik::new_geometry::polygon const& poly) const
+    bbox_type operator() (mapnik::geometry::polygon const& poly) const
     {
-        return (*this) (static_cast<mapnik::new_geometry::line_string>(poly.exterior_ring));
+        return (*this) (static_cast<mapnik::geometry::line_string>(poly.exterior_ring));
     }
 
-    bbox_type operator() (mapnik::new_geometry::multi_point const& multi_point) const
+    bbox_type operator() (mapnik::geometry::multi_point const& multi_point) const
     {
-        return (*this) (static_cast<mapnik::new_geometry::line_string>(multi_point));
+        return (*this) (static_cast<mapnik::geometry::line_string>(multi_point));
     }
 
-    bbox_type operator() (mapnik::new_geometry::multi_line_string const& multi_line) const
+    bbox_type operator() (mapnik::geometry::multi_line_string const& multi_line) const
     {
         bbox_type bbox;
         for (auto const& line : multi_line)
@@ -81,7 +81,7 @@ struct geometry_envelope
         return bbox;
     }
 
-    bbox_type operator() (mapnik::new_geometry::multi_polygon const& multi_poly) const
+    bbox_type operator() (mapnik::geometry::multi_polygon const& multi_poly) const
     {
         bbox_type bbox;
         for (auto const& poly : multi_poly)
@@ -92,7 +92,7 @@ struct geometry_envelope
         return bbox;
     }
 
-    bbox_type operator() (mapnik::new_geometry::geometry_collection const& collection) const
+    bbox_type operator() (mapnik::geometry::geometry_collection const& collection) const
     {
         bbox_type bbox;
         for (auto const& geom : collection)
@@ -106,7 +106,7 @@ struct geometry_envelope
 
 }
 
-inline mapnik::box2d<double> envelope(mapnik::new_geometry::geometry const& geom)
+inline mapnik::box2d<double> envelope(mapnik::geometry::geometry const& geom)
 {
     return detail::geometry_envelope() (geom);
 }

@@ -42,7 +42,7 @@
 
 namespace mapnik { namespace json {
 
-using position = mapnik::new_geometry::point;
+using position = mapnik::geometry::point;
 using boxes = std::vector<std::pair<box2d<double>, std::pair<std::size_t, std::size_t>>>;
 
 namespace qi = boost::spirit::qi;

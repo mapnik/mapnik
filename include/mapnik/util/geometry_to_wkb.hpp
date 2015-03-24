@@ -131,20 +131,20 @@ struct wkb_buffer
 
 using wkb_buffer_ptr = std::unique_ptr<wkb_buffer>;
 
-wkb_buffer_ptr point_wkb( new_geometry::point const& pt, wkbByteOrder byte_order)
+wkb_buffer_ptr point_wkb( geometry::point const& pt, wkbByteOrder byte_order)
 {
     std::size_t size = 1 + 4 + 8 * 2 ; // byteOrder + wkbType + Point
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(new_geometry::geometry_types::Point), 4 , byte_order);
+    write(ss, static_cast<int>(geometry::geometry_types::Point), 4 , byte_order);
     write(ss, pt.x, 8, byte_order);
     write(ss, pt.y, 8, byte_order);
     assert(ss.good());
     return std::move(wkb);
 }
 
-wkb_buffer_ptr line_string_wkb(new_geometry::line_string const& line, wkbByteOrder byte_order)
+wkb_buffer_ptr line_string_wkb(geometry::line_string const& line, wkbByteOrder byte_order)
 {
     unsigned num_points = line.size();
     assert(num_points > 1);
@@ -152,11 +152,11 @@ wkb_buffer_ptr line_string_wkb(new_geometry::line_string const& line, wkbByteOrd
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(mapnik::new_geometry::geometry_types::LineString) , 4, byte_order);
+    write(ss, static_cast<int>(mapnik::geometry::geometry_types::LineString) , 4, byte_order);
     write(ss, num_points, 4, byte_order);
     for (unsigned i=0; i< num_points; ++i)
     {
-        new_geometry::point const& pt = line[i];
+        geometry::point const& pt = line[i];
         write(ss, pt.x, 8, byte_order);
         write(ss, pt.y, 8, byte_order);
     }
@@ -164,7 +164,7 @@ wkb_buffer_ptr line_string_wkb(new_geometry::line_string const& line, wkbByteOrd
     return std::move(wkb);
 }
 
-wkb_buffer_ptr polygon_wkb( new_geometry::polygon const& poly, wkbByteOrder byte_order)
+wkb_buffer_ptr polygon_wkb( geometry::polygon const& poly, wkbByteOrder byte_order)
 {
     std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
     size += 4 + 2 * 8 * poly.exterior_ring.size();
@@ -177,7 +177,7 @@ wkb_buffer_ptr polygon_wkb( new_geometry::polygon const& poly, wkbByteOrder byte
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(mapnik::new_geometry::geometry_types::Polygon), 4, byte_order);
+    write(ss, static_cast<int>(mapnik::geometry::geometry_types::Polygon), 4, byte_order);
     write(ss, poly.num_rings(), 4, byte_order);
 
     // exterior
@@ -202,18 +202,18 @@ wkb_buffer_ptr polygon_wkb( new_geometry::polygon const& poly, wkbByteOrder byte
     return std::move(wkb);
 }
 
-wkb_buffer_ptr multi_point_wkb( new_geometry::multi_point const& multi_pt, wkbByteOrder byte_order)
+wkb_buffer_ptr multi_point_wkb( geometry::multi_point const& multi_pt, wkbByteOrder byte_order)
 {
     std::size_t size = 1 + 4 + 4 + (1 + 4 + 8 * 2) * multi_pt.size() ; // byteOrder + wkbType + num_point + Point.size * num_points
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(new_geometry::geometry_types::MultiPoint), 4, byte_order);
+    write(ss, static_cast<int>(geometry::geometry_types::MultiPoint), 4, byte_order);
     write(ss, multi_pt.size(), 4 ,byte_order);
     for (auto const& pt : multi_pt)
     {
         ss.write(reinterpret_cast<char*>(&byte_order),1);
-        write(ss, static_cast<int>(new_geometry::geometry_types::Point), 4, byte_order);
+        write(ss, static_cast<int>(geometry::geometry_types::Point), 4, byte_order);
         write(ss, pt.x, 8, byte_order);
         write(ss, pt.y, 8, byte_order);
     }
@@ -232,34 +232,34 @@ struct geometry_to_wkb
     geometry_to_wkb(wkbByteOrder byte_order)
         : byte_order_(byte_order) {}
 
-    result_type operator() (new_geometry::geometry const& geom) const
+    result_type operator() (geometry::geometry const& geom) const
     {
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (new_geometry::geometry_empty const&) const
+    result_type operator() (geometry::geometry_empty const&) const
     {
         return result_type();
     }
 
-    result_type operator() (new_geometry::point const& pt) const
+    result_type operator() (geometry::point const& pt) const
     {
         return point_wkb(pt, byte_order_);
     }
 
-    result_type operator() (new_geometry::line_string const& line) const
+    result_type operator() (geometry::line_string const& line) const
     {
         return line_string_wkb(line, byte_order_);
     }
 
-    result_type operator() (new_geometry::polygon const& poly) const
+    result_type operator() (geometry::polygon const& poly) const
     {
         return polygon_wkb(poly, byte_order_);
     }
 
     // multi/collection
 
-    result_type operator() (new_geometry::multi_point const& multi_pt) const
+    result_type operator() (geometry::multi_point const& multi_pt) const
     {
         return multi_point_wkb(multi_pt, byte_order_);
     }
@@ -287,7 +287,7 @@ wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte
     wkb_buffer_ptr multi_wkb = std::make_unique<wkb_buffer>(multi_size);
     wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(new_geometry::detail::geometry_type()(multi_geom)) , 4, byte_order);
+    write(ss, static_cast<int>(geometry::detail::geometry_type()(multi_geom)) , 4, byte_order);
     write(ss, multi_geom.size(), 4 ,byte_order);
 
     for ( wkb_buffer_ptr const& wkb : wkb_cont)

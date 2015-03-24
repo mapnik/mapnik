@@ -68,15 +68,15 @@ int main(int argc, char** argv)
     try {
 
         // spatialite blob
-        mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
+        mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                                                sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                                                mapnik::wkbSpatiaLite);
-        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
+        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
 
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                 sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                 mapnik::wkbAuto);
-        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
+        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
 
 
 
@@ -88,13 +88,13 @@ int main(int argc, char** argv)
         geom = mapnik::geometry_utils::from_wkb((const char*)sq_valid_blob,
                                                 sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
                                                 mapnik::wkbGeneric);
-        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
+        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
 
         geom = mapnik::geometry_utils::from_wkb( (const char*)sq_valid_blob,
                                                  sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
                                                  mapnik::wkbAuto);
 
-        BOOST_TEST(mapnik::new_geometry::is_valid(geom) && mapnik::new_geometry::is_simple(geom));
+        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
 
         BOOST_TEST_THROWS(mapnik::geometry_utils::from_wkb((const char*)sq_invalid_blob,
                                                            sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),

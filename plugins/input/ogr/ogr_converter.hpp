@@ -39,14 +39,14 @@ class ogr_converter
 {
 public:
 
-    static mapnik::new_geometry::geometry convert_geometry (OGRGeometry* ogr_geom);
-    static mapnik::new_geometry::point convert_point (OGRPoint* ogr_geom);
-    static mapnik::new_geometry::multi_point convert_multipoint (OGRMultiPoint* ogr_geom);
-    static mapnik::new_geometry::line_string convert_linestring (OGRLineString* ogr_geom);
-    static mapnik::new_geometry::multi_line_string convert_multilinestring (OGRMultiLineString* ogr_geom);
-    static mapnik::new_geometry::polygon convert_polygon (OGRPolygon* ogr_geom);
-    static mapnik::new_geometry::multi_polygon convert_multipolygon (OGRMultiPolygon* ogr_geom);
-    static mapnik::new_geometry::geometry_collection convert_collection (OGRGeometryCollection* ogr_geom);
+    static mapnik::geometry::geometry convert_geometry (OGRGeometry* ogr_geom);
+    static mapnik::geometry::point convert_point (OGRPoint* ogr_geom);
+    static mapnik::geometry::multi_point convert_multipoint (OGRMultiPoint* ogr_geom);
+    static mapnik::geometry::line_string convert_linestring (OGRLineString* ogr_geom);
+    static mapnik::geometry::multi_line_string convert_multilinestring (OGRMultiLineString* ogr_geom);
+    static mapnik::geometry::polygon convert_polygon (OGRPolygon* ogr_geom);
+    static mapnik::geometry::multi_polygon convert_multipolygon (OGRMultiPolygon* ogr_geom);
+    static mapnik::geometry::geometry_collection convert_collection (OGRGeometryCollection* ogr_geom);
 };
 
 #endif // OGR_CONVERTER_HPP

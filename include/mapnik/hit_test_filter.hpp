@@ -49,16 +49,16 @@ struct hit_test_visitor
        y_(y),
        tol_(tol) {}
 
-    bool operator() (new_geometry::geometry_empty const& ) const
+    bool operator() (geometry::geometry_empty const& ) const
     {
         return false;
     }
 
-    bool operator() (new_geometry::point const& geom) const
+    bool operator() (geometry::point const& geom) const
     {
         return distance(geom.x, geom.y, x_, y_) <= tol_;
     }
-    bool operator() (new_geometry::multi_point const& geom) const
+    bool operator() (geometry::multi_point const& geom) const
     {
         for (auto const& pt : geom)
         {
@@ -66,7 +66,7 @@ struct hit_test_visitor
         }
         return false;
     }
-    bool operator() (new_geometry::line_string const& geom) const
+    bool operator() (geometry::line_string const& geom) const
     {
         std::size_t num_points = geom.num_points();
         if (num_points > 1)
@@ -81,7 +81,7 @@ struct hit_test_visitor
         }
         return false;
     }
-    bool operator() (new_geometry::multi_line_string const& geom) const
+    bool operator() (geometry::multi_line_string const& geom) const
     {
         for (auto const& line: geom)
         {
@@ -89,7 +89,7 @@ struct hit_test_visitor
         }
         return false;
     }
-    bool operator() (new_geometry::polygon const& geom) const
+    bool operator() (geometry::polygon const& geom) const
     {
         auto const& exterior = geom.exterior_ring;
         std::size_t num_points = exterior.num_points();
@@ -124,7 +124,7 @@ struct hit_test_visitor
         }
         return inside;
     }
-    bool operator() (new_geometry::multi_polygon const& geom) const
+    bool operator() (geometry::multi_polygon const& geom) const
     {
         for (auto const& poly: geom)
         {
@@ -132,7 +132,7 @@ struct hit_test_visitor
         }
         return false;
     }
-    bool operator() (new_geometry::geometry_collection const& collection) const
+    bool operator() (geometry::geometry_collection const& collection) const
     {
         for (auto const& geom: collection)
         {
@@ -148,7 +148,7 @@ struct hit_test_visitor
 
 }
 
-inline bool hit_test(mapnik::new_geometry::geometry const& geom, double x, double y, double tol)
+inline bool hit_test(mapnik::geometry::geometry const& geom, double x, double y, double tol)
 {
     return mapnik::util::apply_visitor(detail::hit_test_visitor(x,y,tol), geom);
 }

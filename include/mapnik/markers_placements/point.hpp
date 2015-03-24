@@ -79,7 +79,7 @@ public:
             return false;
         }
 
-        if (locator_.type() == new_geometry::geometry_types::LineString)
+        if (locator_.type() == geometry::geometry_types::LineString)
         {
             if (!label::middle_point(locator_, x, y))
             {

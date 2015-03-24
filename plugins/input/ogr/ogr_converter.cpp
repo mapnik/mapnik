@@ -29,7 +29,7 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 
-mapnik::new_geometry::geometry ogr_converter::convert_geometry(OGRGeometry* ogr_geom)
+mapnik::geometry::geometry ogr_converter::convert_geometry(OGRGeometry* ogr_geom)
 {
     // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
     switch (wkbFlatten(ogr_geom->getGeometryType()))
@@ -65,19 +65,19 @@ mapnik::new_geometry::geometry ogr_converter::convert_geometry(OGRGeometry* ogr_
             MAPNIK_LOG_WARN(ogr) << "ogr_converter: unknown <ogr> geometry_type="
                                  << wkbFlatten(ogr_geom->getGeometryType());
         }
-        return mapnik::new_geometry::geometry();
+        return mapnik::geometry::geometry();
         break;
     }
 }
 
-mapnik::new_geometry::point ogr_converter::convert_point(OGRPoint* ogr_geom)
+mapnik::geometry::point ogr_converter::convert_point(OGRPoint* ogr_geom)
 {
-    return mapnik::new_geometry::point(ogr_geom->getX(), ogr_geom->getY());
+    return mapnik::geometry::point(ogr_geom->getX(), ogr_geom->getY());
 }
 
-mapnik::new_geometry::multi_point ogr_converter::convert_multipoint(OGRMultiPoint* ogr_geom)
+mapnik::geometry::multi_point ogr_converter::convert_multipoint(OGRMultiPoint* ogr_geom)
 {
-    mapnik::new_geometry::multi_point geom;
+    mapnik::geometry::multi_point geom;
     int num_geometries = ogr_geom->getNumGeometries();
     geom.reserve(num_geometries);
     for (int i = 0; i < num_geometries; ++i)
@@ -88,9 +88,9 @@ mapnik::new_geometry::multi_point ogr_converter::convert_multipoint(OGRMultiPoin
     return geom;
 }
 
-mapnik::new_geometry::line_string ogr_converter::convert_linestring(OGRLineString* ogr_geom)
+mapnik::geometry::line_string ogr_converter::convert_linestring(OGRLineString* ogr_geom)
 {
-    mapnik::new_geometry::line_string geom;
+    mapnik::geometry::line_string geom;
     int num_points = ogr_geom->getNumPoints();
     geom.reserve(num_points);
     for (int i = 0; i < num_points; ++i)
@@ -100,9 +100,9 @@ mapnik::new_geometry::line_string ogr_converter::convert_linestring(OGRLineStrin
     return geom;
 }
 
-mapnik::new_geometry::multi_line_string ogr_converter::convert_multilinestring(OGRMultiLineString* ogr_geom)
+mapnik::geometry::multi_line_string ogr_converter::convert_multilinestring(OGRMultiLineString* ogr_geom)
 {
-    mapnik::new_geometry::multi_line_string geom;
+    mapnik::geometry::multi_line_string geom;
     int num_geometries = ogr_geom->getNumGeometries();
     geom.reserve(num_geometries);
     for (int i = 0; i < num_geometries; ++i)
@@ -114,10 +114,10 @@ mapnik::new_geometry::multi_line_string ogr_converter::convert_multilinestring(O
 }
 
 
-mapnik::new_geometry::polygon ogr_converter::convert_polygon(OGRPolygon* ogr_geom)
+mapnik::geometry::polygon ogr_converter::convert_polygon(OGRPolygon* ogr_geom)
 {
-    mapnik::new_geometry::polygon geom;
-    mapnik::new_geometry::linear_ring exterior;
+    mapnik::geometry::polygon geom;
+    mapnik::geometry::linear_ring exterior;
     OGRLinearRing* ogr_exterior = ogr_geom->getExteriorRing();
     int num_points = ogr_exterior->getNumPoints();
     exterior.reserve(num_points);
@@ -131,7 +131,7 @@ mapnik::new_geometry::polygon ogr_converter::convert_polygon(OGRPolygon* ogr_geo
     for (int r = 0; r < num_interior; ++r)
     {
         OGRLinearRing* ogr_interior = ogr_geom->getInteriorRing(r);
-        mapnik::new_geometry::linear_ring interior;
+        mapnik::geometry::linear_ring interior;
         int num_interior_points = ogr_interior->getNumPoints();
         interior.reserve(num_interior_points);
         for (int i = 0; i < num_interior_points; ++i)
@@ -143,9 +143,9 @@ mapnik::new_geometry::polygon ogr_converter::convert_polygon(OGRPolygon* ogr_geo
     return geom;
 }
 
-mapnik::new_geometry::multi_polygon ogr_converter::convert_multipolygon(OGRMultiPolygon* ogr_geom)
+mapnik::geometry::multi_polygon ogr_converter::convert_multipolygon(OGRMultiPolygon* ogr_geom)
 {
-    mapnik::new_geometry::multi_polygon geom;
+    mapnik::geometry::multi_polygon geom;
     int num_geometries = ogr_geom->getNumGeometries();
     geom.reserve(num_geometries);
     for (int i = 0; i < num_geometries; ++i)
@@ -156,9 +156,9 @@ mapnik::new_geometry::multi_polygon ogr_converter::convert_multipolygon(OGRMulti
     return geom;
 }
 
-mapnik::new_geometry::geometry_collection ogr_converter::convert_collection(OGRGeometryCollection* ogr_geom)
+mapnik::geometry::geometry_collection ogr_converter::convert_collection(OGRGeometryCollection* ogr_geom)
 {
-    mapnik::new_geometry::geometry_collection geom;
+    mapnik::geometry::geometry_collection geom;
     int num_geometries = ogr_geom->getNumGeometries();
     geom.reserve(num_geometries);
     for (int i = 0; i < num_geometries; ++i)

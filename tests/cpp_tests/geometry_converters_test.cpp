@@ -55,7 +55,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     line_symbolizer sym;
     view_transform t(bbox.width(),bbox.height(), bbox);
     mapnik::geometry_container output_paths;
-    output_geometry_backend backend(output_paths, mapnik::new_geometry::geometry_types::LineString);
+    output_geometry_backend backend(output_paths, mapnik::geometry::geometry_types::LineString);
 
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::feature_impl f(ctx,0);
@@ -98,7 +98,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     polygon_symbolizer sym;
     view_transform t(bbox.width(),bbox.height(), bbox);
     mapnik::geometry_container output_paths;
-    output_geometry_backend backend(output_paths, mapnik::new_geometry::geometry_types::Polygon);
+    output_geometry_backend backend(output_paths, mapnik::geometry::geometry_types::Polygon);
 
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::feature_impl f(ctx,0);

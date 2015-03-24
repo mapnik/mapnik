@@ -27,14 +27,14 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 
 BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::new_geometry::point,
+    mapnik::geometry::point,
     (double, x)
     (double, y)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::new_geometry::polygon,
-    (mapnik::new_geometry::linear_ring const&, exterior_ring)
-    (std::vector<mapnik::new_geometry::linear_ring> const& , interior_rings))
+    mapnik::geometry::polygon,
+    (mapnik::geometry::linear_ring const&, exterior_ring)
+    (std::vector<mapnik::geometry::linear_ring> const& , interior_rings))
 
 #endif // MAPNIK_GEOMETRY_FUSION_ADAPTED_HPP

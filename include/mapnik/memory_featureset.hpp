@@ -78,8 +78,8 @@ public:
                 }
                 else
                 {
-                    new_geometry::geometry const& geom = (*pos_)->get_geometry();
-                    if (bbox_.intersects(new_geometry::envelope(geom)))
+                    geometry::geometry const& geom = (*pos_)->get_geometry();
+                    if (bbox_.intersects(geometry::envelope(geom)))
                     {
                         return *pos_++;
                     }

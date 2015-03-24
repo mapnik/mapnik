@@ -613,7 +613,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                feature->set_geometry(mapnik::new_geometry::point(pt.x,pt.y));
+                feature->set_geometry(mapnik::geometry::point(pt.x,pt.y));
                 feature->put_new("value",value);
                 if (raster_has_nodata)
                 {

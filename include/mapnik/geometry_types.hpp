@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GEOMETRY_TYPES_HPP
 #define MAPNIK_GEOMETRY_TYPES_HPP
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 // OGC compatible types
 enum geometry_types : std::uint8_t

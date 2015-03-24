@@ -88,11 +88,11 @@ protected:
     //Processing
     // Using list instead of vector, because we delete random elements and need iterators to stay valid.
     // Remaining geometries to be processed.
-    mutable std::list<new_geometry::geometry*> geometries_to_process_;
+    mutable std::list<geometry::geometry*> geometries_to_process_;
     // Remaining points to be processed.
     mutable std::list<pixel_position> points_;
     // Geometry currently being processed.
-    mutable std::list<new_geometry::geometry*>::iterator geo_itr_;
+    mutable std::list<geometry::geometry*>::iterator geo_itr_;
     // Point currently being processed.
     mutable std::list<pixel_position>::iterator point_itr_;
     // Use point placement. Otherwise line placement is used.

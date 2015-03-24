@@ -25,48 +25,48 @@
 
 #include <mapnik/geometry.hpp>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 namespace detail {
 
 struct geometry_empty
 {
-    bool operator() (mapnik::new_geometry::geometry const& geom) const
+    bool operator() (mapnik::geometry::geometry const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    bool operator() (mapnik::new_geometry::point const&) const
+    bool operator() (mapnik::geometry::point const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::new_geometry::line_string const& geom) const
+    bool operator() (mapnik::geometry::line_string const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::new_geometry::polygon const& geom) const
+    bool operator() (mapnik::geometry::polygon const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::new_geometry::multi_point const& geom) const
+    bool operator() (mapnik::geometry::multi_point const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::new_geometry::multi_line_string const& geom) const
+    bool operator() (mapnik::geometry::multi_line_string const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::new_geometry::multi_polygon const& geom) const
+    bool operator() (mapnik::geometry::multi_polygon const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::new_geometry::geometry_collection const& geom) const
+    bool operator() (mapnik::geometry::geometry_collection const& geom) const
     {
         return geom.empty();
     }
@@ -74,7 +74,7 @@ struct geometry_empty
 
 }
 
-inline bool empty(mapnik::new_geometry::geometry const& geom)
+inline bool empty(mapnik::geometry::geometry const& geom)
 {
     return detail::geometry_empty()(geom);
 }

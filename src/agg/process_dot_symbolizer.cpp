@@ -124,7 +124,7 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     ren.color(agg::rgba8_pre(fill.red(), fill.green(), fill.blue(), int(fill.alpha() * opacity)));
     using render_dot_symbolizer_type = detail::render_dot_symbolizer<rasterizer, renderer_type, renderer_common, proj_transform>;
     render_dot_symbolizer_type apply(rx, ry, *ras_ptr, ren, common_, prj_trans);
-    mapnik::util::apply_visitor(new_geometry::vertex_processor<render_dot_symbolizer_type>(apply), feature.get_geometry());
+    mapnik::util::apply_visitor(geometry::vertex_processor<render_dot_symbolizer_type>(apply), feature.get_geometry());
 }
 
 template void agg_renderer<image_rgba8>::process(dot_symbolizer const&,

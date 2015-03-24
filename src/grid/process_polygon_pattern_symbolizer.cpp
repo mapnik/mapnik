@@ -86,7 +86,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
-    using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
     apply_vertex_converter_type apply(converter);
     mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 

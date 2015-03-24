@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/datasource_cache.hpp>
@@ -30,13 +29,13 @@ SECTION("hello world") {
             REQUIRE( feat1->id() == static_cast<mapnik::value_integer>(1) );
             REQUIRE( feat2->id() == static_cast<mapnik::value_integer>(2) );
             auto const& geom1 = feat1->get_geometry();
-            REQUIRE( geom1.is<mapnik::new_geometry::point>() );
-            auto const& point = mapnik::util::get<mapnik::new_geometry::point>(geom1);
+            REQUIRE( geom1.is<mapnik::geometry::point>() );
+            auto const& point = mapnik::util::get<mapnik::geometry::point>(geom1);
             REQUIRE( point.x == bbox.center().x );
             REQUIRE( point.y == bbox.center().y );
             auto const& geom2 = feat2->get_geometry();
-            REQUIRE( geom2.is<mapnik::new_geometry::line_string>() );
-            auto const& line = mapnik::util::get<mapnik::new_geometry::line_string>(geom2);
+            REQUIRE( geom2.is<mapnik::geometry::line_string>() );
+            auto const& line = mapnik::util::get<mapnik::geometry::line_string>(geom2);
             REQUIRE( line.size() == 4 );
             REQUIRE( line[0].x ==  bbox.minx() );
             REQUIRE( line[0].y ==  bbox.maxy() );

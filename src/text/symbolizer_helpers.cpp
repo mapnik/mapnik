@@ -102,10 +102,10 @@ base_symbolizer_helper::base_symbolizer_helper(
 
 struct largest_bbox_first
 {
-    bool operator() (new_geometry::geometry const* g0, new_geometry::geometry const* g1) const
+    bool operator() (geometry::geometry const* g0, geometry::geometry const* g1) const
     {
-        box2d<double> b0 = new_geometry::envelope(*g0);
-        box2d<double> b1 = new_geometry::envelope(*g1);
+        box2d<double> b0 = geometry::envelope(*g0);
+        box2d<double> b1 = geometry::envelope(*g1);
         return b0.width() * b0.height() > b1.width() * b1.height();
     }
 };
@@ -115,27 +115,27 @@ void base_symbolizer_helper::initialize_geometries() const
     bool largest_box_only = text_props_->largest_bbox_only;
     double minimum_path_length = text_props_->minimum_path_length;
 
-    new_geometry::geometry const& geom = feature_.get_geometry();
-    new_geometry::geometry_types type = new_geometry::geometry_type(geom);
+    geometry::geometry const& geom = feature_.get_geometry();
+    geometry::geometry_types type = geometry::geometry_type(geom);
     // FIXME: how to handle MultiLinePolygon
-    if (type == new_geometry::geometry_types::Polygon)
+    if (type == geometry::geometry_types::Polygon)
     {
         if (minimum_path_length > 0)
         {
-            box2d<double> gbox = t_.forward(new_geometry::envelope(geom), prj_trans_);
+            box2d<double> gbox = t_.forward(geometry::envelope(geom), prj_trans_);
             if (gbox.width() >= minimum_path_length)
             {
-                geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
+                geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
             }
         }
         else
         {
-            geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
+            geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
         }
     }
     else
     {
-        geometries_to_process_.push_back(const_cast<new_geometry::geometry*>(&geom));
+        geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
     }
     // FIXME: return early if geometries_to_process_.empty() ?
     if (largest_box_only)
@@ -166,12 +166,12 @@ void base_symbolizer_helper::initialize_points() const
 
     for (auto * geom_ptr : geometries_to_process_)
     {
-        new_geometry::geometry const& geom = *geom_ptr;
+        geometry::geometry const& geom = *geom_ptr;
         if (how_placed == VERTEX_PLACEMENT)
         {
             using apply_vertex_placement = detail::apply_vertex_placement<std::list<pixel_position> >;
             apply_vertex_placement apply(points_, t_, prj_trans_);
-            util::apply_visitor(new_geometry::vertex_processor<apply_vertex_placement>(apply), geom);
+            util::apply_visitor(geometry::vertex_processor<apply_vertex_placement>(apply), geom);
 #if 0
             va.rewind(0);
             for(unsigned i = 0; i < va.size(); ++i)
@@ -188,19 +188,19 @@ void base_symbolizer_helper::initialize_points() const
             // https://github.com/mapnik/mapnik/issues/1423
             bool success = false;
             // https://github.com/mapnik/mapnik/issues/1350
-            auto type = new_geometry::geometry_type(geom);
+            auto type = geometry::geometry_type(geom);
 
             // FIXME: how to handle MultiLineString?
-            if (type == new_geometry::geometry_types::LineString)
+            if (type == geometry::geometry_types::LineString)
             {
-                auto const& line = mapnik::util::get<new_geometry::line_string>(geom);
-                new_geometry::line_string_vertex_adapter va(line);
+                auto const& line = mapnik::util::get<geometry::line_string>(geom);
+                geometry::line_string_vertex_adapter va(line);
                 success = label::middle_point(va, label_x,label_y);
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                new_geometry::point pt;
-                new_geometry::centroid(geom, pt);
+                geometry::point pt;
+                geometry::centroid(geom, pt);
                 label_x = pt.x;
                 label_y = pt.y;
                 success = true;
@@ -282,11 +282,11 @@ bool text_symbolizer_helper::next_line_placement() const
             continue; //Reexecute size check
         }
 
-        auto type = new_geometry::geometry_type(**geo_itr_);
-        if (type == new_geometry::LineString) // ??
+        auto type = geometry::geometry_type(**geo_itr_);
+        if (type == geometry::LineString) // ??
         {
-            auto const& line = util::get<new_geometry::line_string>(**geo_itr_);
-            new_geometry::line_string_vertex_adapter va(line);
+            auto const& line = util::get<geometry::line_string>(**geo_itr_);
+            geometry::line_string_vertex_adapter va(line);
             converter_.apply(va);
             if (adapter_.status())
             {

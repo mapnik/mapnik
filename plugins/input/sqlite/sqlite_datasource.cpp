@@ -448,8 +448,8 @@ boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_t
             if (data)
             {
 
-                mapnik::new_geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, format_);
-                if (mapnik::new_geometry::empty(geom))
+                mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, format_);
+                if (mapnik::geometry::empty(geom))
                 {
                     continue;
                 }

@@ -32,4 +32,4 @@ using sink_type = std::back_insert_iterator<std::string>;
 
 template struct mapnik::json::properties_generator_grammar<sink_type, mapnik::feature_impl>;
 template struct mapnik::json::feature_generator_grammar<sink_type, mapnik::feature_impl>;
-template struct mapnik::json::geometry_generator_grammar<sink_type, mapnik::new_geometry::geometry>;
+template struct mapnik::json::geometry_generator_grammar<sink_type, mapnik::geometry::geometry>;

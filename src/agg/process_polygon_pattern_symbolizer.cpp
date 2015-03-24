@@ -143,7 +143,7 @@ struct agg_renderer_process_visitor_p
             double y0 = 0;
             using apply_local_alignment = detail::apply_local_alignment;
             apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
-            util::apply_visitor(new_geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
+            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
             offset_x = unsigned(current_buffer_->width() - x0);
             offset_y = unsigned(current_buffer_->height() - y0);
         }
@@ -173,7 +173,7 @@ struct agg_renderer_process_visitor_p
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
-        using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+        using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
         agg::scanline_u8 sl;
@@ -243,7 +243,7 @@ struct agg_renderer_process_visitor_p
             double y0 = 0;
             using apply_local_alignment = detail::apply_local_alignment;
             apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
-            util::apply_visitor(new_geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
+            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
 
             offset_x = unsigned(current_buffer_->width() - x0);
             offset_y = unsigned(current_buffer_->height() - y0);
@@ -273,7 +273,7 @@ struct agg_renderer_process_visitor_p
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
-        using vertex_processor_type = new_geometry::vertex_processor<apply_vertex_converter_type>;
+        using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
         agg::scanline_u8 sl;

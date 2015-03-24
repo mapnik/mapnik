@@ -43,7 +43,7 @@ namespace mapnik { namespace svg {
         svg = point | linestring | polygon
             ;
 
-        point = &uint_(mapnik::new_geometry::geometry_types::Point)[_1 = _type(_val)]
+        point = &uint_(mapnik::geometry::geometry_types::Point)[_1 = _type(_val)]
             << svg_point [_1 = _first(_val)]
             ;
 
@@ -53,11 +53,11 @@ namespace mapnik { namespace svg {
             << lit('\"')
             ;
 
-        linestring = &uint_(mapnik::new_geometry::geometry_types::LineString)[_1 = _type(_val)]
+        linestring = &uint_(mapnik::geometry::geometry_types::LineString)[_1 = _type(_val)]
             << lit("d=\"") << svg_path << lit("\"")
             ;
 
-        polygon = &uint_(mapnik::new_geometry::geometry_types::Polygon)[_1 = _type(_val)]
+        polygon = &uint_(mapnik::geometry::geometry_types::Polygon)[_1 = _type(_val)]
             << lit("d=\"") << svg_path << lit("\"")
             ;
 

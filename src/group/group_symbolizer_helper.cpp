@@ -92,7 +92,7 @@ pixel_position_list const& group_symbolizer_helper::get()
             // TODO to support clipped geometries this needs to use
             // vertex_converters
             apply_find_line_placements apply(t_, prj_trans_, *this);
-            mapnik::util::apply_visitor(new_geometry::vertex_processor<apply_find_line_placements>(apply), *geom);
+            mapnik::util::apply_visitor(geometry::vertex_processor<apply_find_line_placements>(apply), *geom);
         }
     }
 

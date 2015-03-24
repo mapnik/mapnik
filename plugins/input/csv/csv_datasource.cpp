@@ -541,11 +541,11 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-                        mapnik::new_geometry::geometry geom;
+                        mapnik::geometry::geometry geom;
                         if (mapnik::from_wkt(value, geom))
                         {
                             // correct orientations etc
-                            mapnik::new_geometry::correct(geom);
+                            mapnik::geometry::correct(geom);
                             // set geometry
                             feature->set_geometry(std::move(geom));
                             parsed_wkt = true;
@@ -581,7 +581,7 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-                        mapnik::new_geometry::geometry geom;
+                        mapnik::geometry::geometry geom;
                         if (mapnik::json::from_geojson(value, geom))
                         {
                             feature->set_geometry(std::move(geom));
@@ -816,7 +816,7 @@ void csv_datasource::parse_csv(T & stream,
             {
                 if (parsed_x && parsed_y)
                 {
-                    mapnik::new_geometry::point pt(x,y);
+                    mapnik::geometry::point pt(x,y);
                     feature->set_geometry(std::move(pt));
                     features_.push_back(feature);
                     null_geom = false;

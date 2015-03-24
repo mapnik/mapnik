@@ -27,7 +27,7 @@
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/correct.hpp>
 
-namespace mapnik { namespace new_geometry {
+namespace mapnik { namespace geometry {
 
 namespace detail {
 
@@ -62,7 +62,7 @@ struct geometry_correct
 
 }
 
-inline void correct(mapnik::new_geometry::geometry & geom)
+inline void correct(mapnik::geometry::geometry & geom)
 {
     return mapnik::util::apply_visitor(detail::geometry_correct(), geom);
 }
