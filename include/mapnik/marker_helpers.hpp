@@ -176,7 +176,8 @@ protected:
     double scale_factor_;
 };
 
-void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path);
+void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars,
+                   svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path);
 
 bool push_explicit_style(svg_attribute_type const& src,
                          svg_attribute_type & dst,
@@ -209,7 +210,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         apply_vertex_converter_type apply(converter);
         mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
-    else //if (type != geometry::geometry_types::GeometryCollection) // multi geometries/collection
+    else
     {
 
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
@@ -254,19 +255,19 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                     converter.apply(va);
                 }
             }
+            else
+            {
+                MAPNIK_LOG_WARN(marker_symbolizer) << "TODO: if you get here -> open an issue";
+            }
         }
-        else if (type == geometry::geometry_types::MultiPolygon)
+        else
         {
             if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            geometry::multi_polygon const& multi_poly = mapnik::util::get<geometry::multi_polygon>(geom);
-            for (auto const& poly : multi_poly)
-            {
-                geometry::polygon_vertex_adapter va(poly);
-                converter.apply(va);
-            }
+            apply_vertex_converter_type apply(converter);
+            mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
         }
     }
 }
