@@ -49,18 +49,16 @@ void render(mapnik::geometry::multi_polygon const& geom,
     ren_base renb(pixf);
     renderer ren(renb);
     mapnik::proj_transform prj_trans(mapnik::projection("+init=epsg:4326"),mapnik::projection("+init=epsg:4326"));
-    unsigned idx = 0;
+    ren.color(agg::rgba8(127,127,127,255));
+    agg::rasterizer_scanline_aa<> ras;
     for (auto const& poly : geom)
     {
-        unsigned c = idx * 100;
-        ren.color(agg::rgba8(c,c,c,255));
-        agg::rasterizer_scanline_aa<> ras;
         mapnik::geometry::polygon_vertex_adapter va(poly);
         path_type path(tr,va,prj_trans);
         ras.add_path(path);
-        agg::scanline_u8 sl;
-        agg::render_scanlines(ras, sl, ren);
     }
+    agg::scanline_u8 sl;
+    agg::render_scanlines(ras, sl, ren);
     mapnik::save_to_file(im,name);
 }
 
@@ -407,7 +405,6 @@ int main(int argc, char** argv)
         throw std::runtime_error("could not open: '" + filename_ + "'");
     std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                (std::istreambuf_iterator<char>()) );
-    /*
     {
         test1 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with agg");
@@ -416,7 +413,6 @@ int main(int argc, char** argv)
         test2 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with clipper");
     }
-    */
     {
         test3 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with boost");
