@@ -27,6 +27,8 @@
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/correct.hpp>
 
+#include <type_traits>
+
 namespace mapnik { namespace geometry {
 
 namespace detail {
@@ -34,6 +36,11 @@ namespace detail {
 struct geometry_correct
 {
     using result_type = void;
+
+    result_type operator() (geometry & geom) const
+    {
+        mapnik::util::apply_visitor(*this, geom);
+    }
 
     result_type operator() (geometry_collection & collection) const
     {
@@ -45,12 +52,12 @@ struct geometry_correct
 
     result_type operator() (polygon & poly) const
     {
-        return boost::geometry::correct(poly);
+        boost::geometry::correct(poly);
     }
 
     result_type operator() (multi_polygon & multi_poly) const
     {
-        return boost::geometry::correct(multi_poly);
+        boost::geometry::correct(multi_poly);
     }
 
     template <typename T>
@@ -58,13 +65,16 @@ struct geometry_correct
     {
         //no-op
     }
+
 };
 
 }
 
-inline void correct(mapnik::geometry::geometry & geom)
+template <typename GeomType>
+inline void correct(GeomType & geom)
 {
-    return mapnik::util::apply_visitor(detail::geometry_correct(), geom);
+    static_assert(!std::is_const<GeomType>::value,"mapnik::geometry::correct on const& is invalid");
+    detail::geometry_correct()(geom);
 }
 
 }}
