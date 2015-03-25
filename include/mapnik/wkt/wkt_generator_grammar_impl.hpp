@@ -54,7 +54,7 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
 
     geometry_dispatch = eps[_a = geometry_type(_val)] <<
         (&uint_(geometry::geometry_types::Point)[_1 = _a]
-         << (point | empty[_1 = _a]))
+         << point)
         |
         (&uint_(geometry::geometry_types::LineString)[_1 = _a]
          << (linestring | empty[_1 = _a]))
@@ -73,6 +73,9 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
         |
         (&uint_(geometry::geometry_types::GeometryCollection)[_1 = _a]
          << (geometry_collection | empty[_1 = _a]))
+        |
+        (&uint_(geometry::geometry_types::Unknown)[_1 = _a]
+         << lit("POINT EMPTY")) // special case for geometry_empty as mapnik::geometry::point can't be empty
         ;
 
     point = lit("POINT(") << point_coord << lit(")")
