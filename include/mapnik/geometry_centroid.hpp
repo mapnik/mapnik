@@ -38,21 +38,53 @@ struct geometry_centroid
     geometry_centroid(point & pt)
         : pt_(pt) {}
 
-    result_type operator() (geometry const& geom) const
+    template <typename T>
+    result_type operator() (T const& geom) const
     {
-        return mapnik::util::apply_visitor(*this, geom);
+        return util::apply_visitor(*this, geom);
     }
+
     result_type operator() (geometry_empty const&) const
     {
         return false;
     }
+
     result_type operator() (geometry_collection const& collection) const
     {
         return false;
     }
 
-    template <typename T>
-    result_type operator() (T const& geom) const
+    result_type operator() (point const& geom) const
+    {
+        boost::geometry::centroid(geom, pt_);
+        return true;
+    }
+
+    result_type operator() (line_string const& geom) const
+    {
+        boost::geometry::centroid(geom, pt_);
+        return true;
+    }
+
+    result_type operator() (polygon const& geom) const
+    {
+        boost::geometry::centroid(geom, pt_);
+        return true;
+    }
+
+    result_type operator() (multi_point const& geom) const
+    {
+        boost::geometry::centroid(geom, pt_);
+        return true;
+    }
+
+    result_type operator() (multi_line_string const& geom) const
+    {
+        boost::geometry::centroid(geom, pt_);
+        return true;
+    }
+
+    result_type operator() (multi_polygon const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
@@ -62,9 +94,10 @@ struct geometry_centroid
 
 }
 
-inline bool centroid(mapnik::geometry::geometry const& geom, point & pt)
+template <typename T>
+inline bool centroid(T const& geom, point & pt)
 {
-    return detail::geometry_centroid(pt) (geom);
+    return detail::geometry_centroid(pt)(geom);
 }
 
 }}

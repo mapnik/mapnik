@@ -87,12 +87,12 @@ pixel_position_list const& group_symbolizer_helper::get()
     else
     {
         using apply_find_line_placements = detail::apply_find_line_placements<group_symbolizer_helper>;
-        for (auto const* geom : geometries_to_process_)
+        for (auto const& geom : geometries_to_process_)
         {
             // TODO to support clipped geometries this needs to use
             // vertex_converters
             apply_find_line_placements apply(t_, prj_trans_, *this);
-            mapnik::util::apply_visitor(geometry::vertex_processor<apply_find_line_placements>(apply), *geom);
+            mapnik::util::apply_visitor(geometry::vertex_processor<apply_find_line_placements>(apply), geom);
         }
     }
 

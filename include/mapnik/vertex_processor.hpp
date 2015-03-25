@@ -34,7 +34,8 @@ struct vertex_processor
     vertex_processor(processor_type& proc)
         : proc_(proc) {}
 
-    void operator() (geometry const& geom)
+    template <typename Geometry>
+    void operator() (Geometry const& geom)
     {
         util::apply_visitor(*this, geom);
     }

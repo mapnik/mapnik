@@ -31,7 +31,8 @@ namespace mapnik { namespace geometry { namespace detail {
 
 struct geometry_type
 {
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry const& geom) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (T const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
@@ -78,7 +79,8 @@ struct geometry_type
 };
 } // detail
 
-static inline mapnik::geometry::geometry_types geometry_type(mapnik::geometry::geometry const& geom)
+template <typename T>
+static inline mapnik::geometry::geometry_types geometry_type(T const& geom)
 {
     return detail::geometry_type()(geom);
 }

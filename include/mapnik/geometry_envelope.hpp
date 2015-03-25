@@ -34,7 +34,8 @@ struct geometry_envelope
 {
     using bbox_type = box2d<double>;
 
-    bbox_type operator() (mapnik::geometry::geometry const& geom) const
+    template <typename T>
+    bbox_type operator() (T const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
@@ -106,7 +107,8 @@ struct geometry_envelope
 
 }
 
-inline mapnik::box2d<double> envelope(mapnik::geometry::geometry const& geom)
+template <typename T>
+inline mapnik::box2d<double> envelope(T const& geom)
 {
     return detail::geometry_envelope() (geom);
 }

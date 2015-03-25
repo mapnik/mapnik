@@ -74,6 +74,54 @@ struct apply_vertex_placement
     proj_transform const& prj_trans_;
 };
 
+template <typename T>
+struct split_multi_geometries
+{
+    using container_type = T;
+    split_multi_geometries(container_type & cont)
+        : cont_(cont) {}
+
+    void operator() (geometry::geometry_empty const&) const {}
+    void operator() (geometry::multi_point const& multi_pt) const
+    {
+        for ( auto const& pt : multi_pt )
+        {
+            cont_.push_back(std::move(base_symbolizer_helper::geometry_cref(std::cref(pt))));
+        }
+    }
+    void operator() (geometry::multi_line_string const& multi_line) const
+    {
+        for ( auto const& line : multi_line )
+        {
+            cont_.push_back(std::move(base_symbolizer_helper::geometry_cref(std::cref(line))));
+        }
+    }
+
+    void operator() (geometry::multi_polygon const& multi_poly) const
+    {
+        for ( auto const& poly : multi_poly )
+        {
+            cont_.push_back(std::move(base_symbolizer_helper::geometry_cref(std::cref(poly))));
+        }
+    }
+    void operator() (geometry::geometry_collection const& collection) const
+    {
+#if 0
+        for ( auto const& geom : collection)
+        {
+            (*this)(geom);
+        }
+#endif
+    }
+
+    template <typename Geometry>
+    void operator() (Geometry const& geom) const
+    {
+        cont_.push_back(std::move(base_symbolizer_helper::geometry_cref(std::cref(geom))));
+    }
+    container_type & cont_;
+};
+
 } // ns detail
 
 base_symbolizer_helper::base_symbolizer_helper(
@@ -108,6 +156,13 @@ struct largest_bbox_first
         box2d<double> b1 = geometry::envelope(*g1);
         return b0.width() * b0.height() > b1.width() * b1.height();
     }
+    bool operator() (base_symbolizer_helper::geometry_cref const& g0,
+                     base_symbolizer_helper::geometry_cref const& g1) const
+    {
+        box2d<double> b0 = geometry::envelope(g0);
+        box2d<double> b1 = geometry::envelope(g1);
+        return b0.width() * b0.height() > b1.width() * b1.height();
+    }
 };
 
 void base_symbolizer_helper::initialize_geometries() const
@@ -117,7 +172,9 @@ void base_symbolizer_helper::initialize_geometries() const
 
     geometry::geometry const& geom = feature_.get_geometry();
     geometry::geometry_types type = geometry::geometry_type(geom);
+
     // FIXME: how to handle MultiLinePolygon
+
     if (type == geometry::geometry_types::Polygon)
     {
         if (minimum_path_length > 0)
@@ -125,24 +182,28 @@ void base_symbolizer_helper::initialize_geometries() const
             box2d<double> gbox = t_.forward(geometry::envelope(geom), prj_trans_);
             if (gbox.width() >= minimum_path_length)
             {
-                geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
+                //geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
+                geometries_to_process_.push_back(std::move(geometry_cref(std::cref(geom.get<geometry::polygon>()))));
             }
         }
         else
         {
-            geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
+            //geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
+            geometries_to_process_.push_back(std::move(geometry_cref(std::cref(geom.get<geometry::polygon>()))));
         }
     }
     else
     {
-        geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
+        //geometries_to_process_.push_back(const_cast<geometry::geometry*>(&geom));
+        util::apply_visitor(detail::split_multi_geometries<geometry_container_type>(geometries_to_process_), geom);
     }
+
     // FIXME: return early if geometries_to_process_.empty() ?
     if (largest_box_only)
     {
         geometries_to_process_.sort(largest_bbox_first());
         geo_itr_ = geometries_to_process_.begin();
-        geometries_to_process_.erase(++geo_itr_,geometries_to_process_.end());
+        geometries_to_process_.erase(++geo_itr_, geometries_to_process_.end());
     }
     geo_itr_ = geometries_to_process_.begin();
 }
@@ -164,24 +225,14 @@ void base_symbolizer_helper::initialize_points() const
     double label_y=0.0;
     double z=0.0;
 
-    for (auto * geom_ptr : geometries_to_process_)
+    for (auto const& geom : geometries_to_process_)
     {
-        geometry::geometry const& geom = *geom_ptr;
+        //geometry::geometry const& geom = *geom_ptr;
         if (how_placed == VERTEX_PLACEMENT)
         {
             using apply_vertex_placement = detail::apply_vertex_placement<std::list<pixel_position> >;
             apply_vertex_placement apply(points_, t_, prj_trans_);
             util::apply_visitor(geometry::vertex_processor<apply_vertex_placement>(apply), geom);
-#if 0
-            va.rewind(0);
-            for(unsigned i = 0; i < va.size(); ++i)
-            {
-                va.vertex(&label_x, &label_y);
-                prj_trans_.backward(label_x, label_y, z);
-                t_.forward(&label_x, &label_y);
-                points_.emplace_back(label_x, label_y);
-            }
-#endif
         }
         else
         {
@@ -204,8 +255,6 @@ void base_symbolizer_helper::initialize_points() const
                 label_x = pt.x;
                 label_y = pt.y;
                 success = true;
-
-                //success = label::centroid(va, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
@@ -282,10 +331,12 @@ bool text_symbolizer_helper::next_line_placement() const
             continue; //Reexecute size check
         }
 
-        auto type = geometry::geometry_type(**geo_itr_);
-        if (type == geometry::LineString) // ??
+
+        //auto type = geometry::geometry_type(*geo_itr_.get());
+
+        if (geo_itr_->is<base_symbolizer_helper::line_string_cref>()) // line_string
         {
-            auto const& line = util::get<geometry::line_string>(**geo_itr_);
+            auto const& line = util::get<geometry::line_string const>(*geo_itr_);
             geometry::line_string_vertex_adapter va(line);
             converter_.apply(va);
             if (adapter_.status())
