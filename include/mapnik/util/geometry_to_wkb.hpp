@@ -227,6 +227,7 @@ template <typename MultiGeometry>
 
 struct geometry_to_wkb
 {
+
     using result_type = wkb_buffer_ptr;
 
     geometry_to_wkb(wkbByteOrder byte_order)

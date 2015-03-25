@@ -382,8 +382,8 @@ void map_parser::parse_map_include(Map & map, xml_node const& node)
                         mapnik::value_bool b;
                         mapnik::value_integer i;
                         mapnik::value_double d;
-                        if (mapnik::util::string2bool(val,b)) params[key] = b;
-                        else if (mapnik::util::string2int(val,i)) params[key] = i;
+                        if (mapnik::util::string2int(val,i)) params[key] = i;
+                        else if (mapnik::util::string2bool(val,b)) params[key] = b;
                         else if (mapnik::util::string2double(val,d)) params[key] = d;
                         else params[key] = val;
                     }

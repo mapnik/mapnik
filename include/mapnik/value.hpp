@@ -717,6 +717,11 @@ struct convert<std::string>
         return str;
     }
 
+    std::string operator() (value_bool val) const
+    {
+        return val ? "true": "false";
+    }
+
     std::string operator() (value_null const&) const
     {
         return "";
@@ -744,6 +749,16 @@ struct to_unicode
     {
         std::string str;
         util::to_string(str,val);
+        return value_unicode_string(str.c_str());
+    }
+    
+    value_unicode_string operator() (value_bool val) const
+    {
+        if (val) {
+            std::string str("true");
+            return value_unicode_string(str.c_str());
+        }
+        std::string str("false");
         return value_unicode_string(str.c_str());
     }
 
