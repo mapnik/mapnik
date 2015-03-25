@@ -19,7 +19,7 @@ def make_tmp_map():
     context.push('Name')
     f = mapnik.Feature(context,1)
     f['Name'] = 'Hello'
-    f.add_geometries_from_wkt('POINT (0 0)')
+    f.geometry = mapnik.Geometry.from_wkt('POINT (0 0)')
     ds.add_feature(f)
     s = mapnik.Style()
     r = mapnik.Rule()
