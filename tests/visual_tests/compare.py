@@ -1,34 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import mapnik
+import os
 from unittest import TestCase
 
 try:
     import json
 except ImportError:
     import simplejson as json
-
-
-# returns true if pixels are not nearly identical
-def compare_pixels(pixel1, pixel2, alpha=True, pixel_threshold=0):
-    if pixel1 == pixel2:
-        return False
-    r_diff = abs((pixel1 & 0xff) - (pixel2 & 0xff))
-    g_diff = abs(((pixel1 >> 8) & 0xff) - ((pixel2 >> 8) & 0xff))
-    b_diff = abs(((pixel1 >> 16) & 0xff)- ((pixel2 >> 16) & 0xff))
-    if alpha:
-        a_diff = abs(((pixel1 >> 24) & 0xff) - ((pixel2 >> 24) & 0xff))
-        if(r_diff > pixel_threshold or
-           g_diff > pixel_threshold or
-           b_diff > pixel_threshold or
-           a_diff > pixel_threshold):
-            return True
-    else:
-        if(r_diff > pixel_threshold or
-           g_diff > pixel_threshold or
-           b_diff > pixel_threshold):
-            return True
-    return False
 
 # compare two images and return number of different pixels
 def compare(actual, expected, alpha=True):
@@ -38,7 +17,10 @@ def compare(actual, expected, alpha=True):
     delta_pixels = (im2.width() * im2.height()) - pixels
     if delta_pixels != 0:
         return delta_pixels
-    return im1.compare(im2, 0, alpha)
+    if os.name == 'nt':
+        return im1.compare(im2, 3, alpha)
+    else:
+        return im1.compare(im2, 0, alpha)
 
 def compare_grids(actual, expected, threshold=0, alpha=True):
     global errors
