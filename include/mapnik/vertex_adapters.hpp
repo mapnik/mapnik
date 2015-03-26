@@ -125,11 +125,17 @@ struct polygon_vertex_adapter
 
     unsigned vertex(double* x, double* y) const
     {
+/*
         if (close_loop_)
         {
             close_loop_ = false;
+            point const& coord = (rings_itr_ == 0) ?
+                poly_.exterior_ring[0] : poly_.interior_rings[rings_itr_- 1][0];
+            *x = coord.x;
+            *y = coord.y;
             return SEG_CLOSE;
         }
+*/
         if (rings_itr_ == rings_end_)
             return mapnik::SEG_END;
         if (current_index_ < end_index_)
@@ -145,8 +151,10 @@ struct polygon_vertex_adapter
             }
             if (current_index_ == end_index_)
             {
-                close_loop_ = true;
-                //return mapnik::SEG_CLOSE;
+                //close_loop_ = true;
+                *x = 0;
+                *y = 0;
+                return mapnik::SEG_CLOSE;
             }
             return mapnik::SEG_LINETO;
         }
