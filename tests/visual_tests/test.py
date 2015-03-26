@@ -7,6 +7,7 @@ import mapnik
 #mapnik.logger.set_severity(mapnik.severity_type.Debug)
 import shutil
 import os.path
+import os
 from compare import compare, compare_grids
 import platform
 import glob
@@ -27,9 +28,14 @@ defaults = {
     'grid': mapnik.has_grid_renderer()
 }
 
-cairo_threshold = 0
-agg_threshold = 0
-grid_threshold = 0
+if os.name == 'nt':
+    cairo_threshold = 10
+    agg_threshold = 0
+    grid_threshold = 0
+else:
+    cairo_threshold = 0
+    agg_threshold = 0
+    grid_threshold = 0
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)

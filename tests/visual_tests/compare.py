@@ -17,10 +17,7 @@ def compare(actual, expected, alpha=True):
     delta_pixels = (im2.width() * im2.height()) - pixels
     if delta_pixels != 0:
         return delta_pixels
-    if os.name == 'nt':
-        return im1.compare(im2, 3, alpha)
-    else:
-        return im1.compare(im2, 0, alpha)
+    return im1.compare(im2, 0, alpha)
 
 def compare_grids(actual, expected, threshold=0, alpha=True):
     global errors
