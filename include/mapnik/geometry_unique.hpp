@@ -50,10 +50,20 @@ struct geometry_unique
         }
     }
 
+    result_type operator() (line_string & line) const
+    {
+        boost::geometry::unique(line);
+    }
+
+    result_type operator() (polygon & poly) const
+    {
+        boost::geometry::unique(poly);
+    }
+
     template <typename T>
     result_type operator() (T & geom) const
     {
-        boost::geometry::unique(geom);
+        // no-op
     }
 
 };
