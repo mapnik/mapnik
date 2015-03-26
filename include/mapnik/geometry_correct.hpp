@@ -50,6 +50,16 @@ struct geometry_correct
         }
     }
 
+    result_type operator() (line_string & line) const
+    {
+         boost::geometry::correct(line);
+    }
+
+    result_type operator() (multi_line_string & multi_line) const
+    {
+         boost::geometry::correct(multi_line);
+    }
+
     result_type operator() (polygon & poly) const
     {
         boost::geometry::correct(poly);
