@@ -8,6 +8,7 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/vertex_adapters.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_correct.hpp>
@@ -95,22 +96,55 @@ public:
         }
         mapnik::geometry::polygon const& poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
         mapnik::geometry::polygon_vertex_adapter va(poly);
+
+
         conv_clip clipped(va);
         clipped.clip_box(
                     extent_.minx(),
                     extent_.miny(),
                     extent_.maxx(),
                     extent_.maxy());
-        unsigned cmd;
-        double x,y;
+
+
         clipped.rewind(0);
         mapnik::geometry::polygon poly2;
         mapnik::geometry::linear_ring ring;
-        // TODO: handle resulting multipolygon
-        while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
+        // exterior ring
+        unsigned cmd;
+        double x, y, x0, y0;
+        while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END)
+        {
+            if (cmd == mapnik::SEG_MOVETO)
+            {
+                x0 = x; y0 = y;
+            }
+
+            if (cmd == mapnik::SEG_CLOSE)
+            {
+                ring.add_coord(x0, y0);
+                break;
+            }
             ring.add_coord(x,y);
         }
         poly2.set_exterior_ring(std::move(ring));
+        // interior rings
+        ring.clear();
+        while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END)
+        {
+            if (cmd == mapnik::SEG_MOVETO)
+            {
+                x0 = x; y0 = y;
+            }
+            else if (cmd == mapnik::SEG_CLOSE)
+            {
+                ring.add_coord(x0,y0);
+                poly2.add_hole(std::move(ring));
+                ring.clear();
+                continue;
+            }
+            ring.add_coord(x,y);
+        }
+
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
         mapnik::geometry::multi_polygon mp;
@@ -139,7 +173,7 @@ public:
         if (!geom.is<mapnik::geometry::polygon>())
         {
             std::clog << "not a polygon!\n";
-            return false;            
+            return false;
         }
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
@@ -222,10 +256,22 @@ public:
         mapnik::geometry::polygon poly2;
         mapnik::geometry::linear_ring ring;
         // TODO: handle resulting multipolygon
-        while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
-            if (cmd != mapnik::SEG_CLOSE) ring.add_coord(x,y);
+        // exterior ring
+        while (true)
+        {
+            cmd = clipped.vertex(&x, &y);
+            ring.add_coord(x,y);
+            if (cmd == mapnik::SEG_CLOSE) break;
         }
         poly2.set_exterior_ring(std::move(ring));
+        // interior ring
+        ring.clear();
+        while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END)
+        {
+            ring.add_coord(x,y);
+        }
+        poly2.add_hole(std::move(ring));
+        mapnik::geometry::correct(poly2);
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
         mapnik::geometry::multi_polygon mp;
@@ -374,9 +420,9 @@ public:
                 unsigned cmd;
                 double x,y;
                 while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END) {
-                    count++;
+                    ++count;
                 }
-                unsigned expected_count = 31;
+                unsigned expected_count = 29;
                 if (count != expected_count) {
                     std::clog << "test3: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
                     valid = false;
