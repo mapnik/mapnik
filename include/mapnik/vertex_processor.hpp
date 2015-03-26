@@ -23,7 +23,7 @@
 #ifndef MAPNIK_VERTEX_PROCESSOR_HPP
 #define MAPNIK_VERTEX_PROCESSOR_HPP
 
-#include <mapnik/geometry.hpp>
+#include <mapnik/vertex_adapters.hpp>
 
 namespace mapnik { namespace geometry {
 
