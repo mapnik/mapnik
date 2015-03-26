@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_CORRECT_HPP
-#define MAPNIK_GEOMETRY_CORRECT_HPP
+#ifndef MAPNIK_GEOMETRY_UNIQUE_HPP
+#define MAPNIK_GEOMETRY_UNIQUE_HPP
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
-#include <boost/geometry/algorithms/correct.hpp>
+#include <boost/geometry/algorithms/unique.hpp>
+#include <boost/geometry/algorithms/unique.hpp>
 
 #include <type_traits>
 
@@ -33,7 +34,7 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
-struct geometry_correct
+struct geometry_unique
 {
     using result_type = void;
 
@@ -50,20 +51,10 @@ struct geometry_correct
         }
     }
 
-    result_type operator() (polygon & poly) const
-    {
-        boost::geometry::correct(poly);
-    }
-
-    result_type operator() (multi_polygon & multi_poly) const
-    {
-        boost::geometry::correct(multi_poly);
-    }
-
     template <typename T>
     result_type operator() (T & geom) const
     {
-        //no-op
+        boost::geometry::unique(geom);
     }
 
 };
@@ -71,12 +62,12 @@ struct geometry_correct
 }
 
 template <typename GeomType>
-inline void correct(GeomType & geom)
+inline void unique(GeomType & geom)
 {
-    static_assert(!std::is_const<GeomType>::value,"mapnik::geometry::correct on const& is invalid");
-    detail::geometry_correct()(geom);
+    static_assert(!std::is_const<GeomType>::value,"mapnik::geometry::unique on const& is invalid");
+    detail::geometry_unique()(geom);
 }
 
 }}
 
-#endif // MAPNIK_GEOMETRY_CORRECT_HPP
+#endif // MAPNIK_GEOMETRY_UNIQUE_HPP
