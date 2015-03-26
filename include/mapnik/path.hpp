@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_HPP
-#define MAPNIK_GEOMETRY_HPP
+#ifndef MAPNIK_PATH_HPP
+#define MAPNIK_PATH_HPP
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
@@ -181,4 +181,4 @@ using vertex_adapter = detail::vertex_adapter<path_type>;
 
 }
 
-#endif // MAPNIK_GEOMETRY_HPP
+#endif // MAPNIK_PATH_HPP
