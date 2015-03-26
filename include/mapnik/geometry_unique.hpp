@@ -26,7 +26,6 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/unique.hpp>
-#include <boost/geometry/algorithms/unique.hpp>
 
 #include <type_traits>
 
