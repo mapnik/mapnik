@@ -62,6 +62,7 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
 
     start = features(_r1)
         ;
+
     features = iter_pos[_a = _1] >> -(lit('{') >> -lit("\"type\"")
                                       >> lit(':') >> lit("\"FeatureCollection\"")
                                       >> *(lit(',') >> (json.key_value - lit("\"features\"")))
@@ -69,45 +70,58 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
                                       >> lit(':'))
                                  >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
         ;
-    feature = raw[lit('{')[_a = 1] >> lit("\"type\"") >> lit(':') >> lit("\"Feature\"")
-                   >> *(eps(_a > 0) >> (lit('{')[_a += 1]
-                                        |
-                                        lit('}')[_a -=1]
-                                        |
-                                        coords[_b = _1]
-                                        |
-                                        char_))][push_box(_r1, _r2, _b, _1)]
+
+    feature = raw[lit('{')[_a = 1]
+                  >> *(eps(_a > 0) >> (lit('{')[_a += 1]
+                                       |
+                                       lit('}')[_a -=1]
+                                       |
+                                       coords[_b = _1]
+                                       |
+                                       char_))][push_box(_r1, _r2, _b, _1)]
         ;
-    coords = lit("\"coordinates\"") >> lit(':') >> (rings_array(_a) | rings (_a) | ring(_a) | pos[calculate_bounding_box(_a,_1)])[_val = _a]
+
+    coords = lit("\"coordinates\"")
+        >> lit(':') >> (rings_array(_a) | rings (_a) | ring(_a) | pos[calculate_bounding_box(_a,_1)])[_val = _a]
         ;
+
     pos = lit('[') > -(double_ > lit(',') > double_) > omit[*(lit(',') > double_)] > lit(']')
         ;
+
     ring = lit('[') >> pos[calculate_bounding_box(_r1,_1)] % lit(',') > lit(']')
         ;
+
     rings = lit('[') >> ring(_r1)  % lit(',') > lit(']')
         ;
+
     rings_array = lit('[') >> rings(_r1) % lit(',') > lit(']')
         ;
 
     // generic json types
     json.value = json.object | json.array | json.string_ | json.number
         ;
+
     json.pairs = json.key_value % lit(',')
         ;
+
     json.key_value = (json.string_ >> lit(':') >> json.value)
         ;
+
     json.object = lit('{') >> *json.pairs >> lit('}')
         ;
+
     json.array = lit('[')
         >> json.value >> *(lit(',') >> json.value)
         >> lit(']')
         ;
+
     json.number = json.strict_double
         | json.int__
         | lit("true")
         | lit("false")
         | lit("null")
         ;
+
     coords.name("Coordinates");
     pos.name("Position");
     ring.name("Ring");
