@@ -325,7 +325,7 @@ public:
             while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
                 count++;
             }
-            unsigned expected_count = 29;
+            unsigned expected_count = 31;
             if (count != expected_count) {
                 std::clog << "test2: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
                 valid = false;
