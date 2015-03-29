@@ -210,7 +210,8 @@ private:
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
-            if (vtx.cmd == SEG_LINETO) {
+            if (vtx.cmd == SEG_LINETO)
+            {
                 if (distance_to_previous(vtx) > tolerance_)
                 {
                     // Only output a vertex if it's far enough away from the previous
@@ -241,6 +242,7 @@ private:
             }
             else if (vtx.cmd == SEG_MOVETO)
             {
+                start_vertex_ = vtx;
                 break;
             }
             else
@@ -254,7 +256,6 @@ private:
         *y = vtx.y;
         return vtx.cmd;
     }
-#pragma GCC diagnostic pop
 
     template <typename Iterator>
     bool fit_sleeve(Iterator itr,Iterator end, vertex2d const& v)
@@ -284,8 +285,6 @@ private:
             if (status_ == cache &&
                 vertices_.size() >= min_size)
                 status_ = process;
-
-            previous_vertex_ = vtx;
 
             if (vtx.cmd == SEG_MOVETO)
             {
@@ -323,7 +322,9 @@ private:
                     vertices_.push_back(sleeve_cont_.back());
                     sleeve_cont_.clear();
                 }
-                vertices_.push_back(start_vertex_);
+                vtx.x = start_vertex_.x;
+                vtx.y = start_vertex_.y;
+                vertices_.push_back(vtx);
                 if (status_ == process) break;
             }
         }
@@ -349,8 +350,15 @@ private:
         {
             vertex2d v = vertices_.front();
             vertices_.pop_front();
-            *x = v.x;
-            *y = v.y;
+            if (v.cmd == SEG_CLOSE)
+            {
+                *x = *y = 0.0; // restore SEG_CLOSE command
+            }
+            else
+            {
+                *x = v.x;
+                *y = v.y;
+            }
             return v.cmd;
         }
         return SEG_END;
@@ -555,7 +563,7 @@ private:
         }
 
         // Slurp the points back out that haven't been marked as discarded
-        for (vertex2d& vertex : vertices)
+        for (vertex2d const& vertex : vertices)
         {
             if (vertex.cmd != SEG_END)
             {
