@@ -16,29 +16,20 @@ SECTION("polygon") {
     double x,y;
     unsigned cmd;
 
-    // 0,0
     cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_MOVETO );
     REQUIRE( x == 1 );
     REQUIRE( y == 1 );
 
-    // 1,1
     cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_LINETO );
     REQUIRE( x == 2 );
     REQUIRE( y == 2 );
 
-    // 100,100
     cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_LINETO );
     REQUIRE( x == 100 );
     REQUIRE( y == 100 );
-
-    // last point should be same as first
-    cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == 1 );
-    REQUIRE( y == 1 );
 
     // close
     cmd = va.vertex(&x,&y);
@@ -103,11 +94,6 @@ SECTION("polygon with hole") {
     REQUIRE( y == 10 );
 
     cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == 0 );
-    REQUIRE( y == 0 );
-
-    cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_CLOSE );
     REQUIRE( x == 0 );
     REQUIRE( y == 0 );
@@ -131,11 +117,6 @@ SECTION("polygon with hole") {
     cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_LINETO );
     REQUIRE( x == -3 );
-    REQUIRE( y == 7 );
-
-    cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == -7 );
     REQUIRE( y == 7 );
 
     cmd = va.vertex(&x,&y);
@@ -165,9 +146,9 @@ SECTION("polygon with hole") {
     REQUIRE( y == 4 );
 
     cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == -6 );
-    REQUIRE( y == 4 );
+    REQUIRE( cmd == mapnik::SEG_CLOSE );
+    REQUIRE( x == 0 );
+    REQUIRE( y == 0 );
 
     mapnik::geometry::correct(g);
 
@@ -192,11 +173,6 @@ SECTION("polygon with hole") {
     cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_LINETO );
     REQUIRE( x == -10 );
-    REQUIRE( y == 0 );
-
-    cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == 0 );
     REQUIRE( y == 0 );
 
     cmd = va.vertex(&x,&y);
@@ -226,11 +202,6 @@ SECTION("polygon with hole") {
     REQUIRE( y == 3 );
 
     cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == -7 );
-    REQUIRE( y == 7 );
-
-    cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_CLOSE );
     REQUIRE( x == 0 );
     REQUIRE( y == 0 );
@@ -257,10 +228,9 @@ SECTION("polygon with hole") {
     REQUIRE( y == 4 );
 
     cmd = va.vertex(&x,&y);
-    REQUIRE( cmd == mapnik::SEG_LINETO );
-    REQUIRE( x == -6 );
-    REQUIRE( y == 4 );
-
+    REQUIRE( cmd == mapnik::SEG_CLOSE );
+    REQUIRE( x == 0 );
+    REQUIRE( y == 0 );
 }
 
 }

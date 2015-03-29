@@ -125,14 +125,6 @@ struct polygon_vertex_adapter
 
     unsigned vertex(double* x, double* y) const
     {
-
-        if (close_loop_)
-        {
-            close_loop_ = false;
-            *x = 0;
-            *y = 0;
-            return mapnik::SEG_CLOSE;
-        }
         if (rings_itr_ == rings_end_)
         {
             return mapnik::SEG_END;
@@ -150,7 +142,9 @@ struct polygon_vertex_adapter
             }
             if (current_index_ == end_index_)
             {
-                close_loop_ = true;
+                *x = 0;
+                *y = 0;
+                return mapnik::SEG_CLOSE;
             }
             return mapnik::SEG_LINETO;
         }
