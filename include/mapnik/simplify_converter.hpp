@@ -192,8 +192,15 @@ private:
             return SEG_END;
 
         previous_vertex_ = vertices_[pos_];
-        *x = previous_vertex_.x;
-        *y = previous_vertex_.y;
+        if (previous_vertex_.cmd == SEG_CLOSE)
+        {
+            *x = *y = 0.0; // restore SEG_CLOSE command
+        }
+        else
+        {
+            *x = previous_vertex_.x;
+            *y = previous_vertex_.y;
+        }
         pos_++;
         return previous_vertex_.cmd;
     }
@@ -403,10 +410,20 @@ private:
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
+            if (vtx.cmd == SEG_MOVETO)
+            {
+                start_vertex_ = vtx;
+            }
+            else if (vtx.cmd == SEG_CLOSE)
+            {
+                vtx.x = start_vertex_.x;
+                vtx.y = start_vertex_.y;
+            }
             v_list.push_back(new weighted_vertex(vtx));
         }
 
-        if (v_list.empty()) {
+        if (v_list.empty())
+        {
             return status_ = process;
         }
 
@@ -553,6 +570,15 @@ private:
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
+            if (vtx.cmd == SEG_MOVETO)
+            {
+                start_vertex_ = vtx;
+            }
+            else if (vtx.cmd == SEG_CLOSE)
+            {
+                vtx.x = start_vertex_.x;
+                vtx.y = start_vertex_.y;
+            }
             vertices.push_back(vtx);
         }
 
