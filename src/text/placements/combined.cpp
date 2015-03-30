@@ -58,7 +58,9 @@ text_placements_ptr text_placements_combined::from_xml(xml_node const& xml, font
     text_placements_ptr list_placement_ptr = text_placements_list::from_xml(xml, fontsets, is_shield);
     if(simple_placement_ptr && list_placement_ptr)
     {
-        return std::make_shared<text_placements_combined>(simple_placement_ptr, list_placement_ptr);
+        text_placements_ptr ptr = std::make_shared<text_placements_combined>(simple_placement_ptr, list_placement_ptr);
+        ptr->defaults.from_xml(xml, fontsets, is_shield);
+        return ptr;
     }
     return text_placements_ptr();
 }
@@ -86,7 +88,7 @@ bool text_placement_info_combined::next() const
         //try the simple placement first
         if(simple_placement_info_->next())
         {
-            apply_simple_placement();
+            apply_simple_placement(); 
         }
         else if(list_placement_info_->next()) //try the list placement options
         {
