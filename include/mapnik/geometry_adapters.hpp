@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_ADAPTERS_HPP
 #define MAPNIK_GEOMETRY_ADAPTERS_HPP
 
+// undef B0 to workaround https://svn.boost.org/trac/boost/ticket/10467
+#undef B0
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/linestring.hpp>
