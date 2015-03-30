@@ -209,6 +209,7 @@ private:
     {
         if (status_ == closing)
         {
+            *x = *y = 0.0;
             status_ = end;
             return SEG_CLOSE;
         }
@@ -223,7 +224,8 @@ private:
                 {
                     // Only output a vertex if it's far enough away from the previous
                     break;
-                } else
+                }
+                else
                 {
                     last = vtx;
                     // continue
