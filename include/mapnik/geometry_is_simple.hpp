@@ -54,16 +54,37 @@ struct geometry_is_simple
         return true;
     }
 
-    template <typename T>
-    result_type operator() (T const& geom) const
+    result_type operator() (point const& pt) const
     {
-        return boost::geometry::is_simple(geom);
+        return boost::geometry::is_simple(pt);
     }
+    result_type operator() (line_string const& line) const
+    {
+        return boost::geometry::is_simple(line);
+    }
+    result_type operator() (polygon const& poly) const
+    {
+        return boost::geometry::is_simple(poly);
+    }
+    result_type operator() (multi_point const& multi_pt) const
+    {
+        return boost::geometry::is_simple(multi_pt);
+    }
+    result_type operator() (multi_line_string const& multi_line) const
+    {
+        return boost::geometry::is_simple(multi_line);
+    }
+    result_type operator() (multi_polygon const& multi_poly) const
+    {
+        return boost::geometry::is_simple(multi_poly);
+    }
+
 };
 
 }
 
-inline bool is_simple(mapnik::geometry::geometry const& geom)
+template <typename T>
+inline bool is_simple(T const& geom)
 {
     return detail::geometry_is_simple() (geom);
 }

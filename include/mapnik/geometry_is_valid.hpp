@@ -54,16 +54,41 @@ struct geometry_is_valid
         return true;
     }
 
-    template <typename T>
-    result_type operator() (T const& geom) const
+    result_type operator() (point const& pt) const
     {
-        return boost::geometry::is_valid(geom);
+        return boost::geometry::is_valid(pt);
+    }
+
+    result_type operator() (line_string const& line) const
+    {
+        return boost::geometry::is_valid(line);
+    }
+
+    result_type operator() (polygon const& poly) const
+    {
+        return boost::geometry::is_valid(poly);
+    }
+
+    result_type operator() (multi_point const& multi_pt) const
+    {
+        return boost::geometry::is_valid(multi_pt);
+    }
+
+    result_type operator() (multi_line_string const& multi_line) const
+    {
+        return boost::geometry::is_valid(multi_line);
+    }
+
+    result_type operator() (multi_polygon const& multi_poly) const
+    {
+        return boost::geometry::is_valid(multi_poly);
     }
 };
 
 }
 
-inline bool is_valid(mapnik::geometry::geometry const& geom)
+template <typename T>
+inline bool is_valid(T const& geom)
 {
     return detail::geometry_is_valid() (geom);
 }
