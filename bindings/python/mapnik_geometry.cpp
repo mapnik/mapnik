@@ -48,10 +48,11 @@
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/geometry_centroid.hpp>
 
-#include <mapnik/wkt/wkt_factory.hpp> // from_wkt/to_wkt
+#include <mapnik/wkt/wkt_factory.hpp> // from_wkt
 #include <mapnik/json/geometry_parser.hpp> // from_geojson
 #include <mapnik/util/geometry_to_geojson.hpp> // to_geojson
 #include <mapnik/util/geometry_to_wkb.hpp> // to_wkb
+#include <mapnik/util/geometry_to_wkt.hpp> // to_wkt
 //#include <mapnik/util/geometry_to_svg.hpp>
 #include <mapnik/wkb.hpp>
 
@@ -132,7 +133,7 @@ std::string to_geojson_impl(mapnik::geometry::geometry const& geom)
 std::string to_wkt_impl(mapnik::geometry::geometry const& geom)
 {
     std::string wkt;
-    if (!mapnik::to_wkt(wkt,geom))
+    if (!mapnik::util::to_wkt(wkt,geom))
     {
         throw std::runtime_error("Generate WKT failed");
     }
