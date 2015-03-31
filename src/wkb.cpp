@@ -28,8 +28,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/geometry_adapters.hpp>
-// boost.geometry
-#include <boost/geometry/algorithms/correct.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 namespace mapnik
 {
@@ -315,8 +314,6 @@ private:
             if ( i == 0) poly.set_exterior_ring(std::move(ring));
             else poly.add_hole(std::move(ring));
         }
-        // correct orientations etc
-        boost::geometry::correct(poly);
         return poly;
     }
 
@@ -392,7 +389,9 @@ mapnik::geometry::geometry geometry_utils::from_wkb(const char* wkb,
                                                         wkbFormat format)
 {
     wkb_reader reader(wkb, size, format);
-    return mapnik::geometry::geometry(reader.read());
+    mapnik::geometry::geometry geom(reader.read());
+    mapnik::geometry::correct(geom);
+    return geom;
 }
 
 } // namespace mapnik
