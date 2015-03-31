@@ -26,11 +26,10 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/datasource.hpp>
-#include <mapnik/geom_util.hpp>
+#include <mapnik/util/is_clockwise.hpp>
 // boost
 
 using mapnik::datasource_exception;
-using mapnik::hit_test_first;
 const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
@@ -106,7 +105,7 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
             double y = record.read_double();
             line.add_coord(x, y);
         }
-        return std::move(mapnik::geometry::geometry(std::move(line)));
+        return mapnik::geometry::geometry(std::move(line));
     }
     else
     {
@@ -140,23 +139,10 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
             }
             multi_line.push_back(std::move(line));
         }
-        return std::move(mapnik::geometry::geometry(std::move(multi_line)));
+        return mapnik::geometry::geometry(std::move(multi_line));
     }
 }
 
-template <typename T>
-bool is_clockwise(T const& ring)
-{
-    double area = 0.0;
-    std::size_t num_points = ring.size();
-    for (int i = 0; i < num_points; ++i)
-    {
-        auto const& p0 = ring[i];
-        auto const& p1 = ring[(i + 1) % num_points];
-        area += p0.x * p1.y - p0.y * p1.x;
-    }
-    return ( area < 0.0) ? true : false;
-}
 
 mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & record)
 {
@@ -190,7 +176,7 @@ mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & reco
         {
             poly.set_exterior_ring(std::move(ring));
         }
-        else if (is_clockwise(ring))
+        else if (mapnik::util::is_clockwise(ring))
         {
             multi_poly.emplace_back(std::move(poly));
             poly.interior_rings.clear();
@@ -204,7 +190,7 @@ mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & reco
     if (multi_poly.size() > 0) // multi
     {
         multi_poly.emplace_back(std::move(poly));
-        return std::move(mapnik::geometry::geometry(std::move(multi_poly)));
+        return mapnik::geometry::geometry(std::move(multi_poly));
     }
-    return std::move(mapnik::geometry::geometry(std::move(poly)));
+    return mapnik::geometry::geometry(std::move(poly));
 }
