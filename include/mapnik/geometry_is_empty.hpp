@@ -70,11 +70,19 @@ struct geometry_is_empty
     {
         return geom.empty();
     }
+
+    template <typename T>
+    bool operator() (T const& geom) const
+    {
+        return true;
+    }
+
 };
 
 }
 
-inline bool is_empty(mapnik::geometry::geometry const& geom)
+template <typename GeomType>
+inline bool is_empty(GeomType & geom)
 {
     return detail::geometry_is_empty()(geom);
 }
