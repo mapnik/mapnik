@@ -120,61 +120,81 @@ public:
 
     mapnik::geometry::geometry read()
     {
+        mapnik::geometry::geometry geom = mapnik::geometry::geometry_empty();
         int type = read_integer();
         switch (type)
         {
         case wkbPoint:
-            return std::move(mapnik::geometry::geometry(read_point()));
+            geom = std::move(read_point());
+            break;
         case wkbLineString:
-            return std::move(mapnik::geometry::geometry(read_linestring()));
+            geom = std::move(read_linestring());
+            break;
         case wkbPolygon:
-            return std::move(mapnik::geometry::geometry(read_polygon()));
+            geom = std::move(read_polygon());
+            break;
         case wkbMultiPoint:
-            return std::move(mapnik::geometry::geometry(read_multipoint()));
+            geom = std::move(read_multipoint());
+            break;
         case wkbMultiLineString:
-            return std::move(mapnik::geometry::geometry(read_multilinestring()));
+            geom = std::move(read_multilinestring());
+            break;
         case wkbMultiPolygon:
-            return std::move(mapnik::geometry::geometry(read_multipolygon()));
+            geom = std::move(read_multipolygon());
+            break;
         case wkbGeometryCollection:
-            return std::move(mapnik::geometry::geometry(read_collection()));
+            geom = std::move(read_collection());
+            break;
         case wkbPointZ:
         case wkbPointM:
-            return std::move(mapnik::geometry::geometry(read_point<true>()));
+            geom = std::move(read_point<true>());
+            break;
         case wkbPointZM:
-            return std::move(mapnik::geometry::geometry(read_point<true,true>()));
+            geom = std::move(read_point<true,true>());
+            break;
         case wkbLineStringZ:
         case wkbLineStringM:
-            return std::move(mapnik::geometry::geometry(read_linestring<true>()));
+            geom = std::move(read_linestring<true>());
+            break;
         case wkbLineStringZM:
-            return std::move(mapnik::geometry::geometry(read_linestring<true,true>()));
+            geom = std::move(read_linestring<true,true>());
+            break;
         case wkbPolygonZ:
         case wkbPolygonM:
-            return std::move(mapnik::geometry::geometry(read_polygon<true>()));
+            geom = std::move(read_polygon<true>());
+            break;
         case wkbPolygonZM:
-            return std::move(mapnik::geometry::geometry(read_polygon<true,true>()));
+            geom = std::move(read_polygon<true,true>());
         case wkbMultiPointZ:
         case wkbMultiPointM:
-            return std::move(mapnik::geometry::geometry(read_multipoint<true>()));
+            geom = std::move(read_multipoint<true>());
+            break;
         case wkbMultiPointZM:
-            return std::move(mapnik::geometry::geometry(read_multipoint<true,true>()));
+            geom = std::move(read_multipoint<true,true>());
+            break;
         case wkbMultiLineStringZ:
         case wkbMultiLineStringM:
-            return std::move(mapnik::geometry::geometry(read_multilinestring<true>()));
+            geom = std::move(read_multilinestring<true>());
+            break;
         case wkbMultiLineStringZM:
-            return std::move(mapnik::geometry::geometry(read_multilinestring<true,true>()));
+            geom = std::move(read_multilinestring<true,true>());
+            break;
         case wkbMultiPolygonZ:
         case wkbMultiPolygonM:
-            return std::move(mapnik::geometry::geometry(read_multipolygon<true>()));
+            geom = std::move(read_multipolygon<true>());
+            break;
         case wkbMultiPolygonZM:
-            return std::move(mapnik::geometry::geometry(read_multipolygon<true,true>()));
+            geom = std::move(read_multipolygon<true,true>());
+            break;
         case wkbGeometryCollectionZ:
         case wkbGeometryCollectionM:
         case wkbGeometryCollectionZM:
-            return std::move(mapnik::geometry::geometry(read_collection()));
+            geom = std::move(read_collection());
+            break;
         default:
             break;
         }
-        throw std::runtime_error("Uknown WKB geometry type");
+        return geom;
     }
 
 private:

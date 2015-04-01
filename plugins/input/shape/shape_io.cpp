@@ -90,12 +90,12 @@ void shape_io::read_bbox(shape_file::record_type & record, mapnik::box2d<double>
 
 mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & record)
 {
+    mapnik::geometry::geometry geom; // default empty
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
 
     if (num_parts == 1)
     {
-
         mapnik::geometry::line_string line;
         line.reserve(num_points);
         record.skip(4);
@@ -105,7 +105,7 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
             double y = record.read_double();
             line.add_coord(x, y);
         }
-        return mapnik::geometry::geometry(std::move(line));
+        geom = std::move(line);
     }
     else
     {
@@ -139,13 +139,15 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
             }
             multi_line.push_back(std::move(line));
         }
-        return mapnik::geometry::geometry(std::move(multi_line));
+        geom = std::move(multi_line);
     }
+    return geom;
 }
 
 
 mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & record)
 {
+    mapnik::geometry::geometry geom; // default empty
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
 
@@ -190,7 +192,9 @@ mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & reco
     if (multi_poly.size() > 0) // multi
     {
         multi_poly.emplace_back(std::move(poly));
-        return mapnik::geometry::geometry(std::move(multi_poly));
+        geom = std::move(multi_poly);
+        return geom;
     }
-    return mapnik::geometry::geometry(std::move(poly));
+    geom = std::move(poly);
+    return geom;
 }
