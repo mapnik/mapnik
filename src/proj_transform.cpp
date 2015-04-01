@@ -120,7 +120,7 @@ unsigned int proj_transform::forward (geometry::line_string & ls) const
     }
 
     unsigned int err_n = 0;
-    for (auto p : ls)
+    for (auto & p : ls)
     {
         if (!forward(p))
         {
@@ -243,7 +243,7 @@ unsigned int proj_transform::backward (geometry::line_string & ls) const
     }
     
     unsigned int err_n = 0;
-    for (auto p : ls)
+    for (auto & p : ls)
     {
         if (!backward(p))
         {

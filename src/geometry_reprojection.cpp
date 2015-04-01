@@ -118,7 +118,7 @@ struct geom_reproj_visitor {
         new_poly.set_exterior_ring(std::move(new_ext));
         new_poly.interior_rings.reserve(poly.interior_rings.size());
 
-        for (auto lr : poly.interior_rings)
+        for (auto const& lr : poly.interior_rings)
         {
             geometry::linear_ring new_lr(lr);
             if (!reverse_)
@@ -167,7 +167,7 @@ struct geom_reproj_visitor {
         }
         geometry::multi_point new_mp;
         new_mp.reserve(mp.size());
-        for (auto p : mp)
+        for (auto const& p : mp)
         {
             geometry::point new_p(p);
             if (trans_point(new_p))
@@ -186,7 +186,7 @@ struct geom_reproj_visitor {
     {
         geometry::multi_line_string new_mls;
         new_mls.reserve(mls.size());
-        for (auto ls : mls)
+        for (auto const& ls : mls)
         {
             geometry::line_string new_ls(ls);
             if (trans_ls(new_ls))
@@ -205,7 +205,7 @@ struct geom_reproj_visitor {
     {
         geometry::multi_polygon new_mpoly;
         new_mpoly.reserve(mpoly.size());
-        for (auto poly : mpoly)
+        for (auto const& poly : mpoly)
         {
             geometry::polygon new_poly;
             if (trans_poly(new_poly, poly))
@@ -224,7 +224,7 @@ struct geom_reproj_visitor {
     {
         geometry::geometry_collection new_c;
         new_c.reserve(c.size());
-        for (auto g : c)
+        for (auto const& g : c)
         {
             geometry::geometry new_g(std::move(reproject(g, proj_trans_, n_err_, reverse_)));
             if (!new_g.is<geometry::geometry_empty>())
@@ -248,9 +248,9 @@ struct geom_reproj_visitor {
 
 } // end detail ns
 
-geometry::geometry reproject(geometry::geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool backwards)
+geometry::geometry reproject(geometry::geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
 {
-    detail::geom_reproj_visitor visit(proj_trans, n_err, backwards);
+    detail::geom_reproj_visitor visit(proj_trans, n_err, reverse);
     return util::apply_visitor(visit, geom);  
 }
 

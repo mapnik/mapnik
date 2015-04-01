@@ -92,7 +92,7 @@ static inline bool merc2lonlat(double * x, double * y , int point_count)
 
 static inline bool lonlat2merc(geometry::line_string & ls)
 {
-    for(auto p: ls) 
+    for(auto & p : ls) 
     {
         if (p.x > 180) p.x = 180;
         else if (p.x < -180) p.x = -180;
@@ -107,7 +107,7 @@ static inline bool lonlat2merc(geometry::line_string & ls)
 
 static inline bool merc2lonlat(geometry::line_string & ls)
 {
-    for (auto p : ls)
+    for (auto & p : ls)
     {
         if (p.x > MAXEXTENT) p.x = MAXEXTENT;
         else if (p.x < -MAXEXTENT) p.x = -MAXEXTENT;

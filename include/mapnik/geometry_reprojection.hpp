@@ -32,7 +32,7 @@
 
 namespace mapnik {
 
-MAPNIK_DECL geometry::geometry reproject(geometry::geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool backwards = false);
+MAPNIK_DECL geometry::geometry reproject(geometry::geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse = false);
 
 MAPNIK_DECL geometry::geometry reproject(geometry::geometry const& geom, projection const& source, projection const& dest, unsigned int & n_err);
 
