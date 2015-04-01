@@ -159,6 +159,7 @@ source = Split(
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
+    geometry_reprojection.cpp
     expression_node.cpp
     expression_string.cpp
     expression.cpp

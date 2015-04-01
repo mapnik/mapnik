@@ -29,6 +29,10 @@
 
 namespace mapnik {
 
+namespace geometry {
+struct point;
+struct line_string;
+}
 class projection;
 template <typename T> class box2d;
 
@@ -39,10 +43,15 @@ public:
                    projection const& dest);
 
     bool equal() const;
+    bool is_known() const;
     bool forward (double& x, double& y , double& z) const;
     bool backward (double& x, double& y , double& z) const;
     bool forward (double *x, double *y , double *z, int point_count) const;
     bool backward (double *x, double *y , double *z, int point_count) const;
+    bool forward (geometry::point & p) const;
+    bool backward (geometry::point & p) const;
+    unsigned int forward (geometry::line_string & ls) const;
+    unsigned int backward (geometry::line_string & ls) const;
     bool forward (box2d<double> & box) const;
     bool backward (box2d<double> & box) const;
     bool forward (box2d<double> & box, int points) const;
