@@ -165,6 +165,7 @@ public:
             break;
         case wkbPolygonZM:
             geom = std::move(read_polygon<true,true>());
+            break;
         case wkbMultiPointZ:
         case wkbMultiPointM:
             geom = std::move(read_multipoint<true>());
