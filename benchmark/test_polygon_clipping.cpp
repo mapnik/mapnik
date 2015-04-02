@@ -433,6 +433,166 @@ public:
     }
 };
 
+class test4 : public benchmark::test_case
+{
+    std::string wkt_in_;
+    mapnik::box2d<double> extent_;
+    std::string expected_;
+public:
+    test4(mapnik::parameters const& params,
+          std::string const& wkt_in,
+          mapnik::box2d<double> const& extent)
+     : test_case(params),
+       wkt_in_(wkt_in),
+       extent_(extent),
+       expected_("./benchmark/data/polygon_clipping_clipper") {}
+    bool validate() const
+    {
+        mapnik::geometry::geometry geom;
+        if (!mapnik::from_wkt(wkt_in_, geom))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        if (mapnik::geometry::is_empty(geom))
+        {
+            std::clog << "empty geom!\n";
+            return false;
+        }
+        if (!geom.is<mapnik::geometry::polygon>())
+        {
+            std::clog << "not a polygon!\n";
+            return false;
+        }
+        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::correct(poly);
+        ClipperLib::Clipper clipper;
+
+        std::vector<ClipperLib::IntPoint> path;
+        for (auto const& pt : poly.exterior_ring)
+        {
+            double x = pt.x;
+            double y = pt.y;
+            path.emplace_back(static_cast<ClipperLib::cInt>(x),static_cast<ClipperLib::cInt>(y));
+        }
+        if (!clipper.AddPath(path, ClipperLib::ptSubject, true))
+        {
+            std::clog << "ptSubject ext failed!\n";
+        }
+        for (auto const& ring : poly.interior_rings)
+        {
+            path.clear();
+            for (auto const& pt : ring)
+            {
+                double x = pt.x;
+                double y = pt.y;
+                path.emplace_back(static_cast<ClipperLib::cInt>(x),static_cast<ClipperLib::cInt>(y));
+            }
+            if (!clipper.AddPath(path, ClipperLib::ptSubject, true))
+            {
+                std::clog << "ptSubject ext failed!\n";
+            }
+        }
+        std::cerr << "path size=" << path.size() << std::endl;
+        std::vector<ClipperLib::IntPoint> clip_box;
+        clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.minx()),static_cast<ClipperLib::cInt>(extent_.miny()));
+        clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.maxx()),static_cast<ClipperLib::cInt>(extent_.miny()));
+        clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.maxx()),static_cast<ClipperLib::cInt>(extent_.maxy()));
+        clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.minx()),static_cast<ClipperLib::cInt>(extent_.maxy()));
+        clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.minx()),static_cast<ClipperLib::cInt>(extent_.miny()));
+
+        if (!clipper.AddPath( clip_box, ClipperLib::ptClip, true ))
+        {
+            std::clog << "ptClip failed!\n";
+        }
+
+        ClipperLib::PolyTree polygons;
+        clipper.Execute(ClipperLib::ctIntersection, polygons, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+        clipper.Clear();
+        ClipperLib::PolyNode* polynode = polygons.GetFirst();
+        mapnik::geometry::multi_polygon mp;
+        mp.emplace_back();
+        bool first = true;
+        while (polynode)
+        {
+            //do stuff with polynode here
+            if (first) first = false;
+            else mp.emplace_back();
+            if (!polynode->IsHole())
+            {
+                for (auto const& pt : polynode->Contour)
+                {
+                    mp.back().exterior_ring.add_coord(pt.X, pt.Y);
+                }
+            }
+            else
+            {
+                mapnik::geometry::linear_ring hole;
+                for (auto const& pt : polynode->Contour)
+                {
+                    hole.add_coord(pt.X, pt.Y);
+                }
+                mp.back().add_hole(std::move(hole));
+            }
+            std::cerr << "Is hole? " << polynode->IsHole() << std::endl;
+            polynode = polynode->GetNext();
+        }
+        std::string expect = expected_+".png";
+        std::string actual = expected_+"_actual.png";
+        mapnik::geometry::geometry geom2(mp);
+        auto env = mapnik::geometry::envelope(geom2);
+        if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
+        {
+            std::clog << "generating expected image: " << expect << "\n";
+            render(mp,env,expect);
+        }
+        render(mp,env,actual);
+        return benchmark::compare_images(actual,expect);
+    }
+    bool operator()() const
+    {
+        mapnik::geometry::geometry geom;
+        if (!mapnik::from_wkt(wkt_in_, geom))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        if (mapnik::geometry::is_empty(geom))
+        {
+            std::clog << "empty geom!\n";
+            return false;
+        }
+        if (!geom.is<mapnik::geometry::polygon>())
+        {
+            std::clog << "not a polygon!\n";
+            return false;
+        }
+        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::correct(poly);
+        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
+        bool valid = true;
+        for (unsigned i=0;i<iterations_;++i)
+        {
+            std::deque<mapnik::geometry::polygon> result;
+            boost::geometry::intersection(bbox,poly,result);
+            unsigned count = 0;
+            for (auto const& geom : result)
+            {
+                mapnik::geometry::polygon_vertex_adapter va(geom);
+                unsigned cmd;
+                double x,y;
+                while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END) {
+                    ++count;
+                }
+                unsigned expected_count = 29;
+                if (count != expected_count) {
+                    std::clog << "test3: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
+                    valid = false;
+                }
+            }
+        }
+        return valid;
+    }
+};
+
 int main(int argc, char** argv)
 {
     mapnik::parameters params;
@@ -463,6 +623,9 @@ int main(int argc, char** argv)
         test3 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with boost");
     }
-
+    {
+        test4 test_runner(params,wkt_in,clipping_box);
+        run(test_runner,"clipping polygon with clipper_tree");
+    }
     return 0;
 }
