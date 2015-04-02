@@ -102,8 +102,7 @@ struct hit_test_visitor
             // todo - account for tolerance
             if (pip(pt0.x,pt0.y,pt1.x,pt1.y,x_,y_))
             {
-                inside = true;
-                break;
+                inside = !inside;
             }
         }
         if (!inside) return false;
@@ -118,7 +117,6 @@ struct hit_test_visitor
                 {
                     // TODO - account for tolerance
                     inside=!inside;
-                    break;
                 }
             }
         }
