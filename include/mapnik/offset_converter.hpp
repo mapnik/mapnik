@@ -302,9 +302,18 @@ private:
         // intersection detection smoothes it out.
         pre_first_ = v1;
         displace(pre_first_, -2 * std::fabs(offset_), 0, angle_b);
-
+        start_ = pre_first_;
         while ((v1 = v2, v2.cmd = geom_.vertex(&v2.x, &v2.y)) != SEG_END)
         {
+            if (v2.cmd == SEG_MOVETO)
+            {
+                start_ = v2;
+            }
+            else if (v2.cmd == SEG_CLOSE)
+            {
+                v2.x = start_.x;
+                v2.y = start_.y;
+            }
             angle_a = angle_b;
             angle_b = std::atan2((v2.y - v1.y), (v2.x - v1.x));
             joint_angle = explement_reflex_angle(angle_b - angle_a);
@@ -375,15 +384,13 @@ private:
 
     unsigned output_vertex(double* px, double* py)
     {
-        *px = cur_.x;
-        *py = cur_.y;
+        if (cur_.cmd == SEG_CLOSE) *px = *py = 0.0;
+        else
+        {
+            *px = cur_.x;
+            *py = cur_.y;
+        }
         return cur_.cmd;
-    }
-
-    unsigned output_vertex(double* px, double* py, status st)
-    {
-        status_ = st;
-        return output_vertex(px, py);
     }
 
     void push_vertex(vertex2d const& v)
@@ -398,6 +405,7 @@ private:
     status                  status_;
     size_t                  pos_;
     std::vector<vertex2d>   vertices_;
+    vertex2d                start_;
     vertex2d                pre_first_;
     vertex2d                pre_;
     vertex2d                cur_;
