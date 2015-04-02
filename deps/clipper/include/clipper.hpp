@@ -135,7 +135,7 @@ enum EndType {etClosedPolygon, etClosedLine, etOpenButt, etOpenSquare, etOpenRou
 class PolyNode;
 typedef std::vector< PolyNode* > PolyNodes;
 
-class PolyNode 
+class MAPNIK_DECL PolyNode 
 { 
 public:
     PolyNode();
@@ -158,7 +158,7 @@ private:
     friend class MAPNIK_DECL ClipperOffset; 
 };
 
-class PolyTree: public PolyNode
+class MAPNIK_DECL PolyTree: public PolyNode
 { 
 public:
     ~PolyTree(){Clear();};
