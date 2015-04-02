@@ -377,7 +377,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                     // we can deduce the alpha channel from nodata in the Byte case
                     // by reusing the reading of R,G,B bands directly
-                    if (has_nodata && !color_table && red->GetRasterDataType() != GDT_Byte)
+                    if (has_nodata && !color_table && red->GetRasterDataType() == GDT_Byte)
                     {
                         double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
                         // read the data in and create an alpha channel from the nodata values
