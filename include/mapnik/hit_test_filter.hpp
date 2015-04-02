@@ -119,6 +119,10 @@ struct hit_test_visitor
                     inside=!inside;
                 }
             }
+            if (!inside)
+            {
+                return false;
+            }
         }
         return inside;
     }
