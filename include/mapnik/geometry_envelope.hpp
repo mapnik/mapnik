@@ -33,75 +33,97 @@ namespace detail {
 struct geometry_envelope
 {
     using bbox_type = box2d<double>;
+    bbox_type & bbox;
+
+    geometry_envelope(bbox_type & bbox_)
+        : bbox(bbox_) {}
 
     template <typename T>
-    bbox_type operator() (T const& geom) const
+    void operator() (T const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    bbox_type operator() (mapnik::geometry::geometry_empty const&) const
+    void operator() (mapnik::geometry::geometry_empty const&) const {}
+
+    void operator() (mapnik::geometry::point const& pt) const
     {
-        return mapnik::box2d<double>();
+        bbox.init(pt.x, pt.y, pt.x, pt.y);
     }
 
-    bbox_type operator() (mapnik::geometry::point const& pt) const
+    void operator() (mapnik::geometry::line_string const& line) const
     {
-        return mapnik::box2d<double>(pt.x, pt.y, pt.x, pt.y);
-    }
-
-    bbox_type operator() (mapnik::geometry::line_string const& line) const
-    {
-        bbox_type bbox;
+        bool first = true;
         for (auto const& pt : line)
         {
-            if (!bbox.valid()) bbox.init(pt.x, pt.y, pt.x, pt.y);
-            else bbox.expand_to_include(pt.x, pt.y);
+            if (first && !bbox.valid()) 
+            {
+                bbox.init(pt.x, pt.y, pt.x, pt.y);
+                first = false;
+            }
+            else 
+            {
+                bbox.expand_to_include(pt.x, pt.y);
+            }
         }
-        return bbox;
     }
 
-    bbox_type operator() (mapnik::geometry::polygon const& poly) const
+    void operator() (mapnik::geometry::polygon const& poly) const
     {
-        return (*this) (static_cast<mapnik::geometry::line_string>(poly.exterior_ring));
+        bool first = true;
+        for (auto const& pt : poly.exterior_ring)
+        {
+            if (first && !bbox.valid()) 
+            {
+                bbox.init(pt.x, pt.y, pt.x, pt.y);
+                first = false;
+            }
+            else 
+            {
+                bbox.expand_to_include(pt.x, pt.y);
+            }
+        }
     }
 
-    bbox_type operator() (mapnik::geometry::multi_point const& multi_point) const
+    void operator() (mapnik::geometry::multi_point const& multi_point) const
     {
-        return (*this) (static_cast<mapnik::geometry::line_string>(multi_point));
+        bool first = true;
+        for (auto const& pt : multi_point)
+        {
+            if (first && !bbox.valid()) 
+            {
+                bbox.init(pt.x, pt.y, pt.x, pt.y);
+                first = false;
+            }
+            else 
+            {
+                bbox.expand_to_include(pt.x, pt.y);
+            }
+        }
     }
 
-    bbox_type operator() (mapnik::geometry::multi_line_string const& multi_line) const
+    void operator() (mapnik::geometry::multi_line_string const& multi_line) const
     {
-        bbox_type bbox;
         for (auto const& line : multi_line)
         {
-            if (!bbox.valid()) bbox = (*this)(line);
-            else bbox.expand_to_include((*this)(line));
+            (*this)(line);
         }
-        return bbox;
     }
 
-    bbox_type operator() (mapnik::geometry::multi_polygon const& multi_poly) const
+    void operator() (mapnik::geometry::multi_polygon const& multi_poly) const
     {
-        bbox_type bbox;
         for (auto const& poly : multi_poly)
         {
-            if (!bbox.valid()) bbox = (*this)(poly);
-            else bbox.expand_to_include((*this)(poly));
+            (*this)(poly);
         }
-        return bbox;
     }
 
-    bbox_type operator() (mapnik::geometry::geometry_collection const& collection) const
+    void operator() (mapnik::geometry::geometry_collection const& collection) const
     {
-        bbox_type bbox;
         for (auto const& geom : collection)
         {
-            if (!bbox.valid()) bbox = (*this)(geom);
-            else bbox.expand_to_include((*this)(geom));
+            (*this)(geom);
         }
-        return bbox;
     }
 };
 
@@ -109,8 +131,11 @@ struct geometry_envelope
 
 template <typename T>
 inline mapnik::box2d<double> envelope(T const& geom)
-{
-    return detail::geometry_envelope() (geom);
+{   
+    box2d<double> bbox;
+    detail::geometry_envelope op(bbox);
+    op(geom);
+    return bbox;
 }
 
 }}

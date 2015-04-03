@@ -93,7 +93,7 @@ struct hit_test_visitor
     {
         auto const& exterior = geom.exterior_ring;
         std::size_t num_points = exterior.num_points();
-        if (num_points < 2) return false;
+        if (num_points < 4) return false;
         bool inside = false;
         for (std::size_t i = 1; i < num_points; ++i)
         {
@@ -109,6 +109,10 @@ struct hit_test_visitor
         for (auto const& ring :  geom.interior_rings)
         {
             std::size_t num_interior_points = ring.size();
+            if (num_interior_points < 4)
+            {
+                continue;
+            }
             for (std::size_t j = 1; j < num_interior_points; ++j)
             {
                 auto const& pt0 = ring[j-1];
@@ -118,10 +122,6 @@ struct hit_test_visitor
                     // TODO - account for tolerance
                     inside=!inside;
                 }
-            }
-            if (!inside)
-            {
-                return false;
             }
         }
         return inside;
