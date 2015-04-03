@@ -26,6 +26,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 
+#include <iostream>
+
 namespace mapnik { namespace geometry {
 
 namespace detail {
@@ -43,12 +45,16 @@ struct geometry_envelope
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
-
+    
     void operator() (mapnik::geometry::geometry_empty const&) const {}
 
     void operator() (mapnik::geometry::point const& pt) const
     {
-        bbox.init(pt.x, pt.y, pt.x, pt.y);
+        if (!bbox.valid())
+        {
+            bbox.init(pt.x, pt.y, pt.x, pt.y);
+        }
+        bbox.expand_to_include(pt.x, pt.y);
     }
 
     void operator() (mapnik::geometry::line_string const& line) const
