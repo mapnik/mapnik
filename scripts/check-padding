@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+cpp="/tmp/alignment.cpp"
+app="/tmp/alignment"
+
+function usage() {
+    echo "Usage:"
+    echo ""
+    echo "./scripts/rebuild.sh [header] [class name]"
+    echo ""
+    echo "Please pass a header file and a class name"
+    echo ""
+    echo "    ./scripts/check-padding include/mapnik/attribute.hpp mapnik::attribute"
+    echo ""
+    exit 1
+
+}
+
+function add() {
+    echo $1 >> ${cpp}
+}
+
+CXX=${CXX:-clang++}
+
+function compile() {
+    ${CXX} -o ${app} ${cpp} -Wpadded -I./ -isystem ./mason_packages/.link/include `mapnik-config --all-flags` -Ideps -Lsrc -Ideps/agg/include -Iinclude
+}
+
+if [[ ${1:-unset} == "unset" ]] || [[ ${2:-unset} == "unset" ]] || [[ $@ == '-h' ]] || [[ $@ == '--help' ]]; then
+    usage
+fi
+
+echo '' > ${cpp}
+
+add "#include <iostream>"
+add "#include <vector>"
+
+add "#include \"$1\""
+
+add ""
+
+add '#define REPORT(type) std::clog << "sizeof(" #type ") " << sizeof(type) << "\n";'
+
+add "int main() {"
+add ""
+
+add "REPORT(std::string)"
+add "REPORT(unsigned int)"
+add "REPORT(int)"
+add "REPORT(bool)"
+add "REPORT(std::vector<double>)"
+add "REPORT(std::size_t)"
+
+add "REPORT($2)"
+
+add "return 0;"
+add "}"
+
+compile
+${app}
