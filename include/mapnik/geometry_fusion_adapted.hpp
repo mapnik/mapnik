@@ -24,7 +24,9 @@
 #ifndef MAPNIK_GEOMETRY_FUSION_ADAPTED_HPP
 #define MAPNIK_GEOMETRY_FUSION_ADAPTED_HPP
 
+#include <mapnik/geometry.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <vector>
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::geometry::point,
