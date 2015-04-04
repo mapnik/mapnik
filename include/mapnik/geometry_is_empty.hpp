@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_EMPTY_HPP
-#define MAPNIK_GEOMETRY_EMPTY_HPP
+#ifndef MAPNIK_GEOMETRY_IS_EMPTY_HPP
+#define MAPNIK_GEOMETRY_IS_EMPTY_HPP
 
 #include <mapnik/geometry.hpp>
 
@@ -82,11 +82,11 @@ struct geometry_is_empty
 }
 
 template <typename GeomType>
-inline bool is_empty(GeomType & geom)
+inline bool is_empty(GeomType const& geom)
 {
     return detail::geometry_is_empty()(geom);
 }
 
 }}
 
-#endif // MAPNIK_GEOMETRY_EMPTY_HPP
+#endif // MAPNIK_GEOMETRY_IS_EMPTY_HPP
