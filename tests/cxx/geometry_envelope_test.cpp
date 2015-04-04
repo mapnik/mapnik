@@ -18,9 +18,9 @@ SECTION("envelope_test") {
     }
     {
         // Test empty geom
-        //geometry geom(mapnik::geometry::geometry_empty);
-        //mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
-        //REQUIRE_FALSE( bbox.valid() );
+        geometry geom(std::move(mapnik::geometry::geometry_empty()));
+        mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
+        REQUIRE_FALSE( bbox.valid() );
     }
     {
         line_string line;
