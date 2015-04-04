@@ -24,16 +24,10 @@
 #define MAPNIK_GEOMETRY_HPP
 
 #include <mapnik/util/variant.hpp>
-#include <mapnik/vertex.hpp>
-#include <mapnik/util/noncopyable.hpp>
-#include <mapnik/geometry_types.hpp>
 
-#include <algorithm>
 #include <vector>
-#include <tuple>
 #include <type_traits>
 #include <cstddef>
-#include <utility>
 
 namespace mapnik { namespace geometry {
 
