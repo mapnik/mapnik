@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_TYPES_HPP
 #define MAPNIK_GEOMETRY_TYPES_HPP
 
+#include <cstdint>
+
 namespace mapnik { namespace geometry {
 
 // OGC compatible types

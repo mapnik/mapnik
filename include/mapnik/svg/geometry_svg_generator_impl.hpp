@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-
+#include <mapnik/geometry_types.hpp>
 #include <mapnik/svg/geometry_svg_generator.hpp>
 
 namespace mapnik { namespace svg {

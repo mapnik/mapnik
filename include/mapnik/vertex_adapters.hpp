@@ -24,6 +24,8 @@
 #define MAPNIK_VERTEX_ADAPTERS_HPP
 
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_types.hpp>
+#include <mapnik/vertex.hpp>
 
 namespace mapnik { namespace geometry {
 
