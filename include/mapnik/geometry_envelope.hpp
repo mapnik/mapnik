@@ -26,8 +26,6 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 
-#include <iostream>
-
 namespace mapnik { namespace geometry {
 
 namespace detail {
