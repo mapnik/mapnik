@@ -30,13 +30,13 @@ bool is_clockwise(T const& ring)
 {
     double area = 0.0;
     std::size_t num_points = ring.size();
-    for (int i = 0; i < num_points; ++i)
+    for (std::size_t i = 0; i < num_points; ++i)
     {
         auto const& p0 = ring[i];
         auto const& p1 = ring[(i + 1) % num_points];
         area += p0.x * p1.y - p0.y * p1.x;
     }
-    return ( area < 0.0) ? true : false;
+    return (area < 0.0) ? true : false;
 }
 }}
 
