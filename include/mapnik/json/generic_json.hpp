@@ -154,8 +154,8 @@ struct generic_json
     qi::rule<Iterator,space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
     // conversions
-    boost::phoenix::function<detail::value_converter<mapnik::value_integer> > integer_converter;
-    boost::phoenix::function<detail::value_converter<mapnik::value_double> > double_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer> > integer_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double> > double_converter;
 };
 
 }}
