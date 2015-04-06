@@ -20,19 +20,22 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_ENVELOPE_HPP
-#define MAPNIK_GEOMETRY_ENVELOPE_HPP
-
-#include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
-
-namespace mapnik {     
+#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry_envelope_impl.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
+namespace mapnik {
 namespace geometry {
 
-template <typename T>
-MAPNIK_DECL mapnik::box2d<double> envelope(T const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(geometry const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(geometry_empty const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(point const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(line_string const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(polygon const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(multi_point const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(multi_line_string const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(multi_polygon const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(geometry_collection const& geom);
 
 } // end ns geometry
 } // end ns mapnik
-
-#endif // MAPNIK_GEOMETRY_ENVELOPE_HPP

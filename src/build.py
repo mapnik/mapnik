@@ -191,6 +191,7 @@ source = Split(
     palette.cpp
     marker_helpers.cpp
     transform_expression_grammar.cpp
+    geometry_envelope.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
