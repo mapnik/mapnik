@@ -37,10 +37,10 @@ namespace geometry {
 // This is done this way so that large geometry collections that only have a few failing points or polygon parts could
 // still be return with out the few failing projections.
 
-MAPNIK_DECL geometry reproject_copy(geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse = false);
+MAPNIK_DECL geometry reproject_copy(geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err);
 
 template <typename T>
-MAPNIK_DECL T reproject_copy(T const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse = false);
+MAPNIK_DECL T reproject_copy(T const& geom, proj_transform const& proj_trans, unsigned int & n_err);
 
 template <typename T>
 MAPNIK_DECL T reproject_copy(T const& geom, projection const& source, projection const& dest, unsigned int & n_err);
@@ -51,7 +51,7 @@ MAPNIK_DECL T reproject_copy(T const& geom, projection const& source, projection
 // otherwise you could be dealing with a corrupt geometry.
 
 template <typename T>
-MAPNIK_DECL bool reproject(T & geom, proj_transform const& proj_trans, bool reverse = false);
+MAPNIK_DECL bool reproject(T & geom, proj_transform const& proj_trans);
 
 template <typename T>
 MAPNIK_DECL bool reproject(T & geom, projection const& source, projection const& dest);

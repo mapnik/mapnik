@@ -30,133 +30,83 @@ namespace geometry {
 
 namespace detail {
     
-geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, unsigned int &, bool)
+geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, unsigned int &)
 {
     return geometry_empty();
 }
 
-point reproject_internal(point const & p, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+point reproject_internal(point const & p, proj_transform const& proj_trans, unsigned int & n_err)
 {
     point new_p(p);
-    if (!reverse)
+    if (!proj_trans.forward(new_p))
     {
-        if (!proj_trans.forward(new_p))
-        {
-            n_err++;
-        }
+        ++n_err;
     }
-    else
-    {
-        if (!proj_trans.backward(new_p))
-        {
-            n_err++;
-        }
-    }
-    return std::move(new_p);
+    return new_p;
 }
 
-line_string reproject_internal(line_string const & ls, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+line_string reproject_internal(line_string const & ls, proj_transform const& proj_trans, unsigned int & n_err)
 {
     line_string new_ls(ls);
-    unsigned int err = 0;
-    if (!reverse)
-    {
-        err = proj_trans.forward(new_ls);
-    }
-    else
-    {
-        err = proj_trans.backward(new_ls);
-    }
+    unsigned int err = proj_trans.forward(new_ls);
     if (err > 0)
     {
         n_err += err;
     }
-    return std::move(new_ls);
+    return new_ls;
 }
     
-polygon reproject_internal(polygon const & poly, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+polygon reproject_internal(polygon const & poly, proj_transform const& proj_trans, unsigned int & n_err)
 {
     polygon new_poly;
     linear_ring new_ext(poly.exterior_ring);
-    int err = 0;
-    if (!reverse)
-    {
-        err = proj_trans.forward(new_ext);
-    }
-    else
-    {
-        err = proj_trans.backward(new_ext);
-    }
+    int err = proj_trans.forward(new_ext);
     // If the exterior ring doesn't transform don't bother with the holes.
     if (err > 0)
     {
         n_err += err;
-        return std::move(new_poly);
     }
-    new_poly.set_exterior_ring(std::move(new_ext));
-    new_poly.interior_rings.reserve(poly.interior_rings.size());
-
-    for (auto const& lr : poly.interior_rings)
+    else
     {
-        linear_ring new_lr(lr);
-        if (!reverse)
+        new_poly.set_exterior_ring(std::move(new_ext));
+        new_poly.interior_rings.reserve(poly.interior_rings.size());
+
+        for (auto const& lr : poly.interior_rings)
         {
+            linear_ring new_lr(lr);
             err = proj_trans.forward(new_lr);
+            if (err > 0)
+            {
+                n_err += err;
+                // If there is an error in interior ring drop
+                // it from polygon.
+                continue;
+            }
+            new_poly.add_hole(std::move(new_lr));
         }
-        else
-        {
-            err = proj_trans.backward(new_lr);
-        }
-        if (err > 0)
-        {
-            n_err += err;
-            // If there is an error in interior ring drop
-            // it from polygon.
-            continue;
-        }
-        new_poly.add_hole(std::move(new_lr));
     }
-    return std::move(new_poly);
+    return new_poly;
 }
     
-multi_point reproject_internal(multi_point const & mp, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+multi_point reproject_internal(multi_point const & mp, proj_transform const& proj_trans, unsigned int & n_err)
 {
+    multi_point new_mp;
     if (proj_trans.is_known())
     {
         // If the projection is known we do them all at once because it is faster
         // since we know that no point will fail reprojection
-        multi_point new_mp(mp);
-        if (!reverse)
-        {
-            proj_trans.forward(new_mp);
-        }
-        else
-        {
-            proj_trans.backward(new_mp);
-        }
-        return std::move(new_mp);
+        new_mp.assign(mp.begin(), mp.end());
+        proj_trans.forward(new_mp);
     }
-    multi_point new_mp;
-    new_mp.reserve(mp.size());
-    for (auto const& p : mp)
+    else
     {
-        point new_p(p);
-        if (!reverse)
+        new_mp.reserve(mp.size());
+        for (auto const& p : mp)
         {
+            point new_p(p);
             if (!proj_trans.forward(new_p))
             {
-                n_err++;
-            }
-            else
-            {
-                new_mp.emplace_back(std::move(new_p));
-            }
-        }
-        else
-        {
-            if (!proj_trans.backward(new_p))
-            {
-                n_err++;
+                ++n_err;
             }
             else
             {
@@ -164,62 +114,59 @@ multi_point reproject_internal(multi_point const & mp, proj_transform const& pro
             }
         }
     }
-    return std::move(new_mp);
+    return new_mp;
 }
 
-multi_line_string reproject_internal(multi_line_string const & mls, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+multi_line_string reproject_internal(multi_line_string const & mls, proj_transform const& proj_trans, unsigned int & n_err)
 {
     multi_line_string new_mls;
     new_mls.reserve(mls.size());
     for (auto const& ls : mls)
     {
-        line_string new_ls = reproject_internal(ls, proj_trans, n_err, reverse);
+        line_string new_ls = reproject_internal(ls, proj_trans, n_err);
         if (!new_ls.empty())
         {
             new_mls.emplace_back(std::move(new_ls));
         }
     }
-    return std::move(new_mls);
+    return new_mls;
 }
     
-multi_polygon reproject_internal(multi_polygon const & mpoly, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+multi_polygon reproject_internal(multi_polygon const & mpoly, proj_transform const& proj_trans, unsigned int & n_err)
 {
     multi_polygon new_mpoly;
     new_mpoly.reserve(mpoly.size());
     for (auto const& poly : mpoly)
     {
-        polygon new_poly = reproject_internal(poly, proj_trans, n_err, reverse);
+        polygon new_poly = reproject_internal(poly, proj_trans, n_err);
         if (!new_poly.exterior_ring.empty())
         {
             new_mpoly.emplace_back(std::move(new_poly));
         }
     }
-    return std::move(new_mpoly);
+    return new_mpoly;
 }
     
-geometry_collection reproject_internal(geometry_collection const & c, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+geometry_collection reproject_internal(geometry_collection const & c, proj_transform const& proj_trans, unsigned int & n_err)
 {
     geometry_collection new_c;
     new_c.reserve(c.size());
     for (auto const& g : c)
     {
-        geometry new_g(std::move(reproject_copy(g, proj_trans, n_err, reverse)));
+        geometry new_g(std::move(reproject_copy(g, proj_trans, n_err)));
         if (!new_g.is<geometry_empty>())
         {
             new_c.emplace_back(std::move(new_g));
         }
     }
-    return std::move(new_c);
+    return new_c;
 }
 
 struct geom_reproj_copy_visitor {
 
-    geom_reproj_copy_visitor(proj_transform const & proj_trans, 
-                             unsigned int & n_err,
-                             bool reverse)
+    geom_reproj_copy_visitor(proj_transform const & proj_trans, unsigned int & n_err)
         : proj_trans_(proj_trans), 
-          n_err_(n_err),
-          reverse_(reverse) {}
+          n_err_(n_err) {}
 
     geometry operator() (geometry_empty const&)
     {
@@ -229,7 +176,7 @@ struct geom_reproj_copy_visitor {
     geometry operator() (point const& p)
     {
         int intial_err = n_err_;
-        point new_p = reproject_internal(p, proj_trans_, n_err_, reverse_);
+        point new_p = reproject_internal(p, proj_trans_, n_err_);
         if (n_err_ > intial_err)
         {
             return std::move(geometry_empty());
@@ -240,7 +187,7 @@ struct geom_reproj_copy_visitor {
     geometry operator() (line_string const& ls)
     {
         int intial_err = n_err_;
-        line_string new_ls = reproject_internal(ls, proj_trans_, n_err_, reverse_);
+        line_string new_ls = reproject_internal(ls, proj_trans_, n_err_);
         if (n_err_ > intial_err)
         {
             return std::move(geometry_empty());
@@ -250,7 +197,7 @@ struct geom_reproj_copy_visitor {
     
     geometry operator() (polygon const& poly)
     {
-        polygon new_poly = reproject_internal(poly, proj_trans_, n_err_, reverse_);
+        polygon new_poly = reproject_internal(poly, proj_trans_, n_err_);
         if (new_poly.exterior_ring.empty())
         {
             return std::move(geometry_empty());
@@ -260,7 +207,7 @@ struct geom_reproj_copy_visitor {
     
     geometry operator() (multi_point const& mp)
     {
-        multi_point new_mp = reproject_internal(mp, proj_trans_, n_err_, reverse_);
+        multi_point new_mp = reproject_internal(mp, proj_trans_, n_err_);
         if (new_mp.empty())
         {
             return std::move(geometry_empty());
@@ -270,7 +217,7 @@ struct geom_reproj_copy_visitor {
     
     geometry operator() (multi_line_string const& mls)
     {
-        multi_line_string new_mls = reproject_internal(mls, proj_trans_, n_err_, reverse_);
+        multi_line_string new_mls = reproject_internal(mls, proj_trans_, n_err_);
         if (new_mls.empty())
         {
             return std::move(geometry_empty());
@@ -280,7 +227,7 @@ struct geom_reproj_copy_visitor {
     
     geometry operator() (multi_polygon const& mpoly)
     {
-        multi_polygon new_mpoly = reproject_internal(mpoly, proj_trans_, n_err_, reverse_);
+        multi_polygon new_mpoly = reproject_internal(mpoly, proj_trans_, n_err_);
         if (new_mpoly.empty())
         {
             return std::move(geometry_empty());
@@ -290,7 +237,7 @@ struct geom_reproj_copy_visitor {
     
     geometry operator() (geometry_collection const& c)
     {
-        geometry_collection new_c = reproject_internal(c, proj_trans_, n_err_, reverse_);
+        geometry_collection new_c = reproject_internal(c, proj_trans_, n_err_);
         if (new_c.empty())
         {
             return std::move(geometry_empty());
@@ -298,42 +245,40 @@ struct geom_reproj_copy_visitor {
         return std::move(new_c);
     }
 
-
   private:
     proj_transform const& proj_trans_;
     unsigned int & n_err_;
-    bool reverse_;
 
 };
 
 } // end detail ns
 
-geometry reproject_copy(geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+geometry reproject_copy(geometry const& geom, proj_transform const& proj_trans, unsigned int & n_err)
 {
-    detail::geom_reproj_copy_visitor visit(proj_trans, n_err, reverse);
+    detail::geom_reproj_copy_visitor visit(proj_trans, n_err);
     return mapnik::util::apply_visitor(visit, geom);
 }
 
 template <typename T>
-T reproject_copy(T const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse)
+T reproject_copy(T const& geom, proj_transform const& proj_trans, unsigned int & n_err)
 {
-    return detail::reproject_internal(geom, proj_trans, n_err, reverse);
+    return detail::reproject_internal(geom, proj_trans, n_err);
 }
 
-template MAPNIK_DECL geometry_empty reproject_copy(geometry_empty const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL point reproject_copy(point const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL line_string reproject_copy(line_string const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL polygon reproject_copy(polygon const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL multi_point reproject_copy(multi_point const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL multi_line_string reproject_copy(multi_line_string const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL multi_polygon reproject_copy(multi_polygon const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
-template MAPNIK_DECL geometry_collection reproject_copy(geometry_collection const& geom, proj_transform const& proj_trans, unsigned int & n_err, bool reverse);
+template MAPNIK_DECL geometry_empty reproject_copy(geometry_empty const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL point reproject_copy(point const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL line_string reproject_copy(line_string const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL polygon reproject_copy(polygon const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL multi_point reproject_copy(multi_point const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL multi_line_string reproject_copy(multi_line_string const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL multi_polygon reproject_copy(multi_polygon const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template MAPNIK_DECL geometry_collection reproject_copy(geometry_collection const& geom, proj_transform const& proj_trans, unsigned int & n_err);
 
 template <typename T>
 T reproject_copy(T const& geom, projection const& source, projection const& dest, unsigned int & n_err)
 {
     proj_transform proj_trans(source, dest);
-    return reproject_copy(geom, proj_trans, n_err, false);
+    return reproject_copy(geom, proj_trans, n_err);
 }
 
 template MAPNIK_DECL geometry reproject_copy(geometry const& geom, projection const& source, projection const& dest, unsigned int & n_err);
@@ -350,8 +295,8 @@ namespace detail {
 
 struct geom_reproj_visitor {
 
-    geom_reproj_visitor(proj_transform const & proj_trans, bool reverse)
-        : proj_trans_(proj_trans), reverse_(reverse) {}
+    geom_reproj_visitor(proj_transform const & proj_trans)
+        : proj_trans_(proj_trans) {}
 
     bool operator() (geometry & geom)
     {
@@ -362,74 +307,34 @@ struct geom_reproj_visitor {
     
     bool operator() (point & p)
     {
-        if (!reverse_)
+        if (!proj_trans_.forward(p))
         {
-            if (!proj_trans_.forward(p))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (!proj_trans_.backward(p))
-            {
-                return false;
-            }
+            return false;
         }
         return true;
     }
 
     bool operator() (line_string & ls)
     {
-        if (!reverse_)
+        if (proj_trans_.forward(ls) > 0)
         {
-            if (proj_trans_.forward(ls) > 0)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (proj_trans_.backward(ls) > 0)
-            {
-                return false;
-            }
+            return false;
         }
         return true;
     }
 
     bool operator() (polygon & poly)
     {
-        if (!reverse_)
+        if (proj_trans_.forward(poly.exterior_ring) > 0)
         {
-            if (proj_trans_.forward(poly.exterior_ring) > 0)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (proj_trans_.backward(poly.exterior_ring) > 0)
-            {
-                return false;
-            }
+            return false;
         }
         
         for (auto & lr : poly.interior_rings)
         {
-            if (!reverse_)
+            if (proj_trans_.forward(lr) > 0)
             {
-                if (proj_trans_.forward(lr) > 0)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (proj_trans_.backward(lr) > 0)
-                {
-                    return false;
-                }
+                return false;
             }
         }
         return true;
@@ -478,34 +383,33 @@ struct geom_reproj_visitor {
 
   private:
     proj_transform const& proj_trans_;
-    bool reverse_;
 
 };
 
 } // end detail ns
 
 template <typename T>
-bool reproject(T & geom, proj_transform const& proj_trans, bool reverse)
+bool reproject(T & geom, proj_transform const& proj_trans)
 {
-    detail::geom_reproj_visitor visit(proj_trans, reverse);
+    detail::geom_reproj_visitor visit(proj_trans);
     return visit(geom);
 }
 
-template MAPNIK_DECL bool reproject(geometry & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(geometry_empty & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(point & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(line_string & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(polygon & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(multi_point & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(multi_line_string & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(multi_polygon & geom, proj_transform const& proj_trans, bool reverse);
-template MAPNIK_DECL bool reproject(geometry_collection & geom, proj_transform const& proj_trans, bool reverse);
+template MAPNIK_DECL bool reproject(geometry & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(geometry_empty & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(point & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(line_string & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(polygon & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(multi_point & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(multi_line_string & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(multi_polygon & geom, proj_transform const& proj_trans);
+template MAPNIK_DECL bool reproject(geometry_collection & geom, proj_transform const& proj_trans);
 
 template <typename T>
 bool reproject(T & geom, projection const& source, projection const& dest)
 {
     proj_transform proj_trans(source, dest);
-    detail::geom_reproj_visitor visit(proj_trans, false);
+    detail::geom_reproj_visitor visit(proj_trans);
     return visit(geom);
 }
 
