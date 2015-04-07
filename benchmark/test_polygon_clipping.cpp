@@ -12,7 +12,7 @@
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_correct.hpp>
-#include <mapnik/geometry_empty.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/color.hpp>
 // agg
