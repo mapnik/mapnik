@@ -33,6 +33,7 @@ namespace mapnik { namespace geometry {
 
 struct point
 {
+    using value_type = double;
     point() {}
     point(double x_, double y_)
         : x(x_), y(y_)
@@ -41,8 +42,8 @@ struct point
     point(point const& other) = default;
     point(point && other) noexcept = default;
     point & operator=(point const& other) = default;
-    double x;
-    double y;
+    value_type x;
+    value_type y;
 };
 
 struct bounding_box

@@ -31,11 +31,13 @@ namespace mapnik { namespace geometry {
 
 struct point_vertex_adapter
 {
+    using value_type = typename point::value_type;
+
     point_vertex_adapter(point const& pt)
         : pt_(pt),
           first_(true) {}
 
-    unsigned vertex(double*x, double*y) const
+    unsigned vertex(value_type * x, value_type * y) const
     {
         if (first_)
         {
@@ -63,13 +65,14 @@ struct point_vertex_adapter
 
 struct line_string_vertex_adapter
 {
+    using value_type = typename point::value_type;
     line_string_vertex_adapter(line_string const& line)
         : line_(line),
           current_index_(0),
           end_index_(line.size())
     {}
 
-    unsigned vertex(double*x, double*y) const
+    unsigned vertex(value_type * x, value_type * y) const
     {
         if (current_index_ != end_index_)
         {
@@ -106,6 +109,7 @@ struct line_string_vertex_adapter
 
 struct polygon_vertex_adapter
 {
+    using value_type = typename point::value_type;
     polygon_vertex_adapter(polygon const& poly)
         : poly_(poly),
           rings_itr_(0),
@@ -123,7 +127,7 @@ struct polygon_vertex_adapter
         start_loop_ = true;
     }
 
-    unsigned vertex(double* x, double* y) const
+    unsigned vertex(value_type * x, value_type * y) const
     {
         if (rings_itr_ == rings_end_)
         {
