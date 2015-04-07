@@ -31,11 +31,41 @@
 #include <mapnik/svg/output/svg_output_grammars.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/symbolizer_dispatch.hpp>
-
+#include <mapnik/vertex_processor.hpp>
+#include <mapnik/geometry_transform.hpp>
 // boost
 #include <boost/spirit/include/karma.hpp>
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
+
+template <typename CalculationType>
+struct coord_transformer
+{
+    using calc_type = CalculationType;
+
+    coord_transformer(view_transform const& tr, proj_transform const& prj_trans)
+        : tr_(tr), prj_trans_(prj_trans) {}
+
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2 & p2) const
+    {
+        using coordinate_type = typename boost::geometry::coordinate_type<P2>::type;
+        calc_type x = boost::geometry::get<0>(p1);
+        calc_type y = boost::geometry::get<1>(p1);
+        calc_type z = 0.0;
+        if (!prj_trans_.backward(x, y, z)) return false;
+        tr_.forward(&x,&y);
+        boost::geometry::set<0>(p2, boost::numeric_cast<coordinate_type>(x));
+        boost::geometry::set<1>(p2, boost::numeric_cast<coordinate_type>(y));
+        return true;
+    }
+
+    view_transform const& tr_;
+    proj_transform const& prj_trans_;
+};
+
+} // ns geometry
 
 struct symbol_type_dispatch
 {
@@ -60,7 +90,7 @@ bool is_path_based(symbolizer const& sym)
 }
 
 template <typename OutputIterator, typename PathType>
-void generate_path(OutputIterator & output_iterator, PathType const& path, svg::path_output_attributes const& path_attributes)
+void generate_path_impl(OutputIterator & output_iterator, PathType const& path, svg::path_output_attributes const& path_attributes)
 {
     using path_dash_array_grammar = svg::svg_path_dash_array_grammar<OutputIterator>;
     using path_attributes_grammar = svg::svg_path_attributes_grammar<OutputIterator>;
@@ -72,6 +102,26 @@ void generate_path(OutputIterator & output_iterator, PathType const& path, svg::
     boost::spirit::karma::generate(output_iterator, lit(" ") << dash_array_grammar, path_attributes.stroke_dasharray());
     boost::spirit::karma::generate(output_iterator, lit(" ") << attributes_grammar << lit("/>\n"), path_attributes);
 }
+
+namespace detail {
+
+template <typename OutputIterator>
+struct generate_path
+{
+    generate_path( OutputIterator & out, svg::path_output_attributes const& path_attributes)
+        : out_(out),
+          path_attributes_(path_attributes) {}
+
+    template <typename Adapter>
+    void operator() (Adapter const& adapter) const
+    {
+        generate_path_impl(out_, adapter, path_attributes_);
+    }
+    OutputIterator & out_;
+    svg::path_output_attributes const& path_attributes_;
+};
+
+} // ns detail
 
 template <typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
@@ -102,6 +152,10 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
         //vertex_adapter va(geom);
         //path_type path(common_.t_, va, prj_trans);
         //generate_path(generator_.output_iterator_, path, path_attributes_);
+        auto transformed_geom = geometry::transform(feature.get_geometry(), geometry::coord_transformer<double>(common_.t_, prj_trans));
+        using vertex_processor_type = geometry::vertex_processor<detail::generate_path<OutputIterator> >;
+        detail::generate_path<OutputIterator> apply_generator(generator_.output_iterator_,path_attributes_);
+        //mapnik::util::apply_visitor(vertex_processor_type(apply_generator),feature.get_geometry());
 
         // set the previously collected values back to their defaults
         // for the feature that will be processed next.
