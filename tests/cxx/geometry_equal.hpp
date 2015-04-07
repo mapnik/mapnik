@@ -79,6 +79,8 @@ auto zip_crange(Conts&... conts)
 
 using namespace mapnik::geometry;
 
+void assert_g_equal(geometry const& g1, geometry const& g2);
+
 struct geometry_equal_visitor
 {
     template <typename T1, typename T2>
@@ -130,7 +132,46 @@ struct geometry_equal_visitor
 
     void operator() (multi_point const& mp1, multi_point const& mp2)
     {
-        (*this)(static_cast<line_string>(mp1), static_cast<line_string>(mp2));
+        (*this)(static_cast<line_string const&>(mp1), static_cast<line_string const&>(mp2));
+    }
+    
+    void operator() (multi_line_string const& mls1, multi_line_string const& mls2)
+    {
+        if (mls1.size() != mls2.size())
+        {
+            REQUIRE(false);
+        }
+
+        for (auto const& ls : zip_crange(mls1, mls2))
+        {
+            (*this)(ls.get<0>(),ls.get<1>());
+        }
+    }
+    
+    void operator() (multi_polygon const& mpoly1, multi_polygon const& mpoly2)
+    {
+        if (mpoly1.size() != mpoly2.size())
+        {
+            REQUIRE(false);
+        }
+
+        for (auto const& poly : zip_crange(mpoly1, mpoly2))
+        {
+            (*this)(poly.get<0>(),poly.get<1>());
+        }
+    }
+    
+    void operator() (geometry_collection const& c1, geometry_collection const& c2)
+    {
+        if (c1.size() != c2.size())
+        {
+            REQUIRE(false);
+        }
+
+        for (auto const& g : zip_crange(c1, c2))
+        {
+            (*this)(g.get<0>(),g.get<1>());
+        }
     }
 };
 

@@ -242,6 +242,81 @@ SECTION("test_projection_4326_3857 - Line_String Geometry Object") {
         assert_g_equal(geom3, geom1);
     }
 } // End Section
+
+SECTION("test_projection_4326_3857 - Line_String Geometry Variant Object") {
+    using namespace mapnik::geometry;
+    mapnik::projection source("+init=epsg:4326");
+    mapnik::projection dest("+init=epsg:3857");
+    mapnik::proj_transform proj_trans1(source, dest);
+    mapnik::proj_transform proj_trans2(dest, source);
+    line_string geom1_;
+    geom1_.emplace_back(point(-97.48872756958008, 35.360286150765084));
+    geom1_.emplace_back(point(-97.48065948486328, 35.34894577151337));
+    geom1_.emplace_back(point(-97.47267723083496, 35.36224605490395));
+    geom1_.emplace_back(point(-97.46323585510252, 35.34523530173256));
+    geom1_.emplace_back(point(-97.45963096618651, 35.36329598397908));
+    geom1_.emplace_back(point(-97.47550964355469, 35.369245324153866));
+    line_string geom2_;
+    geom2_.emplace_back(point(-10852395.511130, 4212951.024108));
+    geom2_.emplace_back(point(-10851497.376047, 4211403.174286));
+    geom2_.emplace_back(point(-10850608.795594, 4213218.553707));
+    geom2_.emplace_back(point(-10849557.786455, 4210896.778973));
+    geom2_.emplace_back(point(-10849156.492056, 4213361.873135));
+    geom2_.emplace_back(point(-10850924.098335, 4214174.016561));
+    line_string geom0_;
+    geometry geom0(geom0_);
+    geometry geom1(geom1_);
+    geometry geom2(geom2_);
+    unsigned int err = 0;
+    {
+        // Reprojecting empty line string will return a geometry_empty
+        geometry new_geom = reproject_copy(geom0, proj_trans1, err);
+        REQUIRE(err == 0);
+        REQUIRE(new_geom.is<geometry_empty>());
+    }
+    {
+        // Test Standard Transform
+        geometry new_geom = reproject_copy(geom1, proj_trans1, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform in reverse
+        geometry new_geom = reproject_copy(geom2, proj_trans2, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform providing projections not transfrom
+        geometry new_geom = reproject_copy(geom1, source, dest, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform providing projections in reverse
+        geometry new_geom = reproject_copy(geom2, dest, source, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform in place
+        geometry geom3(geom1);
+        REQUIRE(reproject(geom3, proj_trans1));
+        assert_g_equal(geom3, geom2);
+        // Transform in place reverse
+        REQUIRE(reproject(geom3, proj_trans2));
+        assert_g_equal(geom3, geom1);
+    }
+    {
+        // Transform in place providing projections
+        geometry geom3(geom1);
+        REQUIRE(reproject(geom3, source, dest));
+        assert_g_equal(geom3, geom2);
+        // Transform in place provoding projections reversed
+        REQUIRE(reproject(geom3, dest, source));
+        assert_g_equal(geom3, geom1);
+    }
+} // End Section
     
 SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
     using namespace mapnik::geometry;
@@ -276,9 +351,17 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
     unsigned int err = 0;
     {
         // Test Standard Transform
+        // Add extra vector to outer ring.
+        geom1.interior_rings.emplace_back();
+        REQUIRE(geom1.interior_rings.size() == 2);
         polygon new_geom = reproject_copy(geom1, proj_trans1, err);
         REQUIRE(err == 0);
+        // Should remove the empty ring added to back of geom1
+        REQUIRE(new_geom.interior_rings.size() == 1);
         assert_g_equal(new_geom, geom2);
+        // Remove extra ring for future validity tests.
+        geom1.interior_rings.pop_back();
+        REQUIRE(geom1.interior_rings.size() == 1);
     }
     {
         // Transform in reverse
@@ -301,7 +384,13 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
     {
         // Transform in place
         polygon geom3(geom1);
+        geom3.interior_rings.emplace_back();
         REQUIRE(reproject(geom3, proj_trans1));
+        // Should NOT remove the empty ring added to back of geom1
+        REQUIRE(geom3.interior_rings.size() == 2);
+        // Remove so asserts that geometries are the same
+        geom3.interior_rings.pop_back();
+        REQUIRE(geom3.interior_rings.size() == 1);
         assert_g_equal(geom3, geom2);
         // Transform in place reverse
         REQUIRE(reproject(geom3, proj_trans2));
@@ -317,6 +406,233 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
         assert_g_equal(geom3, geom1);
     }
 } // End Section
+
+SECTION("test_projection_4326_3857 - Polygon Geometry Variant Object") {
+    using namespace mapnik::geometry;
+    mapnik::projection source("+init=epsg:4326");
+    mapnik::projection dest("+init=epsg:3857");
+    mapnik::proj_transform proj_trans1(source, dest);
+    mapnik::proj_transform proj_trans2(dest, source);
+    polygon geom1_;
+    geom1_.exterior_ring.emplace_back(point(-97.62588500976562, 35.62939577711732));
+    geom1_.exterior_ring.emplace_back(point(-97.79067993164062, 35.43941441533686));
+    geom1_.exterior_ring.emplace_back(point(-97.60391235351562, 35.34425514918409));
+    geom1_.exterior_ring.emplace_back(point(-97.42813110351562, 35.48191987272801));
+    geom1_.exterior_ring.emplace_back(point(-97.62588500976562, 35.62939577711732));
+    geom1_.interior_rings.emplace_back();
+    geom1_.interior_rings.back().emplace_back(point(-97.66571044921875, 35.46849952318069));
+    geom1_.interior_rings.back().emplace_back(point(-97.61489868164062, 35.54116627999813));
+    geom1_.interior_rings.back().emplace_back(point(-97.53799438476562, 35.459551379037606));
+    geom1_.interior_rings.back().emplace_back(point(-97.62451171875, 35.42598697382711));
+    geom1_.interior_rings.back().emplace_back(point(-97.66571044921875, 35.46849952318069));
+    polygon geom2_;
+    geom2_.exterior_ring.emplace_back(point(-10867663.807530, 4249745.898599));
+    geom2_.exterior_ring.emplace_back(point(-10886008.694318, 4223757.308982));
+    geom2_.exterior_ring.emplace_back(point(-10865217.822625, 4210763.014174));
+    geom2_.exterior_ring.emplace_back(point(-10845649.943384, 4229566.523132));
+    geom2_.exterior_ring.emplace_back(point(-10867663.807530, 4249745.898599));
+    geom2_.interior_rings.emplace_back();
+    geom2_.interior_rings.back().emplace_back(point(-10872097.155170, 4227732.034453));
+    geom2_.interior_rings.back().emplace_back(point(-10866440.815077, 4237668.848130));
+    geom2_.interior_rings.back().emplace_back(point(-10857879.867909, 4226509.042001));
+    geom2_.interior_rings.back().emplace_back(point(-10867510.933473, 4221922.820303));
+    geom2_.interior_rings.back().emplace_back(point(-10872097.155170, 4227732.034453));
+    polygon geom0_;
+    geometry geom0(geom0_);
+    geometry geom1(geom1_);
+    geometry geom2(geom2_);
+    unsigned int err = 0;
+    {
+        // Reprojecting empty poly will return a geometry_empty
+        geometry new_geom = reproject_copy(geom0, proj_trans1, err);
+        REQUIRE(err == 0);
+        REQUIRE(new_geom.is<geometry_empty>());
+    }
+    {
+        // Test Standard Transform
+        geometry new_geom = reproject_copy(geom1, proj_trans1, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform in reverse
+        geometry new_geom = reproject_copy(geom2, proj_trans2, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform providing projections not transfrom
+        geometry new_geom = reproject_copy(geom1, source, dest, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform providing projections in reverse
+        geometry new_geom = reproject_copy(geom2, dest, source, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform in place
+        geometry geom3(geom1);
+        REQUIRE(reproject(geom3, proj_trans1));
+        assert_g_equal(geom3, geom2);
+        // Transform in place reverse
+        REQUIRE(reproject(geom3, proj_trans2));
+        assert_g_equal(geom3, geom1);
+    }
+    {
+        // Transform in place providing projections
+        geometry geom3(geom1);
+        REQUIRE(reproject(geom3, source, dest));
+        assert_g_equal(geom3, geom2);
+        // Transform in place provoding projections reversed
+        REQUIRE(reproject(geom3, dest, source));
+        assert_g_equal(geom3, geom1);
+    }
+} // END SECTION
+
+SECTION("test_projection_4326_3857 - Multi_Point Geometry Object") {
+    using namespace mapnik::geometry;
+    mapnik::projection source("+init=epsg:4326");
+    mapnik::projection dest("+init=epsg:3857");
+    mapnik::proj_transform proj_trans1(source, dest);
+    mapnik::proj_transform proj_trans2(dest, source);
+    multi_point geom1;
+    geom1.emplace_back(point(-97.48872756958008, 35.360286150765084));
+    geom1.emplace_back(point(-97.48065948486328, 35.34894577151337));
+    geom1.emplace_back(point(-97.47267723083496, 35.36224605490395));
+    geom1.emplace_back(point(-97.46323585510252, 35.34523530173256));
+    geom1.emplace_back(point(-97.45963096618651, 35.36329598397908));
+    geom1.emplace_back(point(-97.47550964355469, 35.369245324153866));
+    multi_point geom2;
+    geom2.emplace_back(point(-10852395.511130, 4212951.024108));
+    geom2.emplace_back(point(-10851497.376047, 4211403.174286));
+    geom2.emplace_back(point(-10850608.795594, 4213218.553707));
+    geom2.emplace_back(point(-10849557.786455, 4210896.778973));
+    geom2.emplace_back(point(-10849156.492056, 4213361.873135));
+    geom2.emplace_back(point(-10850924.098335, 4214174.016561));
+    unsigned int err = 0;
+    {
+        // Test Standard Transform
+        multi_point new_geom = reproject_copy(geom1, proj_trans1, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform in reverse
+        multi_point new_geom = reproject_copy(geom2, proj_trans2, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform providing projections not transfrom
+        multi_point new_geom = reproject_copy(geom1, source, dest, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform providing projections in reverse
+        multi_point new_geom = reproject_copy(geom2, dest, source, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform in place
+        multi_point geom3(geom1);
+        REQUIRE(reproject(geom3, proj_trans1));
+        assert_g_equal(geom3, geom2);
+        // Transform in place reverse
+        REQUIRE(reproject(geom3, proj_trans2));
+        assert_g_equal(geom3, geom1);
+    }
+    {
+        // Transform in place providing projections
+        multi_point geom3(geom1);
+        REQUIRE(reproject(geom3, source, dest));
+        assert_g_equal(geom3, geom2);
+        // Transform in place provoding projections reversed
+        REQUIRE(reproject(geom3, dest, source));
+        assert_g_equal(geom3, geom1);
+    }
+} // End Section
+
+SECTION("test_projection_4326_3857 - Multi_Point Geometry Variant Object") {
+    using namespace mapnik::geometry;
+    mapnik::projection source("+init=epsg:4326");
+    mapnik::projection dest("+init=epsg:3857");
+    mapnik::proj_transform proj_trans1(source, dest);
+    mapnik::proj_transform proj_trans2(dest, source);
+    multi_point geom1_;
+    geom1_.emplace_back(point(-97.48872756958008, 35.360286150765084));
+    geom1_.emplace_back(point(-97.48065948486328, 35.34894577151337));
+    geom1_.emplace_back(point(-97.47267723083496, 35.36224605490395));
+    geom1_.emplace_back(point(-97.46323585510252, 35.34523530173256));
+    geom1_.emplace_back(point(-97.45963096618651, 35.36329598397908));
+    geom1_.emplace_back(point(-97.47550964355469, 35.369245324153866));
+    multi_point geom2_;
+    geom2_.emplace_back(point(-10852395.511130, 4212951.024108));
+    geom2_.emplace_back(point(-10851497.376047, 4211403.174286));
+    geom2_.emplace_back(point(-10850608.795594, 4213218.553707));
+    geom2_.emplace_back(point(-10849557.786455, 4210896.778973));
+    geom2_.emplace_back(point(-10849156.492056, 4213361.873135));
+    geom2_.emplace_back(point(-10850924.098335, 4214174.016561));
+    multi_point geom0_;
+    geometry geom0(geom0_);
+    geometry geom1(geom1_);
+    geometry geom2(geom2_);
+    unsigned int err = 0;
+    {
+        // Reprojecting empty multi point will return a geometry_empty
+        geometry new_geom = reproject_copy(geom0, proj_trans1, err);
+        REQUIRE(err == 0);
+        REQUIRE(new_geom.is<geometry_empty>());
+    }
+    {
+        // Test Standard Transform
+        geometry new_geom = reproject_copy(geom1, proj_trans1, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform in reverse
+        geometry new_geom = reproject_copy(geom2, proj_trans2, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform providing projections not transfrom
+        geometry new_geom = reproject_copy(geom1, source, dest, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform providing projections in reverse
+        geometry new_geom = reproject_copy(geom2, dest, source, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform in place
+        geometry geom3(geom1);
+        REQUIRE(reproject(geom3, proj_trans1));
+        assert_g_equal(geom3, geom2);
+        // Transform in place reverse
+        REQUIRE(reproject(geom3, proj_trans2));
+        assert_g_equal(geom3, geom1);
+    }
+    {
+        // Transform in place providing projections
+        geometry geom3(geom1);
+        REQUIRE(reproject(geom3, source, dest));
+        assert_g_equal(geom3, geom2);
+        // Transform in place provoding projections reversed
+        REQUIRE(reproject(geom3, dest, source));
+        assert_g_equal(geom3, geom1);
+    }
+} // End Section
+
+
 /*
         for (auto const& p : new_geom)
         {

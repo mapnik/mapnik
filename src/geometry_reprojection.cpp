@@ -60,9 +60,9 @@ polygon reproject_internal(polygon const & poly, proj_transform const& proj_tran
 {
     polygon new_poly;
     linear_ring new_ext(poly.exterior_ring);
-    int err = proj_trans.forward(new_ext);
+    unsigned int err = proj_trans.forward(new_ext);
     // If the exterior ring doesn't transform don't bother with the holes.
-    if (err > 0)
+    if (err > 0 || new_ext.empty())
     {
         n_err += err;
     }
@@ -75,7 +75,7 @@ polygon reproject_internal(polygon const & poly, proj_transform const& proj_tran
         {
             linear_ring new_lr(lr);
             err = proj_trans.forward(new_lr);
-            if (err > 0)
+            if (err > 0 || new_lr.empty())
             {
                 n_err += err;
                 // If there is an error in interior ring drop
@@ -175,7 +175,7 @@ struct geom_reproj_copy_visitor {
     
     geometry operator() (point const& p)
     {
-        int intial_err = n_err_;
+        unsigned int intial_err = n_err_;
         point new_p = reproject_internal(p, proj_trans_, n_err_);
         if (n_err_ > intial_err)
         {
@@ -188,7 +188,7 @@ struct geom_reproj_copy_visitor {
     {
         int intial_err = n_err_;
         line_string new_ls = reproject_internal(ls, proj_trans_, n_err_);
-        if (n_err_ > intial_err)
+        if (n_err_ > intial_err || new_ls.empty())
         {
             return std::move(geometry_empty());
         }
