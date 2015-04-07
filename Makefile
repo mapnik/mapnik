@@ -74,6 +74,9 @@ test-python:
 test-cpp:
 	./tests/cpp_tests/run
 
+test-cxx:
+	./tests/cxx/run
+
 check: test-local
 
 bench:
