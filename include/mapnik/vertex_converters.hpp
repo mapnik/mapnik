@@ -69,14 +69,10 @@ struct offset_transform_tag {};
 namespace  detail {
 
 template <typename T0, typename T1>
-struct converter_traits
-{
-    using geometry_type = T0;
-    using conv_type = geometry_type;
-};
+struct converter_traits {};
 
 template <typename T>
-struct converter_traits<T,mapnik::smooth_tag>
+struct converter_traits<T, mapnik::smooth_tag>
 {
     using geometry_type = T;
     using conv_type = typename agg::conv_smooth_poly1_curve<geometry_type>;
