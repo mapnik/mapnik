@@ -29,7 +29,7 @@ namespace mapnik {
 namespace geometry {
 
 namespace detail {
-    
+
 geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, unsigned int &)
 {
     return geometry_empty();
@@ -55,7 +55,7 @@ line_string reproject_internal(line_string const & ls, proj_transform const& pro
     }
     return new_ls;
 }
-    
+
 polygon reproject_internal(polygon const & poly, proj_transform const& proj_trans, unsigned int & n_err)
 {
     polygon new_poly;
@@ -87,7 +87,7 @@ polygon reproject_internal(polygon const & poly, proj_transform const& proj_tran
     }
     return new_poly;
 }
-    
+
 multi_point reproject_internal(multi_point const & mp, proj_transform const& proj_trans, unsigned int & n_err)
 {
     multi_point new_mp;
@@ -131,7 +131,7 @@ multi_line_string reproject_internal(multi_line_string const & mls, proj_transfo
     }
     return new_mls;
 }
-    
+
 multi_polygon reproject_internal(multi_polygon const & mpoly, proj_transform const& proj_trans, unsigned int & n_err)
 {
     multi_polygon new_mpoly;
@@ -146,7 +146,7 @@ multi_polygon reproject_internal(multi_polygon const & mpoly, proj_transform con
     }
     return new_mpoly;
 }
-    
+
 geometry_collection reproject_internal(geometry_collection const & c, proj_transform const& proj_trans, unsigned int & n_err)
 {
     geometry_collection new_c;
@@ -165,87 +165,80 @@ geometry_collection reproject_internal(geometry_collection const & c, proj_trans
 struct geom_reproj_copy_visitor {
 
     geom_reproj_copy_visitor(proj_transform const & proj_trans, unsigned int & n_err)
-        : proj_trans_(proj_trans), 
+        : proj_trans_(proj_trans),
           n_err_(n_err) {}
 
     geometry operator() (geometry_empty const&)
     {
-        return std::move(geometry_empty());
+        return geometry_empty();
     }
-    
+
     geometry operator() (point const& p)
     {
+        geometry geom; // default empty
         unsigned int intial_err = n_err_;
         point new_p = reproject_internal(p, proj_trans_, n_err_);
-        if (n_err_ > intial_err)
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_p);
+        if (n_err_ > intial_err) return geom;
+        geom = std::move(new_p);
+        return geom;
     }
 
     geometry operator() (line_string const& ls)
     {
+        geometry geom; // default empty
         int intial_err = n_err_;
         line_string new_ls = reproject_internal(ls, proj_trans_, n_err_);
-        if (n_err_ > intial_err || new_ls.empty())
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_ls);
-    }
-    
-    geometry operator() (polygon const& poly)
-    {
-        polygon new_poly = reproject_internal(poly, proj_trans_, n_err_);
-        if (new_poly.exterior_ring.empty())
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_poly);
-    }
-    
-    geometry operator() (multi_point const& mp)
-    {
-        multi_point new_mp = reproject_internal(mp, proj_trans_, n_err_);
-        if (new_mp.empty())
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_mp);
-    }
-    
-    geometry operator() (multi_line_string const& mls)
-    {
-        multi_line_string new_mls = reproject_internal(mls, proj_trans_, n_err_);
-        if (new_mls.empty())
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_mls);
-    }
-    
-    geometry operator() (multi_polygon const& mpoly)
-    {
-        multi_polygon new_mpoly = reproject_internal(mpoly, proj_trans_, n_err_);
-        if (new_mpoly.empty())
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_mpoly);
-    }
-    
-    geometry operator() (geometry_collection const& c)
-    {
-        geometry_collection new_c = reproject_internal(c, proj_trans_, n_err_);
-        if (new_c.empty())
-        {
-            return std::move(geometry_empty());
-        }
-        return std::move(new_c);
+        if (n_err_ > intial_err || new_ls.empty()) return geom;
+        geom = std::move(new_ls);
+        return geom;
     }
 
-  private:
+    geometry operator() (polygon const& poly)
+    {
+        geometry geom; // default empty
+        polygon new_poly = reproject_internal(poly, proj_trans_, n_err_);
+        if (new_poly.exterior_ring.empty()) return geom;
+        geom = std::move(new_poly);
+        return geom;
+    }
+
+    geometry operator() (multi_point const& mp)
+    {
+        geometry geom; // default empty
+        multi_point new_mp = reproject_internal(mp, proj_trans_, n_err_);
+        if (new_mp.empty()) return geom;
+        geom = std::move(new_mp);
+        return geom;
+    }
+
+    geometry operator() (multi_line_string const& mls)
+    {
+        geometry geom; // default empty
+        multi_line_string new_mls = reproject_internal(mls, proj_trans_, n_err_);
+        if (new_mls.empty()) return geom;
+        geom = std::move(new_mls);
+        return geom;
+    }
+
+    geometry operator() (multi_polygon const& mpoly)
+    {
+        geometry geom; // default empty
+        multi_polygon new_mpoly = reproject_internal(mpoly, proj_trans_, n_err_);
+        if (new_mpoly.empty()) return geom;
+        geom = std::move(new_mpoly);
+        return geom;
+    }
+
+    geometry operator() (geometry_collection const& c)
+    {
+        geometry geom; // default empty
+        geometry_collection new_c = reproject_internal(c, proj_trans_, n_err_);
+        if (new_c.empty()) return geom;
+        geom = std::move(new_c);
+        return geom;
+    }
+
+private:
     proj_transform const& proj_trans_;
     unsigned int & n_err_;
 
@@ -304,7 +297,7 @@ struct geom_reproj_visitor {
     }
 
     bool operator() (geometry_empty &) { return true; }
-    
+
     bool operator() (point & p)
     {
         if (!proj_trans_.forward(p))
@@ -329,7 +322,7 @@ struct geom_reproj_visitor {
         {
             return false;
         }
-        
+
         for (auto & lr : poly.interior_rings)
         {
             if (proj_trans_.forward(lr) > 0)
@@ -339,12 +332,12 @@ struct geom_reproj_visitor {
         }
         return true;
     }
-    
+
     bool operator() (multi_point & mp)
     {
         return (*this) (static_cast<line_string &>(mp));
     }
-    
+
     bool operator() (multi_line_string & mls)
     {
         for (auto & ls : mls)
@@ -356,7 +349,7 @@ struct geom_reproj_visitor {
         }
         return true;
     }
-    
+
     bool operator() (multi_polygon & mpoly)
     {
         for (auto & poly : mpoly)
@@ -368,7 +361,7 @@ struct geom_reproj_visitor {
         }
         return true;
     }
-    
+
     bool operator() (geometry_collection & c)
     {
         for (auto & g : c)
@@ -381,7 +374,7 @@ struct geom_reproj_visitor {
         return true;
     }
 
-  private:
+private:
     proj_transform const& proj_trans_;
 
 };
