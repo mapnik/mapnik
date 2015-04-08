@@ -34,12 +34,6 @@ struct geometry_to_path
     geometry_to_path(path_type & p)
         : p_(p) {}
 
-
-    void operator() (geometry_collection const& collection) const
-    {
-        // fixme
-    }
-
     void operator() (geometry const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
@@ -92,11 +86,40 @@ struct geometry_to_path
         }
     }
 
-    template <typename T>
-    void operator() (T const& geom) const
+    // multi point
+    void operator() (multi_point const& multi_pt) const
     {
-        // no-op
+        for (auto const& pt : multi_pt)
+        {
+            (*this)(pt);
+        }
     }
+    // multi_line_string
+    void operator() (multi_line_string const& multi_line) const
+    {
+        for (auto const& line : multi_line)
+        {
+            (*this)(line);
+        }
+    }
+
+    // multi_polygon
+    void operator() (multi_polygon const& multi_poly) const
+    {
+        for (auto const& poly : multi_poly)
+        {
+            (*this)(poly);
+        }
+    }
+
+    void operator() (geometry_collection const& collection) const
+    {
+        for (auto const& geom :  collection)
+        {
+            (*this)(geom);
+        }
+    }
+
 
     path_type & p_;
 
