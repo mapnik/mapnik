@@ -161,6 +161,21 @@ struct geometry_equal_visitor
         }
     }
     
+    void operator() (mapnik::util::recursive_wrapper<geometry_collection> const& c1_, mapnik::util::recursive_wrapper<geometry_collection> const& c2_)
+    {
+        geometry_collection const& c1 = static_cast<geometry_collection const&>(c1_);
+        geometry_collection const& c2 = static_cast<geometry_collection const&>(c2_);
+        if (c1.size() != c2.size())
+        {
+            REQUIRE(false);
+        }
+
+        for (auto const& g : zip_crange(c1, c2))
+        {
+            assert_g_equal(g.get<0>(),g.get<1>());
+        }
+    }
+    
     void operator() (geometry_collection const& c1, geometry_collection const& c2)
     {
         if (c1.size() != c2.size())
@@ -170,7 +185,7 @@ struct geometry_equal_visitor
 
         for (auto const& g : zip_crange(c1, c2))
         {
-            (*this)(g.get<0>(),g.get<1>());
+            assert_g_equal(g.get<0>(),g.get<1>());
         }
     }
 };
