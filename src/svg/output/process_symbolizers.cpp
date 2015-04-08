@@ -33,6 +33,7 @@
 #include <mapnik/symbolizer_dispatch.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/geometry_transform.hpp>
+#include <mapnik/geometry_to_path.hpp>
 // boost
 #include <boost/spirit/include/karma.hpp>
 
@@ -103,33 +104,13 @@ void generate_path_impl(OutputIterator & output_iterator, PathType const& path, 
     boost::spirit::karma::generate(output_iterator, lit(" ") << attributes_grammar << lit("/>\n"), path_attributes);
 }
 
-namespace detail {
-
-template <typename OutputIterator>
-struct generate_path
-{
-    generate_path( OutputIterator & out, svg::path_output_attributes const& path_attributes)
-        : out_(out),
-          path_attributes_(path_attributes) {}
-
-    template <typename Adapter>
-    void operator() (Adapter const& adapter) const
-    {
-        generate_path_impl(out_, adapter, path_attributes_);
-    }
-    OutputIterator & out_;
-    svg::path_output_attributes const& path_attributes_;
-};
-
-} // ns detail
-
 template <typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            mapnik::feature_impl & feature,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-    using path_type = transform_path_adapter<view_transform, vertex_adapter>;
+    using trans_path_type = transform_path_adapter<view_transform, vertex_adapter>;
 
     bool process_path = false;
     // process each symbolizer to collect its (path) information.
@@ -147,16 +128,11 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
-
-        // FIXME! needs generic adapter
-        //vertex_adapter va(geom);
-        //path_type path(common_.t_, va, prj_trans);
-        //generate_path(generator_.output_iterator_, path, path_attributes_);
-        auto transformed_geom = geometry::transform(feature.get_geometry(), geometry::coord_transformer<double>(common_.t_, prj_trans));
-        using vertex_processor_type = geometry::vertex_processor<detail::generate_path<OutputIterator> >;
-        detail::generate_path<OutputIterator> apply_generator(generator_.output_iterator_,path_attributes_);
-        //mapnik::util::apply_visitor(vertex_processor_type(apply_generator),feature.get_geometry());
-
+        path_type path;
+        geometry::to_path(feature.get_geometry(), path);
+        vertex_adapter va(path);
+        trans_path_type trans_path(common_.t_, va, prj_trans);
+        generate_path_impl(generator_.output_iterator_, trans_path, path_attributes_);
         // set the previously collected values back to their defaults
         // for the feature that will be processed next.
         path_attributes_.reset();
