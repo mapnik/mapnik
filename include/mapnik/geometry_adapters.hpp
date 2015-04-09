@@ -34,11 +34,16 @@
 #include <boost/geometry/core/mutable_range.hpp>
 #include <boost/geometry/core/tag.hpp>
 #include <boost/geometry/core/tags.hpp>
+//
+#include <mapnik/box2d.hpp>
 
 // register point
 BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point, double, cs::cartesian, x, y)
 // ring
 BOOST_GEOMETRY_REGISTER_RING(mapnik::geometry::linear_ring)
+
+// needed by box2d<double>
+BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, cs::cartesian, x, y)
 
 namespace boost {
 
@@ -69,39 +74,45 @@ range_end(mapnik::geometry::line_string const& line) {return line.end();}
 
 namespace geometry { namespace traits {
 
-template<> struct tag<mapnik::geometry::bounding_box> { using type = box_tag; };
+// register mapnik::box2d<double>
 
-template<> struct point_type<mapnik::geometry::bounding_box> { using type = mapnik::geometry::point; };
+template<> struct tag<mapnik::box2d<double> > { using type = box_tag; };
 
+template<> struct point_type<mapnik::box2d<double> > { using type = mapnik::coord2d; };
 
 template <>
-struct indexed_access<mapnik::geometry::bounding_box, min_corner, 0>
+struct indexed_access<mapnik::box2d<double>, min_corner, 0>
 {
-    static inline double get(mapnik::geometry::bounding_box const& b) { return b.p0.x;}
-    static inline void set(mapnik::geometry::bounding_box& b, double value) { b.p0.x = value; }
+    using ct = coordinate_type<mapnik::coord2d>::type;
+    static inline ct get(mapnik::box2d<double> const& b) { return b.minx();}
+    static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_minx(value); }
 };
 
 template <>
-struct indexed_access<mapnik::geometry::bounding_box, min_corner, 1>
+struct indexed_access<mapnik::box2d<double>, min_corner, 1>
 {
-    static inline double get(mapnik::geometry::bounding_box const& b) { return b.p0.y;}
-    static inline void set(mapnik::geometry::bounding_box& b, double value) { b.p0.y = value; }
+    using ct = coordinate_type<mapnik::coord2d>::type;
+    static inline ct get(mapnik::box2d<double> const& b) { return b.miny();}
+    static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_miny(value); }
 };
 
 template <>
-struct indexed_access<mapnik::geometry::bounding_box, max_corner, 0>
+struct indexed_access<mapnik::box2d<double>, max_corner, 0>
 {
-    static inline double get(mapnik::geometry::bounding_box const& b) { return b.p1.x;}
-    static inline void set(mapnik::geometry::bounding_box& b, double value) { b.p1.x = value; }
+    using ct = coordinate_type<mapnik::coord2d>::type;
+    static inline ct get(mapnik::box2d<double> const& b) { return b.maxx();}
+    static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_maxx(value); }
 };
 
 template <>
-struct indexed_access<mapnik::geometry::bounding_box, max_corner, 1>
+struct indexed_access<mapnik::box2d<double>, max_corner, 1>
 {
-    static inline double get(mapnik::geometry::bounding_box const& b) { return b.p1.y;}
-    static inline void set(mapnik::geometry::bounding_box& b, double value) { b.p1.y = value; }
+    using ct = coordinate_type<mapnik::coord2d>::type;
+    static inline ct get(mapnik::box2d<double> const& b) { return b.maxy();}
+    static inline void set(mapnik::box2d<double> &b , ct const& value) { b.set_maxy(value); }
 };
 
+// mapnik::geometry::line_string
 template<>
 struct tag<mapnik::geometry::line_string>
 {

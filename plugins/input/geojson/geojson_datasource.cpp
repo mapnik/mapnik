@@ -47,7 +47,6 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
-#include <mapnik/util/boost_geometry_adapters.hpp> // boost.geometry - register box2d<double>
 
 #if defined(SHAPE_MEMORY_MAPPED_FILE)
 #include <boost/interprocess/mapped_region.hpp>

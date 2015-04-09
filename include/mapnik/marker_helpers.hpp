@@ -220,7 +220,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             multi_policy == MARKER_WHOLE_MULTI)
         {
             geometry::point pt;
-            if (geometry::centroid(geom, pt))
+            if (geometry::centroid(geom, pt) && converter.disp_.args_.bbox.contains(pt.x, pt.y))
             {
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();

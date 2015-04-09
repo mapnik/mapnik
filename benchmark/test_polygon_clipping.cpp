@@ -368,8 +368,7 @@ public:
         mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
         mapnik::geometry::correct(poly);
         std::deque<mapnik::geometry::polygon> result;
-        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
-        boost::geometry::intersection(bbox,poly,result);
+        boost::geometry::intersection(extent_,poly,result);
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
         mapnik::geometry::multi_polygon mp;
@@ -407,12 +406,11 @@ public:
         }
         mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
         mapnik::geometry::correct(poly);
-        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
             std::deque<mapnik::geometry::polygon> result;
-            boost::geometry::intersection(bbox,poly,result);
+            boost::geometry::intersection(extent_,poly,result);
             unsigned count = 0;
             for (auto const& geom : result)
             {
@@ -567,12 +565,11 @@ public:
         }
         mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
         mapnik::geometry::correct(poly);
-        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
             std::deque<mapnik::geometry::polygon> result;
-            boost::geometry::intersection(bbox,poly,result);
+            boost::geometry::intersection(extent_,poly,result);
             unsigned count = 0;
             for (auto const& geom : result)
             {
