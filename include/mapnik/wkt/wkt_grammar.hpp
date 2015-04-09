@@ -85,29 +85,29 @@ struct add_hole
 }
 
 template <typename Iterator>
-struct wkt_grammar : qi::grammar<Iterator, void(mapnik::geometry::geometry&) , ascii::space_type>
+struct wkt_grammar : qi::grammar<Iterator, void(mapnik::geometry::geometry<double> &) , ascii::space_type>
 {
     wkt_grammar();
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> geometry_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> point_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> linestring_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> polygon_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> multipoint_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> multilinestring_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> multipolygon_tagged_text;
-    qi::rule<Iterator, void(mapnik::geometry::geometry&), ascii::space_type> geometrycollection_tagged_text;
-    qi::rule<Iterator, mapnik::geometry::point(), ascii::space_type> point_text;
-    qi::rule<Iterator, mapnik::geometry::line_string(), ascii::space_type> linestring_text;
-    qi::rule<Iterator, mapnik::geometry::linear_ring(), ascii::space_type> linearring_text;
-    qi::rule<Iterator, mapnik::geometry::polygon(), ascii::space_type> polygon_text;
-    qi::rule<Iterator, mapnik::geometry::multi_point(), ascii::space_type> multipoint_text;
-    qi::rule<Iterator, mapnik::geometry::multi_line_string(), ascii::space_type> multilinestring_text;
-    qi::rule<Iterator, mapnik::geometry::multi_polygon(), ascii::space_type> multipolygon_text;
-    qi::rule<Iterator, qi::locals<mapnik::geometry::geometry>,
-             mapnik::geometry::geometry_collection(), ascii::space_type> geometrycollection_text;
-    qi::rule<Iterator, mapnik::geometry::point(), ascii::space_type> point;
-    qi::rule<Iterator, mapnik::geometry::line_string(), ascii::space_type> points;
-    qi::rule<Iterator, mapnik::geometry::linear_ring(), ascii::space_type> ring_points;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> geometry_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> point_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> linestring_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> polygon_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> multipoint_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> multilinestring_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> multipolygon_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> geometrycollection_tagged_text;
+    qi::rule<Iterator, mapnik::geometry::point<double>(), ascii::space_type> point_text;
+    qi::rule<Iterator, mapnik::geometry::line_string<double>(), ascii::space_type> linestring_text;
+    qi::rule<Iterator, mapnik::geometry::linear_ring<double>(), ascii::space_type> linearring_text;
+    qi::rule<Iterator, mapnik::geometry::polygon<double>(), ascii::space_type> polygon_text;
+    qi::rule<Iterator, mapnik::geometry::multi_point<double>(), ascii::space_type> multipoint_text;
+    qi::rule<Iterator, mapnik::geometry::multi_line_string<double>(), ascii::space_type> multilinestring_text;
+    qi::rule<Iterator, mapnik::geometry::multi_polygon<double>(), ascii::space_type> multipolygon_text;
+    qi::rule<Iterator, qi::locals<mapnik::geometry::geometry<double> >,
+             mapnik::geometry::geometry_collection<double>(), ascii::space_type> geometrycollection_text;
+    qi::rule<Iterator, mapnik::geometry::point<double>(), ascii::space_type> point;
+    qi::rule<Iterator, mapnik::geometry::line_string<double>(), ascii::space_type> points;
+    qi::rule<Iterator, mapnik::geometry::linear_ring<double>(), ascii::space_type> ring_points;
     qi::rule<Iterator,ascii::space_type> empty_set;
     boost::phoenix::function<detail::assign> assign;
     boost::phoenix::function<detail::move_part> move_part;

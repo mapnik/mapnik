@@ -90,7 +90,7 @@ static inline bool merc2lonlat(double * x, double * y , int point_count)
     return true;
 }
 
-static inline bool lonlat2merc(geometry::line_string & ls)
+static inline bool lonlat2merc(geometry::line_string<double> & ls)
 {
     for(auto & p : ls) 
     {
@@ -105,7 +105,7 @@ static inline bool lonlat2merc(geometry::line_string & ls)
     return true;
 }
 
-static inline bool merc2lonlat(geometry::line_string & ls)
+static inline bool merc2lonlat(geometry::line_string<double> & ls)
 {
     for (auto & p : ls)
     {

@@ -96,7 +96,7 @@ struct feature_generator
             x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
             y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
         }
-        mapnik::geometry::point point(x, y);
+        mapnik::geometry::point<double> point(x, y);
         feature->set_geometry(std::move(point));
         assign_properties(*feature, pt, tr_);
         return feature;
@@ -105,7 +105,7 @@ struct feature_generator
     feature_ptr operator() (multi_point const& multi_pt) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        mapnik::geometry::multi_point multi_point;
+        mapnik::geometry::multi_point<double> multi_point;
         multi_point.reserve(multi_pt.points.size());
         for (auto const& pt : multi_pt.points)
         {
@@ -129,7 +129,7 @@ struct feature_generator
         double px = 0, py = 0;
         index_type arc_index = line.ring;
 
-        mapnik::geometry::line_string line_string;
+        mapnik::geometry::line_string<double> line_string;
         line_string.reserve( topo_.arcs[arc_index].coordinates.size());
 
         for (auto pt : topo_.arcs[arc_index].coordinates)
@@ -152,14 +152,14 @@ struct feature_generator
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
 
-        mapnik::geometry::multi_line_string multi_line_string;
+        mapnik::geometry::multi_line_string<double> multi_line_string;
         multi_line_string.reserve(multi_line.rings.size());
         for (auto const& index : multi_line.rings)
         {
             double px = 0, py = 0;
             bool reverse = index < 0;
             index_type arc_index = reverse ? std::abs(index) - 1 : index;
-            mapnik::geometry::line_string line_string;
+            mapnik::geometry::line_string<double> line_string;
             line_string.reserve(topo_.arcs[arc_index].coordinates.size());
             for (auto pt : topo_.arcs[arc_index].coordinates)
             {
@@ -183,12 +183,12 @@ struct feature_generator
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
         std::vector<mapnik::topojson::coordinate> processed_coords;
-        mapnik::geometry::polygon polygon;
+        mapnik::geometry::polygon<double> polygon;
         if (poly.rings.size() > 1) polygon.interior_rings.reserve(poly.rings.size() - 1);
         bool first = true;
         for (auto const& ring : poly.rings)
         {
-            mapnik::geometry::linear_ring linear_ring;
+            mapnik::geometry::linear_ring<double> linear_ring;
             for (auto const& index : ring)
             {
                 double px = 0, py = 0;
@@ -248,18 +248,18 @@ struct feature_generator
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
         std::vector<mapnik::topojson::coordinate> processed_coords;
-        mapnik::geometry::multi_polygon multi_polygon;
+        mapnik::geometry::multi_polygon<double> multi_polygon;
         multi_polygon.reserve(multi_poly.polygons.size());
 
         for (auto const& poly : multi_poly.polygons)
         {
             bool first = true;
-            mapnik::geometry::polygon polygon;
+            mapnik::geometry::polygon<double> polygon;
             if (poly.size() > 1) polygon.interior_rings.reserve(poly.size() - 1);
 
             for (auto const& ring : poly)
             {
-                mapnik::geometry::linear_ring linear_ring;
+                mapnik::geometry::linear_ring<double> linear_ring;
                 for (auto const& index : ring)
                 {
                     double px = 0, py = 0;

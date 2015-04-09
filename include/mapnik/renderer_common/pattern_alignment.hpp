@@ -39,10 +39,10 @@ struct apply_local_alignment
           clip_box_(clip_box),
           x_(x),
           y_(y) {}
-
-    void operator() (geometry::polygon_vertex_adapter & va)
+    
+    void operator() (geometry::polygon_vertex_adapter<double> & va)
     {
-        using clipped_geometry_type = agg::conv_clip_polygon<geometry::polygon_vertex_adapter>;
+        using clipped_geometry_type = agg::conv_clip_polygon<geometry::polygon_vertex_adapter<double> >;
         using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
         clipped_geometry_type clipped(va);
         clipped.clip_box(clip_box_.minx(),clip_box_.miny(),clip_box_.maxx(),clip_box_.maxy());

@@ -76,8 +76,8 @@ public:
 
     void move_to(std::streampos pos);
     static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
-    static mapnik::geometry::geometry read_polyline(shape_file::record_type & record);
-    static mapnik::geometry::geometry read_polygon(shape_file::record_type & record);
+    static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
+    static mapnik::geometry::geometry<double> read_polygon(shape_file::record_type & record);
 
     shapeType type_;
     shape_file shp_;

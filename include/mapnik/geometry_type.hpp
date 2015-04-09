@@ -42,37 +42,37 @@ struct geometry_type
         return mapnik::geometry::geometry_types::Unknown;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::point const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::point<double> const&) const
     {
         return mapnik::geometry::geometry_types::Point;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::line_string const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::line_string<double> const&) const
     {
         return mapnik::geometry::geometry_types::LineString;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::polygon const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::polygon<double> const&) const
     {
         return mapnik::geometry::geometry_types::Polygon;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_point const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_point<double> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPoint;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_line_string const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_line_string<double> const&) const
     {
         return mapnik::geometry::geometry_types::MultiLineString;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_polygon const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_polygon<double> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPolygon;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry_collection const&) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry_collection<double> const&) const
     {
         return mapnik::geometry::geometry_types::GeometryCollection;
     }

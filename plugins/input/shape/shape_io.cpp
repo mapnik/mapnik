@@ -88,15 +88,15 @@ void shape_io::read_bbox(shape_file::record_type & record, mapnik::box2d<double>
     bbox.init(lox, loy, hix, hiy);
 }
 
-mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & record)
+mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_type & record)
 {
-    mapnik::geometry::geometry geom; // default empty
+    mapnik::geometry::geometry<double> geom; // default empty
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
 
     if (num_parts == 1)
     {
-        mapnik::geometry::line_string line;
+        mapnik::geometry::line_string<double> line;
         line.reserve(num_points);
         record.skip(4);
         for (int i = 0; i < num_points; ++i)
@@ -116,7 +116,7 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
         }
 
         int start, end;
-        mapnik::geometry::multi_line_string multi_line;
+        mapnik::geometry::multi_line_string<double> multi_line;
         for (int k = 0; k < num_parts; ++k)
         {
             start = parts[k];
@@ -129,7 +129,7 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
                 end = parts[k + 1];
             }
 
-            mapnik::geometry::line_string line;
+            mapnik::geometry::line_string<double> line;
             line.reserve(end - start);
             for (int j = start; j < end; ++j)
             {
@@ -145,9 +145,9 @@ mapnik::geometry::geometry shape_io::read_polyline(shape_file::record_type & rec
 }
 
 
-mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & record)
+mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_type & record)
 {
-    mapnik::geometry::geometry geom; // default empty
+    mapnik::geometry::geometry<double> geom; // default empty
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
 
@@ -158,15 +158,15 @@ mapnik::geometry::geometry shape_io::read_polygon(shape_file::record_type & reco
         parts[i] = record.read_ndr_integer();
     }
 
-    mapnik::geometry::multi_polygon multi_poly;
-    mapnik::geometry::polygon poly;
+    mapnik::geometry::multi_polygon<double> multi_poly;
+    mapnik::geometry::polygon<double> poly;
     for (int k = 0; k < num_parts; ++k)
     {
         int start = parts[k];
         int end;
         if (k == num_parts - 1) end = num_points;
         else end = parts[k + 1];
-        mapnik::geometry::linear_ring ring;
+        mapnik::geometry::linear_ring<double> ring;
         ring.reserve(end - start);
         for (int j = start; j < end; ++j)
         {

@@ -53,7 +53,7 @@ mapnik::feature_ptr hello_featureset::next()
 
         // take the outer ring of the bbox that was used to query
         // to dynamically generate a fake line
-        mapnik::geometry::line_string line;
+        mapnik::geometry::line_string<double> line;
         line.reserve(4);
         line.add_coord(box_.minx(),box_.maxy());
         line.add_coord(box_.maxx(),box_.maxy());

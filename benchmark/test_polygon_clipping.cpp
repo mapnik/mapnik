@@ -33,7 +33,7 @@
 #include <iostream>
 #include <cstdlib>
 
-void render(mapnik::geometry::multi_polygon const& geom,
+void render(mapnik::geometry::multi_polygon<double> const& geom,
             mapnik::box2d<double> const& extent,
             std::string const& name)
 {
@@ -79,7 +79,7 @@ public:
        expected_("./benchmark/data/polygon_clipping_agg") {}
     bool validate() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -89,12 +89,12 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double>>())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon const& poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
         mapnik::geometry::polygon_vertex_adapter va(poly);
 
 
@@ -107,8 +107,8 @@ public:
 
 
         clipped.rewind(0);
-        mapnik::geometry::polygon poly2;
-        mapnik::geometry::linear_ring ring;
+        mapnik::geometry::polygon<double> poly2;
+        mapnik::geometry::linear_ring<double> ring;
         // exterior ring
         unsigned cmd;
         double x, y, x0, y0;
@@ -147,7 +147,7 @@ public:
 
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        mapnik::geometry::multi_polygon mp;
+        mapnik::geometry::multi_polygon<double> mp;
         mp.emplace_back(poly2);
         auto env = mapnik::geometry::envelope(mp);
         if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
@@ -160,7 +160,7 @@ public:
     }
     bool operator()() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -170,7 +170,7 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double>>())
         {
             std::clog << "not a polygon!\n";
             return false;
@@ -179,7 +179,7 @@ public:
         for (unsigned i=0;i<iterations_;++i)
         {
             unsigned count = 0;
-            mapnik::geometry::polygon const& poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+            mapnik::geometry::polygon<double> const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
             mapnik::geometry::polygon_vertex_adapter va(poly);
             conv_clip clipped(va);
             clipped.clip_box(
@@ -222,7 +222,7 @@ public:
        expected_("./benchmark/data/polygon_clipping_clipper") {}
     bool validate() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -232,12 +232,12 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double>>())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
         agg::path_storage ps;
         ps.move_to(extent_.minx(), extent_.miny());
         ps.line_to(extent_.minx(), extent_.maxy());
@@ -253,8 +253,8 @@ public:
         unsigned cmd;
         double x,y;
         clipped.rewind(0);
-        mapnik::geometry::polygon poly2;
-        mapnik::geometry::linear_ring ring;
+        mapnik::geometry::polygon<double> poly2;
+        mapnik::geometry::linear_ring<double> ring;
         // TODO: handle resulting multipolygon
         // exterior ring
         while (true)
@@ -274,7 +274,7 @@ public:
         mapnik::geometry::correct(poly2);
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        mapnik::geometry::multi_polygon mp;
+        mapnik::geometry::multi_polygon<double> mp;
         mp.emplace_back(poly2);
         auto env = mapnik::geometry::envelope(mp);
         if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
@@ -287,7 +287,7 @@ public:
     }
     bool operator()() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -297,12 +297,12 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double>>())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon const& poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
         agg::path_storage ps;
         ps.move_to(extent_.minx(), extent_.miny());
         ps.line_to(extent_.minx(), extent_.maxy());
@@ -350,7 +350,7 @@ public:
        expected_("./benchmark/data/polygon_clipping_boost") {}
     bool validate() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -360,25 +360,25 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double> >())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
-        std::deque<mapnik::geometry::polygon> result;
+        std::deque<mapnik::geometry::polygon<double> > result;
         mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         boost::geometry::intersection(bbox,poly,result);
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        mapnik::geometry::multi_polygon mp;
+        mapnik::geometry::multi_polygon<double> mp;
         for (auto const& geom: result)
         {
             //std::clog << boost::geometry::dsv(geom) << "\n";
             mp.emplace_back(geom);
         }
-        mapnik::geometry::geometry geom2(mp);
+        mapnik::geometry::geometry<double> geom2(mp);
         auto env = mapnik::geometry::envelope(geom2);
         if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
         {
@@ -390,7 +390,7 @@ public:
     }
     bool operator()() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -400,18 +400,18 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double> >())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
         mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
-            std::deque<mapnik::geometry::polygon> result;
+            std::deque<mapnik::geometry::polygon<double> > result;
             boost::geometry::intersection(bbox,poly,result);
             unsigned count = 0;
             for (auto const& geom : result)
@@ -448,7 +448,7 @@ public:
        expected_("./benchmark/data/polygon_clipping_clipper") {}
     bool validate() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -458,12 +458,12 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double> >())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
         ClipperLib::Clipper clipper;
 
@@ -509,7 +509,7 @@ public:
         clipper.Execute(ClipperLib::ctIntersection, polygons, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
         clipper.Clear();
         ClipperLib::PolyNode* polynode = polygons.GetFirst();
-        mapnik::geometry::multi_polygon mp;
+        mapnik::geometry::multi_polygon<double> mp;
         mp.emplace_back();
         bool first = true;
         while (polynode)
@@ -526,7 +526,7 @@ public:
             }
             else
             {
-                mapnik::geometry::linear_ring hole;
+                mapnik::geometry::linear_ring<double> hole;
                 for (auto const& pt : polynode->Contour)
                 {
                     hole.add_coord(pt.X, pt.Y);
@@ -538,7 +538,7 @@ public:
         }
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        mapnik::geometry::geometry geom2(mp);
+        mapnik::geometry::geometry<double> geom2(mp);
         auto env = mapnik::geometry::envelope(geom2);
         if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
         {
@@ -550,7 +550,7 @@ public:
     }
     bool operator()() const
     {
-        mapnik::geometry::geometry geom;
+        mapnik::geometry::geometry<double> geom;
         if (!mapnik::from_wkt(wkt_in_, geom))
         {
             throw std::runtime_error("Failed to parse WKT");
@@ -560,18 +560,18 @@ public:
             std::clog << "empty geom!\n";
             return false;
         }
-        if (!geom.is<mapnik::geometry::polygon>())
+        if (!geom.is<mapnik::geometry::polygon<double> >())
         {
             std::clog << "not a polygon!\n";
             return false;
         }
-        mapnik::geometry::polygon & poly = mapnik::util::get<mapnik::geometry::polygon>(geom);
+        mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
         mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
-            std::deque<mapnik::geometry::polygon> result;
+            std::deque<mapnik::geometry::polygon<double> > result;
             boost::geometry::intersection(bbox,poly,result);
             unsigned count = 0;
             for (auto const& geom : result)

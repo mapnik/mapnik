@@ -78,7 +78,7 @@ public:
                 }
                 else
                 {
-                    geometry::geometry const& geom = (*pos_)->get_geometry();
+                    geometry::geometry<double> const& geom = (*pos_)->get_geometry();
                     if (bbox_.intersects(geometry::envelope(geom)))
                     {
                         return *pos_++;

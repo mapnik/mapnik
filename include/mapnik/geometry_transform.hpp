@@ -29,22 +29,22 @@
 
 namespace mapnik { namespace geometry { namespace detail {
 
-template <typename Transformer>
+template <typename Transformer, typename V>
 struct geometry_transform
 {
     geometry_transform(Transformer const& transformer)
         : transformer_(transformer) {}
 
-    using result_type = geometry;
+    using result_type = geometry<V>;
 
-    geometry operator() (geometry_empty const& empty) const
+    geometry<V> operator() (geometry_empty const& empty) const
     {
         return empty;
     }
 
-    geometry operator() (geometry_collection const& collection) const
+    geometry<V> operator() (geometry_collection<V> const& collection) const
     {
-        geometry_collection collection_out;
+        geometry_collection<V> collection_out;
         for (auto const& geom :  collection)
         {
             collection_out.push_back(std::move((*this)(geom)));
@@ -52,13 +52,13 @@ struct geometry_transform
         return collection_out;
     }
 
-    geometry operator() (geometry const& geom) const
+    geometry<V> operator() (geometry<V> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
     template <typename T>
-    geometry operator() (T const& geom) const
+    geometry<V> operator() (T const& geom) const
     {
         using geometry_type = T;
         geometry_type geom_transformed;
@@ -72,10 +72,10 @@ struct geometry_transform
 };
 } // ns detail
 
-template <typename T0, typename T1>
-geometry transform(T0 const& geom, T1 const& transformer)
+template <typename T0, typename T1, typename T2>
+geometry<T0> transform(T1 const& geom, T2 const& transformer)
 {
-    return detail::geometry_transform<T1>(transformer)(geom);
+    return detail::geometry_transform<T2, T0>(transformer)(geom);
 }
 
 }}

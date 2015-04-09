@@ -34,7 +34,7 @@
 
 namespace mapnik { namespace json {
 
-inline bool from_geojson(std::string const& json, mapnik::geometry::geometry & geom)
+inline bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom)
 {
     using namespace boost::spirit;
     static const geometry_grammar<char const*> g;

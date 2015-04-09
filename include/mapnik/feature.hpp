@@ -195,17 +195,17 @@ public:
         return ctx_;
     }
 
-    inline void set_geometry(geometry::geometry && geom)
+    inline void set_geometry(geometry::geometry<double> && geom)
     {
         geom_ = std::move(geom);
     }
 
-    inline void set_geometry_copy(geometry::geometry const& geom)
+    inline void set_geometry_copy(geometry::geometry<double> const& geom)
     {
         geom_ = geom;
     }
 
-    inline geometry::geometry const& get_geometry() const
+    inline geometry::geometry<double> const& get_geometry() const
     {
         return geom_;
     }
@@ -262,7 +262,7 @@ private:
     mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
-    geometry::geometry geom_;
+    geometry::geometry<double> geom_;
     raster_ptr raster_;
 };
 

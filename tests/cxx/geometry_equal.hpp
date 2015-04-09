@@ -79,7 +79,8 @@ auto zip_crange(Conts&... conts)
 
 using namespace mapnik::geometry;
 
-void assert_g_equal(geometry const& g1, geometry const& g2);
+template <typename T>
+void assert_g_equal(geometry<T> const& g1, geometry<T> const& g2);
 
 struct geometry_equal_visitor
 {
@@ -95,13 +96,15 @@ struct geometry_equal_visitor
         REQUIRE(true);
     }
 
-    void operator() (point const& p1, point const& p2)
+    template <typename T>
+    void operator() (point<T> const& p1, point<T> const& p2)
     {
         REQUIRE(p1.x == Approx(p2.x));
         REQUIRE(p1.y == Approx(p2.y));
     }
     
-    void operator() (line_string const& ls1, line_string const& ls2)
+    template <typename T>
+    void operator() (line_string<T> const& ls1, line_string<T> const& ls2)
     {
         if (ls1.size() != ls2.size())
         {
@@ -115,9 +118,10 @@ struct geometry_equal_visitor
         }
     }
     
-    void operator() (polygon const& p1, polygon const& p2)
+    template <typename T>
+    void operator() (polygon<T> const& p1, polygon<T> const& p2)
     {
-        (*this)(static_cast<line_string const&>(p1.exterior_ring), static_cast<line_string const&>(p2.exterior_ring));
+        (*this)(static_cast<line_string<T> const&>(p1.exterior_ring), static_cast<line_string<T> const&>(p2.exterior_ring));
         
         if (p1.interior_rings.size() != p2.interior_rings.size())
         {
@@ -126,16 +130,18 @@ struct geometry_equal_visitor
 
         for (auto const& p : zip_crange(p1.interior_rings, p2.interior_rings))
         {
-            (*this)(static_cast<line_string const&>(p.get<0>()),static_cast<line_string const&>(p.get<1>()));
+            (*this)(static_cast<line_string<T> const&>(p.get<0>()),static_cast<line_string<T> const&>(p.get<1>()));
         }
     }
 
-    void operator() (multi_point const& mp1, multi_point const& mp2)
+    template <typename T>
+    void operator() (multi_point<T> const& mp1, multi_point<T> const& mp2)
     {
-        (*this)(static_cast<line_string const&>(mp1), static_cast<line_string const&>(mp2));
+        (*this)(static_cast<line_string<T> const&>(mp1), static_cast<line_string<T> const&>(mp2));
     }
     
-    void operator() (multi_line_string const& mls1, multi_line_string const& mls2)
+    template <typename T>
+    void operator() (multi_line_string<T> const& mls1, multi_line_string<T> const& mls2)
     {
         if (mls1.size() != mls2.size())
         {
@@ -148,7 +154,8 @@ struct geometry_equal_visitor
         }
     }
     
-    void operator() (multi_polygon const& mpoly1, multi_polygon const& mpoly2)
+    template <typename T>
+    void operator() (multi_polygon<T> const& mpoly1, multi_polygon<T> const& mpoly2)
     {
         if (mpoly1.size() != mpoly2.size())
         {
@@ -161,10 +168,11 @@ struct geometry_equal_visitor
         }
     }
     
-    void operator() (mapnik::util::recursive_wrapper<geometry_collection> const& c1_, mapnik::util::recursive_wrapper<geometry_collection> const& c2_)
+    template <typename T>
+    void operator() (mapnik::util::recursive_wrapper<geometry_collection<T> > const& c1_, mapnik::util::recursive_wrapper<geometry_collection<T> > const& c2_)
     {
-        geometry_collection const& c1 = static_cast<geometry_collection const&>(c1_);
-        geometry_collection const& c2 = static_cast<geometry_collection const&>(c2_);
+        geometry_collection<T> const& c1 = static_cast<geometry_collection<T> const&>(c1_);
+        geometry_collection<T> const& c2 = static_cast<geometry_collection<T> const&>(c2_);
         if (c1.size() != c2.size())
         {
             REQUIRE(false);
@@ -176,7 +184,8 @@ struct geometry_equal_visitor
         }
     }
     
-    void operator() (geometry_collection const& c1, geometry_collection const& c2)
+    template <typename T>
+    void operator() (geometry_collection<T> const& c1, geometry_collection<T> const& c2)
     {
         if (c1.size() != c2.size())
         {
@@ -190,7 +199,8 @@ struct geometry_equal_visitor
     }
 };
 
-void assert_g_equal(geometry const& g1, geometry const& g2)
+template <typename T>
+void assert_g_equal(geometry<T> const& g1, geometry<T> const& g2)
 {
     return mapnik::util::apply_visitor(geometry_equal_visitor(), g1, g2);
 }

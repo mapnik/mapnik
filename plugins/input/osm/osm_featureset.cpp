@@ -81,7 +81,7 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         if (static_cast<osm_way*>(cur_item)->is_polygon())
         {
-            mapnik::geometry::linear_ring ring;
+            mapnik::geometry::linear_ring<double> ring;
             for (unsigned int count = 0;
                  count < static_cast<osm_way*>(cur_item)->nodes.size();
                  count++)
@@ -89,13 +89,13 @@ feature_ptr osm_featureset<filterT>::next()
                 ring.add_coord(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
                                 static_cast<osm_way*>(cur_item)->nodes[count]->lat);
             }
-            mapnik::geometry::polygon geom;
+            mapnik::geometry::polygon<double> geom;
             geom.set_exterior_ring(std::move(ring));
             feature->set_geometry(std::move(geom));
         }
         else
         {
-            mapnik::geometry::line_string geom;
+            mapnik::geometry::line_string<double> geom;
             for (unsigned int count = 0;
                  count < static_cast<osm_way*>(cur_item)->nodes.size();
                  count++)

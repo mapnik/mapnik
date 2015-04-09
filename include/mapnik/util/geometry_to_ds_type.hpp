@@ -42,44 +42,44 @@ struct datasource_geometry_type
         return mapnik::datasource_geometry_t::Unknown;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::point const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::point<double> const&) const
     {
         return mapnik::datasource_geometry_t::Point;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::line_string const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::line_string<double> const&) const
     {
         return mapnik::datasource_geometry_t::LineString;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::polygon const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::polygon<double> const&) const
     {
         return mapnik::datasource_geometry_t::Polygon;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_point const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_point<double> const&) const
     {
         return mapnik::datasource_geometry_t::Point;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_line_string const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_line_string<double> const&) const
     {
         return mapnik::datasource_geometry_t::LineString;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_polygon const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_polygon<double> const&) const
     {
         return mapnik::datasource_geometry_t::Polygon;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_collection const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_collection<double> const&) const
     {
         return mapnik::datasource_geometry_t::Collection;
     }
 };
 } // detail
 
-static inline mapnik::datasource_geometry_t to_ds_type(mapnik::geometry::geometry const& geom)
+static inline mapnik::datasource_geometry_t to_ds_type(mapnik::geometry::geometry<double> const& geom)
 {
     return util::apply_visitor(detail::datasource_geometry_type(), geom);
 }

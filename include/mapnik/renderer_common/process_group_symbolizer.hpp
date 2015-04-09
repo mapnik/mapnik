@@ -343,7 +343,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
         // try to ensure that we don't get edge artefacts due to any
         // symbolizers with avoid-edges set: only the avoid-edges of
         // the group symbolizer itself should matter.
-        geometry::point origin_pt(x,y);
+        geometry::point<double> origin_pt(x,y);
         sub_feature->set_geometry(origin_pt);
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())

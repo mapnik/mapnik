@@ -65,9 +65,9 @@ struct end_container<mapnik::feature_impl const>
 
 template <>
 struct transform_attribute<const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>,
-                           mapnik::geometry::geometry const& , karma::domain>
+                           mapnik::geometry::geometry<double> const& , karma::domain>
 {
-    using type = mapnik::geometry::geometry const&;
+    using type = mapnik::geometry::geometry<double> const&;
     static type pre(const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>& f)
     {
         return boost::fusion::at<mpl::int_<0> >(f).get_geometry();
@@ -98,7 +98,7 @@ struct feature_generator_grammar :
 {
     feature_generator_grammar();
     karma::rule<OutputIterator, FeatureType const&()> feature;
-    geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry> geometry;
+    geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry<double> > geometry;
     properties_generator_grammar<OutputIterator, FeatureType> properties;
     boost::phoenix::function<get_id<FeatureType> > id_;
 };

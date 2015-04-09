@@ -32,10 +32,10 @@
 
 namespace mapnik { namespace util {
 
-inline bool to_wkt(std::string & wkt,  mapnik::geometry::geometry const& geom)
+inline bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<double> const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::geometry::geometry> generator;
+    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double> > generator;
     sink_type sink(wkt);
     return boost::spirit::karma::generate(sink, generator, geom);
 }

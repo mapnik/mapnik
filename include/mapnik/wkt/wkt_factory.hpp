@@ -34,7 +34,7 @@
 
 namespace mapnik {
 
-inline bool from_wkt(std::string const& wkt, mapnik::geometry::geometry & geom)
+inline bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> & geom)
 {
     using namespace boost::spirit;
     static const mapnik::wkt::wkt_grammar<std::string::const_iterator> g;

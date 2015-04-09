@@ -196,7 +196,7 @@ public:
             const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
-                mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
+                mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
                 if (!mapnik::geometry::is_empty(geom))
                 {
                     mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
@@ -280,7 +280,7 @@ public:
                 const char* data = (const char*) rs->column_blob(0, size);
                 if (data)
                 {
-                    mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
+                    mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
                     if (!mapnik::geometry::is_empty(geom))
                     {
                         mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
@@ -356,7 +356,7 @@ public:
             const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
-                mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
+                mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
                 if (!mapnik::geometry::is_empty(geom))
                 {
                     mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);

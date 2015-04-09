@@ -97,13 +97,13 @@ bool proj_transform::forward (double & x, double & y , double & z) const
     return forward(&x, &y, &z, 1);
 }
 
-bool proj_transform::forward (geometry::point & p) const
+bool proj_transform::forward (geometry::point<double> & p) const
 {
     double z = 0;
     return forward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::forward (geometry::line_string & ls) const
+unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
 {
     if (is_source_equal_dest_)
         return 0;
@@ -220,13 +220,13 @@ bool proj_transform::backward (double & x, double & y , double & z) const
     return backward(&x, &y, &z, 1);
 }
 
-bool proj_transform::backward (geometry::point & p) const
+bool proj_transform::backward (geometry::point<double> & p) const
 {
     double z = 0;
     return backward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::backward (geometry::line_string & ls) const
+unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
 {
     if (is_source_equal_dest_)
         return 0;

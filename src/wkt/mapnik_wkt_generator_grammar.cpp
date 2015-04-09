@@ -27,6 +27,6 @@
 namespace mapnik { namespace wkt {
 
 using sink_type = std::back_insert_iterator<std::string>;
-template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry>;
+template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double> >;
 
 }}

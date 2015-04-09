@@ -118,9 +118,9 @@ public:
         needSwap_ = byteOrder_ ? wkbXDR : wkbNDR;
     }
 
-    mapnik::geometry::geometry read()
+    mapnik::geometry::geometry<double> read()
     {
-        mapnik::geometry::geometry geom = mapnik::geometry::geometry_empty();
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
         int type = read_integer();
         switch (type)
         {
@@ -263,19 +263,19 @@ private:
     }
 
     template <bool Z = false, bool M = false>
-    mapnik::geometry::point read_point()
+    mapnik::geometry::point<double> read_point()
     {
         double x = read_double();
         double y = read_double();
         if (Z) pos_ += 8;
         if (M) pos_ += 8;
-        return mapnik::geometry::point(x, y);
+        return mapnik::geometry::point<double>(x, y);
     }
 
     template <bool Z = false, bool M = false>
-    mapnik::geometry::multi_point read_multipoint()
+    mapnik::geometry::multi_point<double> read_multipoint()
     {
-        mapnik::geometry::multi_point multi_point;
+        mapnik::geometry::multi_point<double> multi_point;
         int num_points = read_integer();
         multi_point.reserve(num_points);
         for (int i = 0; i < num_points; ++i)
@@ -287,23 +287,23 @@ private:
     }
 
     template <bool M = false, bool Z = false>
-    mapnik::geometry::line_string read_linestring()
+    mapnik::geometry::line_string<double> read_linestring()
     {
-        mapnik::geometry::line_string line;
+        mapnik::geometry::line_string<double> line;
         int num_points = read_integer();
         if (num_points > 0)
         {
             line.reserve(num_points);
-            read_coords<mapnik::geometry::line_string, M, Z>(line, num_points);
+            read_coords<mapnik::geometry::line_string<double>, M, Z>(line, num_points);
         }
         return line;
     }
 
     template <bool M = false, bool Z = false>
-    mapnik::geometry::multi_line_string read_multilinestring()
+    mapnik::geometry::multi_line_string<double> read_multilinestring()
     {
         int num_lines = read_integer();
-        mapnik::geometry::multi_line_string multi_line;
+        mapnik::geometry::multi_line_string<double> multi_line;
         multi_line.reserve(num_lines);
         for (int i = 0; i < num_lines; ++i)
         {
@@ -314,10 +314,10 @@ private:
     }
 
     template <bool M = false, bool Z = false>
-    mapnik::geometry::polygon read_polygon()
+    mapnik::geometry::polygon<double> read_polygon()
     {
         int num_rings = read_integer();
-        mapnik::geometry::polygon poly;
+        mapnik::geometry::polygon<double> poly;
         if (num_rings > 1)
         {
             poly.interior_rings.reserve(num_rings - 1);
@@ -325,12 +325,12 @@ private:
 
         for (int i = 0; i < num_rings; ++i)
         {
-            mapnik::geometry::linear_ring ring;
+            mapnik::geometry::linear_ring<double> ring;
             int num_points = read_integer();
             if (num_points > 0)
             {
                 ring.reserve(num_points);
-                read_coords<mapnik::geometry::linear_ring, M, Z>(ring, num_points);
+                read_coords<mapnik::geometry::linear_ring<double>, M, Z>(ring, num_points);
             }
             if ( i == 0) poly.set_exterior_ring(std::move(ring));
             else poly.add_hole(std::move(ring));
@@ -339,10 +339,10 @@ private:
     }
 
     template <bool M = false, bool Z = false>
-    mapnik::geometry::multi_polygon read_multipolygon()
+    mapnik::geometry::multi_polygon<double> read_multipolygon()
     {
         int num_polys = read_integer();
-        mapnik::geometry::multi_polygon multi_poly;
+        mapnik::geometry::multi_polygon<double> multi_poly;
         for (int i = 0; i < num_polys; ++i)
         {
             pos_ += 5;
@@ -351,10 +351,10 @@ private:
         return multi_poly;
     }
 
-    mapnik::geometry::geometry_collection read_collection()
+    mapnik::geometry::geometry_collection<double> read_collection()
     {
         int num_geometries = read_integer();
-        mapnik::geometry::geometry_collection collection;
+        mapnik::geometry::geometry_collection<double> collection;
         for (int i = 0; i < num_geometries; ++i)
         {
             pos_ += 1; // skip byte order
@@ -405,12 +405,12 @@ private:
 
 };
 
-mapnik::geometry::geometry geometry_utils::from_wkb(const char* wkb,
+mapnik::geometry::geometry<double> geometry_utils::from_wkb(const char* wkb,
                                                         unsigned size,
                                                         wkbFormat format)
 {
     wkb_reader reader(wkb, size, format);
-    mapnik::geometry::geometry geom(reader.read());
+    mapnik::geometry::geometry<double> geom(reader.read());
     mapnik::geometry::correct(geom);
     return geom;
 }

@@ -6,13 +6,13 @@
 TEST_CASE("vertex_adapters") {
 
 SECTION("polygon") {
-    mapnik::geometry::polygon g;
+    mapnik::geometry::polygon<double> g;
     g.exterior_ring.add_coord(1,1);
     g.exterior_ring.add_coord(2,2);
     g.exterior_ring.add_coord(100,100);
     g.exterior_ring.add_coord(1,1);
 
-    mapnik::geometry::polygon_vertex_adapter va(g);
+    mapnik::geometry::polygon_vertex_adapter<double> va(g);
     double x,y;
     unsigned cmd;
 
@@ -45,14 +45,14 @@ SECTION("polygon") {
 }
 
 SECTION("polygon with hole") {
-    mapnik::geometry::polygon g;
+    mapnik::geometry::polygon<double> g;
     g.exterior_ring.add_coord(0,0);
     g.exterior_ring.add_coord(-10,0);
     g.exterior_ring.add_coord(-10,10);
     g.exterior_ring.add_coord(0,10);
     g.exterior_ring.add_coord(0,0);
-    std::vector<mapnik::geometry::linear_ring> interior_rings;
-    mapnik::geometry::linear_ring hole;
+    std::vector<mapnik::geometry::linear_ring<double> > interior_rings;
+    mapnik::geometry::linear_ring<double> hole;
     hole.add_coord(-7,7);
     hole.add_coord(-7,3);
     hole.add_coord(-3,3);
@@ -60,7 +60,7 @@ SECTION("polygon with hole") {
     hole.add_coord(-7,7);
     g.add_hole(std::move(hole));
 
-    mapnik::geometry::linear_ring hole_in_hole;
+    mapnik::geometry::linear_ring<double> hole_in_hole;
     hole_in_hole.add_coord(-6,4);
     hole_in_hole.add_coord(-6,6);
     hole_in_hole.add_coord(-4,6);
@@ -68,7 +68,7 @@ SECTION("polygon with hole") {
     hole_in_hole.add_coord(-6,4);
     g.add_hole(std::move(hole_in_hole));
 
-    mapnik::geometry::polygon_vertex_adapter va(g);
+    mapnik::geometry::polygon_vertex_adapter<double> va(g);
     double x,y;
     unsigned cmd;
 
