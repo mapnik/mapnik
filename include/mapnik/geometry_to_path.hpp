@@ -37,9 +37,13 @@ struct geometry_to_path
     template <typename T>
     void operator() (geometry<T> const& geom) const
     {
-        return mapnik::util::apply_visitor(*this, geom);
+        mapnik::util::apply_visitor(*this, geom);
     }
 
+    void operator() (geometry_empty const&) const
+    {
+        // no-op
+    }
     // point
     template <typename T>
     void operator() (point<T> const& pt) const
