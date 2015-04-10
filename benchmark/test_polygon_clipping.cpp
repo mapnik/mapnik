@@ -512,26 +512,25 @@ public:
         bool first = true;
         while (polynode)
         {
-            //do stuff with polynode here
-            if (first) first = false;
-            else mp.emplace_back();
             if (!polynode->IsHole())
             {
+                if (first) first = false;
+                else mp.emplace_back(); // start new polygon
                 for (auto const& pt : polynode->Contour)
                 {
                     mp.back().exterior_ring.add_coord(pt.X, pt.Y);
                 }
-            }
-            else
-            {
-                mapnik::geometry::linear_ring hole;
-                for (auto const& pt : polynode->Contour)
+                // childrens are interior rings
+                for (auto const* ring : polynode->Childs)
                 {
-                    hole.add_coord(pt.X, pt.Y);
+                    mapnik::geometry::linear_ring hole;
+                    for (auto const& pt : ring->Contour)
+                    {
+                        hole.add_coord(pt.X, pt.Y);
+                    }
+                    mp.back().add_hole(std::move(hole));
                 }
-                mp.back().add_hole(std::move(hole));
             }
-            std::cerr << "Is hole? " << polynode->IsHole() << std::endl;
             polynode = polynode->GetNext();
         }
         std::string expect = expected_+".png";
