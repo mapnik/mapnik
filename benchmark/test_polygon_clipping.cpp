@@ -37,7 +37,7 @@ void render(mapnik::geometry::multi_polygon<double> const& geom,
             mapnik::box2d<double> const& extent,
             std::string const& name)
 {
-    using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry::polygon_vertex_adapter>;
+    using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry::polygon_vertex_adapter<double>>;
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_plain>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
     mapnik::image_rgba8 im(256,256);
@@ -54,7 +54,7 @@ void render(mapnik::geometry::multi_polygon<double> const& geom,
     agg::rasterizer_scanline_aa<> ras;
     for (auto const& poly : geom)
     {
-        mapnik::geometry::polygon_vertex_adapter va(poly);
+        mapnik::geometry::polygon_vertex_adapter<double> va(poly);
         path_type path(tr,va,prj_trans);
         ras.add_path(path);
     }
@@ -69,7 +69,7 @@ class test1 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    using conv_clip = agg::conv_clip_polygon<mapnik::geometry::polygon_vertex_adapter>;
+    using conv_clip = agg::conv_clip_polygon<mapnik::geometry::polygon_vertex_adapter<double>>;
     test1(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -95,7 +95,7 @@ public:
             return false;
         }
         mapnik::geometry::polygon<double> const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
-        mapnik::geometry::polygon_vertex_adapter va(poly);
+        mapnik::geometry::polygon_vertex_adapter<double> va(poly);
 
 
         conv_clip clipped(va);
@@ -180,7 +180,7 @@ public:
         {
             unsigned count = 0;
             mapnik::geometry::polygon<double> const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
-            mapnik::geometry::polygon_vertex_adapter va(poly);
+            mapnik::geometry::polygon_vertex_adapter<double> va(poly);
             conv_clip clipped(va);
             clipped.clip_box(
                         extent_.minx(),
@@ -212,7 +212,7 @@ class test2 : public benchmark::test_case
     mapnik::box2d<double> extent_;
     std::string expected_;
 public:
-    using poly_clipper = agg::conv_clipper<mapnik::geometry::polygon_vertex_adapter, agg::path_storage>;
+    using poly_clipper = agg::conv_clipper<mapnik::geometry::polygon_vertex_adapter<double>, agg::path_storage>;
     test2(mapnik::parameters const& params,
           std::string const& wkt_in,
           mapnik::box2d<double> const& extent)
@@ -244,7 +244,7 @@ public:
         ps.line_to(extent_.maxx(), extent_.maxy());
         ps.line_to(extent_.maxx(), extent_.miny());
         ps.close_polygon();
-        mapnik::geometry::polygon_vertex_adapter va(poly);
+        mapnik::geometry::polygon_vertex_adapter<double> va(poly);
         poly_clipper clipped(va,ps,
                              agg::clipper_and,
                              agg::clipper_non_zero,
@@ -313,7 +313,7 @@ public:
         for (unsigned i=0;i<iterations_;++i)
         {
             unsigned count = 0;
-            mapnik::geometry::polygon_vertex_adapter va(poly);
+            mapnik::geometry::polygon_vertex_adapter<double> va(poly);
             poly_clipper clipped(va,ps,
                                  agg::clipper_and,
                                  agg::clipper_non_zero,
@@ -368,7 +368,7 @@ public:
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
         std::deque<mapnik::geometry::polygon<double> > result;
-        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
+        mapnik::geometry::bounding_box<double> bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         boost::geometry::intersection(bbox,poly,result);
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
@@ -407,7 +407,7 @@ public:
         }
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
-        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
+        mapnik::geometry::bounding_box<double> bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
@@ -416,7 +416,7 @@ public:
             unsigned count = 0;
             for (auto const& geom : result)
             {
-                mapnik::geometry::polygon_vertex_adapter va(geom);
+                mapnik::geometry::polygon_vertex_adapter<double> va(geom);
                 unsigned cmd;
                 double x,y;
                 while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END) {
@@ -567,7 +567,7 @@ public:
         }
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
-        mapnik::geometry::bounding_box bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
+        mapnik::geometry::bounding_box<double> bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
@@ -576,7 +576,7 @@ public:
             unsigned count = 0;
             for (auto const& geom : result)
             {
-                mapnik::geometry::polygon_vertex_adapter va(geom);
+                mapnik::geometry::polygon_vertex_adapter<double> va(geom);
                 unsigned cmd;
                 double x,y;
                 while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END) {

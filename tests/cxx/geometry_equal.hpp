@@ -102,7 +102,7 @@ struct geometry_equal_visitor
         REQUIRE(p1.x == Approx(p2.x));
         REQUIRE(p1.y == Approx(p2.y));
     }
-    
+
     template <typename T>
     void operator() (line_string<T> const& ls1, line_string<T> const& ls2)
     {
@@ -111,18 +111,18 @@ struct geometry_equal_visitor
             REQUIRE(false);
         }
 
-        for(auto const& p : zip_crange(ls1, ls2)) 
+        for(auto const& p : zip_crange(ls1, ls2))
         {
-            REQUIRE(p.get<0>().x == Approx(p.get<1>().x));
-            REQUIRE(p.get<0>().y == Approx(p.get<1>().y));
+            REQUIRE(p.template get<0>().x == Approx(p.template get<1>().x));
+            REQUIRE(p.template get<0>().y == Approx(p.template get<1>().y));
         }
     }
-    
+
     template <typename T>
     void operator() (polygon<T> const& p1, polygon<T> const& p2)
     {
         (*this)(static_cast<line_string<T> const&>(p1.exterior_ring), static_cast<line_string<T> const&>(p2.exterior_ring));
-        
+
         if (p1.interior_rings.size() != p2.interior_rings.size())
         {
             REQUIRE(false);
@@ -130,7 +130,7 @@ struct geometry_equal_visitor
 
         for (auto const& p : zip_crange(p1.interior_rings, p2.interior_rings))
         {
-            (*this)(static_cast<line_string<T> const&>(p.get<0>()),static_cast<line_string<T> const&>(p.get<1>()));
+            (*this)(static_cast<line_string<T> const&>(p.template get<0>()),static_cast<line_string<T> const&>(p.template get<1>()));
         }
     }
 
@@ -139,7 +139,7 @@ struct geometry_equal_visitor
     {
         (*this)(static_cast<line_string<T> const&>(mp1), static_cast<line_string<T> const&>(mp2));
     }
-    
+
     template <typename T>
     void operator() (multi_line_string<T> const& mls1, multi_line_string<T> const& mls2)
     {
@@ -150,10 +150,10 @@ struct geometry_equal_visitor
 
         for (auto const& ls : zip_crange(mls1, mls2))
         {
-            (*this)(ls.get<0>(),ls.get<1>());
+            (*this)(ls.template get<0>(),ls.template get<1>());
         }
     }
-    
+
     template <typename T>
     void operator() (multi_polygon<T> const& mpoly1, multi_polygon<T> const& mpoly2)
     {
@@ -164,10 +164,10 @@ struct geometry_equal_visitor
 
         for (auto const& poly : zip_crange(mpoly1, mpoly2))
         {
-            (*this)(poly.get<0>(),poly.get<1>());
+            (*this)(poly.template get<0>(),poly.template get<1>());
         }
     }
-    
+
     template <typename T>
     void operator() (mapnik::util::recursive_wrapper<geometry_collection<T> > const& c1_, mapnik::util::recursive_wrapper<geometry_collection<T> > const& c2_)
     {
@@ -180,10 +180,10 @@ struct geometry_equal_visitor
 
         for (auto const& g : zip_crange(c1, c2))
         {
-            assert_g_equal(g.get<0>(),g.get<1>());
+            assert_g_equal(g.template get<0>(),g.template get<1>());
         }
     }
-    
+
     template <typename T>
     void operator() (geometry_collection<T> const& c1, geometry_collection<T> const& c2)
     {
@@ -194,7 +194,7 @@ struct geometry_equal_visitor
 
         for (auto const& g : zip_crange(c1, c2))
         {
-            assert_g_equal(g.get<0>(),g.get<1>());
+            assert_g_equal(g.template get<0>(),g.template get<1>());
         }
     }
 };
