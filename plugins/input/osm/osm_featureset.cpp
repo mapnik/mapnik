@@ -63,7 +63,7 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         double lat = static_cast<osm_node*>(cur_item)->lat;
         double lon = static_cast<osm_node*>(cur_item)->lon;
-        feature->set_geometry(mapnik::geometry::point(lon,lat));
+        feature->set_geometry(mapnik::geometry::point<double>(lon,lat));
     }
     else if (dataset_->current_item_is_way())
     {

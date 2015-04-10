@@ -10,10 +10,11 @@ hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string
     : box_(box),
       feature_id_(1),
       tr_(new mapnik::transcoder(encoding)),
-      ctx_(std::make_shared<mapnik::context_type>()) {
-        // add known field names to attributes schema
-        ctx_->push("key");
-      }
+      ctx_(std::make_shared<mapnik::context_type>())
+{
+     // add known field names to attributes schema
+     ctx_->push("key");
+ }
 
 hello_featureset::~hello_featureset() { }
 
@@ -35,7 +36,7 @@ mapnik::feature_ptr hello_featureset::next()
         mapnik::coord2d center = box_.center();
 
         // create a new point geometry
-        feature->set_geometry(mapnik::geometry::point(center.x,center.y));
+        feature->set_geometry(mapnik::geometry::point<double>(center.x,center.y));
 
         // return the feature!
         return feature;
