@@ -46,8 +46,8 @@ public:
     bool is_known() const;
     bool forward (double& x, double& y , double& z) const;
     bool backward (double& x, double& y , double& z) const;
-    bool forward (double *x, double *y , double *z, int point_count) const;
-    bool backward (double *x, double *y , double *z, int point_count) const;
+    bool forward (double *x, double *y , double *z, int point_count, int offset = 1) const;
+    bool backward (double *x, double *y , double *z, int point_count, int offset = 1) const;
     bool forward (geometry::point<double> & p) const;
     bool backward (geometry::point<double> & p) const;
     unsigned int forward (geometry::line_string<double> & ls) const;

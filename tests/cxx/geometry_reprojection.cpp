@@ -1152,4 +1152,123 @@ SECTION("test_projection_4326_3857 - Geometry Collection Variant Object") {
     }
 } // END SECTION
 
+SECTION("test_projection_4269_3857 - Line_String Geometry Object") {
+    using namespace mapnik::geometry;
+    mapnik::projection source("+init=epsg:4269");
+    mapnik::projection dest("+init=epsg:3857");
+    mapnik::proj_transform proj_trans1(source, dest);
+    mapnik::proj_transform proj_trans2(dest, source);
+    line_string<double> geom1;
+    geom1.emplace_back(point<double>(-97.48872756958008, 35.360286150765084));
+    geom1.emplace_back(point<double>(-97.48065948486328, 35.34894577151337));
+    geom1.emplace_back(point<double>(-97.47267723083496, 35.36224605490395));
+    geom1.emplace_back(point<double>(-97.46323585510252, 35.34523530173256));
+    geom1.emplace_back(point<double>(-97.45963096618651, 35.36329598397908));
+    geom1.emplace_back(point<double>(-97.47550964355469, 35.369245324153866));
+    line_string<double> geom2;
+    geom2.emplace_back(point<double>(-10852395.511130, 4212951.024108));
+    geom2.emplace_back(point<double>(-10851497.376047, 4211403.174286));
+    geom2.emplace_back(point<double>(-10850608.795594, 4213218.553707));
+    geom2.emplace_back(point<double>(-10849557.786455, 4210896.778973));
+    geom2.emplace_back(point<double>(-10849156.492056, 4213361.873135));
+    geom2.emplace_back(point<double>(-10850924.098335, 4214174.016561));
+    unsigned int err = 0;
+    {
+        // Test Standard Transform
+        line_string<double> new_geom = reproject_copy(geom1, proj_trans1, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform in reverse
+        line_string<double> new_geom = reproject_copy(geom2, proj_trans2, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform providing projections not transfrom
+        line_string<double> new_geom = reproject_copy(geom1, source, dest, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform providing projections in reverse
+        line_string<double> new_geom = reproject_copy(geom2, dest, source, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform in place
+        line_string<double> geom3(geom1);
+        REQUIRE(reproject(geom3, proj_trans1));
+        assert_g_equal(geom3, geom2);
+        // Transform in place reverse
+        REQUIRE(reproject(geom3, proj_trans2));
+        assert_g_equal(geom3, geom1);
+    }
+    {
+        // Transform in place providing projections
+        line_string<double> geom3(geom1);
+        REQUIRE(reproject(geom3, source, dest));
+        assert_g_equal(geom3, geom2);
+        // Transform in place provoding projections reversed
+        REQUIRE(reproject(geom3, dest, source));
+        assert_g_equal(geom3, geom1);
+    }
+} // End Section
+
+SECTION("test_projection_4269_3857 - Point Geometry Object") {
+    using namespace mapnik::geometry;
+    mapnik::projection source("+init=epsg:4269");
+    mapnik::projection dest("+init=epsg:3857");
+    mapnik::proj_transform proj_trans1(source, dest);
+    mapnik::proj_transform proj_trans2(dest, source);
+    point<double> geom1(-97.552175, 35.522895);
+    point<double> geom2(-10859458.446776, 4235169.496066);
+    unsigned int err = 0;
+    {
+        // Test Standard Transform
+        point<double> new_geom = reproject_copy(geom1, proj_trans1, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform in reverse
+        point<double> new_geom = reproject_copy(geom2, proj_trans2, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform providing projections not transfrom
+        point<double> new_geom = reproject_copy(geom1, source, dest, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom2);
+    }
+    {
+        // Transform providing projections in reverse
+        point<double> new_geom = reproject_copy(geom2, dest, source, err);
+        REQUIRE(err == 0);
+        assert_g_equal(new_geom, geom1);
+    }
+    {
+        // Transform in place
+        point<double> geom3(-97.552175, 35.522895);
+        REQUIRE(reproject(geom3, proj_trans1));
+        assert_g_equal(geom3, geom2);
+        // Transform in place reverse - back
+        REQUIRE(reproject(geom3, proj_trans2));
+        assert_g_equal(geom3, geom1);
+    }
+    {
+        // Transform in place providing projections
+        point<double> geom3(-97.552175, 35.522895);
+        REQUIRE(reproject(geom3, source, dest));
+        assert_g_equal(geom3, geom2);
+        // Transform in place provoding projections reversed
+        REQUIRE(reproject(geom3, dest, source));
+        assert_g_equal(geom3, geom1);
+    }
+} // End Section
+
+
 } // End Testcase
