@@ -367,9 +367,10 @@ public:
         }
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
+
         std::deque<mapnik::geometry::polygon<double> > result;
-        mapnik::geometry::bounding_box<double> bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
-        boost::geometry::intersection(bbox,poly,result);
+        boost::geometry::intersection(extent_,poly,result);
+
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
         mapnik::geometry::multi_polygon<double> mp;
@@ -407,12 +408,12 @@ public:
         }
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
-        mapnik::geometry::bounding_box<double> bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
+
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
             std::deque<mapnik::geometry::polygon<double> > result;
-            boost::geometry::intersection(bbox,poly,result);
+            boost::geometry::intersection(extent_,poly,result);
             unsigned count = 0;
             for (auto const& geom : result)
             {
@@ -514,26 +515,25 @@ public:
         bool first = true;
         while (polynode)
         {
-            //do stuff with polynode here
-            if (first) first = false;
-            else mp.emplace_back();
             if (!polynode->IsHole())
             {
+                if (first) first = false;
+                else mp.emplace_back(); // start new polygon
                 for (auto const& pt : polynode->Contour)
                 {
                     mp.back().exterior_ring.add_coord(pt.X, pt.Y);
                 }
-            }
-            else
-            {
-                mapnik::geometry::linear_ring<double> hole;
-                for (auto const& pt : polynode->Contour)
+                // childrens are interior rings
+                for (auto const* ring : polynode->Childs)
                 {
-                    hole.add_coord(pt.X, pt.Y);
+                    mapnik::geometry::linear_ring<double> hole;
+                    for (auto const& pt : ring->Contour)
+                    {
+                        hole.add_coord(pt.X, pt.Y);
+                    }
+                    mp.back().add_hole(std::move(hole));
                 }
-                mp.back().add_hole(std::move(hole));
             }
-            std::cerr << "Is hole? " << polynode->IsHole() << std::endl;
             polynode = polynode->GetNext();
         }
         std::string expect = expected_+".png";
@@ -567,12 +567,13 @@ public:
         }
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
-        mapnik::geometry::bounding_box<double> bbox(extent_.minx(),extent_.miny(),extent_.maxx(),extent_.maxy());
+
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
             std::deque<mapnik::geometry::polygon<double> > result;
-            boost::geometry::intersection(bbox,poly,result);
+            boost::geometry::intersection(extent_,poly,result);
+
             unsigned count = 0;
             for (auto const& geom : result)
             {

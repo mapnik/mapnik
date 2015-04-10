@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_HPP
 
 #include <mapnik/util/variant.hpp>
-
+#include <mapnik/coord.hpp>
 #include <vector>
 #include <type_traits>
 #include <cstddef>
@@ -39,6 +39,9 @@ struct point
     point(T x_, T y_)
         : x(x_), y(y_)
     {}
+    // temp - remove when geometry is templated on value_type
+    point(mapnik::coord<double, 2> const& c)
+        : x(c.x), y(c.y) {}
 
     point(point const& other) = default;
     point(point && other) noexcept = default;
@@ -47,16 +50,6 @@ struct point
     value_type y;
 };
 
-template <typename T>
-struct bounding_box
-{
-    bounding_box() {} // no-init
-    bounding_box(T lox, T loy, T hix, T hiy)
-        : p0(lox,loy),
-          p1(hix,hiy) {}
-    point<T> p0;
-    point<T> p1;
-};
 
 template <typename T>
 struct line_string : std::vector<point<T> >
