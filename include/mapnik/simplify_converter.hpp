@@ -244,7 +244,8 @@ private:
                     // We eliminated the previous point because it was too close, but
                     // we have to output it now anyway, since this is the end of the
                     // vertex stream. Make sure that we output SEG_CLOSE in the next call.
-                    vtx = last;
+                    vtx.x = start_vertex_.x;
+                    vtx.y = start_vertex_.y;
                     status_ = closing;
                 }
                 break;
