@@ -57,7 +57,7 @@ struct unicode_string : qi::grammar<Iterator, std::string()>
 
 struct push_utf8
 {
-    typedef void result_type;
+    using result_type = void;
 
     void operator()(std::string& utf8, uchar code_point) const
     {
@@ -70,7 +70,7 @@ struct push_utf8
 
 struct push_esc
 {
-    typedef void result_type;
+    using result_type = void;
 
     void operator()(std::string& utf8, uchar c) const
     {
