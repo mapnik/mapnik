@@ -98,7 +98,40 @@ SECTION("polygon with hole") {
     REQUIRE( x == 0 );
     REQUIRE( y == 0 );
 
-    // first hole
+    // exterior ring via ring_vertex_adapter
+    mapnik::geometry::ring_vertex_adapter va2(g.exterior_ring);
+    cmd = va2.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_MOVETO );
+    REQUIRE( x == 0 );
+    REQUIRE( y == 0 );
+
+    cmd = va2.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_LINETO );
+    REQUIRE( x == -10 );
+    REQUIRE( y == 0 );
+
+    cmd = va2.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_LINETO );
+    REQUIRE( x == -10 );
+    REQUIRE( y == 10 );
+
+    cmd = va2.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_LINETO );
+    REQUIRE( x == 0 );
+    REQUIRE( y == 10 );
+
+    cmd = va2.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_CLOSE );
+    REQUIRE( x == 0 );
+    REQUIRE( y == 0 );
+
+    // since ring adapter is only for exterior, next should be END
+    cmd = va2.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_END );
+    REQUIRE( x == 0 );
+    REQUIRE( y == 0 );
+
+    // first hole for polygon_adapter
     cmd = va.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_MOVETO );
     REQUIRE( x == -7 );

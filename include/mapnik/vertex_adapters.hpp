@@ -178,6 +178,57 @@ private:
     mutable bool start_loop_;
 };
 
+struct ring_vertex_adapter
+{
+    using value_type = typename point::value_type;
+    ring_vertex_adapter(linear_ring const& ring)
+        : ring_(ring),
+          current_index_(0),
+          end_index_(ring_.size()),
+          start_loop_(true) {}
+
+    void rewind(unsigned) const
+    {
+        current_index_ = 0;
+        end_index_ = ring_.size();
+        start_loop_ = true;
+    }
+
+    unsigned vertex(value_type * x, value_type * y) const
+    {
+        if (current_index_ < end_index_)
+        {
+            auto const& coord = ring_[current_index_++];
+            *x = coord.x;
+            *y = coord.y;
+            if (start_loop_)
+            {
+                start_loop_= false;
+                return mapnik::SEG_MOVETO;
+            }
+            if (current_index_ == end_index_)
+            {
+                *x = 0;
+                *y = 0;
+                return mapnik::SEG_CLOSE;
+            }
+            return mapnik::SEG_LINETO;
+        }
+        return mapnik::SEG_END;
+    }
+
+    inline geometry_types type () const
+    {
+        return geometry_types::Polygon;
+    }
+
+private:
+    linear_ring const& ring_;
+    mutable std::size_t current_index_;
+    mutable std::size_t end_index_;
+    mutable bool start_loop_;
+};
+
 template <typename T>
 struct vertex_adapter_traits{};
 
