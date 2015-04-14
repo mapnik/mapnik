@@ -103,8 +103,13 @@ struct apply_vertex_mode
 template <typename BufferType>
 struct RingRenderer {
 
-    using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
-    using renderer = agg::renderer_scanline_aa_solid<ren_base>;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+    using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
+
     using path_type = transform_path_adapter<view_transform, geometry::ring_vertex_adapter>;
 
     RingRenderer(rasterizer & ras_ptr,
@@ -122,25 +127,26 @@ struct RingRenderer {
     {
         ras_ptr_.reset();
         agg::rendering_buffer buf(im_.getBytes(),im_.width(),im_.height(),im_.getRowSize());
-        agg::pixfmt_rgba32_pre pixf(buf);
-        ren_base renb(pixf);
-        renderer ren(renb);
+        pixfmt_comp_type pixf(buf);
+        renderer_base renb(pixf);
+        renderer_type ren(renb);
         geometry::ring_vertex_adapter va(ring);
         path_type path(tr_,va,prj_trans_);
         ras_ptr_.add_path(path);
+        ras_ptr_.filling_rule(agg::fill_non_zero);
         ren.color(color);
         agg::render_scanlines(ras_ptr_, sl_, ren);
     }
 
     void draw_outline(geometry::linear_ring const& ring,
                    agg::rgba8 const& color,
-                   double stroke_width)
+                   double stroke_width=3)
     {
         ras_ptr_.reset();
         agg::rendering_buffer buf(im_.getBytes(),im_.width(),im_.height(),im_.getRowSize());
-        agg::pixfmt_rgba32_pre pixf(buf);
-        ren_base renb(pixf);
-        renderer ren(renb);
+        pixfmt_comp_type pixf(buf);
+        renderer_base renb(pixf);
+        renderer_type ren(renb);
         geometry::ring_vertex_adapter va(ring);
         path_type path(tr_,va,prj_trans_);
         agg::conv_stroke<path_type> stroke(path);
@@ -174,20 +180,20 @@ struct render_ring_visitor {
 
     void operator()(mapnik::geometry::polygon const& geom)
     {
-        agg::rgba8 red(255, 0, 0, 255);
-        agg::rgba8 green(0, 255, 255, 255);
-        agg::rgba black(0,0,0,255);
+        agg::rgba8 red(255,0,0,255);
+        agg::rgba8 green(0,255,255,255);
+        agg::rgba8 black(0,0,0,255);
         renderer_.draw_ring(geom.exterior_ring,red);
         if (mapnik::util::is_clockwise(geom.exterior_ring))
         {
-            renderer_.draw_outline(geom.exterior_ring,black,2);
+            renderer_.draw_outline(geom.exterior_ring,black);
         }
         for (auto const& ring : geom.interior_rings)
         {
             renderer_.draw_ring(ring,green);
             if (!mapnik::util::is_clockwise(ring))
             {
-                renderer_.draw_outline(ring,black,2);
+                renderer_.draw_outline(ring,black);
             }
         }
     }
