@@ -178,10 +178,10 @@ void SimplifyPolygon(const Path &in_poly, Paths &out_polys, PolyFillType fillTyp
 void SimplifyPolygons(const Paths &in_polys, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
 void SimplifyPolygons(Paths &polys, PolyFillType fillType = pftEvenOdd);
 
-void CleanPolygon(const Path& in_poly, Path& out_poly, double distance = 1.415);
-void CleanPolygon(Path& poly, double distance = 1.415);
-void CleanPolygons(const Paths& in_polys, Paths& out_polys, double distance = 1.415);
-void CleanPolygons(Paths& polys, double distance = 1.415);
+MAPNIK_DECL void CleanPolygon(const Path& in_poly, Path& out_poly, double distance = 1.415);
+MAPNIK_DECL void CleanPolygon(Path& poly, double distance = 1.415);
+MAPNIK_DECL void CleanPolygons(const Paths& in_polys, Paths& out_polys, double distance = 1.415);
+MAPNIK_DECL void CleanPolygons(Paths& polys, double distance = 1.415);
 
 void MinkowskiSum(const Path& pattern, const Path& path, Paths& solution, bool pathIsClosed);
 void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool pathIsClosed);
