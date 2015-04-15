@@ -181,10 +181,11 @@ private:
     mutable bool start_loop_;
 };
 
+template <typename T>
 struct ring_vertex_adapter
 {
-    using value_type = typename point::value_type;
-    ring_vertex_adapter(linear_ring const& ring)
+    using value_type = typename point<T>::value_type;
+    ring_vertex_adapter(linear_ring<T> const& ring)
         : ring_(ring),
           current_index_(0),
           end_index_(ring_.size()),
@@ -226,7 +227,7 @@ struct ring_vertex_adapter
     }
 
 private:
-    linear_ring const& ring_;
+    linear_ring<T> const& ring_;
     mutable std::size_t current_index_;
     mutable std::size_t end_index_;
     mutable bool start_loop_;

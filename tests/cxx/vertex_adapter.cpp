@@ -99,7 +99,7 @@ SECTION("polygon with hole") {
     REQUIRE( y == 0 );
 
     // exterior ring via ring_vertex_adapter
-    mapnik::geometry::ring_vertex_adapter va2(g.exterior_ring);
+    mapnik::geometry::ring_vertex_adapter<double> va2(g.exterior_ring);
     cmd = va2.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_MOVETO );
     REQUIRE( x == 0 );
