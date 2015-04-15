@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  6.2.8                                                           *
-* Date      :  10 February 2015                                                *
+* Version   :  6.2.9                                                           *
+* Date      :  16 February 2015                                                *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2015                                         *
 *                                                                              *
@@ -170,18 +170,18 @@ private:
     friend class MAPNIK_DECL Clipper; //to access AllNodes
 };
 
-bool Orientation(const Path &poly);
-double Area(const Path &poly);
-int PointInPolygon(const IntPoint &pt, const Path &path);
+MAPNIK_DECL bool Orientation(const Path &poly);
+MAPNIK_DECL double Area(const Path &poly);
+MAPNIK_DECL int PointInPolygon(const IntPoint &pt, const Path &path);
 
-void SimplifyPolygon(const Path &in_poly, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
-void SimplifyPolygons(const Paths &in_polys, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
-void SimplifyPolygons(Paths &polys, PolyFillType fillType = pftEvenOdd);
+MAPNIK_DECL void SimplifyPolygon(const Path &in_poly, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
+MAPNIK_DECL void SimplifyPolygons(const Paths &in_polys, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
+MAPNIK_DECL void SimplifyPolygons(Paths &polys, PolyFillType fillType = pftEvenOdd);
 
-void CleanPolygon(const Path& in_poly, Path& out_poly, double distance = 1.415);
-void CleanPolygon(Path& poly, double distance = 1.415);
-void CleanPolygons(const Paths& in_polys, Paths& out_polys, double distance = 1.415);
-void CleanPolygons(Paths& polys, double distance = 1.415);
+MAPNIK_DECL void CleanPolygon(const Path& in_poly, Path& out_poly, double distance = 1.415);
+MAPNIK_DECL void CleanPolygon(Path& poly, double distance = 1.415);
+MAPNIK_DECL void CleanPolygons(const Paths& in_polys, Paths& out_polys, double distance = 1.415);
+MAPNIK_DECL void CleanPolygons(Paths& polys, double distance = 1.415);
 
 void MinkowskiSum(const Path& pattern, const Path& path, Paths& solution, bool pathIsClosed);
 void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool pathIsClosed);
