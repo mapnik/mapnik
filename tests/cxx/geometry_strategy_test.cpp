@@ -40,7 +40,7 @@ SECTION("proj and view strategy") {
 
     }
     {
-        // Test that both work streamed together
+        // Test that both work grouped together
         using sg_type = strategy_group<mapnik::proj_strategy, mapnik::view_strategy<double> >;
         sg_type sg(ps, vs);
         point<double> p1(-97.553098,35.523105);
@@ -48,7 +48,7 @@ SECTION("proj and view strategy") {
         geometry<double> p2 = transform<double>(p1, sg);
         REQUIRE(p2.is<point<double> >());
         point<double> p3 = mapnik::util::get<point<double> >(p2);
-        std::cout << p3.x << " , " << p3.y << std::endl;
+        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
 
