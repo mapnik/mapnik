@@ -27,6 +27,9 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
+// boost
+#include <boost/geometry.hpp>
+
 namespace mapnik {
 
 namespace geometry {
@@ -68,6 +71,36 @@ private:
     bool wgs84_to_merc_;
     bool merc_to_wgs84_;
 };
+
+struct proj_strategy
+{
+    proj_strategy(proj_transform const& prj_trans)
+        : prj_trans_(prj_trans) {}
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2 & p2) const
+    {
+        using p2_type = typename boost::geometry::coordinate_type<P2>::type;
+        double x = boost::geometry::get<0>(p1);
+        double y = boost::geometry::get<1>(p1);
+        double z = 0.0;
+        if (!prj_trans_.forward(x, y, z)) return false;
+        boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
+        boost::geometry::set<1>(p2, boost::numeric_cast<p2_type>(y));
+        return true;
+    }
+    
+    template <typename P1, typename P2>
+    inline P2 execute(P1 const& p1, bool & status) const
+    {
+        P2 p2;
+        status = apply(p1, p2);
+        return p2;
+    }
+
+    proj_transform const& prj_trans_;
+};
+
 }
 
 #endif // MAPNIK_PROJ_TRANSFORM_HPP

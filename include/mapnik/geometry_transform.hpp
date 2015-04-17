@@ -70,6 +70,7 @@ struct geometry_transform
     }
     Transformer const& transformer_;
 };
+
 } // ns detail
 
 template <typename T0, typename T1, typename T2>
