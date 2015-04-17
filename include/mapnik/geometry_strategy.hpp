@@ -38,10 +38,57 @@ namespace helper
     struct gen_seq<0, Ts...> : index<Ts...> {};
 }
 
+// Groups a set of strategies at runtime, the conversion from P1 to P2 will take place on the LAST strategy.
 template <typename... Strategies>
 struct strategy_group
 {
     strategy_group(Strategies const& ... ops)
+        : ops_(ops ...) {}
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2 & p2) const
+    {
+        bool status = true;
+        p2 = execute_start<P1,P2>(p1, status, ops_);
+        return status;
+    }
+
+    template <typename P1, typename P2, typename... Args, std::size_t... Is>
+    inline P2 execute_start(P1 const & p1, bool & status, std::tuple<Args const&...> const& tup, helper::index<Is...>) const
+    {
+        return execute<P1,P2, Args...>(p1, status, std::get<Is>(tup)...);
+    }
+
+    template <typename P1, typename P2>
+    inline P2 execute_start(P1 const& p, bool & status, std::tuple<Strategies const& ...> const& tup) const
+    {
+        return execute_start<P1,P2, Strategies...>(p, status, tup, helper::gen_seq<sizeof...(Strategies)> {} );
+    }
+
+    template <typename P1, typename P2, typename T, typename ...Args>
+    inline P2 execute(P1 const& p, bool & status, T const& strat, Args const& ... args) const
+    { 
+        return execute<P1,P2>(strat.template execute<P1,P1>(p, status), status, args...);
+    }
+
+    template <typename P1, typename P2, typename T>
+    inline P2 execute(P1 const& p, bool & status, T const& strat) const
+    {
+        return strat.template execute<P1,P2>(p, status);
+    }
+    
+private:
+    std::tuple<Strategies const& ...> ops_;
+
+};
+
+
+// The difference between this strategy group and the previous is that the conversion from P1 to P2 happens
+// in the first strategy rather then the last strategy. 
+template <typename... Strategies>
+struct strategy_group_first
+{
+    strategy_group_first(Strategies const& ... ops)
         : ops_(ops ...) {}
 
     template <typename P1, typename P2>
@@ -67,17 +114,23 @@ struct strategy_group
     template <typename P1, typename P2, typename T, typename ...Args>
     inline P2 execute_first(P1 const& p, bool & status, T const& strat, Args const& ... args) const
     { 
-        return execute_next(strat.template execute<P1,P2>(p, status), status, args...);
+        return execute<P2>(strat.template execute<P1,P2>(p, status), status, args...);
     }
 
     template <typename P2, typename T, typename ...Args>
-    inline P2 execute_next(P2 const& p, bool & status, T const& strat, Args const& ... args) const
-    {
-        return execute_next(strat.template execute<P2,P2>(p, status), status, args...);
+    inline P2 execute(P2 const& p, bool & status, T const& strat, Args const& ... args) const
+    { 
+        return execute<P2>(strat.template execute<P2,P2>(p, status), status, args...);
     }
 
+    template <typename P2, typename T>
+    inline P2 execute(P2 const& p, bool & status, T const& strat) const
+    {
+        return strat.template execute<P2,P2>(p, status);
+    }
+    
     template <typename P2>
-    inline P2 execute_next(P2 const& p, bool & status) const
+    inline P2 execute(P2 const& p, bool & status) const
     {
         return p;
     }
@@ -85,6 +138,56 @@ struct strategy_group
 private:
     std::tuple<Strategies const& ...> ops_;
 
+};
+
+struct scale_strategy
+{
+    scale_strategy(double scale, double offset = 0)
+        : scale_(scale), offset_(offset) {}
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const & p1, P2 & p2) const
+    {
+        
+        using p2_type = typename boost::geometry::coordinate_type<P2>::type;
+        double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
+        double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
+        try {
+            boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
+        }
+        catch(boost::numeric::negative_overflow&)
+        {
+            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
+        }
+        catch(boost::numeric::positive_overflow&) 
+        {
+            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
+        }
+        try {
+            boost::geometry::set<1>(p2, boost::numeric_cast<p2_type>(y));
+        }
+        catch(boost::numeric::negative_overflow&)
+        {
+            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
+        }
+        catch(boost::numeric::positive_overflow&) 
+        {
+            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
+        }
+        return true;
+    }
+    
+    template <typename P1, typename P2>
+    inline P2 execute(P1 const& p1, bool & status) const
+    {
+        P2 p2;
+        status = apply(p1, p2);
+        return p2;
+    }
+
+private:
+    double scale_;
+    double offset_;
 };
 
 } // end geometry ns

@@ -39,8 +39,10 @@
 
 // register point
 BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<double>, double, cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<int>, int, cs::cartesian, x, y)
 // ring
 BOOST_GEOMETRY_REGISTER_RING(mapnik::geometry::linear_ring<double>)
+BOOST_GEOMETRY_REGISTER_RING(mapnik::geometry::linear_ring<int>)
 
 // needed by box2d<double>
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, cs::cartesian, x, y)
@@ -54,9 +56,21 @@ struct range_iterator<mapnik::geometry::line_string<double> >
 };
 
 template <>
+struct range_iterator<mapnik::geometry::line_string<int> >
+{
+    using type = mapnik::geometry::line_string<int>::iterator;
+};
+
+template <>
 struct range_const_iterator<mapnik::geometry::line_string<double> >
 {
     using type = mapnik::geometry::line_string<double>::const_iterator;
+};
+
+template <>
+struct range_const_iterator<mapnik::geometry::line_string<int> >
+{
+    using type = mapnik::geometry::line_string<int>::const_iterator;
 };
 
 inline mapnik::geometry::line_string<double>::iterator
@@ -70,6 +84,18 @@ range_begin(mapnik::geometry::line_string<double> const& line) {return line.begi
 
 inline mapnik::geometry::line_string<double>::const_iterator
 range_end(mapnik::geometry::line_string<double> const& line) {return line.end();}
+
+inline mapnik::geometry::line_string<int>::iterator
+range_begin(mapnik::geometry::line_string<int> & line) {return line.begin();}
+
+inline mapnik::geometry::line_string<int>::iterator
+range_end(mapnik::geometry::line_string<int> & line) {return line.end();}
+
+inline mapnik::geometry::line_string<int>::const_iterator
+range_begin(mapnik::geometry::line_string<int> const& line) {return line.begin();}
+
+inline mapnik::geometry::line_string<int>::const_iterator
+range_end(mapnik::geometry::line_string<int> const& line) {return line.end();}
 
 
 namespace geometry { namespace traits {
@@ -118,6 +144,12 @@ struct tag<mapnik::geometry::line_string<double> >
     using type = linestring_tag;
 };
 
+template<>
+struct tag<mapnik::geometry::line_string<int> >
+{
+    using type = linestring_tag;
+};
+
 // mapnik::geometry::polygon
 template<>
 struct tag<mapnik::geometry::polygon<double> >
@@ -125,8 +157,20 @@ struct tag<mapnik::geometry::polygon<double> >
     using type = polygon_tag;
 };
 
+template<>
+struct tag<mapnik::geometry::polygon<int> >
+{
+    using type = polygon_tag;
+};
+
 template <>
 struct point_order<mapnik::geometry::linear_ring<double> >
+{
+    static const order_selector value = counterclockwise;
+};
+
+template <>
+struct point_order<mapnik::geometry::linear_ring<int> >
 {
     static const order_selector value = counterclockwise;
 };
@@ -138,12 +182,29 @@ struct tag<mapnik::geometry::multi_point<double> >
 };
 
 template<>
+struct tag<mapnik::geometry::multi_point<int> >
+{
+    using type = multi_point_tag;
+};
+
+template<>
 struct tag<mapnik::geometry::multi_line_string<double> >
 {
     using type = multi_linestring_tag;
 };
 
+template<>
+struct tag<mapnik::geometry::multi_line_string<int> >
+{
+    using type = multi_linestring_tag;
+};
+
 template<> struct tag<mapnik::geometry::multi_polygon<double> >
+{
+    using type = multi_polygon_tag;
+};
+
+template<> struct tag<mapnik::geometry::multi_polygon<int> >
 {
     using type = multi_polygon_tag;
 };
@@ -154,9 +215,19 @@ template<> struct ring_const_type<mapnik::geometry::polygon<double> >
     using type =  mapnik::geometry::linear_ring<double> const&;
 };
 
+template<> struct ring_const_type<mapnik::geometry::polygon<int> >
+{
+    using type =  mapnik::geometry::linear_ring<int> const&;
+};
+
 template<> struct ring_mutable_type<mapnik::geometry::polygon<double> >
 {
     using type = mapnik::geometry::linear_ring<double>&;
+};
+
+template<> struct ring_mutable_type<mapnik::geometry::polygon<int> >
+{
+    using type = mapnik::geometry::linear_ring<int>&;
 };
 
 // interior
@@ -168,6 +239,16 @@ template<> struct interior_const_type<mapnik::geometry::polygon<double> >
 template<> struct interior_mutable_type<mapnik::geometry::polygon<double> >
 {
     using type = std::vector<mapnik::geometry::linear_ring<double> >&;
+};
+
+template<> struct interior_const_type<mapnik::geometry::polygon<int> >
+{
+    using type = std::vector<mapnik::geometry::linear_ring<int> > const&;
+};
+
+template<> struct interior_mutable_type<mapnik::geometry::polygon<int> >
+{
+    using type = std::vector<mapnik::geometry::linear_ring<int> >&;
 };
 
 // exterior
@@ -195,6 +276,35 @@ struct interior_rings<mapnik::geometry::polygon<double> >
     }
 
     static holes_type const& get(mapnik::geometry::polygon<double> const& p)
+    {
+        return p.interior_rings;
+    }
+};
+
+template<>
+struct exterior_ring<mapnik::geometry::polygon<int> >
+{
+    static mapnik::geometry::linear_ring<int> & get(mapnik::geometry::polygon<int> & p)
+    {
+        return p.exterior_ring;
+    }
+
+    static mapnik::geometry::linear_ring<int> const& get(mapnik::geometry::polygon<int> const& p)
+    {
+        return p.exterior_ring;
+    }
+};
+
+template<>
+struct interior_rings<mapnik::geometry::polygon<int> >
+{
+    using holes_type = std::vector<mapnik::geometry::linear_ring<int> >;
+    static holes_type&  get(mapnik::geometry::polygon<int> & p)
+    {
+        return p.interior_rings;
+    }
+
+    static holes_type const& get(mapnik::geometry::polygon<int> const& p)
     {
         return p.interior_rings;
     }
