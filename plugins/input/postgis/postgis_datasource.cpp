@@ -154,10 +154,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 schema_ = geometry_table_.substr(0, idx);
                 geometry_table_ = geometry_table_.substr(idx + 1);
             }
-            else
-            {
-                geometry_table_ = geometry_table_.substr(0);
-            }
 
             // NOTE: geometry_table_ how should ideally be a table name, but
             // there are known edge cases where this will break down and
