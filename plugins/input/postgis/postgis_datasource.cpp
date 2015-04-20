@@ -234,6 +234,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
                 if (!geometry_table_.empty())
                 {
+                    if (!schema_.empty())
+                    {
+                        s << schema_ << '.';
+                    }
                     s << geometry_table_;
                 }
                 else
