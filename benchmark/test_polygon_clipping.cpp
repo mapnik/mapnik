@@ -468,7 +468,7 @@ public:
         mapnik::geometry::correct(poly);
         ClipperLib::Clipper clipper;
 
-        std::vector<ClipperLib::IntPoint> path;
+        mapnik::geometry::line_string<std::int64_t> path;
         for (auto const& pt : poly.exterior_ring)
         {
             double x = pt.x;
@@ -494,7 +494,7 @@ public:
             }
         }
         std::cerr << "path size=" << path.size() << std::endl;
-        std::vector<ClipperLib::IntPoint> clip_box;
+        mapnik::geometry::line_string<std::int64_t> clip_box;
         clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.minx()),static_cast<ClipperLib::cInt>(extent_.miny()));
         clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.maxx()),static_cast<ClipperLib::cInt>(extent_.miny()));
         clip_box.emplace_back(static_cast<ClipperLib::cInt>(extent_.maxx()),static_cast<ClipperLib::cInt>(extent_.maxy()));
@@ -521,7 +521,7 @@ public:
                 else mp.emplace_back(); // start new polygon
                 for (auto const& pt : polynode->Contour)
                 {
-                    mp.back().exterior_ring.add_coord(pt.X, pt.Y);
+                    mp.back().exterior_ring.add_coord(pt.x, pt.y);
                 }
                 // childrens are interior rings
                 for (auto const* ring : polynode->Childs)
@@ -529,7 +529,7 @@ public:
                     mapnik::geometry::linear_ring<double> hole;
                     for (auto const& pt : ring->Contour)
                     {
-                        hole.add_coord(pt.X, pt.Y);
+                        hole.add_coord(pt.x, pt.y);
                     }
                     mp.back().add_hole(std::move(hole));
                 }

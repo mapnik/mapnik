@@ -227,8 +227,8 @@ namespace agg
   {
 	  ClipperLib::IntPoint v;
 
-	  v.X = Round(x * m_scaling_factor);
-	  v.Y = Round(y * m_scaling_factor);
+	  v.x = Round(x * m_scaling_factor);
+	  v.y = Round(y * m_scaling_factor);
 	  m_vertex_accumulator.add( v );
   }
   //------------------------------------------------------------------------------
@@ -248,8 +248,8 @@ namespace agg
   {
     m_vertex++;
     if(m_vertex >= (int)m_result[m_contour].size()) return false;
-    *x = (double)m_result[ m_contour ][ m_vertex ].X / m_scaling_factor;
-    *y = (double)m_result[ m_contour ][ m_vertex ].Y / m_scaling_factor;
+    *x = (double)m_result[ m_contour ][ m_vertex ].x / m_scaling_factor;
+    *y = (double)m_result[ m_contour ][ m_vertex ].y / m_scaling_factor;
     return true;
   }
   //------------------------------------------------------------------------------
