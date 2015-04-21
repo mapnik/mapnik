@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_STRATEGY_HPP
 #define MAPNIK_GEOMETRY_STRATEGY_HPP
 
+#include <mapnik/geometry_adapters.hpp>
+
 namespace mapnik { 
 namespace geometry {
 

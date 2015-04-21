@@ -35,6 +35,7 @@
 #define clipper_hpp
 
 #include <mapnik/config.hpp>
+#include <mapnik/geometry.hpp>
 
 #define CLIPPER_VERSION "6.2.6"
 
@@ -46,7 +47,7 @@
 //#define use_xyz
 
 //use_lines: Enables line clipping. Adds a very minor cost to performance.
-//#define use_lines
+#define use_lines
   
 //use_deprecated: Enables temporary support for the obsolete functions
 //#define use_deprecated  
@@ -76,37 +77,41 @@ enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
   static cInt const loRange = 0x7FFF;
   static cInt const hiRange = 0x7FFF;
 #else
-  typedef signed long long cInt;
+  typedef std::int64_t cInt;
   static cInt const loRange = 0x3FFFFFFF;
   static cInt const hiRange = 0x3FFFFFFFFFFFFFFFLL;
-  typedef signed long long long64;     //used by Int128 class
-  typedef unsigned long long ulong64;
+  typedef std::int64_t long64;     //used by Int128 class
+  typedef std::uint64_t ulong64;
 
 #endif
-
+/*
 struct IntPoint {
-  cInt X;
-  cInt Y;
+  cInt x;
+  cInt y;
 #ifdef use_xyz
-  cInt Z;
+  cInt z;
   IntPoint(cInt x = 0, cInt y = 0, cInt z = 0): X(x), Y(y), Z(z) {};
 #else
-  IntPoint(cInt x = 0, cInt y = 0): X(x), Y(y) {};
+  IntPoint(cInt x_ = 0, cInt y_ = 0): x(x_), y(y_) {};
 #endif
 
   friend inline bool operator== (const IntPoint& a, const IntPoint& b)
   {
-    return a.X == b.X && a.Y == b.Y;
+    return a.x == b.x && a.y == b.y;
   }
   friend inline bool operator!= (const IntPoint& a, const IntPoint& b)
   {
-    return a.X != b.X  || a.Y != b.Y; 
+    return a.x != b.x  || a.y != b.y; 
   }
-};
+};*/
+
+typedef mapnik::geometry::point<cInt> IntPoint;
+
 //------------------------------------------------------------------------------
 
-typedef std::vector< IntPoint > Path;
-typedef std::vector< Path > Paths;
+//typedef std::vector< IntPoint > Path;
+typedef mapnik::geometry::line_string<cInt> Path;
+typedef mapnik::geometry::multi_line_string<cInt> Paths;
 
 inline Path& operator <<(Path& poly, const IntPoint& p) {poly.push_back(p); return poly;}
 inline Paths& operator <<(Paths& polys, const Path& p) {polys.push_back(p); return polys;}
@@ -117,10 +122,10 @@ std::ostream& operator <<(std::ostream &s, const Paths &p);
 
 struct DoublePoint
 {
-  double X;
-  double Y;
-  DoublePoint(double x = 0, double y = 0) : X(x), Y(y) {}
-  DoublePoint(IntPoint ip) : X((double)ip.X), Y((double)ip.Y) {}
+  double x;
+  double y;
+  DoublePoint(double x_ = 0, double y_ = 0) : x(x_), y(y_) {}
+  DoublePoint(IntPoint ip) : x((double)ip.x), y((double)ip.y) {}
 };
 //------------------------------------------------------------------------------
 
@@ -189,7 +194,7 @@ void MinkowskiDiff(const Path& poly1, const Path& poly2, Paths& solution);
 
 void PolyTreeToPaths(const PolyTree& polytree, Paths& paths);
 void ClosedPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
-void OpenPathsFromPolyTree(PolyTree& polytree, Paths& paths);
+MAPNIK_DECL void OpenPathsFromPolyTree(PolyTree& polytree, Paths& paths);
 
 void ReversePath(Path& p);
 void ReversePaths(Paths& p);

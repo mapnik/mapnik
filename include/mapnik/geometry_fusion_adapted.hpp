@@ -35,8 +35,19 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::geometry::point<std::int64_t>,
+    (std::int64_t, x)
+    (std::int64_t, y)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
     mapnik::geometry::polygon<double>,
     (mapnik::geometry::linear_ring<double> const&, exterior_ring)
     (std::vector<mapnik::geometry::linear_ring<double> > const& , interior_rings))
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::geometry::polygon<std::int64_t>,
+    (mapnik::geometry::linear_ring<std::int64_t> const&, exterior_ring)
+    (std::vector<mapnik::geometry::linear_ring<std::int64_t> > const& , interior_rings))
 
 #endif // MAPNIK_GEOMETRY_FUSION_ADAPTED_HPP

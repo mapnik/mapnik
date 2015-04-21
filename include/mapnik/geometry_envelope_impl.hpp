@@ -44,7 +44,8 @@ struct geometry_envelope
     
     void operator() (mapnik::geometry::geometry_empty const&) const {}
 
-    void operator() (mapnik::geometry::point<double> const& pt) const
+    template <typename T>
+    void operator() (mapnik::geometry::point<T> const& pt) const
     {
         if (!bbox.valid())
         {
@@ -53,7 +54,8 @@ struct geometry_envelope
         bbox.expand_to_include(pt.x, pt.y);
     }
 
-    void operator() (mapnik::geometry::line_string<double> const& line) const
+    template <typename T>
+    void operator() (mapnik::geometry::line_string<T> const& line) const
     {
         bool first = true;
         for (auto const& pt : line)
@@ -70,7 +72,8 @@ struct geometry_envelope
         }
     }
 
-    void operator() (mapnik::geometry::polygon<double> const& poly) const
+    template <typename T>
+    void operator() (mapnik::geometry::polygon<T> const& poly) const
     {
         bool first = true;
         for (auto const& pt : poly.exterior_ring)
@@ -87,7 +90,8 @@ struct geometry_envelope
         }
     }
 
-    void operator() (mapnik::geometry::multi_point<double> const& multi_point) const
+    template <typename T>
+    void operator() (mapnik::geometry::multi_point<T> const& multi_point) const
     {
         bool first = true;
         for (auto const& pt : multi_point)
@@ -104,7 +108,8 @@ struct geometry_envelope
         }
     }
 
-    void operator() (mapnik::geometry::multi_line_string<double> const& multi_line) const
+    template <typename T>
+    void operator() (mapnik::geometry::multi_line_string<T> const& multi_line) const
     {
         for (auto const& line : multi_line)
         {
@@ -112,7 +117,8 @@ struct geometry_envelope
         }
     }
 
-    void operator() (mapnik::geometry::multi_polygon<double> const& multi_poly) const
+    template <typename T>
+    void operator() (mapnik::geometry::multi_polygon<T> const& multi_poly) const
     {
         for (auto const& poly : multi_poly)
         {
@@ -120,7 +126,8 @@ struct geometry_envelope
         }
     }
 
-    void operator() (mapnik::geometry::geometry_collection<double> const& collection) const
+    template <typename T>
+    void operator() (mapnik::geometry::geometry_collection<T> const& collection) const
     {
         for (auto const& geom : collection)
         {

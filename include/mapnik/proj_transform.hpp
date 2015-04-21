@@ -26,9 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
-
-// boost
-#include <boost/geometry.hpp>
+#include <mapnik/geometry_adapters.hpp>
 
 namespace mapnik {
 
@@ -85,6 +83,55 @@ struct proj_strategy
         double y = boost::geometry::get<1>(p1);
         double z = 0.0;
         if (!prj_trans_.forward(x, y, z)) return false;
+        try {
+            boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
+        }
+        catch(boost::numeric::negative_overflow&)
+        {
+            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
+        }
+        catch(boost::numeric::positive_overflow&) 
+        {
+            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
+        }
+        try {
+            boost::geometry::set<1>(p2, boost::numeric_cast<p2_type>(y));
+        }
+        catch(boost::numeric::negative_overflow&)
+        {
+            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
+        }
+        catch(boost::numeric::positive_overflow&) 
+        {
+            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
+        }
+        return true;
+    }
+    
+    template <typename P1, typename P2>
+    inline P2 execute(P1 const& p1, bool & status) const
+    {
+        P2 p2;
+        status = apply(p1, p2);
+        return p2;
+    }
+
+    proj_transform const& prj_trans_;
+};
+
+struct proj_backward_strategy
+{
+    proj_backward_strategy(proj_transform const& prj_trans)
+        : prj_trans_(prj_trans) {}
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2 & p2) const
+    {
+        using p2_type = typename boost::geometry::coordinate_type<P2>::type;
+        double x = boost::geometry::get<0>(p1);
+        double y = boost::geometry::get<1>(p1);
+        double z = 0.0;
+        if (!prj_trans_.backward(x, y, z)) return false;
         try {
             boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
         }

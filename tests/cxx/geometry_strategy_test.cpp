@@ -26,9 +26,7 @@ SECTION("proj and view strategy") {
         // Test first that proj strategy works properly
         point<double> p1(-97.553098,35.523105);
         point<double> r1(-1.08596e+07, 4.2352e+06);
-        geometry<double> p2 = transform<double>(p1, ps);
-        REQUIRE(p2.is<point<double> >());
-        point<double> p3 = mapnik::util::get<point<double> >(p2);
+        point<double> p3 = transform<double>(p1, ps);
         //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
@@ -36,9 +34,7 @@ SECTION("proj and view strategy") {
         // Test next that view_strategy works
         point<double> p1(-1.08596e+07, 4.2352e+06);
         point<double> r1(58.6287 , 100.945);
-        geometry<double> p2 = transform<double>(p1, vs);
-        REQUIRE(p2.is<point<double> >());
-        point<double> p3 = mapnik::util::get<point<double> >(p2);
+        point<double> p3 = transform<double>(p1, vs);
         //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
 
@@ -49,9 +45,7 @@ SECTION("proj and view strategy") {
         point<double> r1(58.6287 , 100.945);
         using sg_type = strategy_group<mapnik::view_strategy>;
         sg_type sg(vs);
-        geometry<double> p2 = transform<double>(p1, sg);
-        REQUIRE(p2.is<point<double> >());
-        point<double> p3 = mapnik::util::get<point<double> >(p2);
+        point<double> p3 = transform<double>(p1, sg);
         //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
 
@@ -62,9 +56,7 @@ SECTION("proj and view strategy") {
         sg_type sg(ps, vs);
         point<double> p1(-97.553098,35.523105);
         point<double> r1(58.6287 , 100.945);
-        geometry<double> p2 = transform<double>(p1, sg);
-        REQUIRE(p2.is<point<double> >());
-        point<double> p3 = mapnik::util::get<point<double> >(p2);
+        point<double> p3 = transform<double>(p1, sg);
         //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
@@ -85,10 +77,10 @@ SECTION("proj and view strategy") {
         using sg_type = strategy_group<mapnik::proj_strategy, mapnik::view_strategy >;
         sg_type sg(ps, vs);
         geometry<double> p1(std::move(point<double>(-97.553098,35.523105)));
-        point<int> r1(58 , 100);
-        geometry<int> p2 = transform<int>(p1, sg);
-        REQUIRE(p2.is<point<int> >());
-        point<int> p3 = mapnik::util::get<point<int> >(p2);
+        point<std::int64_t> r1(58 , 100);
+        geometry<std::int64_t> p2 = transform<std::int64_t>(p1, sg);
+        REQUIRE(p2.is<point<std::int64_t> >());
+        point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
         //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
@@ -98,10 +90,10 @@ SECTION("proj and view strategy") {
         using sg_type = strategy_group<mapnik::proj_strategy, mapnik::view_strategy, mapnik::geometry::scale_strategy >;
         sg_type sg(ps, vs, ss);
         geometry<double> p1(std::move(point<double>(-97.553098,35.523105)));
-        point<int> r1(938 , 1615);
-        geometry<int> p2 = transform<int>(p1, sg);
-        REQUIRE(p2.is<point<int> >());
-        point<int> p3 = mapnik::util::get<point<int> >(p2);
+        point<std::int64_t> r1(938 , 1615);
+        geometry<std::int64_t> p2 = transform<std::int64_t>(p1, sg);
+        REQUIRE(p2.is<point<std::int64_t> >());
+        point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
         //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
@@ -110,12 +102,12 @@ SECTION("proj and view strategy") {
         mapnik::geometry::scale_strategy ss(1.0/16.0);
         using sg_type = strategy_group_first<mapnik::geometry::scale_strategy, mapnik::unview_strategy, mapnik::proj_strategy >;
         sg_type sg(ss, uvs, ps_rev);
-        geometry<int> p1(std::move(point<int>(938 , 1615)));
+        geometry<std::int64_t> p1(std::move(point<std::int64_t>(938 , 1615)));
         point<double> r1(-97.5586 , 35.5322);
         geometry<double> p2 = transform<double>(p1, sg);
         REQUIRE(p2.is<point<double> >());
         point<double> p3 = mapnik::util::get<point<double> >(p2);
-        std::cout << p3.x << " , " << p3.y << std::endl;
+        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
 

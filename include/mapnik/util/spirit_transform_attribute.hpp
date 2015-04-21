@@ -115,6 +115,94 @@ namespace boost { namespace spirit { namespace traits {
         }
     };
 
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::point<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::point<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::point<std::int64_t> >(geom);
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::line_string<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::line_string<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::line_string<std::int64_t> >(geom);
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::polygon<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::polygon<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::polygon<std::int64_t> >(geom);
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::polygon<std::int64_t> const,
+                               std::vector<mapnik::geometry::linear_ring<std::int64_t> > const&, karma::domain>
+    {
+        using type = std::vector<mapnik::geometry::linear_ring<std::int64_t> > const&;
+        static type pre(mapnik::geometry::polygon<std::int64_t> const& poly)
+        {
+            return poly.interior_rings;
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::multi_point<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::multi_point<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::multi_point<std::int64_t> >(geom);
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::multi_line_string<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::multi_line_string<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::multi_line_string<std::int64_t> >(geom);
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::multi_polygon<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::multi_polygon<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::multi_polygon<std::int64_t> >(geom);
+        }
+    };
+
+    template <>
+    struct transform_attribute<mapnik::geometry::geometry<std::int64_t> const,
+                               mapnik::geometry::geometry_collection<std::int64_t> const&, karma::domain>
+    {
+        using type = mapnik::geometry::geometry_collection<std::int64_t> const&;
+        static type pre(mapnik::geometry::geometry<std::int64_t> const& geom)
+        {
+            return mapnik::util::get<mapnik::geometry::geometry_collection<std::int64_t> >(geom);
+        }
+    };
+
 }}}
 
 #endif // MAPNIK_UTIL_SPIRIT_TRANSFORM_ATTRIBUTE_HPP

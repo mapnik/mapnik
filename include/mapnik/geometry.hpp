@@ -46,6 +46,14 @@ struct point
     point(point const& other) = default;
     point(point && other) noexcept = default;
     point & operator=(point const& other) = default;
+    friend inline bool operator== (point<T> const& a, point<T> const& b)
+    {
+        return a.x == b.x && a.y == b.y;
+    }
+    friend inline bool operator!= (point<T> const& a, point <T> const& b)
+    {
+        return a.x != b.x  || a.y != b.y; 
+    }
     value_type x;
     value_type y;
 };
@@ -55,6 +63,8 @@ template <typename T>
 struct line_string : std::vector<point<T> >
 {
     line_string() = default;
+    line_string (std::size_t size)
+        : std::vector<point<T> >(size) {}
     line_string (line_string && other) = default ;
     line_string& operator=(line_string &&) = default;
     line_string (line_string const& ) = default;
@@ -64,7 +74,21 @@ struct line_string : std::vector<point<T> >
 };
 
 template <typename T>
-struct linear_ring : line_string<T> {};
+struct linear_ring : line_string<T> 
+{
+    linear_ring() = default;
+    linear_ring(std::size_t size)
+        : line_string<T>(size) {}
+    linear_ring (linear_ring && other) = default ;
+    linear_ring& operator=(linear_ring &&) = default;
+    linear_ring(line_string<T> && other)
+        : line_string<T>(other) {}
+    linear_ring (linear_ring const& ) = default;
+    linear_ring(line_string<T> const& other)
+        : line_string<T>(other) {}
+    linear_ring& operator=(linear_ring const&) = default;
+            
+};
 
 template <typename T>
 struct polygon
