@@ -1101,17 +1101,20 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
             placements = std::make_shared<text_placements_dummy>();
             placements->defaults.from_xml(node, fontsets_, false);
         }
-        if (strict_ && !placements->defaults.format_defaults.fontset)
+        if (placements)
         {
-            ensure_font_face(placements->defaults.format_defaults.face_name);
+            if (strict_ && !placements->defaults.format_defaults.fontset)
+            {
+                ensure_font_face(placements->defaults.format_defaults.face_name);
+            }
+            text_symbolizer sym;
+            parse_symbolizer_base(sym, node);
+            put<text_placements_ptr>(sym, keys::text_placements_, placements);
+            set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::halo_comp_op, node);
+            set_symbolizer_property<symbolizer_base,halo_rasterizer_enum>(sym, keys::halo_rasterizer, node);
+            set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::halo_transform, node);
+            rule.append(std::move(sym));
         }
-        text_symbolizer sym;
-        parse_symbolizer_base(sym, node);
-        put<text_placements_ptr>(sym, keys::text_placements_, placements);
-        set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::halo_comp_op, node);
-        set_symbolizer_property<symbolizer_base,halo_rasterizer_enum>(sym, keys::halo_rasterizer, node);
-        set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::halo_transform, node);
-        rule.append(std::move(sym));
     }
     catch (config_error const& ex)
     {
