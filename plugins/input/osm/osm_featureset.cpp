@@ -33,7 +33,6 @@
 #include "osm_featureset.hpp"
 
 using mapnik::feature_ptr;
-using mapnik::geometry_type;
 using mapnik::feature_factory;
 
 template <typename filterT>
@@ -64,9 +63,7 @@ feature_ptr osm_featureset<filterT>::next()
         feature = feature_factory::create(ctx_, cur_item->id);
         double lat = static_cast<osm_node*>(cur_item)->lat;
         double lon = static_cast<osm_node*>(cur_item)->lon;
-        std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
-        point->move_to(lon, lat);
-        feature->add_geometry(point.release());
+        feature->set_geometry(mapnik::geometry::point<double>(lon,lat));
     }
     else if (dataset_->current_item_is_way())
     {
@@ -82,24 +79,32 @@ feature_ptr osm_featureset<filterT>::next()
 
         if (!cur_item) return feature_ptr();
         feature = feature_factory::create(ctx_, cur_item->id);
-        mapnik::geometry_type::types geom_type = mapnik::geometry_type::types::LineString;
         if (static_cast<osm_way*>(cur_item)->is_polygon())
         {
-            geom_type = mapnik::geometry_type::types::Polygon;
+            mapnik::geometry::linear_ring<double> ring;
+            for (unsigned int count = 0;
+                 count < static_cast<osm_way*>(cur_item)->nodes.size();
+                 count++)
+            {
+                ring.add_coord(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
+                                static_cast<osm_way*>(cur_item)->nodes[count]->lat);
+            }
+            mapnik::geometry::polygon<double> geom;
+            geom.set_exterior_ring(std::move(ring));
+            feature->set_geometry(std::move(geom));
         }
-        std::unique_ptr<geometry_type> geom = std::make_unique<geometry_type>(geom_type);
-
-        geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
-                      static_cast<osm_way*>(cur_item)->nodes[0]->lat);
-
-        for (unsigned int count = 1;
-             count < static_cast<osm_way*>(cur_item)->nodes.size();
-             count++)
+        else
         {
-            geom->line_to(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
-                          static_cast<osm_way*>(cur_item)->nodes[count]->lat);
+            mapnik::geometry::line_string<double> geom;
+            for (unsigned int count = 0;
+                 count < static_cast<osm_way*>(cur_item)->nodes.size();
+                 count++)
+            {
+                geom.add_coord(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
+                                static_cast<osm_way*>(cur_item)->nodes[count]->lat);
+            }
+            feature->set_geometry(std::move(geom));
         }
-        feature->add_geometry(geom.release());
     }
     else
     {

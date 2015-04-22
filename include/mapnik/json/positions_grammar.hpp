@@ -27,7 +27,8 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
-
+#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -41,8 +42,10 @@
 #include <tuple>
 
 namespace mapnik { namespace json {
+
 struct empty {};
-using position = std::tuple<double,double>;
+
+using position = mapnik::geometry::point<double>;
 using positions = std::vector<position>;
 using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;
 

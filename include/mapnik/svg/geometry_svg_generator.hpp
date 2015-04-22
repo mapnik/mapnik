@@ -26,7 +26,8 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp> // for container stuff
+ // for container stuff
+#include <mapnik/geometry.hpp>
 #include <mapnik/view_transform.hpp> // for container stuff
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/util/path_iterator.hpp>
@@ -108,11 +109,11 @@ namespace mapnik { namespace svg {
     template <typename T>
     struct get_first
     {
-        using geometry_type = T;
-        using result_type = typename geometry_type::value_type const;
-        result_type operator() (geometry_type const& geom) const
+        using path_type = T;
+        using result_type = typename path_type::value_type const;
+        result_type operator() (path_type const& geom) const
         {
-            typename geometry_type::value_type coord;
+            typename path_type::value_type coord;
             geom.rewind(0);
             std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
             return coord;
@@ -120,13 +121,13 @@ namespace mapnik { namespace svg {
     };
 
     template <>
-    struct get_first<mapnik::geometry_type>
+    struct get_first<mapnik::path_type>
     {
-        using geometry_type = mapnik::geometry_type;
-        using result_type = geometry_type::value_type const;
-        result_type operator() (geometry_type const& geom) const
+        using path_type = mapnik::path_type;
+        using result_type = path_type::value_type const;
+        result_type operator() (path_type const& geom) const
         {
-            geometry_type::value_type coord;
+            path_type::value_type coord;
             std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
             return coord;
         }
@@ -142,27 +143,27 @@ namespace mapnik { namespace svg {
     };
     }
 
-    template <typename OutputIterator, typename Geometry>
+    template <typename OutputIterator, typename Path>
     struct svg_path_generator :
-        karma::grammar<OutputIterator, Geometry const& ()>
+        karma::grammar<OutputIterator, Path const& ()>
     {
 
-        using geometry_type = Geometry;
-        using coord_type = typename boost::remove_pointer<typename geometry_type::value_type>::type;
+        using path_type = Path;
+        using coord_type = typename boost::remove_pointer<typename path_type::value_type>::type;
 
         svg_path_generator();
         // rules
-        karma::rule<OutputIterator, geometry_type const& ()> svg;
-        karma::rule<OutputIterator, geometry_type const& ()> point;
-        karma::rule<OutputIterator, geometry_type const& ()> linestring;
-        karma::rule<OutputIterator, geometry_type const& ()> polygon;
+        karma::rule<OutputIterator, path_type const& ()> svg;
+        karma::rule<OutputIterator, path_type const& ()> point;
+        karma::rule<OutputIterator, path_type const& ()> linestring;
+        karma::rule<OutputIterator, path_type const& ()> polygon;
 
         karma::rule<OutputIterator, coord_type ()> svg_point;
-        karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> svg_path;
+        karma::rule<OutputIterator, karma::locals<unsigned>, path_type const& ()> svg_path;
 
         // phoenix functions
-        phoenix::function<svg_detail::get_type<geometry_type> > _type;
-        phoenix::function<svg_detail::get_first<geometry_type> > _first;
+        phoenix::function<svg_detail::get_type<path_type> > _type;
+        phoenix::function<svg_detail::get_first<path_type> > _first;
         //
         karma::real_generator<double, svg_detail::coordinate_policy<double> > coordinate;
 

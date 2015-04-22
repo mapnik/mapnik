@@ -225,9 +225,6 @@ private:
     void update_box() const;
 };
 
-geometry_type *origin_point(proj_transform const& prj_trans,
-                            renderer_common const& common);
-
 template <typename F>
 void render_offset_placements(placements_list const& placements,
                               pixel_position const& offset,
@@ -339,8 +336,15 @@ void render_group_symbolizer(group_symbolizer const& sym,
         }
 
         // add a single point geometry at pixel origin
-        sub_feature->add_geometry(origin_point(prj_trans, common));
-
+        double x = common.width_ / 2.0, y = common.height_ / 2.0, z = 0.0;
+        common.t_.backward(&x, &y);
+        prj_trans.forward(x, y, z);
+        // note that we choose a point in the middle of the screen to
+        // try to ensure that we don't get edge artefacts due to any
+        // symbolizers with avoid-edges set: only the avoid-edges of
+        // the group symbolizer itself should matter.
+        geometry::point<double> origin_pt(x,y);
+        sub_feature->set_geometry(origin_pt);
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())
         {

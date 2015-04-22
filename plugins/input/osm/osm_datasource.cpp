@@ -153,7 +153,7 @@ box2d<double> osm_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> osm_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> osm_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource::geometry_t>(mapnik::datasource::Collection);
+    return boost::optional<mapnik::datasource_geometry_t>(mapnik::datasource_geometry_t::Collection);
 }

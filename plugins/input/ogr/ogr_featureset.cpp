@@ -25,7 +25,6 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
@@ -101,7 +100,7 @@ feature_ptr ogr_featureset::next()
         OGRGeometry* geom = poFeature->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
         {
-            ogr_converter::convert_geometry(geom, feature);
+            feature->set_geometry(std::move(ogr_converter::convert_geometry(geom)));
         }
         else
         {

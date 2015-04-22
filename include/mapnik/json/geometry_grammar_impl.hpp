@@ -42,23 +42,23 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     qi::lit_type lit;
     qi::int_type int_;
     qi::double_type double_;
+    qi::_val_type _val;
     qi::_1_type _1;
     qi::_2_type _2;
     qi::_3_type _3;
     qi::_4_type _4;
     qi::_a_type _a;
     qi::_b_type _b;
-    qi::_r1_type _r1;
     qi::eps_type eps;
     using qi::fail;
     using qi::on_error;
-
-    start = geometry(_r1) | geometry_collection(_r1);
+    using phoenix::push_back;
+    start = geometry  | geometry_collection;
 
     geometry = (lit('{')[_a = 0 ]
                 >> (-lit(',') >> lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1]
                     ^
-                    (-lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinates[_b = _1]))[create_geometry(_r1,_a,_b)]
+                    (-lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinates[_b = _1]))[create_geometry(_val,_a,_b)]
                 >> lit('}'))
         | lit("null")
         ;
@@ -67,7 +67,7 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
                            >> (-lit(',') >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
                                ^
                                -lit(',') >> lit("\"geometries\"") >> lit(':')
-                               >> lit('[') >> geometry(_r1) % lit(',') >> lit(']'))
+                               >> lit('[') >> geometry[push_back(_val, _1)] % lit(',') >> lit(']'))
                            >> lit('}'))
         | lit("null")
         ;

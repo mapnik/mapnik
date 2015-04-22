@@ -2,6 +2,8 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
+ * Copyright (C) 2015 Artem Pavlenko
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -38,88 +40,56 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry_is_valid.hpp>
+#include <mapnik/geometry_is_simple.hpp>
+#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry_centroid.hpp>
+
 #include <mapnik/wkt/wkt_factory.hpp> // from_wkt
-#include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/json/geometry_parser.hpp> // from_geojson
-#include <mapnik/util/geometry_to_geojson.hpp>
-#include <mapnik/util/geometry_to_svg.hpp>
+#include <mapnik/util/geometry_to_geojson.hpp> // to_geojson
+#include <mapnik/util/geometry_to_wkb.hpp> // to_wkb
+#include <mapnik/util/geometry_to_wkt.hpp> // to_wkt
+//#include <mapnik/util/geometry_to_svg.hpp>
 #include <mapnik/wkb.hpp>
-#include <mapnik/util/geometry_to_wkb.hpp>
+
 
 // stl
 #include <stdexcept>
 
 namespace {
 
-mapnik::geometry_type const& getitem_impl(mapnik::geometry_container & p, int key)
+std::shared_ptr<mapnik::geometry::geometry<double> > from_wkb_impl(std::string const& wkb)
 {
-    if (key >=0 && key < static_cast<int>(p.size()))
-        return p[key];
-    PyErr_SetString(PyExc_IndexError, "Index is out of range");
-    throw boost::python::error_already_set();
-}
-
-void add_wkt_impl(mapnik::geometry_container& p, std::string const& wkt)
-{
-    if (!mapnik::from_wkt(wkt , p))
-        throw std::runtime_error("Failed to parse WKT");
-}
-
-void add_wkb_impl(mapnik::geometry_container& p, std::string const& wkb)
-{
-    if (!mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size()))
-        throw std::runtime_error("Failed to parse WKB");
-}
-
-void add_geojson_impl(mapnik::geometry_container& paths, std::string const& json)
-{
-    if (!mapnik::json::from_geojson(json, paths))
-        throw std::runtime_error("Failed to parse geojson geometry");
-}
-
-std::shared_ptr<mapnik::geometry_container> from_wkt_impl(std::string const& wkt)
-{
-    std::shared_ptr<mapnik::geometry_container> paths = std::make_shared<mapnik::geometry_container>();
-    if (!mapnik::from_wkt(wkt, *paths))
-        throw std::runtime_error("Failed to parse WKT");
-    return paths;
-}
-
-std::shared_ptr<mapnik::geometry_container> from_wkb_impl(std::string const& wkb)
-{
-    std::shared_ptr<mapnik::geometry_container> paths = std::make_shared<mapnik::geometry_container>();
-    if (!mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size()))
-        throw std::runtime_error("Failed to parse WKB");
-    return paths;
-}
-
-std::shared_ptr<mapnik::geometry_container> from_geojson_impl(std::string const& json)
-{
-    std::shared_ptr<mapnik::geometry_container> paths = std::make_shared<mapnik::geometry_container>();
-    if (!mapnik::json::from_geojson(json, *paths))
-        throw std::runtime_error("Failed to parse geojson geometry");
-    return paths;
-}
-
-mapnik::box2d<double> envelope_impl2(mapnik::geometry_container & p)
-{
-    mapnik::box2d<double> b;
-    bool first = true;
-    for (mapnik::geometry_type const& geom : p)
+    std::shared_ptr<mapnik::geometry::geometry<double> > geom = std::make_shared<mapnik::geometry::geometry<double> >();
+    try
     {
-        auto bbox = ::mapnik::envelope(geom);
-        if (first)
-        {
-            b = bbox;
-            first=false;
-        }
-        else
-        {
-            b.expand_to_include(bbox);
-        }
+        *geom = std::move(mapnik::geometry_utils::from_wkb(wkb.c_str(), wkb.size()));
     }
-    return b;
+    catch (...)
+    {
+        throw std::runtime_error("Failed to parse WKB");
+    }
+    return geom;
+}
+
+std::shared_ptr<mapnik::geometry::geometry<double> > from_wkt_impl(std::string const& wkt)
+{
+    std::shared_ptr<mapnik::geometry::geometry<double> > geom = std::make_shared<mapnik::geometry::geometry<double> >();
+    if (!mapnik::from_wkt(wkt, *geom))
+        throw std::runtime_error("Failed to parse WKT geometry");
+    return geom;
+}
+
+std::shared_ptr<mapnik::geometry::geometry<double> > from_geojson_impl(std::string const& json)
+{
+    std::shared_ptr<mapnik::geometry::geometry<double> > geom = std::make_shared<mapnik::geometry::geometry<double> >();
+    if (!mapnik::json::from_geojson(json, *geom))
+        throw std::runtime_error("Failed to parse geojson geometry");
+    return geom;
 }
 
 }
@@ -131,7 +101,7 @@ inline std::string boost_version()
     return s.str();
 }
 
-PyObject* to_wkb(mapnik::geometry_type const& geom, mapnik::util::wkbByteOrder byte_order)
+PyObject* to_wkb_impl(mapnik::geometry::geometry<double> const& geom, mapnik::wkbByteOrder byte_order)
 {
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
     if (wkb)
@@ -150,26 +120,17 @@ PyObject* to_wkb(mapnik::geometry_type const& geom, mapnik::util::wkbByteOrder b
     }
 }
 
-PyObject* to_wkb2( mapnik::geometry_container const& p, mapnik::util::wkbByteOrder byte_order)
+std::string to_geojson_impl(mapnik::geometry::geometry<double> const& geom)
 {
-    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(p,byte_order);
-    if (wkb)
+    std::string wkt;
+    if (!mapnik::util::to_geojson(wkt, geom))
     {
-        return
-#if PY_VERSION_HEX >= 0x03000000
-            ::PyBytes_FromStringAndSize
-#else
-            ::PyString_FromStringAndSize
-#endif
-            ((const char*)wkb->buffer(),wkb->size());
+        throw std::runtime_error("Generate JSON failed");
     }
-    else
-    {
-        Py_RETURN_NONE;
-    }
+    return wkt;
 }
 
-std::string to_wkt(mapnik::geometry_type const& geom)
+std::string to_wkt_impl(mapnik::geometry::geometry<double> const& geom)
 {
     std::string wkt;
     if (!mapnik::util::to_wkt(wkt,geom))
@@ -179,108 +140,140 @@ std::string to_wkt(mapnik::geometry_type const& geom)
     return wkt;
 }
 
-std::string to_wkt2(mapnik::geometry_container const& geom)
+mapnik::geometry::geometry_types geometry_type_impl(mapnik::geometry::geometry<double> const& geom)
 {
-    std::string wkt;
-    if (!mapnik::util::to_wkt(wkt,geom))
-    {
-        throw std::runtime_error("Generate WKT failed");
-    }
-    return wkt;
+    return mapnik::geometry::geometry_type(geom);
 }
 
-std::string to_geojson(mapnik::geometry_type const& geom)
+mapnik::box2d<double> geometry_envelope_impl(mapnik::geometry::geometry<double> const& geom)
 {
-    std::string wkt;
-    if (!mapnik::util::to_geojson(wkt,geom))
-    {
-        throw std::runtime_error("Generate JSON failed");
-    }
-    return wkt;
+    return mapnik::geometry::envelope(geom);
 }
 
-std::string to_geojson2(mapnik::geometry_container const& geom)
+bool geometry_is_valid_impl(mapnik::geometry::geometry<double> const& geom)
 {
-    std::string wkt;
-    if (!mapnik::util::to_geojson(wkt,geom))
-    {
-        throw std::runtime_error("Generate JSON failed");
-    }
-    return wkt;
+    return mapnik::geometry::is_valid(geom);
 }
 
-std::string to_svg(mapnik::geometry_type const& geom)
+bool geometry_is_simple_impl(mapnik::geometry::geometry<double> const& geom)
 {
-    std::string svg;
-    if (!mapnik::util::to_svg(svg, geom))
-    {
-        throw std::runtime_error("Generate SVG failed");
-    }
-    return svg;
+    return mapnik::geometry::is_simple(geom);
 }
 
-mapnik::box2d<double> envelope_impl(mapnik::geometry_type const& geom)
+bool geometry_is_empty_impl(mapnik::geometry::geometry<double> const& geom)
 {
-    return ::mapnik::envelope(geom);
+    return mapnik::geometry::is_empty(geom);
 }
-/*
-// https://github.com/mapnik/mapnik/issues/1437
-std::string to_svg2( mapnik::geometry_container const& geom)
+
+void geometry_correct_impl(mapnik::geometry::geometry<double> & geom)
 {
-    std::string svg; // Use Python String directly ?
-    bool result = mapnik::util::to_svg(svg,geom);
-    if (!result)
-    {
-        throw std::runtime_error("Generate WKT failed");
-    }
-    return svg;
-}*/
+    mapnik::geometry::correct(geom);
+}
+
+void polygon_set_exterior_impl(mapnik::geometry::polygon<double> & poly, mapnik::geometry::linear_ring<double> const& ring)
+{
+    poly.exterior_ring = ring; // copy
+}
+
+void polygon_add_hole_impl(mapnik::geometry::polygon<double> & poly, mapnik::geometry::linear_ring<double> const& ring)
+{
+    poly.interior_rings.push_back(ring); // copy
+}
+
+mapnik::geometry::point<double> geometry_centroid_impl(mapnik::geometry::geometry<double> const& geom)
+{
+    mapnik::geometry::point<double> pt;
+    mapnik::geometry::centroid(geom, pt);
+    return pt;
+}
 
 
 void export_geometry()
 {
     using namespace boost::python;
 
-    enum_<mapnik::geometry_type::types>("GeometryType")
-        .value("Point",mapnik::geometry_type::types::Point)
-        .value("LineString",mapnik::geometry_type::types::LineString)
-        .value("Polygon",mapnik::geometry_type::types::Polygon)
+    implicitly_convertible<mapnik::geometry::point<double>, mapnik::geometry::geometry<double> >();
+    implicitly_convertible<mapnik::geometry::line_string<double>, mapnik::geometry::geometry<double> >();
+    implicitly_convertible<mapnik::geometry::polygon<double>, mapnik::geometry::geometry<double> >();
+    enum_<mapnik::geometry::geometry_types>("GeometryType")
+        .value("Unknown",mapnik::geometry::geometry_types::Unknown)
+        .value("Point",mapnik::geometry::geometry_types::Point)
+        .value("LineString",mapnik::geometry::geometry_types::LineString)
+        .value("Polygon",mapnik::geometry::geometry_types::Polygon)
+        .value("MultiPoint",mapnik::geometry::geometry_types::MultiPoint)
+        .value("MultiLineString",mapnik::geometry::geometry_types::MultiLineString)
+        .value("MultiPolygon",mapnik::geometry::geometry_types::MultiPolygon)
+        .value("GeometryCollection",mapnik::geometry::geometry_types::GeometryCollection)
         ;
 
-    enum_<mapnik::util::wkbByteOrder>("wkbByteOrder")
-        .value("XDR",mapnik::util::wkbXDR)
-        .value("NDR",mapnik::util::wkbNDR)
+    enum_<mapnik::wkbByteOrder>("wkbByteOrder")
+        .value("XDR",mapnik::wkbXDR)
+        .value("NDR",mapnik::wkbNDR)
         ;
 
-    using mapnik::geometry_type;
-    class_<mapnik::geometry_type, std::shared_ptr<mapnik::geometry_type>, boost::noncopyable>("Geometry2d",no_init)
-        .def("envelope",&envelope_impl)
-        // .def("__str__",&mapnik::geometry_type::to_string)
-        .def("type",&mapnik::geometry_type::type)
-        .def("to_wkb",&to_wkb)
-        .def("to_wkt",&to_wkt)
-        .def("to_geojson",&to_geojson)
-        .def("to_svg",&to_svg)
-        // TODO add other geometry_type methods
+    using mapnik::geometry::geometry;
+    using mapnik::geometry::point;
+    using mapnik::geometry::line_string;
+    using mapnik::geometry::linear_ring;
+    using mapnik::geometry::polygon;
+
+    class_<point<double> >("Point", init<double, double>((arg("x"), arg("y")),
+                                                "Constructs a new Point object\n"))
+        .add_property("x", &point<double>::x, "X coordinate")
+        .add_property("y", &point<double>::y, "Y coordinate")
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
+        .def("to_geojson",&to_geojson_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
         ;
 
-    class_<mapnik::geometry_container, std::shared_ptr<mapnik::geometry_container>, boost::noncopyable>("Path")
-        .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
-        .def("__len__", &mapnik::geometry_container::size)
-        .def("envelope",envelope_impl2)
-        .def("add_wkt",add_wkt_impl)
-        .def("add_wkb",add_wkb_impl)
-        .def("add_geojson",add_geojson_impl)
-        .def("to_wkt",&to_wkt2)
-        //.def("to_svg",&to_svg2)
-        .def("to_wkb",&to_wkb2)
-        .def("from_wkt",from_wkt_impl)
-        .def("from_wkb",from_wkb_impl)
-        .def("from_geojson",from_geojson_impl)
-        .def("to_geojson",&to_geojson2)
+    class_<line_string<double> >("LineString", init<>(
+                      "Constructs a new LineString object\n"))
+        .def("add_coord", &line_string<double>::add_coord, "Adds coord")
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
+        .def("to_geojson",&to_geojson_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
+        ;
+
+    class_<linear_ring<double> >("LinearRing", init<>(
+                            "Constructs a new LinearRtring object\n"))
+        .def("add_coord", &linear_ring<double>::add_coord, "Adds coord")
+        ;
+
+    class_<polygon<double> >("Polygon", init<>(
+                        "Constructs a new Polygon object\n"))
+        .add_property("exterior_ring", &polygon<double>::exterior_ring , "Exterior ring")
+        .def("add_hole", &polygon_add_hole_impl, "Add interior ring")
+        .def("num_rings", polygon_set_exterior_impl, "Number of rings (at least 1)")
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
+        .def("to_geojson",&to_geojson_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
+        ;
+
+    class_<geometry<double>, std::shared_ptr<geometry<double> >, boost::noncopyable>("Geometry",no_init)
+        .def("envelope",&geometry_envelope_impl)
+        .def("from_geojson", from_geojson_impl)
+        .def("from_wkt", from_wkt_impl)
+        .def("from_wkb", from_wkb_impl)
+        .staticmethod("from_geojson")
         .staticmethod("from_wkt")
         .staticmethod("from_wkb")
-        .staticmethod("from_geojson")
+        .def("__str__",&to_wkt_impl)
+        .def("type",&geometry_type_impl)
+        .def("is_valid", &geometry_is_valid_impl)
+        .def("is_simple", &geometry_is_simple_impl)
+        .def("is_empty", &geometry_is_empty_impl)
+        .def("correct", &geometry_correct_impl)
+        .def("centroid",&geometry_centroid_impl)
+        .def("to_wkb",&to_wkb_impl)
+        .def("to_wkt",&to_wkt_impl)
+        .def("to_geojson",&to_geojson_impl)
+        //.def("to_svg",&to_svg)
+        // TODO add other geometry_type methods
         ;
-
 }

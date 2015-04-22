@@ -85,7 +85,7 @@ public:
     featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
-    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
 
 private:

@@ -87,12 +87,53 @@ bool proj_transform::equal() const
     return is_source_equal_dest_;
 }
 
+bool proj_transform::is_known() const
+{
+    return merc_to_wgs84_ || wgs84_to_merc_;
+}
+
 bool proj_transform::forward (double & x, double & y , double & z) const
 {
     return forward(&x, &y, &z, 1);
 }
 
-bool proj_transform::forward (double * x, double * y , double * z, int point_count) const
+bool proj_transform::forward (geometry::point<double> & p) const
+{
+    double z = 0;
+    return forward(&(p.x), &(p.y), &z, 1);
+}
+
+unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
+{
+    std::size_t size = ls.size();
+    if (size == 0) return 0;
+
+    if (is_source_equal_dest_)
+        return 0;
+
+    if (wgs84_to_merc_)
+    {
+        lonlat2merc(ls);
+        return 0;
+    }
+    else if (merc_to_wgs84_)
+    {
+        merc2lonlat(ls);
+        return 0;
+    }
+
+    geometry::point<double> * ptr = ls.data();
+    double * x = reinterpret_cast<double*>(ptr);
+    double * y = x + 1;
+    double * z = NULL;
+    if(!forward(x, y, z, size, 2))
+    {
+        return size;
+    }
+    return 0;
+}
+
+bool proj_transform::forward (double * x, double * y , double * z, int point_count, int offset) const
 {
 
     if (is_source_equal_dest_)
@@ -112,13 +153,13 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= DEG_TO_RAD;
-            y[i] *= DEG_TO_RAD;
+            x[i*offset] *= DEG_TO_RAD;
+            y[i*offset] *= DEG_TO_RAD;
         }
     }
 
     if (pj_transform( source_.proj_, dest_.proj_, point_count,
-                      0, x,y,z) != 0)
+                      offset, x,y,z) != 0)
     {
         return false;
     }
@@ -127,15 +168,15 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= RAD_TO_DEG;
-            y[i] *= RAD_TO_DEG;
+            x[i*offset] *= RAD_TO_DEG;
+            y[i*offset] *= RAD_TO_DEG;
         }
     }
 #endif
     return true;
 }
 
-bool proj_transform::backward (double * x, double * y , double * z, int point_count) const
+bool proj_transform::backward (double * x, double * y , double * z, int point_count, int offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -154,13 +195,13 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= DEG_TO_RAD;
-            y[i] *= DEG_TO_RAD;
+            x[i*offset] *= DEG_TO_RAD;
+            y[i*offset] *= DEG_TO_RAD;
         }
     }
 
     if (pj_transform( dest_.proj_, source_.proj_, point_count,
-                      0, x,y,z) != 0)
+                      offset, x,y,z) != 0)
     {
         return false;
     }
@@ -169,8 +210,8 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= RAD_TO_DEG;
-            y[i] *= RAD_TO_DEG;
+            x[i*offset] *= RAD_TO_DEG;
+            y[i*offset] *= RAD_TO_DEG;
         }
     }
 #endif
@@ -182,6 +223,41 @@ bool proj_transform::backward (double & x, double & y , double & z) const
     return backward(&x, &y, &z, 1);
 }
 
+bool proj_transform::backward (geometry::point<double> & p) const
+{
+    double z = 0;
+    return backward(&(p.x), &(p.y), &z, 1);
+}
+
+unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
+{
+    std::size_t size = ls.size();
+    if (size == 0) return 0;
+    
+    if (is_source_equal_dest_)
+        return 0;
+
+    if (wgs84_to_merc_)
+    {
+        merc2lonlat(ls);
+        return 0;
+    }
+    else if (merc_to_wgs84_)
+    {
+        lonlat2merc(ls);
+        return 0;
+    }
+    
+    geometry::point<double> * ptr = ls.data();
+    double * x = reinterpret_cast<double*>(ptr);
+    double * y = x + 1;
+    double * z = NULL;
+    if(!backward(x, y, z, size, 2))
+    {
+        return size;
+    }
+    return 0;
+}
 
 bool proj_transform::forward (box2d<double> & box) const
 {

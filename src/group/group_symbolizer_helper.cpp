@@ -23,7 +23,9 @@
 // mapnik
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/geom_util.hpp>
+//#include <mapnik/geom_util.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/value_types.hpp>
@@ -35,7 +37,30 @@
 //agg
 #include "agg_conv_clip_polyline.h"
 
-namespace mapnik {
+namespace mapnik { namespace detail {
+
+template <typename Helper>
+struct apply_find_line_placements : util::noncopyable
+{
+    apply_find_line_placements(view_transform const& t, proj_transform const& prj_trans, Helper & helper)
+        : t_(t),
+          prj_trans_(prj_trans),
+          helper_(helper) {}
+
+    template <typename Adapter>
+    void operator() (Adapter & va) const
+    {
+        using vertex_adapter_type = Adapter;
+        using path_type = transform_path_adapter<view_transform, vertex_adapter_type>;
+        path_type path(t_, va, prj_trans_);
+        helper_.find_line_placements(path);
+    }
+    view_transform const& t_;
+    proj_transform const& prj_trans_;
+    Helper & helper_;
+};
+
+} // ns detail
 
 group_symbolizer_helper::group_symbolizer_helper(
         group_symbolizer const& sym, feature_impl const& feature,
@@ -61,14 +86,13 @@ pixel_position_list const& group_symbolizer_helper::get()
     }
     else
     {
-        for (auto const* geom : geometries_to_process_)
+        using apply_find_line_placements = detail::apply_find_line_placements<group_symbolizer_helper>;
+        for (auto const& geom : geometries_to_process_)
         {
             // TODO to support clipped geometries this needs to use
             // vertex_converters
-            using path_type = transform_path_adapter<view_transform,vertex_adapter>;
-            vertex_adapter va(*geom);
-            path_type path(t_, va, prj_trans_);
-            find_line_placements(path);
+            apply_find_line_placements apply(t_, prj_trans_, *this);
+            mapnik::util::apply_visitor(geometry::vertex_processor<apply_find_line_placements>(apply), geom);
         }
     }
 

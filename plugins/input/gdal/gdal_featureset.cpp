@@ -44,7 +44,6 @@ using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::view_transform;
-using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
@@ -378,7 +377,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                     // we can deduce the alpha channel from nodata in the Byte case
                     // by reusing the reading of R,G,B bands directly
-                    if (has_nodata && !color_table && red->GetRasterDataType() != GDT_Byte)
+                    if (has_nodata && !color_table && red->GetRasterDataType() == GDT_Byte)
                     {
                         double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
                         // read the data in and create an alpha channel from the nodata values
@@ -614,9 +613,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                std::unique_ptr<geometry_type> point = std::make_unique<geometry_type>(mapnik::geometry_type::types::Point);
-                point->move_to(pt.x, pt.y);
-                feature->add_geometry(point.release());
+                feature->set_geometry(mapnik::geometry::point<double>(pt.x,pt.y));
                 feature->put_new("value",value);
                 if (raster_has_nodata)
                 {

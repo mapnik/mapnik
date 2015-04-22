@@ -24,8 +24,8 @@
 #define CONTAINER_ADAPTER_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
+
+
 #include <mapnik/util/path_iterator.hpp>
 
 // boost
@@ -37,20 +37,21 @@
 namespace boost { namespace spirit { namespace traits {
 
 template <>
-struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
+struct is_container<mapnik::path_type const> : mpl::true_ {} ;
 
 template <>
 struct is_container<mapnik::vertex_adapter const> : mpl::true_ {} ;
 
 // make gcc and darwin toolsets happy.
-template <>
-struct is_container<mapnik::geometry_container const> : mpl::false_ {} ;
+// FIXME
+//template <>
+//struct is_container<mapnik::geometry_container const> : mpl::false_ {} ;
 
 //
 template <>
-struct container_iterator<mapnik::geometry_type const>
+struct container_iterator<mapnik::path_type const>
 {
-    using type = mapnik::util::path_iterator<mapnik::geometry_type>;
+    using type = mapnik::util::path_iterator<mapnik::path_type>;
 };
 
 template <>
@@ -60,12 +61,12 @@ struct container_iterator<mapnik::vertex_adapter const>
 };
 
 template <>
-struct begin_container<mapnik::geometry_type const>
+struct begin_container<mapnik::path_type const>
 {
-    static mapnik::util::path_iterator<mapnik::geometry_type>
-    call (mapnik::geometry_type const& g)
+    static mapnik::util::path_iterator<mapnik::path_type>
+    call (mapnik::path_type const& p)
     {
-        return mapnik::util::path_iterator<mapnik::geometry_type>(g);
+        return mapnik::util::path_iterator<mapnik::path_type>(p);
     }
 };
 
@@ -73,19 +74,19 @@ template <>
 struct begin_container<mapnik::vertex_adapter const>
 {
     static mapnik::util::path_iterator<mapnik::vertex_adapter>
-    call (mapnik::vertex_adapter const& g)
+    call (mapnik::vertex_adapter const& p)
     {
-        return mapnik::util::path_iterator<mapnik::vertex_adapter>(g);
+        return mapnik::util::path_iterator<mapnik::vertex_adapter>(p);
     }
 };
 
 template <>
-struct end_container<mapnik::geometry_type const>
+struct end_container<mapnik::path_type const>
 {
-    static mapnik::util::path_iterator<mapnik::geometry_type>
-    call (mapnik::geometry_type const&)
+    static mapnik::util::path_iterator<mapnik::path_type>
+    call (mapnik::path_type const&)
     {
-        return mapnik::util::path_iterator<mapnik::geometry_type>();
+        return mapnik::util::path_iterator<mapnik::path_type>();
     }
 };
 

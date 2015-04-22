@@ -26,7 +26,8 @@
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geom_util.hpp>
+#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_centroid.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/expression_evaluator.hpp>
@@ -37,14 +38,15 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 // agg
 #include "agg_trans_affine.h"
 
 // boost
 #include <boost/optional.hpp>
-
 // stl
 #include <memory>
 #include <type_traits> // remove_reference
@@ -66,13 +68,13 @@ struct vector_markers_dispatch : util::noncopyable
                             double scale_factor,
                             feature_impl & feature,
                             attributes const& vars)
-    : src_(src),
-        marker_trans_(marker_trans),
-        sym_(sym),
-        detector_(detector),
-        feature_(feature),
-        vars_(vars),
-        scale_factor_(scale_factor)
+        : src_(src),
+          marker_trans_(marker_trans),
+          sym_(sym),
+          detector_(detector),
+          feature_(feature),
+          vars_(vars),
+          scale_factor_(scale_factor)
     {}
 
     virtual ~vector_markers_dispatch() {}
@@ -174,7 +176,8 @@ protected:
     double scale_factor_;
 };
 
-void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path);
+void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars,
+                   svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path);
 
 bool push_explicit_style(svg_attribute_type const& src,
                          svg_attribute_type & dst,
@@ -193,28 +196,36 @@ void setup_transform_scaling(agg::trans_affine & tr,
 template <typename Converter>
 void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, symbolizer_base const& sym)
 {
-    std::size_t geom_count = feature.paths().size();
-    if (geom_count == 1)
+    using vertex_converter_type = Converter;
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+
+    auto const& geom = feature.get_geometry();
+    geometry::geometry_types type = geometry::geometry_type(geom);
+
+    if (type == geometry::geometry_types::Point
+        || type == geometry::geometry_types::LineString
+        || type == geometry::geometry_types::Polygon)
     {
-        vertex_adapter va(feature.paths()[0]);
-        converter.apply(va);
+        apply_vertex_converter_type apply(converter);
+        mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
-    else if (geom_count > 1)
+    else
     {
+
         marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
         marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
 
         if (placement == MARKER_POINT_PLACEMENT &&
             multi_policy == MARKER_WHOLE_MULTI)
         {
-            double x, y;
-            if (label::centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y))
+            geometry::point<double> pt;
+            // test if centroid is contained by bounding box
+            if (geometry::centroid(geom, pt) && converter.disp_.args_.bbox.contains(pt.x, pt.y))
             {
-                geometry_type pt(geometry_type::types::Point);
-                pt.move_to(x, y);
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();
-                vertex_adapter va(pt);
+                geometry::point_vertex_adapter<double> va(pt);
                 converter.apply(va);
             }
         }
@@ -223,23 +234,31 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         {
             // Only apply to path with largest envelope area
             // TODO: consider using true area for polygon types
-            double maxarea = 0;
-            geometry_type const* largest = 0;
-            for (geometry_type const& geom : feature.paths())
+            if (type == geometry::geometry_types::MultiPolygon)
             {
-                vertex_adapter va(geom);
-                const box2d<double>& env = va.envelope();
-                double area = env.width() * env.height();
-                if (area > maxarea)
+                geometry::multi_polygon<double> const& multi_poly = mapnik::util::get<geometry::multi_polygon<double> >(geom);
+                double maxarea = 0;
+                geometry::polygon<double> const* largest = 0;
+                for (geometry::polygon<double> const& poly : multi_poly)
                 {
-                    maxarea = area;
-                    largest = &geom;
+                    box2d<double> bbox = geometry::envelope(poly);
+                    geometry::polygon_vertex_adapter<double> va(poly);
+                    double area = bbox.width() * bbox.height();
+                    if (area > maxarea)
+                    {
+                        maxarea = area;
+                        largest = &poly;
+                    }
+                }
+                if (largest)
+                {
+                    geometry::polygon_vertex_adapter<double> va(*largest);
+                    converter.apply(va);
                 }
             }
-            if (largest)
+            else
             {
-                vertex_adapter va(*largest);
-                converter.apply(va);
+                MAPNIK_LOG_WARN(marker_symbolizer) << "TODO: if you get here -> open an issue";
             }
         }
         else
@@ -248,11 +267,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            for (geometry_type const& path : feature.paths())
-            {
-                vertex_adapter va(path);
-                converter.apply(va);
-            }
+            apply_vertex_converter_type apply(converter);
+            mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
         }
     }
 }

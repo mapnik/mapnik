@@ -57,7 +57,7 @@ struct unicode_string : qi::grammar<Iterator, std::string()>
 
 struct push_utf8
 {
-    typedef void result_type;
+    using result_type = void;
 
     void operator()(std::string& utf8, uchar code_point) const
     {
@@ -70,7 +70,7 @@ struct push_utf8
 
 struct push_esc
 {
-    typedef void result_type;
+    using result_type = void;
 
     void operator()(std::string& utf8, uchar c) const
     {
@@ -152,8 +152,8 @@ struct generic_json
     qi::rule<Iterator,space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
     // conversions
-    boost::phoenix::function<detail::value_converter<mapnik::value_integer> > integer_converter;
-    boost::phoenix::function<detail::value_converter<mapnik::value_double> > double_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer> > integer_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double> > double_converter;
 };
 
 }}

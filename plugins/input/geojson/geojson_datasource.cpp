@@ -41,13 +41,12 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
-#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
-#include <mapnik/util/boost_geometry_adapters.hpp> // boost.geometry - register box2d<double>
 
 #if defined(SHAPE_MEMORY_MAPPED_FILE)
 #include <boost/interprocess/mapped_region.hpp>
@@ -287,22 +286,37 @@ const char * geojson_datasource::name()
     return "geojson";
 }
 
-boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry_type() const
+mapnik::datasource::datasource_t geojson_datasource::type() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    return type_;
+}
+
+mapnik::box2d<double> geojson_datasource::envelope() const
+{
+    return extent_;
+}
+
+mapnik::layer_descriptor geojson_datasource::get_descriptor() const
+{
+    return desc_;
+}
+
+boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     if (cache_features_)
     {
         unsigned num_features = features_.size();
         for (unsigned i = 0; i < num_features && i < 5; ++i)
         {
-            mapnik::util::to_ds_type(features_[i]->paths(),result);
+            result = mapnik::util::to_ds_type(features_[i]->get_geometry());
             if (result)
             {
                 int type = static_cast<int>(*result);
                 if (multi_type > 0 && multi_type != type)
                 {
-                    result.reset(mapnik::datasource::Collection);
+                    result.reset(mapnik::datasource_geometry_t::Collection);
                     return result;
                 }
                 multi_type = type;
@@ -341,13 +355,13 @@ boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
-            mapnik::util::to_ds_type(feature->paths(),result);
+            result = mapnik::util::to_ds_type(feature->get_geometry());
             if (result)
             {
                 int type = static_cast<int>(*result);
                 if (multi_type > 0 && multi_type != type)
                 {
-                    result.reset(mapnik::datasource::Collection);
+                    result.reset(mapnik::datasource_geometry_t::Collection);
                     return result;
                 }
                 multi_type = type;
@@ -355,21 +369,6 @@ boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry
         }
     }
     return result;
-}
-
-mapnik::datasource::datasource_t geojson_datasource::type() const
-{
-    return type_;
-}
-
-mapnik::box2d<double> geojson_datasource::envelope() const
-{
-    return extent_;
-}
-
-mapnik::layer_descriptor geojson_datasource::get_descriptor() const
-{
-    return desc_;
 }
 
 mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) const

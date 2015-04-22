@@ -25,9 +25,11 @@
 
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/feature.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 namespace mapnik {
 
@@ -58,14 +60,10 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
-    for (geometry_type const& geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            vertex_adapter va(geom);
-            converter.apply(va);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 
     color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);
     fill_func(fill, opacity);
@@ -73,4 +71,4 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP

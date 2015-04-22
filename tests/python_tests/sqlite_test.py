@@ -364,10 +364,9 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         fs = ds.all_features()
         eq_(len(fs),1)
         feat = fs[0]
-        #eq_(feat.id(),1)
+        eq_(feat.id(),0) # should be 1?
         eq_(feat['alias'],'test')
-        eq_(len(feat.geometries()),1)
-        eq_(feat.geometries()[0].to_wkt(),'Point(0 0)')
+        eq_(feat.geometry.to_wkt(),'POINT(0 0)')
 
     def test_db_with_one_untyped_column():
         # form up an in-memory test db

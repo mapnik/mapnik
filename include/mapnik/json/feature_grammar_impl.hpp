@@ -82,8 +82,8 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
 
     feature = lit('{')
         >> (feature_type | (lit("\"geometry\"") >> lit(':')
-                            >> geometry_grammar_(extract_geometry_(_r1))) | properties(_r1) | json_.key_value) % lit(',')
-        >> lit('}')
+                            >> geometry_grammar_[set_geometry(_r1, _1)]) | properties(_r1) | json_.key_value) % lit(',')
+                            >> lit('}')
         ;
 
     properties = lit("\"properties\"")

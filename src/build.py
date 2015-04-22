@@ -159,6 +159,7 @@ source = Split(
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
+    geometry_reprojection.cpp
     expression_node.cpp
     expression_string.cpp
     expression.cpp
@@ -190,6 +191,7 @@ source = Split(
     palette.cpp
     marker_helpers.cpp
     transform_expression_grammar.cpp
+    geometry_envelope.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp

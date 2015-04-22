@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-
+#include <mapnik/path.hpp>
 // boost
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -80,17 +80,17 @@ private:
     const path_type *vertices_;
 };
 
-// specialization for mapnik::geometry_type - vertex interface has been removed
+// specialization for mapnik::path_type - vertex interface has been removed
 template <>
-class path_iterator<geometry_type>
-    : public boost::iterator_facade< path_iterator<geometry_type>,
+class path_iterator<path_type>
+    : public boost::iterator_facade< path_iterator<path_type>,
                                      std::tuple<unsigned,double,double> const,
                                      boost::forward_traversal_tag
                                      >
 {
 
 public:
-    using path_type = mapnik::geometry_type;
+    using path_type = mapnik::path_type;
     using value_type = std::tuple<unsigned, double, double>;
     using size_type = path_type::size_type;
     path_iterator()

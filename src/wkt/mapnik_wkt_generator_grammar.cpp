@@ -21,14 +21,13 @@
  *****************************************************************************/
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
 #include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 #include <string>
 
 namespace mapnik { namespace wkt {
 
 using sink_type = std::back_insert_iterator<std::string>;
-template struct wkt_generator<sink_type, mapnik::geometry_type>;
-template struct wkt_multi_generator<sink_type, mapnik::geometry_container>;
+template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double>, double >;
+template struct wkt_generator_grammar_int<sink_type, mapnik::geometry::geometry<std::int64_t>, std::int64_t >;
 
 }}

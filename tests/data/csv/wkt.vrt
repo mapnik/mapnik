@@ -1,0 +1,7 @@
+<OGRVRTDataSource>
+    <OGRVRTLayer name="wkt">
+        <SrcDataSource relativeToVRT="1">wkt.csv</SrcDataSource>
+        <LayerSRS>WGS84</LayerSRS>
+        <GeometryField encoding="WKT" field="WKT"/>
+    </OGRVRTLayer>
+</OGRVRTDataSource>

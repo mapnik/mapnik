@@ -28,6 +28,7 @@
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/vertex.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -41,7 +42,47 @@
 #include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
 
-namespace mapnik {
+namespace mapnik { namespace detail {
+
+template <typename Rasterizer, typename Renderer, typename Common, typename ProjTransform>
+struct render_dot_symbolizer : util::noncopyable
+{
+    render_dot_symbolizer(double rx, double ry, Rasterizer & ras, Renderer & ren, Common & common, ProjTransform const& prj_trans)
+        : ras_(ras),
+          ren_(ren),
+          common_(common),
+          prj_trans_(prj_trans),
+          rx_(rx),
+          ry_(ry),
+          el_(0, 0, rx, ry) {}
+
+    template <typename Adapter>
+    void operator() (Adapter const& va)
+    {
+        double x,y,z = 0;
+        unsigned cmd = SEG_END;
+        va.rewind(0);
+        while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
+        {
+            if (cmd == SEG_CLOSE) continue;
+            prj_trans_.backward(x, y, z);
+            common_.t_.forward(&x, &y);
+            el_.init(x, y, rx_, ry_, el_.num_steps());
+            ras_.add_path(el_);
+            agg::render_scanlines(ras_, sl_, ren_);
+        }
+    }
+    Rasterizer & ras_;
+    Renderer & ren_;
+    Common & common_;
+    ProjTransform const& prj_trans_;
+    double rx_;
+    double ry_;
+    agg::ellipse el_;
+    agg::scanline_u8 sl_;
+};
+
+} // ns detail
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
@@ -79,27 +120,11 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
     renderer_base renb(pixf);
     renderer_type ren(renb);
-    agg::scanline_u8 sl;
-    ren.color(agg::rgba8_pre(fill.red(), fill.green(), fill.blue(), int(fill.alpha() * opacity)));
-    agg::ellipse el(0,0,rx,ry);
-    unsigned num_steps = el.num_steps();
 
-    for (geometry_type const& geom : feature.paths())
-    {
-        double x,y,z = 0;
-        unsigned cmd = 1;
-        vertex_adapter va(geom);
-        va.rewind(0);
-        while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
-        {
-            if (cmd == SEG_CLOSE) continue;
-            prj_trans.backward(x,y,z);
-            common_.t_.forward(&x,&y);
-            el.init(x,y,rx,ry,num_steps);
-            ras_ptr->add_path(el);
-            agg::render_scanlines(*ras_ptr, sl, ren);
-        }
-    }
+    ren.color(agg::rgba8_pre(fill.red(), fill.green(), fill.blue(), int(fill.alpha() * opacity)));
+    using render_dot_symbolizer_type = detail::render_dot_symbolizer<rasterizer, renderer_type, renderer_common, proj_transform>;
+    render_dot_symbolizer_type apply(rx, ry, *ras_ptr, ren, common_, prj_trans);
+    mapnik::util::apply_visitor(geometry::vertex_processor<render_dot_symbolizer_type>(apply), feature.get_geometry());
 }
 
 template void agg_renderer<image_rgba8>::process(dot_symbolizer const&,

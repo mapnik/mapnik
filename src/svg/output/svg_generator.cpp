@@ -24,7 +24,6 @@
 
 // mapnik
 #include <mapnik/svg/output/svg_generator.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/svg/output/svg_output_grammars.hpp>
 

@@ -22,7 +22,6 @@
 
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>

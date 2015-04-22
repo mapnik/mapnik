@@ -26,7 +26,7 @@ def make_map():
     pixel_key = 1
     f = mapnik.Feature(context,pixel_key)
     f['Name'] = str(pixel_key)
-    f.add_geometries_from_wkt('POLYGON ((0 0, 0 256, 256 256, 256 0, 0 0))')
+    f.geometry=mapnik.Geometry.from_wkt('POLYGON ((0 0, 0 256, 256 256, 256 0, 0 0))')
     ds.add_feature(f)
     s = mapnik.Style()
     r = mapnik.Rule()

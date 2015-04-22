@@ -41,10 +41,20 @@ if 'osm' in mapnik.DatasourceCache.plugin_names():
         eq_(ds.field_types(),['str', 'str', 'str', 'str'])
         fs = ds.featureset()
         feat = fs.next()
+        eq_(feat.to_geojson(),'{"type":"Feature","id":890,"geometry":{"type":"Point","coordinates":[-61.7960248,17.1415874]},"properties":{}}')
         eq_(feat.id(),4294968186)
         eq_(feat['bigint'], None)
         feat = fs.next()
         eq_(feat['bigint'],'9223372036854775807')
+
+    def test_reading_ways():
+        ds = mapnik.Osm(file='../data/osm/ways.osm')
+        eq_(len(ds.fields()),0)
+        eq_(ds.fields(),[])
+        eq_(ds.field_types(),[])
+        feat = ds.all_features()[4]
+        eq_(feat.to_geojson(),'{"type":"Feature","id":1,"geometry":{"type":"LineString","coordinates":[[0,2],[0,-2]]},"properties":{}}')
+        eq_(feat.id(),1)
 
 
 if __name__ == "__main__":

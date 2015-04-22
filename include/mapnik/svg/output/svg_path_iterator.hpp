@@ -24,7 +24,7 @@
 #define SVG_PATH_ITERATOR_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/view_transform.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 // boost

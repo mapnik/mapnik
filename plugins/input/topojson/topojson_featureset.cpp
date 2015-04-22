@@ -25,6 +25,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/geometry_adapters.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -36,7 +37,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/range/adaptor/reversed.hpp>
-#include <boost/range/adaptor/sliced.hpp>
 #include <boost/geometry.hpp>
 #pragma GCC diagnostic pop
 
@@ -89,8 +89,6 @@ struct feature_generator
     feature_ptr operator() (point const& pt) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::unique_ptr<geometry_type> point_ptr(new geometry_type(geometry_type::types::Point));
-
         double x = pt.coord.x;
         double y = pt.coord.y;
         if (topo_.tr)
@@ -98,9 +96,8 @@ struct feature_generator
             x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
             y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
         }
-
-        point_ptr->move_to(x,y);
-        feature->paths().push_back(point_ptr.release());
+        mapnik::geometry::point<double> point(x, y);
+        feature->set_geometry(std::move(point));
         assign_properties(*feature, pt, tr_);
         return feature;
     }
@@ -108,11 +105,10 @@ struct feature_generator
     feature_ptr operator() (multi_point const& multi_pt) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-
+        mapnik::geometry::multi_point<double> multi_point;
+        multi_point.reserve(multi_pt.points.size());
         for (auto const& pt : multi_pt.points)
         {
-            std::unique_ptr<geometry_type> point_ptr(new geometry_type(geometry_type::types::Point));
-
             double x = pt.x;
             double y = pt.y;
             if (topo_.tr)
@@ -120,10 +116,9 @@ struct feature_generator
                 x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                 y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
             }
-
-            point_ptr->move_to(x,y);
-            feature->paths().push_back(point_ptr.release());
+            multi_point.add_coord(x, y);
         }
+        feature->set_geometry(std::move(multi_point));
         assign_properties(*feature, multi_pt, tr_);
         return feature;
     }
@@ -131,11 +126,12 @@ struct feature_generator
     feature_ptr operator() (linestring const& line) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::unique_ptr<geometry_type> line_ptr(new geometry_type(geometry_type::types::LineString));
-
         double px = 0, py = 0;
         index_type arc_index = line.ring;
-        bool first = true;
+
+        mapnik::geometry::line_string<double> line_string;
+        line_string.reserve( topo_.arcs[arc_index].coordinates.size());
+
         for (auto pt : topo_.arcs[arc_index].coordinates)
         {
             double x = pt.x;
@@ -145,18 +141,9 @@ struct feature_generator
                 x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                 y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
             }
-            if (first)
-            {
-                first = false;
-                line_ptr->move_to(x,y);
-            }
-            else
-            {
-                line_ptr->line_to(x,y);
-            }
+            line_string.add_coord(x,y);
         }
-
-        feature->paths().push_back(line_ptr.release());
+        feature->set_geometry(std::move(line_string));
         assign_properties(*feature, line, tr_);
         return feature;
     }
@@ -165,14 +152,15 @@ struct feature_generator
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
 
+        mapnik::geometry::multi_line_string<double> multi_line_string;
+        multi_line_string.reserve(multi_line.rings.size());
         for (auto const& index : multi_line.rings)
         {
-            std::unique_ptr<geometry_type> line_ptr(new geometry_type(geometry_type::types::LineString));
-
             double px = 0, py = 0;
-            bool first = true;
             bool reverse = index < 0;
             index_type arc_index = reverse ? std::abs(index) - 1 : index;
+            mapnik::geometry::line_string<double> line_string;
+            line_string.reserve(topo_.arcs[arc_index].coordinates.size());
             for (auto pt : topo_.arcs[arc_index].coordinates)
             {
                 double x = pt.x;
@@ -182,18 +170,11 @@ struct feature_generator
                     x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                     y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                 }
-                if (first)
-                {
-                    first = false;
-                    line_ptr->move_to(x,y);
-                }
-                else
-                {
-                    line_ptr->line_to(x,y);
-                }
+                line_string.add_coord(x, y);
             }
-            feature->paths().push_back(line_ptr.release());
+            multi_line_string.push_back(std::move(line_string));
         }
+        feature->set_geometry(std::move(multi_line_string));
         assign_properties(*feature, multi_line, tr_);
         return feature;
     }
@@ -201,12 +182,13 @@ struct feature_generator
     feature_ptr operator() (polygon const& poly) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
         std::vector<mapnik::topojson::coordinate> processed_coords;
-
+        mapnik::geometry::polygon<double> polygon;
+        if (poly.rings.size() > 1) polygon.interior_rings.reserve(poly.rings.size() - 1);
+        bool first = true;
         for (auto const& ring : poly.rings)
         {
-            bool first = true;
+            mapnik::geometry::linear_ring<double> linear_ring;
             for (auto const& index : ring)
             {
                 double px = 0, py = 0;
@@ -233,33 +215,31 @@ struct feature_generator
 
                 if (reverse)
                 {
-                    for (auto const& c : processed_coords | reversed | sliced(0, processed_coords.size()-1))
+                    for (auto const& c : processed_coords | reversed)
                     {
-                        if (first)
-                        {
-                            first = false;
-                            poly_ptr->move_to(c.x,c.y);
-                        }
-                        else poly_ptr->line_to(c.x,c.y);
+                        linear_ring.emplace_back(c.x, c.y);
                     }
                 }
                 else
                 {
-                    for (auto const& c : processed_coords | sliced(0, processed_coords.size()-1))
+                    for (auto const& c : processed_coords)
                     {
-                        if (first)
-                        {
-                            first = false;
-                            poly_ptr->move_to(c.x,c.y);
-                        }
-                        else poly_ptr->line_to(c.x,c.y);
+                        linear_ring.emplace_back(c.x, c.y);
                     }
                 }
             }
-            poly_ptr->close_path();
+            if (first)
+            {
+                first = false;
+                polygon.set_exterior_ring(std::move(linear_ring));
+            }
+            else
+            {
+                polygon.add_hole(std::move(linear_ring));
+            }
         }
-
-        feature->paths().push_back(poly_ptr.release());
+        boost::geometry::correct(polygon);
+        feature->set_geometry(std::move(polygon));
         assign_properties(*feature, poly, tr_);
         return feature;
     }
@@ -268,12 +248,18 @@ struct feature_generator
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
         std::vector<mapnik::topojson::coordinate> processed_coords;
+        mapnik::geometry::multi_polygon<double> multi_polygon;
+        multi_polygon.reserve(multi_poly.polygons.size());
+
         for (auto const& poly : multi_poly.polygons)
         {
-            std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
+            bool first = true;
+            mapnik::geometry::polygon<double> polygon;
+            if (poly.size() > 1) polygon.interior_rings.reserve(poly.size() - 1);
+
             for (auto const& ring : poly)
             {
-                bool first = true;
+                mapnik::geometry::linear_ring<double> linear_ring;
                 for (auto const& index : ring)
                 {
                     double px = 0, py = 0;
@@ -299,33 +285,33 @@ struct feature_generator
 
                     if (reverse)
                     {
-                        for (auto const& c : (processed_coords | reversed | sliced(0,processed_coords.size() - 1)))
+                        for (auto const& c : (processed_coords | reversed))
                         {
-                            if (first)
-                            {
-                                first = false;
-                                poly_ptr->move_to(c.x,c.y);
-                            }
-                            else poly_ptr->line_to(c.x,c.y);
+                            linear_ring.add_coord(c.x, c.y);
                         }
                     }
                     else
                     {
-                        for (auto const& c : processed_coords | sliced(0,processed_coords.size() - 1))
+                        for (auto const& c : processed_coords)
                         {
-                            if (first)
-                            {
-                                first = false;
-                                poly_ptr->move_to(c.x,c.y);
-                            }
-                            else poly_ptr->line_to(c.x,c.y);
+                            linear_ring.add_coord(c.x, c.y);
                         }
                     }
                 }
-                poly_ptr->close_path();
+                if (first)
+                {
+                    first = false;
+                    polygon.set_exterior_ring(std::move(linear_ring));
+                }
+                else
+                {
+                    polygon.add_hole(std::move(linear_ring));
+                }
             }
-            feature->paths().push_back(poly_ptr.release());
+            boost::geometry::correct(polygon);
+            multi_polygon.push_back(std::move(polygon));
         }
+        feature->set_geometry(std::move(multi_polygon));
         assign_properties(*feature, multi_poly, tr_);
         return feature;
     }

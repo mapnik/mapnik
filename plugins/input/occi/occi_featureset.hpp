@@ -26,11 +26,8 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/unicode.hpp>
-
-// boost
-
+// stl
 #include <memory>
 
 // oci

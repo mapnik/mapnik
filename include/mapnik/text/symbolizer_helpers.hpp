@@ -25,6 +25,7 @@
 //mapnik
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/geometry.hpp>
 
 namespace mapnik {
 
@@ -60,6 +61,13 @@ using vertex_converter_type = vertex_converter<placement_finder_adapter<placemen
 class base_symbolizer_helper
 {
 public:
+
+    using point_cref = std::reference_wrapper<geometry::point<double> const>;
+    using line_string_cref = std::reference_wrapper<geometry::line_string<double> const>;
+    using polygon_cref = std::reference_wrapper<geometry::polygon<double> const>;
+    using geometry_cref = util::variant<point_cref, line_string_cref, polygon_cref>;
+    // Using list instead of vector, because we delete random elements and need iterators to stay valid.
+    using geometry_container_type = std::list<geometry_cref>;
     base_symbolizer_helper(symbolizer_base const& sym,
                            feature_impl const& feature,
                            attributes const& vars,
@@ -85,13 +93,12 @@ protected:
     float scale_factor_;
 
     //Processing
-    // Using list instead of vector, because we delete random elements and need iterators to stay valid.
     // Remaining geometries to be processed.
-    mutable std::list<geometry_type*> geometries_to_process_;
+    mutable geometry_container_type geometries_to_process_;
+    // Geometry currently being processed.
+    mutable geometry_container_type::iterator geo_itr_;
     // Remaining points to be processed.
     mutable std::list<pixel_position> points_;
-    // Geometry currently being processed.
-    mutable std::list<geometry_type*>::iterator geo_itr_;
     // Point currently being processed.
     mutable std::list<pixel_position>::iterator point_itr_;
     // Use point placement. Otherwise line placement is used.

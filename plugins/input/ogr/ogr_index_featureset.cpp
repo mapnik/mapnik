@@ -25,7 +25,6 @@
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
@@ -120,7 +119,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             geom->getEnvelope(&feature_envelope_);
             if (!filter_.pass(mapnik::box2d<double>(feature_envelope_.MinX,feature_envelope_.MinY,
                                             feature_envelope_.MaxX,feature_envelope_.MaxY))) continue;
-            ogr_converter::convert_geometry (geom, feature);
+            feature->set_geometry(std::move(ogr_converter::convert_geometry(geom)));
         }
         else
         {

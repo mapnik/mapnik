@@ -26,22 +26,17 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/util/path_iterator.hpp>
-#include <mapnik/util/container_adapter.hpp>
-#include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
-
+#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
+#include <boost/spirit/home/karma/domain.hpp>
 #pragma GCC diagnostic pop
-
-//stl
-#include <tuple>
 
 namespace mapnik { namespace json {
 
@@ -52,58 +47,12 @@ namespace detail {
 template <typename Geometry>
 struct get_type
 {
-    using result_type = int;
-    result_type operator() (Geometry const& geom) const
+    using result_type = mapnik::geometry::geometry_types;
+    template <typename T>
+    result_type operator() (T const& geom) const
     {
-        return static_cast<int>(geom.type());
-    }
-};
-
-template <typename Geometry>
-struct get_first
-{
-    using result_type = typename Geometry::value_type const;
-    result_type operator() (Geometry const& geom) const
-    {
-        typename Geometry::value_type coord;
-        std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
-        return coord;
-    }
-};
-
-template <typename GeometryContainer>
-struct multi_geometry_type
-{
-    using result_type = std::tuple<unsigned,bool> ;
-    result_type operator() (GeometryContainer const& cont) const
-    {
-        unsigned type = 0u;
-        bool collection = false;
-        for (auto const& geom : cont)
-        {
-            if (type != 0u && geom.type() != type)
-            {
-                collection = true;
-                break;
-            }
-            type = geom.type();
-        }
-        if (cont.size() > 1) type +=3;
-        return std::tuple<unsigned,bool>(type, collection);
-    }
-};
-
-template <typename GeometryContainer>
-struct not_empty
-{
-    using result_type = bool;
-    result_type operator() (GeometryContainer const& cont) const
-    {
-        for (auto const& geom : cont)
-        {
-            if (geom.size() > 0) return true;
-        }
-        return false;
+        auto type = mapnik::geometry::geometry_type(geom);
+        return type;
     }
 };
 
@@ -140,47 +89,30 @@ struct json_coordinate_policy : karma::real_policies<T>
 
 template <typename OutputIterator, typename Geometry>
 struct geometry_generator_grammar :
-        karma::grammar<OutputIterator, Geometry const& ()>
+        karma::grammar<OutputIterator, Geometry const&()>
 {
-    using geometry_type = Geometry;
-    using coord_type = typename std::remove_pointer<typename geometry_type::value_type>::type;
     geometry_generator_grammar();
-    karma::rule<OutputIterator, geometry_type const& ()> coordinates;
-    karma::rule<OutputIterator, geometry_type const& ()> point;
-    karma::rule<OutputIterator, geometry_type const& ()> linestring;
-    karma::rule<OutputIterator, geometry_type const& ()> polygon;
-    karma::rule<OutputIterator, geometry_type const& ()> coords;
-    karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
-    karma::rule<OutputIterator, coord_type()> point_coord;
-    karma::rule<OutputIterator, coord_type(unsigned& )> polygon_coord;
-    boost::phoenix::function<detail::get_type<geometry_type> > _type;
-    boost::phoenix::function<detail::get_first<geometry_type> > _first;
+    karma::rule<OutputIterator, Geometry const&()> geometry;
+    karma::rule<OutputIterator, karma::locals<mapnik::geometry::geometry_types>, Geometry const&() > geometry_dispatch;
+    karma::rule<OutputIterator, geometry::geometry<double> const&()> point;
+    karma::rule<OutputIterator, geometry::point<double> const&()> point_coord;
+    karma::rule<OutputIterator, geometry::geometry<double> const&()> linestring;
+    karma::rule<OutputIterator, geometry::line_string<double> const&()> linestring_coord;
+    karma::rule<OutputIterator, geometry::geometry<double> const&()> polygon;
+    karma::rule<OutputIterator, geometry::polygon<double> const&()> polygon_coord;
+    karma::rule<OutputIterator, geometry::linear_ring<double> const&()> exterior_ring_coord;
+    karma::rule<OutputIterator, std::vector<geometry::linear_ring<double> > const&()> interior_ring_coord;
+    karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_point;
+    karma::rule<OutputIterator, geometry::multi_point<double> const& ()> multi_point_coord;
+    karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_linestring;
+    karma::rule<OutputIterator, geometry::multi_line_string<double> const& ()> multi_linestring_coord;
+    karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_polygon;
+    karma::rule<OutputIterator, geometry::multi_polygon<double> const& ()> multi_polygon_coord;
+    karma::rule<OutputIterator, geometry::geometry<double> const& ()> geometry_collection;
+    karma::rule<OutputIterator, geometry::geometry_collection<double> const& ()> geometries;
+    boost::phoenix::function<detail::get_type<Geometry> > geometry_type;
     karma::real_generator<double, detail::json_coordinate_policy<double> > coordinate;
-};
 
-
-template <typename OutputIterator, typename GeometryContainer>
-struct multi_geometry_generator_grammar :
-        karma::grammar<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                       GeometryContainer const& ()>
-{
-    using geometry_type = typename std::remove_pointer<typename GeometryContainer::value_type>::type;
-    multi_geometry_generator_grammar();
-    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                GeometryContainer const&()> start;
-    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                GeometryContainer const&()> geometry_collection;
-    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
-                GeometryContainer const&()> geometry;
-    karma::rule<OutputIterator, karma::locals<unsigned>,
-                geometry_type const&()> geometry2;
-    karma::rule<OutputIterator, GeometryContainer const&()> coordinates;
-    geometry_generator_grammar<OutputIterator, geometry_type>  path;
-    // phoenix functions
-    boost::phoenix::function<detail::multi_geometry_type<GeometryContainer> > multi_type_;
-    boost::phoenix::function<detail::get_type<geometry_type> > type_;
-    boost::phoenix::function<detail::not_empty<GeometryContainer> > not_empty_;
-    karma::symbols<unsigned, char const*> geometry_types;
 };
 
 }}

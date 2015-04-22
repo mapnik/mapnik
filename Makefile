@@ -13,8 +13,8 @@ install:
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 src/json/libmapnik-json.a:
-	# we first build memory intensive files with -j2
-	$(PYTHON) scons/scons.py -j2 \
+	# we first build memory intensive files with -j1
+	$(PYTHON) scons/scons.py -j1 \
 		--config=cache --implicit-cache --max-drift=1 \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
@@ -73,6 +73,9 @@ test-python:
 
 test-cpp:
 	./tests/cpp_tests/run
+
+test-cxx:
+	./tests/cxx/run
 
 check: test-local
 

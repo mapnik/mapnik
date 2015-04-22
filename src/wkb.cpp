@@ -25,24 +25,17 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
-#include <mapnik/coord_array.hpp>
-#include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 namespace mapnik
 {
 
-using CoordinateArray = coord_array<coord2d>;
-
 struct wkb_reader : util::noncopyable
 {
 private:
-    enum wkbByteOrder {
-        wkbXDR=0,
-        wkbNDR=1
-    };
-
     const char* wkb_;
     std::size_t size_;
     std::size_t pos_;
@@ -84,7 +77,7 @@ public:
         wkbMultiLineStringZM=3005,
         wkbMultiPolygonZM=3006,
         wkbGeometryCollectionZM=3007
-     };
+    };
 
     wkb_reader(const char* wkb, std::size_t size, wkbFormat format)
         : wkb_(wkb),
@@ -125,83 +118,84 @@ public:
         needSwap_ = byteOrder_ ? wkbXDR : wkbNDR;
     }
 
-    void read(geometry_container & paths)
+    mapnik::geometry::geometry<double> read()
     {
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
         int type = read_integer();
-
         switch (type)
         {
         case wkbPoint:
-            read_point(paths);
+            geom = std::move(read_point());
             break;
         case wkbLineString:
-            read_linestring(paths);
+            geom = std::move(read_linestring());
             break;
         case wkbPolygon:
-            read_polygon(paths);
+            geom = std::move(read_polygon());
             break;
         case wkbMultiPoint:
-            read_multipoint(paths);
+            geom = std::move(read_multipoint());
             break;
         case wkbMultiLineString:
-            read_multilinestring(paths);
+            geom = std::move(read_multilinestring());
             break;
         case wkbMultiPolygon:
-            read_multipolygon(paths);
+            geom = std::move(read_multipolygon());
             break;
         case wkbGeometryCollection:
-            read_collection(paths);
+            geom = std::move(read_collection());
             break;
         case wkbPointZ:
         case wkbPointM:
-            read_point_xyz(paths);
+            geom = std::move(read_point<true>());
             break;
         case wkbPointZM:
-            read_point_xyzm(paths);
+            geom = std::move(read_point<true,true>());
             break;
         case wkbLineStringZ:
         case wkbLineStringM:
-            read_linestring_xyz(paths);
+            geom = std::move(read_linestring<true>());
             break;
         case wkbLineStringZM:
-            read_linestring_xyzm(paths);
+            geom = std::move(read_linestring<true,true>());
             break;
         case wkbPolygonZ:
         case wkbPolygonM:
-            read_polygon_xyz(paths);
+            geom = std::move(read_polygon<true>());
             break;
         case wkbPolygonZM:
-            read_polygon_xyzm(paths);
+            geom = std::move(read_polygon<true,true>());
             break;
         case wkbMultiPointZ:
         case wkbMultiPointM:
-            read_multipoint_xyz(paths);
+            geom = std::move(read_multipoint<true>());
             break;
         case wkbMultiPointZM:
-            read_multipoint_xyzm(paths);
+            geom = std::move(read_multipoint<true,true>());
             break;
         case wkbMultiLineStringZ:
         case wkbMultiLineStringM:
-            read_multilinestring_xyz(paths);
+            geom = std::move(read_multilinestring<true>());
             break;
         case wkbMultiLineStringZM:
-            read_multilinestring_xyzm(paths);
+            geom = std::move(read_multilinestring<true,true>());
             break;
         case wkbMultiPolygonZ:
         case wkbMultiPolygonM:
-            read_multipolygon_xyz(paths);
+            geom = std::move(read_multipolygon<true>());
             break;
         case wkbMultiPolygonZM:
-            read_multipolygon_xyzm(paths);
+            geom = std::move(read_multipolygon<true,true>());
             break;
         case wkbGeometryCollectionZ:
         case wkbGeometryCollectionM:
         case wkbGeometryCollectionZM:
-            read_collection(paths);
+            geom = std::move(read_collection());
             break;
         default:
             break;
         }
+        return geom;
     }
 
 private:
@@ -238,329 +232,136 @@ private:
         return d;
     }
 
-    void read_coords(CoordinateArray& ar)
+    template <typename Ring, bool Z = false, bool M = false>
+    void read_coords(Ring & ring, std::size_t num_points)
     {
-        if (! needSwap_)
+        double x,y;
+        if (!needSwap_)
         {
-            for (auto & coord : ar)
+            for (std::size_t i = 0; i < num_points; ++i)
             {
-                read_double_ndr(wkb_ + pos_, coord.x);
-                read_double_ndr(wkb_ + pos_ + 8, coord.y);
+                read_double_ndr(wkb_ + pos_, x);
+                read_double_ndr(wkb_ + pos_ + 8, y);
+                ring.emplace_back(x,y);
                 pos_ += 16; // skip XY
+                if (Z) pos_ += 8;
+                if (M) pos_ += 8;
             }
         }
         else
         {
-            for (auto & coord : ar)
+            for (std::size_t i = 0; i < num_points; ++i)
             {
-                read_double_xdr(wkb_ + pos_, coord.x);
-                read_double_xdr(wkb_ + pos_ + 8, coord.y);
+                read_double_xdr(wkb_ + pos_, x);
+                read_double_xdr(wkb_ + pos_ + 8, y);
+                ring.emplace_back(x,y);
                 pos_ += 16; // skip XY
+                if (Z) pos_ += 8;
+                if (M) pos_ += 8;
             }
         }
     }
 
-    void read_coords_xyz(CoordinateArray& ar)
-    {
-        if (! needSwap_)
-        {
-            for (auto & coord : ar)
-            {
-                read_double_ndr(wkb_ + pos_, coord.x);
-                read_double_ndr(wkb_ + pos_ + 8, coord.y);
-                pos_ += 24; // skip XYZ
-            }
-        }
-        else
-        {
-            for (auto & coord : ar)
-            {
-                read_double_xdr(wkb_ + pos_, coord.x);
-                read_double_xdr(wkb_ + pos_ + 8, coord.y);
-                pos_ += 24; // skip XYZ
-            }
-        }
-    }
-
-    void read_coords_xyzm(CoordinateArray& ar)
-    {
-        if (! needSwap_)
-        {
-            for (auto & coord : ar)
-            {
-                read_double_ndr(wkb_ + pos_, coord.x);
-                read_double_ndr(wkb_ + pos_ + 8, coord.y);
-                pos_ += 32; // skip XYZM
-            }
-        }
-        else
-        {
-            for (auto & coord : ar)
-            {
-                read_double_xdr(wkb_ + pos_, coord.x);
-                read_double_xdr(wkb_ + pos_ + 8, coord.y);
-                pos_ += 32; // skip XYZM
-            }
-        }
-    }
-
-    void read_point(geometry_container & paths)
+    template <bool Z = false, bool M = false>
+    mapnik::geometry::point<double> read_point()
     {
         double x = read_double();
         double y = read_double();
-        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
-        pt->move_to(x, y);
-        paths.push_back(pt.release());
+        if (Z) pos_ += 8;
+        if (M) pos_ += 8;
+        return mapnik::geometry::point<double>(x, y);
     }
 
-    void read_multipoint(geometry_container & paths)
+    template <bool Z = false, bool M = false>
+    mapnik::geometry::multi_point<double> read_multipoint()
     {
+        mapnik::geometry::multi_point<double> multi_point;
         int num_points = read_integer();
+        multi_point.reserve(num_points);
         for (int i = 0; i < num_points; ++i)
         {
             pos_ += 5;
-            read_point(paths);
+            multi_point.emplace_back(read_point<Z,M>());
         }
+        return multi_point;
     }
 
-    void read_point_xyz(geometry_container & paths)
+    template <bool M = false, bool Z = false>
+    mapnik::geometry::line_string<double> read_linestring()
     {
-        double x = read_double();
-        double y = read_double();
-        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
-        pos_ += 8; // double z = read_double();
-        pt->move_to(x, y);
-        paths.push_back(pt.release());
-    }
-
-    void read_point_xyzm(geometry_container & paths)
-    {
-        double x = read_double();
-        double y = read_double();
-        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
-        pos_ += 16;
-        pt->move_to(x, y);
-        paths.push_back(pt.release());
-    }
-
-    void read_multipoint_xyz(geometry_container & paths)
-    {
-        int num_points = read_integer();
-        for (int i = 0; i < num_points; ++i)
-        {
-            pos_ += 5;
-            read_point_xyz(paths);
-        }
-    }
-
-    void read_multipoint_xyzm(geometry_container & paths)
-    {
-        int num_points = read_integer();
-        for (int i = 0; i < num_points; ++i)
-        {
-            pos_ += 5;
-            read_point_xyzm(paths);
-        }
-    }
-
-    void read_linestring(geometry_container & paths)
-    {
+        mapnik::geometry::line_string<double> line;
         int num_points = read_integer();
         if (num_points > 0)
         {
-            CoordinateArray ar(num_points);
-            read_coords(ar);
-            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
-            line->move_to(ar[0].x, ar[0].y);
-            for (int i = 1; i < num_points; ++i)
-            {
-                line->line_to(ar[i].x, ar[i].y);
-            }
-            paths.push_back(line.release());
+            line.reserve(num_points);
+            read_coords<mapnik::geometry::line_string<double>, M, Z>(line, num_points);
         }
+        return line;
     }
 
-    void read_multilinestring(geometry_container & paths)
+    template <bool M = false, bool Z = false>
+    mapnik::geometry::multi_line_string<double> read_multilinestring()
     {
         int num_lines = read_integer();
+        mapnik::geometry::multi_line_string<double> multi_line;
+        multi_line.reserve(num_lines);
         for (int i = 0; i < num_lines; ++i)
         {
             pos_ += 5;
-            read_linestring(paths);
+            multi_line.push_back(std::move(read_linestring<M, Z>()));
         }
+        return multi_line;
     }
 
-    void read_linestring_xyz(geometry_container & paths)
-    {
-        int num_points = read_integer();
-        if (num_points > 0)
-        {
-            CoordinateArray ar(num_points);
-            read_coords_xyz(ar);
-            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
-            line->move_to(ar[0].x, ar[0].y);
-            for (int i = 1; i < num_points; ++i)
-            {
-                line->line_to(ar[i].x, ar[i].y);
-            }
-            paths.push_back(line.release());
-        }
-    }
-
-    void read_linestring_xyzm(geometry_container & paths)
-    {
-        int num_points = read_integer();
-        if (num_points > 0)
-        {
-            CoordinateArray ar(num_points);
-            read_coords_xyzm(ar);
-            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
-            line->move_to(ar[0].x, ar[0].y);
-            for (int i = 1; i < num_points; ++i)
-            {
-                line->line_to(ar[i].x, ar[i].y);
-            }
-            paths.push_back(line.release());
-        }
-    }
-
-    void read_multilinestring_xyz(geometry_container & paths)
-    {
-        int num_lines = read_integer();
-        for (int i = 0; i < num_lines; ++i)
-        {
-            pos_ += 5;
-            read_linestring_xyz(paths);
-        }
-    }
-
-    void read_multilinestring_xyzm(geometry_container & paths)
-    {
-        int num_lines = read_integer();
-        for (int i = 0; i < num_lines; ++i)
-        {
-            pos_ += 5;
-            read_linestring_xyzm(paths);
-        }
-    }
-
-    void read_polygon(geometry_container & paths)
+    template <bool M = false, bool Z = false>
+    mapnik::geometry::polygon<double> read_polygon()
     {
         int num_rings = read_integer();
-        if (num_rings > 0)
+        mapnik::geometry::polygon<double> poly;
+        if (num_rings > 1)
         {
-            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
-            for (int i = 0; i < num_rings; ++i)
-            {
-                int num_points = read_integer();
-                if (num_points > 0)
-                {
-                    CoordinateArray ar(num_points);
-                    read_coords(ar);
-                    poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points ; ++j)
-                    {
-                        poly->line_to(ar[j].x, ar[j].y);
-                    }
-                    poly->close_path();
-                }
-            }
-            if (poly->size() > 3) // ignore if polygon has less than (3 + close_path) vertices
-                paths.push_back(poly.release());
+            poly.interior_rings.reserve(num_rings - 1);
         }
+
+        for (int i = 0; i < num_rings; ++i)
+        {
+            mapnik::geometry::linear_ring<double> ring;
+            int num_points = read_integer();
+            if (num_points > 0)
+            {
+                ring.reserve(num_points);
+                read_coords<mapnik::geometry::linear_ring<double>, M, Z>(ring, num_points);
+            }
+            if ( i == 0) poly.set_exterior_ring(std::move(ring));
+            else poly.add_hole(std::move(ring));
+        }
+        return poly;
     }
 
-    void read_multipolygon(geometry_container & paths)
+    template <bool M = false, bool Z = false>
+    mapnik::geometry::multi_polygon<double> read_multipolygon()
     {
         int num_polys = read_integer();
+        mapnik::geometry::multi_polygon<double> multi_poly;
         for (int i = 0; i < num_polys; ++i)
         {
             pos_ += 5;
-            read_polygon(paths);
+            multi_poly.push_back(std::move(read_polygon<M, Z>()));
         }
+        return multi_poly;
     }
 
-    void read_polygon_xyz(geometry_container & paths)
-    {
-        int num_rings = read_integer();
-        if (num_rings > 0)
-        {
-            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
-            for (int i = 0; i < num_rings; ++i)
-            {
-                int num_points = read_integer();
-                if (num_points > 0)
-                {
-                    CoordinateArray ar(num_points);
-                    read_coords_xyz(ar);
-                    poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points; ++j)
-                    {
-                        poly->line_to(ar[j].x, ar[j].y);
-                    }
-                    poly->close_path();
-                }
-            }
-            if (poly->size() > 2) // ignore if polygon has less than 3 vertices
-                paths.push_back(poly.release());
-        }
-    }
-
-    void read_polygon_xyzm(geometry_container & paths)
-    {
-        int num_rings = read_integer();
-        if (num_rings > 0)
-        {
-            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
-            for (int i = 0; i < num_rings; ++i)
-            {
-                int num_points = read_integer();
-                if (num_points > 0)
-                {
-                    CoordinateArray ar(num_points);
-                    read_coords_xyzm(ar);
-                    poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points; ++j)
-                    {
-                        poly->line_to(ar[j].x, ar[j].y);
-                    }
-                    poly->close_path();
-                }
-            }
-            if (poly->size() > 2) // ignore if polygon has less than 3 vertices
-                paths.push_back(poly.release());
-        }
-    }
-
-    void read_multipolygon_xyz(geometry_container & paths)
-    {
-        int num_polys = read_integer();
-        for (int i = 0; i < num_polys; ++i)
-        {
-            pos_ += 5;
-            read_polygon_xyz(paths);
-        }
-    }
-
-    void read_multipolygon_xyzm(geometry_container & paths)
-    {
-        int num_polys = read_integer();
-        for (int i = 0; i < num_polys; ++i)
-        {
-            pos_ += 5;
-            read_polygon_xyzm(paths);
-        }
-    }
-
-    void read_collection(geometry_container & paths)
+    mapnik::geometry::geometry_collection<double> read_collection()
     {
         int num_geometries = read_integer();
+        mapnik::geometry::geometry_collection<double> collection;
         for (int i = 0; i < num_geometries; ++i)
         {
             pos_ += 1; // skip byte order
-            read(paths);
-        }
-    }
+            collection.push_back(std::move(read()));
+         }
+        return collection;
+     }
 
     std::string wkb_geometry_type_string(int type)
     {
@@ -595,7 +396,7 @@ private:
         case wkbGeometryCollection:  s << "GeometryCollection"; break;
         case wkbGeometryCollectionZ: s << "GeometryCollectionZ"; break;
         case wkbGeometryCollectionM: s << "GeometryCollectionM"; break;
-        case wkbGeometryCollectionZM: s << "GeometryCollectionZM"; break;
+        case wkbGeometryCollectionZM:s << "GeometryCollectionZM"; break;
         default:                     s << "wkbUnknown(" << type << ")"; break;
         }
 
@@ -604,17 +405,14 @@ private:
 
 };
 
-bool geometry_utils::from_wkb(geometry_container& paths,
-                               const char* wkb,
-                               unsigned size,
-                               wkbFormat format)
+mapnik::geometry::geometry<double> geometry_utils::from_wkb(const char* wkb,
+                                                        unsigned size,
+                                                        wkbFormat format)
 {
-    std::size_t geom_count = paths.size();
     wkb_reader reader(wkb, size, format);
-    reader.read(paths);
-    if (paths.size() > geom_count)
-        return true;
-    return false;
+    mapnik::geometry::geometry<double> geom(reader.read());
+    mapnik::geometry::correct(geom);
+    return geom;
 }
 
-}
+} // namespace mapnik

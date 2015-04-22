@@ -29,6 +29,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/svg/svg_converter.hpp>
@@ -36,7 +37,8 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
-
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/renderer_common/pattern_alignment.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -57,24 +59,24 @@ template <typename buffer_type>
 struct agg_renderer_process_visitor_p
 {
     agg_renderer_process_visitor_p(renderer_common & common,
-                                 buffer_type * current_buffer,
-                                 std::unique_ptr<rasterizer> const& ras_ptr, 
-                                 gamma_method_enum & gamma_method,
-                                 double & gamma,
-                                 polygon_pattern_symbolizer const& sym,
-                                 mapnik::feature_impl & feature,
-                                 proj_transform const& prj_trans)
-        : common_(common),
-          current_buffer_(current_buffer),
-          ras_ptr_(ras_ptr),
-          gamma_method_(gamma_method),
-          gamma_(gamma),
-          sym_(sym),
-          feature_(feature),
-          prj_trans_(prj_trans) {}
+                                   buffer_type * current_buffer,
+                                   std::unique_ptr<rasterizer> const& ras_ptr,
+                                   gamma_method_enum & gamma_method,
+                                   double & gamma,
+                                   polygon_pattern_symbolizer const& sym,
+                                   mapnik::feature_impl & feature,
+                                   proj_transform const& prj_trans)
+    : common_(common),
+        current_buffer_(current_buffer),
+        ras_ptr_(ras_ptr),
+        gamma_method_(gamma_method),
+        gamma_(gamma),
+        sym_(sym),
+        feature_(feature),
+        prj_trans_(prj_trans) {}
 
     void operator() (marker_null const&) {}
-    
+
     void operator() (marker_svg const& marker)
     {
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
@@ -84,9 +86,6 @@ struct agg_renderer_process_visitor_p
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
 
-        using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
-        using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
-
         agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->getRowSize());
         ras_ptr_->reset();
@@ -121,8 +120,8 @@ struct agg_renderer_process_visitor_p
         using ren_base = agg::renderer_base<pixfmt_type>;
 
         using renderer_type = agg::renderer_scanline_aa_alpha<ren_base,
-            agg::span_allocator<agg::rgba8>,
-            span_gen_type>;
+                                                              agg::span_allocator<agg::rgba8>,
+                                                              span_gen_type>;
 
         pixfmt_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
@@ -142,14 +141,9 @@ struct agg_renderer_process_visitor_p
         {
             double x0 = 0;
             double y0 = 0;
-            if (feature_.num_geometries() > 0)
-            {
-                vertex_adapter va(feature_.get_geometry(0));
-                clipped_geometry_type clipped(va);
-                clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
-                path_type path(common_.t_,clipped,prj_trans_);
-                path.vertex(&x0,&y0);
-            }
+            using apply_local_alignment = detail::apply_local_alignment;
+            apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
+            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
             offset_x = unsigned(current_buffer_->width() - x0);
             offset_y = unsigned(current_buffer_->height() - y0);
         }
@@ -162,9 +156,15 @@ struct agg_renderer_process_visitor_p
         agg::trans_affine tr;
         auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
         if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
+        using vertex_converter_type = vertex_converter<rasterizer,
+                                                       clip_poly_tag,
+                                                       transform_tag,
+                                                       affine_transform_tag,
+                                                       simplify_tag,
+                                                       smooth_tag>;
 
-        vertex_converter<rasterizer, clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>
-            converter(clip_box,*ras_ptr_,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+        vertex_converter_type converter(clip_box,*ras_ptr_,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+
 
         if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
         converter.set<transform_tag>(); //always transform
@@ -172,23 +172,17 @@ struct agg_renderer_process_visitor_p
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        for ( geometry_type const& geom : feature_.paths())
-        {
-            if (geom.size() > 2)
-            {
-                vertex_adapter va(geom);
-                converter.apply(va);
-            }
-        }
+        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+        using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+        apply_vertex_converter_type apply(converter);
+        mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
         agg::scanline_u8 sl;
         ras_ptr_->filling_rule(agg::fill_even_odd);
         agg::render_scanlines(*ras_ptr_, sl, rp);
     }
-    
+
     void operator() (marker_rgba8 const& marker)
     {
-        using clipped_geometry_type = agg::conv_clip_polygon<vertex_adapter>;
-        using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
         using color = agg::rgba8;
         using order = agg::order_rgba;
         using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
@@ -204,10 +198,10 @@ struct agg_renderer_process_visitor_p
         using ren_base = agg::renderer_base<pixfmt_type>;
 
         using renderer_type = agg::renderer_scanline_aa_alpha<ren_base,
-            agg::span_allocator<agg::rgba8>,
-            span_gen_type>;
+                                                              agg::span_allocator<agg::rgba8>,
+                                                              span_gen_type>;
         mapnik::image_rgba8 const& image = marker.get_data();
-        
+
 
         agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->getRowSize());
@@ -247,14 +241,10 @@ struct agg_renderer_process_visitor_p
         {
             double x0 = 0;
             double y0 = 0;
-            if (feature_.num_geometries() > 0)
-            {
-                vertex_adapter va(feature_.get_geometry(0));
-                clipped_geometry_type clipped(va);
-                clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
-                path_type path(common_.t_,clipped,prj_trans_);
-                path.vertex(&x0,&y0);
-            }
+            using apply_local_alignment = detail::apply_local_alignment;
+            apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
+            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
+
             offset_x = unsigned(current_buffer_->width() - x0);
             offset_y = unsigned(current_buffer_->height() - y0);
         }
@@ -267,9 +257,14 @@ struct agg_renderer_process_visitor_p
         agg::trans_affine tr;
         auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
         if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
+        using vertex_converter_type = vertex_converter<rasterizer,
+                                                       clip_poly_tag,
+                                                       transform_tag,
+                                                       affine_transform_tag,
+                                                       simplify_tag,
+                                                       smooth_tag>;
 
-        vertex_converter<rasterizer, clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>
-            converter(clip_box,*ras_ptr_,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+        vertex_converter_type converter(clip_box,*ras_ptr_,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
         if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
         converter.set<transform_tag>(); //always transform
@@ -277,20 +272,16 @@ struct agg_renderer_process_visitor_p
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        for ( geometry_type const& geom : feature_.paths())
-        {
-            if (geom.size() > 2)
-            {
-                vertex_adapter va(geom);
-                converter.apply(va);
-            }
-        }
+        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+        using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+        apply_vertex_converter_type apply(converter);
+        mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
         agg::scanline_u8 sl;
         ras_ptr_->filling_rule(agg::fill_even_odd);
         agg::render_scanlines(*ras_ptr_, sl, rp);
     }
 
-  private:
+private:
     renderer_common & common_;
     buffer_type * current_buffer_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
@@ -303,26 +294,27 @@ struct agg_renderer_process_visitor_p
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
     mapnik::marker const& marker = marker_cache::instance().find(filename, true);
     agg_renderer_process_visitor_p<buffer_type> visitor(common_,
-                                         current_buffer_,
-                                         ras_ptr,
-                                         gamma_method_,
-                                         gamma_,
-                                         sym,
-                                         feature,
-                                         prj_trans);
+                                                        current_buffer_,
+                                                        ras_ptr,
+                                                        gamma_method_,
+                                                        gamma_,
+                                                        sym,
+                                                        feature,
+                                                        prj_trans);
     util::apply_visitor(visitor, marker);
+
 }
 
 
 template void agg_renderer<image_rgba8>::process(polygon_pattern_symbolizer const&,
-                                              mapnik::feature_impl &,
-                                              proj_transform const&);
+                                                 mapnik::feature_impl &,
+                                                 proj_transform const&);
 
 }

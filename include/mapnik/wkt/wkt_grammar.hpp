@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,10 @@
 #ifndef MAPNIK_WKT_GRAMMAR_HPP
 #define MAPNIK_WKT_GRAMMAR_HPP
 
+// mapnik
+#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
@@ -31,93 +35,84 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
 
-// mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
-#include <mapnik/vertex.hpp>
 
 namespace mapnik { namespace wkt {
 
 using namespace boost::spirit;
 
-struct push_vertex
-{
-    template <typename T>
-    struct result
-    {
-        using type = void;
-    };
+namespace detail {
 
-    template <typename T0,typename T1, typename T2, typename T3>
-    void operator() (T0 c, T1 path, T2 x, T3 y) const
+struct assign
+{
+    using result_type = void;
+    template <typename T0, typename T1>
+    void operator() (T0 & geom, T1 && obj) const
     {
-        BOOST_ASSERT( path!=0 );
-        path->push_vertex(x,y,c);
+        geom = std::move(obj);
     }
 };
 
-struct close_path
+struct move_part
 {
-    template <typename T>
-    struct result
+    using result_type = void;
+    template <typename Geometry, typename Part>
+    void operator() (Geometry & geom, Part && part) const
     {
-        using type = void;
-    };
-
-    template <typename T>
-    void operator() (T path) const
-    {
-        BOOST_ASSERT( path!=0 );
-        path->close_path();
+        geom.push_back(std::move(part));
     }
 };
 
-struct cleanup
+struct set_exterior
 {
-    template <typename T0>
-    struct result
+    using result_type = void;
+    template <typename Polygon, typename Ring>
+    void operator() (Polygon & poly, Ring && ring) const
     {
-        using type = void;
-    };
-
-    template <typename T0>
-    void operator() (T0 & path) const
-    {
-        if (path)  delete path,path=0;
+        poly.set_exterior_ring(std::move(ring));
     }
 };
+
+struct add_hole
+{
+    using result_type = void;
+    template <typename Polygon, typename Ring>
+    void operator() (Polygon & poly, Ring && ring) const
+    {
+        poly.add_hole(std::move(ring));
+    }
+};
+
+}
 
 template <typename Iterator>
-struct wkt_grammar : qi::grammar<Iterator,  mapnik::geometry_container() , ascii::space_type>
+struct wkt_grammar : qi::grammar<Iterator, void(mapnik::geometry::geometry<double> &) , ascii::space_type>
 {
     wkt_grammar();
-    qi::rule<Iterator,mapnik::geometry_container(),ascii::space_type> geometry_tagged_text;
-    qi::rule<Iterator,qi::locals<geometry_type*>,mapnik::geometry_container(),ascii::space_type> point_tagged_text;
-    qi::rule<Iterator,qi::locals<geometry_type*>,mapnik::geometry_container(),ascii::space_type> linestring_tagged_text;
-    qi::rule<Iterator,qi::locals<geometry_type*>,mapnik::geometry_container(),ascii::space_type> polygon_tagged_text;
-    qi::rule<Iterator,mapnik::geometry_container(),ascii::space_type> multipoint_tagged_text;
-    qi::rule<Iterator,mapnik::geometry_container(),ascii::space_type> multilinestring_tagged_text;
-    qi::rule<Iterator,mapnik::geometry_container(),ascii::space_type> multipolygon_tagged_text;
-    qi::rule<Iterator,void(geometry_type*),ascii::space_type> point_text;
-    qi::rule<Iterator,void(geometry_type*),ascii::space_type> linestring_text;
-    qi::rule<Iterator,void(geometry_type*),ascii::space_type> polygon_text;
-    qi::rule<Iterator, qi::locals<geometry_type*>, mapnik::geometry_container(),ascii::space_type> multipoint_text;
-    qi::rule<Iterator, qi::locals<geometry_type*>, mapnik::geometry_container(),ascii::space_type> multilinestring_text;
-    qi::rule<Iterator, qi::locals<geometry_type*>, mapnik::geometry_container(),ascii::space_type> multipolygon_text;
-    qi::rule<Iterator,void(CommandType,geometry_type*),ascii::space_type> point;
-    qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),ascii::space_type> points;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> geometry_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> point_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> linestring_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> polygon_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> multipoint_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> multilinestring_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> multipolygon_tagged_text;
+    qi::rule<Iterator, void(mapnik::geometry::geometry<double> &), ascii::space_type> geometrycollection_tagged_text;
+    qi::rule<Iterator, mapnik::geometry::point<double>(), ascii::space_type> point_text;
+    qi::rule<Iterator, mapnik::geometry::line_string<double>(), ascii::space_type> linestring_text;
+    qi::rule<Iterator, mapnik::geometry::linear_ring<double>(), ascii::space_type> linearring_text;
+    qi::rule<Iterator, mapnik::geometry::polygon<double>(), ascii::space_type> polygon_text;
+    qi::rule<Iterator, mapnik::geometry::multi_point<double>(), ascii::space_type> multipoint_text;
+    qi::rule<Iterator, mapnik::geometry::multi_line_string<double>(), ascii::space_type> multilinestring_text;
+    qi::rule<Iterator, mapnik::geometry::multi_polygon<double>(), ascii::space_type> multipolygon_text;
+    qi::rule<Iterator, qi::locals<mapnik::geometry::geometry<double> >,
+             mapnik::geometry::geometry_collection<double>(), ascii::space_type> geometrycollection_text;
+    qi::rule<Iterator, mapnik::geometry::point<double>(), ascii::space_type> point;
+    qi::rule<Iterator, mapnik::geometry::line_string<double>(), ascii::space_type> points;
+    qi::rule<Iterator, mapnik::geometry::linear_ring<double>(), ascii::space_type> ring_points;
     qi::rule<Iterator,ascii::space_type> empty_set;
-    boost::phoenix::function<push_vertex> push_vertex_;
-    boost::phoenix::function<close_path> close_path_;
-    boost::phoenix::function<cleanup> cleanup_;
-};
-
-template <typename Iterator>
-struct wkt_collection_grammar : qi::grammar<Iterator, mapnik::geometry_container(), ascii::space_type>
-{
-    wkt_collection_grammar();
-    qi::rule<Iterator,mapnik::geometry_container(),ascii::space_type> start;
-    wkt_grammar<Iterator> wkt;
+    boost::phoenix::function<detail::assign> assign;
+    boost::phoenix::function<detail::move_part> move_part;
+    boost::phoenix::function<detail::set_exterior> set_exterior;
+    boost::phoenix::function<detail::add_hole> add_hole;
 };
 
 }}

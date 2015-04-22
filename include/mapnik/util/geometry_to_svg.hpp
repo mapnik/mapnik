@@ -25,8 +25,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
 #include <mapnik/svg/geometry_svg_generator.hpp>
 
 // boost

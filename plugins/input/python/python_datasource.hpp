@@ -41,7 +41,7 @@ public:
     mapnik::box2d<double> envelope() const;
 
     // mandatory: optionally return the overal geometry type of the datasource
-    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
 
     // mandatory: return the layer descriptor
     mapnik::layer_descriptor get_descriptor() const;

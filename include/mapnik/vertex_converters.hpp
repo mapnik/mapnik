@@ -23,7 +23,6 @@
 #ifndef MAPNIK_VERTEX_CONVERTERS_HPP
 #define MAPNIK_VERTEX_CONVERTERS_HPP
 
-
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/attribute.hpp>
@@ -37,7 +36,7 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/geometry.hpp>
+
 // agg
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"
@@ -70,14 +69,10 @@ struct offset_transform_tag {};
 namespace  detail {
 
 template <typename T0, typename T1>
-struct converter_traits
-{
-    using geometry_type = T0;
-    using conv_type = geometry_type;
-};
+struct converter_traits {};
 
 template <typename T>
-struct converter_traits<T,mapnik::smooth_tag>
+struct converter_traits<T, mapnik::smooth_tag>
 {
     using geometry_type = T;
     using conv_type = typename agg::conv_smooth_poly1_curve<geometry_type>;
@@ -288,8 +283,8 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
         }
     }
 
-    template <typename Geometry>
-    static void forward(Dispatcher & disp, Geometry & geom)
+    template <typename Geometry, typename Processor>
+    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc)
     {
         constexpr std::size_t index = sizeof...(ConverterTypes);
         if (disp.vec_[index] == 1)
@@ -297,11 +292,11 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
             using conv_type = typename detail::converter_traits<Geometry,Current>::conv_type;
             conv_type conv(geom);
             detail::converter_traits<conv_type,Current>::setup(conv,disp.args_);
-            converters_helper<Dispatcher, ConverterTypes...>::forward(disp, conv);
+            converters_helper<Dispatcher, ConverterTypes...>::forward(disp, conv, proc);
         }
         else
         {
-            converters_helper<Dispatcher,ConverterTypes...>::forward(disp, geom);
+            converters_helper<Dispatcher,ConverterTypes...>::forward(disp, geom, proc);
         }
     }
 };
@@ -311,40 +306,37 @@ struct converters_helper<Dispatcher>
 {
     template <typename Converter>
     static void set(Dispatcher &, int) {}
-    template <typename Geometry>
-    static void forward(Dispatcher & disp, Geometry & geom)
+    template <typename Geometry, typename Processor>
+    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc)
     {
-        disp.args_.proc.add_path(geom);
+        proc.add_path(geom);
     }
 };
 
-template <typename Args, typename... ConverterTypes>
+template <typename Args, int NUM_CONV>
 struct dispatcher : util::noncopyable
 {
     using this_type = dispatcher;
     using args_type = Args;
 
-    dispatcher(typename Args::processor_type & proc, box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
+    dispatcher(box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
                proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
                attributes const& vars, double scale_factor)
-        : args_(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor)
+        : args_(bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor)
     {
         std::fill(vec_.begin(), vec_.end(), 0);
     }
 
-    std::array<unsigned, sizeof...(ConverterTypes)> vec_;
+    std::array<unsigned, NUM_CONV> vec_;
     args_type args_;
 };
 
-template <typename Processor>
 struct arguments : util::noncopyable
 {
-    using processor_type = Processor;
-    arguments(Processor & proc, box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
+    arguments(box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
               proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
               attributes const& vars, double scale_factor)
-        : proc(proc),
-          bbox(bbox),
+        : bbox(bbox),
           sym(sym),
           tr(tr),
           prj_trans(prj_trans),
@@ -353,7 +345,6 @@ struct arguments : util::noncopyable
           vars(vars),
           scale_factor(scale_factor) {}
 
-    Processor & proc;
     box2d<double> const& bbox;
     symbolizer_base const& sym;
     view_transform const& tr;
@@ -376,8 +367,8 @@ struct vertex_converter : private util::noncopyable
     using proj_trans_type = proj_transform;
     using affine_trans_type = agg::trans_affine;
     using feature_type = feature_impl;
-    using args_type = detail::arguments<Processor>;
-    using dispatcher_type = detail::dispatcher<args_type,ConverterTypes...>;
+    using args_type = detail::arguments;
+    using dispatcher_type = detail::dispatcher<args_type, sizeof...(ConverterTypes)>;
 
     vertex_converter(bbox_type const& bbox,
                      processor_type & proc,
@@ -388,11 +379,13 @@ struct vertex_converter : private util::noncopyable
                      feature_type const& feature,
                      attributes const& vars,
                      double scale_factor)
-        : disp_(proc,bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor) {}
+        : disp_(bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor),
+          proc_(proc) {}
 
-    void apply(vertex_adapter & geom)
+    template <typename VertexAdapter>
+    void apply(VertexAdapter & geom)
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<vertex_adapter>(disp_, geom);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<VertexAdapter, Processor>(disp_, geom, proc_);
     }
 
     template <typename Converter>
@@ -408,6 +401,7 @@ struct vertex_converter : private util::noncopyable
     }
 
     dispatcher_type disp_;
+    Processor & proc_;
 };
 
 }

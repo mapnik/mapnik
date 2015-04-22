@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp> // for M_PI on windows
 #include <mapnik/enumeration.hpp>
+#include <mapnik/geometry.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -85,6 +86,36 @@ static inline bool merc2lonlat(double * x, double * y , int point_count)
         x[i] = (x[i] / MAXEXTENT) * 180;
         y[i] = (y[i] / MAXEXTENT) * 180;
         y[i] = R2D * (2 * std::atan(std::exp(y[i] * D2R)) - M_PI_by2);
+    }
+    return true;
+}
+
+static inline bool lonlat2merc(geometry::line_string<double> & ls)
+{
+    for(auto & p : ls) 
+    {
+        if (p.x > 180) p.x = 180;
+        else if (p.x < -180) p.x = -180;
+        if (p.y > MAX_LATITUDE) p.y = MAX_LATITUDE;
+        else if (p.y < -MAX_LATITUDE) p.y = -MAX_LATITUDE;
+        p.x = p.x * MAXEXTENTby180;
+        p.y = std::log(std::tan((90 + p.y) * M_PIby360)) * R2D;
+        p.y = p.y * MAXEXTENTby180;
+    }
+    return true;
+}
+
+static inline bool merc2lonlat(geometry::line_string<double> & ls)
+{
+    for (auto & p : ls)
+    {
+        if (p.x > MAXEXTENT) p.x = MAXEXTENT;
+        else if (p.x < -MAXEXTENT) p.x = -MAXEXTENT;
+        if (p.y > MAXEXTENT) p.y = MAXEXTENT;
+        else if (p.y < -MAXEXTENT) p.y = -MAXEXTENT;
+        p.x = (p.x / MAXEXTENT) * 180;
+        p.y = (p.y / MAXEXTENT) * 180;
+        p.y = R2D * (2 * std::atan(std::exp(p.y * D2R)) - M_PI_by2);
     }
     return true;
 }

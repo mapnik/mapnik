@@ -43,7 +43,7 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using path_type = transform_path_adapter<view_transform,vertex_adapter>;
+    using transform_path_type = transform_path_adapter<view_transform,vertex_adapter>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
     mapnik::color fill = get<color, keys::fill>(sym, feature, common_.vars_);
@@ -54,29 +54,29 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
 
     render_building_symbolizer(
         feature, height,
-        [&](geometry_type const& faces)
+        [&](path_type const& faces)
         {
             vertex_adapter va(faces);
-            path_type faces_path(common_.t_, va, prj_trans);
+            transform_path_type faces_path(common_.t_, va, prj_trans);
             context_.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8 / 255.0,
                                fill.blue() * 0.8 / 255.0, fill.alpha() * opacity / 255.0);
             context_.add_path(faces_path);
             context_.fill();
         },
-        [&](geometry_type const& frame)
+        [&](path_type const& frame)
         {
             vertex_adapter va(frame);
-            path_type path(common_.t_, va, prj_trans);
+            transform_path_type path(common_.t_, va, prj_trans);
             context_.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8/255.0,
                               fill.blue() * 0.8 / 255.0, fill.alpha() * opacity / 255.0);
             context_.set_line_width(common_.scale_factor_);
             context_.add_path(path);
             context_.stroke();
         },
-        [&](geometry_type const& roof)
+        [&](path_type const& roof)
         {
             vertex_adapter va(roof);
-            path_type roof_path(common_.t_, va, prj_trans);
+            transform_path_type roof_path(common_.t_, va, prj_trans);
             context_.set_color(fill, opacity);
             context_.add_path(roof_path);
             context_.fill();

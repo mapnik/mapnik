@@ -112,27 +112,28 @@ def test_geometry_type_eval():
 
     # POINT = 1
     f = mapnik.Feature(context,0)
-    f.add_geometries_from_wkt('POINT(10 40)')
+    f.geometry = mapnik.Geometry.from_wkt('POINT(10 40)')
     eq_(expr.evaluate(f),1)
     eq_(mapnik.Expression("[mapnik::geometry_type]=point").evaluate(f),True)
 
     # LINESTRING = 2
     f = mapnik.Feature(context,0)
-    f.add_geometries_from_wkt('LINESTRING (30 10, 10 30, 40 40)')
+    f.geometry = mapnik.Geometry.from_wkt('LINESTRING (30 10, 10 30, 40 40)')
     eq_(expr.evaluate(f),2)
-    eq_(mapnik.Expression("[mapnik::geometry_type]=linestring").evaluate(f),True)
+    eq_(mapnik.Expression("[mapnik::geometry_type] = linestring").evaluate(f),True)
 
     # POLYGON = 3
     f = mapnik.Feature(context,0)
-    f.add_geometries_from_wkt('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))')
+    f.geometry = mapnik.Geometry.from_wkt('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))')
     eq_(expr.evaluate(f),3)
-    eq_(mapnik.Expression("[mapnik::geometry_type]=polygon").evaluate(f),True)
+    eq_(mapnik.Expression("[mapnik::geometry_type] = polygon").evaluate(f),True)
 
     # COLLECTION = 4
     f = mapnik.Feature(context,0)
-    f.add_geometries_from_wkt('GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))')
+    geom = mapnik.Geometry.from_wkt('GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))')
+    f.geometry = geom;
     eq_(expr.evaluate(f),4)
-    eq_(mapnik.Expression("[mapnik::geometry_type]=collection").evaluate(f),True)
+    eq_(mapnik.Expression("[mapnik::geometry_type] = collection").evaluate(f),True)
 
 def test_regex_match():
     context = mapnik.Context()

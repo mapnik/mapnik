@@ -89,6 +89,7 @@ enum debug_symbolizer_mode_enum : std::uint8_t
 {
     DEBUG_SYM_MODE_COLLISION,
     DEBUG_SYM_MODE_VERTEX,
+    DEBUG_SYM_MODE_RINGS,
     debug_symbolizer_mode_enum_MAX
 };
 

@@ -29,9 +29,11 @@
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 namespace mapnik
 {
@@ -49,9 +51,9 @@ struct cairo_renderer_process_visitor_l
           width_(width),
           height_(height) {}
 
-    std::shared_ptr<cairo_pattern> operator() (mapnik::marker_null const&) 
+    std::shared_ptr<cairo_pattern> operator() (mapnik::marker_null const&)
     {
-        throw std::runtime_error("This should not have been reached.");    
+        throw std::runtime_error("This should not have been reached.");
     }
 
     std::shared_ptr<cairo_pattern> operator() (mapnik::marker_svg const& marker)
@@ -101,7 +103,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     }
 
     mapnik::marker const& marker = marker_cache::instance().find(filename, true);
-    
+
     if (marker.is<mapnik::marker_null>()) return;
 
     unsigned width = marker.width();
@@ -116,7 +118,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
                                            width,
                                            height);
     std::shared_ptr<cairo_pattern> pattern = util::apply_visitor(visit, marker);
-    
+
     context_.set_line_width(height);
 
     pattern->set_extend(CAIRO_EXTEND_REPEAT);
@@ -141,12 +143,13 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     using rasterizer_type = line_pattern_rasterizer<cairo_context>;
     rasterizer_type ras(context_, *pattern, width, height);
-    vertex_converter<rasterizer_type,clip_line_tag, transform_tag,
-                     affine_transform_tag,
-                     simplify_tag, smooth_tag,
-                     offset_transform_tag,
-                     dash_tag, stroke_tag>
-        converter(clipping_extent, ras, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
+    using vertex_converter_type = vertex_converter<rasterizer_type,clip_line_tag, transform_tag,
+                                                   affine_transform_tag,
+                                                   simplify_tag, smooth_tag,
+                                                   offset_transform_tag,
+                                                   dash_tag, stroke_tag>;
+
+    vertex_converter_type converter(clipping_extent, ras, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
@@ -155,15 +158,10 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-
-    for (auto const& geom : feature.paths())
-    {
-        if (geom.size() > 1)
-        {
-            vertex_adapter va(geom);
-            converter.apply(va);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter);
+    mapnik::util::apply_visitor(vertex_processor_type(apply), feature.get_geometry());
 }
 
 template void cairo_renderer<cairo_ptr>::process(line_pattern_symbolizer const&,

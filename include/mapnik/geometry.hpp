@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,163 +23,124 @@
 #ifndef MAPNIK_GEOMETRY_HPP
 #define MAPNIK_GEOMETRY_HPP
 
-// mapnik
-#include <mapnik/vertex_vector.hpp>
-#include <mapnik/box2d.hpp>
-#include <mapnik/util/noncopyable.hpp>
+#include <mapnik/util/variant.hpp>
+#include <mapnik/coord.hpp>
+#include <vector>
+#include <type_traits>
+#include <cstddef>
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
 
-template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private util::noncopyable
+template <typename T>
+struct point
 {
-
-public:
-    static const std::uint8_t geometry_bits = 7;
-    enum types : std::uint8_t
-    {
-        Unknown = 0x00,
-        Point =   0x01,
-        LineString = 0x02,
-        Polygon = 0x03,
-        PolygonExterior = Polygon,
-        PolygonInterior = Polygon | ( 1 << geometry_bits)
-    };
-    using coord_type = T;
-    using container_type = Container<coord_type>;
-    using value_type = typename container_type::value_type;
-    using size_type = typename container_type::size_type;
-    container_type cont_;
-    types type_;
-public:
-
-    geometry()
-        : type_(Unknown)
+    using value_type = T;
+    point() {}
+    point(T x_, T y_)
+        : x(x_), y(y_)
     {}
+    // temp - remove when geometry is templated on value_type
+    point(mapnik::coord<double, 2> const& c)
+        : x(c.x), y(c.y) {}
 
-    explicit geometry(types type)
-        : type_(type)
-    {}
-
-    types type() const
+    point(point const& other) = default;
+    point(point && other) noexcept = default;
+    point & operator=(point const& other) = default;
+    friend inline bool operator== (point<T> const& a, point<T> const& b)
     {
-        return static_cast<types>(type_ & types::Polygon);
+        return a.x == b.x && a.y == b.y;
+    }
+    friend inline bool operator!= (point<T> const& a, point <T> const& b)
+    {
+        return a.x != b.x  || a.y != b.y; 
+    }
+    value_type x;
+    value_type y;
+};
+
+
+template <typename T>
+struct line_string : std::vector<point<T> >
+{
+    line_string() = default;
+    line_string (std::size_t size)
+        : std::vector<point<T> >(size) {}
+    line_string (line_string && other) = default ;
+    line_string& operator=(line_string &&) = default;
+    line_string (line_string const& ) = default;
+    line_string& operator=(line_string const&) = default;
+    inline std::size_t num_points() const { return std::vector<point<T>>::template size(); }
+    inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
+};
+
+template <typename T>
+struct linear_ring : line_string<T> 
+{
+    linear_ring() = default;
+    linear_ring(std::size_t size)
+        : line_string<T>(size) {}
+    linear_ring (linear_ring && other) = default ;
+    linear_ring& operator=(linear_ring &&) = default;
+    linear_ring(line_string<T> && other)
+        : line_string<T>(other) {}
+    linear_ring (linear_ring const& ) = default;
+    linear_ring(line_string<T> const& other)
+        : line_string<T>(other) {}
+    linear_ring& operator=(linear_ring const&) = default;
+            
+};
+
+template <typename T>
+struct polygon
+{
+    linear_ring<T> exterior_ring;
+    std::vector<linear_ring<T>> interior_rings;
+
+    inline void set_exterior_ring(linear_ring<T> && ring)
+    {
+        exterior_ring = std::move(ring);
     }
 
-    bool interior() const
+    inline void add_hole(linear_ring<T> && ring)
     {
-        return static_cast<bool>(type_ >> geometry_bits);
+        interior_rings.emplace_back(std::move(ring));
     }
 
-    void set_type(types type)
-    {
-        type_ = type;
-    }
+    inline bool empty() const { return exterior_ring.empty(); }
 
-    container_type const& data() const
+    inline std::size_t num_rings() const
     {
-        return cont_;
-    }
-
-    size_type size() const
-    {
-        return cont_.size();
-    }
-    void push_vertex(coord_type x, coord_type y, CommandType c)
-    {
-        cont_.push_back(x,y,c);
-    }
-
-    void line_to(coord_type x,coord_type y)
-    {
-        push_vertex(x,y,SEG_LINETO);
-    }
-
-    void move_to(coord_type x,coord_type y)
-    {
-        push_vertex(x,y,SEG_MOVETO);
-    }
-
-    void close_path()
-    {
-        push_vertex(0,0,SEG_CLOSE);
+        return 1 + interior_rings.size();
     }
 };
 
-namespace detail {
-template <typename Geometry>
-struct vertex_adapter : private util::noncopyable
-{
-    using size_type = typename Geometry::size_type;
-    using value_type = typename Geometry::value_type;
-    using types = typename Geometry::types;
+template <typename T>
+struct multi_point : line_string<T> {};
 
-    vertex_adapter(Geometry const& geom)
-        : geom_(geom),
-          itr_(0) {}
+template <typename T>
+struct multi_line_string : std::vector<line_string<T>> {};
 
-    size_type size() const
-    {
-        return geom_.size();
-    }
+template <typename T>
+struct multi_polygon : std::vector<polygon<T>> {};
 
-    unsigned vertex(double* x, double* y) const
-    {
-        return geom_.cont_.get_vertex(itr_++,x,y);
-    }
+template <typename T>
+struct geometry_collection;
 
-    unsigned vertex(std::size_t index, double* x, double* y) const
-    {
-        return geom_.cont_.get_vertex(index, x, y);
-    }
+struct geometry_empty {};
 
-    void rewind(unsigned ) const
-    {
-        itr_ = 0;
-    }
+template <typename T>
+using geometry = mapnik::util::variant<geometry_empty,
+                                       point<T>,
+                                       line_string<T>,
+                                       polygon<T>,
+                                       multi_point<T>,
+                                       multi_line_string<T>,
+                                       multi_polygon<T>,
+                                       mapnik::util::recursive_wrapper<geometry_collection<T> > >;
 
-    types type() const
-    {
-        return geom_.type();
-    }
+template <typename T>
+struct geometry_collection : std::vector<geometry<T>> {};
 
-    box2d<double> envelope() const
-    {
-        box2d<double> result;
-        double x = 0;
-        double y = 0;
-        rewind(0);
-        size_type geom_size = size();
-        for (size_type i = 0; i < geom_size; ++i)
-        {
-            unsigned cmd = vertex(&x,&y);
-            if (cmd == SEG_CLOSE) continue;
-            if (i == 0)
-            {
-                result.init(x,y,x,y);
-            }
-            else
-            {
-                result.expand_to_include(x,y);
-            }
-        }
-        return result;
-    }
-    Geometry const& geom_;
-    mutable size_type itr_;
-};
-}
+}}
 
-template <typename Geometry>
-box2d<double> envelope(Geometry const& geom)
-{
-    detail::vertex_adapter<Geometry> va(geom);
-    return va.envelope();
-}
-
-using geometry_type = geometry<double,vertex_vector>;
-using vertex_adapter = detail::vertex_adapter<geometry_type>;
-
-}
-
-#endif // MAPNIK_GEOMETRY_HPP
+#endif //MAPNIK_GEOMETRY_HPP

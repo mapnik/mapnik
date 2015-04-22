@@ -107,7 +107,8 @@ boost::python::dict describe(std::shared_ptr<mapnik::datasource> const& ds)
     description["name"] = ld.get_name();
     description["geometry_type"] = ds->get_geometry_type();
     description["encoding"] = ld.get_encoding();
-    for (auto const& param : ld.get_extra_parameters()) {
+    for (auto const& param : ld.get_extra_parameters())
+    {
         description[param.first] = param.second;
     }
     return description;
@@ -176,11 +177,11 @@ void export_datasource()
         .value("Raster",mapnik::datasource::Raster)
         ;
 
-    enum_<mapnik::datasource::geometry_t>("DataGeometryType")
-        .value("Point",mapnik::datasource::Point)
-        .value("LineString",mapnik::datasource::LineString)
-        .value("Polygon",mapnik::datasource::Polygon)
-        .value("Collection",mapnik::datasource::Collection)
+    enum_<mapnik::datasource_geometry_t>("DataGeometryType")
+        .value("Point",mapnik::datasource_geometry_t::Point)
+        .value("LineString",mapnik::datasource_geometry_t::LineString)
+        .value("Polygon",mapnik::datasource_geometry_t::Polygon)
+        .value("Collection",mapnik::datasource_geometry_t::Collection)
         ;
 
     class_<datasource,std::shared_ptr<datasource>,

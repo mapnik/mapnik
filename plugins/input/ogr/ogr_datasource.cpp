@@ -390,9 +390,9 @@ box2d<double> ogr_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
     if (dataset_ && layer_.is_valid())
     {
         OGRLayer* layer = layer_.layer();
@@ -405,19 +405,19 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
             {
             case wkbPoint:
             case wkbMultiPoint:
-                result.reset(mapnik::datasource::Point);
+                result.reset(mapnik::datasource_geometry_t::Point);
                 break;
             case wkbLinearRing:
             case wkbLineString:
             case wkbMultiLineString:
-                result.reset(mapnik::datasource::LineString);
+                result.reset(mapnik::datasource_geometry_t::LineString);
                 break;
             case wkbPolygon:
             case wkbMultiPolygon:
-                result.reset(mapnik::datasource::Polygon);
+                result.reset(mapnik::datasource_geometry_t::Polygon);
                 break;
             case wkbGeometryCollection:
-                result.reset(mapnik::datasource::Collection);
+                result.reset(mapnik::datasource_geometry_t::Collection);
                 break;
             case wkbNone:
             case wkbUnknown:
@@ -440,19 +440,19 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                             {
                             case wkbPoint:
                             case wkbMultiPoint:
-                                result.reset(mapnik::datasource::Point);
+                                result.reset(mapnik::datasource_geometry_t::Point);
                                 break;
                             case wkbLinearRing:
                             case wkbLineString:
                             case wkbMultiLineString:
-                                result.reset(mapnik::datasource::LineString);
+                                result.reset(mapnik::datasource_geometry_t::LineString);
                                 break;
                             case wkbPolygon:
                             case wkbMultiPolygon:
-                                result.reset(mapnik::datasource::Polygon);
+                                result.reset(mapnik::datasource_geometry_t::Polygon);
                                 break;
                             case wkbGeometryCollection:
-                                result.reset(mapnik::datasource::Collection);
+                                result.reset(mapnik::datasource_geometry_t::Collection);
                                 break;
                             default:
                                 break;

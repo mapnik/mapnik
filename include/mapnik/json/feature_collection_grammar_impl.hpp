@@ -38,14 +38,14 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback>::feature_colle
 {
         qi::lit_type lit;
         qi::eps_type eps;
+        qi::_1_type _1;
+        qi::_2_type _2;
+        qi::_3_type _3;
         qi::_4_type _4;
-        qi::_3_type _2;
-        qi::_2_type _3;
         qi::_a_type _a;
         qi::_r1_type _r1;
         qi::_r2_type _r2;
         qi::_r3_type _r3;
-        using phoenix::push_back;
         using phoenix::construct;
         using phoenix::new_;
         using phoenix::val;
@@ -72,7 +72,7 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback>::feature_colle
 
         feature_from_geometry =
             eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
-            >> geometry_g(extract_geometry(*_a)) [on_feature(_r3, _a)]
+            >> geometry_g[set_geometry(*_a, _1)] [on_feature(_r3, _a)]
             ;
 
         start.name("start");

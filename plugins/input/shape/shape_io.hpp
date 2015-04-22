@@ -24,7 +24,6 @@
 #define SHAPE_IO_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
@@ -77,8 +76,8 @@ public:
 
     void move_to(std::streampos pos);
     static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
-    static void read_polyline(shape_file::record_type & record,mapnik::geometry_container & geom);
-    static void read_polygon(shape_file::record_type & record,mapnik::geometry_container & geom);
+    static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
+    static mapnik::geometry::geometry<double> read_polygon(shape_file::record_type & record);
 
     shapeType type_;
     shape_file shp_;
