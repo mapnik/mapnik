@@ -85,6 +85,7 @@ IMPLEMENT_ENUM( marker_multi_policy_e, marker_multi_policy_strings )
 static const char * debug_symbolizer_mode_strings[] = {
     "collision",
     "vertex",
+    "rings",
     ""
 };
 
