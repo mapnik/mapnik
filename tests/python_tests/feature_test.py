@@ -38,12 +38,13 @@ def test_python_extended_constructor():
 def test_add_geom_wkb():
 # POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))
     wkb = '010300000001000000050000000000000000003e4000000000000024400000000000002440000000000000344000000000000034400000000000004440000000000000444000000000000044400000000000003e400000000000002440'
-    context = mapnik.Context()
-    f = mapnik.Feature(context,1)
-    f.geometry = mapnik.Geometry.from_wkb(unhexlify(wkb))
-    eq_(f.geometry.is_valid(), True)
-    eq_(f.geometry.is_simple(), True)
-    eq_(f.geometry.envelope(), f.envelope())
+    geometry = mapnik.Geometry.from_wkb(unhexlify(wkb))
+    eq_(geometry.is_valid(), False) # False because winding order is wrong according to OGC or because end point != first point
+    eq_(geometry.is_simple(), True)
+    eq_(geometry.envelope(), mapnik.Box2d(10.0,10.0,40.0,40.0))
+    geometry.correct()
+    # valid after calling correct
+    eq_(geometry.is_valid(), True)
 
 def test_feature_expression_evaluation():
     context = mapnik.Context()
