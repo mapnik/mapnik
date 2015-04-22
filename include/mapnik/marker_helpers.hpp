@@ -219,13 +219,13 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         if (placement == MARKER_POINT_PLACEMENT &&
             multi_policy == MARKER_WHOLE_MULTI)
         {
-            geometry::point pt;
+            geometry::point<double> pt;
             // test if centroid is contained by bounding box
             if (geometry::centroid(geom, pt) && converter.disp_.args_.bbox.contains(pt.x, pt.y))
             {
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();
-                geometry::point_vertex_adapter va(pt);
+                geometry::point_vertex_adapter<double> va(pt);
                 converter.apply(va);
             }
         }
@@ -236,13 +236,13 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             // TODO: consider using true area for polygon types
             if (type == geometry::geometry_types::MultiPolygon)
             {
-                geometry::multi_polygon const& multi_poly = mapnik::util::get<geometry::multi_polygon>(geom);
+                geometry::multi_polygon<double> const& multi_poly = mapnik::util::get<geometry::multi_polygon<double> >(geom);
                 double maxarea = 0;
-                geometry::polygon const* largest = 0;
-                for (geometry::polygon const& poly : multi_poly)
+                geometry::polygon<double> const* largest = 0;
+                for (geometry::polygon<double> const& poly : multi_poly)
                 {
                     box2d<double> bbox = geometry::envelope(poly);
-                    geometry::polygon_vertex_adapter va(poly);
+                    geometry::polygon_vertex_adapter<double> va(poly);
                     double area = bbox.width() * bbox.height();
                     if (area > maxarea)
                     {
@@ -252,7 +252,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 }
                 if (largest)
                 {
-                    geometry::polygon_vertex_adapter va(*largest);
+                    geometry::polygon_vertex_adapter<double> va(*largest);
                     converter.apply(va);
                 }
             }

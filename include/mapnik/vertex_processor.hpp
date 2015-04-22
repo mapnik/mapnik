@@ -43,52 +43,60 @@ struct vertex_processor
     {
         // no-op
     }
-    void operator() (point const& pt)
+    
+    template <typename T1>
+    void operator() (point<T1> const& pt)
     {
-        point_vertex_adapter va(pt);
+        point_vertex_adapter<T1> va(pt);
         proc_(va);
     }
 
-    void operator() (line_string const& line)
+    template <typename T1>
+    void operator() (line_string<T1> const& line)
     {
-        line_string_vertex_adapter va(line);
+        line_string_vertex_adapter<T1> va(line);
         proc_(va);
     }
 
-    void operator() (polygon const& poly)
+    template <typename T1>
+    void operator() (polygon<T1> const& poly)
     {
-        polygon_vertex_adapter va(poly);
+        polygon_vertex_adapter<T1> va(poly);
         proc_(va);
     }
 
-    void operator() (multi_point const& multi_pt)
+    template <typename T1>
+    void operator() (multi_point<T1> const& multi_pt)
     {
         for (auto const& pt : multi_pt)
         {
-            point_vertex_adapter va(pt);
+            point_vertex_adapter<T1> va(pt);
             proc_(va);
         }
     }
 
-    void operator() (multi_line_string const& multi_line)
+    template <typename T1>
+    void operator() (multi_line_string<T1> const& multi_line)
     {
         for (auto const& line : multi_line)
         {
-            line_string_vertex_adapter va(line);
+            line_string_vertex_adapter<T1> va(line);
             proc_(va);
         }
     }
 
-    void operator() (multi_polygon const& multi_poly)
+    template <typename T1>
+    void operator() (multi_polygon<T1> const& multi_poly)
     {
         for ( auto const& poly : multi_poly)
         {
-            polygon_vertex_adapter va(poly);
+            polygon_vertex_adapter<T1> va(poly);
             proc_(va);
         }
     }
 
-    void operator() (geometry_collection const& collection)
+    template <typename T1>
+    void operator() (geometry_collection<T1> const& collection)
     {
         for (auto const& geom : collection)
         {

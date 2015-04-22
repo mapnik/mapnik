@@ -110,7 +110,7 @@ struct RingRenderer {
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
 
-    using path_type = transform_path_adapter<view_transform, geometry::ring_vertex_adapter>;
+    using path_type = transform_path_adapter<view_transform, geometry::ring_vertex_adapter<double> >;
 
     RingRenderer(rasterizer & ras_ptr,
                  BufferType & im,
@@ -122,7 +122,7 @@ struct RingRenderer {
        prj_trans_(prj_trans),
        sl_() {}
 
-    void draw_ring(geometry::linear_ring const& ring,
+    void draw_ring(geometry::linear_ring<double> const& ring,
                    agg::rgba8 const& color)
     {
         ras_ptr_.reset();
@@ -130,7 +130,7 @@ struct RingRenderer {
         pixfmt_comp_type pixf(buf);
         renderer_base renb(pixf);
         renderer_type ren(renb);
-        geometry::ring_vertex_adapter va(ring);
+        geometry::ring_vertex_adapter<double> va(ring);
         path_type path(tr_,va,prj_trans_);
         ras_ptr_.add_path(path);
         ras_ptr_.filling_rule(agg::fill_non_zero);
@@ -138,7 +138,7 @@ struct RingRenderer {
         agg::render_scanlines(ras_ptr_, sl_, ren);
     }
 
-    void draw_outline(geometry::linear_ring const& ring,
+    void draw_outline(geometry::linear_ring<double> const& ring,
                    agg::rgba8 const& color,
                    double stroke_width=3)
     {
@@ -147,7 +147,7 @@ struct RingRenderer {
         pixfmt_comp_type pixf(buf);
         renderer_base renb(pixf);
         renderer_type ren(renb);
-        geometry::ring_vertex_adapter va(ring);
+        geometry::ring_vertex_adapter<double> va(ring);
         path_type path(tr_,va,prj_trans_);
         agg::conv_stroke<path_type> stroke(path);
         stroke.width(stroke_width);
@@ -170,7 +170,7 @@ struct render_ring_visitor {
     render_ring_visitor(RingRenderer<BufferType> & renderer)
      : renderer_(renderer) {}
 
-    void operator()(mapnik::geometry::multi_polygon const& geom)
+    void operator()(mapnik::geometry::multi_polygon<double> const& geom)
     {
         for (auto const& poly : geom)
         {
@@ -178,7 +178,7 @@ struct render_ring_visitor {
         }
     }
 
-    void operator()(mapnik::geometry::polygon const& geom)
+    void operator()(mapnik::geometry::polygon<double> const& geom)
     {
         agg::rgba8 red(255,0,0,255);
         agg::rgba8 green(0,255,255,255);

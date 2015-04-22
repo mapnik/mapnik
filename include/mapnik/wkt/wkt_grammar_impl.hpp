@@ -63,7 +63,7 @@ wkt_grammar<Iterator>::wkt_grammar()
     // <point text> ::= <empty set> | <left paren> <point> <right paren>
     point_text = (lit("(") >> point >> lit(')'))
         //| empty_set - we're catching 'POINT EMPTY' case in point_tagged_text rule ^^ by creating geometry_empty
-        // because our geometry::point can't be empty
+        // because our geometry::point<double> can't be empty
         ;
 
     //<linestring tagged text> ::= linestring <linestring text>
@@ -133,7 +133,7 @@ wkt_grammar<Iterator>::wkt_grammar()
 
     // geometry collection text
     geometrycollection_text = (lit('(')
-                               >> ( eps[_a = construct<geometry::geometry>()]
+                               >> ( eps[_a = construct<geometry::geometry<double> >()]
                                     >> geometry_tagged_text(_a)[move_part(_val,_a)] % lit(','))
                                >> lit(')'))
         |

@@ -37,12 +37,14 @@ struct geometry_correct
 {
     using result_type = void;
 
-    result_type operator() (geometry & geom) const
+    template <typename T>
+    result_type operator() (geometry<T> & geom) const
     {
         mapnik::util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry_collection & collection) const
+    template <typename T>
+    result_type operator() (geometry_collection<T> & collection) const
     {
         for (auto & geom : collection)
         {
@@ -50,12 +52,14 @@ struct geometry_correct
         }
     }
 
-    result_type operator() (polygon & poly) const
+    template <typename T>
+    result_type operator() (polygon<T> & poly) const
     {
         boost::geometry::correct(poly);
     }
 
-    result_type operator() (multi_polygon & multi_poly) const
+    template <typename T>
+    result_type operator() (multi_polygon<T> & multi_poly) const
     {
         boost::geometry::correct(multi_poly);
     }

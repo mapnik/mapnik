@@ -31,42 +31,42 @@ namespace detail {
 
 struct geometry_is_empty
 {
-    bool operator() (mapnik::geometry::geometry const& geom) const
+    bool operator() (mapnik::geometry::geometry<double> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    bool operator() (mapnik::geometry::point const&) const
+    bool operator() (mapnik::geometry::point<double> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::line_string const& geom) const
+    bool operator() (mapnik::geometry::line_string<double> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::polygon const& geom) const
+    bool operator() (mapnik::geometry::polygon<double> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::multi_point const& geom) const
+    bool operator() (mapnik::geometry::multi_point<double> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::multi_line_string const& geom) const
+    bool operator() (mapnik::geometry::multi_line_string<double> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::multi_polygon const& geom) const
+    bool operator() (mapnik::geometry::multi_polygon<double> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::geometry_collection const& geom) const
+    bool operator() (mapnik::geometry::geometry_collection<double> const& geom) const
     {
         return geom.empty();
     }

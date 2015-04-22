@@ -34,13 +34,19 @@ struct geometry_to_path
     geometry_to_path(path_type & p)
         : p_(p) {}
 
-    void operator() (geometry const& geom) const
+    template <typename T>
+    void operator() (geometry<T> const& geom) const
     {
-        return mapnik::util::apply_visitor(*this, geom);
+        mapnik::util::apply_visitor(*this, geom);
     }
 
+    void operator() (geometry_empty const&) const
+    {
+        // no-op
+    }
     // point
-    void operator() (point const& pt) const
+    template <typename T>
+    void operator() (point<T> const& pt) const
     {
         //point pt_new;
         //Transformer::apply(pt, pt_new);
@@ -48,7 +54,8 @@ struct geometry_to_path
     }
 
     // line_string
-    void operator() (line_string const& line) const
+    template <typename T>
+    void operator() (line_string<T> const& line) const
     {
         bool first = true;
         for (auto const& pt : line)
@@ -61,7 +68,8 @@ struct geometry_to_path
     }
 
     // polygon
-    void operator() (polygon const& poly) const
+    template <typename T>
+    void operator() (polygon<T> const& poly) const
     {
         // exterior
         bool first = true;
@@ -87,7 +95,8 @@ struct geometry_to_path
     }
 
     // multi point
-    void operator() (multi_point const& multi_pt) const
+    template <typename T>
+    void operator() (multi_point<T> const& multi_pt) const
     {
         for (auto const& pt : multi_pt)
         {
@@ -95,7 +104,8 @@ struct geometry_to_path
         }
     }
     // multi_line_string
-    void operator() (multi_line_string const& multi_line) const
+    template <typename T>
+    void operator() (multi_line_string<T> const& multi_line) const
     {
         for (auto const& line : multi_line)
         {
@@ -104,7 +114,8 @@ struct geometry_to_path
     }
 
     // multi_polygon
-    void operator() (multi_polygon const& multi_poly) const
+    template <typename T>
+    void operator() (multi_polygon<T> const& multi_poly) const
     {
         for (auto const& poly : multi_poly)
         {
@@ -112,14 +123,14 @@ struct geometry_to_path
         }
     }
 
-    void operator() (geometry_collection const& collection) const
+    template <typename T>
+    void operator() (geometry_collection<T> const& collection) const
     {
         for (auto const& geom :  collection)
         {
             (*this)(geom);
         }
     }
-
 
     path_type & p_;
 

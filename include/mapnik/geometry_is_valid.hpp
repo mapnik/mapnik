@@ -35,7 +35,8 @@ struct geometry_is_valid
 {
     using result_type = bool;
 
-    result_type operator() (geometry const& geom) const
+    template <typename T>
+    result_type operator() (geometry<T> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
@@ -45,7 +46,8 @@ struct geometry_is_valid
         return false;
     }
 
-    result_type operator() (geometry_collection const& collection) const
+    template <typename T>
+    result_type operator() (geometry_collection<T> const& collection) const
     {
         for (auto const& geom : collection)
         {
@@ -54,32 +56,38 @@ struct geometry_is_valid
         return true;
     }
 
-    result_type operator() (point const& pt) const
+    template <typename T>
+    result_type operator() (point<T> const& pt) const
     {
         return boost::geometry::is_valid(pt);
     }
 
-    result_type operator() (line_string const& line) const
+    template <typename T>
+    result_type operator() (line_string<T> const& line) const
     {
         return boost::geometry::is_valid(line);
     }
 
-    result_type operator() (polygon const& poly) const
+    template <typename T>
+    result_type operator() (polygon<T> const& poly) const
     {
         return boost::geometry::is_valid(poly);
     }
 
-    result_type operator() (multi_point const& multi_pt) const
+    template <typename T>
+    result_type operator() (multi_point<T> const& multi_pt) const
     {
         return boost::geometry::is_valid(multi_pt);
     }
 
-    result_type operator() (multi_line_string const& multi_line) const
+    template <typename T>
+    result_type operator() (multi_line_string<T> const& multi_line) const
     {
         return boost::geometry::is_valid(multi_line);
     }
 
-    result_type operator() (multi_polygon const& multi_poly) const
+    template <typename T>
+    result_type operator() (multi_polygon<T> const& multi_poly) const
     {
         return boost::geometry::is_valid(multi_poly);
     }

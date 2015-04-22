@@ -122,7 +122,7 @@ feature_ptr postgis_featureset::next()
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
 
-        mapnik::geometry::geometry geometry = geometry_utils::from_wkb(data, size);
+        mapnik::geometry::geometry<double> geometry = geometry_utils::from_wkb(data, size);
         feature->set_geometry(std::move(geometry));
 
         totalGeomSize_ += size;

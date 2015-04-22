@@ -81,7 +81,7 @@ int main (int argc, char ** argv )
         while(f)
         {
             std::cerr << *f << std::endl;
-            mapnik::geometry::geometry const& geom = f->get_geometry();
+            mapnik::geometry::geometry<double> const& geom = f->get_geometry();
             // NDR
             {
                 mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::wkbNDR);

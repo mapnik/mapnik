@@ -42,37 +42,44 @@ struct geometry_type
         return mapnik::geometry::geometry_types::Unknown;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::point const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::point<T> const&) const
     {
         return mapnik::geometry::geometry_types::Point;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::line_string const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::line_string<T> const&) const
     {
         return mapnik::geometry::geometry_types::LineString;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::polygon const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::polygon<T> const&) const
     {
         return mapnik::geometry::geometry_types::Polygon;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_point const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_point<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPoint;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_line_string const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_line_string<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiLineString;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_polygon const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_polygon<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPolygon;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry_collection const&) const
+    template <typename T>
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry_collection<T> const&) const
     {
         return mapnik::geometry::geometry_types::GeometryCollection;
     }

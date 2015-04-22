@@ -86,14 +86,14 @@ struct split_multi_geometries
           minimum_path_length_(minimum_path_length) {}
 
     void operator() (geometry::geometry_empty const&) const {}
-    void operator() (geometry::multi_point const& multi_pt) const
+    void operator() (geometry::multi_point<double> const& multi_pt) const
     {
         for ( auto const& pt : multi_pt )
         {
             cont_.push_back(std::move(base_symbolizer_helper::geometry_cref(std::cref(pt))));
         }
     }
-    void operator() (geometry::multi_line_string const& multi_line) const
+    void operator() (geometry::multi_line_string<double> const& multi_line) const
     {
         for ( auto const& line : multi_line )
         {
@@ -101,7 +101,7 @@ struct split_multi_geometries
         }
     }
 
-    void operator() (geometry::polygon const& poly) const
+    void operator() (geometry::polygon<double> const& poly) const
     {
         if (minimum_path_length_ > 0)
         {
@@ -117,7 +117,7 @@ struct split_multi_geometries
         }
     }
 
-    void operator() (geometry::multi_polygon const& multi_poly) const
+    void operator() (geometry::multi_polygon<double> const& multi_poly) const
     {
         for ( auto const& poly : multi_poly )
         {
@@ -125,7 +125,7 @@ struct split_multi_geometries
         }
     }
 
-    void operator() (geometry::geometry_collection const& collection) const
+    void operator() (geometry::geometry_collection<double> const& collection) const
     {
         for ( auto const& geom : collection)
         {
@@ -173,7 +173,7 @@ base_symbolizer_helper::base_symbolizer_helper(
 
 struct largest_bbox_first
 {
-    bool operator() (geometry::geometry const* g0, geometry::geometry const* g1) const
+    bool operator() (geometry::geometry<double> const* g0, geometry::geometry<double> const* g1) const
     {
         box2d<double> b0 = geometry::envelope(*g0);
         box2d<double> b1 = geometry::envelope(*g1);
@@ -239,13 +239,13 @@ void base_symbolizer_helper::initialize_points() const
             // FIXME: how to handle MultiLineString?
             if (type == geometry::geometry_types::LineString)
             {
-                auto const& line = mapnik::util::get<geometry::line_string>(geom);
-                geometry::line_string_vertex_adapter va(line);
+                auto const& line = mapnik::util::get<geometry::line_string<double> >(geom);
+                geometry::line_string_vertex_adapter<double> va(line);
                 success = label::middle_point(va, label_x,label_y);
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                geometry::point pt;
+                geometry::point<double> pt;
                 geometry::centroid(geom, pt);
                 label_x = pt.x;
                 label_y = pt.y;
@@ -255,8 +255,8 @@ void base_symbolizer_helper::initialize_points() const
             {
                 if (type == geometry::geometry_types::Polygon)
                 {
-                    auto const& poly = mapnik::util::get<geometry::polygon>(geom);
-                    geometry::polygon_vertex_adapter va(poly);
+                    auto const& poly = mapnik::util::get<geometry::polygon<double> >(geom);
+                    geometry::polygon_vertex_adapter<double> va(poly);
                     success = label::interior_position(va, label_x, label_y);
                 }
             }
@@ -333,8 +333,8 @@ bool text_symbolizer_helper::next_line_placement() const
 
         if (geo_itr_->is<base_symbolizer_helper::line_string_cref>()) // line_string
         {
-            auto const& line = util::get<geometry::line_string const>(*geo_itr_);
-            geometry::line_string_vertex_adapter va(line);
+            auto const& line = util::get<geometry::line_string<double> const>(*geo_itr_);
+            geometry::line_string_vertex_adapter<double> va(line);
             converter_.apply(va);
             if (adapter_.status())
             {

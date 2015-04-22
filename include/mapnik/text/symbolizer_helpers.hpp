@@ -62,9 +62,9 @@ class base_symbolizer_helper
 {
 public:
 
-    using point_cref = std::reference_wrapper<geometry::point const>;
-    using line_string_cref = std::reference_wrapper<geometry::line_string const>;
-    using polygon_cref = std::reference_wrapper<geometry::polygon const>;
+    using point_cref = std::reference_wrapper<geometry::point<double> const>;
+    using line_string_cref = std::reference_wrapper<geometry::line_string<double> const>;
+    using polygon_cref = std::reference_wrapper<geometry::polygon<double> const>;
     using geometry_cref = util::variant<point_cref, line_string_cref, polygon_cref>;
     // Using list instead of vector, because we delete random elements and need iterators to stay valid.
     using geometry_container_type = std::list<geometry_cref>;

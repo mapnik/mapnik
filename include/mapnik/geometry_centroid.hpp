@@ -31,15 +31,16 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
+template <typename T>
 struct geometry_centroid
 {
     using result_type = bool;
 
-    geometry_centroid(point & pt)
+    geometry_centroid(point<T> & pt)
         : pt_(pt) {}
 
-    template <typename T>
-    result_type operator() (T const& geom) const
+    template <typename T1>
+    result_type operator() (T1 const& geom) const
     {
         return util::apply_visitor(*this, geom);
     }
@@ -49,55 +50,55 @@ struct geometry_centroid
         return false;
     }
 
-    result_type operator() (geometry_collection const& collection) const
+    result_type operator() (geometry_collection<T> const& collection) const
     {
         return false;
     }
 
-    result_type operator() (point const& geom) const
+    result_type operator() (point<T> const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
-    result_type operator() (line_string const& geom) const
+    result_type operator() (line_string<T> const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
-    result_type operator() (polygon const& geom) const
+    result_type operator() (polygon<T> const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
-    result_type operator() (multi_point const& geom) const
+    result_type operator() (multi_point<T> const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
-    result_type operator() (multi_line_string const& geom) const
+    result_type operator() (multi_line_string<T> const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
-    result_type operator() (multi_polygon const& geom) const
+    result_type operator() (multi_polygon<T> const& geom) const
     {
         boost::geometry::centroid(geom, pt_);
         return true;
     }
-    point & pt_;
+    point<T> & pt_;
 };
 
 }
 
-template <typename T>
-inline bool centroid(T const& geom, point & pt)
+template <typename T1, typename T2>
+inline bool centroid(T1 const& geom, point<T2> & pt)
 {
-    return detail::geometry_centroid(pt)(geom);
+    return detail::geometry_centroid<T2>(pt)(geom);
 }
 
 }}

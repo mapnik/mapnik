@@ -39,7 +39,7 @@ struct create_point
 
     void operator() (position const& pos) const
     {
-        mapnik::geometry::point point(pos.x, pos.y);
+        mapnik::geometry::point<double> point(pos.x, pos.y);
         geom_ = std::move(point);
     }
 
@@ -59,7 +59,7 @@ struct create_linestring
         std::size_t size = ring.size();
         if (size > 1)
         {
-            mapnik::geometry::line_string line;
+            mapnik::geometry::line_string<double> line;
             line.reserve(size);
             for (auto && pt : ring)
             {
@@ -83,7 +83,7 @@ struct create_polygon
 
     void operator() (std::vector<positions> const& rings) const
     {
-        mapnik::geometry::polygon poly;
+        mapnik::geometry::polygon<double> poly;
         std::size_t num_rings = rings.size();
         if (num_rings > 1)
             poly.interior_rings.reserve(num_rings - 1);
@@ -91,7 +91,7 @@ struct create_polygon
         for ( std::size_t i = 0; i < num_rings; ++i)
         {
             std::size_t size = rings[i].size();
-            mapnik::geometry::linear_ring ring;
+            mapnik::geometry::linear_ring<double> ring;
             ring.reserve(size);
             for ( auto && pt : rings[i])
             {
@@ -120,7 +120,7 @@ struct create_multipoint
 
     void operator() (positions const& points) const
     {
-        mapnik::geometry::multi_point multi_point;
+        mapnik::geometry::multi_point<double> multi_point;
         multi_point.reserve(points.size());
         for (auto && pos : points)
         {
@@ -143,12 +143,12 @@ struct create_multilinestring
 
     void operator() (std::vector<positions> const& rings) const
     {
-        mapnik::geometry::multi_line_string multi_line;
+        mapnik::geometry::multi_line_string<double> multi_line;
         multi_line.reserve(rings.size());
 
         for (auto const& ring : rings)
         {
-            mapnik::geometry::line_string line;
+            mapnik::geometry::line_string<double> line;
             line.reserve(ring.size());
             for (auto && pt : ring)
             {
@@ -173,11 +173,11 @@ struct create_multipolygon
 
     void operator()(std::vector<std::vector<positions> > const& rings_array) const
     {
-        mapnik::geometry::multi_polygon multi_poly;
+        mapnik::geometry::multi_polygon<double> multi_poly;
         multi_poly.reserve(rings_array.size());
         for (auto const& rings : rings_array)
         {
-            mapnik::geometry::polygon poly;
+            mapnik::geometry::polygon<double> poly;
             std::size_t num_rings = rings.size();
             if ( num_rings > 1)
                 poly.interior_rings.reserve(num_rings - 1);
@@ -185,7 +185,7 @@ struct create_multipolygon
             for ( std::size_t i = 0; i < num_rings; ++i)
             {
                 std::size_t size = rings[i].size();
-                mapnik::geometry::linear_ring ring;
+                mapnik::geometry::linear_ring<double> ring;
                 ring.reserve(size);
                 for ( auto && pt : rings[i])
                 {

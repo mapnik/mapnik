@@ -31,11 +31,12 @@
 
 namespace mapnik { namespace geometry {
 
+template <typename T>
 struct point
 {
-    using value_type = double;
+    using value_type = T;
     point() {}
-    point(double x_, double y_)
+    point(T x_, T y_)
         : x(x_), y(y_)
     {}
     // temp - remove when geometry is templated on value_type
@@ -45,35 +46,62 @@ struct point
     point(point const& other) = default;
     point(point && other) noexcept = default;
     point & operator=(point const& other) = default;
+    friend inline bool operator== (point<T> const& a, point<T> const& b)
+    {
+        return a.x == b.x && a.y == b.y;
+    }
+    friend inline bool operator!= (point<T> const& a, point <T> const& b)
+    {
+        return a.x != b.x  || a.y != b.y; 
+    }
     value_type x;
     value_type y;
 };
 
-struct line_string : std::vector<point>
+
+template <typename T>
+struct line_string : std::vector<point<T> >
 {
     line_string() = default;
+    line_string (std::size_t size)
+        : std::vector<point<T> >(size) {}
     line_string (line_string && other) = default ;
     line_string& operator=(line_string &&) = default;
     line_string (line_string const& ) = default;
     line_string& operator=(line_string const&) = default;
-    inline std::size_t num_points() const { return size(); }
-    inline void add_coord(double x, double y) { emplace_back(x,y);}
+    inline std::size_t num_points() const { return std::vector<point<T>>::template size(); }
+    inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
 };
 
+template <typename T>
+struct linear_ring : line_string<T> 
+{
+    linear_ring() = default;
+    linear_ring(std::size_t size)
+        : line_string<T>(size) {}
+    linear_ring (linear_ring && other) = default ;
+    linear_ring& operator=(linear_ring &&) = default;
+    linear_ring(line_string<T> && other)
+        : line_string<T>(other) {}
+    linear_ring (linear_ring const& ) = default;
+    linear_ring(line_string<T> const& other)
+        : line_string<T>(other) {}
+    linear_ring& operator=(linear_ring const&) = default;
+            
+};
 
-struct linear_ring : line_string {};
-
+template <typename T>
 struct polygon
 {
-    linear_ring exterior_ring;
-    std::vector<linear_ring> interior_rings;
+    linear_ring<T> exterior_ring;
+    std::vector<linear_ring<T>> interior_rings;
 
-    inline void set_exterior_ring(linear_ring && ring)
+    inline void set_exterior_ring(linear_ring<T> && ring)
     {
         exterior_ring = std::move(ring);
     }
 
-    inline void add_hole(linear_ring && ring)
+    inline void add_hole(linear_ring<T> && ring)
     {
         interior_rings.emplace_back(std::move(ring));
     }
@@ -86,21 +114,32 @@ struct polygon
     }
 };
 
-struct multi_point : line_string {};
-struct multi_line_string : std::vector<line_string> {};
-struct multi_polygon : std::vector<polygon> {};
-struct geometry_collection;
-struct geometry_empty {};
-using geometry = mapnik::util::variant<geometry_empty,
-                                       point,
-                                       line_string,
-                                       polygon,
-                                       multi_point,
-                                       multi_line_string,
-                                       multi_polygon,
-                                       mapnik::util::recursive_wrapper<geometry_collection> >;
+template <typename T>
+struct multi_point : line_string<T> {};
 
-struct geometry_collection : std::vector<geometry> {};
+template <typename T>
+struct multi_line_string : std::vector<line_string<T>> {};
+
+template <typename T>
+struct multi_polygon : std::vector<polygon<T>> {};
+
+template <typename T>
+struct geometry_collection;
+
+struct geometry_empty {};
+
+template <typename T>
+using geometry = mapnik::util::variant<geometry_empty,
+                                       point<T>,
+                                       line_string<T>,
+                                       polygon<T>,
+                                       multi_point<T>,
+                                       multi_line_string<T>,
+                                       multi_polygon<T>,
+                                       mapnik::util::recursive_wrapper<geometry_collection<T> > >;
+
+template <typename T>
+struct geometry_collection : std::vector<geometry<T>> {};
 
 }}
 

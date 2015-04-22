@@ -45,7 +45,7 @@ namespace mapnik { namespace json {
 
 struct empty {};
 
-using position = mapnik::geometry::point;
+using position = mapnik::geometry::point<double>;
 using positions = std::vector<position>;
 using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;
 

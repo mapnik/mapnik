@@ -36,7 +36,7 @@ namespace mapnik {
 namespace detail {
 
 template <typename F1, typename F2, typename F3>
-void make_building(geometry::polygon const& poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
+void make_building(geometry::polygon<double> const& poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
 {
     const std::unique_ptr<path_type> frame(new path_type(path_type::types::LineString));
     const std::unique_ptr<path_type> roof(new path_type(path_type::types::Polygon));
@@ -44,7 +44,7 @@ void make_building(geometry::polygon const& poly, double height, F1 const& face_
     double x0 = 0;
     double y0 = 0;
     double x,y;
-    geometry::polygon_vertex_adapter va(poly);
+    geometry::polygon_vertex_adapter<double> va(poly);
     va.rewind(0);
     for (unsigned cm = va.vertex(&x, &y); cm != SEG_END;
          cm = va.vertex(&x, &y))
@@ -115,14 +115,14 @@ void render_building_symbolizer(mapnik::feature_impl const& feature,
 {
 
     auto const& geom = feature.get_geometry();
-    if (geom.is<geometry::polygon>())
+    if (geom.is<geometry::polygon<double> >())
     {
-        auto const& poly = geom.get<geometry::polygon>();
+        auto const& poly = geom.get<geometry::polygon<double> >();
         detail::make_building(poly, height, face_func, frame_func, roof_func);
     }
-    else if (geom.is<geometry::multi_polygon>())
+    else if (geom.is<geometry::multi_polygon<double> >())
     {
-        auto const& multi_poly = geom.get<geometry::multi_polygon>();
+        auto const& multi_poly = geom.get<geometry::multi_polygon<double> >();
         for (auto const& poly : multi_poly)
         {
             detail::make_building(poly, height, face_func, frame_func, roof_func);

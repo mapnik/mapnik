@@ -63,8 +63,8 @@ void render_point_symbolizer(point_symbolizer const &sym,
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common.scale_factor_);
 
-        mapnik::geometry::geometry const& geometry = feature.get_geometry();
-        mapnik::geometry::point pt;
+        mapnik::geometry::geometry<double> const& geometry = feature.get_geometry();
+        mapnik::geometry::point<double> pt;
         if (placement == CENTROID_POINT_PLACEMENT)
         {
             if (!geometry::centroid(geometry, pt)) return;

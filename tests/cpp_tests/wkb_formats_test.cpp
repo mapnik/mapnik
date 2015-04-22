@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     try {
 
         // spatialite blob
-        mapnik::geometry::geometry geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
+        mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                                                sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                                                mapnik::wkbSpatiaLite);
         BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));

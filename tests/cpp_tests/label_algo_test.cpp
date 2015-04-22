@@ -18,10 +18,10 @@ int main(int argc, char** argv)
     try
     {
         // reused these for simplicity
-        mapnik::geometry::point centroid;
+        mapnik::geometry::point<double> centroid;
         {
             // single point
-            mapnik::geometry::point pt(10,10);
+            mapnik::geometry::point<double> pt(10,10);
             BOOST_TEST( mapnik::geometry::centroid(pt, centroid));
             BOOST_TEST( pt.x == centroid.x);
             BOOST_TEST( pt.y == centroid.y);
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 
         // linestring with three consecutive verticies
         {
-            mapnik::geometry::line_string line;
+            mapnik::geometry::line_string<double> line;
             line.add_coord(0, 0);
             line.add_coord(25, 25);
             line.add_coord(50, 50);

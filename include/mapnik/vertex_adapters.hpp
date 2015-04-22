@@ -29,11 +29,12 @@
 
 namespace mapnik { namespace geometry {
 
+template <typename T>
 struct point_vertex_adapter
 {
-    using value_type = typename point::value_type;
+    using value_type = typename point<T>::value_type;
 
-    point_vertex_adapter(point const& pt)
+    point_vertex_adapter(point<T> const& pt)
         : pt_(pt),
           first_(true) {}
 
@@ -59,14 +60,15 @@ struct point_vertex_adapter
         return geometry_types::Point;
     }
 
-    point const& pt_;
+    point<T> const& pt_;
     mutable bool first_;
 };
 
+template <typename T>
 struct line_string_vertex_adapter
 {
-    using value_type = typename point::value_type;
-    line_string_vertex_adapter(line_string const& line)
+    using value_type = typename point<T>::value_type;
+    line_string_vertex_adapter(line_string<T> const& line)
         : line_(line),
           current_index_(0),
           end_index_(line.size())
@@ -76,7 +78,7 @@ struct line_string_vertex_adapter
     {
         if (current_index_ != end_index_)
         {
-            point const& coord = line_[current_index_++];
+            point<T> const& coord = line_[current_index_++];
             *x = coord.x;
             *y = coord.y;
             if (current_index_ == 1)
@@ -101,16 +103,17 @@ struct line_string_vertex_adapter
         return geometry_types::LineString;
     }
 
-    line_string const& line_;
+    line_string<T> const& line_;
     mutable std::size_t current_index_;
     const std::size_t end_index_;
 
 };
 
+template <typename T>
 struct polygon_vertex_adapter
 {
-    using value_type = typename point::value_type;
-    polygon_vertex_adapter(polygon const& poly)
+    using value_type = typename point<T>::value_type;
+    polygon_vertex_adapter(polygon<T> const& poly)
         : poly_(poly),
           rings_itr_(0),
           rings_end_(poly_.interior_rings.size() + 1),
@@ -135,7 +138,7 @@ struct polygon_vertex_adapter
         }
         if (current_index_ < end_index_)
         {
-            point const& coord = (rings_itr_ == 0) ?
+            point<T> const& coord = (rings_itr_ == 0) ?
                 poly_.exterior_ring[current_index_++] : poly_.interior_rings[rings_itr_- 1][current_index_++];
             *x = coord.x;
             *y = coord.y;
@@ -156,7 +159,7 @@ struct polygon_vertex_adapter
         {
             current_index_ = 0;
             end_index_ = poly_.interior_rings[rings_itr_ - 1].size();
-            point const& coord = poly_.interior_rings[rings_itr_ - 1][current_index_++];
+            point<T> const& coord = poly_.interior_rings[rings_itr_ - 1][current_index_++];
             *x = coord.x;
             *y = coord.y;
             return mapnik::SEG_MOVETO;
@@ -170,7 +173,7 @@ struct polygon_vertex_adapter
     }
 
 private:
-    polygon const& poly_;
+    polygon<T> const& poly_;
     mutable std::size_t rings_itr_;
     mutable std::size_t rings_end_;
     mutable std::size_t current_index_;
@@ -178,10 +181,11 @@ private:
     mutable bool start_loop_;
 };
 
+template <typename T>
 struct ring_vertex_adapter
 {
-    using value_type = typename point::value_type;
-    ring_vertex_adapter(linear_ring const& ring)
+    using value_type = typename point<T>::value_type;
+    ring_vertex_adapter(linear_ring<T> const& ring)
         : ring_(ring),
           current_index_(0),
           end_index_(ring_.size()),
@@ -223,49 +227,49 @@ struct ring_vertex_adapter
     }
 
 private:
-    linear_ring const& ring_;
+    linear_ring<T> const& ring_;
     mutable std::size_t current_index_;
     mutable std::size_t end_index_;
     mutable bool start_loop_;
 };
 
 template <typename T>
-struct vertex_adapter_traits{};
+struct vertex_adapter_traits {};
 
 template <>
-struct vertex_adapter_traits<point>
+struct vertex_adapter_traits<point<double> >
 {
-    using type = point_vertex_adapter;
+    using type = point_vertex_adapter<double>;
 };
 
 template <>
-struct vertex_adapter_traits<line_string>
+struct vertex_adapter_traits<line_string<double> >
 {
-    using type = line_string_vertex_adapter;
+    using type = line_string_vertex_adapter<double>;
 };
 
 template <>
-struct vertex_adapter_traits<polygon>
+struct vertex_adapter_traits<polygon<double> >
 {
-    using type = polygon_vertex_adapter;
+    using type = polygon_vertex_adapter<double>;
 };
 
 template <>
-struct vertex_adapter_traits<multi_point>
+struct vertex_adapter_traits<multi_point<double> >
 {
-    using type = point_vertex_adapter;
+    using type = point_vertex_adapter<double>;
 };
 
 template <>
-struct vertex_adapter_traits<multi_line_string>
+struct vertex_adapter_traits<multi_line_string<double> >
 {
-    using type = line_string_vertex_adapter;
+    using type = line_string_vertex_adapter<double>;
 };
 
 template <>
-struct vertex_adapter_traits<multi_polygon>
+struct vertex_adapter_traits<multi_polygon<double> >
 {
-    using type = polygon_vertex_adapter;
+    using type = polygon_vertex_adapter<double>;
 };
 
 }}
