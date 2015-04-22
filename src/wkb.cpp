@@ -28,7 +28,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/geometry_adapters.hpp>
-#include <mapnik/geometry_correct.hpp>
 
 namespace mapnik
 {
@@ -411,7 +410,6 @@ mapnik::geometry::geometry<double> geometry_utils::from_wkb(const char* wkb,
 {
     wkb_reader reader(wkb, size, format);
     mapnik::geometry::geometry<double> geom(reader.read());
-    mapnik::geometry::correct(geom);
     return geom;
 }
 

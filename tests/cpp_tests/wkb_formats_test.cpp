@@ -5,6 +5,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/geometry_is_valid.hpp>
 #include <mapnik/geometry_is_simple.hpp>
+#include <mapnik/geometry_correct.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <vector>
 #include <algorithm>
@@ -71,14 +72,15 @@ int main(int argc, char** argv)
         mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                                                sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                                                mapnik::wkbSpatiaLite);
+        // winding order is not correct per OGC so we'll fix it
+        mapnik::geometry::correct(geom);
         BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
 
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                 sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                 mapnik::wkbAuto);
+        mapnik::geometry::correct(geom);
         BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
-
-
 
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_invalid_blob,
                                                 sizeof(sp_invalid_blob) / sizeof(sp_invalid_blob[0]),
