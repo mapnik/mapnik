@@ -455,6 +455,8 @@ bool hit_test(PathType & path, double x, double y, double tol)
     double y0 = 0;
     double x1 = 0;
     double y1 = 0;
+    double start_x = 0;
+    double start_y = 0;
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END)
@@ -465,16 +467,19 @@ bool hit_test(PathType & path, double x, double y, double tol)
     mapnik::geometry::geometry_types geom_type = static_cast<mapnik::geometry::geometry_types>(path.type());
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
-        if (command == SEG_CLOSE)
-        {
-            continue;
-        }
         ++count;
         if (command == SEG_MOVETO)
         {
             x0 = x1;
             y0 = y1;
+            start_x = x0;
+            start_y = y0;
             continue;
+        }
+        else if (command == SEG_CLOSE)
+        {
+            x1 = start_x;
+            y1 = start_y;
         }
         switch(geom_type)
         {
