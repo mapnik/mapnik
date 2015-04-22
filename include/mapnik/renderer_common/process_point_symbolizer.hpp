@@ -30,6 +30,10 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/geometry_centroid.hpp>
+#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_types.hpp>
+#include <mapnik/vertex_adapters.hpp>
+#include <mapnik/geom_util.hpp>
 
 namespace mapnik {
 
@@ -69,11 +73,13 @@ void render_point_symbolizer(point_symbolizer const &sym,
         {
             if (!geometry::centroid(geometry, pt)) return;
         }
-        //else
-        //{
-        //    if (!label::interior_position(va ,x, y))
-        //        return;
-        //}
+        else if (mapnik::geometry::geometry_type(geometry) == mapnik::geometry::geometry_types::Polygon)
+        {
+            auto const& poly = mapnik::util::get<geometry::polygon<double> >(geometry);
+            geometry::polygon_vertex_adapter<double> va(poly);
+            if (!label::interior_position(va ,pt.x, pt.y))
+                return;
+        }
         double x = pt.x;
         double y = pt.y;
         double z = 0;
