@@ -10,6 +10,14 @@
 #include <vector>
 #include <algorithm>
 
+namespace {
+void test_simple_and_valid(const mapnik::geometry::geometry<double> &geom) {
+// only Boost >= 1.56 has is_valid and is_simple
+#if BOOST_VERSION >= 105600
+    BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
+#endif
+}
+}
 
 int main(int argc, char** argv)
 {
@@ -74,13 +82,13 @@ int main(int argc, char** argv)
                                                                                mapnik::wkbSpatiaLite);
         // winding order is not correct per OGC so we'll fix it
         mapnik::geometry::correct(geom);
-        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
+        test_simple_and_valid(geom);
 
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                 sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                 mapnik::wkbAuto);
         mapnik::geometry::correct(geom);
-        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
+        test_simple_and_valid(geom);
 
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_invalid_blob,
                                                 sizeof(sp_invalid_blob) / sizeof(sp_invalid_blob[0]),
@@ -92,13 +100,13 @@ int main(int argc, char** argv)
         geom = mapnik::geometry_utils::from_wkb((const char*)sq_valid_blob,
                                                 sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
                                                 mapnik::wkbGeneric);
-        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
+        test_simple_and_valid(geom);
 
         geom = mapnik::geometry_utils::from_wkb( (const char*)sq_valid_blob,
                                                  sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
                                                  mapnik::wkbAuto);
 
-        BOOST_TEST(mapnik::geometry::is_valid(geom) && mapnik::geometry::is_simple(geom));
+        test_simple_and_valid(geom);
 
         geom = mapnik::geometry_utils::from_wkb((const char*)sq_invalid_blob,
                                                 sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
