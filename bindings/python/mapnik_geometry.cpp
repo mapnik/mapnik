@@ -150,6 +150,9 @@ mapnik::box2d<double> geometry_envelope_impl(mapnik::geometry::geometry<double> 
     return mapnik::geometry::envelope(geom);
 }
 
+// only Boost >= 1.56 has is_valid and is_simple
+#if BOOST_VERSION >= 105600
+
 bool geometry_is_valid_impl(mapnik::geometry::geometry<double> const& geom)
 {
     return mapnik::geometry::is_valid(geom);
@@ -159,6 +162,8 @@ bool geometry_is_simple_impl(mapnik::geometry::geometry<double> const& geom)
 {
     return mapnik::geometry::is_simple(geom);
 }
+
+#endif // BOOST_VERSION >= 1.56
 
 bool geometry_is_empty_impl(mapnik::geometry::geometry<double> const& geom)
 {
@@ -221,8 +226,11 @@ void export_geometry()
                                                 "Constructs a new Point object\n"))
         .add_property("x", &point<double>::x, "X coordinate")
         .add_property("y", &point<double>::y, "Y coordinate")
+// only Boost >= 1.56 has is_valid and is_simple
+#if BOOST_VERSION >= 105600
         .def("is_valid", &geometry_is_valid_impl)
         .def("is_simple", &geometry_is_simple_impl)
+#endif // BOOST_VERSION >= 1.56
         .def("to_geojson",&to_geojson_impl)
         .def("to_wkb",&to_wkb_impl)
         .def("to_wkt",&to_wkt_impl)
@@ -231,8 +239,11 @@ void export_geometry()
     class_<line_string<double> >("LineString", init<>(
                       "Constructs a new LineString object\n"))
         .def("add_coord", &line_string<double>::add_coord, "Adds coord")
+// only Boost >= 1.56 has is_valid and is_simple
+#if BOOST_VERSION >= 105600
         .def("is_valid", &geometry_is_valid_impl)
         .def("is_simple", &geometry_is_simple_impl)
+#endif // BOOST_VERSION >= 1.56
         .def("to_geojson",&to_geojson_impl)
         .def("to_wkb",&to_wkb_impl)
         .def("to_wkt",&to_wkt_impl)
@@ -248,8 +259,11 @@ void export_geometry()
         .add_property("exterior_ring", &polygon<double>::exterior_ring , "Exterior ring")
         .def("add_hole", &polygon_add_hole_impl, "Add interior ring")
         .def("num_rings", polygon_set_exterior_impl, "Number of rings (at least 1)")
+// only Boost >= 1.56 has is_valid and is_simple
+#if BOOST_VERSION >= 105600
         .def("is_valid", &geometry_is_valid_impl)
         .def("is_simple", &geometry_is_simple_impl)
+#endif // BOOST_VERSION >= 1.56
         .def("to_geojson",&to_geojson_impl)
         .def("to_wkb",&to_wkb_impl)
         .def("to_wkt",&to_wkt_impl)
@@ -265,8 +279,11 @@ void export_geometry()
         .staticmethod("from_wkb")
         .def("__str__",&to_wkt_impl)
         .def("type",&geometry_type_impl)
+// only Boost >= 1.56 has is_valid and is_simple
+#if BOOST_VERSION >= 105600
         .def("is_valid", &geometry_is_valid_impl)
         .def("is_simple", &geometry_is_simple_impl)
+#endif // BOOST_VERSION >= 1.56
         .def("is_empty", &geometry_is_empty_impl)
         .def("correct", &geometry_correct_impl)
         .def("centroid",&geometry_centroid_impl)

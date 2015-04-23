@@ -6,6 +6,9 @@
 
 TEST_CASE("geometry is_valid") {
 
+// only Boost >= 1.56 has the is_valid function
+#if BOOST_VERSION >= 105600
+
 SECTION("point") {
     mapnik::geometry::point<double> pt(0,0);
     REQUIRE( mapnik::geometry::is_valid(pt) );
@@ -22,5 +25,7 @@ SECTION("line_string") {
     REQUIRE( mapnik::geometry::is_valid(line) );
 
 }
+
+#endif // BOOST_VERSION >= 1.56
 
 }
