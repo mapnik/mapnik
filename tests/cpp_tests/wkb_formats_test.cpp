@@ -9,6 +9,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <vector>
 #include <algorithm>
+#include <boost/version.hpp>
 
 namespace {
 void test_simple_and_valid(const mapnik::geometry::geometry<double> &geom) {

@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_IS_SIMPLE_HPP
 #define MAPNIK_GEOMETRY_IS_SIMPLE_HPP
 
+#include <boost/version.hpp>
+
 // only Boost >= 1.56 contains the is_simple function
 #if BOOST_VERSION >= 105600
 

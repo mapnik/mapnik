@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_IS_VALID_HPP
 #define MAPNIK_GEOMETRY_IS_VALID_HPP
 
+#include <boost/version.hpp>
+
 // only Boost >= 1.56 contains the is_valid function
 #if BOOST_VERSION >= 105600
 
