@@ -9,13 +9,13 @@ matrix:
   include:
     - os: osx
       compiler: clang
-      env: JOBS=12 COVERAGE=true
+      env: JOBS=8 COVERAGE=true
     - os: osx
       compiler: clang
-      env: JOBS=12
+      env: JOBS=8
     - os: linux
       compiler: clang
-      env: JOBS=12
+      env: JOBS=8
     - os: linux
       compiler: gcc
       env: JOBS=6
