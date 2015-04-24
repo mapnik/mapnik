@@ -66,7 +66,7 @@ struct vector_markers_dispatch : util::noncopyable
                             symbolizer_base const& sym,
                             Detector & detector,
                             double scale_factor,
-                            feature_impl & feature,
+                            feature_impl const& feature,
                             attributes const& vars)
         : src_(src),
           marker_trans_(marker_trans),
@@ -113,7 +113,7 @@ protected:
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;
-    feature_impl & feature_;
+    feature_impl const& feature_;
     attributes const& vars_;
     double scale_factor_;
 };
@@ -126,7 +126,7 @@ struct raster_markers_dispatch : util::noncopyable
                             symbolizer_base const& sym,
                             Detector & detector,
                             double scale_factor,
-                            feature_impl & feature,
+                            feature_impl const& feature,
                             attributes const& vars)
     : src_(src),
         marker_trans_(marker_trans),
@@ -171,7 +171,7 @@ protected:
     agg::trans_affine const& marker_trans_;
     symbolizer_base const& sym_;
     Detector & detector_;
-    feature_impl & feature_;
+    feature_impl const& feature_;
     attributes const& vars_;
     double scale_factor_;
 };
