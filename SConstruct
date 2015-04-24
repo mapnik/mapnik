@@ -78,7 +78,6 @@ pretty_dep_names = {
     'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/GDAL',
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/OGR',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
@@ -320,7 +319,6 @@ opts.AddVariables(
     # Install Variables
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
     ('LIBDIR_SCHEMA', 'The library sub-directory appended to the "prefix", sometimes lib64 on 64bit linux systems', LIBDIR_SCHEMA_DEFAULT),
-    ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
     ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths (create multiple excludes separated by :)', ''),
@@ -335,7 +333,6 @@ opts.AddVariables(
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
-    ('BOOST_PYTHON_LIB','Specify library name to specific Boost Python lib (e.g. "boost_python-py26")','boost_python'),
 
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
@@ -403,12 +400,8 @@ opts.AddVariables(
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if provided then the bundled DejaVu fonts are not installed)',''),
     ('LIB_DIR_NAME','Name to use for the subfolder beside libmapnik where fonts and plugins are installed','mapnik'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
-    BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
-    BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'True'),
-    ('FRAMEWORK_SEARCH_PATH','Custom framework search path on Mac OS X', ''),
     BoolVariable('FULL_LIB_PATH', 'Embed the full and absolute path to libmapnik when linking ("install_name" on OS X/rpath on Linux)', 'True'),
     BoolVariable('ENABLE_SONAME', 'Embed a soname in libmapnik on Linux', 'True'),
-    ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
@@ -452,17 +445,12 @@ pickle_store = [# Scons internal variables
         'BOOST_APPEND',
         'LIBDIR_SCHEMA',
         'REQUESTED_PLUGINS',
-        'PYTHON_VERSION',
-        'PYTHON_INCLUDES',
-        'PYTHON_INSTALL_LOCATION',
-        'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_CAIRO',
         'MAPNIK_HAS_DLFCN',
         'HAS_PYCAIRO',
         'PYCAIRO_PATHS',
         'HAS_LIBXML2',
-        'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
         'PATH',
@@ -1145,7 +1133,6 @@ if not preconfigured:
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
     env['SQLITE_LINKFLAGS'] = []
-    env['PYTHON_INCLUDES'] = []
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1646,94 +1633,6 @@ if not preconfigured:
             env['SKIPPED_DEPS'].append('cairo')
             env['HAS_CAIRO'] = False
 
-    if 'python' in env['BINDINGS']:
-        if not os.access(env['PYTHON'], os.X_OK):
-            color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
-            Exit(1)
-
-        py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
-
-        if py3:
-            sys_prefix = '''%s -c "import sys; print(sys.prefix)"''' % env['PYTHON']
-        else:
-            sys_prefix = '''%s -c "import sys; print sys.prefix"''' % env['PYTHON']
-        env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
-
-        if HAS_DISTUTILS:
-            if py3:
-                sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print(get_python_version())"''' % env['PYTHON']
-            else:
-                sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print get_python_version()"''' % env['PYTHON']
-            env['PYTHON_VERSION'] = call(sys_version)
-
-            if py3:
-                py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())"''' % env['PYTHON']
-            else:
-                py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
-            env['PYTHON_INCLUDES'].append(call(py_includes))
-
-            # also append platform specific includes
-            if py3:
-                py_plat_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc(plat_specific=True))"''' % env['PYTHON']
-            else:
-                py_plat_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc(plat_specific=True)"''' % env['PYTHON']
-            env['PYTHON_INCLUDES'].append(call(py_plat_includes))
-
-            # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
-            if py3:
-                site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True))"''' % env['PYTHON']
-            else:
-                site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)"''' % env['PYTHON']
-            env['PYTHON_SITE_PACKAGES'] = call(site_packages)
-        else:
-            env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
-            env['PYTHON_VERSION'] = os.popen('''%s -c "import sys; print sys.version"''' % env['PYTHON']).read()[0:3]
-            env['PYTHON_INCLUDES'] = [env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']]
-            env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
-
-        # if user-requested custom prefix fall back to manual concatenation for building subdirectories
-        if env['PYTHON_PREFIX']:
-            py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
-            env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_PREFIX'] + os.path.sep +  py_relative_install
-        else:
-            env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SITE_PACKAGES']
-
-        if py3:
-            is_64_bit = '''%s -c "import sys; print(sys.maxsize == 9223372036854775807)"''' % env['PYTHON']
-        else:
-            is_64_bit = '''%s -c "import sys; print sys.maxint == 9223372036854775807"''' % env['PYTHON']
-
-        if is_64_bit:
-            env['PYTHON_IS_64BIT'] = True
-        else:
-            env['PYTHON_IS_64BIT'] = False
-
-        if has_boost_devel and 'python' in env['BINDINGS']:
-            if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
-                env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
-            elif env['BOOST_PYTHON_LIB'] == 'boost_python':
-                env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
-            if not env['HOST']:
-                if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
-                    color_print(1,'Could not find required header files for boost python')
-                    env['MISSING_DEPS'].append('boost python')
-
-            if env['CAIRO']:
-                if CHECK_PKG_CONFIG and conf.CheckPKG('pycairo'):
-                    env['HAS_PYCAIRO'] = True
-                    temp_env = env.Clone()
-                    temp_env['CPPPATH'] = []
-                    temp_env.ParseConfig('pkg-config --cflags pycairo')
-                    if temp_env['CPPPATH']:
-                        env['PYCAIRO_PATHS'] = copy(temp_env['CPPPATH'])
-                    else:
-                        print temp_env['CPPPATH']
-                else:
-                    env['SKIPPED_DEPS'].extend(['pycairo'])
-            else:
-                color_print(4,'Not building with pycairo support, pass CAIRO=True to enable')
-
-
     #### End Config Stage for Required Dependencies ####
 
     if env['MISSING_DEPS']:
@@ -1863,29 +1762,6 @@ if not preconfigured:
             env.Append(CXXFLAGS = common_cxx_flags + '-O%s' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
-
-        if 'python' in env['BINDINGS']:
-            majver, minver = env['PYTHON_VERSION'].split('.')
-            # we don't want the includes it in the main environment...
-            # as they are later set in the python build.py
-            # ugly hack needed until we have env specific conf
-            backup = env.Clone().Dictionary()
-            for pyinc in env['PYTHON_INCLUDES']:
-                env.AppendUnique(CPPPATH = fix_path(pyinc))
-
-            if not conf.CheckHeader(header='Python.h',language='C'):
-                color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
-                Exit(1)
-
-            if (int(majver), int(minver)) < (2, 2):
-                color_print(1,"Python version 2.2 or greater required")
-                Exit(1)
-
-            if 'python' in env['BINDINGS']:
-                color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
-                color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
-                color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
-            env.Replace(**backup)
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
         if env['PRIORITIZE_LINKING']:
@@ -2069,16 +1945,6 @@ if not HELP_REQUESTED:
             env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
         else :
             color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' and other command line programs will not be available")
-
-    # Build the Python bindings
-    if 'python' in env['BINDINGS']:
-        SConscript('bindings/python/build.py')
-
-        # Install the python speed testing scripts if python bindings will be available
-        SConscript('utils/performance/build.py')
-
-    # Install the mapnik upgrade script
-    SConscript('utils/upgrade_map_xml/build.py')
 
     # Configure fonts and if requested install the bundled DejaVu fonts
     SConscript('fonts/build.py')

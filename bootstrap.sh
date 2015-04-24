@@ -8,7 +8,7 @@ todo
 
 - gdal shared lib / avoid dlclose atexit crash
 - clang debs to s3
-- docs for base setup: sudo apt-get -y install zlib1g-dev python-dev make git python-dev
+- docs for base setup: sudo apt-get -y install zlib1g-dev make git
 - shrink icu data
 '
 
@@ -50,21 +50,12 @@ function install_mason_deps() {
     install boost_libfilesystem 1.57.0
     install boost_libprogram_options 1.57.0
     install boost_libregex 1.57.0
-    install boost_libpython 1.57.0
     install libpq 9.4.0
     install sqlite 3.8.8.1
     install gdal 1.11.1
     install expat 2.1.0
     install pixman 0.32.6
     install cairo 1.12.18
-}
-
-function setup_nose() {
-    if [[ ! -d $(pwd)/nose-1.3.4 ]]; then
-        curl -s -O https://pypi.python.org/packages/source/n/nose/nose-1.3.4.tar.gz
-        tar -xzf nose-1.3.4.tar.gz
-    fi
-    export PYTHONPATH=$(pwd)/nose-1.3.4:${PYTHONPATH}
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
@@ -114,11 +105,9 @@ CAIRO_INCLUDES = '${MASON_LINKED_REL}/include'
 CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
 SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
 SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
-FRAMEWORK_PYTHON = False
 BENCHMARK = True
 CPP_TESTS = True
 PGSQL2SQLITE = True
-BINDINGS = 'python'
 XMLPARSER = 'ptree'
 SVG2PNG = True
 SAMPLE_INPUT_PLUGINS = True
@@ -134,7 +123,6 @@ function setup_runtime_settings() {
 function main() {
     setup_mason
     install_mason_deps
-    setup_nose
     make_config
     setup_runtime_settings
     echo "Ready, now run:"

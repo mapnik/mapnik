@@ -3,7 +3,6 @@
 failures=0
 
 source ./localize.sh
-PYTHON=${PYTHON:-python}
 
 echo "*** Running Next Gen C++ tests..."
 ./tests/cxx/run
@@ -14,13 +13,5 @@ echo "*** Running Old C++ tests..."
 ./tests/cpp_tests/run
 failures=$((failures+$?))
 echo
-
-echo "*** Running visual tests..."
-$PYTHON tests/visual_tests/test.py -q
-failures=$((failures+$?))
-
-echo "*** Running python tests..."
-$PYTHON tests/run_tests.py -q
-failures=$((failures+$?))
 
 exit $failures
