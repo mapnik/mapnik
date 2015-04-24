@@ -152,7 +152,7 @@ struct raster_markers_dispatch : util::noncopyable
         box2d<double> bbox(0,0, src_.width(),src_.height());
         direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
         markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
-        markers_placement_finder<T, label_collision_detector4> placement_finder(
+        markers_placement_finder<T, Detector> placement_finder(
             placement_method, path, detector_, params);
         double x, y, angle = .0;
         while (placement_finder.get_point(x, y, angle, ignore_placement))
