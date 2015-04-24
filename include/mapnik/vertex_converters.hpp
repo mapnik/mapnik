@@ -284,7 +284,10 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
     }
 
     template <typename Geometry, typename Processor>
-    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc)
+    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc,
+                        typename std::enable_if<!std::is_same
+                        <typename detail::converter_traits<Geometry,Current>::conv_type,
+                        transform_path_adapter<view_transform, Geometry> >::value >::type* = 0)
     {
         constexpr std::size_t index = sizeof...(ConverterTypes);
         if (disp.vec_[index] == 1)
@@ -298,6 +301,17 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
         {
             converters_helper<Dispatcher,ConverterTypes...>::forward(disp, geom, proc);
         }
+    }
+    template <typename Geometry, typename Processor>
+    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc,
+                        typename std::enable_if<std::is_same
+                        <typename detail::converter_traits<Geometry,Current>::conv_type,
+                        transform_path_adapter<view_transform, Geometry> >::value >::type* = 0)
+    {
+        using conv_type = typename detail::converter_traits<Geometry,Current>::conv_type;
+        conv_type conv(geom);
+        detail::converter_traits<conv_type,Current>::setup(conv,disp.args_);
+        converters_helper<Dispatcher, ConverterTypes...>::forward(disp, conv, proc);
     }
 };
 

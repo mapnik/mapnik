@@ -69,7 +69,7 @@ struct line_string : std::vector<point<T> >
     line_string& operator=(line_string &&) = default;
     line_string (line_string const& ) = default;
     line_string& operator=(line_string const&) = default;
-    inline std::size_t num_points() const { return std::vector<point<T>>::template size(); }
+    inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
     inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
 };
 

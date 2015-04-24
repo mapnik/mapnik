@@ -36,10 +36,10 @@ class MAPNIK_DECL image_view<image_null>
 public:
     using pixel_type = image_null::pixel_type;
     static const image_dtype dtype = image_null::dtype;
-    
+
     image_view() {}
     ~image_view() {};
-    
+
     image_view(image_view<image_null> const& rhs) {}
     image_view<image_null> & operator=(image_view<image_null> const& rhs) { return *this; }
     bool operator==(image_view<image_null> const& rhs) const { return true; }
@@ -49,7 +49,7 @@ public:
     unsigned y() const { return 0; }
     unsigned width() const { return 0; }
     unsigned height() const { return 0; }
-    const pixel_type operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get from a null image view"); }
+    pixel_type operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get from a null image view"); }
     unsigned getSize() const { return 0; }
     unsigned getRowSize() const { return 0; }
     const pixel_type* getRow(unsigned row) const { return nullptr; }
