@@ -4,13 +4,8 @@ failures=0
 
 source ./localize.sh
 
-echo "*** Running Next Gen C++ tests..."
+echo "*** Running C++ tests..."
 ./tests/cxx/run
-failures=$((failures+$?))
-echo
-
-echo "*** Running Old C++ tests..."
-./tests/cpp_tests/run
 failures=$((failures+$?))
 echo
 
