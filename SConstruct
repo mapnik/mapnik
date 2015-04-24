@@ -126,8 +126,7 @@ PLUGINS = { # plugins with external dependencies
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'python':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'}
             }
 
 
@@ -1647,7 +1646,7 @@ if not preconfigured:
             env['SKIPPED_DEPS'].append('cairo')
             env['HAS_CAIRO'] = False
 
-    if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
+    if 'python' in env['BINDINGS']:
         if not os.access(env['PYTHON'], os.X_OK):
             color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
             Exit(1)
@@ -1865,7 +1864,7 @@ if not preconfigured:
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
-        if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
+        if 'python' in env['BINDINGS']:
             majver, minver = env['PYTHON_VERSION'].split('.')
             # we don't want the includes it in the main environment...
             # as they are later set in the python build.py
