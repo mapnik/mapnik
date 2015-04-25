@@ -23,6 +23,8 @@
 #ifndef MAPNIK_DATASOURCE_GEOMETRY_TYPE_HPP
 #define MAPNIK_DATASOURCE_GEOMETRY_TYPE_HPP
 
+#include <cstdint>
+
 namespace mapnik {
 
 enum datasource_geometry_t : std::uint8_t {
