@@ -1,6 +1,6 @@
 # Mapnik Installation
 
-Mapnik is cross platform and runs on Linux, Mac OSX, Solaris, *BSD, and Windows.
+Mapnik runs on Linux, OS X, Windows, and BSD systems.
 
 To configure and build Mapnik do:
 
@@ -15,7 +15,7 @@ To trigger parallel compilation you can pass a JOBS value to make:
     $ JOBS=4 make
 ```
 
-(Note that compiling Mapnik needs several GBytes of RAM. If you use parallel compiliation it needs more.)
+(Note that compiling Mapnik needs several GBytes of RAM. If you use parallel compilation it needs more.)
 
 To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
@@ -29,15 +29,15 @@ NOTE: the above will not work on windows, rather see https://github.com/mapnik/m
 
 Then to run the tests locally (without needing to install):
 
-    make test-local
+    make test
 
 Install like:
 
-    sudo make install
+    make install
 
 If you need to uninstall do:
 
-    sudo make uninstall
+    make uninstall
 
 For more details see the `Building` Section below.
 
@@ -62,7 +62,6 @@ Mapnik Core depends on:
     - These libraries are used:
       - filesystem
       - system
-      - thread (for python bindings only)
       - regex (optionally built with icu regex support)
       - program_options (optionally for mapnik command line programs)
  * libicuuc >= 4.0 (ideally >= 4.2) - International Components for Unicode
@@ -79,19 +78,10 @@ Mapnik Core optionally depends on:
  * libwebp - WEBP graphics  (Default enabled, if found)
  * libproj - PROJ.4 projection library (Default enabled, if found)
 
-Mapnik Python bindings depend on:
-
- * Python 2.5-2.7 or >= 3.2 
- * Boost python
- * simplejson module if using <= 2.5
-
-Note: Python 3.x is supported, see: https://github.com/mapnik/mapnik/wiki/Python3k
-
 Additional optional dependencies:
 
  * Cairo >= 1.6.0 - Graphics library for output formats like PDF, PS, and SVG
     - pkg-config - Required for building with cairo support
-    - pycairo - Python bindings for cairo
  * PostgreSQL (for PostGIS plugin support)
     - libpq - PostreSQL libraries
     - pg_config - PostgreSQL installation capabilities
@@ -160,17 +150,7 @@ For more details on usage see:
 
 You can run the Mapnik tests locally (without installing) like:
 
-    make test-local # see the Makefile for how this works
-
-Or you can install and test like:
-
-    make install && make test
-
-Many of the tests are written in python and you can run them individually like:
-
-    make install
-    python tests/python_tests/shapefile_test.py
-
+    make test
 
 ## Learning Mapnik
 

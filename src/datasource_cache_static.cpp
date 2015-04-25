@@ -64,9 +64,6 @@
     #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
         #include "input/postgis/postgis_datasource.hpp"
     #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_PYTHON)
-        #include "input/python/python_datasource.hpp"
-    #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
         #include "input/raster/raster_datasource.hpp"
     #endif
@@ -114,9 +111,6 @@ static datasource_map ds_map = boost::assign::map_list_of
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
         (std::string("postgis"), &ds_generator<postgis_datasource>)
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_PYTHON)
-        (std::string("python"), &ds_generator<python_datasource>)
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
         (std::string("raster"), &ds_generator<raster_datasource>)
