@@ -1950,7 +1950,6 @@ if not HELP_REQUESTED:
     SConscript('fonts/build.py')
 
     # build C++ tests
-    SConscript('tests/cpp_tests/build.py')
     SConscript('tests/cxx/build.py')
 
     if env['BENCHMARK']:
