@@ -85,7 +85,7 @@ SECTION("lines") {
 
     try {
 
-        std::string filename("tests/cpp_tests/data/cases.txt");
+        std::string filename("test/unit/data/cases.txt");
         std::ifstream stream(filename.c_str(),std::ios_base::in | std::ios_base::binary);
         if (!stream.is_open())
             throw std::runtime_error("could not open: '" + filename + "'");
