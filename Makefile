@@ -46,7 +46,6 @@ clean:
 	@find ./ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./ -name "*.a" -exec rm {} \;
-	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
 
 distclean:
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
@@ -64,12 +63,6 @@ test:
 
 test-local:
 	make test
-
-test-visual:
-	bash -c "source ./localize.sh && python tests/visual_tests/test.py -q"
-
-test-python:
-	bash -c "source ./localize.sh && python tests/run_tests.py -q"
 
 test-cpp:
 	./tests/cpp_tests/run
