@@ -49,5 +49,5 @@ demo/viewer/release/
 demo/viewer/ui_about.h
 demo/viewer/ui_info.h
 demo/viewer/ui_layer_info.h
-tests/cpp_tests/*-bin
-tests/cxx/run
+test/standalone/*-bin
+test/unit/run

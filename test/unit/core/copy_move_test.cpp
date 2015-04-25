@@ -28,7 +28,7 @@ SECTION("layers") {
 
         auto ds1 = ds0; // shared ptr copy
         REQUIRE( (ds1 == ds0) );
-        REQUIRE( (*ds1 != *ds0) );
+        REQUIRE( !(*ds1 != *ds0) );
         REQUIRE( (ds1.get() == ds0.get()) );
         ds1 = mapnik::datasource_cache::instance().create(p); // new with the same parameters
         REQUIRE( (ds1 != ds0) );

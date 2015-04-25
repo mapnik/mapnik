@@ -20,49 +20,10 @@
 #include <vector>
 #include <algorithm>
 
-bool compare_images(std::string const& src_fn,std::string const& dest_fn)
-{
-    using namespace mapnik;
-    std::unique_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
-    if (!reader1.get())
-    {
-        throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
-    }
-    std::shared_ptr<image_rgba8> image_ptr1 = std::make_shared<image_rgba8>(reader1->width(),reader1->height());
-    reader1->read(0,0,*image_ptr1);
-
-    std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
-    if (!reader2.get())
-    {
-        throw mapnik::image_reader_exception("Failed to load: " + src_fn);
-    }
-    std::shared_ptr<image_rgba8> image_ptr2 = std::make_shared<image_rgba8>(reader2->width(),reader2->height());
-    reader2->read(0,0,*image_ptr2);
-
-    image_rgba8 const& dest = *image_ptr1;
-    image_rgba8 const& src = *image_ptr2;
-
-    unsigned int width = src.width();
-    unsigned int height = src.height();
-    if ((width != dest.width()) || height != dest.height()) return false;
-    for (unsigned int y = 0; y < height; ++y)
-    {
-        const unsigned int* row_from = src.getRow(y);
-        const unsigned int* row_to = dest.getRow(y);
-        for (unsigned int x = 0; x < width; ++x)
-        {
-            if (row_from[x] != row_to[x]) return false;
-        }
-    }
-    return true;
-}
-
 TEST_CASE("mapnik::request") {
 
 SECTION("rendering") {
 
-    std::string expected("./tests/cpp_tests/support/map-request-marker-text-line-expected.png");
-    std::string expected_cairo("./tests/cpp_tests/support/map-request-marker-text-line-expected-cairo.png");
     try {
 
         mapnik::datasource_cache::instance().register_datasources("plugins/input/csv.input");
@@ -76,12 +37,6 @@ SECTION("rendering") {
         // render normally with apply() and just map and image
         mapnik::agg_renderer<mapnik::image_rgba8> renderer1(m,im,scale_factor);
         renderer1.apply();
-        std::string actual1("/tmp/map-request-marker-text-line-actual1.png");
-        //mapnik::save_to_file(im,expected);
-        mapnik::save_to_file(im,actual1);
-        // TODO - re-enable if we can control the freetype/cairo versions used
-        // https://github.com/mapnik/mapnik/issues/1868
-        //REQUIRE(compare_images(actual1,expected));
 
         // reset image
         mapnik::fill(im, 0);
@@ -94,11 +49,6 @@ SECTION("rendering") {
         mapnik::attributes vars;
         mapnik::agg_renderer<mapnik::image_rgba8> renderer2(m,req,vars,im,scale_factor);
         renderer2.apply();
-        std::string actual2("/tmp/map-request-marker-text-line-actual2.png");
-        mapnik::save_to_file(im,actual2);
-        // TODO - re-enable if we can control the freetype/cairo versions used
-        // https://github.com/mapnik/mapnik/issues/1868
-        //REQUIRE(compare_images(actual2,expected));
 
         // reset image
         mapnik::fill(im, 0);
@@ -128,11 +78,6 @@ SECTION("rendering") {
             }
         }
         renderer3.end_map_processing(m);
-        std::string actual3("/tmp/map-request-marker-text-line-actual3.png");
-        mapnik::save_to_file(im,actual3);
-        // TODO - re-enable if we can control the freetype/cairo versions used
-        // https://github.com/mapnik/mapnik/issues/1868
-        //REQUIRE(compare_images(actual3,expected));
 
         // also test cairo
 #if defined(HAVE_CAIRO)
@@ -143,11 +88,9 @@ SECTION("rendering") {
         mapnik::cairo_renderer<mapnik::cairo_ptr> png_render(m,req,vars,image_context,scale_factor);
         png_render.apply();
         //cairo_surface_write_to_png(&*image_surface, expected_cairo.c_str());
-        std::string actual_cairo("/tmp/map-request-marker-text-line-actual4.png");
-        cairo_surface_write_to_png(&*image_surface, actual_cairo.c_str());
-        // TODO - re-enable if we can control the freetype/cairo versions used
-        // https://github.com/mapnik/mapnik/issues/1868
-        //REQUIRE(compare_images(actual_cairo,expected_cairo));
+        //std::string actual_cairo("/tmp/map-request-marker-text-line-actual4.png");
+        //cairo_surface_write_to_png(&*image_surface, actual_cairo.c_str());
+        // TODO - non visual way to test
 #endif
         // TODO - test grid_renderer
 

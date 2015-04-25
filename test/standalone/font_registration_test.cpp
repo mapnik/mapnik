@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include <mapnik/font_engine_freetype.hpp>
@@ -17,8 +18,6 @@ SECTION("registration") {
     {
         mapnik::logger logger;
         mapnik::logger::severity_type original_severity = logger.get_severity();
-
-
 
         // grab references to global statics of registered/cached fonts
         auto const& global_mapping = mapnik::freetype_engine::get_mapping();

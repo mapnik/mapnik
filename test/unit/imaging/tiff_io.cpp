@@ -8,7 +8,7 @@
 #include <mapnik/util/file_io.hpp>
 
 #include <mapnik/tiff_io.hpp>
-#include "../../src/tiff_reader.cpp"
+#include "../../../src/tiff_reader.cpp"
 
 #define TIFF_ASSERT(filename) \
     mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename); \
