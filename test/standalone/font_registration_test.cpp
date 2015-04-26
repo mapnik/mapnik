@@ -86,12 +86,12 @@ SECTION("registration") {
         REQUIRE( mapnik::freetype_engine::face_names().size() == 0 );
 
         // bogus, emtpy file that looks like font
-        REQUIRE( mapnik::freetype_engine::register_font("tests/data/fonts/fake.ttf") == false );
-        REQUIRE( mapnik::freetype_engine::register_fonts("tests/data/fonts/fake.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::register_font("test-data/fonts/fake.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::register_fonts("test-data/fonts/fake.ttf") == false );
         REQUIRE( mapnik::freetype_engine::face_names().size() == 0 );
 
-        REQUIRE( mapnik::freetype_engine::register_font("tests/data/fonts/intentionally-broken.ttf") == false );
-        REQUIRE( mapnik::freetype_engine::register_fonts("tests/data/fonts/intentionally-broken.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::register_font("test-data/fonts/intentionally-broken.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::register_fonts("test-data/fonts/intentionally-broken.ttf") == false );
         REQUIRE( mapnik::freetype_engine::face_names().size() == 0 );
 
         // now restore the original severity
@@ -109,7 +109,7 @@ SECTION("registration") {
         REQUIRE( face_names.size() == 1 );
 
         // single dejavu font in separate location
-        std::string dejavu_bold_oblique("tests/data/fonts/DejaVuSansMono-BoldOblique.ttf");
+        std::string dejavu_bold_oblique("test-data/fonts/DejaVuSansMono-BoldOblique.ttf");
         REQUIRE( mapnik::freetype_engine::register_font(dejavu_bold_oblique) );
         face_names = mapnik::freetype_engine::face_names();
         REQUIRE( face_names.size() == 2 );
@@ -164,7 +164,7 @@ SECTION("registration") {
         // check that we can correctly read a .ttc containing
         // multiple valid faces
         // https://github.com/mapnik/mapnik/issues/2274
-        REQUIRE( mapnik::freetype_engine::register_font("tests/data/fonts/NotoSans-Regular.ttc") );
+        REQUIRE( mapnik::freetype_engine::register_font("test-data/fonts/NotoSans-Regular.ttc") );
         face_names = mapnik::freetype_engine::face_names();
         REQUIRE( face_names.size() == 24 );
 

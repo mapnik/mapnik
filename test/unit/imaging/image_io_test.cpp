@@ -21,7 +21,7 @@ SECTION("readers") {
     try
     {
 #if defined(HAVE_JPEG)
-        should_throw = "./test/unit/data/blank.jpg";
+        should_throw = "./test-data/images/blank.jpg";
         REQUIRE( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         REQUIRE( type );
@@ -59,7 +59,7 @@ SECTION("readers") {
 #endif
 
 #if defined(HAVE_PNG)
-        should_throw = "./test/unit/data/blank.png";
+        should_throw = "./test-data/images/blank.png";
         REQUIRE( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         REQUIRE( type );
@@ -73,7 +73,7 @@ SECTION("readers") {
             REQUIRE( true );
         }
 
-        should_throw = "./tests/data/images/xcode-CgBI.png";
+        should_throw = "./test-data/images/xcode-CgBI.png";
         REQUIRE( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         REQUIRE( type );
@@ -89,7 +89,7 @@ SECTION("readers") {
 #endif
 
 #if defined(HAVE_TIFF)
-        should_throw = "./test/unit/data/blank.tiff";
+        should_throw = "./test-data/images/blank.tiff";
         REQUIRE( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         REQUIRE( type );
@@ -105,7 +105,7 @@ SECTION("readers") {
 #endif
 
 #if defined(HAVE_WEBP)
-        should_throw = "./test/unit/data/blank.webp";
+        should_throw = "./test-data/images/blank.webp";
         REQUIRE( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         REQUIRE( type );

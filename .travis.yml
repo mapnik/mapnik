@@ -30,6 +30,7 @@ script:
  - source bootstrap.sh
  - if [[ ${COVERAGE} == true ]]; then ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True; else ./configure; fi;
  - make
+ - git clone --depth=1 https://github.com/mapnik/test-data test-data
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - if [[ ${COVERAGE} == true ]]; then
