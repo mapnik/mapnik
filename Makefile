@@ -42,10 +42,10 @@ clean:
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@find ./ -name "*.os" -exec rm {} \;
-	@find ./ -name "*.dylib" -exec rm {} \;
-	@find ./ -name "*.so" -exec rm {} \;
+	@find ./src/ -name "*.dylib" -exec rm {} \;
+	@find ./src/ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
-	@find ./ -name "*.a" -exec rm {} \;
+	@find ./src/ -name "*.a" -exec rm {} \;
 
 distclean:
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
