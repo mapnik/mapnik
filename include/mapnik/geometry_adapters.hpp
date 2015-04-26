@@ -24,6 +24,8 @@
 #define MAPNIK_GEOMETRY_ADAPTERS_HPP
 
 // undef B0 to workaround https://svn.boost.org/trac/boost/ticket/10467
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #undef B0
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
@@ -34,7 +36,8 @@
 #include <boost/geometry/core/mutable_range.hpp>
 #include <boost/geometry/core/tag.hpp>
 #include <boost/geometry/core/tags.hpp>
-//
+#pragma GCC diagnostic pop
+
 #include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 
