@@ -51,5 +51,5 @@ script:
  - make test
  - PYTHONUSERBASE=$(pwd)/mason_packages/.link  pip install --user cpp-coveralls
  - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages/
- - if [[ ${COVERAGE} == true ]]; then cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
+ - if [[ ${COVERAGE} == true ]]; then ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
  - if [[ ${COVERAGE} != true ]]; then make bench; fi;
