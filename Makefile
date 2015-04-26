@@ -59,7 +59,7 @@ uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@source localize.sh && ./test/unit/run && \
+	@source localize.sh && source mapnik-settings.env && ./test/unit/run && \
 	for FILE in test/standalone/*-bin; do \
 		$${FILE}; \
 	done; 
@@ -80,10 +80,12 @@ pep8:
 	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs ged -i '/./,/^$$/!d'
 
 grind:
-	@for FILE in test/standalone/*-bin; do \
+	@source localize.sh && source mapnik-settings.env && \
+	for FILE in test/standalone/*-bin; do \
 		valgrind --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
 	done
-	valgrind --leak-check=full --log-fd=1 ./test/unit/run | grep definitely
+	@source localize.sh && source mapnik-settings.env && \
+	    valgrind --leak-check=full --log-fd=1 ./test/unit/run | grep definitely
 
 render:
 	@for FILE in tests/data/good_maps/*xml; do \

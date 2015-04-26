@@ -115,9 +115,10 @@ SAMPLE_INPUT_PLUGINS = True
 }
 
 function setup_runtime_settings() {
-    export PROJ_LIB=${MASON_LINKED_ABS}/share/proj
-    export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1
-    export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal
+    echo "export PROJ_LIB=${MASON_LINKED_ABS}/share/proj" > mapnik-settings.env
+    echo "export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1" >> mapnik-settings.env
+    echo "export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal" >> mapnik-settings.env
+    source mapnik-settings.env
 }
 
 function main() {
