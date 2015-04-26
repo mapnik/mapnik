@@ -82,8 +82,8 @@ projection& projection::operator=(projection const& rhs)
 {
     projection tmp(rhs);
     swap(tmp);
-    proj_ctx_ = 0;
-    proj_ = 0;
+    proj_ctx_ = nullptr;
+    proj_ = nullptr;
     if (!defer_proj_init_) init_proj4();
     return *this;
 }
@@ -106,11 +106,15 @@ void projection::init_proj4() const
 #if PJ_VERSION >= 480
         proj_ctx_ = pj_ctx_alloc();
         proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
-        if (!proj_)
+        if (!proj_ || !proj_ctx_)
         {
             if (proj_ctx_) {
                 pj_ctx_free(proj_ctx_);
-                proj_ctx_ = 0;
+                proj_ctx_ = nullptr;
+            }
+            if (proj_) {
+                pj_free(proj_);
+                proj_ = nullptr;
             }
             throw proj_init_error(params_);
         }
@@ -202,13 +206,21 @@ void projection::inverse(double & x,double & y) const
 projection::~projection()
 {
 #ifdef MAPNIK_USE_PROJ4
-    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mapnik::scoped_lock lock(mutex_);
-    #endif
-        if (proj_) pj_free(proj_);
-    #if PJ_VERSION >= 480
-        if (proj_ctx_) pj_ctx_free(proj_ctx_);
-    #endif
+ #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+    mapnik::scoped_lock lock(mutex_);
+ #endif
+    if (proj_)
+    {
+        pj_free(proj_);
+        proj_ = nullptr;
+    }
+ #if PJ_VERSION >= 480
+    if (proj_ctx_)
+    {
+        pj_ctx_free(proj_ctx_);
+        proj_ctx_ = nullptr;
+    }
+ #endif
 #endif
 }
 
