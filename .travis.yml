@@ -2,30 +2,31 @@ language: cpp
 
 sudo: false
 
+git:
+  depth: 1
+
 addons:
   postgresql: "9.4"
   apt:
     sources:
      - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.5
+     - llvm-toolchain-precise-3.6
     packages:
-     - clang-3.5
+     - clang-3.6
 
 cache:
   directories:
   - mason_packages
+  - $HOME/.ccache
 
 matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8
+      env: JOBS=8 COVERAGE=true
     - os: linux
       compiler: gcc
       env: JOBS=6
-    - os: osx
-      compiler: clang
-      env: JOBS=8 COVERAGE=true
     - os: osx
       compiler: clang
       env: JOBS=8
@@ -37,8 +38,8 @@ install:
  - if [[ $(uname -s) == 'Linux' ]]; then
     psql -U postgres -c 'create database template_postgis;' -U postgres;
     psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
-    export CXX="clang++-3.5";
-    export CC="clang-3.5";
+    export CXX="ccache clang++-3.6";
+    export CC="ccache clang-3.6";
    fi;
 
 script:
