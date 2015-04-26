@@ -40,6 +40,7 @@ install:
     psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
     export CXX="ccache clang++-3.6";
     export CC="ccache clang-3.6";
+    export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
    fi;
 
 script:
@@ -49,7 +50,6 @@ script:
  - git clone --depth=1 https://github.com/mapnik/test-data test-data
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
- - PYTHONUSERBASE=$(pwd)/mason_packages/.link  pip install --user cpp-coveralls
- - export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages/
+ - PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls
  - if [[ ${COVERAGE} == true ]]; then ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
  - if [[ ${COVERAGE} != true ]]; then make bench; fi;
