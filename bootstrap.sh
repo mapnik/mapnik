@@ -20,7 +20,6 @@ function setup_mason() {
         (cd ./.mason && git pull)
     fi
     export MASON_DIR=$(pwd)/.mason
-    if [[ $(uname -s) == 'Linux' ]]; then source ./.mason/scripts/setup_cpp11_toolchain.sh; fi
     export PATH=$(pwd)/.mason:$PATH
     export CXX=${CXX:-clang++}
     export CC=${CC:-clang}

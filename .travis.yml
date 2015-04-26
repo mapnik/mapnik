@@ -4,6 +4,13 @@ sudo: false
 
 addons:
   postgresql: "9.3"
+  # http://docs.travis-ci.com/user/apt/
+  apt:
+    sources:
+     - ubuntu-toolchain-r-test
+     - llvm-toolchain-precise-3.5
+    packages:
+     - clang-3.5
 
 matrix:
   include:
@@ -24,7 +31,12 @@ before_install:
  - export COVERAGE=${COVERAGE:-false}
 
 install:
- - if [[ $(uname -s) == 'Linux' ]]; then psql -U postgres -c 'create database template_postgis;' -U postgres; psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres; fi;
+ - if [[ $(uname -s) == 'Linux' ]]; then
+    psql -U postgres -c 'create database template_postgis;' -U postgres;
+    psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
+    export CXX="clang++-3.5";
+    export CC="clang-3.5";
+   fi;
 
 script:
  - source bootstrap.sh
@@ -34,7 +46,6 @@ script:
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - if [[ ${COVERAGE} == true ]]; then
-      brew update;
       brew install pyenv;
       eval "$(pyenv init -)";
       pyenv install 2.7.6;
