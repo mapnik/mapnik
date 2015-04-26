@@ -79,13 +79,14 @@ pep8:
 	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$$/{$$d;N;ba' -e '}'
 	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs ged -i '/./,/^$$/!d'
 
+# note: pass --gen-suppressions=yes to create new suppression entries
 grind:
 	@source localize.sh && source mapnik-settings.env && \
 	for FILE in test/standalone/*-bin; do \
-		valgrind --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
+		valgrind --suppressions=./test/unit/valgrind.supp --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
 	done
 	@source localize.sh && source mapnik-settings.env && \
-	    valgrind --leak-check=full --log-fd=1 ./test/unit/run | grep definitely
+	    valgrind --suppressions=./test/unit/valgrind.supp --leak-check=full --log-fd=1 ./test/unit/run | grep definitely;
 
 render:
 	@for FILE in tests/data/good_maps/*xml; do \
