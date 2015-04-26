@@ -3,8 +3,7 @@ language: cpp
 sudo: false
 
 addons:
-  postgresql: "9.3"
-  # http://docs.travis-ci.com/user/apt/
+  postgresql: "9.4"
   apt:
     sources:
      - ubuntu-toolchain-r-test
@@ -18,18 +17,18 @@ cache:
 
 matrix:
   include:
-    - os: osx
-      compiler: clang
-      env: JOBS=8 COVERAGE=true
-    - os: osx
-      compiler: clang
-      env: JOBS=8
     - os: linux
       compiler: clang
       env: JOBS=8
     - os: linux
       compiler: gcc
       env: JOBS=6
+    - os: osx
+      compiler: clang
+      env: JOBS=8 COVERAGE=true
+    - os: osx
+      compiler: clang
+      env: JOBS=8
 
 before_install:
  - export COVERAGE=${COVERAGE:-false}
