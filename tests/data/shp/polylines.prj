@@ -1,1 +1,0 @@
-PROJCS["Spherical Mercator",GEOGCS["Unknown",DATUM["D_Unknown",SPHEROID["GRS80_Sphere_No_Flattening",6378137,0]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Mercator"],PARAMETER["central_meridian",0],PARAMETER["scale_factor",1],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["Meter",1]]
