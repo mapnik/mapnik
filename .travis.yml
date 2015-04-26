@@ -3,7 +3,7 @@ language: cpp
 sudo: false
 
 git:
-  depth: 1
+  depth: 2
 
 addons:
   postgresql: "9.4"

@@ -59,10 +59,7 @@ uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@source localize.sh && source mapnik-settings.env && ./test/unit/run && \
-	for FILE in test/standalone/*-bin; do \
-		$${FILE}; \
-	done; 
+	./run_tests
 
 check: test
 

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+failures=0
+
+source ./localize.sh
+source mapnik-settings.env
+
+./test/unit/run 
+failures=$((failures+$?))
+
+if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; then
+    for FILE in test/standalone/*-bin; do 
+        ${FILE};
+      failures=$((failures+$?))
+    done
+fi
+
+exit $failures
