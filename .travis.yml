@@ -23,13 +23,13 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8 COVERAGE=true
+      env: JOBS=8
     - os: linux
       compiler: gcc
       env: JOBS=6
     - os: osx
       compiler: clang
-      env: JOBS=8
+      env: JOBS=8 COVERAGE=true
 
 before_install:
  - export COVERAGE=${COVERAGE:-false}
