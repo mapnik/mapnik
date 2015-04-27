@@ -252,6 +252,27 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     }
 };
 
+
+template <typename T0, typename T1>
+struct is_switchable
+{
+    static constexpr bool value = true;
+};
+
+template <typename T>
+struct is_switchable<T,transform_tag>
+{
+    static constexpr bool value = false;
+};
+
+template <typename T>
+struct is_switchable<T,stroke_tag>
+{
+    static constexpr bool value = false;
+};
+
+
+
 template <typename Dispatcher, typename... ConverterTypes>
 struct converters_helper;
 
@@ -274,9 +295,7 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
 
     template <typename Geometry, typename Processor>
     static void forward(Dispatcher & disp, Geometry & geom, Processor & proc,
-                        typename std::enable_if<!std::is_same
-                        <typename detail::converter_traits<Geometry,Current>::conv_type,
-                        transform_path_adapter<view_transform, Geometry> >::value >::type* = 0)
+                        typename std::enable_if<detail::is_switchable<Geometry,Current>::value>::type* = 0)
     {
         constexpr std::size_t index = sizeof...(ConverterTypes);
         if (disp.vec_[index] == 1)
@@ -293,9 +312,7 @@ struct converters_helper<Dispatcher,Current,ConverterTypes...>
     }
     template <typename Geometry, typename Processor>
     static void forward(Dispatcher & disp, Geometry & geom, Processor & proc,
-                        typename std::enable_if<std::is_same
-                        <typename detail::converter_traits<Geometry,Current>::conv_type,
-                        transform_path_adapter<view_transform, Geometry> >::value >::type* = 0)
+                        typename std::enable_if<!detail::is_switchable<Geometry,Current>::value>::type* = 0)
     {
         using conv_type = typename detail::converter_traits<Geometry,Current>::conv_type;
         conv_type conv(geom);
