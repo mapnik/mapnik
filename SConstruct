@@ -324,6 +324,7 @@ opts.AddVariables(
     ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths (create multiple excludes separated by :)', ''),
     ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
     ('MAPNIK_NAME', 'Name of library', 'mapnik'),
+    BoolVariable('MAPNIK_BUNDLED_SHARE_DIRECTORY', 'For portable packaging: instruct mapnik-config to report relative paths to bundled GDAL_DATA, PROJ_LIB, and ICU_DATA','False'),
 
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -463,6 +464,7 @@ pickle_store = [# Scons internal variables
         'MAPNIK_INPUT_PLUGINS_DEST',
         'MAPNIK_FONTS',
         'MAPNIK_FONTS_DEST',
+        'MAPNIK_BUNDLED_SHARE_DIRECTORY',
         'MAPNIK_LIB_BASE',
         'MAPNIK_LIB_BASE_DEST',
         'EXTRA_FREETYPE_LIBS',
