@@ -59,6 +59,9 @@ function install_mason_deps() {
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
 MASON_LINKED_REL=./mason_packages/.link
+export C_INCLUDE_PATH="${MASON_LINKED_ABS}/include"
+export CPLUS_INCLUDE_PATH="${MASON_LINKED_ABS}/include"
+export LIBRARY_PATH="${MASON_LINKED_ABS}/lib"
 
 function make_config() {
     if [[ $(uname -s) == 'Darwin' ]]; then
