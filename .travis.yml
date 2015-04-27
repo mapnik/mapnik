@@ -41,6 +41,8 @@ install:
     export CXX="ccache clang++-3.6";
     export CC="ccache clang-3.6";
     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
+   else
+    export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
    fi;
 
 script:
