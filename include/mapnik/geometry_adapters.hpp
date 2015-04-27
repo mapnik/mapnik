@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_ADAPTERS_HPP
 #define MAPNIK_GEOMETRY_ADAPTERS_HPP
 
+#include <mapnik/config.hpp>
+
 // undef B0 to workaround https://svn.boost.org/trac/boost/ticket/10467
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
