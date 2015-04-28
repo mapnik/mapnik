@@ -31,6 +31,7 @@ function mason_ldflags {
 }
 
 function mason_clean {
+    echo "Done"
 }
 
 mason_run "$@"
