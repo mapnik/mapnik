@@ -63,11 +63,11 @@ script:
    elif [[ ${MASON_PUBLISH == true]]; then
     export MASON_NAME=mapnik;
     export MASON_VERSION=latest;
-    export MASON_LIB_FILE=lib/libmapnik-wkt.a
+    export MASON_LIB_FILE=lib/libmapnik-wkt.a;
     source ./.mason.sh; 
     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
    else
-    ./configure
+    ./configure;
    fi;
  - make
  - git clone --depth=1 https://github.com/mapnik/test-data test-data
