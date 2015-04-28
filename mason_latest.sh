@@ -7,6 +7,7 @@ MASON_LIB_FILE=lib/libmapnik-wkt.a
 . ${MASON_DIR:-~/.mason}/mason.sh
 
 function mason_load_source {
+    export MASON_BUILD_PATH=$(pwd)
 }
 
 function mason_compile {

@@ -59,7 +59,7 @@ script:
     export MASON_VERSION=latest;
     export MASON_LIB_FILE=lib/libmapnik-wkt.a
     source ./.mason.sh; 
-    ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='';
+    ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
    else
     ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
    fi;
