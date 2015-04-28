@@ -7,7 +7,6 @@ MASON_LIB_FILE=lib/libmapnik-wkt.a
 . ${MASON_DIR:-~/.mason}/mason.sh
 
 function mason_load_source {
-    ""
 }
 
 function mason_compile {
@@ -31,7 +30,6 @@ function mason_ldflags {
 }
 
 function mason_clean {
-    ""
 }
 
 mason_run "$@"
