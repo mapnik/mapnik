@@ -27,16 +27,20 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8
+      env: JOBS=8 MASON_PUBLISH=true
     - os: linux
       compiler: gcc
       env: JOBS=6
+    - os: osx
+      compiler: clang
+      env: JOBS=8 MASON_PUBLISH=true
     - os: osx
       compiler: clang
       env: JOBS=8 COVERAGE=true
 
 before_install:
  - export COVERAGE=${COVERAGE:-false}
+ - export MASON_PUBLISH=${MASON_PUBLISH:-false}
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
@@ -54,14 +58,16 @@ install:
 
 script:
  - source bootstrap.sh
- - if [[ ${COVERAGE} != true ]]; then 
+ - if [[ ${COVERAGE} == true ]]; then 
+    ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
+   elif [[ ${MASON_PUBLISH == true]]; then
     export MASON_NAME=mapnik;
     export MASON_VERSION=latest;
     export MASON_LIB_FILE=lib/libmapnik-wkt.a
     source ./.mason.sh; 
     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
    else
-    ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
+    ./configure
    fi;
  - make
  - git clone --depth=1 https://github.com/mapnik/test-data test-data
@@ -75,7 +81,7 @@ script:
    fi;
 
 after_success:
- - if [[ ${COVERAGE} != true ]]; then
+ - if [[ ${MASON_PUBLISH} == true ]]; then
     ./mason_latest.sh build;   
     ./mason_latest.sh link;   
     ./mason_latest.sh publish;   
