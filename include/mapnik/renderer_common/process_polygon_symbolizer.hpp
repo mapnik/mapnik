@@ -51,7 +51,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     value_double smooth = get<value_double,keys::smooth>(sym, feature, common.vars_);
     value_double opacity = get<value_double,keys::fill_opacity>(sym, feature, common.vars_);
 
-    vertex_converter_type converter(clip_box, ras, sym, common.t_, prj_trans, tr,
+    vertex_converter_type converter(clip_box, sym, common.t_, prj_trans, tr,
                                     feature,common.vars_,common.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.template set<clip_poly_tag>(); //optional clip (default: true)
@@ -60,9 +60,9 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
-    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-    apply_vertex_converter_type apply(converter);
+    apply_vertex_converter_type apply(converter, ras);
     mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 
     color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);

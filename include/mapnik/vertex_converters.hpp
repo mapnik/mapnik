@@ -271,6 +271,11 @@ struct is_switchable<T,stroke_tag>
     static constexpr bool value = false;
 };
 
+template <typename T>
+struct is_switchable<T,offset_transform_tag>
+{
+    static constexpr bool value = false;
+};
 
 
 template <typename Dispatcher, typename... ConverterTypes>
@@ -377,11 +382,10 @@ struct arguments : util::noncopyable
 
 }
 
-template <typename Processor, typename... ConverterTypes >
+template <typename... ConverterTypes >
 struct vertex_converter : private util::noncopyable
 {
     using bbox_type = box2d<double>;
-    using processor_type = Processor;
     using symbolizer_type = symbolizer_base;
     using trans_type = view_transform;
     using proj_trans_type = proj_transform;
@@ -391,7 +395,6 @@ struct vertex_converter : private util::noncopyable
     using dispatcher_type = detail::dispatcher<args_type, sizeof...(ConverterTypes)>;
 
     vertex_converter(bbox_type const& bbox,
-                     processor_type & proc,
                      symbolizer_type const& sym,
                      trans_type const& tr,
                      proj_trans_type const& prj_trans,
@@ -399,13 +402,12 @@ struct vertex_converter : private util::noncopyable
                      feature_type const& feature,
                      attributes const& vars,
                      double scale_factor)
-        : disp_(bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor),
-          proc_(proc) {}
+        : disp_(bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor) {}
 
-    template <typename VertexAdapter>
-    void apply(VertexAdapter & geom)
+    template <typename VertexAdapter, typename Processor>
+    void apply(VertexAdapter & geom, Processor & proc)
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<VertexAdapter, Processor>(disp_, geom, proc_);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<VertexAdapter, Processor>(disp_, geom, proc);
     }
 
     template <typename Converter>
@@ -421,7 +423,6 @@ struct vertex_converter : private util::noncopyable
     }
 
     dispatcher_type disp_;
-    Processor & proc_;
 };
 
 }

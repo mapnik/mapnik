@@ -288,7 +288,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
     adapter_(finder_,false),
-    converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
+    converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
 
     // setup vertex converter
@@ -335,7 +335,7 @@ bool text_symbolizer_helper::next_line_placement() const
         {
             auto const& line = util::get<geometry::line_string<double> const>(*geo_itr_);
             geometry::line_string_vertex_adapter<double> va(line);
-            converter_.apply(va);
+            //converter_.apply(va, adapter_);
             if (adapter_.status())
             {
                 //Found a placement
@@ -385,7 +385,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
       adapter_(finder_,true),
-      converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
+      converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
    // setup vertex converter
     value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);

@@ -156,14 +156,13 @@ struct agg_renderer_process_visitor_p
         agg::trans_affine tr;
         auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
         if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
-        using vertex_converter_type = vertex_converter<rasterizer,
-                                                       clip_poly_tag,
+        using vertex_converter_type = vertex_converter<clip_poly_tag,
                                                        transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag,
                                                        smooth_tag>;
 
-        vertex_converter_type converter(clip_box,*ras_ptr_,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+        vertex_converter_type converter(clip_box,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
 
         if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
@@ -172,9 +171,9 @@ struct agg_renderer_process_visitor_p
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-        apply_vertex_converter_type apply(converter);
+        apply_vertex_converter_type apply(converter, *ras_ptr_);
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
         agg::scanline_u8 sl;
         ras_ptr_->filling_rule(agg::fill_even_odd);
@@ -257,14 +256,13 @@ struct agg_renderer_process_visitor_p
         agg::trans_affine tr;
         auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
         if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
-        using vertex_converter_type = vertex_converter<rasterizer,
-                                                       clip_poly_tag,
+        using vertex_converter_type = vertex_converter<clip_poly_tag,
                                                        transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag,
                                                        smooth_tag>;
 
-        vertex_converter_type converter(clip_box,*ras_ptr_,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
+        vertex_converter_type converter(clip_box, sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
         if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
         converter.set<transform_tag>(); //always transform
@@ -272,9 +270,9 @@ struct agg_renderer_process_visitor_p
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-        apply_vertex_converter_type apply(converter);
+        apply_vertex_converter_type apply(converter, *ras_ptr_);
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
         agg::scanline_u8 sl;
         ras_ptr_->filling_rule(agg::fill_even_odd);

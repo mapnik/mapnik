@@ -193,11 +193,11 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              symbolizer_base const& sym);
 
 // Apply markers to a feature with multiple geometries
-template <typename Converter>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, symbolizer_base const& sym)
+template <typename Converter, typename Processor>
+void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
 {
     using vertex_converter_type = Converter;
-    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type,Processor>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
 
     auto const& geom = feature.get_geometry();
@@ -207,7 +207,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         || type == geometry::geometry_types::LineString
         || type == geometry::geometry_types::Polygon)
     {
-        apply_vertex_converter_type apply(converter);
+        apply_vertex_converter_type apply(converter, proc);
         mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
     }
     else
@@ -226,7 +226,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 // unset any clipping since we're now dealing with a point
                 converter.template unset<clip_poly_tag>();
                 geometry::point_vertex_adapter<double> va(pt);
-                converter.apply(va);
+                converter.apply(va, proc);
             }
         }
         else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
@@ -253,7 +253,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 if (largest)
                 {
                     geometry::polygon_vertex_adapter<double> va(*largest);
-                    converter.apply(va);
+                    converter.apply(va, proc);
                 }
             }
             else
@@ -267,7 +267,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            apply_vertex_converter_type apply(converter);
+            apply_vertex_converter_type apply(converter, proc);
             mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
         }
     }

@@ -40,6 +40,14 @@ struct render_marker_symbolizer_visitor
     using raster_dispatch_type = RD;
     using buffer_type = typename std::tuple_element<0,ContextType>::type;
 
+    using vertex_converter_type = vertex_converter<clip_line_tag,
+                                                   clip_poly_tag,
+                                                   transform_tag,
+                                                   affine_transform_tag,
+                                                   simplify_tag,
+                                                   smooth_tag,
+                                                   offset_transform_tag>;
+
     render_marker_symbolizer_visitor(std::string const& filename,
                                      markers_symbolizer const& sym,
                                      mapnik::feature_impl & feature,
@@ -100,14 +108,7 @@ struct render_marker_symbolizer_visitor
                                                      snap_to_pixels,
                                                      renderer_context_);
 
-            using vertex_converter_type = vertex_converter<vector_dispatch_type,clip_line_tag,
-                                          clip_poly_tag,
-                                          transform_tag,
-                                          affine_transform_tag,
-                                          simplify_tag, smooth_tag,
-                                          offset_transform_tag>;
             vertex_converter_type converter(clip_box_,
-                                            rasterizer_dispatch,
                                             sym_,
                                             common_.t_,
                                             prj_trans_,
@@ -129,7 +130,7 @@ struct render_marker_symbolizer_visitor
             converter.template set<affine_transform_tag>(); // optional affine transform
             if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
             if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-            apply_markers_multi(feature_, common_.vars_, converter, sym_);
+            apply_markers_multi(feature_, common_.vars_, converter, rasterizer_dispatch, sym_);
         }
         else
         {
@@ -153,14 +154,7 @@ struct render_marker_symbolizer_visitor
                                                      snap_to_pixels,
                                                      renderer_context_);
 
-            using vertex_converter_type = vertex_converter<vector_dispatch_type,clip_line_tag,
-                                          clip_poly_tag,
-                                          transform_tag,
-                                          affine_transform_tag,
-                                          simplify_tag, smooth_tag,
-                                          offset_transform_tag>;
             vertex_converter_type converter(clip_box_,
-                                            rasterizer_dispatch,
                                             sym_,
                                             common_.t_,
                                             prj_trans_,
@@ -182,7 +176,7 @@ struct render_marker_symbolizer_visitor
             converter.template set<affine_transform_tag>(); // optional affine transform
             if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
             if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-            apply_markers_multi(feature_, common_.vars_, converter, sym_);
+            apply_markers_multi(feature_, common_.vars_, converter, rasterizer_dispatch,  sym_);
         }
     }
 
@@ -217,14 +211,8 @@ struct render_marker_symbolizer_visitor
                                                  common_.vars_,
                                                  renderer_context_);
 
-        using vertex_converter_type = vertex_converter<raster_dispatch_type,clip_line_tag,
-                                      clip_poly_tag,
-                                      transform_tag,
-                                      affine_transform_tag,
-                                      simplify_tag, smooth_tag,
-                                      offset_transform_tag>;
+
         vertex_converter_type converter(clip_box_,
-                                        rasterizer_dispatch,
                                         sym_,
                                         common_.t_,
                                         prj_trans_,
@@ -246,7 +234,7 @@ struct render_marker_symbolizer_visitor
         converter.template set<affine_transform_tag>(); // optional affine transform
         if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-        apply_markers_multi(feature_, common_.vars_, converter, sym_);
+        apply_markers_multi(feature_, common_.vars_, converter, rasterizer_dispatch, sym_);
     }
 
   private:
@@ -273,12 +261,12 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     {
         mapnik::marker const& mark = mapnik::marker_cache::instance().find(filename, true);
         render_marker_symbolizer_visitor<VD,RD,RendererType,ContextType> visitor(filename,
-                                         sym,
-                                         feature,
-                                         prj_trans,
-                                         common,
-                                         clip_box,
-                                         renderer_context);
+                                                                                 sym,
+                                                                                 feature,
+                                                                                 prj_trans,
+                                                                                 common,
+                                                                                 clip_box,
+                                                                                 renderer_context);
         util::apply_visitor(visitor, mark);
     }
 }
