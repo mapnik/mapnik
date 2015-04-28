@@ -65,7 +65,9 @@ script:
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
  - if [[ ${COVERAGE} != true ]]; then
-    ./mason_latest.sh mapnik install latest;   
+    ./mason_latest.sh mapnik build;   
+    ./mason_latest.sh mapnik link;   
+    ./mason_latest.sh mapnik publish;   
    fi;
  - if [[ ${COVERAGE} == true ]]; then
     PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
