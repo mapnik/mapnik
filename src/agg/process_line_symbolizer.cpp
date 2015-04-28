@@ -164,13 +164,13 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         set_join_caps_aa(sym, ras, feature, common_.vars_);
 
-        using vertex_converter_type = vertex_converter<rasterizer_type,clip_line_tag, transform_tag,
+        using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag, smooth_tag,
                                                        offset_transform_tag,
                                                        dash_tag, stroke_tag>;
 
-        vertex_converter_type converter(clip_box,ras,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+        vertex_converter_type converter(clip_box,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -178,19 +178,19 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-        apply_vertex_converter_type apply(converter);
+        apply_vertex_converter_type apply(converter, ras);
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
     }
     else
     {
-        using vertex_converter_type = vertex_converter<rasterizer,clip_line_tag, transform_tag,
+        using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag, smooth_tag,
                                                        offset_transform_tag,
                                                        dash_tag, stroke_tag>;
-        vertex_converter_type converter(clip_box,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+        vertex_converter_type converter(clip_box, sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
@@ -202,9 +202,9 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
             converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
 
-        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-        apply_vertex_converter_type apply(converter);
+        apply_vertex_converter_type apply(converter, *ras_ptr);
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;

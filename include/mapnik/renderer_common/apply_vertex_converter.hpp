@@ -25,17 +25,18 @@
 
 namespace mapnik { namespace detail {
 
-template <typename VertexConverter>
+template <typename VertexConverter, typename Processor>
 struct apply_vertex_converter
 {
-    apply_vertex_converter(VertexConverter & converter)
-        : converter_(converter) {}
+    apply_vertex_converter(VertexConverter & converter, Processor & proc)
+        : converter_(converter), proc_(proc) {}
     template <typename Adapter>
     void operator() (Adapter const& adapter) const
     {
-        converter_.apply(adapter);
+        converter_.apply(adapter, proc_);
     }
     VertexConverter & converter_;
+    Processor & proc_;
 };
 
 }}

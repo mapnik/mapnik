@@ -124,23 +124,23 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
-    using vertex_converter_type = vertex_converter<cairo_context,
+    using vertex_converter_type = vertex_converter<
                                                    clip_poly_tag,
                                                    transform_tag,
                                                    affine_transform_tag,
                                                    simplify_tag,
                                                    smooth_tag>;
 
-    vertex_converter_type converter(clip_box, context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+    vertex_converter_type converter(clip_box,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type>;
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, cairo_context>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-    apply_vertex_converter_type apply(converter);
+    apply_vertex_converter_type apply(converter, context_);
     mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
     // fill polygon
     context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
