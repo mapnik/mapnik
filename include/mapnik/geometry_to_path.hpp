@@ -80,6 +80,7 @@ struct geometry_to_path
             if (first) { p_.move_to(pt.x, pt.y); first=false;}
             else p_.line_to(pt.x, pt.y);
         }
+        p_.close_path();
         // interior
         for (auto const& ring : poly.interior_rings)
         {
@@ -91,6 +92,7 @@ struct geometry_to_path
                 if (first) { p_.move_to(pt.x, pt.y); first=false;}
                 else p_.line_to(pt.x, pt.y);
             }
+            p_.close_path();
         }
     }
 
