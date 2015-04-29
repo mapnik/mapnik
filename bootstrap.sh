@@ -49,6 +49,7 @@ function install_mason_deps() {
     install boost_libfilesystem 1.57.0
     install boost_libprogram_options 1.57.0
     install boost_libregex 1.57.0
+    install boost_libpython 1.57.0
     install libpq 9.4.0
     install sqlite 3.8.8.1
     install gdal 1.11.1
