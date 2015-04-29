@@ -34,6 +34,8 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/geometry_transform.hpp>
 #include <mapnik/geometry_to_path.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
+
 // boost
 #include <boost/spirit/include/karma.hpp>
 
@@ -128,8 +130,10 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
+        auto const& geom = feature.get_geometry();
         path_type path;
-        geometry::to_path(feature.get_geometry(), path);
+        path.set_type(static_cast<path_type::types>(mapnik::util::to_ds_type(geom)));
+        geometry::to_path(geom, path);
         vertex_adapter va(path);
         trans_path_type trans_path(common_.t_, va, prj_trans);
         generate_path_impl(generator_.output_iterator_, trans_path, path_attributes_);
