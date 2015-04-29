@@ -27,15 +27,15 @@ function setup_mason() {
 
 function install() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
-    if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/ ]]; then
+    if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/${2} ]]; then
         mason install $1 $2
         mason link $1 $2
     fi
 }
 
 function install_mason_deps() {
-    install freetype 2.5.4
-    install harfbuzz 2cd5323
+    install freetype 2.5.5
+    install harfbuzz 0.9.40
     install jpeg_turbo 1.4.0
     install libxml2 2.9.2
     install libpng 1.6.16
@@ -52,7 +52,7 @@ function install_mason_deps() {
     install boost_libpython 1.57.0
     install libpq 9.4.0
     install sqlite 3.8.8.1
-    install gdal 1.11.1
+    install gdal 1.11.2
     install expat 2.1.0
     install pixman 0.32.6
     install cairo 1.12.18
