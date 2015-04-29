@@ -24,7 +24,7 @@ namespace benchmark {
         }
 
         image_rgba8 const& dest = util::get<image_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
-        image_rgba8 const& src = util::get<image_rgba8>(reader1->read(0,0,reader1->width(), reader1->height()));
+        image_rgba8 const& src = util::get<image_rgba8>(reader2->read(0,0,reader2->width(), reader2->height()));
 
         unsigned int width = src.width();
         unsigned int height = src.height();
