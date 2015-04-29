@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 // mapnik
+#include <mapnik/global.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex_cache.hpp>
 
