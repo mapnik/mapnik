@@ -60,7 +60,7 @@ script:
  - source bootstrap.sh
  - if [[ ${COVERAGE} == true ]]; then 
     ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
-   elif [[ ${MASON_PUBLISH} == true]]; then
+   elif [[ ${MASON_PUBLISH} == true ]]; then
     export MASON_NAME=mapnik;
     export MASON_VERSION=latest;
     export MASON_LIB_FILE=lib/libmapnik-wkt.a;
