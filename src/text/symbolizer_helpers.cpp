@@ -342,9 +342,10 @@ bool text_symbolizer_helper::next_line_placement() const
                 geo_itr_ = geometries_to_process_.erase(geo_itr_);
                 return true;
             }
-            // No placement for this geometry. Keep it in geometries_to_process_ for next try.
-            ++geo_itr_;
         }
+
+        // No placement for this geometry. Keep it in geometries_to_process_ for next try.
+        ++geo_itr_;
     }
     return false;
 }
