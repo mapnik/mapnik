@@ -64,7 +64,7 @@ script:
     export MASON_NAME=mapnik;
     export MASON_VERSION=latest;
     export MASON_LIB_FILE=lib/libmapnik-wkt.a;
-    source ./.mason.sh; 
+    source ./.mason/mason.sh; 
     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
    else
     ./configure;
