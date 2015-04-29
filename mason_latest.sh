@@ -13,7 +13,7 @@ function mason_load_source {
 function mason_compile {
     HERE=$(pwd)
     make install
-    if [ $UNAME = 'Darwin' ]; then
+    if [[ `uname` == 'Darwin' ]]; then
         install_name_tool -id @loader_path/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";     
     fi;
     python -c "data=open('$MASON_PREFIX/bin/mapnik-config','r').read();open('$MASON_PREFIX/bin/mapnik-config','w').write(data.replace('$HERE','.'))"
