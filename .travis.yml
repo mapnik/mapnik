@@ -5,6 +5,10 @@ sudo: false
 git:
   depth: 2
 
+env:
+  global:
+   - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
+   - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
 addons:
   postgresql: "9.4"
   apt:
@@ -23,16 +27,21 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8
+      env: JOBS=8 MASON_PUBLISH=true
     - os: linux
       compiler: gcc
       env: JOBS=6
+    - os: osx
+      compiler: clang
+      env: JOBS=8 MASON_PUBLISH=true
     - os: osx
       compiler: clang
       env: JOBS=8 COVERAGE=true
 
 before_install:
  - export COVERAGE=${COVERAGE:-false}
+ - export MASON_PUBLISH=${MASON_PUBLISH:-false}
+ - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi;
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
@@ -44,14 +53,37 @@ install:
    else
     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
    fi;
+ - if [[ ${COVERAGE} == true ]]; then
+    PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
+   fi;
 
 script:
  - source bootstrap.sh
- - if [[ ${COVERAGE} == true ]]; then ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True; else ./configure; fi;
+ - if [[ ${COVERAGE} == true ]]; then 
+    ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
+   elif [[ ${MASON_PUBLISH} == true ]]; then
+    export MASON_NAME=mapnik;
+    export MASON_VERSION=latest;
+    export MASON_LIB_FILE=lib/libmapnik-wkt.a;
+    source ./.mason/mason.sh; 
+    ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
+   else
+    ./configure;
+   fi;
  - make
  - git clone --depth=1 https://github.com/mapnik/test-data test-data
  - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
- - PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls
- - if [[ ${COVERAGE} == true ]]; then ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; fi;
- - if [[ ${COVERAGE} != true ]]; then make bench; fi;
+ - if [[ ${COVERAGE} == true ]]; then 
+    ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
+   fi;
+ - if [[ ${COVERAGE} != true ]]; then 
+    make bench; 
+   fi;
+
+after_success:
+ - if [[ ${MASON_PUBLISH} == true ]]; then
+    ./mason_latest.sh build;   
+    ./mason_latest.sh link;   
+    ./mason_latest.sh publish;   
+   fi;
