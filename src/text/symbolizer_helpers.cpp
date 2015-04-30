@@ -335,7 +335,7 @@ bool text_symbolizer_helper::next_line_placement() const
         {
             auto const& line = util::get<geometry::line_string<double> const>(*geo_itr_);
             geometry::line_string_vertex_adapter<double> va(line);
-            //converter_.apply(va, adapter_);
+            converter_.apply(va, adapter_);
             if (adapter_.status())
             {
                 //Found a placement

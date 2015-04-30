@@ -43,7 +43,7 @@ struct placement_finder_adapter
           points_on_line_(points_on_line) {}
 
     template <typename PathT>
-    void add_path(PathT & path)
+    void add_path(PathT & path) const
     {
         status_ = finder_.find_line_placements(path, points_on_line_);
     }
