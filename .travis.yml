@@ -3,7 +3,7 @@ language: cpp
 sudo: false
 
 git:
-  depth: 2
+  depth: 10
   submodules: true
 
 env:
