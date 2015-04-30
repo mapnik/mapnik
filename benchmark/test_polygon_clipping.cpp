@@ -306,6 +306,43 @@ public:
     }
 };
 
+inline void process_polynode_branch(ClipperLib::PolyNode* polynode,
+                             mapnik::geometry::multi_polygon<double> & mp)
+{
+    mapnik::geometry::polygon<double> polygon;
+    mapnik::geometry::linear_ring<double> outer;
+    for (auto const& pt : polynode->Contour)
+    {
+        outer.emplace_back(static_cast<double>(pt.x),static_cast<double>(pt.y));
+    }
+    if (outer.front() != outer.back())
+    {
+        outer.emplace_back(outer.front().x, outer.front().y);
+    }
+    polygon.set_exterior_ring(std::move(outer));
+    for (auto * ring : polynode->Childs)
+    {
+        mapnik::geometry::linear_ring<double> inner;
+        for (auto const& pt : ring->Contour)
+        {
+            inner.emplace_back(static_cast<double>(pt.x),static_cast<double>(pt.y));
+        }
+        if (inner.front() != inner.back())
+        {
+            inner.emplace_back(inner.front().x, inner.front().y);
+        }
+        polygon.add_hole(std::move(inner));
+    }
+    mp.emplace_back(std::move(polygon));
+    for (auto * ring : polynode->Childs)
+    {
+        for (auto * sub_ring : ring->Childs)
+        {
+            process_polynode_branch(sub_ring, mp);
+        }
+    }
+}
+
 class test4 : public benchmark::test_case
 {
     std::string wkt_in_;
@@ -347,6 +384,11 @@ public:
             double y = pt.y;
             path.emplace_back(static_cast<ClipperLib::cInt>(x),static_cast<ClipperLib::cInt>(y));
         }
+        double area = ClipperLib::Area(path);
+        if (area > 0)
+        {
+            std::reverse(path.begin(), path.end());
+        } 
         if (!clipper.AddPath(path, ClipperLib::ptSubject, true))
         {
             std::clog << "ptSubject ext failed!\n";
@@ -360,6 +402,11 @@ public:
                 double y = pt.y;
                 path.emplace_back(static_cast<ClipperLib::cInt>(x),static_cast<ClipperLib::cInt>(y));
             }
+            area = ClipperLib::Area(path);
+            if (area < 0)
+            {
+                std::reverse(path.begin(), path.end());
+            } 
             if (!clipper.AddPath(path, ClipperLib::ptSubject, true))
             {
                 std::clog << "ptSubject ext failed!\n";
@@ -379,39 +426,17 @@ public:
         }
 
         ClipperLib::PolyTree polygons;
-        clipper.Execute(ClipperLib::ctIntersection, polygons, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+        clipper.Execute(ClipperLib::ctIntersection, polygons);// ClipperLib::pftNonZero);
         clipper.Clear();
-        ClipperLib::PolyNode* polynode = polygons.GetFirst();
         mapnik::geometry::multi_polygon<double> mp;
-        mp.emplace_back();
-        bool first = true;
-        while (polynode)
+        for (auto * polynode : polygons.Childs)
         {
-            if (!polynode->IsHole())
-            {
-                if (first) first = false;
-                else mp.emplace_back(); // start new polygon
-                for (auto const& pt : polynode->Contour)
-                {
-                    mp.back().exterior_ring.add_coord(pt.x, pt.y);
-                }
-                // childrens are interior rings
-                for (auto const* ring : polynode->Childs)
-                {
-                    mapnik::geometry::linear_ring<double> hole;
-                    for (auto const& pt : ring->Contour)
-                    {
-                        hole.add_coord(pt.x, pt.y);
-                    }
-                    mp.back().add_hole(std::move(hole));
-                }
-            }
-            polynode = polynode->GetNext();
+             process_polynode_branch(polynode, mp);
         }
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
-        mapnik::geometry::geometry<double> geom2(mp);
-        auto env = mapnik::geometry::envelope(geom2);
+        //mapnik::geometry::geometry<double> geom2(mp);
+        auto env = mapnik::geometry::envelope(mp);
         if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
         {
             std::clog << "generating expected image: " << expect << "\n";
