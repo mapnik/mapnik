@@ -18,7 +18,7 @@
 // agg
 #include "agg_conv_clip_polygon.h"
 // clipper
-#include "agg_conv_clipper.h"
+#include "clipper.hpp"
 #include "agg_path_storage.h"
 // rendering
 #include "agg_basics.h"
@@ -206,134 +206,6 @@ public:
     }
 };
 
-class test2 : public benchmark::test_case
-{
-    std::string wkt_in_;
-    mapnik::box2d<double> extent_;
-    std::string expected_;
-public:
-    using poly_clipper = agg::conv_clipper<mapnik::geometry::polygon_vertex_adapter<double>, agg::path_storage>;
-    test2(mapnik::parameters const& params,
-          std::string const& wkt_in,
-          mapnik::box2d<double> const& extent)
-     : test_case(params),
-       wkt_in_(wkt_in),
-       extent_(extent),
-       expected_("./benchmark/data/polygon_clipping_clipper") {}
-    bool validate() const
-    {
-        mapnik::geometry::geometry<double> geom;
-        if (!mapnik::from_wkt(wkt_in_, geom))
-        {
-            throw std::runtime_error("Failed to parse WKT");
-        }
-        if (mapnik::geometry::is_empty(geom))
-        {
-            std::clog << "empty geom!\n";
-            return false;
-        }
-        if (!geom.is<mapnik::geometry::polygon<double>>())
-        {
-            std::clog << "not a polygon!\n";
-            return false;
-        }
-        mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
-        agg::path_storage ps;
-        ps.move_to(extent_.minx(), extent_.miny());
-        ps.line_to(extent_.minx(), extent_.maxy());
-        ps.line_to(extent_.maxx(), extent_.maxy());
-        ps.line_to(extent_.maxx(), extent_.miny());
-        ps.close_polygon();
-        mapnik::geometry::polygon_vertex_adapter<double> va(poly);
-        poly_clipper clipped(va,ps,
-                             agg::clipper_and,
-                             agg::clipper_non_zero,
-                             agg::clipper_non_zero,
-                             1);
-        unsigned cmd;
-        double x,y;
-        clipped.rewind(0);
-        mapnik::geometry::polygon<double> poly2;
-        mapnik::geometry::linear_ring<double> ring;
-        // TODO: handle resulting multipolygon
-        // exterior ring
-        while (true)
-        {
-            cmd = clipped.vertex(&x, &y);
-            ring.add_coord(x,y);
-            if (cmd == mapnik::SEG_CLOSE) break;
-        }
-        poly2.set_exterior_ring(std::move(ring));
-        // interior ring
-        ring.clear();
-        while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END)
-        {
-            ring.add_coord(x,y);
-        }
-        poly2.add_hole(std::move(ring));
-        mapnik::geometry::correct(poly2);
-        std::string expect = expected_+".png";
-        std::string actual = expected_+"_actual.png";
-        mapnik::geometry::multi_polygon<double> mp;
-        mp.emplace_back(poly2);
-        auto env = mapnik::geometry::envelope(mp);
-        if (!mapnik::util::exists(expect) || (std::getenv("UPDATE") != nullptr))
-        {
-            std::clog << "generating expected image: " << expect << "\n";
-            render(mp,env,expect);
-        }
-        render(mp,env,actual);
-        return benchmark::compare_images(actual,expect);
-    }
-    bool operator()() const
-    {
-        mapnik::geometry::geometry<double> geom;
-        if (!mapnik::from_wkt(wkt_in_, geom))
-        {
-            throw std::runtime_error("Failed to parse WKT");
-        }
-        if (mapnik::geometry::is_empty(geom))
-        {
-            std::clog << "empty geom!\n";
-            return false;
-        }
-        if (!geom.is<mapnik::geometry::polygon<double>>())
-        {
-            std::clog << "not a polygon!\n";
-            return false;
-        }
-        mapnik::geometry::polygon<double> const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geom);
-        agg::path_storage ps;
-        ps.move_to(extent_.minx(), extent_.miny());
-        ps.line_to(extent_.minx(), extent_.maxy());
-        ps.line_to(extent_.maxx(), extent_.maxy());
-        ps.line_to(extent_.maxx(), extent_.miny());
-        ps.close_polygon();
-        bool valid = true;
-        for (unsigned i=0;i<iterations_;++i)
-        {
-            unsigned count = 0;
-            mapnik::geometry::polygon_vertex_adapter<double> va(poly);
-            poly_clipper clipped(va,ps,
-                                 agg::clipper_and,
-                                 agg::clipper_non_zero,
-                                 agg::clipper_non_zero,
-                                 1);
-            clipped.rewind(0);
-            unsigned cmd;
-            double x,y;
-            while ((cmd = clipped.vertex(&x, &y)) != mapnik::SEG_END) {
-                count++;
-            }
-            unsigned expected_count = 31;
-            if (count != expected_count) {
-                std::clog << "test2: clipping failed: processed " << count << " verticies but expected " << expected_count << "\n";
-                valid = false;
-            }
-        }
-        return valid;
-    }
-};
 
 class test3 : public benchmark::test_case
 {
@@ -615,10 +487,6 @@ int main(int argc, char** argv)
     {
         test1 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with agg");
-    }
-    {
-        test2 test_runner(params,wkt_in,clipping_box);
-        run(test_runner,"clipping polygon with clipper");
     }
     {
         test3 test_runner(params,wkt_in,clipping_box);
