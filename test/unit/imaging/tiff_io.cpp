@@ -59,7 +59,7 @@
 TEST_CASE("tiff io") {
 
 SECTION("scan rgb8 striped") {
-    std::string filename("./test-data/tiff/scan_512x512_rgb8_striped.tif");
+    std::string filename("./test/data/tiff/scan_512x512_rgb8_striped.tif");
     mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename);
     REQUIRE( tiff_reader.width() == 512 );
     REQUIRE( tiff_reader.height() == 512 );
@@ -89,7 +89,7 @@ SECTION("scan rgb8 striped") {
 }
 
 SECTION("scan rgb8 tiled") {
-    std::string filename("./test-data/tiff/scan_512x512_rgb8_tiled.tif");
+    std::string filename("./test/data/tiff/scan_512x512_rgb8_tiled.tif");
     mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename);
     REQUIRE( tiff_reader.width() == 512 );
     REQUIRE( tiff_reader.height() == 512 );
@@ -119,7 +119,7 @@ SECTION("scan rgb8 tiled") {
 }
 
 SECTION("rgba8 striped") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_rgba8_striped.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_rgba8_striped.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 1 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == false );
@@ -135,7 +135,7 @@ SECTION("rgba8 striped") {
 }
 
 SECTION("rgba8 tiled") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_rgba8_tiled.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_rgba8_tiled.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == true );
@@ -151,7 +151,7 @@ SECTION("rgba8 tiled") {
 }
 
 SECTION("rgb8 striped") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_rgb8_striped.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_rgb8_striped.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 10 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == false );
@@ -167,7 +167,7 @@ SECTION("rgb8 striped") {
 }
 
 SECTION("rgb8 tiled") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_rgb8_tiled.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_rgb8_tiled.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == true );
@@ -183,7 +183,7 @@ SECTION("rgb8 tiled") {
 }
 
 SECTION("gray8 striped") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_gray8_striped.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_gray8_striped.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 32 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == false );
@@ -199,7 +199,7 @@ SECTION("gray8 striped") {
 }
 
 SECTION("gray8 tiled") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_gray8_tiled.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_gray8_tiled.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 8 );
     REQUIRE( tiff_reader.is_tiled() == true );
@@ -215,7 +215,7 @@ SECTION("gray8 tiled") {
 }
 
 SECTION("gray16 striped") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_gray16_striped.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_gray16_striped.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 16 );
     REQUIRE( tiff_reader.bits_per_sample() == 16 );
     REQUIRE( tiff_reader.is_tiled() == false );
@@ -231,7 +231,7 @@ SECTION("gray16 striped") {
 }
 
 SECTION("gray16 tiled") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_gray16_tiled.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_gray16_tiled.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 16 );
     REQUIRE( tiff_reader.is_tiled() == true );
@@ -247,7 +247,7 @@ SECTION("gray16 tiled") {
 }
 
 SECTION("gray32f striped") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_gray32f_striped.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_gray32f_striped.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 8 );
     REQUIRE( tiff_reader.bits_per_sample() == 32 );
     REQUIRE( tiff_reader.is_tiled() == false );
@@ -263,7 +263,7 @@ SECTION("gray32f striped") {
 }
 
 SECTION("gray32f tiled") {
-    TIFF_ASSERT("./test-data/tiff/ndvi_256x256_gray32f_tiled.tif")
+    TIFF_ASSERT("./test/data/tiff/ndvi_256x256_gray32f_tiled.tif")
     REQUIRE( tiff_reader.rows_per_strip() == 0 );
     REQUIRE( tiff_reader.bits_per_sample() == 32 );
     REQUIRE( tiff_reader.is_tiled() == true );

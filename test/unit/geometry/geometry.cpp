@@ -9,7 +9,7 @@
 TEST_CASE("geometry") {
 
 SECTION("json point") {
-    mapnik::util::file input("./test-data/json/point1.json");
+    mapnik::util::file input("./test/data/json/point1.json");
     REQUIRE( input.open() );
     auto json = input.data();
     mapnik::geometry::geometry<double> geom;
@@ -24,7 +24,7 @@ SECTION("json point") {
 }
 
 SECTION("json point reversed") {
-    mapnik::util::file input("./test-data/json/point2.json");
+    mapnik::util::file input("./test/data/json/point2.json");
     REQUIRE( input.open() );
     auto json = input.data();
     mapnik::geometry::geometry<double> geom;

@@ -29,6 +29,7 @@ NOTE: the above will not work on windows, rather see https://github.com/mapnik/m
 
 Then to run the tests locally (without needing to install):
 
+    git submodule update --init
     make test
 
 Install like:
