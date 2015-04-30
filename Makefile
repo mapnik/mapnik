@@ -58,7 +58,10 @@ rebuild:
 uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
-test:
+test/data:
+	git submodule update --init
+
+test: ./test/data
 	@./test/run
 
 check: test
