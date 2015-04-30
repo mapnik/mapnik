@@ -117,6 +117,7 @@ SAMPLE_INPUT_PLUGINS = True
 " > ./config.py
 }
 
+# NOTE: the `mapnik-settings.env` is used by test/run (which is run by `make test`)
 function setup_runtime_settings() {
     echo "export PROJ_LIB=${MASON_LINKED_ABS}/share/proj" > mapnik-settings.env
     echo "export ICU_DATA=${MASON_LINKED_ABS}/share/icu/54.1" >> mapnik-settings.env
