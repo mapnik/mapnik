@@ -15,9 +15,9 @@ addons:
   apt:
     sources:
      - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.6
+     - llvm-toolchain-precise-3.5
     packages:
-     - clang-3.6
+     - clang-3.5
 
 cache:
   directories:
@@ -48,8 +48,8 @@ install:
  - if [[ $(uname -s) == 'Linux' ]]; then
      psql -U postgres -c 'create database template_postgis;' -U postgres;
      psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
-     export CXX="ccache clang++-3.6";
-     export CC="ccache clang-3.6";
+     export CXX="ccache clang++-3.5 -Qunused-arguments";
+     export CC="ccache clang-3.5 -Qunused-arguments";
      export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
    else
      export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
