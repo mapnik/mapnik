@@ -41,49 +41,47 @@ matrix:
 before_install:
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
- - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi;
+ - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
-    psql -U postgres -c 'create database template_postgis;' -U postgres;
-    psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
-    export CXX="ccache clang++-3.6";
-    export CC="ccache clang-3.6";
-    export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
+     psql -U postgres -c 'create database template_postgis;' -U postgres;
+     psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
+     export CXX="ccache clang++-3.6";
+     export CC="ccache clang-3.6";
+     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
    else
-    export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
-   fi;
+     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
+   fi
  - if [[ ${COVERAGE} == true ]]; then
-    PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
-   fi;
+     PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
+   fi
 
 script:
  - source bootstrap.sh
- - if [[ ${COVERAGE} == true ]]; then 
-    ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
+ - if [[ ${COVERAGE} == true ]]; then
+     ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
    elif [[ ${MASON_PUBLISH} == true ]]; then
-    export MASON_NAME=mapnik;
-    export MASON_VERSION=latest;
-    export MASON_LIB_FILE=lib/libmapnik-wkt.a;
-    source ./.mason/mason.sh; 
-    ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
+     export MASON_NAME=mapnik;
+     export MASON_VERSION=latest;
+     export MASON_LIB_FILE=lib/libmapnik-wkt.a;
+     source ./.mason/mason.sh;
+     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
    else
-    ./configure;
-   fi;
+     ./configure;
+   fi
  - make
- - git clone --depth=1 https://github.com/mapnik/test-data test-data
- - git clone --depth=1 https://github.com/mapbox/mapnik-test-data tests/data/mapnik-test-data
  - make test
- - if [[ ${COVERAGE} == true ]]; then 
-    ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
-   fi;
- - if [[ ${COVERAGE} != true ]]; then 
-    make bench; 
-   fi;
+ - if [[ ${COVERAGE} == true ]]; then
+     ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
+   fi
+ - if [[ ${COVERAGE} != true ]]; then
+     make bench;
+   fi
 
 after_success:
  - if [[ ${MASON_PUBLISH} == true ]]; then
-    ./mason_latest.sh build;   
-    ./mason_latest.sh link;   
-    ./mason_latest.sh publish;   
-   fi;
+     ./mason_latest.sh build;
+     ./mason_latest.sh link;
+     ./mason_latest.sh publish;
+   fi
