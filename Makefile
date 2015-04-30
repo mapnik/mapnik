@@ -59,7 +59,7 @@ uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	./run_tests
+	@./test/run
 
 check: test
 
