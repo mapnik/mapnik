@@ -14,7 +14,10 @@ function mason_compile {
     HERE=$(pwd)
     make install
     if [[ `uname` == 'Darwin' ]]; then
-        install_name_tool -id @loader_path/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";     
+        install_name_tool -id @loader_path/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";
+        for f in ${MASON_PREFIX}"/lib/mapnik/input/*.input"; do
+            install_name_tool -id @loader_pather/input/`basename $f` $f
+        done;
     fi;
     python -c "data=open('$MASON_PREFIX/bin/mapnik-config','r').read();open('$MASON_PREFIX/bin/mapnik-config','w').write(data.replace('$HERE','.'))"
     mkdir -p ${MASON_PREFIX}/share/gdal
