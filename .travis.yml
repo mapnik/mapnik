@@ -4,6 +4,7 @@ sudo: false
 
 git:
   depth: 2
+  submodules: true
 
 env:
   global:
