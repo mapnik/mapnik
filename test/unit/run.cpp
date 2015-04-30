@@ -25,7 +25,9 @@ int main (int argc, char* const argv[])
 
 #ifdef MAPNIK_USE_PROJ4
     // http://trac.osgeo.org/proj/ticket/149
+ #if PJ_VERSION >= 480
     pj_clear_initcache();
+ #endif
     // https://trac.osgeo.org/proj/wiki/ProjAPI#EnvironmentFunctions
     pj_deallocate_grids();
 #endif
