@@ -137,6 +137,7 @@ private:
 
 struct marker_null 
 {
+    marker_null() = default;
 public:
     box2d<double> bounding_box() const
     {
@@ -152,9 +153,9 @@ public:
     }
 };
 
-using marker_base = util::variant<marker_svg, 
+using marker_base = util::variant<marker_null, 
                                   marker_rgba8,
-                                  marker_null>;
+                                  marker_svg>;
 namespace detail {
 
 struct get_marker_bbox_visitor

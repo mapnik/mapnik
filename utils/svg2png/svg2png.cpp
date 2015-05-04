@@ -213,9 +213,9 @@ int main (int argc,char** argv)
                 std::clog << "found: " << svg_name << "\n";
             }
 
-            mapnik::marker const& marker = mapnik::marker_cache::instance().find(svg_name, false);
+            std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
             main_marker_visitor visitor(svg_name, return_value, verbose, auto_open);
-            mapnik::util::apply_visitor(visitor, marker);
+            mapnik::util::apply_visitor(visitor, *marker);
         }
     }
     catch (...)

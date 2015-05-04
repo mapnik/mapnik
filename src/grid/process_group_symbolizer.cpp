@@ -136,7 +136,7 @@ struct thunk_renderer
                 {
                     ren_.render_marker(feature_,
                                        glyphs->marker_pos(),
-                                       mark->marker_,
+                                       *mark->marker_,
                                        mark->transform_,
                                        thunk.opacity_, thunk.comp_op_);
                 }

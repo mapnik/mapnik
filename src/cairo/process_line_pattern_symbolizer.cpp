@@ -102,12 +102,12 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         return;
     }
 
-    mapnik::marker const& marker = marker_cache::instance().find(filename, true);
+    std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
 
-    if (marker.is<mapnik::marker_null>()) return;
+    if (marker->is<mapnik::marker_null>()) return;
 
-    unsigned width = marker.width();
-    unsigned height = marker.height();
+    unsigned width = marker->width();
+    unsigned height = marker->height();
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
@@ -117,7 +117,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
                                            feature,
                                            width,
                                            height);
-    std::shared_ptr<cairo_pattern> pattern = util::apply_visitor(visit, marker);
+    std::shared_ptr<cairo_pattern> pattern = util::apply_visitor(visit, *marker);
 
     context_.set_line_width(height);
 

@@ -175,12 +175,12 @@ void agg_renderer<T0,T1>::setup(Map const &m)
     if (image_filename)
     {
         // NOTE: marker_cache returns premultiplied image, if needed
-        mapnik::marker const& bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
+        std::shared_ptr<mapnik::marker const> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
         setup_agg_bg_visitor<buffer_type> visitor(pixmap_,
                                      common_,
                                      m.background_image_comp_op(),
                                      m.background_image_opacity());
-        util::apply_visitor(visitor, bg_marker);
+        util::apply_visitor(visitor, *bg_marker);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }

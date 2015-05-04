@@ -149,8 +149,8 @@ void cairo_renderer<T>::setup(Map const& map)
     if (image_filename)
     {
         // NOTE: marker_cache returns premultiplied image, if needed
-        mapnik::marker const& bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
-        util::apply_visitor(setup_marker_visitor(context_, common_), bg_marker);
+        std::shared_ptr<mapnik::marker const> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
+        util::apply_visitor(setup_marker_visitor(context_, common_), *bg_marker);
     }
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer: Scale=" << map.scale();
 }

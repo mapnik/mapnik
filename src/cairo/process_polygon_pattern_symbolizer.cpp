@@ -101,8 +101,8 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
 
-    mapnik::marker const& marker = mapnik::marker_cache::instance().find(filename,true);
-    if (marker.is<mapnik::marker_null>()) return;
+    std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename,true);
+    if (marker->is<mapnik::marker_null>()) return;
 
     unsigned offset_x=0;
     unsigned offset_y=0;
@@ -119,7 +119,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         offset_y = std::abs(clip_box.height() - y0);
     }
 
-    util::apply_visitor(cairo_renderer_process_visitor_p(context_, image_tr, offset_x, offset_y, opacity), marker);
+    util::apply_visitor(cairo_renderer_process_visitor_p(context_, image_tr, offset_x, offset_y, opacity), *marker);
 
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);

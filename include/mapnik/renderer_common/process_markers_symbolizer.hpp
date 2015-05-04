@@ -259,7 +259,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     if (!filename.empty())
     {
-        mapnik::marker const& mark = mapnik::marker_cache::instance().find(filename, true);
+        std::shared_ptr<mapnik::marker const> mark = mapnik::marker_cache::instance().find(filename, true);
         render_marker_symbolizer_visitor<VD,RD,RendererType,ContextType> visitor(filename,
                                                                                  sym,
                                                                                  feature,
@@ -267,7 +267,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                                                                  common,
                                                                                  clip_box,
                                                                                  renderer_context);
-        util::apply_visitor(visitor, mark);
+        util::apply_visitor(visitor, *mark);
     }
 }
 

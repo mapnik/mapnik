@@ -297,7 +297,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
-    mapnik::marker const& marker = marker_cache::instance().find(filename, true);
+    std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
     agg_renderer_process_visitor_p<buffer_type> visitor(common_,
                                                         current_buffer_,
                                                         ras_ptr,
@@ -306,7 +306,7 @@ void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
                                                         sym,
                                                         feature,
                                                         prj_trans);
-    util::apply_visitor(visitor, marker);
+    util::apply_visitor(visitor, *marker);
 
 }
 

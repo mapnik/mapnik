@@ -54,10 +54,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
-    mapnik::marker const& mark = marker_cache::instance().find(filename, true);
-    if (mark.is<mapnik::marker_null>()) return;
+    std::shared_ptr<mapnik::marker const> mark = marker_cache::instance().find(filename, true);
+    if (mark->is<mapnik::marker_null>()) return;
 
-    if (!mark.is<mapnik::marker_rgba8>())
+    if (!mark->is<mapnik::marker_rgba8>())
     {
         MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
         return;
@@ -82,7 +82,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    int stroke_width = mark.width();
+    int stroke_width = mark->width();
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);

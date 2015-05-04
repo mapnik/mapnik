@@ -61,7 +61,7 @@ void cairo_renderer<T>::process(shield_symbolizer const& sym,
         if (mark) {
             pixel_position pos = glyphs->marker_pos();
             render_marker(pos,
-                          mark->marker_,
+                          *mark->marker_,
                           mark->transform_,
                           opacity);
         }

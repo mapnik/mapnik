@@ -410,13 +410,13 @@ void text_symbolizer_helper::init_marker() const
 {
     std::string filename = mapnik::get<std::string,keys::file>(sym_, feature_, vars_);
     if (filename.empty()) return;
-    mapnik::marker const& marker = marker_cache::instance().find(filename, true);
-    if (marker.is<marker_null>()) return;
+    std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
+    if (marker->is<marker_null>()) return;
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
     if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
-    double width = marker.width();
-    double height = marker.height();
+    double width = marker->width();
+    double height = marker->height();
     double px0 = - 0.5 * width;
     double py0 = - 0.5 * height;
     double px1 = 0.5 * width;
