@@ -14,6 +14,7 @@ install:
 
 python:
 	if [[ ! -d ./bindings/python ]]; then git clone git@github.com:mapnik/python-mapnik.git --recursive ./bindings/python; else (cd bindings/python && git pull && git submodule update --init); fi;
+	make
 	python bindings/python/test/visual.py -q
 
 src/json/libmapnik-json.a:
