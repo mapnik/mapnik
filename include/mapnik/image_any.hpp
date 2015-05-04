@@ -29,18 +29,18 @@
 
 namespace mapnik {
 
-using image_base = util::variant<image_null, 
-                                      image_rgba8, 
-                                      image_gray8, 
-                                      image_gray8s, 
-                                      image_gray16, 
-                                      image_gray16s, 
-                                      image_gray32, 
-                                      image_gray32s, 
-                                      image_gray32f,
-                                      image_gray64, 
-                                      image_gray64s, 
-                                      image_gray64f>;
+using image_base = util::variant<image_null,
+                                 image_rgba8,
+                                 image_gray8,
+                                 image_gray8s,
+                                 image_gray16,
+                                 image_gray16s,
+                                 image_gray32,
+                                 image_gray32s,
+                                 image_gray32f,
+                                 image_gray64,
+                                 image_gray64s,
+                                 image_gray64f>;
 
 
 struct MAPNIK_DECL image_any : image_base
@@ -50,13 +50,13 @@ struct MAPNIK_DECL image_any : image_base
     image_any(int width,
               int height,
               image_dtype type = image_dtype_rgba8,
-              bool initialize = true, 
-              bool premultiplied = false, 
+              bool initialize = true,
+              bool premultiplied = false,
               bool painted = false);
 
     template <typename T>
     image_any(T && data) noexcept
-    : image_base(std::move(data)) {}
+        : image_base(std::move(data)) {}
 
     unsigned char const* getBytes() const;
     unsigned char* getBytes();
@@ -64,8 +64,8 @@ struct MAPNIK_DECL image_any : image_base
     std::size_t height() const;
     bool get_premultiplied() const;
     bool painted() const;
-    unsigned getSize() const;
-    unsigned getRowSize() const;
+    std::size_t size() const;
+    std::size_t row_size() const;
     double get_offset() const;
     double get_scaling() const;
     image_dtype get_dtype() const;
@@ -73,12 +73,12 @@ struct MAPNIK_DECL image_any : image_base
     void set_scaling(double val);
 };
 
-MAPNIK_DECL image_any create_image_any(int width, 
-                int height, 
-                image_dtype type = image_dtype_rgba8,
-                bool initialize = true, 
-                bool premultiplied = false, 
-                bool painted = false);
+MAPNIK_DECL image_any create_image_any(int width,
+                                       int height,
+                                       image_dtype type = image_dtype_rgba8,
+                                       bool initialize = true,
+                                       bool premultiplied = false,
+                                       bool painted = false);
 
 } // end mapnik ns
 

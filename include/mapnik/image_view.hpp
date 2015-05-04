@@ -33,26 +33,26 @@ class image_view
 public:
     using pixel = typename T::pixel;
     using pixel_type = typename T::pixel_type;
-    static const image_dtype dtype = T::dtype;
+    static constexpr image_dtype dtype = T::dtype;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-    
-    image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data);
+
+    image_view(std::size_t x, std::size_t y, std::size_t width, std::size_t height, T const& data);
     ~image_view();
-    
+
     image_view(image_view<T> const& rhs);
     image_view<T> & operator=(image_view<T> const& rhs);
     bool operator==(image_view<T> const& rhs) const;
     bool operator<(image_view<T> const& rhs) const;
 
-    unsigned x() const;
-    unsigned y() const;
-    unsigned width() const;
-    unsigned height() const;
-    const pixel_type& operator() (std::size_t i, std::size_t j) const;
-    unsigned getSize() const;
-    unsigned getRowSize() const;
-    const pixel_type* getRow(unsigned row) const;
-    const pixel_type* getRow(unsigned row, std::size_t x0) const;
+    std::size_t x() const;
+    std::size_t y() const;
+    std::size_t width() const;
+    std::size_t height() const;
+    pixel_type const& operator() (std::size_t i, std::size_t j) const;
+    std::size_t size() const;
+    std::size_t row_size() const;
+    pixel_type const* getRow(std::size_t row) const;
+    pixel_type const* getRow(std::size_t row, std::size_t x0) const;
     T const& data() const;
     bool get_premultiplied() const;
     double get_offset() const;

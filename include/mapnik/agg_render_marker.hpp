@@ -80,7 +80,7 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
         && (std::fabs(0.0 - tr.shx) < agg::affine_epsilon)
         && (std::fabs(1.0 - tr.sy) < agg::affine_epsilon))
     {
-        agg::rendering_buffer src_buffer((unsigned char *)src.getBytes(),src.width(),src.height(),src.getRowSize());
+        agg::rendering_buffer src_buffer((unsigned char *)src.getBytes(),src.width(),src.height(),src.row_size());
         pixfmt_pre pixf_mask(src_buffer);
         if (snap_to_pixels)
         {
@@ -124,7 +124,7 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
         agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                          src.width(),
                                          src.height(),
-                                         src.getRowSize());
+                                         src.row_size());
         pixfmt_pre pixf(marker_buf);
         img_accessor_type ia(pixf);
         agg::trans_affine final_tr(p, 0, 0, width, height);

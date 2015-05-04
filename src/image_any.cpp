@@ -92,18 +92,18 @@ struct get_painted_visitor
 struct get_any_size_visitor
 {
     template <typename T>
-    unsigned operator()(T const& data) const
+    std::size_t operator()(T const& data) const
     {
-        return data.getSize();
+        return data.size();
     }
 };
 
 struct get_any_row_size_visitor
 {
     template <typename T>
-    unsigned operator()(T const& data) const
+    std::size_t operator()(T const& data) const
     {
-        return data.getRowSize();
+        return data.row_size();
     }
 };
 
@@ -156,8 +156,8 @@ struct set_scaling_visitor
 MAPNIK_DECL image_any::image_any(int width,
                      int height,
                      image_dtype type,
-                     bool initialize, 
-                     bool premultiplied, 
+                     bool initialize,
+                     bool premultiplied,
                      bool painted)
     : image_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
 
@@ -191,12 +191,12 @@ MAPNIK_DECL bool image_any::painted() const
     return util::apply_visitor(detail::get_painted_visitor(),*this);
 }
 
-MAPNIK_DECL unsigned image_any::getSize() const
+MAPNIK_DECL std::size_t image_any::size() const
 {
     return util::apply_visitor(detail::get_any_size_visitor(),*this);
 }
 
-MAPNIK_DECL unsigned image_any::getRowSize() const
+MAPNIK_DECL std::size_t image_any::row_size() const
 {
     return util::apply_visitor(detail::get_any_row_size_visitor(),*this);
 }
@@ -227,11 +227,11 @@ MAPNIK_DECL void image_any::set_scaling(double val)
 }
 
 
-MAPNIK_DECL image_any create_image_any(int width, 
+MAPNIK_DECL image_any create_image_any(int width,
                            int height,
-                           image_dtype type, 
-                           bool initialize, 
-                           bool premultiplied, 
+                           image_dtype type,
+                           bool initialize,
+                           bool premultiplied,
                            bool painted)
 {
     switch (type)

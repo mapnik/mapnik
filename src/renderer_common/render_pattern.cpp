@@ -55,7 +55,7 @@ void render_pattern<image_rgba8>(rasterizer & ras,
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
-    agg::rendering_buffer buf(image.getBytes(), image.width(), image.height(), image.getRowSize());
+    agg::rendering_buffer buf(image.getBytes(), image.width(), image.height(), image.row_size());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 

@@ -49,7 +49,7 @@ struct get_view_size_visitor
     template <typename T>
     unsigned operator()(T const& data) const
     {
-        return data.getSize();
+        return data.size();
     }
 };
 
@@ -67,7 +67,7 @@ struct get_view_row_size_visitor
     template <typename T>
     unsigned operator()(T const& data) const
     {
-        return data.getRowSize();
+        return data.row_size();
     }
 };
 
@@ -110,33 +110,33 @@ std::size_t image_view_any::height() const
     return util::apply_visitor(detail::get_view_height_visitor(),*this);
 }
 
-unsigned image_view_any::getSize() const
+std::size_t image_view_any::size() const
 {
     return util::apply_visitor(detail::get_view_size_visitor(),*this);
 }
 
-unsigned image_view_any::getRowSize() const
+std::size_t image_view_any::row_size() const
 {
     return util::apply_visitor(detail::get_view_row_size_visitor(),*this);
 }
 
 bool image_view_any::get_premultiplied() const
-{ 
+{
     return util::apply_visitor(detail::get_view_premultiplied_visitor(),*this);
 }
 
 double image_view_any::get_offset() const
-{ 
+{
     return util::apply_visitor(detail::get_view_offset_visitor(),*this);
 }
 
 double image_view_any::get_scaling() const
-{ 
+{
     return util::apply_visitor(detail::get_view_scaling_visitor(),*this);
 }
 
 image_dtype image_view_any::get_dtype() const
-{ 
+{
     return util::apply_visitor(detail::get_view_dtype_visitor(),*this);
 }
 

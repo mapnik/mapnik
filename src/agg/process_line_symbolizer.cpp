@@ -108,7 +108,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->getRowSize());
+    agg::rendering_buffer buf(current_buffer_->getBytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->row_size());
 
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;

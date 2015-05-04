@@ -121,9 +121,9 @@ struct setup_agg_bg_visitor
            opacity_(opacity) {}
 
     void operator() (marker_null const&) {}
-    
+
     void operator() (marker_svg const&) {}
-    
+
     void operator() (marker_rgba8 const& marker)
     {
         mapnik::image_rgba8 const& bg_image = marker.get_data();
@@ -338,7 +338,7 @@ struct agg_render_marker_visitor
 {
     agg_render_marker_visitor(renderer_common & common,
                               buffer_type * current_buffer,
-                              std::unique_ptr<rasterizer> const& ras_ptr, 
+                              std::unique_ptr<rasterizer> const& ras_ptr,
                               gamma_method_enum & gamma_method,
                               double & gamma,
                               pixel_position const& pos,
@@ -378,11 +378,11 @@ struct agg_render_marker_visitor
         agg::rendering_buffer buf(current_buffer_->getBytes(),
                                   current_buffer_->width(),
                                   current_buffer_->height(),
-                                  current_buffer_->getRowSize());
+                                  current_buffer_->row_size());
         pixfmt_comp_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(comp_op_));
         renderer_base renb(pixf);
-        
+
         box2d<double> const& bbox = marker.get_data()->bounding_box();
         coord<double,2> c = bbox.center();
         // center the svg marker on '0,0'
@@ -429,11 +429,11 @@ struct agg_render_marker_visitor
         agg::rendering_buffer buf(current_buffer_->getBytes(),
                                   current_buffer_->width(),
                                   current_buffer_->height(),
-                                  current_buffer_->getRowSize());
+                                  current_buffer_->row_size());
         pixfmt_comp_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(comp_op_));
         renderer_base renb(pixf);
-        
+
         double width = marker.width();
         double height = marker.height();
         if (std::fabs(1.0 - common_.scale_factor_) < 0.001
@@ -486,7 +486,7 @@ struct agg_render_marker_visitor
             agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
                                              src.width(),
                                              src.height(),
-                                             src.getRowSize());
+                                             src.row_size());
             agg::pixfmt_rgba32_pre marker_pixf(marker_buf);
             using img_accessor_type = agg::image_accessor_clone<agg::pixfmt_rgba32_pre>;
             using interpolator_type = agg::span_interpolator_linear<agg::trans_affine>;
@@ -528,7 +528,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
 {
     agg_render_marker_visitor<buffer_type> visitor(common_,
                                                    current_buffer_,
-                                                   ras_ptr, 
+                                                   ras_ptr,
                                                    gamma_method_,
                                                    gamma_,
                                                    pos,
@@ -557,7 +557,7 @@ void agg_renderer<T0,T1>::debug_draw_box(box2d<double> const& box,
     agg::rendering_buffer buf(current_buffer_->getBytes(),
                               current_buffer_->width(),
                               current_buffer_->height(),
-                              current_buffer_->getRowSize());
+                              current_buffer_->row_size());
     debug_draw_box(buf, box, x, y, angle);
 }
 

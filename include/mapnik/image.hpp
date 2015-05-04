@@ -85,10 +85,10 @@ private:
     bool painted_;
 public:
     image();
-    image(int width, 
-          int height, 
-          bool initialize = true, 
-          bool premultiplied = false, 
+    image(int width,
+          int height,
+          bool initialize = true,
+          bool premultiplied = false,
           bool painted = false);
     image(image<T> const& rhs);
     image(image<T> && rhs) noexcept;
@@ -102,8 +102,8 @@ public:
     const pixel_type& operator() (std::size_t i, std::size_t j) const;
     std::size_t width() const;
     std::size_t height() const;
-    unsigned getSize() const;
-    unsigned getRowSize() const;
+    std::size_t size() const;
+    std::size_t row_size() const;
     void set(pixel_type const& t);
     const pixel_type* getData() const;
     pixel_type* getData();

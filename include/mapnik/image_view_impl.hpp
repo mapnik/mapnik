@@ -26,7 +26,7 @@
 namespace mapnik {
 
 template <typename T>
-image_view<T>::image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data)
+image_view<T>::image_view(std::size_t x, std::size_t y, std::size_t width, std::size_t height, T const& data)
     : x_(x),
       y_(y),
       width_(width),
@@ -71,59 +71,59 @@ bool image_view<T>::operator==(image_view<T> const& rhs) const
 template <typename T>
 bool image_view<T>::operator<(image_view<T> const& rhs) const
 {
-    return data_.getSize() < rhs.data_.getSize();
+    return data_.size() < rhs.data_.size();
 }
 
 template <typename T>
-inline unsigned image_view<T>::x() const
+inline std::size_t image_view<T>::x() const
 {
     return x_;
 }
 
 template <typename T>
-inline unsigned image_view<T>::y() const
+inline std::size_t image_view<T>::y() const
 {
     return y_;
 }
 
 template <typename T>
-inline unsigned image_view<T>::width() const
+inline std::size_t image_view<T>::width() const
 {
     return width_;
 }
 
 template <typename T>
-inline unsigned image_view<T>::height() const
+inline std::size_t image_view<T>::height() const
 {
     return height_;
 }
 
 template <typename T>
-inline const typename image_view<T>::pixel_type& image_view<T>::operator() (std::size_t i, std::size_t j) const
+inline typename image_view<T>::pixel_type const& image_view<T>::operator() (std::size_t i, std::size_t j) const
 {
     return data_(i,j);
 }
 
 template <typename T>
-inline unsigned image_view<T>::getSize() const
+inline std::size_t image_view<T>::size() const
 {
     return height_ * width_ * pixel_size;
 }
 
 template <typename T>
-inline unsigned image_view<T>::getRowSize() const
+inline std::size_t image_view<T>::row_size() const
 {
     return width_ * pixel_size;
 }
 
 template <typename T>
-inline const typename image_view<T>::pixel_type* image_view<T>::getRow(unsigned row) const
+inline typename image_view<T>::pixel_type const* image_view<T>::getRow(std::size_t row) const
 {
     return data_.getRow(row + y_) + x_;
 }
 
 template <typename T>
-inline const typename image_view<T>::pixel_type* image_view<T>::getRow(unsigned row, std::size_t x0) const
+inline typename image_view<T>::pixel_type const* image_view<T>::getRow(std::size_t row, std::size_t x0) const
 {
     return data_.getRow(row + y_, x0) + x_;
 }

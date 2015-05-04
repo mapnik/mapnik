@@ -74,7 +74,7 @@ image<T>::image()
       offset_(0.0),
       scaling_(1.0),
       premultiplied_alpha_(false),
-      painted_(false) 
+      painted_(false)
 {}
 
 template <typename T>
@@ -140,7 +140,7 @@ bool image<T>::operator==(image<T> const& rhs) const
 template <typename T>
 bool image<T>::operator<(image<T> const& rhs) const
 {
-    return getSize() < rhs.getSize();
+    return size() < rhs.size();
 }
 
 template <typename T>
@@ -181,13 +181,13 @@ inline std::size_t image<T>::height() const
 }
 
 template <typename T>
-inline unsigned image<T>::getSize() const
+inline std::size_t image<T>::size() const
 {
     return dimensions_.height() * dimensions_.width() * pixel_size;
 }
-    
+
 template <typename T>
-inline unsigned image<T>::getRowSize() const
+inline std::size_t image<T>::row_size() const
 {
     return dimensions_.width() * pixel_size;
 }
@@ -223,7 +223,7 @@ inline unsigned char* image<T>::getBytes()
 }
 
 template <typename T>
-inline const typename image<T>::pixel_type* image<T>::getRow(std::size_t row) const
+inline typename image<T>::pixel_type const* image<T>::getRow(std::size_t row) const
 {
     return pData_ + row * dimensions_.width();
 }
@@ -281,11 +281,11 @@ inline double image<T>::get_scaling() const
 }
 
 template <typename T>
-inline void image<T>::set_scaling(double set)
+inline void image<T>::set_scaling(double scaling)
 {
-    if (set != 0.0)
+    if (scaling != 0.0)
     {
-        scaling_ = set;
+        scaling_ = scaling;
         return;
     }
     std::clog << "Can not set scaling to 0.0, offset not set." << std::endl;
@@ -322,4 +322,3 @@ inline image_dtype image<T>::get_dtype()  const
 }
 
 } // end ns
-

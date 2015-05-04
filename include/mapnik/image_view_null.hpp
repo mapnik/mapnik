@@ -45,15 +45,15 @@ public:
     bool operator==(image_view<image_null> const& rhs) const { return true; }
     bool operator<(image_view<image_null> const& rhs) const { return false; }
 
-    unsigned x() const { return 0; }
-    unsigned y() const { return 0; }
-    unsigned width() const { return 0; }
-    unsigned height() const { return 0; }
+    std::size_t x() const { return 0; }
+    std::size_t y() const { return 0; }
+    std::size_t width() const { return 0; }
+    std::size_t height() const { return 0; }
     pixel_type operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get from a null image view"); }
-    unsigned getSize() const { return 0; }
-    unsigned getRowSize() const { return 0; }
-    const pixel_type* getRow(unsigned row) const { return nullptr; }
-    const pixel_type* getRow(unsigned row, std::size_t x0) const { return nullptr; }
+    std::size_t size() const { return 0; }
+    std::size_t row_size() const { return 0; }
+    const pixel_type* getRow(std::size_t row) const { return nullptr; }
+    const pixel_type* getRow(std::size_t row, std::size_t x0) const { return nullptr; }
     bool get_premultiplied() const { return false; }
     double get_offset() const { return 0.0; }
     double get_scaling() const { return 1.0; }

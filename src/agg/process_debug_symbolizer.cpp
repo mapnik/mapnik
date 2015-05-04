@@ -126,7 +126,7 @@ struct RingRenderer {
                    agg::rgba8 const& color)
     {
         ras_ptr_.reset();
-        agg::rendering_buffer buf(im_.getBytes(),im_.width(),im_.height(),im_.getRowSize());
+        agg::rendering_buffer buf(im_.getBytes(),im_.width(),im_.height(),im_.row_size());
         pixfmt_comp_type pixf(buf);
         renderer_base renb(pixf);
         renderer_type ren(renb);
@@ -143,7 +143,7 @@ struct RingRenderer {
                    double stroke_width=3)
     {
         ras_ptr_.reset();
-        agg::rendering_buffer buf(im_.getBytes(),im_.width(),im_.height(),im_.getRowSize());
+        agg::rendering_buffer buf(im_.getBytes(),im_.width(),im_.height(),im_.row_size());
         pixfmt_comp_type pixf(buf);
         renderer_base renb(pixf);
         renderer_type ren(renb);

@@ -52,8 +52,8 @@ struct MAPNIK_DECL image_view_any : image_view_base
 
     std::size_t width() const;
     std::size_t height() const;
-    unsigned getSize() const;
-    unsigned getRowSize() const;
+    std::size_t size() const;
+    std::size_t row_size() const;
     bool get_premultiplied() const;
     double get_offset() const;
     double get_scaling() const;

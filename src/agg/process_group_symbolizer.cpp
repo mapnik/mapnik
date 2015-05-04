@@ -81,7 +81,7 @@ struct thunk_renderer<image_rgba8>
                                                         renderer_type,
                                                         pixfmt_comp_type>;
         ras_ptr_->reset();
-        buf_type render_buffer(buf_->getBytes(), buf_->width(), buf_->height(), buf_->getRowSize());
+        buf_type render_buffer(buf_->getBytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -102,7 +102,7 @@ struct thunk_renderer<image_rgba8>
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
         ras_ptr_->reset();
-        buf_type render_buffer(buf_->getBytes(), buf_->width(), buf_->height(), buf_->getRowSize());
+        buf_type render_buffer(buf_->getBytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);

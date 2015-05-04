@@ -45,7 +45,7 @@ void render(mapnik::geometry::multi_polygon<double> const& geom,
     mapnik::box2d<double> padded_extent(155,134,665,466);//extent;
     padded_extent.pad(10);
     mapnik::view_transform tr(im.width(),im.height(),padded_extent,0,0);
-    agg::rendering_buffer buf(im.getBytes(),im.width(),im.height(), im.getRowSize());
+    agg::rendering_buffer buf(im.getBytes(),im.width(),im.height(), im.row_size());
     agg::pixfmt_rgba32_plain pixf(buf);
     ren_base renb(pixf);
     renderer ren(renb);
@@ -388,7 +388,7 @@ public:
         if (area > 0)
         {
             std::reverse(path.begin(), path.end());
-        } 
+        }
         if (!clipper.AddPath(path, ClipperLib::ptSubject, true))
         {
             std::clog << "ptSubject ext failed!\n";
@@ -406,7 +406,7 @@ public:
             if (area < 0)
             {
                 std::reverse(path.begin(), path.end());
-            } 
+            }
             if (!clipper.AddPath(path, ClipperLib::ptSubject, true))
             {
                 std::clog << "ptSubject ext failed!\n";

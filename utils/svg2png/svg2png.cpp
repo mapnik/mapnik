@@ -66,7 +66,7 @@ struct main_marker_visitor
         std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
         return_value_ = -1;
     }
-    
+
     void operator() (mapnik::marker_rgba8 const&)
     {
         std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
@@ -90,7 +90,7 @@ struct main_marker_visitor
         }
         // 10 pixel buffer to avoid edge clipping of 100% svg's
         mapnik::image_rgba8 im(w+0,h+0);
-        agg::rendering_buffer buf(im.getBytes(), im.width(), im.height(), im.getRowSize());
+        agg::rendering_buffer buf(im.getBytes(), im.width(), im.height(), im.row_size());
         pixfmt pixf(buf);
         renderer_base renb(pixf);
 

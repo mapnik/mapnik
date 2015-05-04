@@ -401,7 +401,7 @@ void apply_filter(Src & src, Filter const& filter)
 template <typename Src>
 void apply_filter(Src & src, agg_stack_blur const& op)
 {
-    agg::rendering_buffer buf(src.getBytes(),src.width(),src.height(), src.getRowSize());
+    agg::rendering_buffer buf(src.getBytes(),src.width(),src.height(), src.row_size());
     agg::pixfmt_rgba32_pre pixf(buf);
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
 }

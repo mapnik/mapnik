@@ -147,8 +147,8 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
-        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts 
-        // the destination pixel type required.   
+        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts
+        // the destination pixel type required.
         render_raster_marker(renb_, ras_, this->src_, marker_tr, opacity, this->scale_factor_, snap_to_pixels_);
     }
 
@@ -192,7 +192,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buf_type render_buffer(current_buffer_->getBytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->getRowSize());
+    buf_type render_buffer(current_buffer_->getBytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->row_size());
     box2d<double> clip_box = clipping_extent(common_);
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
