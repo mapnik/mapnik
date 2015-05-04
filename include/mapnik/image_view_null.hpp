@@ -52,8 +52,8 @@ public:
     pixel_type operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get from a null image view"); }
     std::size_t size() const { return 0; }
     std::size_t row_size() const { return 0; }
-    const pixel_type* getRow(std::size_t row) const { return nullptr; }
-    const pixel_type* getRow(std::size_t row, std::size_t x0) const { return nullptr; }
+    const pixel_type* get_row(std::size_t row) const { return nullptr; }
+    const pixel_type* get_row(std::size_t row, std::size_t x0) const { return nullptr; }
     bool get_premultiplied() const { return false; }
     double get_offset() const { return 0.0; }
     double get_scaling() const { return 1.0; }

@@ -31,7 +31,7 @@ struct get_bytes_visitor
     template <typename T>
     unsigned char* operator()(T & data)
     {
-        return data.getBytes();
+        return data.bytes();
     }
 };
 
@@ -49,7 +49,7 @@ struct get_bytes_visitor_const
     template <typename T>
     unsigned char const* operator()(T const& data) const
     {
-        return data.getBytes();
+        return data.bytes();
     }
 };
 
@@ -161,12 +161,12 @@ MAPNIK_DECL image_any::image_any(int width,
                      bool painted)
     : image_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
 
-MAPNIK_DECL unsigned char const* image_any::getBytes() const
+MAPNIK_DECL unsigned char const* image_any::bytes() const
 {
     return util::apply_visitor(detail::get_bytes_visitor_const(),*this);
 }
 
-MAPNIK_DECL unsigned char* image_any::getBytes()
+MAPNIK_DECL unsigned char* image_any::bytes()
 {
     return util::apply_visitor(detail::get_bytes_visitor(),*this);
 }

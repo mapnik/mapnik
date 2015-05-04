@@ -52,8 +52,8 @@ public:
     pixel_type const& operator() (std::size_t i, std::size_t j) const;
     std::size_t size() const;
     std::size_t row_size() const;
-    pixel_type const* getRow(std::size_t row) const;
-    pixel_type const* getRow(std::size_t row, std::size_t x0) const;
+    pixel_type const* get_row(std::size_t row) const;
+    pixel_type const* get_row(std::size_t row, std::size_t x0) const;
     T const& data() const;
     bool get_premultiplied() const;
     double get_offset() const;

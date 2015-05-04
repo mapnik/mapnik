@@ -130,8 +130,8 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
     // TODO: assuming in/out have the same width/height for now
-    std::uint32_t * out_data = out.getData();
-    pixel_type const* in_data = in.getData();
+    std::uint32_t * out_data = out.data();
+    pixel_type const* in_data = in.data();
     int len = out.width() * out.height();
     for (int i=0; i<len; ++i)
     {

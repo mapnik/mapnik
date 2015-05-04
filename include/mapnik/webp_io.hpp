@@ -84,14 +84,14 @@ inline int import_image(T2 const& im_in,
     {
         if (alpha)
         {
-            return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, data.bytes(), stride);
         }
         else
         {
     #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, data.getBytes(), stride);
+            return WebPPictureImportRGBX(&pic, data.bytes(), stride);
     #else
-            return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, data.bytes(), stride);
     #endif
         }
     }
@@ -101,20 +101,20 @@ inline int import_image(T2 const& im_in,
         image_rgba8 im(im_in.width(),im_in.height());
         for (unsigned y = 0; y < im_in.height(); ++y)
         {
-            typename T2::pixel_type const * row_from = im_in.getRow(y);
-            image_rgba8::pixel_type * row_to = im.getRow(y);
+            typename T2::pixel_type const * row_from = im_in.get_row(y);
+            image_rgba8::pixel_type * row_to = im.get_row(y);
             std::copy(row_from, row_from + stride, row_to);
         }
         if (alpha)
         {
-            return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, im.bytes(), stride);
         }
         else
         {
     #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+            return WebPPictureImportRGBX(&pic, im.bytes(), stride);
     #else
-            return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, im.bytes(), stride);
     #endif
         }
     }
@@ -128,14 +128,14 @@ inline int import_image(image_rgba8 const& im,
     int stride = sizeof(image_rgba8::pixel_type) * im.width();
     if (alpha)
     {
-        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+        return WebPPictureImportRGBA(&pic, im.bytes(), stride);
     }
     else
     {
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+        return WebPPictureImportRGBX(&pic, im.bytes(), stride);
 #else
-        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+        return WebPPictureImportRGBA(&pic, im.bytes(), stride);
 #endif
     }
 }
@@ -170,7 +170,7 @@ void save_as_webp(T1& file,
             const int width = pic.width;
             const int height = pic.height;
             for (int y = 0; y < height; ++y) {
-                typename T2::pixel_type const * row = image.getRow(y);
+                typename T2::pixel_type const * row = image.get_row(y);
                 for (int x = 0; x < width; ++x) {
                     const unsigned rgba = row[x];
                     unsigned a = (rgba >> 24) & 0xff;

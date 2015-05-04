@@ -129,8 +129,8 @@ public:
             mapnik::image_rgba8 const& src = im_;
             for (unsigned int y = 0; y < height_; ++y)
             {
-                const unsigned int* row_from = src.getRow(y);
-                const unsigned int* row_to = dest.getRow(y);
+                const unsigned int* row_from = src.get_row(y);
+                const unsigned int* row_to = dest.get_row(y);
                 for (unsigned int x = 0; x < width_; ++x)
                 {
                    if (row_from[x] != row_to[x]) diff = true;
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         {
             test test_runner(params);
-            run(test_runner,*name);        
+            run(test_runner,*name);
         }
     }
     catch (std::exception const& ex)

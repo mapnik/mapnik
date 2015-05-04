@@ -45,7 +45,7 @@ void render(mapnik::geometry::multi_polygon<double> const& geom,
     mapnik::box2d<double> padded_extent(155,134,665,466);//extent;
     padded_extent.pad(10);
     mapnik::view_transform tr(im.width(),im.height(),padded_extent,0,0);
-    agg::rendering_buffer buf(im.getBytes(),im.width(),im.height(), im.row_size());
+    agg::rendering_buffer buf(im.bytes(),im.width(),im.height(), im.row_size());
     agg::pixfmt_rgba32_plain pixf(buf);
     ren_base renb(pixf);
     renderer ren(renb);

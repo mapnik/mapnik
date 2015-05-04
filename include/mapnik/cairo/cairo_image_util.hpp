@@ -44,7 +44,7 @@ static inline void cairo_image_to_rgba8(mapnik::image_rgba8 & data,
     if (cairo_image_surface_get_width(&*surface) != data.width() ||
         cairo_image_surface_get_height(&*surface) != data.height())
     {
-        throw std::runtime_error("Mismatch in dimensions: size of image must match side of cairo surface");        
+        throw std::runtime_error("Mismatch in dimensions: size of image must match side of cairo surface");
     }
 
     int stride = cairo_image_surface_get_stride(&*surface) / 4;
@@ -74,7 +74,7 @@ static inline void cairo_image_to_rgba8(mapnik::image_rgba8 & data,
 
             out_row[column] = color(r, g, b, a).rgba();
         }
-        data.setRow(row, out_row.get(), data.width());
+        data.set_row(row, out_row.get(), data.width());
     }
 }
 

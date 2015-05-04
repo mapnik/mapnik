@@ -83,11 +83,11 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
             ts.backward(&xs(i,j), &ys(i,j));
         }
     }
-    prj_trans.backward(xs.getData(), ys.getData(), nullptr, mesh_nx*mesh_ny);
+    prj_trans.backward(xs.data(), ys.data(), nullptr, mesh_nx*mesh_ny);
 
     agg::rasterizer_scanline_aa<> rasterizer;
     agg::scanline_bin scanline;
-    agg::rendering_buffer buf(target.getBytes(),
+    agg::rendering_buffer buf(target.bytes(),
                               target.width(),
                               target.height(),
                               target.width() * pixel_size);
@@ -95,7 +95,7 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
     renderer_base rb(pixf);
     rasterizer.clip_box(0, 0, target.width(), target.height());
     agg::rendering_buffer buf_tile(
-        const_cast<unsigned char*>(source.getBytes()),
+        const_cast<unsigned char*>(source.bytes()),
         source.width(),
         source.height(),
         source.width() * pixel_size);

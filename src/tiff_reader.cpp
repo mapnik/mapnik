@@ -421,7 +421,7 @@ image_any tiff_reader<T>::read_any_gray(unsigned x0, unsigned y0, unsigned width
             {
                 if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
                 {
-                    pixel_type * row = data.getRow(y - y0);
+                    pixel_type * row = data.get_row(y - y0);
                     std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
                 }
             }
@@ -642,7 +642,7 @@ void tiff_reader<T>::read_tiled(unsigned x0,unsigned y0, ImageData & image)
                 int row = y + ty0 - y0;
                 for (int ty = ty0; ty < ty1; ++ty, ++row)
                 {
-                    image.setRow(row, tx0 - x0, tx1 - x0, &buf[ty * tile_width_ + tx0 - x]);
+                    image.set_row(row, tx0 - x0, tx1 - x0, &buf[ty * tile_width_ + tx0 - x]);
                 }
             }
         }
@@ -672,7 +672,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_rgba8& image)
             ty0 = std::max(y0,y)-y;
             ty1 = std::min(end_y,y+rows_per_strip_)-y;
 
-            if (!TIFFReadRGBAStrip(tif,y,strip.getData()))
+            if (!TIFFReadRGBAStrip(tif,y,strip.data()))
             {
                 MAPNIK_LOG_DEBUG(tiff_reader) << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
@@ -680,7 +680,7 @@ void tiff_reader<T>::read_stripped(unsigned x0,unsigned y0,image_rgba8& image)
             // This is in reverse becauase the TIFFReadRGBAStrip reads inverted
             for (unsigned ty = ty1; ty > ty0; --ty)
             {
-                image.setRow(row,tx0-x0,tx1-x0,&strip.getData()[(ty-1)*width_+tx0]);
+                image.set_row(row,tx0-x0,tx1-x0,&strip.data()[(ty-1)*width_+tx0]);
                 ++row;
             }
         }

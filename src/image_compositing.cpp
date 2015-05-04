@@ -136,12 +136,12 @@ struct rendering_buffer
     rendering_buffer(T const& data)
         : data_(data) {}
 
-    uint8_t const* buf() const { return data_.getBytes(); }
+    uint8_t const* buf() const { return data_.bytes(); }
     unsigned width() const { return data_.width();}
     unsigned height() const { return data_.height();}
     int stride() const { return data_.row_size();}
     uint8_t const* row_ptr(int, int y, unsigned) {return row_ptr(y);}
-    uint8_t const* row_ptr(int y) const { return reinterpret_cast<uint8_t const*>(data_.getRow(y)); }
+    uint8_t const* row_ptr(int y) const { return reinterpret_cast<uint8_t const*>(data_.get_row(y)); }
     row_data row (int y) const { return row_data(0, data_.width() - 1, row_ptr(y)); }
     image_type const& data_;
 };
@@ -161,7 +161,7 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_type = agg::renderer_base<pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.row_size());
+    agg::rendering_buffer dst_buffer(dst.bytes(),dst.width(),dst.height(),dst.row_size());
     const_rendering_buffer src_buffer(src);
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
@@ -191,7 +191,7 @@ MAPNIK_DECL void composite(image_gray32f & dst, image_gray32f const& src, compos
     using dst_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, agg::rendering_buffer, 1, 0>;
     using renderer_type = agg::renderer_base<dst_pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width());
+    agg::rendering_buffer dst_buffer(dst.bytes(),dst.width(),dst.height(),dst.width());
     const_rendering_buffer src_buffer(src);
     dst_pixfmt_type pixf(dst_buffer);
     src_pixfmt_type pixf_mask(src_buffer);

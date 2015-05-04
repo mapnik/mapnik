@@ -61,8 +61,8 @@ public:
     void set(pixel_type const& t) { throw std::runtime_error("Can not set values for null image"); }
     pixel_type& operator() (std::size_t i, std::size_t j) { throw std::runtime_error("Can not get or set values for null image"); }
     pixel_type const& operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get or set values for null image"); }
-    unsigned const char* getBytes() const { return nullptr; }
-    unsigned char* getBytes() {return nullptr; }
+    unsigned const char* bytes() const { return nullptr; }
+    unsigned char* bytes() {return nullptr; }
     double get_offset() const { return 0.0; }
     void set_offset(double set) {}
     double get_scaling() const { return 1.0; }

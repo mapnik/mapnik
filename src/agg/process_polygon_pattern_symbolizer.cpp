@@ -86,7 +86,7 @@ struct agg_renderer_process_visitor_p
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
 
-        agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
+        agg::rendering_buffer buf(current_buffer_->bytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->row_size());
         ras_ptr_->reset();
         value_double gamma = get<value_double, keys::gamma>(sym_, feature_, common_.vars_);
@@ -129,7 +129,7 @@ struct agg_renderer_process_visitor_p
 
         unsigned w = image.width();
         unsigned h = image.height();
-        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.getBytes(),w,h,w*4);
+        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(),w,h,w*4);
         agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
         img_source_type img_src(pixf_pattern);
 
@@ -202,7 +202,7 @@ struct agg_renderer_process_visitor_p
         mapnik::image_rgba8 const& image = marker.get_data();
 
 
-        agg::rendering_buffer buf(current_buffer_->getBytes(), current_buffer_->width(),
+        agg::rendering_buffer buf(current_buffer_->bytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->row_size());
         ras_ptr_->reset();
         value_double gamma = get<value_double, keys::gamma>(sym_, feature_, common_.vars_);
@@ -228,7 +228,7 @@ struct agg_renderer_process_visitor_p
 
         unsigned w = image.width();
         unsigned h = image.height();
-        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.getBytes(),w,h,w*4);
+        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(),w,h,w*4);
         agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
         img_source_type img_src(pixf_pattern);
 

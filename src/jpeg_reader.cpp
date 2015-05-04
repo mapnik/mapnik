@@ -312,7 +312,7 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
                 }
                 out_row[x] = color(r, g, b, a).rgba();
             }
-            image.setRow(row - y0, out_row.get(), w);
+            image.set_row(row - y0, out_row.get(), w);
         }
         ++row;
     }

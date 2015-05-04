@@ -421,11 +421,11 @@ struct is_solid_visitor
         using pixel_type = typename T::pixel_type;
         if (data.width() > 0 && data.height() > 0)
         {
-            pixel_type const* first_row = data.getRow(0);
+            pixel_type const* first_row = data.get_row(0);
             pixel_type const first_pixel = first_row[0];
             for (unsigned y = 0; y < data.height(); ++y)
             {
-                pixel_type const * row = data.getRow(y);
+                pixel_type const * row = data.get_row(y);
                 for (unsigned x = 0; x < data.width(); ++x)
                 {
                     if (first_pixel != row[x])
@@ -478,7 +478,7 @@ struct premultiply_visitor
     {
         if (!data.get_premultiplied())
         {
-            agg::rendering_buffer buffer(data.getBytes(),data.width(),data.height(),data.row_size());
+            agg::rendering_buffer buffer(data.bytes(),data.width(),data.height(),data.row_size());
             agg::pixfmt_rgba32 pixf(buffer);
             pixf.premultiply();
             data.set_premultiplied(true);
@@ -500,7 +500,7 @@ struct demultiply_visitor
     {
         if (data.get_premultiplied())
         {
-            agg::rendering_buffer buffer(data.getBytes(),data.width(),data.height(),data.row_size());
+            agg::rendering_buffer buffer(data.bytes(),data.width(),data.height(),data.row_size());
             agg::pixfmt_rgba32_pre pixf(buffer);
             pixf.demultiply();
             data.set_premultiplied(false);
@@ -616,7 +616,7 @@ struct visitor_set_alpha
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
         {
-            pixel_type* row_to =  data.getRow(y);
+            pixel_type* row_to =  data.get_row(y);
             for (unsigned int x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
@@ -692,7 +692,7 @@ struct visitor_set_grayscale_to_alpha
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
         {
-            pixel_type* row_from = data.getRow(y);
+            pixel_type* row_from = data.get_row(y);
             for (unsigned int x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_from[x];
@@ -725,7 +725,7 @@ struct visitor_set_grayscale_to_alpha_c
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
         {
-            pixel_type* row_from = data.getRow(y);
+            pixel_type* row_from = data.get_row(y);
             for (unsigned int x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_from[x];
@@ -837,7 +837,7 @@ struct visitor_set_color_to_alpha
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned y = 0; y < data.height(); ++y)
         {
-            pixel_type* row_from = data.getRow(y);
+            pixel_type* row_from = data.get_row(y);
             for (unsigned x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_from[x];
@@ -1208,8 +1208,8 @@ struct visitor_set_rectangle
             box2d<int> box = ext0.intersect(ext1);
             for (std::size_t y = box.miny(); y < box.maxy(); ++y)
             {
-                pixel_type* row_to =  dst.getRow(y);
-                pixel_type const * row_from = src.getRow(y-y0_);
+                pixel_type* row_to =  dst.get_row(y);
+                pixel_type const * row_from = src.get_row(y-y0_);
 
                 for (std::size_t x = box.minx(); x < box.maxx(); ++x)
                 {
@@ -1240,8 +1240,8 @@ struct visitor_set_rectangle
             box2d<int> box = ext0.intersect(ext1);
             for (std::size_t y = box.miny(); y < box.maxy(); ++y)
             {
-                pixel_type* row_to =  dst.getRow(y);
-                pixel_type const * row_from = src.getRow(y-y0_);
+                pixel_type* row_to =  dst.get_row(y);
+                pixel_type const * row_from = src.get_row(y-y0_);
 
                 for (std::size_t x = box.minx(); x < box.maxx(); ++x)
                 {
@@ -2195,7 +2195,7 @@ struct visitor_view_to_string
     {
         for (std::size_t i=0;i<view.height();i++)
         {
-            ss_.write(reinterpret_cast<const char*>(view.getRow(i)),
+            ss_.write(reinterpret_cast<const char*>(view.get_row(i)),
                      view.row_size());
         }
     }
@@ -2256,8 +2256,8 @@ MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold, bool)
     unsigned difference = 0;
     for (unsigned int y = 0; y < im1.height(); ++y)
     {
-        const pixel_type * row_from = im1.getRow(y);
-        const pixel_type * row_from2 = im2.getRow(y);
+        const pixel_type * row_from = im1.get_row(y);
+        const pixel_type * row_from2 = im2.get_row(y);
         for (unsigned int x = 0; x < im1.width(); ++x)
         {
             double d = std::abs(static_cast<double>(row_from[x]) - static_cast<double>(row_from2[x]));
@@ -2310,8 +2310,8 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
     {
         for (unsigned int y = 0; y < im1.height(); ++y)
         {
-            const std::uint32_t * row_from = im1.getRow(y);
-            const std::uint32_t * row_from2 = im2.getRow(y);
+            const std::uint32_t * row_from = im1.get_row(y);
+            const std::uint32_t * row_from2 = im2.get_row(y);
             int x = 0;
             for (; x < ROUND_DOWN(im1.width(),4); x +=4 )
             {
@@ -2344,8 +2344,8 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
         __m128i m_thres = _mm_set1_epi8(thres);
         for (unsigned int y = 0; y < im1.height(); ++y)
         {
-            const std::uint32_t * row_from = im1.getRow(y);
-            const std::uint32_t * row_from2 = im2.getRow(y);
+            const std::uint32_t * row_from = im1.get_row(y);
+            const std::uint32_t * row_from2 = im2.get_row(y);
             int x = 0;
             for (; x < ROUND_DOWN(im1.width(),4); x +=4 )
             {
@@ -2394,8 +2394,8 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
 #else
     for (unsigned int y = 0; y < im1.height(); ++y)
     {
-        const std::uint32_t * row_from = im1.getRow(y);
-        const std::uint32_t * row_from2 = im2.getRow(y);
+        const std::uint32_t * row_from = im1.get_row(y);
+        const std::uint32_t * row_from2 = im2.get_row(y);
         for (unsigned int x = 0; x < im1.width(); ++x)
         {
             unsigned rgba = row_from[x];

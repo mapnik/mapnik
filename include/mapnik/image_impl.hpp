@@ -128,7 +128,7 @@ image<T>& image<T>::operator=(image<T> rhs)
 template <typename T>
 bool image<T>::operator==(image<T> const& rhs) const
 {
-    return rhs.getBytes() == getBytes();
+    return rhs.bytes() == bytes();
 }
 
 template <typename T>
@@ -193,55 +193,55 @@ inline void image<T>::set(pixel_type const& t)
 }
 
 template <typename T>
-inline const typename image<T>::pixel_type* image<T>::getData() const
+inline const typename image<T>::pixel_type* image<T>::data() const
 {
     return pData_;
 }
 
 template <typename T>
-inline typename image<T>::pixel_type* image<T>::getData()
+inline typename image<T>::pixel_type* image<T>::data()
 {
     return pData_;
 }
 
 template <typename T>
-inline const unsigned char* image<T>::getBytes() const
+inline const unsigned char* image<T>::bytes() const
 {
     return buffer_.data();
 }
 
 template <typename T>
-inline unsigned char* image<T>::getBytes()
+inline unsigned char* image<T>::bytes()
 {
     return buffer_.data();
 }
 
 template <typename T>
-inline typename image<T>::pixel_type const* image<T>::getRow(std::size_t row) const
+inline typename image<T>::pixel_type const* image<T>::get_row(std::size_t row) const
 {
     return pData_ + row * dimensions_.width();
 }
 
 template <typename T>
-inline const typename image<T>::pixel_type* image<T>::getRow(std::size_t row, std::size_t x0) const
+inline const typename image<T>::pixel_type* image<T>::get_row(std::size_t row, std::size_t x0) const
 {
     return pData_ + row * dimensions_.width() + x0;
 }
 
 template <typename T>
-inline typename image<T>::pixel_type* image<T>::getRow(std::size_t row)
+inline typename image<T>::pixel_type* image<T>::get_row(std::size_t row)
 {
     return pData_ + row * dimensions_.width();
 }
 
 template <typename T>
-inline typename image<T>::pixel_type* image<T>::getRow(std::size_t row, std::size_t x0)
+inline typename image<T>::pixel_type* image<T>::get_row(std::size_t row, std::size_t x0)
 {
     return pData_ + row * dimensions_.width() + x0;
 }
 
 template <typename T>
-inline void image<T>::setRow(std::size_t row, pixel_type const* buf, std::size_t size)
+inline void image<T>::set_row(std::size_t row, pixel_type const* buf, std::size_t size)
 {
     assert(row < dimensions_.height());
     assert(size <= dimensions_.width());
@@ -249,7 +249,7 @@ inline void image<T>::setRow(std::size_t row, pixel_type const* buf, std::size_t
 }
 
 template <typename T>
-inline void image<T>::setRow(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
+inline void image<T>::set_row(std::size_t row, std::size_t x0, std::size_t x1, pixel_type const* buf)
 {
     assert(row < dimensions_.height());
     assert ((x1 - x0) <= dimensions_.width() );

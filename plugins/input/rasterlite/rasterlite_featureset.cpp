@@ -116,7 +116,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
             {
                 mapnik::image_rgba8 image(width,height);
                 unsigned char* raster_data = static_cast<unsigned char*>(raster);
-                std::memcpy(image.getBytes(), raster_data, size);
+                std::memcpy(image.bytes(), raster_data, size);
                 feature->set_raster(std::make_shared<mapnik::raster>(intersect, std::move(image), 1.0));
                 MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Done";
             }

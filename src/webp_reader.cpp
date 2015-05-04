@@ -257,7 +257,7 @@ void webp_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
     }
 
     config.output.colorspace = MODE_RGBA;
-    config.output.u.RGBA.rgba = reinterpret_cast<uint8_t *>(image.getBytes());
+    config.output.u.RGBA.rgba = reinterpret_cast<uint8_t *>(image.bytes());
     config.output.u.RGBA.stride = 4 * image.width();
     config.output.u.RGBA.size = image.width() * image.height() * 4;
     config.output.is_external_memory = 1;

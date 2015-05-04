@@ -204,7 +204,7 @@ struct symbolizer_icon
           std::shared_ptr<mapnik::image_rgba8> symbol = sym.get_image();
           if (symbol)
           {
-          QImage image(symbol->getBytes(),
+          QImage image(symbol->bytes(),
           symbol->width(),symbol->height(),QImage::Format_ARGB32);
           QPixmap pix = QPixmap::fromImage(image.rgbSwapped());
           return QIcon(pix);

@@ -61,7 +61,7 @@ static inline void scale_grid(mapnik::grid::data_type & target,
     //no scaling or subpixel offset
     if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
         for (y=0;y<target_height;++y)
-            target.setRow(y,source.getRow(y),target_width);
+            target.set_row(y,source.get_row(y),target_width);
         return;
     }
 

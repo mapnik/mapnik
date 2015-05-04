@@ -34,8 +34,8 @@ namespace benchmark {
         if ((width != dest.width()) || height != dest.height()) return false;
         for (unsigned int y = 0; y < height; ++y)
         {
-            const unsigned int* row_from = src.getRow(y);
-            const unsigned int* row_to = dest.getRow(y);
+            const unsigned int* row_from = src.get_row(y);
+            const unsigned int* row_to = dest.get_row(y);
             for (unsigned int x = 0; x < width; ++x)
             {
                if (row_from[x] != row_to[x]) return false;

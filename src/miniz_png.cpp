@@ -253,7 +253,7 @@ void PNGWriter::writeIDAT(T const& image)
         }
 
         // Write scanline
-        status = tdefl_compress_buffer(compressor, (mz_uint8 *)image.getRow(y), stride, TDEFL_NO_FLUSH);
+        status = tdefl_compress_buffer(compressor, (mz_uint8 *)image.get_row(y), stride, TDEFL_NO_FLUSH);
         if (status != TDEFL_STATUS_OKAY)
         {
             throw std::runtime_error("failed to compress image");
@@ -290,7 +290,7 @@ void PNGWriter::writeIDATStripAlpha(T const& image) {
         }
 
         // Strip alpha bytes from scanline
-        mz_uint8 *row = (mz_uint8 *)image.getRow(y);
+        mz_uint8 *row = (mz_uint8 *)image.get_row(y);
         for (i = 0, j = 0; j < stride; i += 4, j += 3) {
             scanline[j] = row[i];
             scanline[j+1] = row[i+1];

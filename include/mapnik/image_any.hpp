@@ -58,8 +58,8 @@ struct MAPNIK_DECL image_any : image_base
     image_any(T && data) noexcept
         : image_base(std::move(data)) {}
 
-    unsigned char const* getBytes() const;
-    unsigned char* getBytes();
+    unsigned char const* bytes() const;
+    unsigned char* bytes();
     std::size_t width() const;
     std::size_t height() const;
     bool get_premultiplied() const;

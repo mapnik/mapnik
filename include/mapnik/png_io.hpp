@@ -140,7 +140,7 @@ void save_as_png(T1 & file,
     const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
-        row_pointers[i] = (png_bytep)image.getRow(i);
+        row_pointers[i] = (png_bytep)image.get_row(i);
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
     png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
@@ -166,8 +166,8 @@ void reduce_8(T const& in,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        mapnik::image_rgba8::pixel_type const * row = in.getRow(y);
-        mapnik::image_gray8::pixel_type  * row_out = out.getRow(y);
+        mapnik::image_rgba8::pixel_type const * row = in.get_row(y);
+        mapnik::image_gray8::pixel_type  * row_out = out.get_row(y);
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
@@ -217,8 +217,8 @@ void reduce_4(T const& in,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        mapnik::image_rgba8::pixel_type const * row = in.getRow(y);
-        mapnik::image_gray8::pixel_type  * row_out = out.getRow(y);
+        mapnik::image_rgba8::pixel_type const * row = in.get_row(y);
+        mapnik::image_gray8::pixel_type  * row_out = out.get_row(y);
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
@@ -350,7 +350,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     png_write_info(png_ptr, info_ptr);
     for (unsigned i=0;i<height;i++)
     {
-        png_write_row(png_ptr,(png_bytep)image.getRow(i));
+        png_write_row(png_ptr,(png_bytep)image.get_row(i));
     }
 
     png_write_end(png_ptr, info_ptr);
@@ -385,7 +385,7 @@ void save_as_png8_oct(T1 & file,
         {
             for (unsigned x = 0; x < width; ++x)
             {
-                unsigned val = U2ALPHA((unsigned)image.getRow(y)[x]);
+                unsigned val = U2ALPHA((unsigned)image.get_row(y)[x]);
                 alphaHist[val]++;
                 meanAlpha += val;
                 if (val>0 && val<255)
@@ -503,7 +503,7 @@ void save_as_png8_oct(T1 & file,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        typename T2::pixel_type const * row = image.getRow(y);
+        typename T2::pixel_type const * row = image.get_row(y);
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
@@ -603,8 +603,8 @@ void save_as_png8(T1 & file,
         image_gray8 reduced_image(width, height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_rgba8::pixel_type const * row = image.getRow(y);
-            mapnik::image_gray8::pixel_type  * row_out = reduced_image.getRow(y);
+            mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
+            mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
             for (unsigned x = 0; x < width; ++x)
             {
                 row_out[x] = tree.quantize(row[x]);
@@ -629,8 +629,8 @@ void save_as_png8(T1 & file,
         image_gray8 reduced_image(image_width, image_height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_rgba8::pixel_type const * row = image.getRow(y);
-            mapnik::image_gray8::pixel_type  * row_out = reduced_image.getRow(y);
+            mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
+            mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
             byte index = 0;
             for (unsigned x = 0; x < width; ++x)
             {
@@ -669,7 +669,7 @@ void save_as_png8_hex(T1 & file,
 
         for (unsigned y = 0; y < height; ++y)
         {
-            typename T2::pixel_type const * row = image.getRow(y);
+            typename T2::pixel_type const * row = image.get_row(y);
             for (unsigned x = 0; x < width; ++x)
             {
                 unsigned val = row[x];

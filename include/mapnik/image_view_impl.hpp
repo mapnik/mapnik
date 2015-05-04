@@ -61,7 +61,7 @@ image_view<T>::image_view(image_view<T> && other) noexcept
 template <typename T>
 bool image_view<T>::operator==(image_view<T> const& rhs) const
 {
-    return rhs.data_.getBytes() == data_.getBytes();
+    return rhs.data_.bytes() == data_.bytes();
 }
 
 template <typename T>
@@ -113,15 +113,15 @@ inline std::size_t image_view<T>::row_size() const
 }
 
 template <typename T>
-inline typename image_view<T>::pixel_type const* image_view<T>::getRow(std::size_t row) const
+inline typename image_view<T>::pixel_type const* image_view<T>::get_row(std::size_t row) const
 {
-    return data_.getRow(row + y_) + x_;
+    return data_.get_row(row + y_) + x_;
 }
 
 template <typename T>
-inline typename image_view<T>::pixel_type const* image_view<T>::getRow(std::size_t row, std::size_t x0) const
+inline typename image_view<T>::pixel_type const* image_view<T>::get_row(std::size_t row, std::size_t x0) const
 {
-    return data_.getRow(row + y_, x0) + x_;
+    return data_.get_row(row + y_, x0) + x_;
 }
 
 template <typename T>

@@ -375,7 +375,7 @@ struct agg_render_marker_visitor
             gamma_ = 1.0;
         }
         agg::scanline_u8 sl;
-        agg::rendering_buffer buf(current_buffer_->getBytes(),
+        agg::rendering_buffer buf(current_buffer_->bytes(),
                                   current_buffer_->width(),
                                   current_buffer_->height(),
                                   current_buffer_->row_size());
@@ -426,7 +426,7 @@ struct agg_render_marker_visitor
             gamma_ = 1.0;
         }
         agg::scanline_u8 sl;
-        agg::rendering_buffer buf(current_buffer_->getBytes(),
+        agg::rendering_buffer buf(current_buffer_->bytes(),
                                   current_buffer_->width(),
                                   current_buffer_->height(),
                                   current_buffer_->row_size());
@@ -483,7 +483,7 @@ struct agg_render_marker_visitor
             agg::image_filter_lut filter(filter_kernel, false);
 
             buffer_type const& src = marker.get_data();
-            agg::rendering_buffer marker_buf((unsigned char *)src.getBytes(),
+            agg::rendering_buffer marker_buf((unsigned char *)src.bytes(),
                                              src.width(),
                                              src.height(),
                                              src.row_size());
@@ -554,7 +554,7 @@ template <typename T0, typename T1>
 void agg_renderer<T0,T1>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    agg::rendering_buffer buf(current_buffer_->getBytes(),
+    agg::rendering_buffer buf(current_buffer_->bytes(),
                               current_buffer_->width(),
                               current_buffer_->height(),
                               current_buffer_->row_size());

@@ -199,7 +199,7 @@ struct tag_setter
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
-        if (data.get_premultiplied()) 
+        if (data.get_premultiplied())
         {
             uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
             TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
@@ -428,7 +428,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
         std::unique_ptr<pixel_type[]> row (new pixel_type[width]);
         while (next_scanline < height)
         {
-            std::copy(image.getRow(next_scanline), image.getRow(next_scanline) + width, row.get());
+            std::copy(image.get_row(next_scanline), image.get_row(next_scanline) + width, row.get());
             TIFFWriteScanline(output, row.get(), next_scanline, 0);
             ++next_scanline;
         }
@@ -449,7 +449,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
             int row = y;
             for (int ty = 0; ty < ty1; ++ty, ++row)
             {
-                std::copy(image.getRow(row), image.getRow(row) + width, strip_buffer.get() + ty * width);
+                std::copy(image.get_row(row), image.get_row(row) + width, strip_buffer.get() + ty * width);
             }
             if (TIFFWriteEncodedStrip(output, TIFFComputeStrip(output, y, 0), strip_buffer.get(), strip_size * sizeof(pixel_type)) == -1)
             {
@@ -500,7 +500,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
                 int row = y;
                 for (int ty = 0; ty < ty1; ++ty, ++row)
                 {
-                    std::copy(image.getRow(row, x), image.getRow(row, tx1), image_out.get() + ty * tile_width);
+                    std::copy(image.get_row(row, x), image.get_row(row, tx1), image_out.get() + ty * tile_width);
                 }
                 if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_out.get(), tile_size * sizeof(pixel_type)) == -1)
                 {

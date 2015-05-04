@@ -122,14 +122,14 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     agg::span_allocator<color_type> sa;
 
     // initialize source AGG buffer
-    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.getBytes()),
+    agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.bytes()),
                                    source.width(), source.height(), source.width() * pixel_size);
     pixfmt_pre pixf_src(rbuf_src);
 
     img_src_type img_src(pixf_src);
 
     // initialize destination AGG buffer (with transparency)
-    agg::rendering_buffer rbuf_dst(target.getBytes(), target.width(), target.height(), target.width() * pixel_size);
+    agg::rendering_buffer rbuf_dst(target.bytes(), target.width(), target.height(), target.width() * pixel_size);
     pixfmt_pre pixf_dst(rbuf_dst);
     renderer_base_pre rb_dst_pre(pixf_dst);
 

@@ -139,7 +139,7 @@ boost::gil::rgba8_view_t rgba8_view(Image & img)
     using boost::gil::interleaved_view;
     using boost::gil::rgba8_pixel_t;
     return interleaved_view(img.width(), img.height(),
-                            reinterpret_cast<rgba8_pixel_t*>(img.getBytes()),
+                            reinterpret_cast<rgba8_pixel_t*>(img.bytes()),
                             img.width() * sizeof(rgba8_pixel_t));
 }
 
@@ -401,7 +401,7 @@ void apply_filter(Src & src, Filter const& filter)
 template <typename Src>
 void apply_filter(Src & src, agg_stack_blur const& op)
 {
-    agg::rendering_buffer buf(src.getBytes(),src.width(),src.height(), src.row_size());
+    agg::rendering_buffer buf(src.bytes(),src.width(),src.height(), src.row_size());
     agg::pixfmt_rgba32_pre pixf(buf);
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
 }

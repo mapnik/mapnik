@@ -28,7 +28,7 @@ info_dialog::info_dialog(QVector<QPair<QString,QString> > const& info, QWidget *
   ui.tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Name"));
   ui.tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Value"));
 
-  ui.tableWidget->setRowCount(info.size());
+  ui.tableWidget->set_rowCount(info.size());
   ui.tableWidget->setColumnCount(2);
   for (int i=0;i<info.size();++i)
   {

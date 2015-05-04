@@ -217,7 +217,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     image.set(std::numeric_limits<std::uint8_t>::max());
                     raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                     raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
-                                                     image.getData(), image.width(), image.height(),
+                                                     image.data(), image.width(), image.height(),
                                                      GDT_Byte, 0, 0);
                     if (raster_io_error == CE_Failure)
                     {
@@ -237,7 +237,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     image.set(std::numeric_limits<float>::max());
                     raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                     raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
-                                                     image.getData(), image.width(), image.height(),
+                                                     image.data(), image.width(), image.height(),
                                                      GDT_Float32, 0, 0);
                     if (raster_io_error == CE_Failure)
                     {
@@ -256,7 +256,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     image.set(std::numeric_limits<std::uint16_t>::max());
                     raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                     raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
-                                                     image.getData(), image.width(), image.height(),
+                                                     image.data(), image.width(), image.height(),
                                                      GDT_UInt16, 0, 0);
                     if (raster_io_error == CE_Failure)
                     {
@@ -276,7 +276,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     image.set(std::numeric_limits<std::int16_t>::max());
                     raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                     raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
-                                                     image.getData(), image.width(), image.height(),
+                                                     image.data(), image.width(), image.height(),
                                                      GDT_Int16, 0, 0);
                     if (raster_io_error == CE_Failure)
                     {
@@ -383,7 +383,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         // read the data in and create an alpha channel from the nodata values
                         // TODO - we assume here the nodata value for the red band applies to all bands
                         // more details about this at http://trac.osgeo.org/gdal/ticket/2734
-                        float* imageData = (float*)image.getBytes();
+                        float* imageData = (float*)image.bytes();
                         raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height,
                                                         imageData, image.width(), image.height(),
                                                         GDT_Float32, 0, 0);
@@ -414,7 +414,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                             alpha = NULL; // to avoid reading it again afterwards
                         }
                         raster_io_error = dataset_.RasterIO(GF_Read, x_off, y_off, width, height,
-                                                            image.getBytes(),
+                                                            image.bytes(),
                                                             image.width(), image.height(), GDT_Byte,
                                                             nBandsToRead, NULL,
                                                             4, 4 * image.width(), 1);
@@ -424,17 +424,17 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     }
                     else
                     {
-                        raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
+                        raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 0,
                                                         image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());
                         }
-                        raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 1,
+                        raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 1,
                                                         image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());
                         }
-                        raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 2,
+                        raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 2,
                                                         image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());
@@ -448,7 +448,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         if( apply_nodata >= 0 && apply_nodata <= 255 )
                         {
                             int len = image.width() * image.height();
-                            GByte* pabyBytes = (GByte*) image.getBytes();
+                            GByte* pabyBytes = (GByte*) image.bytes();
                             for (int i = 0; i < len; ++i)
                             {
                                 // TODO - we assume here the nodata value for the red band applies to all bands
@@ -472,7 +472,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: applying nodata value for layer=" << apply_nodata;
                         // first read the data in and create an alpha channel from the nodata values
-                        float* imageData = (float*)image.getBytes();
+                        float* imageData = (float*)image.bytes();
                         raster_io_error = grey->RasterIO(GF_Read, x_off, y_off, width, height,
                                                          imageData, image.width(), image.height(),
                                                          GDT_Float32, 0, 0);
@@ -494,21 +494,21 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         }
                     }
 
-                    raster_io_error = grey->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
+                    raster_io_error = grey->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 0,
                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                     if (raster_io_error == CE_Failure)
                     {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
 
-                    raster_io_error = grey->RasterIO(GF_Read,x_off, y_off, width, height, image.getBytes() + 1,
+                    raster_io_error = grey->RasterIO(GF_Read,x_off, y_off, width, height, image.bytes() + 1,
                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                     if (raster_io_error == CE_Failure)
                     {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
 
-                    raster_io_error = grey->RasterIO(GF_Read,x_off, y_off, width, height, image.getBytes() + 2,
+                    raster_io_error = grey->RasterIO(GF_Read,x_off, y_off, width, height, image.bytes() + 2,
                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
 
                     if (raster_io_error == CE_Failure)
@@ -521,7 +521,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Loading color table...";
                         for (unsigned y = 0; y < image.height(); ++y)
                         {
-                            unsigned int* row = image.getRow(y);
+                            unsigned int* row = image.get_row(y);
                             for (unsigned x = 0; x < image.width(); ++x)
                             {
                                 unsigned value = row[x] & 0xff;
@@ -545,7 +545,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: processing alpha band...";
                     if (!raster_has_nodata)
                     {
-                        raster_io_error = alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 3,
+                        raster_io_error = alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 3,
                                                           image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());

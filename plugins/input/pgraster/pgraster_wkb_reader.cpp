@@ -184,7 +184,7 @@ mapnik::raster_ptr read_data_band(mapnik::box2d<double> const& bbox,
                     bool hasnodata, T reader)
 {
   mapnik::image_gray32f image(width, height);
-  float* data = image.getData();
+  float* data = image.data();
   double val;
   val = reader(); // nodata value, need to read anyway
   for (int y=0; y<height; ++y) {
@@ -273,7 +273,7 @@ mapnik::raster_ptr read_grayscale_band(mapnik::box2d<double> const& bbox,
 
 
   int val;
-  uint8_t * data = image.getBytes();
+  uint8_t * data = image.bytes();
   int ps = 4; // sizeof(image::pixel_type)
   int off;
   val = reader(); // nodata value, need to read anyway
@@ -383,7 +383,7 @@ mapnik::raster_ptr pgraster_wkb_reader::read_rgba(mapnik::box2d<double> const& b
     }
 
     int ps = 4; // sizeof(image::pixel_type)
-    uint8_t * image_data = im.getBytes();
+    uint8_t * image_data = im.bytes();
     for (int y=0; y<height_; ++y) {
       for (int x=0; x<width_; ++x) {
         uint8_t val = read_uint8(&ptr_);

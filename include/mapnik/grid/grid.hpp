@@ -137,17 +137,17 @@ public:
 
     inline value_type const * raw_data() const
     {
-        return data_.getData();
+        return data_.data();
     }
 
     inline value_type* raw_data()
     {
-        return data_.getData();
+        return data_.data();
     }
 
-    inline value_type const * getRow(unsigned row) const
+    inline value_type const * get_row(unsigned row) const
     {
-        return data_.getRow(row);
+        return data_.get_row(row);
     }
 
     inline mapnik::grid_view get_view(unsigned x, unsigned y, unsigned w, unsigned h)
@@ -193,8 +193,8 @@ public:
             box2d<int> box = ext0.intersect(ext1);
             for (int y = box.miny(); y < box.maxy(); ++y)
             {
-                value_type* row_to =  data_.getRow(y);
-                unsigned int const * row_from = data.getRow(y-y0);
+                value_type* row_to =  data_.get_row(y);
+                unsigned int const * row_from = data.get_row(y-y0);
 
                 for (int x = box.minx(); x < box.maxx(); ++x)
                 {

@@ -133,9 +133,9 @@ public:
         return id_name_;
     }
 
-    inline value_type const * getRow(unsigned row) const
+    inline value_type const * get_row(unsigned row) const
     {
-        return data_.getRow(row + y_) + x_;
+        return data_.get_row(row + y_) + x_;
     }
 
     inline T& data()
@@ -150,7 +150,7 @@ public:
 
     inline const unsigned char* raw_data() const
     {
-        return data_.getBytes();
+        return data_.bytes();
     }
 
     inline std::set<std::string> const& get_fields() const

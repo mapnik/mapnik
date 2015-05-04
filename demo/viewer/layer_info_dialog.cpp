@@ -46,7 +46,7 @@ layer_info_dialog::layer_info_dialog(mapnik::layer& lay, QWidget *parent)
     {
         mapnik::parameters ps = ds->params();
 
-        ui.tableWidget->setRowCount(ps.size());
+        ui.tableWidget->set_rowCount(ps.size());
         ui.tableWidget->setColumnCount(2);
 
         mapnik::parameters::const_iterator pos;
