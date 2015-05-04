@@ -40,7 +40,7 @@
 
 namespace mapnik { namespace util { namespace detail {
 
-std::string to_hex(const char* blob, unsigned size)
+std::string to_hex(const char* blob, std::size_t size)
 {
     std::string buf;
     buf.reserve(size * 2);
@@ -48,7 +48,7 @@ std::string to_hex(const char* blob, unsigned size)
     s.seekp(0);
     char hex[3];
     std::memset(hex, 0, 3);
-    for ( unsigned pos = 0; pos < size; ++pos)
+    for (std::size_t pos = 0; pos < size; ++pos)
     {
         std::sprintf (hex, "%02x", int(blob[pos]) & 0xff);
         s << hex;
@@ -146,7 +146,7 @@ wkb_buffer_ptr point_wkb( geometry::point<double> const& pt, wkbByteOrder byte_o
 
 wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByteOrder byte_order)
 {
-    unsigned num_points = line.size();
+    std::size_t num_points = line.size();
     assert(num_points > 1);
     std::size_t size = 1 + 4 + 4 + 8 * 2 * num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
@@ -154,7 +154,7 @@ wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByt
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     write(ss, static_cast<int>(mapnik::geometry::geometry_types::LineString) , 4, byte_order);
     write(ss, num_points, 4, byte_order);
-    for (unsigned i=0; i< num_points; ++i)
+    for (std::size_t i=0; i< num_points; ++i)
     {
         geometry::point<double> const& pt = line[i];
         write(ss, pt.x, 8, byte_order);
