@@ -21,7 +21,6 @@ addons:
 
 cache:
   directories:
-  - mason_packages
   - $HOME/.ccache
 
 matrix:
