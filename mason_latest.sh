@@ -16,6 +16,8 @@ function mason_compile {
     if [[ `uname` == 'Darwin' ]]; then
         install_name_tool -id @loader_path/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";
         for f in ${MASON_PREFIX}"/lib/mapnik/input/*.input"; do
+            echo $f;
+            echo `basename $f`;
             install_name_tool -id plugins/input/`basename $f` $f;
             install_name_tool -change ${MASON_PREFIX}"/lib/libmapnik.dylib" @loader_path/../../libmapnik.dylib $f;
         done;
