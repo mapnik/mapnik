@@ -23,6 +23,9 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 
+//std
+#include <utility>
+
 namespace mapnik {
 
 template <typename T>
