@@ -126,12 +126,6 @@ image<T>& image<T>::operator=(image<T> rhs)
 }
 
 template <typename T>
-image<T> const& image<T>::operator=(image<T> const& rhs) const
-{
-    return rhs;
-}
-
-template <typename T>
 bool image<T>::operator==(image<T> const& rhs) const
 {
     return rhs.getBytes() == getBytes();

@@ -40,7 +40,8 @@ public:
     ~image_view();
 
     image_view(image_view<T> const& rhs);
-    image_view<T> & operator=(image_view<T> const& rhs);
+    image_view(image_view<T> && other) noexcept;
+    image_view<T>& operator=(image_view<T> rhs) = delete;
     bool operator==(image_view<T> const& rhs) const;
     bool operator<(image_view<T> const& rhs) const;
 
@@ -60,10 +61,10 @@ public:
     image_dtype get_dtype() const;
 
 private:
-    unsigned x_;
-    unsigned y_;
-    unsigned width_;
-    unsigned height_;
+    std::size_t x_;
+    std::size_t y_;
+    std::size_t width_;
+    std::size_t height_;
     T const& data_;
 };
 

@@ -73,7 +73,7 @@ class image
 public:
     using pixel = T;
     using pixel_type = typename T::type;
-    static const image_dtype dtype = T::id;
+    static constexpr image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
     detail::image_dimensions<65535> dimensions_;
@@ -93,7 +93,6 @@ public:
     image(image<T> const& rhs);
     image(image<T> && rhs) noexcept;
     image<T>& operator=(image<T> rhs);
-    image<T>const& operator=(image<T> const& rhs) const;
     bool operator==(image<T> const& rhs) const;
     bool operator<(image<T> const& rhs) const;
 
