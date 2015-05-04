@@ -167,9 +167,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag, smooth_tag,
-                                                       offset_transform_tag,
-                                                       dash_tag, stroke_tag>;
-
+                                                       offset_transform_tag>;
         vertex_converter_type converter(clip_box,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
         if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform

@@ -260,26 +260,16 @@ struct is_switchable
 };
 
 template <typename T>
-struct is_switchable<T,transform_tag>
-{
-    static constexpr bool value = false;
-};
-
-// https://github.com/mapnik/mapnik/issues/2791
-/*
-template <typename T>
-struct is_switchable<T,stroke_tag>
+struct is_switchable<T, transform_tag>
 {
     static constexpr bool value = false;
 };
 
 template <typename T>
-struct is_switchable<T,offset_transform_tag>
+struct is_switchable<T, stroke_tag>
 {
     static constexpr bool value = false;
 };
-*/
-
 
 template <typename Dispatcher, typename... ConverterTypes>
 struct converters_helper;

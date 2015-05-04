@@ -85,8 +85,7 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
                                                     transform_tag,
                                                     affine_transform_tag,
                                                     simplify_tag, smooth_tag,
-                                                    offset_transform_tag,
-                                                    dash_tag, stroke_tag>;
+                                                    offset_transform_tag>;
 
     vertex_converter_type converter(clipping_extent,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
@@ -96,7 +95,6 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
     converter.set<affine_transform_tag>(); // optional affine transform
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
     using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, cairo_context>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
     apply_vertex_converter_type apply(converter, context_);
