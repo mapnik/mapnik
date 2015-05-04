@@ -99,18 +99,18 @@ public:
 
     void swap(image<T> & rhs);
     pixel_type& operator() (std::size_t i, std::size_t j);
-    const pixel_type& operator() (std::size_t i, std::size_t j) const;
+    pixel_type const& operator() (std::size_t i, std::size_t j) const;
     std::size_t width() const;
     std::size_t height() const;
     std::size_t size() const;
     std::size_t row_size() const;
     void set(pixel_type const& t);
-    const pixel_type* getData() const;
+    pixel_type const* getData() const;
     pixel_type* getData();
-    const unsigned char* getBytes() const;
+    unsigned char const* getBytes() const;
     unsigned char* getBytes();
-    const pixel_type* getRow(std::size_t row) const;
-    const pixel_type* getRow(std::size_t row, std::size_t x0) const;
+    pixel_type const* getRow(std::size_t row) const;
+    pixel_type const* getRow(std::size_t row, std::size_t x0) const;
     pixel_type* getRow(std::size_t row);
     pixel_type* getRow(std::size_t row, std::size_t x0);
     void setRow(std::size_t row, pixel_type const* buf, std::size_t size);
