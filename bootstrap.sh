@@ -6,8 +6,6 @@
 
 todo
 
-- gdal shared lib / avoid dlclose atexit crash
-- clang debs to s3
 - docs for base setup: sudo apt-get -y install zlib1g-dev make git
 - shrink icu data
 '
@@ -34,28 +32,29 @@ function install() {
 }
 
 function install_mason_deps() {
-    install freetype 2.5.5
-    install harfbuzz 0.9.40
-    install jpeg_turbo 1.4.0
-    install libxml2 2.9.2
-    install libpng 1.6.16
-    install webp 0.4.2
-    install icu 54.1
-    install proj 4.8.0
-    install libtiff 4.0.4beta
-    install boost 1.57.0
-    install boost_libsystem 1.57.0
-    install boost_libthread 1.57.0
-    install boost_libfilesystem 1.57.0
-    install boost_libprogram_options 1.57.0
-    install boost_libregex 1.57.0
-    install boost_libpython 1.57.0
-    install libpq 9.4.0
-    install sqlite 3.8.8.1
-    install gdal 1.11.2
-    install expat 2.1.0
-    install pixman 0.32.6
-    install cairo 1.12.18
+    install gdal 1.11.2 &
+    install boost 1.57.0 &
+    install boost_libsystem 1.57.0 &
+    install boost_libthread 1.57.0 &
+    install boost_libfilesystem 1.57.0 &
+    install boost_libprogram_options 1.57.0 &
+    install boost_libregex 1.57.0 &
+    install boost_libpython 1.57.0 &
+    install freetype 2.5.5 &
+    install harfbuzz 0.9.40 &
+    install jpeg_turbo 1.4.0 &
+    install libxml2 2.9.2 &
+    install libpng 1.6.16 &
+    install webp 0.4.2 &
+    install icu 54.1 &
+    install proj 4.8.0 &
+    install libtiff 4.0.4beta &
+    install libpq 9.4.0 &
+    install sqlite 3.8.8.1 &
+    install expat 2.1.0 &
+    install pixman 0.32.6 &
+    install cairo 1.12.18 &
+    wait
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
