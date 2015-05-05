@@ -1,4 +1,3 @@
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -27,7 +26,7 @@
 #include <mapnik/image_view_null.hpp>
 #include <mapnik/pixel_types.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
 
 template class MAPNIK_DECL image_view<image_null>;

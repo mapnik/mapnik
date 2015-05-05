@@ -27,21 +27,21 @@
 #include <mapnik/image_impl.hpp>
 #include <mapnik/pixel_types.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
 
-namespace detail 
+namespace detail
 {
 
-// BUFFER 
+// BUFFER
 buffer::buffer(std::size_t size)
     : size_(size),
       data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
 {}
 
 buffer::buffer(buffer && rhs) noexcept
-    : size_(std::move(rhs.size_)),
-      data_(std::move(rhs.data_))
+: size_(std::move(rhs.size_)),
+    data_(std::move(rhs.data_))
 {
     rhs.size_ = 0;
     rhs.data_ = nullptr;
@@ -71,24 +71,24 @@ void buffer::swap(buffer & rhs)
     std::swap(data_, rhs.data_);
 }
 
-inline bool buffer::operator!() const 
-{ 
-    return (data_ == nullptr)? false : true; 
+inline bool buffer::operator!() const
+{
+    return (data_ == nullptr)? false : true;
 }
 
-unsigned char* buffer::data() 
-{ 
-    return data_; 
+unsigned char* buffer::data()
+{
+    return data_;
 }
 
-unsigned char const* buffer::data() const 
-{ 
-    return data_; 
+unsigned char const* buffer::data() const
+{
+    return data_;
 }
 
-std::size_t buffer::size() const 
-{ 
-    return size_; 
+std::size_t buffer::size() const
+{
+    return size_;
 }
 
 template struct MAPNIK_DECL image_dimensions<65535>;

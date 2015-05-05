@@ -56,10 +56,10 @@ image_view<T>::image_view(image_view<T> const& rhs)
 template <typename T>
 image_view<T>::image_view(image_view<T> && other) noexcept
     : x_(std::move(other.x_)),
-      y_(std::move(other.y_)),
-      width_(std::move(other.width_)),
-      height_(std::move(other.height_)),
-      data_(std::move(other.data_)) {}
+    y_(std::move(other.y_)),
+    width_(std::move(other.width_)),
+    height_(std::move(other.height_)),
+    data_(std::move(other.data_)) {}
 
 template <typename T>
 bool image_view<T>::operator==(image_view<T> const& rhs) const

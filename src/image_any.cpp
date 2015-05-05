@@ -35,21 +35,21 @@ struct get_bytes_visitor
     }
 };
 
-struct get_dtype_visitor
-{
-    template <typename T>
-    image_dtype operator()(T & data)
-    {
-        return data.get_dtype();
-    }
-};
-
 struct get_bytes_visitor_const
 {
     template <typename T>
     unsigned char const* operator()(T const& data) const
     {
         return data.bytes();
+    }
+};
+
+struct get_dtype_visitor
+{
+    template <typename T>
+    image_dtype operator()(T const& data) const
+    {
+        return data.get_dtype();
     }
 };
 
@@ -134,7 +134,7 @@ struct set_offset_visitor
     {
         data.set_offset(val_);
     }
-  private:
+private:
     double val_;
 };
 
@@ -147,18 +147,18 @@ struct set_scaling_visitor
     {
         data.set_scaling(val_);
     }
-  private:
+private:
     double val_;
 };
 
 } // namespace detail
 
 MAPNIK_DECL image_any::image_any(int width,
-                     int height,
-                     image_dtype type,
-                     bool initialize,
-                     bool premultiplied,
-                     bool painted)
+                                 int height,
+                                 image_dtype type,
+                                 bool initialize,
+                                 bool premultiplied,
+                                 bool painted)
     : image_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted))) {}
 
 MAPNIK_DECL unsigned char const* image_any::bytes() const
@@ -228,39 +228,39 @@ MAPNIK_DECL void image_any::set_scaling(double val)
 
 
 MAPNIK_DECL image_any create_image_any(int width,
-                           int height,
-                           image_dtype type,
-                           bool initialize,
-                           bool premultiplied,
-                           bool painted)
+                                       int height,
+                                       image_dtype type,
+                                       bool initialize,
+                                       bool premultiplied,
+                                       bool painted)
 {
     switch (type)
     {
-      case image_dtype_gray8:
+    case image_dtype_gray8:
         return image_any(std::move(image_gray8(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray8s:
+    case image_dtype_gray8s:
         return image_any(std::move(image_gray8s(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray16:
+    case image_dtype_gray16:
         return image_any(std::move(image_gray16(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray16s:
+    case image_dtype_gray16s:
         return image_any(std::move(image_gray16s(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray32:
+    case image_dtype_gray32:
         return image_any(std::move(image_gray32(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray32s:
+    case image_dtype_gray32s:
         return image_any(std::move(image_gray32s(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray32f:
+    case image_dtype_gray32f:
         return image_any(std::move(image_gray32f(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray64:
+    case image_dtype_gray64:
         return image_any(std::move(image_gray64(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray64s:
+    case image_dtype_gray64s:
         return image_any(std::move(image_gray64s(width, height, initialize, premultiplied, painted)));
-      case image_dtype_gray64f:
+    case image_dtype_gray64f:
         return image_any(std::move(image_gray64f(width, height, initialize, premultiplied, painted)));
-      case image_dtype_null:
+    case image_dtype_null:
         return image_any(std::move(image_null()));
-      case image_dtype_rgba8:
-      case IMAGE_DTYPE_MAX:
-      default:
+    case image_dtype_rgba8:
+    case IMAGE_DTYPE_MAX:
+    default:
         return image_any(std::move(image_rgba8(width, height, initialize, premultiplied, painted)));
     }
 }
