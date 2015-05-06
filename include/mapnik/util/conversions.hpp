@@ -29,6 +29,7 @@
 
 // stl
 #include <iosfwd>
+#include <string>
 
 namespace mapnik { namespace util {
 
