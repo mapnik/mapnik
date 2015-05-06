@@ -28,10 +28,7 @@
 
 // std
 #include <iosfwd>
-#include <algorithm>
 #include <string>
-//#include <istream>
-//#include <ostream>
 
 namespace mapnik
 {

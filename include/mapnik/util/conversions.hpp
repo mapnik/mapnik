@@ -28,8 +28,7 @@
 #include <mapnik/value_types.hpp>
 
 // stl
-#include <string>
-#include <algorithm>
+#include <iosfwd>
 
 namespace mapnik { namespace util {
 
@@ -39,32 +38,8 @@ to avoid the compile time overhead given it is included
 by many other headers inside mapnik.
 */
 
-MAPNIK_DECL inline bool string2bool(std::string const& value, bool & result)
-{
-    if (value.empty() || value.size() > 5) {
-        return false;
-    } else if (value == "true") {
-        return result = true;
-    } else if (value == "false") {
-        result = false;
-        return true;
-    }
-    std::string val(value);
-    std::transform(val.begin(), val.end(), val.begin(), ::tolower);
-    if (val == "true" || val == "yes" || val == "1" || val == "on") {
-        return result = true;
-    } else if (val == "false" || val == "no" || val == "0" || val == "off") {
-        result = false;
-        return true;
-    }
-    return false;
-}
-
-MAPNIK_DECL inline bool string2bool(const char * iter, const char * end, bool & result)
-{
-    std::string val(iter,end);
-    return string2bool(val,result);
-}
+MAPNIK_DECL bool string2bool(std::string const& value, bool & result);
+MAPNIK_DECL bool string2bool(const char * iter, const char * end, bool & result);
 
 MAPNIK_DECL bool string2int(std::string const& value, int & result);
 MAPNIK_DECL bool string2int(const char * iter, const char * end, int & result);
