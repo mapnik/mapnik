@@ -22,12 +22,12 @@
 
 // mapnik
 #include <mapnik/image.hpp>
+#include <mapnik/pixel_types.hpp>
 
 // stl
-#include <algorithm>
 #include <cassert>
 #include <stdexcept>
-#include <iostream>
+#include <algorithm>
 
 namespace mapnik {
 
@@ -282,7 +282,6 @@ inline void image<T>::set_scaling(double scaling)
         scaling_ = scaling;
         return;
     }
-    std::clog << "Can not set scaling to 0.0, offset not set." << std::endl;
 }
 
 template <typename T>
