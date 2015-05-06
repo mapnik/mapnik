@@ -38,21 +38,21 @@ namespace mapnik
 using value_type = mapnik::value;
 
 template <typename Tag> struct make_op;
-template <> struct make_op<tags::negate> { using type = std::negate<value_type>;};
-template <> struct make_op<tags::plus> { using type = std::plus<value_type>;};
-template <> struct make_op<tags::minus> { using type = std::minus<value_type>;};
-template <> struct make_op<tags::mult> { using type = std::multiplies<value_type>;};
-template <> struct make_op<tags::div> { using type = std::divides<value_type>;};
-template <> struct make_op<tags::mod> { using type =  std::modulus<value_type>;};
-template <> struct make_op<tags::less> { using type = std::less<value_type>;};
-template <> struct make_op<tags::less_equal> { using type = std::less_equal<value_type>;};
-template <> struct make_op<tags::greater> { using type = std::greater<value_type>;};
-template <> struct make_op<tags::greater_equal> { using type = std::greater_equal<value_type>;};
-template <> struct make_op<tags::equal_to> { using type = std::equal_to<value_type>;};
-template <> struct make_op<tags::not_equal_to> { using type = std::not_equal_to<value_type>;};
-template <> struct make_op<tags::logical_not> { using type = std::logical_not<value_type>;};
-template <> struct make_op<tags::logical_and> { using type = std::logical_and<value_type>;};
-template <> struct make_op<tags::logical_or> { using type =  std::logical_or<value_type>;};
+template <> struct make_op<mapnik::tags::negate> { using type = std::negate<value_type>;};
+template <> struct make_op<mapnik::tags::plus> { using type = std::plus<value_type>;};
+template <> struct make_op<mapnik::tags::minus> { using type = std::minus<value_type>;};
+template <> struct make_op<mapnik::tags::mult> { using type = std::multiplies<value_type>;};
+template <> struct make_op<mapnik::tags::div> { using type = std::divides<value_type>;};
+template <> struct make_op<mapnik::tags::mod> { using type =  std::modulus<value_type>;};
+template <> struct make_op<mapnik::tags::less> { using type = std::less<value_type>;};
+template <> struct make_op<mapnik::tags::less_equal> { using type = std::less_equal<value_type>;};
+template <> struct make_op<mapnik::tags::greater> { using type = std::greater<value_type>;};
+template <> struct make_op<mapnik::tags::greater_equal> { using type = std::greater_equal<value_type>;};
+template <> struct make_op<mapnik::tags::equal_to> { using type = std::equal_to<value_type>;};
+template <> struct make_op<mapnik::tags::not_equal_to> { using type = std::not_equal_to<value_type>;};
+template <> struct make_op<mapnik::tags::logical_not> { using type = std::logical_not<value_type>;};
+template <> struct make_op<mapnik::tags::logical_and> { using type = std::logical_and<value_type>;};
+template <> struct make_op<mapnik::tags::logical_or> { using type =  std::logical_or<value_type>;};
 
 template <typename Tag>
 struct unary_node
@@ -130,77 +130,77 @@ struct MAPNIK_DECL regex_replace_node
 
 inline expr_node & operator- (expr_node& expr)
 {
-    return expr = unary_node<tags::negate>(expr);
+    return expr = unary_node<mapnik::tags::negate>(expr);
 }
 
 inline expr_node & operator += ( expr_node &left, expr_node const& right)
 {
-    return left =  binary_node<tags::plus>(left,right);
+    return left =  binary_node<mapnik::tags::plus>(left,right);
 }
 
 inline expr_node & operator -= ( expr_node &left, expr_node const& right)
 {
-    return left =  binary_node<tags::minus>(left,right);
+    return left =  binary_node<mapnik::tags::minus>(left,right);
 }
 
 inline expr_node & operator *= ( expr_node &left , expr_node const& right)
 {
-    return left =  binary_node<tags::mult>(left,right);
+    return left =  binary_node<mapnik::tags::mult>(left,right);
 }
 
 inline expr_node & operator /= ( expr_node &left , expr_node const& right)
 {
-    return left =  binary_node<tags::div>(left,right);
+    return left =  binary_node<mapnik::tags::div>(left,right);
 }
 
 inline expr_node & operator %= ( expr_node &left , expr_node const& right)
 {
-    return left = binary_node<tags::mod>(left,right);
+    return left = binary_node<mapnik::tags::mod>(left,right);
 }
 
 inline expr_node & operator < ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::less>(left,right);
+    return left = binary_node<mapnik::tags::less>(left,right);
 }
 
 inline expr_node & operator <= ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::less_equal>(left,right);
+    return left = binary_node<mapnik::tags::less_equal>(left,right);
 }
 
 inline expr_node & operator > ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::greater>(left,right);
+    return left = binary_node<mapnik::tags::greater>(left,right);
 }
 
 inline expr_node & operator >= ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::greater_equal>(left,right);
+    return left = binary_node<mapnik::tags::greater_equal>(left,right);
 }
 
 inline expr_node & operator == ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::equal_to>(left,right);
+    return left = binary_node<mapnik::tags::equal_to>(left,right);
 }
 
 inline expr_node & operator != ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::not_equal_to>(left,right);
+    return left = binary_node<mapnik::tags::not_equal_to>(left,right);
 }
 
 inline expr_node & operator ! (expr_node & expr)
 {
-    return expr = unary_node<tags::logical_not>(expr);
+    return expr = unary_node<mapnik::tags::logical_not>(expr);
 }
 
 inline expr_node & operator && ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::logical_and>(left,right);
+    return left = binary_node<mapnik::tags::logical_and>(left,right);
 }
 
 inline expr_node & operator || ( expr_node &left, expr_node const& right)
 {
-    return left = binary_node<tags::logical_or>(left,right);
+    return left = binary_node<mapnik::tags::logical_or>(left,right);
 }
 
 }
