@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/debug.hpp>
 
 // stl
 #include <bitset>
@@ -180,7 +181,11 @@ public:
         // TODO: Enum value strings with underscore are deprecated in Mapnik 3.x
         // and support will be removed in Mapnik 4.x.
         std::string str_copy(str);
-        std::replace(str_copy.begin(), str_copy.end(), '_', '-');
+        if (str_copy.find('_') != std::string::npos)
+        {
+            MAPNIK_LOG_ERROR(enumerations) << "enumeration values using \"_\" are deprecated and will be removed in Mapnik 4.x, use \"-\"instead";
+            std::replace(str_copy.begin(), str_copy.end(), '_', '-');
+        }
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
             if (str_copy == our_strings_[i])
