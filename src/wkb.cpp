@@ -27,7 +27,6 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/geometry_adapters.hpp>
 
 namespace mapnik
 {

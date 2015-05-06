@@ -29,27 +29,29 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #undef B0
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/linestring.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/ring.hpp>
-#include <boost/range.hpp>
-#include <boost/range/iterator_range_core.hpp>
-#include <boost/geometry/core/mutable_range.hpp>
-#include <boost/geometry/core/tag.hpp>
-#include <boost/geometry/core/tags.hpp>
+// NOTE: ideally we would not include all of boost/geometry here to save on compile time
+// however we need to pull in <boost/geometry/multi/multi.hpp> for things to work
+// and once we do that the compile time is == to just including boost/geometry.hpp
+#include <boost/geometry.hpp>
 #pragma GCC diagnostic pop
 
 #include <mapnik/geometry.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 
+#include <cstdint>
+#include <vector>
+
 // register point
-BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<double>, double, cs::cartesian, x, y)
-BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<std::int64_t>, std::int64_t, cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<std::int64_t>, std::int64_t, boost::geometry::cs::cartesian, x, y)
 // ring
 BOOST_GEOMETRY_REGISTER_RING_TEMPLATED(mapnik::geometry::linear_ring)
 // needed by box2d<double>
-BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, boost::geometry::cs::cartesian, x, y)
 
 namespace boost {
 

@@ -45,6 +45,7 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/make_unique.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 

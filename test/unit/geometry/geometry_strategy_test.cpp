@@ -7,6 +7,8 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/geometry_transform.hpp>
 #include <mapnik/geometry_strategy.hpp>
+#include <mapnik/proj_strategy.hpp>
+#include <mapnik/view_strategy.hpp>
 
 TEST_CASE("geometry strategy tests") {
 

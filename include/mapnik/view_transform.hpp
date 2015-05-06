@@ -179,62 +179,6 @@ public:
     }
 };
 
-struct view_strategy
-{
-    view_strategy(view_transform const& tr)
-        : tr_(tr) {}
-
-    template <typename P1, typename P2>
-    inline bool apply(P1 const& p1, P2 & p2) const
-    {
-        using coordinate_type = typename boost::geometry::coordinate_type<P2>::type;
-        double x = boost::geometry::get<0>(p1);
-        double y = boost::geometry::get<1>(p1);
-        tr_.forward(&x,&y);
-        boost::geometry::set<0>(p2, boost::numeric_cast<coordinate_type>(x));
-        boost::geometry::set<1>(p2, boost::numeric_cast<coordinate_type>(y));
-        return true;
-    }
-
-    template <typename P1, typename P2>
-    inline P2 execute(P1 const& p1, bool & status) const
-    {
-        P2 p2;
-        status = apply(p1, p2);
-        return p2;
-    }
-
-    view_transform const& tr_;
-};
-
-struct unview_strategy
-{
-    unview_strategy(view_transform const& tr)
-        : tr_(tr) {}
-
-    template <typename P1, typename P2>
-    inline bool apply(P1 const& p1, P2 & p2) const
-    {
-        using coordinate_type = typename boost::geometry::coordinate_type<P2>::type;
-        double x = boost::geometry::get<0>(p1);
-        double y = boost::geometry::get<1>(p1);
-        tr_.backward(&x,&y);
-        boost::geometry::set<0>(p2, boost::numeric_cast<coordinate_type>(x));
-        boost::geometry::set<1>(p2, boost::numeric_cast<coordinate_type>(y));
-        return true;
-    }
-
-    template <typename P1, typename P2>
-    inline P2 execute(P1 const& p1, bool & status) const
-    {
-        P2 p2;
-        status = apply(p1, p2);
-        return p2;
-    }
-
-    view_transform const& tr_;
-};
-
 }
 
 #endif // MAPNIK_VIEW_TRANSFORM_HPP

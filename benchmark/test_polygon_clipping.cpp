@@ -15,6 +15,7 @@
 #include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/color.hpp>
+#include <boost/geometry.hpp>
 // agg
 #include "agg_conv_clip_polygon.h"
 // clipper

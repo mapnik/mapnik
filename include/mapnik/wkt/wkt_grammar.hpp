@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_fusion_adapted.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

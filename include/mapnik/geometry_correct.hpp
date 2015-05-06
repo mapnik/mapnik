@@ -25,7 +25,14 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
+#include <mapnik/util/variant.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/geometry/algorithms/correct.hpp>
+#pragma GCC diagnostic pop
 
 #include <type_traits>
 

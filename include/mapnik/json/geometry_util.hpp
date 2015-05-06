@@ -24,7 +24,6 @@
 #define MAPNIK_JSON_GEOMETRY_UTIL_HPP
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
 
 namespace mapnik { namespace json {
 
