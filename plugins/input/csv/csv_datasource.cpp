@@ -34,7 +34,6 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_correct.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
@@ -544,8 +543,6 @@ void csv_datasource::parse_csv(T & stream,
                         mapnik::geometry::geometry<double> geom;
                         if (mapnik::from_wkt(value, geom))
                         {
-                            // correct orientations etc
-                            mapnik::geometry::correct(geom);
                             // set geometry
                             feature->set_geometry(std::move(geom));
                             parsed_wkt = true;
