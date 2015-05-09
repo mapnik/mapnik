@@ -27,6 +27,7 @@
 #include <mapnik/util/variant.hpp>
 
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/optional.hpp>
 
 #include <tuple>
