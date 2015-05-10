@@ -410,6 +410,11 @@ namespace detail {
 
 struct is_solid_visitor
 {
+    bool operator() (image_view_null const&)
+    {
+        return true;
+    }
+
     bool operator() (image_null const&)
     {
         return true;
@@ -458,6 +463,7 @@ MAPNIK_DECL bool is_solid(T const& image)
     return visitor(image);
 }
 
+template MAPNIK_DECL bool is_solid(image_null const&);
 template MAPNIK_DECL bool is_solid(image_rgba8 const&);
 template MAPNIK_DECL bool is_solid(image_gray8 const&);
 template MAPNIK_DECL bool is_solid(image_gray8s const&);
@@ -469,6 +475,18 @@ template MAPNIK_DECL bool is_solid(image_gray32f const&);
 template MAPNIK_DECL bool is_solid(image_gray64 const&);
 template MAPNIK_DECL bool is_solid(image_gray64s const&);
 template MAPNIK_DECL bool is_solid(image_gray64f const&);
+template MAPNIK_DECL bool is_solid(image_view_null const&);
+template MAPNIK_DECL bool is_solid(image_view_rgba8 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray8 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray8s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray16 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray16s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray32 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray32s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray32f const&);
+template MAPNIK_DECL bool is_solid(image_view_gray64 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray64s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray64f const&);
 
 namespace detail {
 
