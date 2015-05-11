@@ -100,7 +100,7 @@ inline std::size_t image_view<T>::height() const
 template <typename T>
 inline typename image_view<T>::pixel_type const& image_view<T>::operator() (std::size_t i, std::size_t j) const
 {
-    return data_(i,j);
+    return data_(i + x_,j + y_);
 }
 
 template <typename T>

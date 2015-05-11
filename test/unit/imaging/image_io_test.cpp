@@ -78,5 +78,7 @@ SECTION("readers") {
         REQUIRE(false);
     }
 
-}
-}
+} // END SECTION
+
+
+} // END TEST_CASE
