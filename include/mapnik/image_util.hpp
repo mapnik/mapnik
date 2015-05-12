@@ -216,7 +216,7 @@ MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
 template <typename T>
 inline bool check_bounds (T const& data, std::size_t x, std::size_t y)
 {
-    return (x < static_cast<int>(data.width()) && y < static_cast<int>(data.height()));
+    return (x < data.width() && y < data.height());
 }
 
 // COMPOSITE_PIXEL

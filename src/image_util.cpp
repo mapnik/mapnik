@@ -632,19 +632,16 @@ struct visitor_set_alpha
     void operator() (image_rgba8 & data)
     {
         using pixel_type = image_rgba8::pixel_type;
-        pixel_type a1;
-        try
+        if (opacity_ > 1.0)
         {
-            a1 = numeric_cast<std::uint8_t>(255.0 * opacity_);
+            opacity_ = 1.0;
         }
-        catch(negative_overflow&)
+        if (opacity_ < 0.0)
         {
-            a1 = std::numeric_limits<std::uint8_t>::min();
+            opacity_ = 0.0;
         }
-        catch(positive_overflow&)
-        {
-            a1 = std::numeric_limits<std::uint8_t>::max();
-        }
+
+        pixel_type a1 = static_cast<pixel_type>(255.0 * opacity_);
         for (unsigned int y = 0; y < data.height(); ++y)
         {
             pixel_type* row_to =  data.get_row(y);
