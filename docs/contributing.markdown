@@ -21,6 +21,22 @@ Developers with commit access can update test data like:
     cd ../../
     git commit test/data -m "update test-data submodule"
 
+And the visual test data can up updated like:
+
+    cd test/data-visual
+    git remote set-url origin git@github.com:mapnik/test-data-visual
+    git add styles/* images/*
+    git commit -a -m "add more visual tests"
+
+After updating the test data you can then do:
+
+    # then go back to mapnik core
+    cd ../../
+    # the submodule should be marked dirty
+    git status
+    # now commit the changes to the submodule
+    git commit -a -m "update visual tests and data"
+
 ## Community
 
 Mapnik is a creative community focused on making beautiful maps with beautiful software.

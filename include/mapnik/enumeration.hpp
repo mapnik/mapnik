@@ -183,8 +183,8 @@ public:
         std::string str_copy(str);
         if (str_copy.find('_') != std::string::npos)
         {
-            MAPNIK_LOG_ERROR(enumerations) << "enumeration values using \"_\" are deprecated and will be removed in Mapnik 4.x, use \"-\"instead";
             std::replace(str_copy.begin(), str_copy.end(), '_', '-');
+            MAPNIK_LOG_ERROR(enumerations) << "enumeration value (" << str << ") using \"_\" is deprecated and will be removed in Mapnik 4.x, use '" << str_copy << "' instead";
         }
         for (unsigned i = 0; i < THE_MAX; ++i)
         {

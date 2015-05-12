@@ -410,6 +410,11 @@ namespace detail {
 
 struct is_solid_visitor
 {
+    bool operator() (image_view_null const&)
+    {
+        return true;
+    }
+
     bool operator() (image_null const&)
     {
         return true;
@@ -458,6 +463,7 @@ MAPNIK_DECL bool is_solid(T const& image)
     return visitor(image);
 }
 
+template MAPNIK_DECL bool is_solid(image_null const&);
 template MAPNIK_DECL bool is_solid(image_rgba8 const&);
 template MAPNIK_DECL bool is_solid(image_gray8 const&);
 template MAPNIK_DECL bool is_solid(image_gray8s const&);
@@ -469,6 +475,18 @@ template MAPNIK_DECL bool is_solid(image_gray32f const&);
 template MAPNIK_DECL bool is_solid(image_gray64 const&);
 template MAPNIK_DECL bool is_solid(image_gray64s const&);
 template MAPNIK_DECL bool is_solid(image_gray64f const&);
+template MAPNIK_DECL bool is_solid(image_view_null const&);
+template MAPNIK_DECL bool is_solid(image_view_rgba8 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray8 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray8s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray16 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray16s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray32 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray32s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray32f const&);
+template MAPNIK_DECL bool is_solid(image_view_gray64 const&);
+template MAPNIK_DECL bool is_solid(image_view_gray64s const&);
+template MAPNIK_DECL bool is_solid(image_view_gray64f const&);
 
 namespace detail {
 
@@ -614,6 +632,19 @@ struct visitor_set_alpha
     void operator() (image_rgba8 & data)
     {
         using pixel_type = image_rgba8::pixel_type;
+        pixel_type a1;
+        try
+        {
+            a1 = numeric_cast<std::uint8_t>(255.0 * opacity_);
+        }
+        catch(negative_overflow&)
+        {
+            a1 = std::numeric_limits<std::uint8_t>::min();
+        }
+        catch(positive_overflow&)
+        {
+            a1 = std::numeric_limits<std::uint8_t>::max();
+        }
         for (unsigned int y = 0; y < data.height(); ++y)
         {
             pixel_type* row_to =  data.get_row(y);
@@ -621,7 +652,6 @@ struct visitor_set_alpha
             {
                 pixel_type rgba = row_to[x];
                 pixel_type a0 = (rgba >> 24) & 0xff;
-                pixel_type a1 = pixel_type( ((rgba >> 24) & 0xff) * opacity_ );
                 //unsigned a1 = opacity;
                 if (a0 == a1) continue;
 
@@ -682,6 +712,97 @@ template MAPNIK_DECL void set_alpha(image_gray32f &, float);
 template MAPNIK_DECL void set_alpha(image_gray64 &, float);
 template MAPNIK_DECL void set_alpha(image_gray64s &, float);
 template MAPNIK_DECL void set_alpha(image_gray64f &, float);
+
+namespace detail {
+
+struct visitor_multiply_alpha
+{
+    visitor_multiply_alpha(float opacity)
+        : opacity_(opacity) {}
+
+    void operator() (image_rgba8 & data)
+    {
+        using pixel_type = image_rgba8::pixel_type;
+        for (unsigned int y = 0; y < data.height(); ++y)
+        {
+            pixel_type* row_to =  data.get_row(y);
+            for (unsigned int x = 0; x < data.width(); ++x)
+            {
+                pixel_type rgba = row_to[x];
+                pixel_type a0 = (rgba >> 24) & 0xff;
+                pixel_type a1;
+                try
+                {
+                    a1 = numeric_cast<std::uint8_t>(((rgba >> 24) & 0xff) * opacity_);
+                }
+                catch(negative_overflow&)
+                {
+                    a1 = std::numeric_limits<std::uint8_t>::min();
+                }
+                catch(positive_overflow&)
+                {
+                    a1 = std::numeric_limits<std::uint8_t>::max();
+                }
+                //unsigned a1 = opacity;
+                if (a0 == a1) continue;
+
+                pixel_type r = rgba & 0xff;
+                pixel_type g = (rgba >> 8 ) & 0xff;
+                pixel_type b = (rgba >> 16) & 0xff;
+
+                row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
+            }
+        }
+    }
+
+    template <typename T>
+    void operator() (T & data)
+    {
+        throw std::runtime_error("Error: multiply_alpha with " + std::string(typeid(data).name()) + " is not supported");
+    }
+
+  private:
+    float opacity_;
+
+};
+
+} // end detail ns
+
+MAPNIK_DECL void multiply_alpha(image_any & data, float opacity)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    util::apply_visitor(detail::visitor_multiply_alpha(opacity), data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+template <typename T>
+MAPNIK_DECL void multiply_alpha(T & data, float opacity)
+{
+    // Prior to calling the data must not be premultiplied
+    bool remultiply = mapnik::demultiply_alpha(data);
+    detail::visitor_multiply_alpha visit(opacity);
+    visit(data);
+    if (remultiply)
+    {
+        mapnik::premultiply_alpha(data);
+    }
+}
+
+template MAPNIK_DECL void multiply_alpha(image_rgba8 &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray8 &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray8s &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray16 &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray16s &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray32 &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray32s &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray32f &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray64 &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray64s &, float);
+template MAPNIK_DECL void multiply_alpha(image_gray64f &, float);
 
 namespace detail {
 

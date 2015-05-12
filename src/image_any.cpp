@@ -29,7 +29,7 @@ namespace detail {
 struct get_bytes_visitor
 {
     template <typename T>
-    unsigned char* operator()(T & data)
+    unsigned char* operator()(T & data) const
     {
         return data.bytes();
     }
@@ -130,7 +130,7 @@ struct set_offset_visitor
     set_offset_visitor(double val)
         : val_(val) {}
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         data.set_offset(val_);
     }
@@ -143,7 +143,7 @@ struct set_scaling_visitor
     set_scaling_visitor(double val)
         : val_(val) {}
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         data.set_scaling(val_);
     }

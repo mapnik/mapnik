@@ -23,7 +23,7 @@ if [[ -f mapnik-settings.env ]]; then
 fi
 
 run_substep "Running C++ Unit tests..."
-./test/unit/run 
+./test/unit/run
 failures=$((failures+$?))
 
 run_substep "Running standalone C++ tests..."
@@ -33,5 +33,9 @@ if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; the
       failures=$((failures+$?))
     done
 fi
+
+run_substep "Running visual tests..."
+./test/visual/run
+failures=$((failures+$?))
 
 exit $failures

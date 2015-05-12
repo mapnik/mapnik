@@ -147,6 +147,12 @@ MAPNIK_DECL void set_alpha (image_any & image, float opacity);
 template <typename T>
 MAPNIK_DECL void set_alpha (T & image, float opacity);
 
+// MULTIPLY ALPHA
+MAPNIK_DECL void multiply_alpha (image_any & image, float opacity);
+
+template <typename T>
+MAPNIK_DECL void multiply_alpha (T & image, float opacity);
+
 // SET GRAYSCALE TO ALPHA
 MAPNIK_DECL void set_grayscale_to_alpha (image_any & image);
 MAPNIK_DECL void set_grayscale_to_alpha (image_any & image, color const& c);
