@@ -23,16 +23,16 @@
 #ifndef MAPNIK_TOPOLOGY_HPP
 #define MAPNIK_TOPOLOGY_HPP
 
-#include <vector>
-#include <list>
-
 #include <mapnik/json/generic_json.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/util/variant.hpp>
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/optional.hpp>
+
+#include <tuple>
+#include <vector>
+#include <list>
 
 namespace mapnik { namespace topojson {
 

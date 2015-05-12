@@ -411,7 +411,6 @@ opts.AddVariables(
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
     BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
-    BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
     )
 
@@ -452,7 +451,6 @@ pickle_store = [# Scons internal variables
         'HAS_PYCAIRO',
         'PYCAIRO_PATHS',
         'HAS_LIBXML2',
-        'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
         'PATH',
         'PATH_REMOVE',
@@ -1965,15 +1963,3 @@ if not HELP_REQUESTED:
 
     # write the viewer.ini file
     SConscript('demo/viewer/build.py')
-
-    # if requested, build the sample input plugins
-    if env['SAMPLE_INPUT_PLUGINS']:
-        SConscript('plugins/input/templates/helloworld/build.py')
-    else:
-        if 'install' in COMMAND_LINE_TARGETS:
-            plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'hello.input')
-            if os.path.exists(plugin_path):
-                color_print(4,"Notice: removing out of date plugin: '%s'" % plugin_path)
-                os.unlink(plugin_path)
-        if os.path.exists('plugins/input/templates/hello.input'):
-            os.unlink('plugins/input/templates/hello.input')

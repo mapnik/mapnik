@@ -132,7 +132,8 @@ else: # unix, non-macos
         else:
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
     else: # Linux and others
-        lib_env['LIBS'].append('dl')
+        if env['PLATFORM'] != 'FreeBSD':
+            lib_env['LIBS'].append('dl')
         mapnik_lib_link_flag += ' -Wl,-rpath-link,.'
         if env['ENABLE_SONAME']:
             mapnik_lib_link_flag += ' -Wl,-soname,%s' % mapnik_libname

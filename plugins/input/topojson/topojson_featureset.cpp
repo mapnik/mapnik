@@ -339,7 +339,7 @@ topojson_featureset::topojson_featureset(mapnik::topojson::topology const& topo,
       index_array_(std::move(index_array)),
       index_itr_(index_array_.begin()),
       index_end_(index_array_.end()),
-      feature_id_ (0) {}
+      feature_id_(1) {}
 
 topojson_featureset::~topojson_featureset() {}
 
