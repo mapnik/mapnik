@@ -70,7 +70,7 @@ runner::runner(boost::filesystem::path const & styles_dir,
 result_list runner::test_all(report_type & report) const
 {
     std::vector<std::string> files = mapnik::util::list_directory(styles_dir_.string());
-    return test_paralel(files, report, jobs_);
+    return test_parallel(files, report, jobs_);
 }
 
 result_list runner::test(std::vector<std::string> const & style_names, report_type & report) const
@@ -81,10 +81,10 @@ result_list runner::test(std::vector<std::string> const & style_names, report_ty
         {
             return (styles_dir_ / (name + ".xml")).string();
         });
-    return test_paralel(files, report, jobs_);
+    return test_parallel(files, report, jobs_);
 }
 
-result_list runner::test_paralel(std::vector<std::string> const & files, report_type & report, std::size_t jobs) const
+result_list runner::test_parallel(std::vector<std::string> const & files, report_type & report, std::size_t jobs) const
 {
     result_list results;
 
