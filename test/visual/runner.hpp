@@ -52,7 +52,7 @@ public:
 private:
     using files_iterator = std::vector<std::string>::const_iterator;
 
-    result_list test_paralel(std::vector<std::string> const & files, report_type & report, std::size_t jobs) const;
+    result_list test_parallel(std::vector<std::string> const & files, report_type & report, std::size_t jobs) const;
     result_list test_range(files_iterator begin, files_iterator end, std::reference_wrapper<report_type> report) const;
     result_list test_one(std::string const & style_path, config cfg, report_type & report) const;
     void parse_map_sizes(std::string const & str, std::vector<map_size> & sizes) const;
