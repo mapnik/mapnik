@@ -88,7 +88,6 @@ bool placement_finder::next_position()
         horizontal_alignment_ = layout->horizontal_alignment();
         return true;
     }
-    MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
     return false;
 }
 
