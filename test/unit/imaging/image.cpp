@@ -8,11 +8,11 @@
 
 TEST_CASE("image class") {
 
-SECTION("test gray8") {
+SECTION("test gray16") {
     
-    const mapnik::image_gray8 im(4,4);
-    mapnik::image_gray8 im2(im);
-    mapnik::image_gray8 im3(5,5);
+    const mapnik::image_gray16 im(4,4);
+    mapnik::image_gray16 im2(im);
+    mapnik::image_gray16 im3(5,5);
 
     CHECK(im == im);
     CHECK_FALSE(im == im2);
@@ -32,21 +32,33 @@ SECTION("test gray8") {
     CHECK(im2(0,0) == 0);
     im2(0,0) = 1;
     CHECK(im2(0,0) == 1);
-    im2.set(2);
-    CHECK(im2(0,0) == 2);
-    CHECK(im2(1,1) == 2);
+    im2.set(514);
+    CHECK(im2(0,0) == 514);
+    CHECK(im2(1,1) == 514);
 
     // Check that size is correct
-    CHECK(im.size() == 16);
-    CHECK(im2.size() == 16);
+    CHECK(im.size() == 32);
+    CHECK(im2.size() == 32);
     
     // Check that row_size is correct
-    CHECK(im.row_size() == 4);
-    CHECK(im2.row_size() == 4);
+    CHECK(im.row_size() == 8);
+    CHECK(im2.row_size() == 8);
     
     // Check that get_premultiplied is correct
     CHECK_FALSE(im.get_premultiplied());
     CHECK_FALSE(im2.get_premultiplied());
+
+    // Check that set premultiplied works
+    im2.set_premultiplied(true);
+    CHECK(im2.get_premultiplied());
+    
+    // Check that painted is correct
+    CHECK_FALSE(im.painted());
+    CHECK_FALSE(im2.painted());
+
+    // Check that set premultiplied works
+    im2.painted(true);
+    CHECK(im2.painted());
 
     // Check that offset is correct
     CHECK(im.get_offset() == 0.0);
@@ -65,14 +77,18 @@ SECTION("test gray8") {
     CHECK(im2.get_scaling() == 1.1);
 
     // CHECK that image dtype is correct
-    CHECK(im.get_dtype() == mapnik::image_dtype_gray8);
-    CHECK(im2.get_dtype() == mapnik::image_dtype_gray8);
+    CHECK(im.get_dtype() == mapnik::image_dtype_gray16);
+    CHECK(im2.get_dtype() == mapnik::image_dtype_gray16);
 
-    using pixel_type = mapnik::image_view_gray8::pixel_type;
+    using pixel_type = mapnik::image_view_gray16::pixel_type;
     pixel_type expected_val;
     // Check that all data in the view is correct
     // IM
     expected_val = 0;
+    pixel_type const* data_im = im.data();
+    CHECK(*data_im == expected_val);
+    unsigned char const* data_b = im.bytes();
+    CHECK(*data_b == 0);
     for (std::size_t y = 0; y < im.height(); ++y)
     {
         std::size_t width = im.width();
@@ -90,7 +106,13 @@ SECTION("test gray8") {
         }
     }
     // IM2
-    expected_val = 2;
+    expected_val = 514;
+    pixel_type * data_im2 = im2.data();
+    CHECK(*data_im2 == expected_val);
+    unsigned char * data_b2 = im2.bytes();
+    CHECK(*data_b2 == 2);
+    ++data_b;
+    CHECK(*data_b2 == 2);
     for (std::size_t y = 0; y < im2.height(); ++y)
     {
         std::size_t width = im2.width();
@@ -108,6 +130,16 @@ SECTION("test gray8") {
         }
     }
 
+    // Test set row
+    std::vector<pixel_type> v1(im2.width(), 30);
+    std::vector<pixel_type> v2(im2.width()-1, 50);
+    im2.set_row(0, v1.data(), v1.size());
+    im2.set_row(1, 1, v2.size(), v2.data());
+
+    CHECK(im2(0,0) == 30);
+    CHECK(im2(0,1) == 514);
+    CHECK(im2(1,1) == 50);
+    
 } // END SECTION
 
 SECTION("image_null")
