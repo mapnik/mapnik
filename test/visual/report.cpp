@@ -81,30 +81,51 @@ unsigned console_report::summary(result_list const & results)
 
 void console_short_report::report(result const & r)
 {
-    s << '.';
+    switch (r.state)
+    {
+        case STATE_OK:
+            s << ".";
+            break;
+        case STATE_FAIL:
+            s << "✘";
+            break;
+        case STATE_OVERWRITE:
+            s << "✓";
+            break;
+        case STATE_ERROR:
+            s << "ERROR (" << r.error_message << ")\n";
+            break;
+    }
 }
 
 void html_report::report(result const & r, boost::filesystem::path const & output_dir)
 {
-    using namespace boost::filesystem;
+    if (r.state == STATE_ERROR)
+    {
+       s << "<div class=\"text\">Failed to render: " << r.name << "<br><em>" << r.error_message << "</em></div>\n";
+    }
+    else if (r.state == STATE_FAIL)
+    {
+      using namespace boost::filesystem;
 
-    path reference = output_dir / r.reference_image_path.filename();
-    path actual = output_dir / r.actual_image_path.filename();
+      path reference = output_dir / r.reference_image_path.filename();
+      path actual = output_dir / r.actual_image_path.filename();
 
-    copy_file(r.reference_image_path, reference, copy_option::overwrite_if_exists);
-    copy_file(r.actual_image_path, actual, copy_option::overwrite_if_exists);
+      copy_file(r.reference_image_path, reference, copy_option::overwrite_if_exists);
+      copy_file(r.actual_image_path, actual, copy_option::overwrite_if_exists);
 
-     s << "<div class=\"expected\">\n"
-          "  <a href=" << reference.filename() << ">\n"
-          "    <img src=" << reference.filename() << " width=\"100\%\">\n"
-          "  </a>\n"
-          "</div>\n"
-          "<div class=\"text\">" << r.diff << "</div>\n"
-          "<div class=\"actual\">\n"
-          "  <a href=" << actual.filename() << ">\n"
-          "    <img src=" << actual.filename() << " width=\"100\%\">\n"
-          "  </a>\n"
-          "</div>\n";
+       s << "<div class=\"expected\">\n"
+            "  <a href=" << reference.filename() << ">\n"
+            "    <img src=" << reference.filename() << " width=\"100\%\">\n"
+            "  </a>\n"
+            "</div>\n"
+            "<div class=\"text\">" << r.diff << "</div>\n"
+            "<div class=\"actual\">\n"
+            "  <a href=" << actual.filename() << ">\n"
+            "    <img src=" << actual.filename() << " width=\"100\%\">\n"
+            "  </a>\n"
+            "</div>\n";
+    }
 }
 
 constexpr const char * html_header = R"template(<!DOCTYPE html>
@@ -161,7 +182,8 @@ void html_summary(result_list const & results, boost::filesystem::path output_di
 {
     boost::filesystem::path html_root = output_dir / "visual-test-results";
     ensure_dir(html_root);
-    boost::filesystem::path html_report_path = html_root / "comparison.html";
+    boost::filesystem::path html_report_path = html_root / "index.html";
+    std::clog << "View failure report at " << html_report_path << "\n";
     std::ofstream output_file(html_report_path.string());
     html_report report(output_file);
     report.summary(results, html_root);
