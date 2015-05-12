@@ -157,11 +157,7 @@ public:
 
     inline unsigned rgba() const
     {
-#ifdef MAPNIK_BIG_ENDIAN
-        return static_cast<unsigned>((alpha_) | (blue_ << 8) | (green_ << 16) | (red_ << 24)) ;
-#else
         return static_cast<unsigned>((alpha_ << 24) | (blue_ << 16) | (green_ << 8) | (red_)) ;
-#endif
     }
 private:
     void swap(color & rhs)
