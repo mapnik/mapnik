@@ -139,8 +139,103 @@ SECTION("proj and view strategy") {
         assert_g_equal(r1, p3);
     }
 
-}
+} // END SECTION
 
-}
+SECTION("scaling strategies - double to double") {
+    using namespace mapnik::geometry;
+ 
+    {   
+        scale_strategy ss(10.0);
+        point<double> p(-90.3, 35.5);
+        point<double> r(-903.0, 355.0);
+        point<double> o = transform<double>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        scale_strategy ss(0.5, -2.0);
+        point<double> p(-90.3, 35.5);
+        point<double> r(-47.15, 15.75);
+        point<double> o = transform<double>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        // Not the rounding doesn't apply because not casting to ints
+        scale_rounding_strategy ss(0.5, -2.0);
+        point<double> p(-90.3, 35.5);
+        point<double> r(-47.15, 15.75);
+        point<double> o = transform<double>(p, ss);
+        assert_g_equal(r, o);
+    }
+
+} // END SECTION
+
+SECTION("scaling strategies - double to int64") {
+    using namespace mapnik::geometry;
+ 
+    {   
+        scale_strategy ss(10.0);
+        point<double> p(-90.31, 35.58);
+        point<std::int64_t> r(-903, 355);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        scale_strategy ss(0.5, -2.0);
+        point<double> p(-90.3, 35.5);
+        point<std::int64_t> r(-47, 15);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        scale_rounding_strategy ss(0.5, -2.0);
+        point<double> p(-90.3, 35.5);
+        point<std::int64_t> r(-47, 16);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        // Test underflow and overflow
+        std::int64_t min = std::numeric_limits<std::int64_t>::min();
+        std::int64_t max = std::numeric_limits<std::int64_t>::max();
+        scale_strategy ss(1.0E100);
+        point<double> p(-90.3, 35.5);
+        point<std::int64_t> r(min, max);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        // Test underflow and overflow
+        std::int64_t min = std::numeric_limits<std::int64_t>::min();
+        std::int64_t max = std::numeric_limits<std::int64_t>::max();
+        scale_rounding_strategy ss(1.0E100);
+        point<double> p(-90.3, 35.5);
+        point<std::int64_t> r(min, max);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        // Test overrflow and underflow
+        std::int64_t min = std::numeric_limits<std::int64_t>::min();
+        std::int64_t max = std::numeric_limits<std::int64_t>::max();
+        scale_strategy ss(1.0E100);
+        point<double> p(90.3, -35.5);
+        point<std::int64_t> r(max, min);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+    {   
+        // Test overflow and underflow
+        std::int64_t min = std::numeric_limits<std::int64_t>::min();
+        std::int64_t max = std::numeric_limits<std::int64_t>::max();
+        scale_rounding_strategy ss(1.0E100);
+        point<double> p(90.3, -35.5);
+        point<std::int64_t> r(max, min);
+        point<std::int64_t> o = transform<std::int64_t>(p, ss);
+        assert_g_equal(r, o);
+    }
+
+} // END SECTION
+
+} // END TEST CASE
 
 
