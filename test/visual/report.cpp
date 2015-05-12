@@ -111,8 +111,16 @@ void html_report::report(result const & r, boost::filesystem::path const & outpu
       path reference = output_dir / r.reference_image_path.filename();
       path actual = output_dir / r.actual_image_path.filename();
 
-      copy_file(r.reference_image_path, reference, copy_option::overwrite_if_exists);
-      copy_file(r.actual_image_path, actual, copy_option::overwrite_if_exists);
+      if (exists(reference))
+      {
+          remove(reference);
+      }
+      if (exists(actual))
+      {
+          remove(actual);
+      }
+      copy_file(r.reference_image_path, reference);
+      copy_file(r.actual_image_path, actual);
 
        s << "<div class=\"expected\">\n"
             "  <a href=" << reference.filename() << ">\n"
