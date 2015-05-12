@@ -64,7 +64,7 @@ struct result
 {
     std::string name;
     result_state state;
-    char const * renderer_name;
+    std::string renderer_name;
     map_size size;
     double scale_factor;
     boost::filesystem::path actual_image_path;
