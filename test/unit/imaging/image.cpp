@@ -145,57 +145,75 @@ SECTION("test gray16") {
 SECTION("image_null")
 {
     mapnik::image_null im_null;
-/*    const mapnik::image_view_null view_null2;
-    mapnik::image_view_null view_null3(view_null2);
-    mapnik::image_view_null & view_null4 = view_null3;
+    const mapnik::image_null im_null2(2,2); // Actually doesn't really set any size
+    mapnik::image_null im_null3(im_null2);
+    mapnik::image_null im_null4(std::move(im_null3));
     
     // All nulls are equal
-    CHECK(view_null == view_null4);
-    CHECK(view_null == view_null2);
+    CHECK(im_null == im_null4);
+    CHECK(im_null == im_null2);
     
     // No null is greater
-    CHECK_FALSE(view_null < view_null4);
-    CHECK_FALSE(view_null < view_null2);
+    CHECK_FALSE(im_null < im_null4);
+    CHECK_FALSE(im_null < im_null2);
 
     // Check defaults
-    CHECK(view_null.x() == 0);
-    CHECK(view_null.y() == 0);
-    CHECK(view_null.width() == 0);
-    CHECK(view_null.height() == 0);
-    CHECK(view_null.size() == 0);
-    CHECK(view_null.row_size() == 0);
-    CHECK(view_null.get_offset() == 0.0);
-    CHECK(view_null.get_scaling() == 1.0);
-    CHECK(view_null.get_dtype() == mapnik::image_dtype_null);
-    CHECK_FALSE(view_null.get_premultiplied());
+    CHECK(im_null.width() == 0);
+    CHECK(im_null.height() == 0);
+    CHECK(im_null.size() == 0);
+    CHECK(im_null.row_size() == 0);
+    // Setting offset does nothing
+    im_null.set_offset(10000000.0);
+    CHECK(im_null.get_offset() == 0.0);
+    // Setting scaling does nothing
+    im_null.set_scaling(123123123.0);
+    CHECK(im_null.get_scaling() == 1.0);
+    CHECK(im_null.get_dtype() == mapnik::image_dtype_null);
+    // Setting premultiplied does nothing
+    im_null.set_premultiplied(true);
+    CHECK_FALSE(im_null.get_premultiplied());
+    // Setting painted does nothing
+    im_null.painted(true);
+    CHECK_FALSE(im_null.painted());
 
-    // Should throw if we try to access data.
-    REQUIRE_THROWS(view_null(0,0));
+    // Should throw if we try to access or setdata.
+    REQUIRE_THROWS(im_null(0,0));
+    REQUIRE_THROWS(im_null2(0,0));
+    REQUIRE_THROWS(im_null(0,0) = 1);
 
-    CHECK(view_null.get_row(0) == nullptr);
-    CHECK(view_null.get_row(0,0) == nullptr);
-  */  
+    unsigned char const* e1 = im_null.bytes();
+    unsigned char * e2 = im_null.bytes();
+    CHECK(e1 == nullptr);
+    CHECK(e2 == nullptr);
+
 } // END SECTION
 
 SECTION("image any")
 {
-    /*
-    mapnik::image_view_any im_any_null;
+    mapnik::image_null null_im;
+    const mapnik::image_any im_any_null(null_im);
     CHECK(im_any_null.get_dtype() == mapnik::image_dtype_null);
+    CHECK(im_any_null.bytes() == nullptr);
 
-    mapnik::image_gray8 im(4,4);
-    mapnik::image_view_gray8 im_view(0,0,4,4,im);
-    mapnik::image_view_any im_view_any(im_view);
+    mapnik::image_gray16 im(4,4);
+    mapnik::fill(im, 514);
+    mapnik::image_any im_any(im);
 
-    CHECK(im_view_any.get_dtype() == mapnik::image_dtype_gray8);
-    CHECK(im_view_any.width() == 4);
-    CHECK(im_view_any.height() == 4);
-    CHECK(im_view_any.size() == 16);
-    CHECK(im_view_any.row_size() == 4);
-    CHECK_FALSE(im_view_any.get_premultiplied());
-    CHECK(im_view_any.get_offset() == 0.0);
-    CHECK(im_view_any.get_scaling() == 1.0);
-*/
+    CHECK(im_any.get_dtype() == mapnik::image_dtype_gray16);
+    unsigned char * foo = im_any.bytes();
+    CHECK(*foo == 2);
+    ++foo;
+    CHECK(*foo == 2);
+    CHECK(im_any.width() == 4);
+    CHECK(im_any.height() == 4);
+    CHECK(im_any.size() == 32);
+    CHECK(im_any.row_size() == 8);
+    CHECK_FALSE(im_any.get_premultiplied());
+    im_any.set_offset(10.0);
+    CHECK(im_any.get_offset() == 10.0);
+    im_any.set_scaling(2.1);
+    CHECK(im_any.get_scaling() == 2.1);
+
 } // END SECTION
 
 } // END TEST CASE
