@@ -24,6 +24,7 @@
 #define MAPNIK_GEOMETRY_STRATEGY_HPP
 
 #include <mapnik/geometry_adapters.hpp>
+#include <mapnik/util/rounding_cast.hpp>
 
 namespace mapnik { 
 namespace geometry {
@@ -191,6 +192,57 @@ private:
     double scale_;
     double offset_;
 };
+
+struct scale_rounding_strategy
+{
+    scale_rounding_strategy(double scale, double offset = 0)
+        : scale_(scale), offset_(offset) {}
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const & p1, P2 & p2) const
+    {
+        
+        using p2_type = typename boost::geometry::coordinate_type<P2>::type;
+        double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
+        double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
+        try {
+            boost::geometry::set<0>(p2, util::rounding_cast<p2_type>(x));
+        }
+        catch(boost::numeric::negative_overflow&)
+        {
+            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
+        }
+        catch(boost::numeric::positive_overflow&) 
+        {
+            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
+        }
+        try {
+            boost::geometry::set<1>(p2, util::rounding_cast<p2_type>(y));
+        }
+        catch(boost::numeric::negative_overflow&)
+        {
+            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
+        }
+        catch(boost::numeric::positive_overflow&) 
+        {
+            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
+        }
+        return true;
+    }
+    
+    template <typename P1, typename P2>
+    inline P2 execute(P1 const& p1, bool & status) const
+    {
+        P2 p2;
+        status = apply(p1, p2);
+        return p2;
+    }
+
+private:
+    double scale_;
+    double offset_;
+};
+
 
 } // end geometry ns
 } // end mapnik ns
