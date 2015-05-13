@@ -28,9 +28,6 @@
 
 // boost
 #include <boost/program_options.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 int main(int argc, char** argv)
 {
@@ -46,7 +43,7 @@ int main(int argc, char** argv)
         ("styles-dir", po::value<std::string>()->default_value("test/data-visual/styles"), "directory with styles")
         ("images-dir", po::value<std::string>()->default_value("test/data-visual/images"), "directory with reference images")
         ("output-dir", po::value<std::string>()->default_value("/tmp/mapnik-visual-images"), "directory for output files")
-        ("uuid-subdir,u", "write output files to subdirectory with unique name")
+        ("unique-subdir,u", "write output files to subdirectory with unique name")
         ("styles", po::value<std::vector<std::string>>(), "selected styles to test")
         ("fonts", po::value<std::string>()->default_value("fonts"), "font search path")
         ("plugins", po::value<std::string>()->default_value("plugins/input"), "input plugins search path")
@@ -69,10 +66,9 @@ int main(int argc, char** argv)
 
     boost::filesystem::path output_dir(vm["output-dir"].as<std::string>());
 
-    if (vm.count("uuid-subdir"))
+    if (vm.count("unique-subdir"))
     {
-        boost::uuids::uuid uuid = boost::uuids::random_generator()();
-        output_dir /= boost::lexical_cast<std::string>(uuid);
+        output_dir /= boost::filesystem::unique_path();
     }
 
     runner run(vm["styles-dir"].as<std::string>(),
