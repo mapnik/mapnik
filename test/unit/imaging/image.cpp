@@ -213,6 +213,61 @@ SECTION("image any")
     CHECK(im_any.get_offset() == 10.0);
     im_any.set_scaling(2.1);
     CHECK(im_any.get_scaling() == 2.1);
+    CHECK_FALSE(im_any.painted());
+
+} // END SECTION
+
+
+SECTION("test image_any initialization")
+{
+    {
+        mapnik::image_any im(4,4);
+        CHECK(im.get_dtype() == mapnik::image_dtype_rgba8);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_null);
+        CHECK(im.get_dtype() == mapnik::image_dtype_null);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray8);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray8);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray8s);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray8s);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray16);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray16);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray16s);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray16s);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray32);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray32);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray32s);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray32s);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray32f);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray32f);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray64);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray64);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray64s);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray64s);
+    }
+    {
+        mapnik::image_any im(4, 4, mapnik::image_dtype_gray64f);
+        CHECK(im.get_dtype() == mapnik::image_dtype_gray64f);
+    }
 
 } // END SECTION
 
