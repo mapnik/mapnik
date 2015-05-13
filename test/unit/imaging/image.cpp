@@ -271,5 +271,22 @@ SECTION("test image_any initialization")
 
 } // END SECTION
 
+SECTION("Image Buffer")
+{
+    mapnik::detail::buffer buf_zero(0);
+    CHECK(buf_zero.size() == 0);
+    CHECK(!buf_zero);
+    mapnik::detail::buffer buf(10);
+    CHECK(buf.size() == 10);
+    CHECK_FALSE(!buf);
+    unsigned char * d = buf.data();
+    *d = 9;
+    const mapnik::detail::buffer buf2 = buf;
+    CHECK(buf2.size() == 10);
+    unsigned char const* d2 = buf2.data();
+    CHECK(*d2 == 9);
+
+} // END SECTION
+
 } // END TEST CASE
 
