@@ -75,7 +75,8 @@ struct geometry_to_path
         bool first = true;
         for (auto const& pt : poly.exterior_ring)
         {
-            if (first) {
+            if (first)
+            {
                 p_.move_to(pt.x, pt.y);
                 first=false;
             }
