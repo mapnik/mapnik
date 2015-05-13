@@ -62,9 +62,9 @@ namespace mapnik { namespace svg {
             ;
 
         svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
-                      | &uint_(mapnik::SEG_LINETO) [_a +=1] << kstring [if_(_a == 1u) [_1 = "L" ].else_[_1 =""]])
-                     << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
-            ;
+                      | &uint_(mapnik::SEG_LINETO) << lit('L'))
+                     << coordinate << lit(' ') << coordinate) % lit(' ')
+                     ;
 
     }
 
