@@ -37,8 +37,6 @@ namespace mapnik { namespace svg {
         boost::spirit::karma::_val_type _val;
         boost::spirit::karma::_1_type _1;
         boost::spirit::karma::lit_type lit;
-        boost::spirit::karma::_a_type _a;
-        boost::spirit::karma::string_type kstring;
 
         svg = point | linestring | polygon
             ;
