@@ -127,7 +127,6 @@ void handle_png_options(std::string const& type,
         }
         else if (key == "s")
         {
-            //std::string s = t.substr(2);
             if (!val) throw image_writer_exception("invalid compression parameter: <uninitialised>");
 
             if (*val == "default")
