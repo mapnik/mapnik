@@ -624,23 +624,24 @@ template MAPNIK_DECL void set_premultiplied_alpha(image_gray64f &, bool);
 
 namespace detail {
 
+namespace  {
+
+template <typename T>
+inline double clamp(T d, T min, T max)
+{
+    const T t = d < min ? min : d;
+    return t > max ? max : t;
+}
+
+}
 struct visitor_set_alpha
 {
     visitor_set_alpha(float opacity)
-        : opacity_(opacity) {}
+        : opacity_(clamp(opacity, 0.0f, 1.0f)) {}
 
     void operator() (image_rgba8 & data)
     {
         using pixel_type = image_rgba8::pixel_type;
-        if (opacity_ > 1.0)
-        {
-            opacity_ = 1.0;
-        }
-        if (opacity_ < 0.0)
-        {
-            opacity_ = 0.0;
-        }
-
         pixel_type a1 = static_cast<pixel_type>(255.0 * opacity_);
         for (unsigned int y = 0; y < data.height(); ++y)
         {
@@ -649,7 +650,6 @@ struct visitor_set_alpha
             {
                 pixel_type rgba = row_to[x];
                 pixel_type a0 = (rgba >> 24) & 0xff;
-                //unsigned a1 = opacity;
                 if (a0 == a1) continue;
 
                 pixel_type r = rgba & 0xff;
@@ -669,7 +669,6 @@ struct visitor_set_alpha
 
   private:
     float opacity_;
-
 };
 
 } // end detail ns
