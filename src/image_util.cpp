@@ -51,14 +51,6 @@
 #include <sstream>
 #include <algorithm>
 
-// boost
-#include <boost/numeric/conversion/cast.hpp>
-
-
-using boost::numeric_cast;
-using boost::numeric::positive_overflow;
-using boost::numeric::negative_overflow;
-
 namespace mapnik
 {
 
@@ -626,10 +618,11 @@ namespace detail {
 
 namespace  {
 
-template <typename T>
-inline double clamp(T d, T min, T max)
+template <typename T0, typename T1>
+inline T0 clamp(T0 d, T1 min, T1 max)
 {
-    const T t = d < min ? min : d;
+    using result_type = T0;
+    result_type const t = d < min ? min : d;
     return t > max ? max : t;
 }
 
@@ -932,7 +925,7 @@ struct visitor_set_color_to_alpha
     visitor_set_color_to_alpha(color const& c)
         : c_(c) {}
 
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned y = 0; y < data.height(); ++y)
@@ -953,7 +946,7 @@ struct visitor_set_color_to_alpha
     }
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         throw std::runtime_error("Error: set_color_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
     }
@@ -1011,22 +1004,12 @@ struct visitor_fill
         : val_(val) {}
 
     template <typename T2>
-    void operator() (T2 & data)
+    void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val;
-        try
-        {
-            val = numeric_cast<pixel_type>(val_);
-        }
-        catch(negative_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::min();
-        }
-        catch(positive_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::max();
-        }
+        auto val = clamp(val_,
+                         std::numeric_limits<pixel_type>::min(),
+                         std::numeric_limits<pixel_type>::max());
         data.set(val);
     }
 
@@ -1040,7 +1023,7 @@ struct visitor_fill<color>
     visitor_fill(color const& val)
         : val_(val) {}
 
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
         pixel_type val = static_cast<pixel_type>(val_.rgba());
@@ -1049,7 +1032,7 @@ struct visitor_fill<color>
     }
 
     template <typename T2>
-    void operator() (T2 & data)
+    void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
         pixel_type val = static_cast<pixel_type>(val_.rgba());
@@ -1296,7 +1279,7 @@ struct visitor_set_rectangle
     visitor_set_rectangle(image_any const & src, int x0, int y0)
         : src_(src), x0_(x0), y0_(y0) {}
 
-    void operator()(image_rgba8 & dst)
+    void operator()(image_rgba8 & dst) const
     {
         using pixel_type = image_rgba8::pixel_type;
         image_rgba8 src = util::get<image_rgba8>(src_);
@@ -1322,13 +1305,13 @@ struct visitor_set_rectangle
         }
     }
 
-    void operator() (image_null &)
+    void operator() (image_null &) const
     {
         throw std::runtime_error("Set rectangle not support for null images");
     }
 
     template <typename T>
-    void operator() (T & dst)
+    void operator() (T & dst) const
     {
         using pixel_type = typename T::pixel_type;
         T src = util::get<T>(src_);
@@ -1390,14 +1373,14 @@ struct visitor_composite_pixel
     // Obviously c variable would only work for rgba8 currently, but didn't want to
     // make this a template class until new rgba types exist.
     visitor_composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
-        :   opacity_(opacity),
+        :   opacity_(clamp(opacity, 0.0, 1.0)),
             op_(op),
             x_(x),
             y_(y),
             c_(c),
             cover_(cover) {}
 
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using color_type = agg::rgba8;
         using value_type = color_type::value_type;
@@ -1406,29 +1389,29 @@ struct visitor_composite_pixel
 
         if (mapnik::check_bounds(data, x_, y_))
         {
-            unsigned rgba = data(x_,y_);
-            unsigned ca = (unsigned)(((c_ >> 24) & 0xff) * opacity_);
-            unsigned cb = (c_ >> 16 ) & 0xff;
-            unsigned cg = (c_ >> 8) & 0xff;
-            unsigned cr = (c_ & 0xff);
-            blender_type::blend_pix(op_, (value_type*)&rgba, cr, cg, cb, ca, cover_);
+            image_rgba8::pixel_type rgba = data(x_,y_);
+            value_type ca = static_cast<unsigned>(((c_ >> 24) & 0xff) * opacity_);
+            value_type cb = (c_ >> 16 ) & 0xff;
+            value_type cg = (c_ >> 8) & 0xff;
+            value_type cr = (c_ & 0xff);
+            blender_type::blend_pix(op_, reinterpret_cast<value_type*>(&rgba), cr, cg, cb, ca, cover_);
             data(x_,y_) = rgba;
         }
     }
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         throw std::runtime_error("Composite pixel is not supported for this data type");
     }
 
   private:
-    double opacity_;
+    double const opacity_;
     unsigned op_;
-    int x_;
-    int y_;
-    int c_;
-    unsigned cover_;
+    int const x_;
+    int const y_;
+    int const c_;
+    unsigned const cover_;
 
 };
 
@@ -1467,32 +1450,23 @@ struct visitor_set_pixel
         : val_(val), x_(x), y_(y) {}
 
     template <typename T2>
-    void operator() (T2 & data)
+    void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val;
-        try
-        {
-            val = numeric_cast<pixel_type>(val_);
-        }
-        catch(negative_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::min();
-        }
-        catch(positive_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::max();
-        }
+        auto val = clamp(val_,
+                         std::numeric_limits<pixel_type>::min(),
+                         std::numeric_limits<pixel_type>::max());
+
         if (check_bounds(data, x_, y_))
         {
-            data(x_, y_) = val;
+            data(x_, y_) = static_cast<pixel_type>(val);
         }
     }
 
   private:
     T1 const& val_;
-    std::size_t x_;
-    std::size_t y_;
+    std::size_t const x_;
+    std::size_t const y_;
 };
 
 template<>
@@ -1502,7 +1476,7 @@ struct visitor_set_pixel<color>
         : val_(val), x_(x), y_(y) {}
 
     template <typename T2>
-    void operator() (T2 & data)
+    void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
         pixel_type val;
@@ -1530,8 +1504,8 @@ struct visitor_set_pixel<color>
 
   private:
     color const& val_;
-    std::size_t x_;
-    std::size_t y_;
+    std::size_t const x_;
+    std::size_t const y_;
 };
 
 } // end detail ns
@@ -1772,23 +1746,14 @@ struct visitor_get_pixel
         : x_(x), y_(y) {}
 
     template <typename T2>
-    T1 operator() (T2 const& data)
+    T1 operator() (T2 const& data) const
     {
+        using pixel_type = T1;
         if (check_bounds(data, x_, y_))
         {
-            T1 val;
-            try
-            {
-                val = numeric_cast<T1>(data(x_,y_));
-            }
-            catch(negative_overflow&)
-            {
-                val = std::numeric_limits<T1>::min();
-            }
-            catch(positive_overflow&)
-            {
-                val = std::numeric_limits<T1>::max();
-            }
+            auto val = clamp(data(x_, y_),
+                             std::numeric_limits<pixel_type>::min(),
+                             std::numeric_limits<pixel_type>::max());
             return val;
         }
         else
@@ -1798,8 +1763,8 @@ struct visitor_get_pixel
     }
 
   private:
-    std::size_t x_;
-    std::size_t y_;
+    std::size_t const x_;
+    std::size_t const y_;
 };
 
 template<>
@@ -1809,7 +1774,7 @@ struct visitor_get_pixel<color>
         : x_(x), y_(y) {}
 
     template <typename T2>
-    color operator() (T2 const& data)
+    color operator() (T2 const& data) const
     {
         if (check_bounds(data, x_, y_))
         {
@@ -1822,8 +1787,8 @@ struct visitor_get_pixel<color>
     }
 
   private:
-    std::size_t x_;
-    std::size_t y_;
+    std::size_t const x_;
+    std::size_t const y_;
 };
 
 } // end detail ns
@@ -2320,22 +2285,22 @@ struct visitor_create_view
     visitor_create_view(unsigned x,unsigned y, unsigned w, unsigned h)
         : x_(x), y_(y), w_(w), h_(h) {}
 
-    image_view_any operator() (image_null const&)
+    image_view_any operator() (image_null const&) const
     {
         throw std::runtime_error("Can not make a view from a null image");
     }
 
     template <typename T>
-    image_view_any operator() (T const& data)
+    image_view_any operator() (T const& data) const
     {
         image_view<T> view(x_,y_,w_,h_,data);
         return image_view_any(view);
     }
   private:
-    unsigned x_;
-    unsigned y_;
-    unsigned w_;
-    unsigned h_;
+    unsigned const x_;
+    unsigned const y_;
+    unsigned const w_;
+    unsigned const h_;
 };
 
 } // end detail ns
@@ -2532,10 +2497,12 @@ namespace detail
 struct visitor_compare
 {
     visitor_compare(image_any const& im2, double threshold, bool alpha)
-        : im2_(im2), threshold_(threshold), alpha_(alpha) {}
+        : im2_(im2),
+          threshold_(threshold),
+          alpha_(alpha) {}
 
     template <typename T>
-    unsigned operator() (T const & im1)
+    unsigned operator() (T const & im1) const
     {
         if (!im2_.is<T>())
         {
@@ -2546,8 +2513,8 @@ struct visitor_compare
 
   private:
     image_any const& im2_;
-    double threshold_;
-    bool alpha_;
+    double const threshold_;
+    bool const alpha_;
 };
 
 } // end detail ns
