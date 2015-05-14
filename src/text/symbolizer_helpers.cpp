@@ -318,6 +318,40 @@ placements_list const& text_symbolizer_helper::get() const
     return finder_.placements();
 }
 
+class apply_line_placement_visitor
+{
+public:
+    apply_line_placement_visitor(vertex_converter_type & converter,
+                                 placement_finder_adapter<placement_finder> const & adapter)
+        : converter_(converter), adapter_(adapter)
+    {
+    }
+
+    bool operator()(geometry::line_string<double> const & geo) const
+    {
+        geometry::line_string_vertex_adapter<double> va(geo);
+        converter_.apply(va, adapter_);
+        return adapter_.status();
+    }
+
+    bool operator()(geometry::polygon<double> const & geo) const
+    {
+        geometry::polygon_vertex_adapter<double> va(geo);
+        converter_.apply(va, adapter_);
+        return adapter_.status();
+    }
+
+    template <typename T>
+    bool operator()(T const & geo) const
+    {
+        return false;
+    }
+
+private:
+    vertex_converter_type & converter_;
+    placement_finder_adapter<placement_finder> const & adapter_;
+};
+
 bool text_symbolizer_helper::next_line_placement() const
 {
     while (!geometries_to_process_.empty())
@@ -331,17 +365,11 @@ bool text_symbolizer_helper::next_line_placement() const
             continue; //Reexecute size check
         }
 
-        if (geo_itr_->is<base_symbolizer_helper::line_string_cref>()) // line_string
+        if (mapnik::util::apply_visitor(apply_line_placement_visitor(converter_, adapter_), *geo_itr_))
         {
-            auto const& line = util::get<geometry::line_string<double> const>(*geo_itr_);
-            geometry::line_string_vertex_adapter<double> va(line);
-            converter_.apply(va, adapter_);
-            if (adapter_.status())
-            {
-                //Found a placement
-                geo_itr_ = geometries_to_process_.erase(geo_itr_);
-                return true;
-            }
+            //Found a placement
+            geo_itr_ = geometries_to_process_.erase(geo_itr_);
+            return true;
         }
 
         // No placement for this geometry. Keep it in geometries_to_process_ for next try.
