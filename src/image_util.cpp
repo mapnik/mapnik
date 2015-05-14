@@ -91,7 +91,7 @@ MAPNIK_DECL void save_to_file(T const& image,
     {
         save_to_stream<T>(image, file, type, palette);
     }
-    else throw ImageWriterException("Could not write file to " + filename );
+    else throw image_writer_exception("Could not write file to " + filename );
 }
 
 template <typename T>
@@ -104,7 +104,7 @@ MAPNIK_DECL void save_to_file(T const& image,
     {
         save_to_stream<T>(image, file, type);
     }
-    else throw ImageWriterException("Could not write file to " + filename );
+    else throw image_writer_exception("Could not write file to " + filename );
 }
 
 template <typename T>
@@ -124,15 +124,15 @@ MAPNIK_DECL void save_to_stream(T const& image,
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
-            throw ImageWriterException("palettes are not currently supported when writing to tiff format (yet)");
+            throw image_writer_exception("palettes are not currently supported when writing to tiff format (yet)");
         }
         else if (boost::algorithm::starts_with(t, "jpeg"))
         {
-            throw ImageWriterException("palettes are not currently supported when writing to jpeg format");
+            throw image_writer_exception("palettes are not currently supported when writing to jpeg format");
         }
-        else throw ImageWriterException("unknown file type: " + type);
+        else throw image_writer_exception("unknown file type: " + type);
     }
-    else throw ImageWriterException("Could not write to empty stream" );
+    else throw image_writer_exception("Could not write to empty stream" );
 }
 
 // This can be removed once image_any and image_view_any are the only
@@ -155,15 +155,15 @@ MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
-            throw ImageWriterException("palettes are not currently supported when writing to tiff format (yet)");
+            throw image_writer_exception("palettes are not currently supported when writing to tiff format (yet)");
         }
         else if (boost::algorithm::starts_with(t, "jpeg"))
         {
-            throw ImageWriterException("palettes are not currently supported when writing to jpeg format");
+            throw image_writer_exception("palettes are not currently supported when writing to jpeg format");
         }
-        else throw ImageWriterException("unknown file type: " + type);
+        else throw image_writer_exception("unknown file type: " + type);
     }
-    else throw ImageWriterException("Could not write to empty stream" );
+    else throw image_writer_exception("Could not write to empty stream" );
 }
 
 // This can be removed once image_any and image_view_any are the only
@@ -186,15 +186,15 @@ MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
-            throw ImageWriterException("palettes are not currently supported when writing to tiff format (yet)");
+            throw image_writer_exception("palettes are not currently supported when writing to tiff format (yet)");
         }
         else if (boost::algorithm::starts_with(t, "jpeg"))
         {
-            throw ImageWriterException("palettes are not currently supported when writing to jpeg format");
+            throw image_writer_exception("palettes are not currently supported when writing to jpeg format");
         }
-        else throw ImageWriterException("unknown file type: " + type);
+        else throw image_writer_exception("unknown file type: " + type);
     }
-    else throw ImageWriterException("Could not write to empty stream" );
+    else throw image_writer_exception("Could not write to empty stream" );
 }
 
 template <typename T>
@@ -226,9 +226,9 @@ MAPNIK_DECL void save_to_stream(T const& image,
             webp_saver visitor(stream, t);
             util::apply_visitor(visitor, image);
         }
-        else throw ImageWriterException("unknown file type: " + type);
+        else throw image_writer_exception("unknown file type: " + type);
     }
-    else throw ImageWriterException("Could not write to empty stream" );
+    else throw image_writer_exception("Could not write to empty stream" );
 }
 
 // This can be removed once image_any and image_view_any are the only
@@ -266,9 +266,9 @@ MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
             visitor(image);
             //util::apply_visitor(visitor, image);
         }
-        else throw ImageWriterException("unknown file type: " + type);
+        else throw image_writer_exception("unknown file type: " + type);
     }
-    else throw ImageWriterException("Could not write to empty stream" );
+    else throw image_writer_exception("Could not write to empty stream" );
 }
 
 // This can be removed once image_any and image_view_any are the only
@@ -306,9 +306,9 @@ MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
             visitor(image);
             //util::apply_visitor(visitor, image);
         }
-        else throw ImageWriterException("unknown file type: " + type);
+        else throw image_writer_exception("unknown file type: " + type);
     }
-    else throw ImageWriterException("Could not write to empty stream" );
+    else throw image_writer_exception("Could not write to empty stream" );
 }
 
 template <typename T>
@@ -319,7 +319,7 @@ MAPNIK_DECL void save_to_file(T const& image, std::string const& filename)
     {
         save_to_file<T>(image, filename, *type);
     }
-    else throw ImageWriterException("Could not write file to " + filename );
+    else throw image_writer_exception("Could not write file to " + filename );
 }
 
 template <typename T>
@@ -330,7 +330,7 @@ MAPNIK_DECL void save_to_file(T const& image, std::string const& filename, rgba_
     {
         save_to_file<T>(image, filename, *type, palette);
     }
-    else throw ImageWriterException("Could not write file to " + filename );
+    else throw image_writer_exception("Could not write file to " + filename );
 }
 
 // image_rgba8

@@ -53,15 +53,15 @@ struct image_view_any;
 template <typename T> class image_view;
 class color;
 
-class ImageWriterException : public std::exception
+class image_writer_exception : public std::exception
 {
 private:
     std::string message_;
 public:
-    ImageWriterException(std::string const& message)
+    image_writer_exception(std::string const& message)
         : message_(message) {}
 
-    ~ImageWriterException() throw() {}
+    ~image_writer_exception() throw() {}
 
     virtual const char* what() const throw()
     {

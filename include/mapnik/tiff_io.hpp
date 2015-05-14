@@ -190,7 +190,7 @@ struct tag_setter
     void operator() (T const&) const
     {
         // Assume this would be null type
-        throw ImageWriterException("Could not write TIFF - unknown image type provided");
+        throw image_writer_exception("Could not write TIFF - unknown image type provided");
     }
 
     inline void operator() (image_rgba8 const& data) const
@@ -358,7 +358,7 @@ struct tag_setter
     inline void operator() (image_null const&) const
     {
         // Assume this would be null type
-        throw ImageWriterException("Could not write TIFF - Null image provided");
+        throw image_writer_exception("Could not write TIFF - Null image provided");
     }
 
     private:
@@ -406,7 +406,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
                                 tiff_dummy_unmap_proc);
     if (! output)
     {
-        throw ImageWriterException("Could not write TIFF");
+        throw image_writer_exception("Could not write TIFF");
     }
 
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
@@ -453,7 +453,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
             }
             if (TIFFWriteEncodedStrip(output, TIFFComputeStrip(output, y, 0), strip_buffer.get(), strip_size * sizeof(pixel_type)) == -1)
             {
-                throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
+                throw image_writer_exception("Could not write TIFF - TIFF Tile Write failed");
             }
         }
     }
@@ -504,7 +504,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
                 }
                 if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_out.get(), tile_size * sizeof(pixel_type)) == -1)
                 {
-                    throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
+                    throw image_writer_exception("Could not write TIFF - TIFF Tile Write failed");
                 }
             }
         }

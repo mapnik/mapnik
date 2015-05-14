@@ -76,12 +76,12 @@ void handle_tiff_options(std::string const& type,
                         config.compression = COMPRESSION_LZW;
                     }
                     else if (val == "none")
-                    {   
+                    {
                         config.compression = COMPRESSION_NONE;
                     }
                     else
                     {
-                        throw ImageWriterException("invalid tiff compression: '" + val + "'");
+                        throw image_writer_exception("invalid tiff compression: '" + val + "'");
                     }
                 }
             }
@@ -104,7 +104,7 @@ void handle_tiff_options(std::string const& type,
                     }
                     else
                     {
-                        throw ImageWriterException("invalid tiff method: '" + val + "'");
+                        throw image_writer_exception("invalid tiff method: '" + val + "'");
                     }
                 }
             }
@@ -115,7 +115,7 @@ void handle_tiff_options(std::string const& type,
                 {
                     if (!mapnik::util::string2int(val,config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
                     {
-                        throw ImageWriterException("invalid tiff zlevel: '" + val + "'");
+                        throw image_writer_exception("invalid tiff zlevel: '" + val + "'");
                     }
                 }
             }
@@ -126,7 +126,7 @@ void handle_tiff_options(std::string const& type,
                 {
                     if (!mapnik::util::string2int(val,config.tile_height) || config.tile_height < 0 )
                     {
-                        throw ImageWriterException("invalid tiff tile_height: '" + val + "'");
+                        throw image_writer_exception("invalid tiff tile_height: '" + val + "'");
                     }
                 }
             }
@@ -137,7 +137,7 @@ void handle_tiff_options(std::string const& type,
                 {
                     if (!mapnik::util::string2int(val,config.tile_width) || config.tile_width < 0 )
                     {
-                        throw ImageWriterException("invalid tiff tile_width: '" + val + "'");
+                        throw image_writer_exception("invalid tiff tile_width: '" + val + "'");
                     }
                 }
             }
@@ -148,13 +148,13 @@ void handle_tiff_options(std::string const& type,
                 {
                     if (!mapnik::util::string2int(val,config.rows_per_strip) || config.rows_per_strip < 0 )
                     {
-                        throw ImageWriterException("invalid tiff rows_per_strip: '" + val + "'");
+                        throw image_writer_exception("invalid tiff rows_per_strip: '" + val + "'");
                     }
                 }
             }
             else
             {
-                throw ImageWriterException("unhandled tiff option: " + t);
+                throw image_writer_exception("unhandled tiff option: " + t);
             }
         }
     }
@@ -167,13 +167,13 @@ tiff_saver::tiff_saver(std::ostream & stream, std::string const& t):
 template<>
 void tiff_saver::operator()<image_null> (image_null const& image) const
 {
-    throw ImageWriterException("null images not supported");
+    throw image_writer_exception("null images not supported");
 }
 
 template<>
 void tiff_saver::operator()<image_view_null> (image_view_null const& image) const
 {
-    throw ImageWriterException("null image views not supported");
+    throw image_writer_exception("null image views not supported");
 }
 
 template <typename T>
@@ -184,7 +184,7 @@ void tiff_saver::operator() (T const& image) const
     handle_tiff_options(t_, opts);
     save_as_tiff(stream_, image, opts);
 #else
-    throw ImageWriterException("tiff output is not enabled in your build of Mapnik");
+    throw image_writer_exception("tiff output is not enabled in your build of Mapnik");
 #endif
 }
 

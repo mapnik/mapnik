@@ -95,14 +95,14 @@ void handle_png_options(std::string const& type,
             set_colors = true;
             if (!mapnik::util::string2int(t.substr(2),opts.colors) || opts.colors < 1 || opts.colors > 256)
             {
-                throw ImageWriterException("invalid color parameter: " + t.substr(2));
+                throw image_writer_exception("invalid color parameter: " + t.substr(2));
             }
         }
         else if (boost::algorithm::starts_with(t, "t="))
         {
             if (!mapnik::util::string2int(t.substr(2),opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
             {
-                throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
+                throw image_writer_exception("invalid trans_mode parameter: " + t.substr(2));
             }
         }
         else if (boost::algorithm::starts_with(t, "g="))
@@ -110,7 +110,7 @@ void handle_png_options(std::string const& type,
             set_gamma = true;
             if (!mapnik::util::string2double(t.substr(2),opts.gamma) || opts.gamma < 0)
             {
-                throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
+                throw image_writer_exception("invalid gamma parameter: " + t.substr(2));
             }
         }
         else if (boost::algorithm::starts_with(t, "z="))
@@ -125,7 +125,7 @@ void handle_png_options(std::string const& type,
                 || opts.compression < Z_DEFAULT_COMPRESSION
                 || opts.compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
             {
-                throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
+                throw image_writer_exception("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
             }
         }
         else if (boost::algorithm::starts_with(t, "s="))
@@ -153,26 +153,26 @@ void handle_png_options(std::string const& type,
             }
             else
             {
-                throw ImageWriterException("invalid compression strategy parameter: " + s);
+                throw image_writer_exception("invalid compression strategy parameter: " + s);
             }
         }
         else
         {
-            throw ImageWriterException("unhandled png option: " + t);
+            throw image_writer_exception("unhandled png option: " + t);
         }
     }
     // validation
     if (!opts.paletted && set_colors)
     {
-        throw ImageWriterException("invalid color parameter: unavailable for true color (non-paletted) images");
+        throw image_writer_exception("invalid color parameter: unavailable for true color (non-paletted) images");
     }
     if (!opts.paletted && set_gamma)
     {
-        throw ImageWriterException("invalid gamma parameter: unavailable for true color (non-paletted) images");
+        throw image_writer_exception("invalid gamma parameter: unavailable for true color (non-paletted) images");
     }
     if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
     {
-        throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
+        throw image_writer_exception("invalid compression value: (only -1 through 9 are valid)");
     }
 }
 #endif
@@ -186,29 +186,29 @@ png_saver_pal::png_saver_pal(std::ostream & stream, std::string const& t, rgba_p
 template<>
 void png_saver::operator()<image_null> (image_null const& image) const
 {
-    throw ImageWriterException("null images not supported for png");
+    throw image_writer_exception("null images not supported for png");
 }
 
 template<>
 void png_saver_pal::operator()<image_null> (image_null const& image) const
 {
-    throw ImageWriterException("null images not supported for png");
+    throw image_writer_exception("null images not supported for png");
 }
 
 template<>
 void png_saver::operator()<image_view_null> (image_view_null const& image) const
 {
-    throw ImageWriterException("null image views not supported for png");
+    throw image_writer_exception("null image views not supported for png");
 }
 
 template<>
 void png_saver_pal::operator()<image_view_null> (image_view_null const& image) const
 {
-    throw ImageWriterException("null image views not supported for png");
+    throw image_writer_exception("null image views not supported for png");
 }
 
 template <typename T>
-void process_rgba8_png_pal(T const& image, 
+void process_rgba8_png_pal(T const& image,
                           std::string const& t,
                           std::ostream & stream,
                           rgba_palette const& pal)
@@ -238,12 +238,12 @@ void process_rgba8_png_pal(T const& image,
         save_as_png(stream, image, opts);
     }
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
 template <typename T>
-void process_rgba8_png(T const& image, 
+void process_rgba8_png(T const& image,
                           std::string const& t,
                           std::ostream & stream)
 {
@@ -266,7 +266,7 @@ void process_rgba8_png(T const& image,
         save_as_png(stream, image, opts);
     }
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
@@ -298,12 +298,12 @@ template <typename T>
 void png_saver::operator() (T const& image) const
 {
 #if defined(HAVE_PNG)
-    throw ImageWriterException("Mapnik does not support grayscale images for png");
+    throw image_writer_exception("Mapnik does not support grayscale images for png");
     //png_options opts;
     //handle_png_options(t_, opts);
     //save_as_png(stream_, image, opts);
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
@@ -311,12 +311,12 @@ template <typename T>
 void png_saver_pal::operator() (T const& image) const
 {
 #if defined(HAVE_PNG)
-    throw ImageWriterException("Mapnik does not support grayscale images for png");
+    throw image_writer_exception("Mapnik does not support grayscale images for png");
     //png_options opts;
     //handle_png_options(t_, opts);
     //save_as_png(stream_, image, opts);
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
