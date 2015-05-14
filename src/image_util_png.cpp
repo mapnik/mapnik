@@ -80,11 +80,23 @@ void handle_png_options(std::string const& type,
         }
         else if (t == "m=o")
         {
-            opts.use_hextree = false;
+            opts.quantization = png_options::OCTTREE;
         }
         else if (t == "m=h")
         {
-            opts.use_hextree = true;
+            opts.quantization = png_options::HEXTREE;
+        }
+        else if (t == "m=iq")
+        {
+            opts.quantization = png_options::IMGQUANT;
+
+        }
+        else if (boost::algorithm::starts_with(t, "iq="))
+        {
+            if (!mapnik::util::string2int(t.substr(3), opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
+            {
+                throw ImageWriterException("invalid iq speed parameter: " + t.substr(3));
+            }
         }
         else if (t == "e=miniz")
         {
@@ -224,13 +236,17 @@ void process_rgba8_png_pal(T const& image,
     }
     else if (opts.paletted)
     {
-        if (opts.use_hextree)
+        if (opts.quantization == png_options::HEXTREE)
         {
             save_as_png8_hex(stream, image, opts);
         }
-        else
+        else if (opts.quantization == png_options::OCTTREE)
         {
             save_as_png8_oct(stream, image, opts);
+        }
+        else
+        {
+            save_as_png8_libimagequant(stream, image, opts);
         }
     }
     else
@@ -252,13 +268,17 @@ void process_rgba8_png(T const& image,
     handle_png_options(t, opts);
     if (opts.paletted)
     {
-        if (opts.use_hextree)
+        if (opts.quantization == png_options::HEXTREE)
         {
             save_as_png8_hex(stream, image, opts);
         }
-        else
+        else if (opts.quantization == png_options::OCTTREE)
         {
             save_as_png8_oct(stream, image, opts);
+        }
+        else
+        {
+            save_as_png8_libimagequant(stream, image, opts);
         }
     }
     else

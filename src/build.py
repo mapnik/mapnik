@@ -73,6 +73,9 @@ if '-DHAVE_PNG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('png')
    enabled_imaging_libraries.append('png_reader.cpp')
 
+if '-DHAVE_IQ' in env['CPPDEFINES']:
+   lib_env['LIBS'].append('imagequant')
+
 if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
    lib_env['LIBS'].append('proj')
 

@@ -32,6 +32,8 @@
 
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
+#include "memory_datasource.hpp"
+#include "palette.hpp"
 
 // boost
 
@@ -39,6 +41,8 @@
 extern "C"
 {
 #include <png.h>
+// TODO: make this optional
+#include "libimagequant.h"
 }
 
 #define MAX_OCTREE_LEVELS 4
@@ -46,22 +50,27 @@ extern "C"
 namespace mapnik {
 
 struct png_options {
+
+    enum quantization_type { HEXTREE = 0, OCTTREE = 1, IMGQUANT = 2 };
+
     int colors;
     int compression;
     int strategy;
     int trans_mode;
+    int iq_speed;
     double gamma;
     bool paletted;
-    bool use_hextree;
+    quantization_type quantization;
     bool use_miniz;
     png_options() :
         colors(256),
         compression(Z_DEFAULT_COMPRESSION),
         strategy(Z_DEFAULT_STRATEGY),
         trans_mode(-1),
+        iq_speed(3),
         gamma(-1),
         paletted(true),
-        use_hextree(true),
+        quantization(HEXTREE),
         use_miniz(false) {}
 };
 
@@ -702,6 +711,55 @@ void save_as_png8_pal(T1 & file,
                       png_options const& opts)
 {
     save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alphaTable(), opts);
+}
+
+// TODO: This only works with rgba8_t image types
+template <typename T1, typename T2>
+void save_as_png8_libimagequant(T1 & file,
+                                T2 const& image,
+                                png_options const& opts)
+{
+    unsigned width = image.width();
+    unsigned height = image.height();
+
+    // TODO: can this be done as a single blob, rather than using rows?
+    uint32_t *buf[height];
+
+    // TODO: this won't work on big-endian architectures, liq expects
+    //       data in RGBA byte order
+    for (size_t y = 0; y < height; ++y) 
+    {
+        buf[y] = (uint32_t *)image.get_row(y);
+    }
+
+    liq_attr *attr = liq_attr_create();
+    // TODO: set gamma
+    // TODO: error checking
+    liq_set_speed(attr, opts.iq_speed);
+    liq_image *liq_image = liq_image_create_rgba_rows(attr, (void **)buf, width, height, 0);
+    liq_result *res = liq_quantize_image(attr, liq_image);
+
+    // Store palettized version
+    image_gray8 reduced_image(width, height);
+    liq_write_remapped_image(res, liq_image, (void *)reduced_image.data(), width*height*sizeof(gray8_t));
+    const liq_palette *liq_pal = liq_get_palette(res);
+
+    std::vector<mapnik::rgb> palette;
+    std::vector<unsigned> alpha;
+
+    for (int i = 0; i < liq_pal->count; ++i) 
+    {
+        palette.push_back({ liq_pal->entries[i].r, liq_pal->entries[i].g, liq_pal->entries[i].b });
+        alpha.push_back(liq_pal->entries[i].a);
+    }
+
+    // TODO: support 1 & 4 bit packing, not just 8, to reduce the file size, particularly on blank
+    //       or solid tiles
+    save_as_png(file, palette, reduced_image, width, height, 8, alpha, opts);
+
+    liq_attr_destroy(attr);
+    liq_image_destroy(liq_image);
+    liq_result_destroy(res);
 }
 
 }

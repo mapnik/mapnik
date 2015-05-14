@@ -84,6 +84,7 @@ pretty_dep_names = {
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
+    'imgquant':'ImageQuant C library | configure with IQ_LIBS & IQ_INCLUDES',
     'webp':'WEBP C library | configure with WEBP_LIBS & WEBP_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
     'harfbuzz':'HarfBuzz text shaping library | configure with HB_LIBS & HB_INCLUDES',
@@ -346,6 +347,9 @@ opts.AddVariables(
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    BoolVariable('IQ', 'Build Mapnik with ImageQuant support', 'True'),
+    PathVariable('IQ_INCLUDES', 'Search path for libimagequant include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('IQ_LIBS','Search path for libimagequant library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
@@ -1303,6 +1307,15 @@ if not preconfigured:
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['png'])
+
+    if env['IQ']:
+        OPTIONAL_LIBSHEADERS.append(['imagequant', 'libimagequant.h', False,'C','-DHAVE_IQ'])
+        inc_path = env['%s_INCLUDES' % 'IQ']
+        lib_path = env['%s_LIBS' % 'IQ']
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
+    else:
+        env['SKIPPED_DEPS'].extend(['iq'])
 
     if env['WEBP']:
         OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
