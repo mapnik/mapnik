@@ -639,7 +639,7 @@ struct visitor_set_alpha
     visitor_set_alpha(float opacity)
         : opacity_(clamp(opacity, 0.0f, 1.0f)) {}
 
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
         pixel_type a1 = static_cast<pixel_type>(255.0 * opacity_);
@@ -662,7 +662,7 @@ struct visitor_set_alpha
     }
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         throw std::runtime_error("Error: set_alpha with " + std::string(typeid(data).name()) + " is not supported");
     }
