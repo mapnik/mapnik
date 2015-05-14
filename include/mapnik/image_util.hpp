@@ -26,11 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/pixel_types.hpp>
-//#include <mapnik/image.hpp>
-//#include <mapnik/image_any.hpp>
-//#include <mapnik/image_view.hpp>
-//#include <mapnik/image_view_any.hpp>
-//#include <mapnik/color.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -420,7 +415,6 @@ void add_border(T & image)
         image(image.width()-1,y) = 0xffff0000; // blue
     }
 }
-
 }
 
 #endif // MAPNIK_IMAGE_UTIL_HPP
