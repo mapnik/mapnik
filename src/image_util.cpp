@@ -410,18 +410,18 @@ namespace detail {
 
 struct is_solid_visitor
 {
-    bool operator() (image_view_null const&)
+    bool operator() (image_view_null const&) const
     {
         return true;
     }
 
-    bool operator() (image_null const&)
+    bool operator() (image_null const&) const
     {
         return true;
     }
 
     template <typename T>
-    bool operator() (T const & data)
+    bool operator() (T const & data) const
     {
         using pixel_type = typename T::pixel_type;
         if (data.width() > 0 && data.height() > 0)
@@ -492,7 +492,7 @@ namespace detail {
 
 struct premultiply_visitor
 {
-    bool operator() (image_rgba8 & data)
+    bool operator() (image_rgba8 & data) const
     {
         if (!data.get_premultiplied())
         {
@@ -506,7 +506,7 @@ struct premultiply_visitor
     }
 
     template <typename T>
-    bool operator() (T &)
+    bool operator() (T &) const
     {
         return false;
     }
@@ -514,7 +514,7 @@ struct premultiply_visitor
 
 struct demultiply_visitor
 {
-    bool operator() (image_rgba8 & data)
+    bool operator() (image_rgba8 & data) const
     {
         if (data.get_premultiplied())
         {
@@ -528,7 +528,7 @@ struct demultiply_visitor
     }
 
     template <typename T>
-    bool operator() (T &)
+    bool operator() (T &) const
     {
         return false;
     }
@@ -540,12 +540,12 @@ struct set_premultiplied_visitor
         : status_(status) {}
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         data.set_premultiplied(status_);
     }
   private:
-    bool status_;
+    bool const status_;
 };
 
 } // end detail ns
@@ -668,7 +668,7 @@ struct visitor_set_alpha
     }
 
   private:
-    float opacity_;
+    float const opacity_;
 };
 
 } // end detail ns
@@ -714,9 +714,9 @@ namespace detail {
 struct visitor_multiply_alpha
 {
     visitor_multiply_alpha(float opacity)
-        : opacity_(opacity) {}
+        : opacity_(clamp(opacity, 0.0f, 1.0f)) {}
 
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
@@ -725,40 +725,23 @@ struct visitor_multiply_alpha
             for (unsigned int x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
-                pixel_type a0 = (rgba >> 24) & 0xff;
-                pixel_type a1;
-                try
-                {
-                    a1 = numeric_cast<std::uint8_t>(((rgba >> 24) & 0xff) * opacity_);
-                }
-                catch(negative_overflow&)
-                {
-                    a1 = std::numeric_limits<std::uint8_t>::min();
-                }
-                catch(positive_overflow&)
-                {
-                    a1 = std::numeric_limits<std::uint8_t>::max();
-                }
-                //unsigned a1 = opacity;
-                if (a0 == a1) continue;
-
+                pixel_type a = static_cast<uint8_t>(((rgba >> 24) & 0xff) * opacity_);
                 pixel_type r = rgba & 0xff;
                 pixel_type g = (rgba >> 8 ) & 0xff;
                 pixel_type b = (rgba >> 16) & 0xff;
-
-                row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
+                row_to[x] = (a << 24) | (b << 16) | (g << 8) | (r);
             }
         }
     }
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         throw std::runtime_error("Error: multiply_alpha with " + std::string(typeid(data).name()) + " is not supported");
     }
 
-  private:
-    float opacity_;
+    private:
+    float const opacity_;
 
 };
 
@@ -804,7 +787,7 @@ namespace detail {
 
 struct visitor_set_grayscale_to_alpha
 {
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
@@ -826,7 +809,7 @@ struct visitor_set_grayscale_to_alpha
     }
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         MAPNIK_LOG_WARN(image_util) << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified";
     }
@@ -837,7 +820,7 @@ struct visitor_set_grayscale_to_alpha_c
     visitor_set_grayscale_to_alpha_c(color const& c)
         : c_(c) {}
 
-    void operator() (image_rgba8 & data)
+    void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
         for (unsigned int y = 0; y < data.height(); ++y)
@@ -859,7 +842,7 @@ struct visitor_set_grayscale_to_alpha_c
     }
 
     template <typename T>
-    void operator() (T & data)
+    void operator() (T & data) const
     {
         MAPNIK_LOG_WARN(image_util) << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified";
     }
