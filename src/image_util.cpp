@@ -51,8 +51,15 @@
 #include <sstream>
 #include <algorithm>
 
+// boost
+#include <boost/numeric/conversion/cast.hpp>
+
 namespace mapnik
 {
+
+using boost::numeric_cast;
+using boost::numeric::positive_overflow;
+using boost::numeric::negative_overflow;
 
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
@@ -618,11 +625,10 @@ namespace detail {
 
 namespace  {
 
-template <typename T0, typename T1>
-inline T0 clamp(T0 d, T1 min, T1 max)
+template <typename T>
+inline T clamp(T d, T min, T max)
 {
-    using result_type = T0;
-    result_type const t = d < min ? min : d;
+    T const t = d < min ? min : d;
     return t > max ? max : t;
 }
 
@@ -1007,9 +1013,19 @@ struct visitor_fill
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        auto val = clamp(val_,
-                         std::numeric_limits<pixel_type>::min(),
-                         std::numeric_limits<pixel_type>::max());
+        pixel_type val;
+        try
+        {
+            val = numeric_cast<pixel_type>(val_);
+        }
+        catch(negative_overflow&)
+        {
+            val = std::numeric_limits<pixel_type>::min();
+        }
+        catch(positive_overflow&)
+        {
+            val = std::numeric_limits<pixel_type>::max();
+        }
         data.set(val);
     }
 
@@ -1453,13 +1469,22 @@ struct visitor_set_pixel
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        auto val = clamp(val_,
-                         std::numeric_limits<pixel_type>::min(),
-                         std::numeric_limits<pixel_type>::max());
-
+        pixel_type val;
+        try
+        {
+            val = numeric_cast<pixel_type>(val_);
+        }
+        catch(negative_overflow&)
+        {
+            val = std::numeric_limits<pixel_type>::min();
+        }
+        catch(positive_overflow&)
+        {
+            val = std::numeric_limits<pixel_type>::max();
+        }
         if (check_bounds(data, x_, y_))
         {
-            data(x_, y_) = static_cast<pixel_type>(val);
+            data(x_, y_) = val;
         }
     }
 
@@ -1751,9 +1776,19 @@ struct visitor_get_pixel
         using pixel_type = T1;
         if (check_bounds(data, x_, y_))
         {
-            auto val = clamp(data(x_, y_),
-                             std::numeric_limits<pixel_type>::min(),
-                             std::numeric_limits<pixel_type>::max());
+            T1 val;
+            try
+            {
+                val = numeric_cast<T1>(data(x_,y_));
+            }
+            catch(negative_overflow&)
+            {
+                val = std::numeric_limits<T1>::min();
+            }
+            catch(positive_overflow&)
+            {
+                val = std::numeric_limits<T1>::max();
+            }
             return val;
         }
         else
