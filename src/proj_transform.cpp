@@ -264,10 +264,14 @@ bool proj_transform::forward (box2d<double> & box) const
     if (is_source_equal_dest_)
         return true;
 
-    double llx, ulx = box.minx();
-    double lly, lry = box.miny();
-    double lrx, urx = box.maxx();
-    double uly, ury = box.maxy();
+    double llx = box.minx();
+    double ulx = box.minx();
+    double lly = box.miny();
+    double lry = box.miny();
+    double lrx = box.maxx();
+    double urx = box.maxx();
+    double uly = box.maxy(); 
+    double ury = box.maxy();
     double z = 0.0;
     if (!forward(llx,lly,z))
         return false;
@@ -277,10 +281,15 @@ bool proj_transform::forward (box2d<double> & box) const
         return false;
     if (!forward(urx,ury,z))
         return false;
-    box.init(std::min(ulx, llx),
-             std::min(lly, lry),
-             std::max(urx, lrx),
-             std::max(uly, ury));
+
+    double minx = std::min(ulx, llx);
+    double miny = std::min(lly, lry);
+    double maxx = std::max(urx, lrx);
+    double maxy = std::max(ury, uly);
+    box.init(minx,
+             miny,
+             maxx,
+             maxy);
     return true;
 }
 
@@ -289,10 +298,14 @@ bool proj_transform::backward (box2d<double> & box) const
     if (is_source_equal_dest_)
         return true;
 
-    double llx, ulx = box.minx();
-    double lly, lry = box.miny();
-    double lrx, urx = box.maxx();
-    double uly, ury = box.maxy();
+    double llx = box.minx();
+    double ulx = box.minx();
+    double lly = box.miny();
+    double lry = box.miny();
+    double lrx = box.maxx();
+    double urx = box.maxx();
+    double uly = box.maxy(); 
+    double ury = box.maxy();
     double z = 0.0;
     if (!backward(llx,lly,z))
         return false;
@@ -302,10 +315,14 @@ bool proj_transform::backward (box2d<double> & box) const
         return false;
     if (!backward(urx,ury,z))
         return false;
-    box.init(std::min(ulx, llx),
-             std::min(lly, lry),
-             std::max(urx, lrx),
-             std::max(uly, ury));
+    double minx = std::min(ulx, llx);
+    double miny = std::min(lly, lry);
+    double maxx = std::max(urx, lrx);
+    double maxy = std::max(ury, uly);
+    box.init(minx,
+             miny,
+             maxx,
+             maxy);
     return true;
 }
 

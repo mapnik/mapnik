@@ -58,10 +58,15 @@ SECTION("test rgba8 overflow") {
     mapnik::image_rgba8 im(4,4);
     mapnik::color c(128,128,128,128); // This color is premultiplied
     mapnik::fill(im, c); // Because c1 is not premultiplied it will make the image not premultiplied
+    mapnik::color out;
+    out = mapnik::get_pixel<mapnik::color>(im, 0, 0);
+    CHECK(static_cast<int>(out.red()) == 128);
+    CHECK(static_cast<int>(out.green()) == 128);
+    CHECK(static_cast<int>(out.blue()) == 128);
+    CHECK(static_cast<int>(out.alpha()) == 128);
 
     mapnik::multiply_alpha(im, 2.5);
 
-    mapnik::color out;
     out = mapnik::get_pixel<mapnik::color>(im, 0, 0);
     CHECK(static_cast<int>(out.red()) == 128);
     CHECK(static_cast<int>(out.green()) == 128);
