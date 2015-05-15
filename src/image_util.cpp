@@ -2410,8 +2410,8 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
     {
         for (unsigned int y = 0; y < im1.height(); ++y)
         {
-            const std::uint32_t * row_from = im1.get_row(y);
-            const std::uint32_t * row_from2 = im2.get_row(y);
+            const pixel_type * row_from = im1.get_row(y);
+            const pixel_type * row_from2 = im2.get_row(y);
             int x = 0;
             for (; x < ROUND_DOWN(im1.width(),4); x +=4 )
             {
@@ -2444,8 +2444,8 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
         __m128i m_thres = _mm_set1_epi8(thres);
         for (unsigned int y = 0; y < im1.height(); ++y)
         {
-            const std::uint32_t * row_from = im1.get_row(y);
-            const std::uint32_t * row_from2 = im2.get_row(y);
+            const pixel_type * row_from = im1.get_row(y);
+            const pixel_type * row_from2 = im2.get_row(y);
             int x = 0;
             for (; x < ROUND_DOWN(im1.width(),4); x +=4 )
             {
@@ -2494,8 +2494,8 @@ MAPNIK_DECL unsigned compare<image_rgba8>(image_rgba8 const& im1, image_rgba8 co
 #else
     for (unsigned int y = 0; y < im1.height(); ++y)
     {
-        const std::uint32_t * row_from = im1.get_row(y);
-        const std::uint32_t * row_from2 = im2.get_row(y);
+        const pixel_type * row_from = im1.get_row(y);
+        const pixel_type * row_from2 = im2.get_row(y);
         for (unsigned int x = 0; x < im1.width(); ++x)
         {
             unsigned rgba = row_from[x];
