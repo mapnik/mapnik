@@ -7,6 +7,8 @@ else
     export LD_LIBRARY_PATH="${CURRENT_DIR}/src/":${LD_LIBRARY_PATH}
 fi
 
+export PATH=$(pwd)/utils/nik2img/:${PATH}
+
 # mapnik-settings.env is an optional file to store
 # environment variables that should be used before
 # running tests like PROJ_LIB, GDAL_DATA, and ICU_DATA
