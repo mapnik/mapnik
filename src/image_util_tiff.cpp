@@ -29,10 +29,8 @@
 #include <mapnik/image_util_tiff.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/image_options.hpp>
 #include <mapnik/util/conversions.hpp>
-
-// boost
-#include <boost/tokenizer.hpp>
 
 // stl
 #include <string>
@@ -50,111 +48,103 @@ void handle_tiff_options(std::string const& type,
     }
     if (type.length() > 4)
     {
-        boost::char_separator<char> sep(":");
-        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        for (auto const& t : tokens)
+
+        for (auto const& kv : parse_image_options(type))
         {
-            if (t == "tiff")
+            auto const& key = kv.first;
+            auto const& val = kv.second;
+
+            if (key == "compression")
             {
-                continue;
-            }
-            else if (boost::algorithm::starts_with(t, "compression="))
-            {
-                std::string val = t.substr(12);
-                if (!val.empty())
+                if (val && !(*val).empty())
                 {
-                    if (val == "deflate")
+                    if (*val == "deflate")
                     {
                         config.compression = COMPRESSION_DEFLATE;
                     }
-                    else if (val == "adobedeflate")
+                    else if (*val == "adobedeflate")
                     {
                         config.compression = COMPRESSION_ADOBE_DEFLATE;
                     }
-                    else if (val == "lzw")
+                    else if (*val == "lzw")
                     {
                         config.compression = COMPRESSION_LZW;
                     }
-                    else if (val == "none")
+                    else if (*val == "none")
                     {
                         config.compression = COMPRESSION_NONE;
                     }
                     else
                     {
-                        throw image_writer_exception("invalid tiff compression: '" + val + "'");
+                        throw image_writer_exception("invalid tiff compression: '" + *val + "'");
                     }
                 }
             }
-            else if (boost::algorithm::starts_with(t, "method="))
+            else if (key == "method")
             {
-                std::string val = t.substr(7);
-                if (!val.empty())
+                if (val && !(*val).empty())
                 {
-                    if (val == "scanline")
+                    if (*val == "scanline")
                     {
                         config.method = TIFF_WRITE_SCANLINE;
                     }
-                    else if (val == "strip" || val == "stripped")
+                    else if (*val == "strip" || *val == "stripped")
                     {
                         config.method = TIFF_WRITE_STRIPPED;
                     }
-                    else if (val == "tiled")
+                    else if (*val == "tiled")
                     {
                         config.method = TIFF_WRITE_TILED;
                     }
                     else
                     {
-                        throw image_writer_exception("invalid tiff method: '" + val + "'");
+                        throw image_writer_exception("invalid tiff method: '" + *val + "'");
                     }
                 }
             }
-            else if (boost::algorithm::starts_with(t, "zlevel="))
+            else if (key == "zlevel")
             {
-                std::string val = t.substr(7);
-                if (!val.empty())
+                if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(val,config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
+                    if (!mapnik::util::string2int(*val,config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
                     {
-                        throw image_writer_exception("invalid tiff zlevel: '" + val + "'");
+                        throw image_writer_exception("invalid tiff zlevel: '" + *val + "'");
                     }
                 }
             }
-            else if (boost::algorithm::starts_with(t, "tile_height="))
+            else if (key == "tile_height")
             {
-                std::string val = t.substr(12);
-                if (!val.empty())
+                if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(val,config.tile_height) || config.tile_height < 0 )
+                    if (!mapnik::util::string2int(*val,config.tile_height) || config.tile_height < 0 )
                     {
-                        throw image_writer_exception("invalid tiff tile_height: '" + val + "'");
+                        throw image_writer_exception("invalid tiff tile_height: '" + *val + "'");
                     }
                 }
             }
-            else if (boost::algorithm::starts_with(t, "tile_width="))
+            else if (key == "tile_width")
             {
-                std::string val = t.substr(11);
-                if (!val.empty())
+                if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(val,config.tile_width) || config.tile_width < 0 )
+                    if (!mapnik::util::string2int(*val,config.tile_width) || config.tile_width < 0 )
                     {
-                        throw image_writer_exception("invalid tiff tile_width: '" + val + "'");
+                        throw image_writer_exception("invalid tiff tile_width: '" + *val + "'");
                     }
                 }
             }
-            else if (boost::algorithm::starts_with(t, "rows_per_strip="))
+            else if (key == "rows_per_strip")
             {
-                std::string val = t.substr(15);
-                if (!val.empty())
+                if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(val,config.rows_per_strip) || config.rows_per_strip < 0 )
+                    if (!mapnik::util::string2int(*val,config.rows_per_strip) || config.rows_per_strip < 0 )
                     {
-                        throw image_writer_exception("invalid tiff rows_per_strip: '" + val + "'");
+                        throw image_writer_exception("invalid tiff rows_per_strip: '" + *val + "'");
                     }
                 }
             }
             else
             {
-                throw image_writer_exception("unhandled tiff option: " + t);
+                throw image_writer_exception("unhandled tiff option: " + key);
             }
         }
     }

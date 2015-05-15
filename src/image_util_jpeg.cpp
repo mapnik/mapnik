@@ -29,10 +29,8 @@
 #include <mapnik/image_util_jpeg.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/image_options.hpp>
 #include <mapnik/util/conversions.hpp>
-
-// boost
-#include <boost/tokenizer.hpp>
 
 // stl
 #include <string>
@@ -48,25 +46,20 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
 {
 #if defined(HAVE_JPEG)
     int quality = 85;
-    //std::string val = type.substr(4);
     if (type != "jpeg")
     {
-        boost::char_separator<char> sep(":");
-        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        for (auto const& t : tokens)
+        for (auto const& kv : parse_image_options(type))
         {
-            if (t == "jpeg")
+            auto const& key = kv.first;
+            auto const& val = kv.second;
+
+            if ( key == "quality")
             {
-                continue;
-            }
-            else if (boost::algorithm::starts_with(t, "quality="))
-            {
-                std::string val = t.substr(8);
-                if (!val.empty())
+                if (val && ! (*val).empty())
                 {
-                    if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
+                    if (!mapnik::util::string2int(*val, quality) || quality < 0 || quality > 100)
                     {
-                        throw image_writer_exception("invalid jpeg quality: '" + val + "'");
+                        throw image_writer_exception("invalid jpeg quality: '" + *val + "'");
                     }
                 }
             }
