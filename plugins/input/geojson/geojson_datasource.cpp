@@ -27,8 +27,13 @@
 #include <algorithm>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
+#pragma GCC diagnostic pop
+
 // mapnik
 #include <mapnik/boolean.hpp>
 #include <mapnik/unicode.hpp>
