@@ -54,6 +54,7 @@ public:
         text_placement_info(parent, scale_factor),
         state(0), parent_(parent) {}
     bool next() const;
+    virtual void reset_state() { state = 0; }
 private:
     mutable unsigned state;
     text_placements_list const* parent_;
