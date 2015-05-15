@@ -18,8 +18,6 @@ Developers with commit access can update test data like:
     git remote set-url origin git@github.com:mapnik/test-data
     git commit -a -m "update test data"
     git push origin HEAD:master
-    cd ../../
-    git commit test/data -m "update test-data submodule"
 
 And the visual test data can up updated like:
 
@@ -27,6 +25,7 @@ And the visual test data can up updated like:
     git remote set-url origin git@github.com:mapnik/test-data-visual
     git add styles/* images/*
     git commit -a -m "add more visual tests"
+    git push origin HEAD:master
 
 After updating the test data you can then do:
 
@@ -35,7 +34,7 @@ After updating the test data you can then do:
     # the submodule should be marked dirty
     git status
     # now commit the changes to the submodule
-    git commit -a -m "update visual tests and data"
+    git commit test/data test/data-visual -m "update visual tests and data"
 
 ## Community
 
