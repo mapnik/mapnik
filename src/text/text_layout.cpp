@@ -281,11 +281,13 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
         {
             break_position = line.last_char();
         }
+        bool adjust_for_space_character = break_position > 0 && text[break_position - 1] == 0x0020;
 
-        text_line new_line(last_break_position, break_position);
-        clear_cluster_widths(last_break_position, break_position);
+        text_line new_line(last_break_position, adjust_for_space_character ? break_position - 1 : break_position);
+        clear_cluster_widths(last_break_position, adjust_for_space_character ? break_position - 1 : break_position);
         shape_text(new_line);
         add_line(std::move(new_line));
+
         last_break_position = break_position;
         i = break_position - 1;
         current_line_length = 0;
