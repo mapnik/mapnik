@@ -531,14 +531,14 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr/*<bool>*/( layer_node, "clear-label-cache", layer.clear_label_cache() );
     }
 
-    if ( layer.min_zoom() )
+    if ( layer.minimum_scale_denominator() )
     {
-        set_attr( layer_node, "minzoom", layer.min_zoom() );
+        set_attr( layer_node, "minimum_scale_denominator", layer.minimum_scale_denominator() );
     }
 
-    if ( layer.max_zoom() != std::numeric_limits<double>::max() )
+    if ( layer.maximum_scale_denominator() != std::numeric_limits<double>::max() )
     {
-        set_attr( layer_node, "maxzoom", layer.max_zoom() );
+        set_attr( layer_node, "maximum_scale_denominator", layer.maximum_scale_denominator() );
     }
 
     if ( layer.queryable() || explicit_defaults )
