@@ -6,3 +6,14 @@ if [ $(uname -s) = 'Darwin' ]; then
 else
     export LD_LIBRARY_PATH="${CURRENT_DIR}/src/":${LD_LIBRARY_PATH}
 fi
+
+# mapnik-settings.env is an optional file to store
+# environment variables that should be used before
+# running tests like PROJ_LIB, GDAL_DATA, and ICU_DATA
+# These do not normally need to be set except when
+# building against binary versions of dependencies like
+# done via bootstrap.sh
+if [[ -f mapnik-settings.env ]]; then
+    echo "Inheriting from mapnik-settings.env"
+    source mapnik-settings.env
+fi
