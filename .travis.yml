@@ -42,6 +42,7 @@ before_install:
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
+ - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
