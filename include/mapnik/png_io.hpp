@@ -58,6 +58,7 @@ struct png_options {
     int strategy;
     int trans_mode;
     int iq_speed;
+    double iq_dither;
     double gamma;
     bool paletted;
     quantization_type quantization;
@@ -68,6 +69,7 @@ struct png_options {
         strategy(Z_DEFAULT_STRATEGY),
         trans_mode(-1),
         iq_speed(3),
+        iq_dither(-1),
         gamma(-1),
         paletted(true),
         quantization(HEXTREE),
@@ -740,6 +742,9 @@ void save_as_png8_libimagequant(T1 & file,
     liq_result *res = liq_quantize_image(attr, liq_image);
 
     // Store palettized version
+    if (opts.iq_dither != -1) {
+        liq_set_dithering_level(res, opts.iq_dither);
+    }
     image_gray8 reduced_image(width, height);
     liq_write_remapped_image(res, liq_image, (void *)reduced_image.data(), width*height*sizeof(gray8_t));
     const liq_palette *liq_pal = liq_get_palette(res);

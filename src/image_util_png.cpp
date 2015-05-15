@@ -91,11 +91,18 @@ void handle_png_options(std::string const& type,
             opts.quantization = png_options::IMGQUANT;
 
         }
-        else if (boost::algorithm::starts_with(t, "iq="))
+        else if (boost::algorithm::starts_with(t, "iqs="))
         {
-            if (!mapnik::util::string2int(t.substr(3), opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
+            if (!mapnik::util::string2int(t.substr(4), opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
             {
-                throw ImageWriterException("invalid iq speed parameter: " + t.substr(3));
+                throw ImageWriterException("invalid iq speed parameter: " + t.substr(4));
+            }
+        }
+        else if (boost::algorithm::starts_with(t, "iqd="))
+        {
+            if (!mapnik::util::string2double(t.substr(4), opts.iq_dither) || opts.iq_dither < 0 || opts.iq_dither > 1)
+            {
+                throw ImageWriterException("invalid iq dithering parameter: " + t.substr(4));
             }
         }
         else if (t == "e=miniz")
