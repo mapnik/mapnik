@@ -42,9 +42,9 @@ struct image_options_grammar
             ;
         pair = key >> -('=' >> value)
             ;
-        key = char_("a-zA-Z_") >> *char_("a-zA-Z_0-9\\.")
+        key = char_("a-zA-Z_") >> *char_("a-zA-Z_0-9\\.\\-")
             ;
-        value = +char_("a-zA-Z_0-9\\.")
+        value = +char_("a-zA-Z_0-9\\.\\-")
             ;
     }
 
