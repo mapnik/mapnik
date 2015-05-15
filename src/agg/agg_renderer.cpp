@@ -53,8 +53,9 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_rgba.h"
+
 // boost
-#include <boost/math/special_functions/round.hpp>
+#include <boost/optional.hpp>
 
 // stl
 #include <cmath>
@@ -415,8 +416,6 @@ struct agg_render_marker_visitor
         using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
         using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
-        using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-        using svg_attribute_type = agg::pod_bvector<mapnik::svg::path_attributes>;
 
         ras_ptr_->reset();
         if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
@@ -574,7 +573,7 @@ void agg_renderer<T0,T1>::debug_draw_box(R& buf, box2d<double> const& box,
     renderer_base renb(pixf);
     renderer_type ren(renb);
 
-    // compute tranformation matrix
+    // compute transformation matrix
     agg::trans_affine tr = agg::trans_affine_rotation(angle).translate(x, y);
     // prepare path
     agg::path_storage pbox;
