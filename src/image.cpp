@@ -71,11 +71,6 @@ void buffer::swap(buffer & rhs)
     std::swap(data_, rhs.data_);
 }
 
-inline bool buffer::operator!() const
-{
-    return (data_ == nullptr)? false : true;
-}
-
 unsigned char* buffer::data()
 {
     return data_;

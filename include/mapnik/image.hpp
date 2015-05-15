@@ -39,7 +39,10 @@ struct MAPNIK_DECL buffer
     ~buffer();
 
     buffer& operator=(buffer rhs);
-    bool operator!() const;
+    inline bool operator!() const
+    {
+        return (data_ == nullptr)? true : false;
+    }
 
     void swap(buffer & rhs);
     unsigned char* data();

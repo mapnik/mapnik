@@ -47,7 +47,6 @@
 #include <sstream>
 #include <string>
 
-using mapnik::byte;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 
