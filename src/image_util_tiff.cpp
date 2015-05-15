@@ -53,7 +53,7 @@ void handle_tiff_options(std::string const& type,
         {
             auto const& key = kv.first;
             auto const& val = kv.second;
-
+            if (key == "tiff") continue;
             if (key == "compression")
             {
                 if (val && !(*val).empty())

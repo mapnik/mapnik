@@ -55,6 +55,8 @@ void handle_webp_options(std::string const& type,
         {
             auto const& key = kv.first;
             auto const& val = kv.second;
+            
+            if (key == "webp") continue;
 
             if (key == "quality")
             {
