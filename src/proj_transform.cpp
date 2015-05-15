@@ -264,16 +264,23 @@ bool proj_transform::forward (box2d<double> & box) const
     if (is_source_equal_dest_)
         return true;
 
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
+    double llx, ulx = box.minx();
+    double lly, lry = box.miny();
+    double lrx, urx = box.maxx();
+    double uly, ury = box.maxy();
     double z = 0.0;
-    if (!forward(minx,miny,z))
+    if (!forward(llx,lly,z))
         return false;
-    if (!forward(maxx,maxy,z))
+    if (!forward(lrx,lry,z))
         return false;
-    box.init(minx,miny,maxx,maxy);
+    if (!forward(ulx,uly,z))
+        return false;
+    if (!forward(urx,ury,z))
+        return false;
+    box.init(std::min(ulx, llx),
+             std::min(lly, lry),
+             std::max(urx, lrx),
+             std::max(uly, ury));
     return true;
 }
 
@@ -282,16 +289,23 @@ bool proj_transform::backward (box2d<double> & box) const
     if (is_source_equal_dest_)
         return true;
 
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
+    double llx, ulx = box.minx();
+    double lly, lry = box.miny();
+    double lrx, urx = box.maxx();
+    double uly, ury = box.maxy();
     double z = 0.0;
-    if (!backward(minx,miny,z))
+    if (!backward(llx,lly,z))
         return false;
-    if (!backward(maxx,maxy,z))
+    if (!backward(lrx,lry,z))
         return false;
-    box.init(minx,miny,maxx,maxy);
+    if (!backward(ulx,uly,z))
+        return false;
+    if (!backward(urx,ury,z))
+        return false;
+    box.init(std::min(ulx, llx),
+             std::min(lly, lry),
+             std::max(urx, lrx),
+             std::max(uly, ury));
     return true;
 }
 

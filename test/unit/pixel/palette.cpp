@@ -68,11 +68,6 @@ SECTION("rgba palette - exceptions and bad palettes")
     REQUIRE_THROWS(mapnik::rgba_palette("foo"));
     REQUIRE_THROWS(mapnik::rgba_palette("fooo", mapnik::rgba_palette::PALETTE_RGB));
     REQUIRE_THROWS(mapnik::rgba_palette("foo", mapnik::rgba_palette::PALETTE_ACT));
-    
-    mapnik::rgba_palette rgba_pal("FOO^");
-    INFO(rgba_pal.to_string());
-    CHECK_FALSE(rgba_pal.valid());
-
 } // END SECTION
 
 SECTION("rgba palette - act pal_64")
