@@ -224,7 +224,9 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
         double wrap_at;
         double string_width = line.width();
         double string_height = line.line_height();
-        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio_ && (string_width/i) > scaled_wrap_width; i += 1.0) ;
+        for (double i = 1.0;
+             ((wrap_at = string_width/i)/(string_height*i)) > text_ratio_ && (string_width/i) > scaled_wrap_width;
+             i += 1.0) ;
         scaled_wrap_width = wrap_at;
     }
 
@@ -243,10 +245,9 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
     }
 
     breakitr->setText(text);
-
     double current_line_length = 0;
     int last_break_position = static_cast<int>(line.first_char());
-    for (unsigned i=line.first_char(); i < line.last_char(); ++i)
+    for (unsigned i = line.first_char(); i < line.last_char(); ++i)
     {
         // TODO: character_spacing
         std::map<unsigned, double>::const_iterator width_itr = width_map_.find(i);
@@ -256,7 +257,7 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
         }
         if (current_line_length <= scaled_wrap_width) continue;
 
-        int break_position = wrap_before_ ? breakitr->preceding(i) : breakitr->following(i);
+        int break_position = wrap_before_ ? breakitr->preceding(i + 1) : breakitr->following(i);
         // following() returns a break position after the last word. So DONE should only be returned
         // when calling preceding.
         if (break_position <= last_break_position || break_position == static_cast<int>(BreakIterator::DONE))
@@ -289,6 +290,7 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
         i = break_position - 1;
         current_line_length = 0;
     }
+
     if (last_break_position == static_cast<int>(line.first_char()))
     {
         // No line breaks => no reshaping required
@@ -365,7 +367,7 @@ void text_layout::break_line(std::pair<unsigned, unsigned> && line_limits)
         }
         if (current_line_length <= scaled_wrap_width) continue;
 
-        int break_position = wrap_before_ ? breaker.preceding(i) : breaker.following(i);
+        int break_position = wrap_before_ ? breaker.preceding(i + 1) : breaker.following(i);
         if (break_position <= last_break_position || break_position == static_cast<int>(BreakIterator::DONE))
         {
             break_position = breaker.following(i);
