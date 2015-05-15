@@ -80,8 +80,8 @@ struct rgba
     //--------------------------------------------------------------------
     rgba& opacity(double a_)
     {
-        if (a_ < 0) a_ = 0;
-        else if (a_ > 1) a_ = 1;
+        if (a_ < 0) a = 0;
+        else if (a_ > 1) a = 1;
         else a = a_;
         return *this;
     }
@@ -472,8 +472,8 @@ struct rgba8T
     //--------------------------------------------------------------------
     self_type& opacity(double a_)
     {
-        if (a_ < 0) a_ = 0;
-        else if (a_ > 1) a_ = 1;
+        if (a_ < 0) a = 0;
+        else if (a_ > 1) a = 1;
         else a = (value_type)uround(a_ * double(base_mask));
         return *this;
     }
@@ -882,8 +882,8 @@ struct rgba16
     //--------------------------------------------------------------------
     AGG_INLINE self_type& opacity(double a_)
     {
-        if (a_ < 0) a_ = 0;
-        if (a_ > 1) a_ = 1;
+        if (a_ < 0) a = 0;
+        if (a_ > 1) a = 1;
         a = value_type(uround(a_ * double(base_mask)));
         return *this;
     }
@@ -1238,8 +1238,8 @@ struct rgba32
     //--------------------------------------------------------------------
     AGG_INLINE self_type& opacity(double a_)
     {
-        if (a_ < 0) a_ = 0;
-        else if (a_ > 1) a_ = 1;
+        if (a_ < 0) a = 0;
+        else if (a_ > 1) a = 1;
         else a = value_type(a_);
         return *this;
     }
