@@ -41,7 +41,6 @@
 extern "C"
 {
 #include <png.h>
-// TODO: make this optional
 #include <libimagequant.h>
 }
 
@@ -724,46 +723,53 @@ void save_as_png8_libimagequant(T1 & file,
     unsigned width = image.width();
     unsigned height = image.height();
 
-    // TODO: can this be done as a single blob, rather than using rows?
     uint32_t *buf[height];
 
-    // TODO: this won't work on big-endian architectures, liq expects
-    //       data in RGBA byte order
+    // TODO: this won't work on big-endian architectures, liq expects data in RGBA byte order
     for (size_t y = 0; y < height; ++y) 
     {
         buf[y] = (uint32_t *)image.get_row(y);
     }
 
+    // Set up libimagequant
     liq_attr *attr = liq_attr_create();
-    // TODO: set gamma
-    // TODO: error checking
     liq_set_speed(attr, opts.iq_speed);
     liq_image *liq_image = liq_image_create_rgba_rows(attr, (void **)buf, width, height, 0);
+
+    // Do the quantization
     liq_result *res = liq_quantize_image(attr, liq_image);
 
-    if (opts.iq_dither != -1) {
+    if (opts.iq_dither != -1) 
+    {
         liq_set_dithering_level(res, opts.iq_dither);
     }
+    if (opts.gamma > 0)
+    {
+        liq_set_output_gamma(res, opts.gamma);
+    }
+
+    // Extract the generated 8-bit imag
     image_gray8 quantized_image(width, height);
     liq_write_remapped_image(res, liq_image, (void *)quantized_image.data(), width*height*sizeof(gray8_t));
-    const liq_palette *liq_pal = liq_get_palette(res);
 
+    // Extract the generated palette and alpha vector from libimagequant
     std::vector<mapnik::rgb> palette;
     std::vector<unsigned> alpha;
-
+    const liq_palette *liq_pal = liq_get_palette(res);
     for (int i = 0; i < liq_pal->count; ++i) 
     {
         palette.push_back({ liq_pal->entries[i].r, liq_pal->entries[i].g, liq_pal->entries[i].b });
         alpha.push_back(liq_pal->entries[i].a);
     }
 
+    // Encode the image, using a bit-depth depending on the number of colors in the generated
+    // palette
     if (palette.size() > 16)  // 8-bit encoding
     {
         save_as_png(file, palette, quantized_image, width, height, 8, alpha, opts);
     }
     else if (palette.size() > 1) // up to 16 colors, 4-bit encoding
     {
-        // <=16 colors -> write 4-bit color depth PNG
         unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
         image_gray8 reduced_image(image_width, image_height);
@@ -786,7 +792,6 @@ void save_as_png8_libimagequant(T1 & file,
     }
     else // 1 color, 1-bit encoding
     {
-        // 1 color image ->  write 1-bit color depth PNG
         unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
         image_gray8 reduced_image(image_width, image_height);
@@ -794,6 +799,7 @@ void save_as_png8_libimagequant(T1 & file,
         save_as_png(file, palette, reduced_image, width, height, 1, alpha, opts);
     }
 
+    // Cleanup libimagequant
     liq_attr_destroy(attr);
     liq_image_destroy(liq_image);
     liq_result_destroy(res);
