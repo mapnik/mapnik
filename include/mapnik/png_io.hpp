@@ -769,7 +769,7 @@ void save_as_png8_libimagequant(T1 & file,
         image_gray8 reduced_image(image_width, image_height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
+            mapnik::image_gray8::pixel_type const * row = quantized_image.get_row(y);
             mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
             byte index = 0;
             for (unsigned x = 0; x < width; ++x)
