@@ -1214,7 +1214,7 @@ if not preconfigured:
                 break
     elif "linux" in sys.platform:
         for line in open("/proc/cpuinfo"):
-            if "flags" in line and "SSE" in line:
+            if "flags" in line and "sse" in line:
                 if "USE_SSE" in env and env["USE_SSE"] == "detect":
                     color_print(4,'SSE detected on Linux host')
                 SSE_DETECTED = True
