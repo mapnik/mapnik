@@ -741,12 +741,11 @@ void save_as_png8_libimagequant(T1 & file,
     liq_image *liq_image = liq_image_create_rgba_rows(attr, (void **)buf, width, height, 0);
     liq_result *res = liq_quantize_image(attr, liq_image);
 
-    // Store palettized version
     if (opts.iq_dither != -1) {
         liq_set_dithering_level(res, opts.iq_dither);
     }
-    image_gray8 reduced_image(width, height);
-    liq_write_remapped_image(res, liq_image, (void *)reduced_image.data(), width*height*sizeof(gray8_t));
+    image_gray8 quantized_image(width, height);
+    liq_write_remapped_image(res, liq_image, (void *)quantized_image.data(), width*height*sizeof(gray8_t));
     const liq_palette *liq_pal = liq_get_palette(res);
 
     std::vector<mapnik::rgb> palette;
@@ -758,9 +757,42 @@ void save_as_png8_libimagequant(T1 & file,
         alpha.push_back(liq_pal->entries[i].a);
     }
 
-    // TODO: support 1 & 4 bit packing, not just 8, to reduce the file size, particularly on blank
-    //       or solid tiles
-    save_as_png(file, palette, reduced_image, width, height, 8, alpha, opts);
+    if (palette.size() > 16)  // 8-bit encoding
+    {
+        save_as_png(file, palette, quantized_image, width, height, 8, alpha, opts);
+    }
+    else if (palette.size() > 1) // up to 16 colors, 4-bit encoding
+    {
+        // <=16 colors -> write 4-bit color depth PNG
+        unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
+        unsigned image_height = height;
+        image_gray8 reduced_image(image_width, image_height);
+        for (unsigned y = 0; y < height; ++y)
+        {
+            mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
+            mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
+            byte index = 0;
+            for (unsigned x = 0; x < width; ++x)
+            {
+                index = row[x];
+                if (x%2 == 0)
+                {
+                    index = index<<4;
+                }
+                row_out[x>>1] |= index;
+            }
+        }
+        save_as_png(file, palette, reduced_image, width, height, 4, alpha, opts);
+    }
+    else // 1 color, 1-bit encoding
+    {
+        // 1 color image ->  write 1-bit color depth PNG
+        unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
+        unsigned image_height = height;
+        image_gray8 reduced_image(image_width, image_height);
+        reduced_image.set(0);
+        save_as_png(file, palette, reduced_image, width, height, 1, alpha, opts);
+    }
 
     liq_attr_destroy(attr);
     liq_image_destroy(liq_image);
