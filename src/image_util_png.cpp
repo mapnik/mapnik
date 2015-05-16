@@ -88,14 +88,14 @@ void handle_png_options(std::string const& type,
         {
             if (!val || !mapnik::util::string2int(*val, opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
             {
-                throw ImageWriterException("invalid iq speed parameter: " + to_string(val));
+                throw image_writer_exception("invalid iq speed parameter: " + to_string(val));
             }
         }
         else if (key == "iqd")
         {
             if (!val || !mapnik::util::string2double(*val, opts.iq_dither) || opts.iq_dither < 0 || opts.iq_dither > 1)
             {
-                throw ImageWriterException("invalid iq dithering parameter: " + to_string(val));
+                throw image_writer_exception("invalid iq dithering parameter: " + to_string(val));
             }
         }
         else if (key == "e" && val && *val == "miniz")
