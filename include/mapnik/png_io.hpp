@@ -42,7 +42,7 @@ extern "C"
 {
 #include <png.h>
 // TODO: make this optional
-#include "libimagequant.h"
+#include <libimagequant.h>
 }
 
 #define MAX_OCTREE_LEVELS 4

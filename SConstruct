@@ -84,7 +84,6 @@ pretty_dep_names = {
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
-    'imgquant':'ImageQuant C library | configure with IQ_LIBS & IQ_INCLUDES',
     'webp':'WEBP C library | configure with WEBP_LIBS & WEBP_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
     'harfbuzz':'HarfBuzz text shaping library | configure with HB_LIBS & HB_INCLUDES',
@@ -298,6 +297,7 @@ opts.AddVariables(
     ('CUSTOM_DEFINES', 'Custom Compiler DEFINES, e.g. -DENABLE_THIS', ''),
     ('CUSTOM_CFLAGS', 'Custom C flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir> (only used for configure checks)', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
+    EnumVariable('USE_SSE', "Build with SSE instruction set (will default to 'no' if cross-compiling)",'detect', ['detect','yes','no']),
     EnumVariable('LINKING', "Set library format for libmapnik",'shared', ['shared','static']),
     EnumVariable('RUNTIME_LINK', "Set preference for linking dependencies",'shared', ['shared','static']),
     EnumVariable('OPTIMIZATION','Set compiler optimization level','3', ['0','1','2','3','4','s']),
@@ -347,9 +347,6 @@ opts.AddVariables(
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
-    BoolVariable('IQ', 'Build Mapnik with ImageQuant support', 'True'),
-    PathVariable('IQ_INCLUDES', 'Search path for libimagequant include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('IQ_LIBS','Search path for libimagequant library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
@@ -1201,6 +1198,36 @@ if not preconfigured:
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
+    #
+    # libimagequant includes SSE optimizations, so detect if flag is set (USE_SSE)
+    # or if 'detect', check current machine for support
+    SSE_DETECTED = False
+    if "darwin" in sys.platform:
+        import subprocess
+        process = subprocess.Popen(["sysctl","-a"], stdout=subprocess.PIPE)
+        result = process.communicate()[0]
+        for line in result.split("\n"):
+            if "cpu.feature" in line and "SSE" in line:
+                if "USE_SSE" in env and env["USE_SSE"] == "detect":
+                    color_print(4,'SSE detected on Darwin host')
+                SSE_DETECTED = True
+                break
+    elif "linux" in sys.platform:
+        for line in open("/proc/cpuinfo"):
+            if "flags" in line and "SSE" in line:
+                if "USE_SSE" in env and env["USE_SSE"] == "detect":
+                    color_print(4,'SSE detected on Linux host')
+                SSE_DETECTED = True
+                break
+    else:
+        if "USE_SSE" in env and env["USE_SSE"] == "detect":
+            color_print(4,'SSE detection not implemented on this platform, building without SSE')
+
+    # Only enable SSE when explitily set, or when not cross compiling and current host supports it
+    if (not env["HOST"] and (env["USE_SSE"] == "detect" and SSE_DETECTED)) or env["USE_SSE"] == "yes":
+        env.Append(CFLAGS = '-DUSE_SSE -msse')
+        if 'gcc' in env['CC']:
+            lib_env.Append(CFLAGS='-mfpmath=sse')
 
     thread_suffix = 'mt'
     if env['PLATFORM'] == 'FreeBSD':
@@ -1307,15 +1334,6 @@ if not preconfigured:
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['png'])
-
-    if env['IQ']:
-        OPTIONAL_LIBSHEADERS.append(['imagequant', 'libimagequant.h', False,'C','-DHAVE_IQ'])
-        inc_path = env['%s_INCLUDES' % 'IQ']
-        lib_path = env['%s_LIBS' % 'IQ']
-        env.AppendUnique(CPPPATH = fix_path(inc_path))
-        env.AppendUnique(LIBPATH = fix_path(lib_path))
-    else:
-        env['SKIPPED_DEPS'].extend(['iq'])
 
     if env['WEBP']:
         OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
@@ -1576,6 +1594,7 @@ if not preconfigured:
     # prepend to make sure we link locally
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
+    env.Prepend(CPPPATH = '#deps/pngquant/lib')
     env.Prepend(CPPPATH = '#deps/clipper/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')

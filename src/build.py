@@ -23,6 +23,7 @@
 import os
 import sys
 import glob
+import platform
 from copy import copy
 from subprocess import Popen, PIPE
 
@@ -72,9 +73,6 @@ if len(env['EXTRA_FREETYPE_LIBS']):
 if '-DHAVE_PNG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('png')
    enabled_imaging_libraries.append('png_reader.cpp')
-
-if '-DHAVE_IQ' in env['CPPDEFINES']:
-   lib_env['LIBS'].append('imagequant')
 
 if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
    lib_env['LIBS'].append('proj')
@@ -345,6 +343,14 @@ source += Split(
     """
      ../deps/clipper/src/clipper.cpp
     """)
+
+# libimagequant
+lib_env.Append(CFLAGS = "-O3 -fno-math-errno -funroll-loops -fomit-frame-pointer -std=c99")
+# As of GCC 4.5, 387 fp math is significantly slower in C99 mode without this.
+# Note: CPUs without SSE2 use 387 for doubles, even when SSE fp math is set.
+if 'gcc' in env['CC']:
+        lib_env.Append(CFLAGS='-fexcess-prevision=fast')
+source += glob.glob("../deps/pngquant/lib/" + "*.c")
 
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
