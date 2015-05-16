@@ -25,24 +25,21 @@
 
 // mapnik
 #include <mapnik/image.hpp>
-#include <mapnik/image_util.hpp>
 #include <mapnik/svg/svg_storage.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
 
 // agg
 #include "agg_array.h"
-
-// boost
-#include <boost/optional.hpp>
 
 // stl
 #include <memory>
 
 namespace mapnik
 {
+
+struct image_any;
+namespace svg { struct path_attributes; }
 
 using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
 using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;

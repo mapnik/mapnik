@@ -31,6 +31,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/agg_renderer.hpp>
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
@@ -117,15 +118,16 @@ public:
     {
         typename Renderer::image_type image(ren.render(map, scale_factor));
         boost::filesystem::path reference = reference_dir / image_file_name(name, map.width(), map.height(), scale_factor, true);
+        bool reference_exists = mapnik::util::exists(reference.string());
         result res;
 
-        res.state = STATE_OK;
+        res.state = reference_exists ? STATE_OK : STATE_OVERWRITE;
         res.name = name;
         res.renderer_name = Renderer::name;
         res.scale_factor = scale_factor;
         res.size = map_size(map.width(), map.height());
         res.reference_image_path = reference;
-        res.diff = ren.compare(image, reference);
+        res.diff = reference_exists ? ren.compare(image, reference) : 0;
 
         if (res.diff)
         {
@@ -134,12 +136,12 @@ public:
             res.actual_image_path = path;
             res.state = STATE_FAIL;
             ren.save(image, path);
+        }
 
-            if (overwrite)
-            {
-                ren.save(image, reference);
-                res.state = STATE_OVERWRITE;
-            }
+        if ((res.diff && overwrite) || !reference_exists)
+        {
+            ren.save(image, reference);
+            res.state = STATE_OVERWRITE;
         }
 
         return res;

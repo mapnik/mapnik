@@ -182,7 +182,7 @@ void reduce_8(T const& in,
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            byte index = 0;
+            std::uint8_t index = 0;
             int idx = -1;
             for(int j=levels-1; j>0; j--)
             {
@@ -233,7 +233,7 @@ void reduce_4(T const& in,
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            byte index = 0;
+            std::uint8_t index = 0;
             int idx=-1;
             for(int j=levels-1; j>0; j--)
             {
@@ -642,7 +642,7 @@ void save_as_png8(T1 & file,
         {
             mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
             mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
-            byte index = 0;
+            std::uint8_t index = 0;
             for (unsigned x = 0; x < width; ++x)
             {
 

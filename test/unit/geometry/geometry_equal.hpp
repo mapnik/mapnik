@@ -3,9 +3,14 @@
 // boost
 #include <type_traits>
 #include <iterator>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
+#pragma GCC diagnostic pop
 
 // helper namespace to ensure correct functionality
 namespace aux{

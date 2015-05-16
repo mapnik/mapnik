@@ -55,7 +55,7 @@ void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, dou
     {
         save_to_cairo_file(map,filename,*type,scale_factor,scale_denominator);
     }
-    else throw ImageWriterException("Could not write file to " + filename );
+    else throw image_writer_exception("Could not write file to " + filename );
 }
 
 void save_to_cairo_file(mapnik::Map const& map,
@@ -75,7 +75,7 @@ void save_to_cairo_file(mapnik::Map const& map,
 #ifdef CAIRO_HAS_PDF_SURFACE
             surface = cairo_surface_ptr(cairo_pdf_surface_create(filename.c_str(),width,height),cairo_surface_closer());
 #else
-            throw ImageWriterException("PDFSurface not supported in the cairo backend");
+            throw image_writer_exception("PDFSurface not supported in the cairo backend");
 #endif
         }
 #ifdef CAIRO_HAS_SVG_SURFACE
@@ -102,7 +102,7 @@ void save_to_cairo_file(mapnik::Map const& map,
 #endif
         else
         {
-            throw ImageWriterException("unknown file type: " + type);
+            throw image_writer_exception("unknown file type: " + type);
         }
 
         //cairo_t * ctx = cairo_create(surface);

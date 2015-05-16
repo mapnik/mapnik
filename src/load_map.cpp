@@ -587,17 +587,34 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             lyr.set_active(* status);
         }
 
-        optional<double> min_zoom = node.get_opt_attr<double>("minzoom");
-        if (min_zoom)
+        optional<double> minimum_scale_denom = node.get_opt_attr<double>("minimum-scale-denominator");
+        if (minimum_scale_denom)
         {
-            lyr.set_min_zoom(* min_zoom);
+            lyr.set_minimum_scale_denominator(* minimum_scale_denom);
+        }
+        else // back compatibility: remove at Mapnik 4.x
+        {
+            optional<double> min_zoom = node.get_opt_attr<double>("minzoom");
+            if (min_zoom)
+            {
+                MAPNIK_LOG_ERROR(markers_symbolizer) << "'minzoom' is deprecated and will be removed in Mapnik 4.x, use 'minimum-scale-denominator' instead (encountered in layer " << name << ")";
+                lyr.set_minimum_scale_denominator(* min_zoom);
+            }
         }
 
-
-        optional<double> max_zoom = node.get_opt_attr<double>("maxzoom");
-        if (max_zoom)
+        optional<double> maximum_scale_denom = node.get_opt_attr<double>("maximum-scale-denominator");
+        if (maximum_scale_denom)
         {
-            lyr.set_max_zoom(* max_zoom);
+            lyr.set_maximum_scale_denominator(* maximum_scale_denom);
+        }
+        else // back compatibility: remove at Mapnik 4.x
+        {
+            optional<double> max_zoom = node.get_opt_attr<double>("maxzoom");
+            if (max_zoom)
+            {
+                MAPNIK_LOG_ERROR(markers_symbolizer) << "'maxzoom' is deprecated and will be removed in Mapnik 4.x, use 'maximum-scale-denominator' instead (encountered in layer " << name << ")";
+                lyr.set_maximum_scale_denominator(* max_zoom);
+            }
         }
 
         optional<mapnik::boolean_type> queryable = node.get_opt_attr<mapnik::boolean_type>("queryable");

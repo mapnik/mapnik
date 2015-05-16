@@ -37,10 +37,8 @@ extern "C"
 #include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/image_options.hpp>
 #include <mapnik/util/conversions.hpp>
-
-// boost
-#include <boost/tokenizer.hpp>
 
 // stl
 #include <string>
@@ -64,75 +62,70 @@ void handle_png_options(std::string const& type,
         opts.paletted = true;
         return;
     }
-    boost::char_separator<char> sep(":");
-    boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+
     bool set_colors = false;
     bool set_gamma = false;
-    for (std::string const& t : tokens)
+
+    for (auto const& kv : parse_image_options(type))
     {
-        if (t == "png8" || t == "png256")
+        auto const& key = kv.first;
+        auto const& val = kv.second;
+        if (key == "png8" || key == "png256")
         {
             opts.paletted = true;
         }
-        else if (t == "png" || t == "png24" || t == "png32")
+        else if (key == "png" || key == "png24" || key == "png32")
         {
             opts.paletted = false;
         }
-        else if (t == "m=o")
+        else if (key == "m" && val)
         {
-            opts.quantization = png_options::OCTTREE;
+            if (*val == "o") opts.quantization = png_options::OCTTREE;
+            else if (*val == "h") opts.quantization = png_options::HEXTREE;
+            else if (*val == "iq") opts.quantization = png_options::IMGQUANT;
         }
-        else if (t == "m=h")
+        else if (key == "iqs")
         {
-            opts.quantization = png_options::HEXTREE;
-        }
-        else if (t == "m=iq")
-        {
-            opts.quantization = png_options::IMGQUANT;
-
-        }
-        else if (boost::algorithm::starts_with(t, "iqs="))
-        {
-            if (!mapnik::util::string2int(t.substr(4), opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
+            if (!val || !mapnik::util::string2int(*val, opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
             {
-                throw ImageWriterException("invalid iq speed parameter: " + t.substr(4));
+                throw ImageWriterException("invalid iq speed parameter: " + to_string(val));
             }
         }
-        else if (boost::algorithm::starts_with(t, "iqd="))
+        else if (key == "iqd")
         {
-            if (!mapnik::util::string2double(t.substr(4), opts.iq_dither) || opts.iq_dither < 0 || opts.iq_dither > 1)
+            if (!val || !mapnik::util::string2double(*val, opts.iq_dither) || opts.iq_dither < 0 || opts.iq_dither > 1)
             {
-                throw ImageWriterException("invalid iq dithering parameter: " + t.substr(4));
+                throw ImageWriterException("invalid iq dithering parameter: " + to_string(val));
             }
         }
-        else if (t == "e=miniz")
+        else if (key == "e" && val && *val == "miniz")
         {
             opts.use_miniz = true;
         }
-        else if (boost::algorithm::starts_with(t, "c="))
+        else if (key == "c")
         {
             set_colors = true;
-            if (!mapnik::util::string2int(t.substr(2),opts.colors) || opts.colors < 1 || opts.colors > 256)
+            if (!val || !mapnik::util::string2int(*val, opts.colors) || opts.colors < 1 ||  opts.colors > 256)
             {
-                throw ImageWriterException("invalid color parameter: " + t.substr(2));
+                throw image_writer_exception("invalid color parameter: " + to_string(val));
             }
         }
-        else if (boost::algorithm::starts_with(t, "t="))
+        else if (key == "t")
         {
-            if (!mapnik::util::string2int(t.substr(2),opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
+            if (!val || !mapnik::util::string2int(*val,opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
             {
-                throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
+                throw image_writer_exception("invalid trans_mode parameter: " + to_string(val));
             }
         }
-        else if (boost::algorithm::starts_with(t, "g="))
+        else if (key == "g")
         {
             set_gamma = true;
-            if (!mapnik::util::string2double(t.substr(2),opts.gamma) || opts.gamma < 0)
+            if (!val || !mapnik::util::string2double(*val, opts.gamma) || opts.gamma < 0)
             {
-                throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
+                throw image_writer_exception("invalid gamma parameter: " + to_string(val));
             }
         }
-        else if (boost::algorithm::starts_with(t, "z="))
+        else if (key == "z")
         {
             /*
               #define Z_NO_COMPRESSION         0
@@ -140,58 +133,59 @@ void handle_png_options(std::string const& type,
               #define Z_BEST_COMPRESSION       9
               #define Z_DEFAULT_COMPRESSION  (-1)
             */
-            if (!mapnik::util::string2int(t.substr(2),opts.compression)
+            if (!val || !mapnik::util::string2int(*val, opts.compression)
                 || opts.compression < Z_DEFAULT_COMPRESSION
                 || opts.compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
             {
-                throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
+                throw image_writer_exception("invalid compression parameter: " + to_string(val) + " (only -1 through 10 are valid)");
             }
         }
-        else if (boost::algorithm::starts_with(t, "s="))
+        else if (key == "s")
         {
-            std::string s = t.substr(2);
-            if (s == "default")
+            if (!val) throw image_writer_exception("invalid compression parameter: <uninitialised>");
+
+            if (*val == "default")
             {
                 opts.strategy = Z_DEFAULT_STRATEGY;
             }
-            else if (s == "filtered")
+            else if (*val == "filtered")
             {
                 opts.strategy = Z_FILTERED;
             }
-            else if (s == "huff")
+            else if (*val == "huff")
             {
                 opts.strategy = Z_HUFFMAN_ONLY;
             }
-            else if (s == "rle")
+            else if (*val == "rle")
             {
                 opts.strategy = Z_RLE;
             }
-            else if (s == "fixed")
+            else if (*val == "fixed")
             {
                 opts.strategy = Z_FIXED;
             }
             else
             {
-                throw ImageWriterException("invalid compression strategy parameter: " + s);
+                throw image_writer_exception("invalid compression strategy parameter: " + *val);
             }
         }
         else
         {
-            throw ImageWriterException("unhandled png option: " + t);
+            throw image_writer_exception("unhandled png option: " + key);
         }
     }
     // validation
     if (!opts.paletted && set_colors)
     {
-        throw ImageWriterException("invalid color parameter: unavailable for true color (non-paletted) images");
+        throw image_writer_exception("invalid color parameter: unavailable for true color (non-paletted) images");
     }
     if (!opts.paletted && set_gamma)
     {
-        throw ImageWriterException("invalid gamma parameter: unavailable for true color (non-paletted) images");
+        throw image_writer_exception("invalid gamma parameter: unavailable for true color (non-paletted) images");
     }
     if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
     {
-        throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
+        throw image_writer_exception("invalid compression value: (only -1 through 9 are valid)");
     }
 }
 #endif
@@ -205,29 +199,29 @@ png_saver_pal::png_saver_pal(std::ostream & stream, std::string const& t, rgba_p
 template<>
 void png_saver::operator()<image_null> (image_null const& image) const
 {
-    throw ImageWriterException("null images not supported for png");
+    throw image_writer_exception("null images not supported for png");
 }
 
 template<>
 void png_saver_pal::operator()<image_null> (image_null const& image) const
 {
-    throw ImageWriterException("null images not supported for png");
+    throw image_writer_exception("null images not supported for png");
 }
 
 template<>
 void png_saver::operator()<image_view_null> (image_view_null const& image) const
 {
-    throw ImageWriterException("null image views not supported for png");
+    throw image_writer_exception("null image views not supported for png");
 }
 
 template<>
 void png_saver_pal::operator()<image_view_null> (image_view_null const& image) const
 {
-    throw ImageWriterException("null image views not supported for png");
+    throw image_writer_exception("null image views not supported for png");
 }
 
 template <typename T>
-void process_rgba8_png_pal(T const& image, 
+void process_rgba8_png_pal(T const& image,
                           std::string const& t,
                           std::ostream & stream,
                           rgba_palette const& pal)
@@ -261,12 +255,12 @@ void process_rgba8_png_pal(T const& image,
         save_as_png(stream, image, opts);
     }
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
 template <typename T>
-void process_rgba8_png(T const& image, 
+void process_rgba8_png(T const& image,
                           std::string const& t,
                           std::ostream & stream)
 {
@@ -293,7 +287,7 @@ void process_rgba8_png(T const& image,
         save_as_png(stream, image, opts);
     }
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
@@ -325,12 +319,12 @@ template <typename T>
 void png_saver::operator() (T const& image) const
 {
 #if defined(HAVE_PNG)
-    throw ImageWriterException("Mapnik does not support grayscale images for png");
+    throw image_writer_exception("Mapnik does not support grayscale images for png");
     //png_options opts;
     //handle_png_options(t_, opts);
     //save_as_png(stream_, image, opts);
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
@@ -338,12 +332,12 @@ template <typename T>
 void png_saver_pal::operator() (T const& image) const
 {
 #if defined(HAVE_PNG)
-    throw ImageWriterException("Mapnik does not support grayscale images for png");
+    throw image_writer_exception("Mapnik does not support grayscale images for png");
     //png_options opts;
     //handle_png_options(t_, opts);
     //save_as_png(stream_, image, opts);
 #else
-    throw ImageWriterException("png output is not enabled in your build of Mapnik");
+    throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
