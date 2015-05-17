@@ -88,7 +88,6 @@ bool placement_finder::next_position()
         horizontal_alignment_ = layout->horizontal_alignment();
         return true;
     }
-    MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
     return false;
 }
 
@@ -239,10 +238,9 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             double last_cluster_angle = 999;
             int current_cluster = -1;
             pixel_position cluster_offset;
-            double angle;
+            double angle = 0;
             rotation rot;
-            double last_glyph_spacing = 0.;
-
+            double last_glyph_spacing = 0.0;
             for (auto const& glyph : line)
             {
                 if (current_cluster != static_cast<int>(glyph.char_index))
@@ -250,13 +248,17 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     if (adjust)
                     {
                         if (!off_pp.move(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                        {
                             return false;
+                        }
                         last_glyph_spacing = adjust_character_spacing;
                     }
                     else
                     {
                         if (!off_pp.move_to_distance(sign * (layout.cluster_width(current_cluster) + last_glyph_spacing)))
+                        {
                             return false;
+                        }
                         last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                     }
                     current_cluster = glyph.char_index;
@@ -274,7 +276,10 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     last_cluster_angle = angle;
                 }
 
-                if (std::abs(angle) > M_PI/2) ++upside_down_glyph_count;
+                if (std::abs(angle) > M_PI/2)
+                {
+                    ++upside_down_glyph_count;
+                }
 
                 pixel_position pos = off_pp.current_position() + cluster_offset;
                 // Center the text on the line

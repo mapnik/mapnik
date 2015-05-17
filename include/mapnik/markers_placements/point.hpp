@@ -23,12 +23,18 @@
 #ifndef MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
 #define MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
 
+#include <mapnik/box2d.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/geometry_types.hpp>
 #include <mapnik/util/math.hpp>
+#include <mapnik/label_collision_detector.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/util/noncopyable.hpp>
 
 #include "agg_basics.h"
 #include "agg_trans_affine.h"
+
+#include <cmath>
 
 namespace mapnik {
 

@@ -50,6 +50,8 @@ SECTION("test rgba8") {
     CHECK(view_all == view_yellow);
     CHECK(view_all == view_red);
 
+    CHECK(view_all.data() == im);
+
     // Check that view_all and view_all_2 are not the same underlying data
     CHECK_FALSE(view_all == view_all_2);
     CHECK(view_all < view_all_2);

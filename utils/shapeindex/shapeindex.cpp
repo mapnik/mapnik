@@ -32,7 +32,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop

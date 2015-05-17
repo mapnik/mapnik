@@ -24,9 +24,12 @@
 #define MAPNIK_VIEW_STRATEGY_HPP
 
 // mapnik
-#include <mapnik/coord.hpp>
-#include <mapnik/box2d.hpp>
-#include <mapnik/proj_strategy.hpp>
+#include <mapnik/view_transform.hpp>
+
+// boost
+#include <boost/geometry/core/coordinate_type.hpp>
+#include <boost/geometry/core/access.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace mapnik
 {

@@ -29,10 +29,8 @@
 #include <mapnik/image_util_jpeg.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/image_options.hpp>
 #include <mapnik/util/conversions.hpp>
-
-// boost
-#include <boost/tokenizer.hpp>
 
 // stl
 #include <string>
@@ -48,25 +46,22 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
 {
 #if defined(HAVE_JPEG)
     int quality = 85;
-    //std::string val = type.substr(4);
     if (type != "jpeg")
     {
-        boost::char_separator<char> sep(":");
-        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        for (auto const& t : tokens)
+        for (auto const& kv : parse_image_options(type))
         {
-            if (t == "jpeg")
+            auto const& key = kv.first;
+            auto const& val = kv.second;
+            
+            if ( key == "jpeg" ) continue;
+
+            if ( key == "quality")
             {
-                continue;
-            }
-            else if (boost::algorithm::starts_with(t, "quality="))
-            {
-                std::string val = t.substr(8);
-                if (!val.empty())
+                if (val && ! (*val).empty())
                 {
-                    if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
+                    if (!mapnik::util::string2int(*val, quality) || quality < 0 || quality > 100)
                     {
-                        throw ImageWriterException("invalid jpeg quality: '" + val + "'");
+                        throw image_writer_exception("invalid jpeg quality: '" + *val + "'");
                     }
                 }
             }
@@ -74,7 +69,7 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
     }
     save_as_jpeg(stream, quality, image);
 #else
-    throw ImageWriterException("jpeg output is not enabled in your build of Mapnik");
+    throw image_writer_exception("jpeg output is not enabled in your build of Mapnik");
 #endif
 }
 
@@ -93,19 +88,19 @@ void jpeg_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) co
 template<>
 void jpeg_saver::operator()<image_null> (image_null const& image) const
 {
-    throw ImageWriterException("Can not save a null image to jpeg");
+    throw image_writer_exception("Can not save a null image to jpeg");
 }
 
 template<>
 void jpeg_saver::operator()<image_view_null> (image_view_null const& image) const
 {
-    throw ImageWriterException("Can not save a null image to jpeg");
+    throw image_writer_exception("Can not save a null image to jpeg");
 }
 
 template <typename T>
 void jpeg_saver::operator() (T const& image) const
 {
-    throw ImageWriterException("Mapnik does not support jpeg grayscale images");
+    throw image_writer_exception("Mapnik does not support jpeg grayscale images");
 }
 
 template void jpeg_saver::operator()<image_rgba8> (image_rgba8 const& image) const;

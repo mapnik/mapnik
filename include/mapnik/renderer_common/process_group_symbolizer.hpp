@@ -25,8 +25,7 @@
 
 // mapnik
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/marker_helpers.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/renderer_common.hpp>

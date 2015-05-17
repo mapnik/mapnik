@@ -871,6 +871,24 @@ return 0;
     context.Result(ret[0])
     return ret[1].strip()
 
+def CheckBoostScopedEnum(context, silent=False):
+    if not silent:
+        context.Message('Checking whether Boost was compiled with C++11 scoped enums ... ')
+    ret = context.TryLink("""
+#include <boost/filesystem.hpp>
+
+int main()
+{
+    boost::filesystem::path a, b;
+    boost::filesystem::copy_file(a, b);
+    return 0;
+}
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    context.Result(ret)
+    return ret
+
 def icu_at_least_four_two(context):
     ret = context.TryRun("""
 
@@ -1053,6 +1071,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
                'supports_cxx11'        : supports_cxx11,
+               'CheckBoostScopedEnum'  : CheckBoostScopedEnum,
                }
 
 def GetMapnikLibVersion():
@@ -1411,6 +1430,16 @@ if not preconfigured:
                     else:
                         color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
                         env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
+
+        # Boost versions before 1.57 are broken when the system package and
+        # Mapnik are compiled against different standards. On Ubuntu 14.04
+        # using boost 1.54, it breaks scoped enums. It's a bit of a hack to
+        # just turn it off like this, but seems the only available work-
+        # around. See https://svn.boost.org/trac/boost/ticket/6779 for more
+        # details.
+        boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_')]
+        if boost_version < [1, 57] and not conf.CheckBoostScopedEnum():
+            env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
 
     if not env['HOST'] and env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php

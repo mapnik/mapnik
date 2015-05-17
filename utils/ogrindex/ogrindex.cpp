@@ -25,7 +25,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 

@@ -51,11 +51,11 @@ namespace mapnik {
 struct rgba;
 
 struct MAPNIK_DECL rgb {
-    byte r;
-    byte g;
-    byte b;
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
 
-    inline rgb(byte r_, byte g_, byte b_) : r(r_), g(g_), b(b_) {}
+    inline rgb(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_) : r(r_), g(g_), b(b_) {}
     rgb(rgba const& c);
 
     inline bool operator==(const rgb& y) const
@@ -66,12 +66,12 @@ struct MAPNIK_DECL rgb {
 
 struct MAPNIK_DECL rgba
 {
-    byte r;
-    byte g;
-    byte b;
-    byte a;
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
+    std::uint8_t a;
 
-    inline rgba(byte r_, byte g_, byte b_, byte a_)
+    inline rgba(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
         : r(r_),
           g(g_),
           b(b_),

@@ -41,7 +41,6 @@
 #include <string>
 #include <memory>
 
-using mapnik::byte;
 using mapnik::geometry_utils;
 using mapnik::feature_factory;
 using mapnik::context_ptr;

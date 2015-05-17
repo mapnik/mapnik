@@ -11,7 +11,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
@@ -135,7 +134,7 @@ int main (int argc,char** argv)
                         vars[name] = tr.transcode(param.second.get<std::string>().c_str());
                     }
                 }
-            }            
+            }
         }
         mapnik::agg_renderer<mapnik::image_rgba8> ren(map,req,vars,im,scale_factor,0,0);
         ren.apply();

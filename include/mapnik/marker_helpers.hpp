@@ -23,38 +23,31 @@
 #ifndef MAPNIK_MARKER_HELPERS_HPP
 #define MAPNIK_MARKER_HELPERS_HPP
 
-#include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_centroid.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/expression_node.hpp>
-#include <mapnik/expression_evaluator.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/marker.hpp> // for svg_storage_type
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/vertex_converters.hpp>
 #include <mapnik/vertex_processor.hpp>
-#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 // agg
 #include "agg_trans_affine.h"
 
-// boost
-#include <boost/optional.hpp>
 // stl
 #include <memory>
-#include <type_traits> // remove_reference
-#include <cmath>
 
 namespace mapnik {
 
 struct clip_poly_tag;
+
+namespace svg { struct path_attributes; }
 
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
