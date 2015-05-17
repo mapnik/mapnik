@@ -30,9 +30,12 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
-#include <boost/geometry/geometries/geometries.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/segment.hpp>
 #include <boost/geometry/algorithms/is_valid.hpp>
 #include <boost/geometry/algorithms/intersection.hpp>
+#include <boost/geometry/algorithms/area.hpp>
+#include <boost/geometry/algorithms/crosses.hpp>
 
 namespace mapnik { namespace geometry {
 
@@ -108,26 +111,23 @@ inline bool is_valid(T const& geom)
     return detail::geometry_is_valid() (geom);
 }
 
-typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> Point;
+typedef boost::geometry::model::d2::point_xy<double> Point;
 typedef boost::geometry::model::segment<Point> Segment;
 
 template <typename T>
 std::vector<Segment> make_segment_vector(linear_ring<T> ring)
 {
-
     std::vector<Segment> result;
 
-    for (int i = 0; i < ring.size()-1; ++i)
-    {
-        Point a( ring.at(i).x, ring.at(i).y );
-        Point b( ring.at(i+1).x, ring.at(i+1).y );
-        Segment s(a, b);
-        result.push_back(std::move(s));
+    if (ring.size() > 1) {
+        for (int i = 0; i < ring.size()-1; ++i)
+        {
+            Point a( ring.at(i).x, ring.at(i).y );
+            Point b( ring.at(i+1).x, ring.at(i+1).y );
+            Segment s(a, b);
+            result.push_back(std::move(s));
+        }
     }
-    Point a( ring.back().x, ring.back().y );
-    Point b( ring.front().x, ring.front().y );
-    Segment s(a, b);
-    result.push_back(std::move(s));
 
     return result;
 
@@ -136,31 +136,113 @@ std::vector<Segment> make_segment_vector(linear_ring<T> ring)
 template <typename T>
 inline bool is_valid_rings(polygon<T> const& poly)
 {
-    // First, test that at least one point from each interior ring is inside
-    // the exterior ring.  We just grab the first.  If this is satisfied,
-    // and the second test passes, then e
-    for (linear_ring<T> interior_ring : poly.interior_rings) {
-        if (!boost::geometry::within(interior_ring.front(), poly.exterior_ring)) {
+    // If there are no interior rings, then the polygon must be valid
+    if (poly.interior_rings.size() == 0) return true;
+
+    // If there is no exterior rings, and any interior rings have points
+    // then this is not a valid polygon
+    if (poly.exterior_ring.size() == 0) 
+    {
+        for (linear_ring<T> interior_ring : poly.interior_rings) 
+        {
+            if (interior_ring.size() > 0) 
+            {
+                return false;
+            }
+        }
+    }
+
+    // Validate that all the rings are actually rings (i.e. they don't intersect with themselves)
+    // i.e. they're simple polygons.
+    if (boost::geometry::intersects(poly.exterior_ring))
+    {
+        return false;
+    }
+    for (auto ring : poly.interior_rings) 
+    {
+        if (boost::geometry::intersects(ring)) 
+        {
             return false;
         }
     }
 
-    std::vector<Segment> exterior_segments = make_segment_vector(poly.exterior_ring);
-    // Then, make sure there are no line intersections between the exterior ring
-    // and any of the interior rings
-    for (linear_ring<T> interior_ring : poly.interior_rings) {
-        std::vector<Segment> interior_segments = make_segment_vector(interior_ring);
-        for (Segment interior_segment : interior_segments) {
-            for (Segment exterior_segment : exterior_segments) {
-                if (boost::geometry::intersects(interior_segment, exterior_segment)) {
+    // Now, verify the winding directions of everything:  CCW for the exterior ring, and
+    // CW for any interior rings.
+    if (boost::geometry::area(poly.exterior_ring) < 0) 
+    {
+        return false;
+    }
+    for (auto ring : poly.interior_rings) 
+    {
+        if (boost::geometry::area(ring) > 0) 
+        {
+            return false;
+        }
+    }
+
+    // Quick test to see if the interior rings have at least one point
+    // inside the exterior ring.  This test, combined with the line crossing
+    // test next will ensure that all rings are inside the exterior.
+    // Also, check that rings start/end on the same point
+    for (linear_ring<T> ring : poly.interior_rings) 
+    {
+        if (ring.size() > 0) 
+        {
+            if (!boost::geometry::within(ring.front(), poly.exterior_ring)) 
+            {
+                return false;
+            }
+            if (ring.size() > 1) 
+            {
+                if (ring.front().x != ring.back().x || ring.front().y != ring.back().y) 
+                {
                     return false;
                 }
             }
         }
     }
 
-    return true;
+    // Then, make sure there are no line intersections between the exterior ring
+    // and any of the interior rings
+    // TODO: implement boost::geometry::crosses, or convert this to Shamos–Hoey
 
+    auto exterior_segments = make_segment_vector(poly.exterior_ring);
+
+    for (auto interior_ring : poly.interior_rings) 
+    {
+        auto interior_segments = make_segment_vector(interior_ring);
+        for (auto a : exterior_segments) 
+        {
+            for (auto b : interior_segments)
+            {
+                if (boost::geometry::intersects(a, b)) 
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    // Finally, check that none of the interior rings overlap each other.
+    for (int i=0; i < poly.interior_rings.size()-1; i++) 
+    {
+        for (int j=i+1; j < poly.interior_rings.size(); j++) 
+        {
+            if (boost::geometry::intersects(poly.interior_rings.at(i), poly.interior_rings.at(j))) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+template <typename T>
+inline bool is_valid_rings(multi_polygon<T> const& multipoly) {
+    for(polygon<T> poly : multipoly) 
+    {
+        if (!is_valid_rings(poly)) return false;
+    }
 }
 
 }}
