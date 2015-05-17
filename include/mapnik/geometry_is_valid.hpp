@@ -35,7 +35,6 @@
 #include <boost/geometry/algorithms/is_valid.hpp>
 #include <boost/geometry/algorithms/intersection.hpp>
 #include <boost/geometry/algorithms/area.hpp>
-#include <boost/geometry/algorithms/crosses.hpp>
 
 namespace mapnik { namespace geometry {
 
