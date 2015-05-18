@@ -641,7 +641,7 @@ TEST_CASE("csv") {
     for (double d : { .0, +.0, 1e-06, -1e-06, 0.000001, 1.234e+16, 1.234e+16 }) {
       auto feature = fs->next();
       REQUIRE(bool(feature));
-      CHECK(feature->get("floats") == d);
+      CHECK(feature->get("floats").get<mapnik::value_double>() == Approx(d));
     }
   } // END SECTION
 

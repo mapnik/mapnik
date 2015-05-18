@@ -98,10 +98,10 @@ SECTION("envelope multiplication") {
     auto a = mapnik::box2d<double>(100.0, 100.0, 100.001, 100.001);
     a *= 5;
 
-    REQUIRE(std::abs(a.minx() -  99.9980) < 0.001);
-    REQUIRE(std::abs(a.miny() -  99.9980) < 0.001);
-    REQUIRE(std::abs(a.maxx() - 100.0030) < 0.001);
-    REQUIRE(std::abs(a.maxy() - 100.0030) < 0.001);
+    REQUIRE(a.minx() == Approx( 99.9980));
+    REQUIRE(a.miny() == Approx( 99.9980));
+    REQUIRE(a.maxx() == Approx(100.0030));
+    REQUIRE(a.maxy() == Approx(100.0030));
   }
 
   {
