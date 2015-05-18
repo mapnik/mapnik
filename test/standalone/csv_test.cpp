@@ -14,6 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/format.hpp>
+#include <boost/optional/optional_io.hpp>
 
 #include <iostream>
 
