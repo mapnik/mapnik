@@ -1438,8 +1438,11 @@ if not preconfigured:
         # around. See https://svn.boost.org/trac/boost/ticket/6779 for more
         # details.
         boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_')]
-        if boost_version < [1, 57] and not conf.CheckBoostScopedEnum():
-            env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
+        if not conf.CheckBoostScopedEnum():
+            if boost_version < [1, 51]:
+                env.Append(CXXFLAGS = '-DBOOST_NO_SCOPED_ENUMS')
+            elif boost_version < [1, 57]:
+                env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
 
     if not env['HOST'] and env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
