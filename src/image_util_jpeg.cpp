@@ -52,10 +52,9 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
         {
             auto const& key = kv.first;
             auto const& val = kv.second;
-            
-            if ( key == "jpeg" ) continue;
 
-            if ( key == "quality")
+            if ( key == "jpeg" ) continue;
+            else if ( key == "quality")
             {
                 if (val && ! (*val).empty())
                 {
