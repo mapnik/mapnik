@@ -713,7 +713,7 @@ namespace detail {
 struct visitor_multiply_alpha
 {
     visitor_multiply_alpha(float opacity)
-        : opacity_(clamp(opacity, 0.0f, 1.0f)) {}
+        : opacity_(opacity) {}
 
     void operator() (image_rgba8 & data) const
     {
@@ -724,7 +724,8 @@ struct visitor_multiply_alpha
             for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
-                pixel_type a = static_cast<uint8_t>(((rgba >> 24) & 0xff) * opacity_);
+                double new_a = static_cast<double>((rgba >> 24) & 0xff) * opacity_;
+                pixel_type a = static_cast<uint8_t>(clamp(new_a, 0.0, 255.0));
                 pixel_type r = rgba & 0xff;
                 pixel_type g = (rgba >> 8 ) & 0xff;
                 pixel_type b = (rgba >> 16) & 0xff;

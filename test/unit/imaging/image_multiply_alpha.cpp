@@ -71,7 +71,7 @@ SECTION("test rgba8 overflow") {
     CHECK(static_cast<int>(out.red()) == 128);
     CHECK(static_cast<int>(out.green()) == 128);
     CHECK(static_cast<int>(out.blue()) == 128);
-    CHECK(static_cast<int>(out.alpha()) == 128);
+    CHECK(static_cast<int>(out.alpha()) == 255);
 
 } // END SECTION
 
