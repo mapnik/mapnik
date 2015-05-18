@@ -189,16 +189,7 @@ TEST_CASE("csv") {
       broken.emplace_back("test/data/csv/fails/does_not_exist.csv");
 
       for (auto const &path : broken) {
-        bool threw = false;
-
-        try {
-          auto ds = get_csv_ds(path.native());
-
-        } catch (const std::exception &e) {
-          threw = true;
-        }
-
-        REQUIRE(threw);
+        REQUIRE_THROWS(get_csv_ds(path.native()));
       }
     }
   } // END SECTION
@@ -210,18 +201,9 @@ TEST_CASE("csv") {
       add_csv_files("test/data/csv/warns", good);
 
       for (auto const &path : good) {
-        bool threw = false;
-
-        try {
-          auto ds = get_csv_ds(path.native(), false);
-          // require a non-null pointer returned
-          REQUIRE(bool(ds));
-
-        } catch (const std::exception &e) {
-          threw = true;
-        }
-
-        REQUIRE(!threw);
+        auto ds = get_csv_ds(path.native(), false);
+        // require a non-null pointer returned
+        REQUIRE(bool(ds));
       }
     }
   } // END SECTION
@@ -484,15 +466,7 @@ TEST_CASE("csv") {
     // also add an invalid one, triggering throw
     query.add_property_name("bogus");
 
-    bool threw = false;
-    try {
-      ds->features(query);
-
-    } catch (std::exception const &) {
-      threw = true;
-    }
-
-    CHECK(threw);
+    REQUIRE_THROWS(ds->features(query));
   } // END SECTION
 
   SECTION("leading zeros mean strings") {
@@ -590,13 +564,7 @@ TEST_CASE("csv") {
   } // END SECTION
 
   SECTION("fewer headers than rows throws") {
-    bool threw = false;
-    try {
-      get_csv_ds("test/data/csv/more_column_values_than_headers.csv");
-    } catch (std::exception const &) {
-      threw = true;
-    }
-    CHECK(threw);
+    REQUIRE_THROWS(get_csv_ds("test/data/csv/more_column_values_than_headers.csv"));
   } // END SECTION
 
   SECTION("feature ID only incremented for valid rows") {
