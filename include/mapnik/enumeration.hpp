@@ -180,17 +180,22 @@ public:
     {
         // TODO: Enum value strings with underscore are deprecated in Mapnik 3.x
         // and support will be removed in Mapnik 4.x.
+        bool deprecated = false;
         std::string str_copy(str);
         if (str_copy.find('_') != std::string::npos)
         {
             std::replace(str_copy.begin(), str_copy.end(), '_', '-');
-            MAPNIK_LOG_ERROR(enumerations) << "enumeration value (" << str << ") using \"_\" is deprecated and will be removed in Mapnik 4.x, use '" << str_copy << "' instead";
+            deprecated = true;
         }
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
             if (str_copy == our_strings_[i])
             {
                 value_ = static_cast<ENUM>(i);
+                if (deprecated)
+                {
+                    MAPNIK_LOG_ERROR(enumerations) << "enumeration value (" << str << ") using \"_\" is deprecated and will be removed in Mapnik 4.x, use '" << str_copy << "' instead";
+                }
                 return;
             }
         }
