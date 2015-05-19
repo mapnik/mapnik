@@ -52,9 +52,9 @@ private:
     double scale_factor_;
 };
 
-runner::runner(boost::filesystem::path const & styles_dir,
-               boost::filesystem::path const & output_dir,
-               boost::filesystem::path const & reference_dir,
+runner::runner(runner::path_type const & styles_dir,
+               runner::path_type const & output_dir,
+               runner::path_type const & reference_dir,
                bool overwrite,
                std::size_t jobs)
     : styles_dir_(styles_dir),
@@ -69,22 +69,24 @@ runner::runner(boost::filesystem::path const & styles_dir,
 
 result_list runner::test_all(report_type & report) const
 {
-    std::vector<std::string> files = mapnik::util::list_directory(styles_dir_.string());
+    boost::filesystem::directory_iterator begin(styles_dir_);
+    boost::filesystem::directory_iterator end;
+    std::vector<runner::path_type> files(begin, end);
     return test_parallel(files, report, jobs_);
 }
 
 result_list runner::test(std::vector<std::string> const & style_names, report_type & report) const
 {
-    std::vector<std::string> files(style_names.size());
+    std::vector<runner::path_type> files(style_names.size());
     std::transform(style_names.begin(), style_names.end(), std::back_inserter(files),
         [&](std::string const & name)
         {
-            return (styles_dir_ / (name + ".xml")).string();
+            return styles_dir_ / (name + ".xml");
         });
     return test_parallel(files, report, jobs_);
 }
 
-result_list runner::test_parallel(std::vector<std::string> const & files, report_type & report, std::size_t jobs) const
+result_list runner::test_parallel(std::vector<runner::path_type> const & files, report_type & report, std::size_t jobs) const
 {
     result_list results;
 
@@ -137,10 +139,10 @@ result_list runner::test_range(files_iterator begin, files_iterator end, std::re
     config defaults;
     result_list results;
 
-    for (std::vector<std::string>::const_iterator i = begin; i != end; i++)
+    for (runner::files_iterator i = begin; i != end; i++)
     {
-        std::string const & file = *i;
-        if (file.size() >= 3 && file.substr(file.size() - 3) == "xml")
+        runner::path_type const & file = *i;
+        if (file.extension() == ".xml")
         {
             try
             {
@@ -151,7 +153,7 @@ result_list runner::test_range(files_iterator begin, files_iterator end, std::re
             {
                 result r;
                 r.state = STATE_ERROR;
-                r.name = file;
+                r.name = file.string();
                 r.error_message = ex.what();
                 results.emplace_back(r);
                 mapnik::util::apply_visitor(report_visitor(r), report.get());
@@ -162,14 +164,14 @@ result_list runner::test_range(files_iterator begin, files_iterator end, std::re
     return results;
 }
 
-result_list runner::test_one(std::string const& style_path, config cfg, report_type & report) const
+result_list runner::test_one(runner::path_type const& style_path, config cfg, report_type & report) const
 {
     mapnik::Map m(cfg.sizes.front().width, cfg.sizes.front().height);
     result_list results;
 
     try
     {
-        mapnik::load_map(m, style_path, true);
+        mapnik::load_map(m, style_path.string(), true);
     }
     catch (std::exception const& ex)
     {
@@ -199,8 +201,7 @@ result_list runner::test_one(std::string const& style_path, config cfg, report_t
         parse_map_sizes(*sizes, cfg.sizes);
     }
 
-    boost::filesystem::path p(style_path);
-    std::string name(p.stem().string());
+    std::string name(style_path.stem().string());
 
     for (map_size const & size : cfg.sizes)
     {
