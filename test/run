@@ -25,7 +25,10 @@ if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; the
 fi
 
 run_substep "Running visual tests..."
-./test/visual/run
+if [ -z "$JOBS" ]; then
+    JOBS=1
+fi
+./test/visual/run -j $JOBS
 failures=$((failures+$?))
 
 exit $failures
