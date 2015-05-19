@@ -63,8 +63,8 @@ using boost::numeric::negative_overflow;
 
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
-                           std::string const& type,
-                           rgba_palette const& palette)
+                                       std::string const& type,
+                                       rgba_palette const& palette)
 {
     std::ostringstream ss(std::ios::out|std::ios::binary);
     save_to_stream(image, ss, type, palette);
@@ -73,7 +73,7 @@ MAPNIK_DECL std::string save_to_string(T const& image,
 
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
-                           std::string const& type)
+                                       std::string const& type)
 {
     std::ostringstream ss(std::ios::out|std::ios::binary);
     save_to_stream(image, ss, type);
@@ -82,9 +82,9 @@ MAPNIK_DECL std::string save_to_string(T const& image,
 
 template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
-                  std::string const& filename,
-                  std::string const& type,
-                  rgba_palette const& palette)
+                              std::string const& filename,
+                              std::string const& type,
+                              rgba_palette const& palette)
 {
     std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
     if (file)
@@ -96,8 +96,8 @@ MAPNIK_DECL void save_to_file(T const& image,
 
 template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
-                  std::string const& filename,
-                  std::string const& type)
+                              std::string const& filename,
+                              std::string const& type)
 {
     std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
     if (file)
@@ -109,9 +109,9 @@ MAPNIK_DECL void save_to_file(T const& image,
 
 template <typename T>
 MAPNIK_DECL void save_to_stream(T const& image,
-                    std::ostream & stream,
-                    std::string const& type,
-                    rgba_palette const& palette)
+                                std::ostream & stream,
+                                std::string const& type,
+                                rgba_palette const& palette)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -139,9 +139,9 @@ MAPNIK_DECL void save_to_stream(T const& image,
 // items using this template
 template <>
 MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
-                    std::ostream & stream,
-                    std::string const& type,
-                    rgba_palette const& palette)
+                                             std::ostream & stream,
+                                             std::string const& type,
+                                             rgba_palette const& palette)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -170,9 +170,9 @@ MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
 // items using this template
 template <>
 MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
-                    std::ostream & stream,
-                    std::string const& type,
-                    rgba_palette const& palette)
+                                                  std::ostream & stream,
+                                                  std::string const& type,
+                                                  rgba_palette const& palette)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -199,8 +199,8 @@ MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
 
 template <typename T>
 MAPNIK_DECL void save_to_stream(T const& image,
-                    std::ostream & stream,
-                    std::string const& type)
+                                std::ostream & stream,
+                                std::string const& type)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -235,8 +235,8 @@ MAPNIK_DECL void save_to_stream(T const& image,
 // items using this template
 template <>
 MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
-                    std::ostream & stream,
-                    std::string const& type)
+                                             std::ostream & stream,
+                                             std::string const& type)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -275,8 +275,8 @@ MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
 // items using this template
 template <>
 MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
-                    std::ostream & stream,
-                    std::string const& type)
+                                                  std::ostream & stream,
+                                                  std::string const& type)
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
@@ -335,75 +335,75 @@ MAPNIK_DECL void save_to_file(T const& image, std::string const& filename, rgba_
 
 // image_rgba8
 template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                             std::string const&,
-                                             std::string const&);
+                                                    std::string const&,
+                                                    std::string const&);
 
 template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                             std::string const&,
-                                             std::string const&,
-                                             rgba_palette const& palette);
+                                                    std::string const&,
+                                                    std::string const&,
+                                                    rgba_palette const& palette);
 
 template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                             std::string const&);
+                                                    std::string const&);
 
 template MAPNIK_DECL void save_to_file<image_rgba8>(image_rgba8 const&,
-                                             std::string const&,
-                                             rgba_palette const& palette);
+                                                    std::string const&,
+                                                    rgba_palette const& palette);
 
 template MAPNIK_DECL std::string save_to_string<image_rgba8>(image_rgba8 const&,
-                                                      std::string const&);
+                                                             std::string const&);
 
 template MAPNIK_DECL std::string save_to_string<image_rgba8>(image_rgba8 const&,
-                                                      std::string const&,
-                                                      rgba_palette const& palette);
+                                                             std::string const&,
+                                                             rgba_palette const& palette);
 
 // image_view_any
 template MAPNIK_DECL void save_to_file<image_view_any> (image_view_any const&,
-                                              std::string const&,
-                                              std::string const&);
+                                                        std::string const&,
+                                                        std::string const&);
 
 template MAPNIK_DECL void save_to_file<image_view_any> (image_view_any const&,
-                                              std::string const&,
-                                              std::string const&,
-                                              rgba_palette const& palette);
+                                                        std::string const&,
+                                                        std::string const&,
+                                                        rgba_palette const& palette);
 
 template MAPNIK_DECL void save_to_file<image_view_any> (image_view_any const&,
-                                              std::string const&);
+                                                        std::string const&);
 
 template MAPNIK_DECL void save_to_file<image_view_any> (image_view_any const&,
-                                              std::string const&,
-                                              rgba_palette const& palette);
+                                                        std::string const&,
+                                                        rgba_palette const& palette);
 
 template MAPNIK_DECL std::string save_to_string<image_view_any> (image_view_any const&,
-                                                       std::string const&);
+                                                                 std::string const&);
 
 template MAPNIK_DECL std::string save_to_string<image_view_any> (image_view_any const&,
-                                                       std::string const&,
-                                                       rgba_palette const& palette);
+                                                                 std::string const&,
+                                                                 rgba_palette const& palette);
 
 // image_any
 template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                           std::string const&,
-                                           std::string const&);
+                                                  std::string const&,
+                                                  std::string const&);
 
 template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                           std::string const&,
-                                           std::string const&,
-                                           rgba_palette const& palette);
+                                                  std::string const&,
+                                                  std::string const&,
+                                                  rgba_palette const& palette);
 
 template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                           std::string const&);
+                                                  std::string const&);
 
 template MAPNIK_DECL void save_to_file<image_any>(image_any const&,
-                                           std::string const&,
-                                           rgba_palette const& palette);
+                                                  std::string const&,
+                                                  rgba_palette const& palette);
 
 template MAPNIK_DECL std::string save_to_string<image_any>(image_any const&,
-                                                    std::string const&);
+                                                           std::string const&);
 
 template MAPNIK_DECL std::string save_to_string<image_any>(image_any const&,
-                                                    std::string const&,
-                                                    rgba_palette const& palette);
+                                                           std::string const&,
+                                                           rgba_palette const& palette);
 
 namespace detail {
 
@@ -427,10 +427,10 @@ struct is_solid_visitor
         {
             pixel_type const* first_row = data.get_row(0);
             pixel_type const first_pixel = first_row[0];
-            for (unsigned y = 0; y < data.height(); ++y)
+            for (std::size_t y = 0; y < data.height(); ++y)
             {
                 pixel_type const * row = data.get_row(y);
-                for (unsigned x = 0; x < data.width(); ++x)
+                for (std::size_t x = 0; x < data.width(); ++x)
                 {
                     if (first_pixel != row[x])
                     {
@@ -543,7 +543,7 @@ struct set_premultiplied_visitor
     {
         data.set_premultiplied(status_);
     }
-  private:
+private:
     bool const status_;
 };
 
@@ -642,10 +642,10 @@ struct visitor_set_alpha
     {
         using pixel_type = image_rgba8::pixel_type;
         pixel_type a1 = static_cast<pixel_type>(255.0 * opacity_);
-        for (unsigned int y = 0; y < data.height(); ++y)
+        for (std::size_t y = 0; y < data.height(); ++y)
         {
             pixel_type* row_to =  data.get_row(y);
-            for (unsigned int x = 0; x < data.width(); ++x)
+            for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
                 pixel_type a0 = (rgba >> 24) & 0xff;
@@ -666,7 +666,7 @@ struct visitor_set_alpha
         throw std::runtime_error("Error: set_alpha with " + std::string(typeid(data).name()) + " is not supported");
     }
 
-  private:
+private:
     float const opacity_;
 };
 
@@ -718,10 +718,10 @@ struct visitor_multiply_alpha
     void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
-        for (unsigned int y = 0; y < data.height(); ++y)
+        for (std::size_t y = 0; y < data.height(); ++y)
         {
             pixel_type* row_to =  data.get_row(y);
-            for (unsigned int x = 0; x < data.width(); ++x)
+            for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
                 pixel_type a = static_cast<uint8_t>(((rgba >> 24) & 0xff) * opacity_);
@@ -739,7 +739,7 @@ struct visitor_multiply_alpha
         throw std::runtime_error("Error: multiply_alpha with " + std::string(typeid(data).name()) + " is not supported");
     }
 
-    private:
+private:
     float const opacity_;
 
 };
@@ -789,10 +789,10 @@ struct visitor_set_grayscale_to_alpha
     void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
-        for (unsigned int y = 0; y < data.height(); ++y)
+        for (std::size_t y = 0; y < data.height(); ++y)
         {
             pixel_type* row_from = data.get_row(y);
-            for (unsigned int x = 0; x < data.width(); ++x)
+            for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_from[x];
                 pixel_type r = rgba & 0xff;
@@ -822,10 +822,10 @@ struct visitor_set_grayscale_to_alpha_c
     void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
-        for (unsigned int y = 0; y < data.height(); ++y)
+        for (std::size_t y = 0; y < data.height(); ++y)
         {
             pixel_type* row_from = data.get_row(y);
-            for (unsigned int x = 0; x < data.width(); ++x)
+            for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_from[x];
                 pixel_type r = rgba & 0xff;
@@ -846,7 +846,7 @@ struct visitor_set_grayscale_to_alpha_c
         MAPNIK_LOG_WARN(image_util) << "Warning: set_grayscale_to_alpha with " + std::string(typeid(data).name()) + " is not supported, image was not modified";
     }
 
-  private:
+private:
     color const& c_;
 };
 
@@ -934,10 +934,10 @@ struct visitor_set_color_to_alpha
     void operator() (image_rgba8 & data) const
     {
         using pixel_type = image_rgba8::pixel_type;
-        for (unsigned y = 0; y < data.height(); ++y)
+        for (std::size_t y = 0; y < data.height(); ++y)
         {
             pixel_type* row_from = data.get_row(y);
-            for (unsigned x = 0; x < data.width(); ++x)
+            for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_from[x];
                 pixel_type r = rgba & 0xff;
@@ -957,7 +957,7 @@ struct visitor_set_color_to_alpha
         throw std::runtime_error("Error: set_color_to_alpha with " + std::string(typeid(data).name()) + " is not supported");
     }
 
-  private:
+private:
     color const& c_;
 
 };
@@ -1029,7 +1029,7 @@ struct visitor_fill
         data.set(val);
     }
 
-  private:
+private:
     T1 const& val_;
 };
 
@@ -1055,7 +1055,7 @@ struct visitor_fill<color>
         data.set(val);
     }
 
-  private:
+private:
     color const& val_;
 };
 
@@ -1349,7 +1349,7 @@ struct visitor_set_rectangle
             }
         }
     }
-  private:
+private:
     image_any const& src_;
     int x0_;
     int y0_;
@@ -1421,7 +1421,7 @@ struct visitor_composite_pixel
         throw std::runtime_error("Composite pixel is not supported for this data type");
     }
 
-  private:
+private:
     double const opacity_;
     unsigned op_;
     int const x_;
@@ -1488,7 +1488,7 @@ struct visitor_set_pixel
         }
     }
 
-  private:
+private:
     T1 const& val_;
     std::size_t const x_;
     std::size_t const y_;
@@ -1527,7 +1527,7 @@ struct visitor_set_pixel<color>
         }
     }
 
-  private:
+private:
     color const& val_;
     std::size_t const x_;
     std::size_t const y_;
@@ -1797,7 +1797,7 @@ struct visitor_get_pixel
         }
     }
 
-  private:
+private:
     std::size_t const x_;
     std::size_t const y_;
 };
@@ -1821,7 +1821,7 @@ struct visitor_get_pixel<color>
         }
     }
 
-  private:
+private:
     std::size_t const x_;
     std::size_t const y_;
 };
@@ -2296,11 +2296,11 @@ struct visitor_view_to_string
         for (std::size_t i=0;i<view.height();i++)
         {
             ss_.write(reinterpret_cast<const char*>(view.get_row(i)),
-                     view.row_size());
+                      view.row_size());
         }
     }
 
-  private:
+private:
     std::ostringstream & ss_;
 };
 
@@ -2331,7 +2331,7 @@ struct visitor_create_view
         image_view<T> view(x_,y_,w_,h_,data);
         return image_view_any(view);
     }
-  private:
+private:
     unsigned const x_;
     unsigned const y_;
     unsigned const w_;
@@ -2354,11 +2354,11 @@ MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold, bool)
         return im1.width() * im1.height();
     }
     unsigned difference = 0;
-    for (unsigned int y = 0; y < im1.height(); ++y)
+    for (std::size_t y = 0; y < im1.height(); ++y)
     {
         const pixel_type * row_from = im1.get_row(y);
         const pixel_type * row_from2 = im2.get_row(y);
-        for (unsigned int x = 0; x < im1.width(); ++x)
+        for (std::size_t x = 0; x < im1.width(); ++x)
         {
             double d = std::abs(static_cast<double>(row_from[x]) - static_cast<double>(row_from2[x]));
             if (d > threshold)
@@ -2546,7 +2546,7 @@ struct visitor_compare
         return mapnik::compare<T>(im1, util::get<T>(im2_), threshold_, alpha_);
     }
 
-  private:
+private:
     image_any const& im2_;
     double const threshold_;
     bool const alpha_;
