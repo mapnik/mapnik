@@ -78,9 +78,9 @@ result_list runner::test(std::vector<std::string> const & style_names, report_ty
 {
     std::vector<runner::path_type> files(style_names.size());
     std::transform(style_names.begin(), style_names.end(), std::back_inserter(files),
-        [&](std::string const & name)
+        [&](runner::path_type const & name)
         {
-            return styles_dir_ / (name + ".xml");
+            return (name.extension() == ".xml") ? name : (styles_dir_ / (name.string() + ".xml"));
         });
     return test_parallel(files, report, jobs_);
 }
