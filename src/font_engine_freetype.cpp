@@ -84,7 +84,7 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    boost::unique_lock< boost::shared_mutex > lock(mutex_);
 #endif
     font_library library;
     return register_font_impl(file_name, library, global_font_file_mapping_);
@@ -166,7 +166,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    boost::unique_lock< boost::shared_mutex > lock(mutex_);
 #endif
     font_library library;
     return register_fonts_impl(dir, library, global_font_file_mapping_, recurse);
@@ -289,6 +289,9 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
                                       freetype_engine::font_file_mapping_type const& global_font_file_mapping,
                                       freetype_engine::font_memory_cache_type & global_memory_fonts)
 {
+#ifdef MAPNIK_THREADSAFE
+    boost::upgrade_lock< boost::shared_mutex > lock(mutex_);
+#endif
     bool found_font_file = false;
     font_file_mapping_type::const_iterator itr = font_file_mapping.find(family_name);
     // look for font registered on specific map
@@ -338,7 +341,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         if (file.open())
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(mutex_);
+            boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(lock);
 #endif
             auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
             FT_Face face;
@@ -445,7 +448,7 @@ face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional
 }
 
 #ifdef MAPNIK_THREADSAFE
-std::mutex freetype_engine::mutex_;
+boost::shared_mutex freetype_engine::mutex_;
 #endif
 freetype_engine::font_file_mapping_type freetype_engine::global_font_file_mapping_;
 freetype_engine::font_memory_cache_type freetype_engine::global_memory_fonts_;
