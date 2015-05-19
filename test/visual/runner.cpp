@@ -25,7 +25,6 @@
 #include <future>
 
 #include <mapnik/load_map.hpp>
-#include <mapnik/util/fs.hpp>
 
 #include "runner.hpp"
 
