@@ -1388,9 +1388,9 @@ struct visitor_composite_pixel
 {
     // Obviously c variable would only work for rgba8 currently, but didn't want to
     // make this a template class until new rgba types exist.
-    visitor_composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
+    visitor_composite_pixel(composite_mode_e comp_op, int x,int y, unsigned c, unsigned cover, double opacity)
         :   opacity_(clamp(opacity, 0.0, 1.0)),
-            op_(op),
+            comp_op_(comp_op),
             x_(x),
             y_(y),
             c_(c),
@@ -1410,7 +1410,7 @@ struct visitor_composite_pixel
             value_type cb = (c_ >> 16 ) & 0xff;
             value_type cg = (c_ >> 8) & 0xff;
             value_type cr = (c_ & 0xff);
-            blender_type::blend_pix(op_, reinterpret_cast<value_type*>(&rgba), cr, cg, cb, ca, cover_);
+            blender_type::blend_pix(comp_op_, reinterpret_cast<value_type*>(&rgba), cr, cg, cb, ca, cover_);
             data(x_,y_) = rgba;
         }
     }
@@ -1423,7 +1423,7 @@ struct visitor_composite_pixel
 
 private:
     double const opacity_;
-    unsigned op_;
+    composite_mode_e comp_op_;
     int const x_;
     int const y_;
     int const c_;
@@ -1433,29 +1433,29 @@ private:
 
 } // end detail ns
 
-MAPNIK_DECL void composite_pixel(image_any & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity )
+MAPNIK_DECL void composite_pixel(image_any & data, composite_mode_e comp_op, int x, int y, unsigned c, unsigned cover, double opacity )
 {
-    util::apply_visitor(detail::visitor_composite_pixel(op, x, y, c, cover, opacity), data);
+    util::apply_visitor(detail::visitor_composite_pixel(comp_op, x, y, c, cover, opacity), data);
 }
 
 template <typename T>
-MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity )
+MAPNIK_DECL void composite_pixel(T & data, composite_mode_e comp_op, int x, int y, unsigned c, unsigned cover, double opacity )
 {
-    detail::visitor_composite_pixel visitor(op, x, y, c, cover, opacity);
+    detail::visitor_composite_pixel visitor(comp_op, x, y, c, cover, opacity);
     visitor(data);
 }
 
-template MAPNIK_DECL void composite_pixel(image_rgba8 &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray8 &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray8s &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray16 &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray16s &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray32 &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray32s &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray32f &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray64 &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray64s &, unsigned, int, int, unsigned, unsigned, double);
-template MAPNIK_DECL void composite_pixel(image_gray64f &, unsigned, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_rgba8 &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray8 &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray8s &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray16 &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray16s &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray32 &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray32s &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray32f &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray64 &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray64s &, composite_mode_e, int, int, unsigned, unsigned, double);
+template MAPNIK_DECL void composite_pixel(image_gray64f &, composite_mode_e, int, int, unsigned, unsigned, double);
 
 namespace detail {
 
