@@ -56,11 +56,13 @@ enabled_imaging_libraries = []
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
+bthread = 'boost_thread%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
 # note: order matters on linux: see lorder | tsort
 lib_env['LIBS'] = [filesystem,
-                   regex]
+                   regex,
+                   bthread]
 
 if env['HAS_CAIRO']:
     lib_env.Append(LIBS=env['CAIRO_ALL_LIBS'])

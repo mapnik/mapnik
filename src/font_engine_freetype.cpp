@@ -289,36 +289,65 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
                                       freetype_engine::font_file_mapping_type const& global_font_file_mapping,
                                       freetype_engine::font_memory_cache_type & global_memory_fonts)
 {
-#ifdef MAPNIK_THREADSAFE
-    boost::upgrade_lock< boost::shared_mutex > lock(mutex_);
-#endif
     bool found_font_file = false;
-    font_file_mapping_type::const_iterator itr = font_file_mapping.find(family_name);
-    // look for font registered on specific map
-    if (itr != font_file_mapping.end())
+    font_file_mapping_type::const_iterator itr;
     {
-        auto mem_font_itr = font_cache.find(itr->second.second);
-        // if map has font already in memory, use it
-        if (mem_font_itr != font_cache.end())
+#ifdef MAPNIK_THREADSAFE
+        boost::shared_lock< boost::shared_mutex > lock(mutex_);
+#endif
+        itr = font_file_mapping.find(family_name);
+        // look for font registered on specific map
+        if (itr != font_file_mapping.end())
         {
-            FT_Face face;
-            FT_Error error = FT_New_Memory_Face(library.get(),
-                                                reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
-                                                static_cast<FT_Long>(mem_font_itr->second.second), // size
-                                                itr->second.first, // face index
-                                                &face);
-            if (!error) return std::make_shared<font_face>(face);
+            auto mem_font_itr = font_cache.find(itr->second.second);
+            // if map has font already in memory, use it
+            if (mem_font_itr != font_cache.end())
+            {
+                FT_Face face;
+                FT_Error error = FT_New_Memory_Face(library.get(),
+                                                    reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                                    static_cast<FT_Long>(mem_font_itr->second.second), // size
+                                                    itr->second.first, // face index
+                                                    &face);
+                if (!error) return std::make_shared<font_face>(face);
+            }
+            // we don't add to cache here because the map and its font_cache
+            // must be immutable during rendering for predictable thread safety
+            found_font_file = true;
         }
-        // we don't add to cache here because the map and its font_cache
-        // must be immutable during rendering for predictable thread safety
-        found_font_file = true;
-    }
-    else
-    {
-        // otherwise search global registry
-        itr = global_font_file_mapping.find(family_name);
-        if (itr != global_font_file_mapping.end())
+        else
         {
+            // otherwise search global registry
+            itr = global_font_file_mapping.find(family_name);
+            if (itr != global_font_file_mapping.end())
+            {
+                auto mem_font_itr = global_memory_fonts.find(itr->second.second);
+                // if font already in memory, use it
+                if (mem_font_itr != global_memory_fonts.end())
+                {
+                    FT_Face face;
+                    FT_Error error = FT_New_Memory_Face(library.get(),
+                                                        reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                                        static_cast<FT_Long>(mem_font_itr->second.second), // size
+                                                        itr->second.first, // face index
+                                                        &face);
+                    if (!error) return std::make_shared<font_face>(face);
+                }
+                found_font_file = true;
+            }
+        }
+    }
+    // if we found file file but it is not yet in memory
+    if (found_font_file)
+    {
+        mapnik::util::file file(itr->second.second);
+        if (file.open())
+        {
+#ifdef MAPNIK_THREADSAFE
+            boost::unique_lock< boost::shared_mutex > lock(mutex_);
+#endif
+            // Because another thread might have already emplaced this same font if we locked, 
+            // so lets check again if its there.
             auto mem_font_itr = global_memory_fonts.find(itr->second.second);
             // if font already in memory, use it
             if (mem_font_itr != global_memory_fonts.end())
@@ -330,19 +359,9 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
                                                     itr->second.first, // face index
                                                     &face);
                 if (!error) return std::make_shared<font_face>(face);
+                global_memory_fonts.erase(mem_font_itr->first);
             }
-            found_font_file = true;
-        }
-    }
-    // if we found file file but it is not yet in memory
-    if (found_font_file)
-    {
-        mapnik::util::file file(itr->second.second);
-        if (file.open())
-        {
-#ifdef MAPNIK_THREADSAFE
-            boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(lock);
-#endif
+            // Otherwise emplace it
             auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
             FT_Face face;
             FT_Error error = FT_New_Memory_Face(library.get(),
