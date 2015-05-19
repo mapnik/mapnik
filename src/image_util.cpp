@@ -2285,32 +2285,35 @@ template MAPNIK_DECL double get_pixel(image_view_gray64f const&, std::size_t, st
 namespace detail
 {
 
-struct visitor_view_to_string
+template <typename Out>
+struct visitor_view_to_stream
 {
-    visitor_view_to_string(std::ostringstream & ss)
-        : ss_(ss) {}
+    visitor_view_to_stream(Out & os)
+        : os_(os) {}
 
     template <typename T>
     void operator() (T const& view)
     {
         for (std::size_t i=0;i<view.height();i++)
         {
-            ss_.write(reinterpret_cast<const char*>(view.get_row(i)),
+            os_.write(reinterpret_cast<const char*>(view.get_row(i)),
                       view.row_size());
         }
     }
 
 private:
-    std::ostringstream & ss_;
+    Out & os_;
 };
 
 } // end detail ns
 
-
-MAPNIK_DECL void view_to_string (image_view_any const& view, std::ostringstream & ss)
+template <typename Out>
+void view_to_stream (image_view_any const& view, Out & os)
 {
-    util::apply_visitor(detail::visitor_view_to_string(ss), view);
+    util::apply_visitor(detail::visitor_view_to_stream<Out>(os), view);
 }
+
+template MAPNIK_DECL void view_to_stream(image_view_any const& view, std::ostringstream & os);
 
 namespace detail
 {
