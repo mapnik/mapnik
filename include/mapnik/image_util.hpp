@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/pixel_types.hpp>
-
+#include <mapnik/image_compositing.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
@@ -215,10 +215,10 @@ inline bool check_bounds (T const& data, std::size_t x, std::size_t y)
 }
 
 // COMPOSITE_PIXEL
-MAPNIK_DECL void composite_pixel(image_any & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity );
+MAPNIK_DECL void composite_pixel(image_any & data, composite_mode_e comp_op, std::size_t x, std::size_t y, unsigned c, unsigned cover, double opacity );
 
 template <typename T>
-MAPNIK_DECL void composite_pixel(T & data, unsigned op, int x, int y, unsigned c, unsigned cover, double opacity );
+MAPNIK_DECL void composite_pixel(T & data, composite_mode_e comp_op, std::size_t x, std::size_t y, unsigned c, unsigned cover, double opacity );
 
 // SET PIXEL
 template <typename T>
@@ -228,34 +228,34 @@ template <typename T>
 MAPNIK_DECL void set_pixel(image<rgba8_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray8_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray8_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray8s_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray8s_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray16_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray16_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray16s_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray16s_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray32_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray32_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray32s_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray32s_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray32f_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray32f_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray64_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray64_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray64s_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray64s_t> & data, std::size_t x, std::size_t y, T const& val);
 
 template <typename T>
-MAPNIK_DECL void set_pixel(image<gray64f_t>  & data, std::size_t x, std::size_t y, T const& val);
+MAPNIK_DECL void set_pixel(image<gray64f_t> & data, std::size_t x, std::size_t y, T const& val);
 
 // GET PIXEL
 template <typename T>
@@ -334,11 +334,11 @@ MAPNIK_DECL T get_pixel(image_view<image<gray64f_t> > const& data, std::size_t x
 MAPNIK_DECL void view_to_string (image_view_any const& view, std::ostringstream & ss);
 
 // CREATE VIEW
-MAPNIK_DECL image_view_any create_view (image_any const& data, unsigned x, unsigned y, unsigned w, unsigned h);
+MAPNIK_DECL image_view_any create_view (image_any const& data, std::size_t x, std::size_t y, std::size_t w, std::size_t h);
 
 // COMPARE
 template <typename T>
-MAPNIK_DECL unsigned compare(T const& im1, T const& im2, double threshold = 0, bool alpha = true);
+MAPNIK_DECL std::size_t compare(T const& im1, T const& im2, double threshold = 0, bool alpha = true);
 
 inline bool is_png(std::string const& filename)
 {
