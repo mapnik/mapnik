@@ -27,6 +27,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/util/is_clockwise.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 using mapnik::datasource_exception;
 const std::string shape_io::SHP = ".shp";
@@ -195,5 +196,6 @@ mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_typ
     } else {
         geom = std::move(poly);
     }
+    mapnik::geometry::correct(geom);
     return geom;
 }

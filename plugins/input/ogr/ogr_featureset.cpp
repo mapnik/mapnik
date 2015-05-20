@@ -31,6 +31,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 // ogr
 #include "ogr_featureset.hpp"
@@ -100,7 +101,9 @@ feature_ptr ogr_featureset::next()
         OGRGeometry* geom = poFeature->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
         {
-            feature->set_geometry(std::move(ogr_converter::convert_geometry(geom)));
+            auto geom_corrected = ogr_converter::convert_geometry(geom);
+            mapnik::geometry::correct(geom_corrected);
+            feature->set_geometry(std::move(geom_corrected));
         }
         else
         {

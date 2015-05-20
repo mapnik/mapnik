@@ -24,6 +24,7 @@
 #define MAPNIK_JSON_GEOMETRY_UTIL_HPP
 
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 namespace mapnik { namespace json {
 
@@ -100,6 +101,7 @@ struct create_polygon
             else poly.add_hole(std::move(ring));
         }
         geom_ = std::move(poly);
+        mapnik::geometry::correct(geom_);
     }
 
     template <typename T>
@@ -194,6 +196,7 @@ struct create_multipolygon
             multi_poly.emplace_back(std::move(poly));
         }
         geom_ = std::move(multi_poly);
+        mapnik::geometry::correct(geom_);
     }
 
     template <typename T>
