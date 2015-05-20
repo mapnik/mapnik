@@ -633,86 +633,9 @@ inline T clamp(T d, T min, T max)
 }
 
 }
-struct visitor_set_alpha
+struct visitor_apply_opacity
 {
-    visitor_set_alpha(float opacity)
-        : opacity_(clamp(opacity, 0.0f, 1.0f)) {}
-
-    void operator() (image_rgba8 & data) const
-    {
-        using pixel_type = image_rgba8::pixel_type;
-        pixel_type a1 = static_cast<pixel_type>(255.0 * opacity_);
-        for (std::size_t y = 0; y < data.height(); ++y)
-        {
-            pixel_type* row_to =  data.get_row(y);
-            for (std::size_t x = 0; x < data.width(); ++x)
-            {
-                pixel_type rgba = row_to[x];
-                pixel_type a0 = (rgba >> 24) & 0xff;
-                if (a0 == a1) continue;
-
-                pixel_type r = rgba & 0xff;
-                pixel_type g = (rgba >> 8 ) & 0xff;
-                pixel_type b = (rgba >> 16) & 0xff;
-
-                row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
-            }
-        }
-    }
-
-    template <typename T>
-    void operator() (T & data) const
-    {
-        throw std::runtime_error("Error: set_alpha with " + std::string(typeid(data).name()) + " is not supported");
-    }
-
-private:
-    float const opacity_;
-};
-
-} // end detail ns
-
-MAPNIK_DECL void set_alpha(image_any & data, float opacity)
-{
-    // Prior to calling the data must not be premultiplied
-    bool remultiply = mapnik::demultiply_alpha(data);
-    util::apply_visitor(detail::visitor_set_alpha(opacity), data);
-    if (remultiply)
-    {
-        mapnik::premultiply_alpha(data);
-    }
-}
-
-template <typename T>
-MAPNIK_DECL void set_alpha(T & data, float opacity)
-{
-    // Prior to calling the data must not be premultiplied
-    bool remultiply = mapnik::demultiply_alpha(data);
-    detail::visitor_set_alpha visit(opacity);
-    visit(data);
-    if (remultiply)
-    {
-        mapnik::premultiply_alpha(data);
-    }
-}
-
-template MAPNIK_DECL void set_alpha(image_rgba8 &, float);
-template MAPNIK_DECL void set_alpha(image_gray8 &, float);
-template MAPNIK_DECL void set_alpha(image_gray8s &, float);
-template MAPNIK_DECL void set_alpha(image_gray16 &, float);
-template MAPNIK_DECL void set_alpha(image_gray16s &, float);
-template MAPNIK_DECL void set_alpha(image_gray32 &, float);
-template MAPNIK_DECL void set_alpha(image_gray32s &, float);
-template MAPNIK_DECL void set_alpha(image_gray32f &, float);
-template MAPNIK_DECL void set_alpha(image_gray64 &, float);
-template MAPNIK_DECL void set_alpha(image_gray64s &, float);
-template MAPNIK_DECL void set_alpha(image_gray64f &, float);
-
-namespace detail {
-
-struct visitor_multiply_alpha
-{
-    visitor_multiply_alpha(float opacity)
+    visitor_apply_opacity(float opacity)
         : opacity_(clamp(opacity, 0.0f, 1.0f)) {}
 
     void operator() (image_rgba8 & data) const
@@ -724,11 +647,12 @@ struct visitor_multiply_alpha
             for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
-                pixel_type a = static_cast<uint8_t>(((rgba >> 24) & 0xff) * opacity_);
+                pixel_type a = static_cast<pixel_type>(((rgba >> 24) & 0xff) * opacity_);
                 pixel_type r = rgba & 0xff;
                 pixel_type g = (rgba >> 8 ) & 0xff;
                 pixel_type b = (rgba >> 16) & 0xff;
-                row_to[x] = (a << 24) | (b << 16) | (g << 8) | (r);
+
+                row_to[x] = (a << 24)| (b << 16) |  (g << 8) | (r) ;
             }
         }
     }
@@ -736,21 +660,20 @@ struct visitor_multiply_alpha
     template <typename T>
     void operator() (T & data) const
     {
-        throw std::runtime_error("Error: multiply_alpha with " + std::string(typeid(data).name()) + " is not supported");
+        throw std::runtime_error("Error: apply_opacity with " + std::string(typeid(data).name()) + " is not supported");
     }
 
 private:
     float const opacity_;
-
 };
 
 } // end detail ns
 
-MAPNIK_DECL void multiply_alpha(image_any & data, float opacity)
+MAPNIK_DECL void apply_opacity(image_any & data, float opacity)
 {
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
-    util::apply_visitor(detail::visitor_multiply_alpha(opacity), data);
+    util::apply_visitor(detail::visitor_apply_opacity(opacity), data);
     if (remultiply)
     {
         mapnik::premultiply_alpha(data);
@@ -758,11 +681,11 @@ MAPNIK_DECL void multiply_alpha(image_any & data, float opacity)
 }
 
 template <typename T>
-MAPNIK_DECL void multiply_alpha(T & data, float opacity)
+MAPNIK_DECL void apply_opacity(T & data, float opacity)
 {
     // Prior to calling the data must not be premultiplied
     bool remultiply = mapnik::demultiply_alpha(data);
-    detail::visitor_multiply_alpha visit(opacity);
+    detail::visitor_apply_opacity visit(opacity);
     visit(data);
     if (remultiply)
     {
@@ -770,17 +693,17 @@ MAPNIK_DECL void multiply_alpha(T & data, float opacity)
     }
 }
 
-template MAPNIK_DECL void multiply_alpha(image_rgba8 &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray8 &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray8s &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray16 &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray16s &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray32 &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray32s &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray32f &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray64 &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray64s &, float);
-template MAPNIK_DECL void multiply_alpha(image_gray64f &, float);
+template MAPNIK_DECL void apply_opacity(image_rgba8 &, float);
+template MAPNIK_DECL void apply_opacity(image_gray8 &, float);
+template MAPNIK_DECL void apply_opacity(image_gray8s &, float);
+template MAPNIK_DECL void apply_opacity(image_gray16 &, float);
+template MAPNIK_DECL void apply_opacity(image_gray16s &, float);
+template MAPNIK_DECL void apply_opacity(image_gray32 &, float);
+template MAPNIK_DECL void apply_opacity(image_gray32s &, float);
+template MAPNIK_DECL void apply_opacity(image_gray32f &, float);
+template MAPNIK_DECL void apply_opacity(image_gray64 &, float);
+template MAPNIK_DECL void apply_opacity(image_gray64s &, float);
+template MAPNIK_DECL void apply_opacity(image_gray64f &, float);
 
 namespace detail {
 

@@ -43,6 +43,7 @@ benchmarks = [
     "test_font_registration.cpp",
     "test_rendering.cpp",
     "test_rendering_shared_map.cpp",
+#    "test_numeric_cast_vs_static_cast.cpp",
 ]
 for cpp_test in benchmarks:
     test_program = test_env_local.Program('out/'+cpp_test.replace('.cpp',''), source=[cpp_test])

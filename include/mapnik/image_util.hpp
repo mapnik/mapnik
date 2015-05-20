@@ -136,17 +136,11 @@ MAPNIK_DECL bool is_solid (image_view_any const& image);
 template <typename T>
 MAPNIK_DECL bool is_solid (T const& image);
 
-// SET ALPHA
-MAPNIK_DECL void set_alpha (image_any & image, float opacity);
+// APPLY OPACITY
+MAPNIK_DECL void apply_opacity (image_any & image, float opacity);
 
 template <typename T>
-MAPNIK_DECL void set_alpha (T & image, float opacity);
-
-// MULTIPLY ALPHA
-MAPNIK_DECL void multiply_alpha (image_any & image, float opacity);
-
-template <typename T>
-MAPNIK_DECL void multiply_alpha (T & image, float opacity);
+MAPNIK_DECL void apply_opacity (T & image, float opacity);
 
 // SET GRAYSCALE TO ALPHA
 MAPNIK_DECL void set_grayscale_to_alpha (image_any & image);
