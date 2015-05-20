@@ -48,7 +48,7 @@ namespace mapnik {
 
 struct png_options {
 
-    enum quantization_type { HEXTREE = 0, OCTTREE = 1, IMGQUANT = 2 };
+    enum quantization_enum { HEXTREE, OCTTREE, IMGQUANT };
 
     int colors;
     int compression;
@@ -58,7 +58,7 @@ struct png_options {
     double iq_dither;
     double gamma;
     bool paletted;
-    quantization_type quantization;
+    quantization_enum quantization;
     bool use_miniz;
     png_options() :
         colors(256),
