@@ -110,139 +110,142 @@ inline bool is_valid(T const& geom)
     return detail::geometry_is_valid() (geom);
 }
 
-typedef boost::geometry::model::d2::point_xy<double> Point;
-typedef boost::geometry::model::segment<Point> Segment;
+enum y_axis_orientation_enum : std::uint8_t
+{
+    Y_AXIS_NORTH_POSITIVE,
+    Y_AXIS_NORTH_NEGATIVE
+};
 
 template <typename T>
-std::vector<Segment> make_segment_vector(linear_ring<T> ring)
+inline bool is_valid_rings(polygon<T> const& poly,
+                           std::string &message,
+                           y_axis_orientation_enum const& y_axis_orientation = Y_AXIS_NORTH_POSITIVE )
 {
-    std::vector<Segment> result;
 
-    if (ring.size() > 1) {
-        for (int i = 0; i < ring.size()-1; ++i)
-        {
-            Point a( ring.at(i).x, ring.at(i).y );
-            Point b( ring.at(i+1).x, ring.at(i+1).y );
-            Segment s(a, b);
-            result.push_back(std::move(s));
-        }
-    }
-
-    return result;
-
-}
-
-template <typename T>
-inline bool is_valid_rings(polygon<T> const& poly)
-{
-    // If there are no interior rings, then the polygon must be valid
-    if (poly.interior_rings.size() == 0) return true;
-
-    // If there is no exterior rings, and any interior rings have points
-    // then this is not a valid polygon
-    if (poly.exterior_ring.size() == 0) 
+    // TODO: update to Boost 1.58, it supports getting the reason the ring is invalid
+    //       it would be nice to use "b::g::is_valid" here, but it does not support reverse
+    //       winding for inner rings, nor does it work when the Y-axis is inverted
+    if (!boost::geometry::is_simple(poly.exterior_ring))
     {
-        for (linear_ring<T> interior_ring : poly.interior_rings) 
-        {
-            if (interior_ring.size() > 0) 
-            {
-                return false;
-            }
-        }
+        message = "Exterior ring is not simple";
+        return false;
     }
-
-    // Validate that all the rings are actually rings (i.e. they don't intersect with themselves)
-    // i.e. they're simple polygons.
     if (boost::geometry::intersects(poly.exterior_ring))
     {
+        message = "Exterior ring self-intersects";
         return false;
     }
-    for (auto ring : poly.interior_rings) 
+    int n=0;
+    for (auto const& ring : poly.interior_rings)
     {
-        if (boost::geometry::intersects(ring)) 
+        // Can't use is_valid here, it retrns false on opposite windings for inner rings
+        if (!boost::geometry::is_simple(ring))
         {
+            message = "Interior ring " + std::to_string(n) + " is not simple";
             return false;
         }
+        if (boost::geometry::intersects(ring))
+        {
+            message = "Interior ring " + std::to_string(n) + " self-intersects";
+            return false;
+        }
+        ++n;
     }
 
-    // Now, verify the winding directions of everything:  CCW for the exterior ring, and
-    // CW for any interior rings.
-    if (boost::geometry::area(poly.exterior_ring) < 0) 
+    // Now, verify the winding directions of everything, according to OGC where "view from the top"
+    // means exterior ring should be CCW, and interior rings should be CW.
+    // If the y-axis orientation is north-positive, a CCW exterior ring should have a positive area,
+    // and the CW interior rings should have positive areas.
+    // If the y-axis orientation is north-negative, this logic is reversed as the area calculation
+    // will return the inverse.
+    if (y_axis_orientation == Y_AXIS_NORTH_POSITIVE && boost::geometry::area(poly.exterior_ring) < 0)
     {
+        message = "Invalid winding for exterior ring under positive Y axis";
         return false;
     }
-    for (auto ring : poly.interior_rings) 
+    else if (y_axis_orientation == Y_AXIS_NORTH_NEGATIVE && boost::geometry::area(poly.exterior_ring) > 0)
     {
-        if (boost::geometry::area(ring) > 0) 
+        message = "Invalid winding for exterior ring under negative Y axis";
+        return false;
+    }
+
+    n=0;
+    for (auto const& ring : poly.interior_rings)
+    {
+        if (y_axis_orientation == Y_AXIS_NORTH_POSITIVE && boost::geometry::area(ring) > 0)
         {
+            message = "Invalid winding for interior ring " + std::to_string(n) + " under positive Y axis";
             return false;
         }
+        else if (y_axis_orientation == Y_AXIS_NORTH_NEGATIVE && boost::geometry::area(ring) < 0)
+        {
+            message = "invalid winding for interior ring " + std::to_string(n) + " under negative Y axis";
+            return false;
+        }
+        ++n;
     }
 
-    // Quick test to see if the interior rings have at least one point
-    // inside the exterior ring.  This test, combined with the line crossing
-    // test next will ensure that all rings are inside the exterior.
-    // Also, check that rings start/end on the same point
-    for (linear_ring<T> ring : poly.interior_rings) 
-    {
-        if (ring.size() > 0) 
+    // Now, make sure all the interior rings are inside the exterior ring
+    // OGC 6.1.11.1
+    n=0;
+    for (auto const& ring : poly.interior_rings) {
+        if (!boost::geometry::within(ring, poly.exterior_ring))
         {
-            if (!boost::geometry::within(ring.front(), poly.exterior_ring)) 
-            {
-                return false;
-            }
-            if (ring.size() > 1) 
-            {
-                if (ring.front().x != ring.back().x || ring.front().y != ring.back().y) 
-                {
-                    return false;
-                }
-            }
+            message = "Interior ring " + std::to_string(n) + " not within exterior ring";
+            return false;
         }
-    }
-
-    // Then, make sure there are no line intersections between the exterior ring
-    // and any of the interior rings
-    // TODO: implement boost::geometry::crosses, or convert this to Shamos–Hoey
-
-    auto exterior_segments = make_segment_vector(poly.exterior_ring);
-
-    for (auto interior_ring : poly.interior_rings) 
-    {
-        auto interior_segments = make_segment_vector(interior_ring);
-        for (auto a : exterior_segments) 
-        {
-            for (auto b : interior_segments)
-            {
-                if (boost::geometry::intersects(a, b)) 
-                {
-                    return false;
-                }
-            }
-        }
+        ++n;
     }
 
     // Finally, check that none of the interior rings overlap each other.
-    for (int i=0; i < poly.interior_rings.size()-1; i++) 
+    // OGC 6.1.11.1
+    const size_t interior_ring_count = poly.interior_rings.size();
+    for (size_t i=0; i < interior_ring_count; ++i)
     {
-        for (int j=i+1; j < poly.interior_rings.size(); j++) 
+        auto const& A = poly.interior_rings.at(i);
+        for (size_t j=i+1; j < interior_ring_count; ++j)
         {
-            if (boost::geometry::intersects(poly.interior_rings.at(i), poly.interior_rings.at(j))) {
+            if (boost::geometry::intersects(A, poly.interior_rings.at(j))) {
+                message = "Interior ring " + std::to_string(i) + " intersects interior ring " + std::to_string(j);
                 return false;
             }
         }
     }
 
+    message = "";
     return true;
 }
 
 template <typename T>
-inline bool is_valid_rings(multi_polygon<T> const& multipoly) {
-    for(polygon<T> poly : multipoly) 
-    {
-        if (!is_valid_rings(poly)) return false;
-    }
+inline bool is_valid_rings(polygon<T> const& poly,
+                           y_axis_orientation_enum const& y_axis_orientation = Y_AXIS_NORTH_POSITIVE )
+{
+    std::string dummy;
+    return is_valid_rings(poly, dummy, y_axis_orientation);
 }
+
+template <typename T>
+inline bool is_valid_rings(multi_polygon<T> const& multipoly,
+                           std::string &message,
+                           y_axis_orientation_enum const& y_axis_orientation = Y_AXIS_NORTH_POSITIVE )
+{
+    for(polygon<T> poly : multipoly)
+    {
+        if (!is_valid_rings(poly, message, y_axis_orientation)) return false;
+    }
+    return true;
+}
+
+
+template <typename T>
+inline bool is_valid_rings(multi_polygon<T> const& multipoly,
+                           y_axis_orientation_enum const& y_axis_orientation = Y_AXIS_NORTH_POSITIVE )
+{
+    std::string dummy;
+    return is_valid_rings(multipoly, y_axis_orientation);
+}
+
+
 
 }}
 
