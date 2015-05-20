@@ -30,6 +30,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 // boost
 #ifdef SHAPE_MEMORY_MAPPED_FILE
@@ -121,7 +122,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
             geom->getEnvelope(&feature_envelope_);
             if (!filter_.pass(mapnik::box2d<double>(feature_envelope_.MinX,feature_envelope_.MinY,
                                             feature_envelope_.MaxX,feature_envelope_.MaxY))) continue;
-            feature->set_geometry(std::move(ogr_converter::convert_geometry(geom)));
+            auto geom_corrected = ogr_converter::convert_geometry(geom);
+            mapnik::geometry::correct(geom_corrected);
+            feature->set_geometry(std::move(geom_corrected));
         }
         else
         {

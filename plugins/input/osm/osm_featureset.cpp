@@ -27,8 +27,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/unicode.hpp>
-
-// boost
+#include <mapnik/geometry_correct.hpp>
 
 #include "osm_featureset.hpp"
 
@@ -91,6 +90,7 @@ feature_ptr osm_featureset<filterT>::next()
             }
             mapnik::geometry::polygon<double> geom;
             geom.set_exterior_ring(std::move(ring));
+            mapnik::geometry::correct(geom);
             feature->set_geometry(std::move(geom));
         }
         else

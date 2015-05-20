@@ -26,6 +26,8 @@
 #include <mapnik/json/topology.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry_correct.hpp>
+
 // stl
 #include <string>
 #include <vector>
@@ -263,6 +265,7 @@ struct feature_generator
             }
             if (hit)
             {
+                mapnik::geometry::correct(polygon);
                 feature->set_geometry(std::move(polygon));
                 assign_properties(*feature, poly, tr_);                
             }
@@ -345,6 +348,7 @@ struct feature_generator
             }
             if (hit)
             {
+                mapnik::geometry::correct(multi_polygon);
                 feature->set_geometry(std::move(multi_polygon));
                 assign_properties(*feature, multi_poly, tr_);                
             }
