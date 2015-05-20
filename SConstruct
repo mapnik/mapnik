@@ -1215,6 +1215,8 @@ if not preconfigured:
     env.Append(LINKFLAGS = DEFAULT_CXX11_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
+    ### platform specific bits
+
     thread_suffix = 'mt'
     if env['PLATFORM'] == 'FreeBSD':
         thread_suffix = ''
