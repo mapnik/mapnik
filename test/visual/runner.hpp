@@ -38,11 +38,13 @@ class runner
     using renderer_type = mapnik::util::variant<renderer<agg_renderer>,
                                                 renderer<cairo_renderer>/*,
                                                 renderer<grid_renderer>*/>;
+    using path_type = boost::filesystem::path;
+    using files_iterator = std::vector<path_type>::const_iterator;
 
 public:
-    runner(boost::filesystem::path const & styles_dir,
-           boost::filesystem::path const & output_dir,
-           boost::filesystem::path const & reference_dir,
+    runner(path_type const & styles_dir,
+           path_type const & output_dir,
+           path_type const & reference_dir,
            bool overwrite,
            std::size_t jobs);
 
@@ -50,17 +52,15 @@ public:
     result_list test(std::vector<std::string> const & style_names, report_type & report) const;
 
 private:
-    using files_iterator = std::vector<std::string>::const_iterator;
-
-    result_list test_parallel(std::vector<std::string> const & files, report_type & report, std::size_t jobs) const;
+    result_list test_parallel(std::vector<path_type> const & files, report_type & report, std::size_t jobs) const;
     result_list test_range(files_iterator begin, files_iterator end, std::reference_wrapper<report_type> report) const;
-    result_list test_one(std::string const & style_path, config cfg, report_type & report) const;
+    result_list test_one(path_type const & style_path, config cfg, report_type & report) const;
     void parse_map_sizes(std::string const & str, std::vector<map_size> & sizes) const;
 
     const map_sizes_grammar<std::string::const_iterator> map_sizes_parser_;
-    const boost::filesystem::path styles_dir_;
-    const boost::filesystem::path output_dir_;
-    const boost::filesystem::path reference_dir_;
+    const path_type styles_dir_;
+    const path_type output_dir_;
+    const path_type reference_dir_;
     const std::size_t jobs_;
     const renderer_type renderers_[boost::mpl::size<renderer_type::types>::value];
 };

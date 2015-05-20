@@ -75,8 +75,6 @@ struct result
 
 using result_list = std::vector<result>;
 
-bool ensure_dir(boost::filesystem::path const & dir);
-
 }
 
 #endif

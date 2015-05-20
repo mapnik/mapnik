@@ -45,7 +45,6 @@ else:
     # visual tests
     source = Split(
         """
-        visual/config.cpp
         visual/report.cpp
         visual/runner.cpp
         visual/run.cpp

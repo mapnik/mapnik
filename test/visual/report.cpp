@@ -189,7 +189,7 @@ void html_report::summary(result_list const & results, boost::filesystem::path c
 void html_summary(result_list const & results, boost::filesystem::path output_dir)
 {
     boost::filesystem::path html_root = output_dir / "visual-test-results";
-    ensure_dir(html_root);
+    boost::filesystem::create_directories(html_root);
     boost::filesystem::path html_report_path = html_root / "index.html";
     std::clog << "View failure report at " << html_report_path << "\n";
     std::ofstream output_file(html_report_path.string());
