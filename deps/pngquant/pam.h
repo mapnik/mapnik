@@ -28,15 +28,7 @@
 
 #define MAX_DIFF 1e20
 
-#ifndef USE_SSE
-#  if defined(__SSE__) && (defined(WIN32) || defined(__WIN32__))
-#    define USE_SSE 1
-#  else
-#    define USE_SSE 0
-#  endif
-#endif
-
-#if USE_SSE
+#if __SSE__ || (_M_IX86_FP > 0)
 #  include <xmmintrin.h>
 #  ifdef _MSC_VER
 #    include <intrin.h>
@@ -186,7 +178,7 @@ inline static float min_colordifference(const f_pixel px, const f_pixel py)
 ALWAYS_INLINE static float colordifference(f_pixel px, f_pixel py);
 inline static float colordifference(f_pixel px, f_pixel py)
 {
-#if USE_SSE
+#if __SSE__ || (_M_IX86_FP > 0)
     const __m128 vpx = _mm_load_ps((const float*)&px);
     const __m128 vpy = _mm_load_ps((const float*)&py);
 

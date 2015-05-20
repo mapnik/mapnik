@@ -154,7 +154,7 @@ static void liq_verbose_printf_flush(liq_attr *attr)
 }
 }
 
-#if USE_SSE
+#if __SSE__ || (_M_IX86_FP > 0)
 inline static bool is_sse_available()
 {
 #if (defined(__x86_64__) || defined(__amd64))
@@ -416,7 +416,7 @@ static void liq_aligned_free(void *inptr)
 
 LIQ_EXPORT liq_attr* liq_attr_create_with_allocator(void* (*custom_malloc)(size_t), void (*custom_free)(void*))
 {
-#if USE_SSE
+#if __SSE__ || (_M_IX86_FP > 0)
     if (!is_sse_available()) {
         return NULL;
     }
@@ -640,7 +640,7 @@ static const rgba_pixel *liq_image_get_row_rgba(liq_image *img, unsigned int row
 static void convert_row_to_f(liq_image *img, f_pixel *row_f_pixels, const unsigned int row, const float gamma_lut[])
 {
     assert(row_f_pixels);
-    assert(!USE_SSE || 0 == ((uintptr_t)row_f_pixels & 15));
+    assert(!(__SSE__ || (_M_IX86_FP > 0)) || 0 == ((uintptr_t)row_f_pixels & 15));
 
     const rgba_pixel *const row_pixels = liq_image_get_row_rgba(img, row);
 
