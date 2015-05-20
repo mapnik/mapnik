@@ -5,7 +5,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/image_util.hpp>
 
-TEST_CASE("image multiply_opacity") {
+TEST_CASE("image apply_opacity") {
 
 SECTION("test rgba8") {
 
@@ -22,10 +22,10 @@ SECTION("test rgba8") {
     mapnik::fill(im2, c2); // Because c1 is premultiplied it will make the image premultiplied
     mapnik::fill(im2_any, c2); // Because c1 is premultiplied it will make the image premultiplied
 
-    mapnik::multiply_opacity(im, 0.75);
-    mapnik::multiply_opacity(im_any, 0.75);
-    mapnik::multiply_opacity(im2, 0.75);
-    mapnik::multiply_opacity(im2_any, 0.75);
+    mapnik::apply_opacity(im, 0.75);
+    mapnik::apply_opacity(im_any, 0.75);
+    mapnik::apply_opacity(im2, 0.75);
+    mapnik::apply_opacity(im2_any, 0.75);
 
     mapnik::color out;
     // This should have only changed the alpha, as it was not premultipleid
@@ -65,13 +65,13 @@ SECTION("test rgba8 overflow") {
     CHECK(static_cast<int>(out.blue()) == 128);
     CHECK(static_cast<int>(out.alpha()) == 128);
 
-    mapnik::multiply_opacity(im, 2.5);
+    mapnik::apply_opacity(im, 2.5);
 
     out = mapnik::get_pixel<mapnik::color>(im, 0, 0);
     CHECK(static_cast<int>(out.red()) == 128);
     CHECK(static_cast<int>(out.green()) == 128);
     CHECK(static_cast<int>(out.blue()) == 128);
-    CHECK(static_cast<int>(out.alpha()) == 255);
+    CHECK(static_cast<int>(out.alpha()) == 128);
 
 } // END SECTION
 
@@ -81,7 +81,7 @@ SECTION("test rgba8 underflow") {
     mapnik::color c(128,128,128,128); // This color is premultiplied
     mapnik::fill(im, c); // Because c1 is not premultiplied it will make the image not premultiplied
 
-    mapnik::multiply_opacity(im, -2.5);
+    mapnik::apply_opacity(im, -2.5);
 
     mapnik::color out;
     out = mapnik::get_pixel<mapnik::color>(im, 0, 0);
@@ -97,8 +97,8 @@ SECTION("test gray8") {
     mapnik::image_gray8 im(4,4);
     mapnik::image_any im_any(mapnik::image_gray8(4,4));
 
-    CHECK_THROWS(mapnik::multiply_opacity(im, 0.25));
-    CHECK_THROWS(mapnik::multiply_opacity(im_any, 0.25));
+    CHECK_THROWS(mapnik::apply_opacity(im, 0.25));
+    CHECK_THROWS(mapnik::apply_opacity(im_any, 0.25));
 
 } // END SECTION
 } // END TEST_CASE
