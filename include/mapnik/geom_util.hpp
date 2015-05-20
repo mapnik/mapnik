@@ -520,10 +520,6 @@ bool interior_position(PathType & path, double & x, double & y)
     if (!label::centroid(path, x,y))
         return false;
 
-    // if we are not a polygon, or the default is within the polygon we are done
-    if (hit_test(path,x,y,0.001))
-        return true;
-
     // otherwise we find a horizontal line across the polygon and then return the
     // center of the widest intersection between the polygon and the line.
 
