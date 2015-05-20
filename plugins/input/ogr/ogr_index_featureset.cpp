@@ -43,6 +43,8 @@
 #include "ogr_converter.hpp"
 #include "ogr_index.hpp"
 
+#include <gdal_version.h>
+
 using mapnik::query;
 using mapnik::box2d;
 using mapnik::feature_ptr;
@@ -139,6 +141,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
             switch (type_oid)
             {
             case OFTInteger:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64:
+#endif
             {
                 feature->put<mapnik::value_integer>(fld_name,poFeature->GetFieldAsInteger (i));
                 break;
@@ -158,6 +163,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
             }
 
             case OFTIntegerList:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64List:
+#endif
             case OFTRealList:
             case OFTStringList:
             case OFTWideStringList: // deprecated !

@@ -334,6 +334,9 @@ void ogr_datasource::init(mapnik::parameters const& params)
             switch (type_oid)
             {
             case OFTInteger:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64:
+#endif
                 desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
                 break;
 
@@ -351,6 +354,9 @@ void ogr_datasource::init(mapnik::parameters const& params)
                 break;
 
             case OFTIntegerList:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64List:
+#endif
             case OFTRealList:
             case OFTStringList:
             case OFTWideStringList: // deprecated !
