@@ -60,8 +60,8 @@ class MAPNIK_DECL geometry_utils : private util::noncopyable
 public:
 
     static mapnik::geometry::geometry<double> from_wkb(const char* wkb,
-                                                   unsigned size,
-                                                   wkbFormat format = wkbGeneric);
+                                                       std::size_t size,
+                                                       wkbFormat format = wkbGeneric);
 };
 
 }
