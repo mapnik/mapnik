@@ -32,8 +32,6 @@
 
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
-#include "memory_datasource.hpp"
-#include "palette.hpp"
 
 // boost
 
