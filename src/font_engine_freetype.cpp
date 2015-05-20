@@ -84,7 +84,7 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    boost::unique_lock< boost::shared_mutex > lock(mutex_);
 #endif
     font_library library;
     return register_font_impl(file_name, library, global_font_file_mapping_);
@@ -166,7 +166,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    boost::unique_lock< boost::shared_mutex > lock(mutex_);
 #endif
     font_library library;
     return register_fonts_impl(dir, library, global_font_file_mapping_, recurse);
@@ -312,6 +312,9 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     }
     else
     {
+#ifdef MAPNIK_THREADSAFE
+        boost::shared_lock< boost::shared_mutex > lock(mutex_);
+#endif
         // otherwise search global registry
         itr = global_font_file_mapping.find(family_name);
         if (itr != global_font_file_mapping.end())
@@ -338,8 +341,36 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         if (file.open())
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(mutex_);
+            // Upgrade locks only allow one thread to be in upgraded state.
+            boost::upgrade_lock< boost::shared_mutex > lock(mutex_);
 #endif
+            // Because another thread might have already emplaced this same font if we locked, 
+            // so lets check again if its there.
+            auto mem_font_itr = global_memory_fonts.find(itr->second.second);
+            // if font already in memory, use it
+            if (mem_font_itr != global_memory_fonts.end())
+            {
+                FT_Face face;
+                FT_Error error = FT_New_Memory_Face(library.get(),
+                                                    reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                                    static_cast<FT_Long>(mem_font_itr->second.second), // size
+                                                    itr->second.first, // face index
+                                                    &face);
+                if (!error) 
+                {
+                    return std::make_shared<font_face>(face);
+                }
+                else
+                {
+                    // Not truely thread safe here... because could delete the memory of an underlying process...
+                    // However, not sure how this ever would occur. And if they did, it was corrupt
+                    // data at any point 
+                    boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(lock);
+                    global_memory_fonts.erase(mem_font_itr->first);
+                }
+            }
+            // Otherwise emplace it
+            boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(lock);
             auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
             FT_Face face;
             FT_Error error = FT_New_Memory_Face(library.get(),
@@ -445,7 +476,7 @@ face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional
 }
 
 #ifdef MAPNIK_THREADSAFE
-std::mutex freetype_engine::mutex_;
+boost::shared_mutex freetype_engine::mutex_;
 #endif
 freetype_engine::font_file_mapping_type freetype_engine::global_font_file_mapping_;
 freetype_engine::font_memory_cache_type freetype_engine::global_memory_fonts_;

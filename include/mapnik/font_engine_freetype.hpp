@@ -36,7 +36,9 @@
 #include <vector>
 
 #ifdef MAPNIK_THREADSAFE
-#include <mutex>
+//#include <mutex>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #endif
 
 namespace boost { template <class T> class optional; }
@@ -94,7 +96,7 @@ private:
     static bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
     static bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
 #ifdef MAPNIK_THREADSAFE
-    static std::mutex mutex_;
+    static boost::shared_mutex mutex_;
 #endif
     static font_file_mapping_type global_font_file_mapping_;
     static font_memory_cache_type global_memory_fonts_;
