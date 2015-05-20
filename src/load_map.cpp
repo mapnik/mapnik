@@ -1658,12 +1658,14 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
         {
             if (node.is_text())
             {
-                error_message += "\n* text '" + node.text() + "'";
+                error_message += "\n* text '" + node.text();
             }
             else
             {
-                error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
+                error_message += "\n* node '" + node.name();
             }
+            error_message += "' at line " + node.line_to_string();
+
             return; //All attributes and children are automatically unprocessed, too.
         }
         xml_node::attribute_map const& attrs = node.get_attributes();
