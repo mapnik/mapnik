@@ -11,9 +11,9 @@ if not env['CPP_TESTS']:
         os.unlink(cpp_test_bin)
 else:
     test_env['LIBS'] = [env['MAPNIK_NAME']]
-    test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
     test_env.AppendUnique(LIBS='mapnik-wkt')
     test_env.AppendUnique(LIBS='mapnik-json')
+    test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
     if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
         test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(CXXFLAGS='-g')
@@ -45,7 +45,6 @@ else:
     # visual tests
     source = Split(
         """
-        visual/config.cpp
         visual/report.cpp
         visual/runner.cpp
         visual/run.cpp

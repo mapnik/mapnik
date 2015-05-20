@@ -120,7 +120,7 @@ void projection::init_proj4() const
         }
 #else
         #if defined(MAPNIK_THREADSAFE)
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         #endif
         proj_ = pj_init_plus(params_.c_str());
         if (!proj_) throw proj_init_error(params_);
@@ -158,7 +158,7 @@ void projection::forward(double & x, double &y ) const
         throw std::runtime_error("projection::forward not supported unless proj4 is initialized");
     }
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     #endif
     projUV p;
     p.u = x * DEG_TO_RAD;
@@ -185,7 +185,7 @@ void projection::inverse(double & x,double & y) const
     }
 
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     #endif
     if (is_geographic_)
     {
@@ -207,7 +207,7 @@ projection::~projection()
 {
 #ifdef MAPNIK_USE_PROJ4
  #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
  #endif
     if (proj_)
     {

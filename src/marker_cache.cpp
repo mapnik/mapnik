@@ -70,7 +70,7 @@ marker_cache::~marker_cache() {}
 void marker_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     using iterator_type = boost::unordered_map<std::string, std::shared_ptr<mapnik::marker const> >::const_iterator;
     iterator_type itr = marker_cache_.begin();
@@ -112,7 +112,7 @@ bool marker_cache::insert_svg(std::string const& name, std::string const& svg_st
 bool marker_cache::insert_marker(std::string const& uri, mapnik::marker && path)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     return marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(std::move(path))).second;
 }
@@ -137,7 +137,7 @@ struct visitor_create_marker
     marker operator() (T & data)
     {
         throw std::runtime_error("Can not make marker from this data type");
-    }   
+    }
 };
 
 } // end detail ns
@@ -151,7 +151,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
     }
 
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     using iterator_type = boost::unordered_map<std::string, std::shared_ptr<mapnik::marker const> >::const_iterator;
     iterator_type itr = marker_cache_.find(uri);

@@ -84,7 +84,7 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     font_library library;
     return register_font_impl(file_name, library, global_font_file_mapping_);
@@ -166,7 +166,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     font_library library;
     return register_fonts_impl(dir, library, global_font_file_mapping_, recurse);
@@ -338,7 +338,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         if (file.open())
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(mutex_);
+            std::lock_guard<std::mutex> lock(mutex_);
 #endif
             auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
             FT_Face face;
