@@ -218,9 +218,9 @@ void topojson_datasource::parse_topojson(T const& buffer)
             {
                 extent_.expand_to_include(box);
             }
+            values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
+            ++geometry_index;
         }
-        values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
-        ++geometry_index;
     }
 
     // packing algorithm
