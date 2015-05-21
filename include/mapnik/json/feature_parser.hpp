@@ -39,7 +39,7 @@ inline bool from_geojson(std::string const& json, mapnik::feature_impl & feature
     using iterator_type = char const*;
     static const mapnik::json::feature_grammar<iterator_type,mapnik::feature_impl> g(tr);
     using namespace boost::spirit;
-    ascii::space_type space;
+    standard::space_type space;
     iterator_type start = json.c_str();
     iterator_type end = start + json.length();
     return qi::phrase_parse(start, end, (g)(boost::phoenix::ref(feature)), space);

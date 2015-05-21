@@ -70,7 +70,7 @@ mapnik::feature_ptr large_geojson_featureset::next()
         static const mapnik::transcoder tr("utf8");
         static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
         using namespace boost::spirit;
-        ascii::space_type space;
+        standard::space_type space;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,1));
         if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space))
         {

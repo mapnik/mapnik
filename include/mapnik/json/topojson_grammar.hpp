@@ -44,7 +44,7 @@ namespace mapnik { namespace topojson {
 
 namespace qi = boost::spirit::qi;
 namespace fusion = boost::fusion;
-using space_type = boost::spirit::ascii::space_type;
+using space_type = mapnik::json::space_type;
 
 template <typename Iterator, typename ErrorHandler = json::error_handler<Iterator> >
 struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>

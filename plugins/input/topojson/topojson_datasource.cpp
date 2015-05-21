@@ -190,7 +190,7 @@ const mapnik::topojson::topojson_grammar<base_iterator_type> g;
 template <typename T>
 void topojson_datasource::parse_topojson(T const& buffer)
 {
-    boost::spirit::ascii::space_type space;
+    boost::spirit::standard::space_type space;
     bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), g, space, topo_);
     if (!result)
     {

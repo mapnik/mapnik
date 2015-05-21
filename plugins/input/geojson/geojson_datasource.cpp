@@ -192,7 +192,7 @@ template <typename Iterator>
 void geojson_datasource::initialise_index(Iterator start, Iterator end)
 {
     mapnik::json::boxes boxes;
-    boost::spirit::ascii::space_type space;
+    boost::spirit::standard::space_type space;
     Iterator itr = start;
     if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
     {
@@ -214,7 +214,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             Iterator end = itr + geometry_index.second;
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            boost::spirit::ascii::space_type space;
+            boost::spirit::standard::space_type space;
             if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
@@ -236,7 +236,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
 template <typename Iterator>
 void geojson_datasource::parse_geojson(Iterator start, Iterator end)
 {
-    boost::spirit::ascii::space_type space;
+    boost::spirit::standard::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     std::size_t start_id = 1;
 
@@ -355,7 +355,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             chr_iterator_type end = start + json.size();
 
             using namespace boost::spirit;
-            ascii::space_type space;
+            standard::space_type space;
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
             if (!qi::phrase_parse(start, end, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
             {

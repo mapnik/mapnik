@@ -37,9 +37,9 @@
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
+namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
-using space_type = ascii::space_type;
+using space_type = standard::space_type;
 using json_value = mapnik::util::variant<value_null,value_bool, value_integer, value_double, std::string>;
 using uchar = std::uint32_t; // a unicode code point
 
