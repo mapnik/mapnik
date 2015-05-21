@@ -74,8 +74,8 @@ struct unview_strategy
         double x = boost::geometry::get<0>(p1);
         double y = boost::geometry::get<1>(p1);
         tr_.backward(&x,&y);
-        boost::geometry::set<0>(p2, boost::numeric_cast<coordinate_type>(x));
-        boost::geometry::set<1>(p2, boost::numeric_cast<coordinate_type>(y));
+        boost::geometry::set<0>(p2, static_cast<coordinate_type>(x));
+        boost::geometry::set<1>(p2, static_cast<coordinate_type>(y));
         return true;
     }
 

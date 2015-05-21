@@ -162,7 +162,7 @@ SECTION("scaling strategies - double to double") {
         // Not the rounding doesn't apply because not casting to ints
         scale_rounding_strategy ss(0.5, -2.0);
         point<double> p(-90.3, 35.5);
-        point<double> r(-47.15, 15.75);
+        point<double> r(-47.0, 16.0);
         point<double> o = transform<double>(p, ss);
         assert_g_equal(r, o);
     }
