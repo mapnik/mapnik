@@ -20,13 +20,14 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PROJ_STRATEGY_HPP
-#define MAPNIK_PROJ_STRATEGY_HPP
+#ifndef MAPNIK_VECTOR_TILE_STRATEGY_HPP
+#define MAPNIK_VECTOR_TILE_STRATEGY_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/view_transform.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -40,45 +41,15 @@
 namespace mapnik {
 
 namespace geometry {
-template <typename T> struct point;
-template <typename T> struct line_string;
-}
-class projection;
-template <typename T> class box2d;
 
-struct proj_strategy
+struct vector_tile_strategy
 {
-    proj_strategy(proj_transform const& prj_trans)
-        : prj_trans_(prj_trans) {}
-
-    template <typename P1, typename P2>
-    inline bool apply(P1 const& p1, P2 & p2) const
-    {
-        using p2_type = typename boost::geometry::coordinate_type<P2>::type;
-        double x = boost::geometry::get<0>(p1);
-        double y = boost::geometry::get<1>(p1);
-        double z = 0.0;
-        if (!prj_trans_.forward(x, y, z)) return false;
-        boost::geometry::set<0>(p2, static_cast<p2_type>(x));
-        boost::geometry::set<1>(p2, static_cast<p2_type>(y));
-        return true;
-    }
-    
-    template <typename P1, typename P2>
-    inline P2 execute(P1 const& p1, bool & status) const
-    {
-        P2 p2;
-        status = apply(p1, p2);
-        return p2;
-    }
-
-    proj_transform const& prj_trans_;
-};
-
-struct proj_backward_strategy
-{
-    proj_backward_strategy(proj_transform const& prj_trans)
-        : prj_trans_(prj_trans) {}
+    vector_tile_strategy(proj_transform const& prj_trans,
+                         view_transform const& tr,
+                         double scaling)
+        : prj_trans_(prj_trans),
+          tr_(tr),
+          scaling_(scaling) {}
 
     template <typename P1, typename P2>
     inline bool apply(P1 const& p1, P2 & p2) const
@@ -88,6 +59,11 @@ struct proj_backward_strategy
         double y = boost::geometry::get<1>(p1);
         double z = 0.0;
         if (!prj_trans_.backward(x, y, z)) return false;
+        tr_.forward(&x,&y);
+        x = x * scaling_;
+        y = y * scaling_;
+        x = std::floor(x + 0.5);
+        y = std::floor(y + 0.5);
         boost::geometry::set<0>(p2, static_cast<p2_type>(x));
         boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
@@ -102,8 +78,11 @@ struct proj_backward_strategy
     }
 
     proj_transform const& prj_trans_;
+    view_transform const& tr_;
+    double const scaling_;
 };
 
 }
+}
 
-#endif // MAPNIK_PROJ_STRATEGY_HPP
+#endif // MAPNIK_VECTOR_TILE_STRATEGY_HPP
