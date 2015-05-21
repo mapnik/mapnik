@@ -36,11 +36,15 @@ else:
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
     Depends(test_program, env.subst('../src/json/libmapnik-json${LIBSUFFIX}'))
     Depends(test_program, env.subst('../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
+    if 'install' in COMMAND_LINE_TARGETS:
+        env.Alias('install',test_program)
 
     # standalone tests
     for standalone in glob.glob('./standalone/*cpp'):
-        test_program = test_env_local.Program(standalone.replace('.cpp','-bin'), source=standalone)
+        test_program2 = test_env_local.Program(standalone.replace('.cpp','-bin'), source=standalone)
         Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
+        if 'install' in COMMAND_LINE_TARGETS:
+            env.Alias('install',test_program2)
 
     # visual tests
     source = Split(
@@ -50,9 +54,9 @@ else:
         visual/run.cpp
         """
         )
-    test_program = test_env_local.Program('visual/run', source=source)
+    test_program3 = test_env_local.Program('visual/run', source=source)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
 
     # build locally if installing
     if 'install' in COMMAND_LINE_TARGETS:
-        env.Alias('install',test_program)
+        env.Alias('install',test_program3)
