@@ -412,6 +412,7 @@ opts.AddVariables(
     BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
+    EnumVariable('USE_SSE', 'Enable support for SSE vector instructions','yes',['yes','no','platform_default'])
     )
 
 # variables to pickle after successful configure step

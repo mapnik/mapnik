@@ -346,11 +346,20 @@ source += Split(
     """)
 
 # libimagequant
-lib_env.Append(CFLAGS = "-O3 -fno-math-errno -funroll-loops -fomit-frame-pointer -std=c99 -msse -mfpmath=sse")
-# As of GCC 4.5, 387 fp math is significantly slower in C99 mode without this.
-# Note: CPUs without SSE2 use 387 for doubles, even when SSE fp math is set.
-if 'gcc' in env['CC']:
+lib_env.Append(CFLAGS = "-O3 -fno-math-errno -funroll-loops -fomit-frame-pointer -std=c99")
+if env["USE_SSE"] == "yes":
+    lib_env.Append(CFLAGS="-msse -mfpmath=sse")
+    # As of GCC 4.5, 387 fp math is significantly slower in C99 mode without this.
+    # Note: CPUs without SSE2 use 387 for doubles, even when SSE fp math is set.
+    if 'gcc' in env['CC']:
         lib_env.Append(CFLAGS='-fexcess-prevision=fast')
+elif env["USE_SSE"] == "no":
+    lib_env.Append(CFLAGS="-mno-sse")
+elif env["USE_SSE"] == "platform_default":
+    # Let compiler decide
+    None
+    
+
 source += glob.glob("../deps/pngquant/" + "*.c")
 
 if env['RUNTIME_LINK'] == "static":
