@@ -39,8 +39,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
 #include <boost/version.hpp>
@@ -57,9 +55,7 @@
 class topojson_datasource : public mapnik::datasource
 {
 public:
-    using point_type = boost::geometry::model::d2::point_xy<double>;
-    using box_type = boost::geometry::model::box<point_type>;
-
+    using box_type = mapnik::box2d<double>;
     using item_type = std::pair<box_type,std::size_t>;
     using linear_type = boost::geometry::index::linear<16,4>;
     using spatial_index_type = boost::geometry::index::rtree<item_type,linear_type>;

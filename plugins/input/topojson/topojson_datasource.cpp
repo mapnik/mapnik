@@ -33,6 +33,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/json/topojson_grammar.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 #include <mapnik/util/variant.hpp>
@@ -218,7 +219,7 @@ void topojson_datasource::parse_topojson(T const& buffer)
             {
                 extent_.expand_to_include(box);
             }
-            values.emplace_back(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), geometry_index);
+            values.emplace_back(box, geometry_index);
             ++geometry_index;
         }
     }
@@ -278,10 +279,9 @@ mapnik::layer_descriptor topojson_datasource::get_descriptor() const
 mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) const
 {
     // if the query box intersects our world extent then query for features
-    mapnik::box2d<double> const& b = q.get_bbox();
-    if (extent_.intersects(b))
+    mapnik::box2d<double> const& box = q.get_bbox();
+    if (extent_.intersects(box))
     {
-        box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
         topojson_featureset::array_type index_array;
         if (tree_)
         {
