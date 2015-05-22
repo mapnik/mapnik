@@ -66,7 +66,7 @@ public:
 
     inline std::FILE * get() const
     {
-        return file_.get();;
+        return file_.get();
     }
 
     inline std::size_t size() const
