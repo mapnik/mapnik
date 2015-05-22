@@ -12,27 +12,33 @@ function run_success { >&2 echo -e "\033[1m\033[32m* $1\033[0m"; }
 
 run_step "Starting Mapnik tests"
 
-run_substep "Running C++ Unit tests..."
-./test/unit/run
-failures=$((failures+$?))
+if [ -d "test/data" ]; then
 
-run_substep "Running standalone C++ tests..."
-if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; then
-    for FILE in test/standalone/*-bin; do 
-        ${FILE};
-      failures=$((failures+$?))
-    done
-fi
-
-if [ -d "test/data-visual/styles" ]; then
-    run_substep "Running visual tests..."
-    if [ -z "$JOBS" ]; then
-        JOBS=1
-    fi
-    ./test/visual/run -j $JOBS
+    run_substep "Running C++ Unit tests..."
+    ./test/unit/run
     failures=$((failures+$?))
+
+    run_substep "Running standalone C++ tests..."
+    if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; then
+        for FILE in test/standalone/*-bin; do
+            ${FILE};
+          failures=$((failures+$?))
+        done
+    fi
+
+    if [ -d "test/data-visual/styles" ]; then
+        run_substep "Running visual tests..."
+        if [ -z "$JOBS" ]; then
+            JOBS=1
+        fi
+        ./test/visual/run -j $JOBS
+        failures=$((failures+$?))
+    else
+        echo "Notice: Skipping visual tests, the visual tests data are not present under the standard directory \"test/data-visual\"."
+    fi
+
 else
-    echo "Notice: Skipping visual tests, the visual tests data are not present under the standard directory \"test/data-visual\"."
+    echo "Notice: Skipping all tests, the test data are not present under the standard directory \"test/data\"."
 fi
 
 exit $failures
