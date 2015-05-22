@@ -1,15 +1,11 @@
 
-#if defined(HAVE_TIFF)
+#if defined(HAVE_WEBP)
 
 #include "catch.hpp"
 
-#include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/util/file_io.hpp>
 #include <mapnik/image_view_any.hpp>
-
 #include <mapnik/webp_io.hpp>
-
 
 TEST_CASE("webp io") {
 
@@ -24,7 +20,6 @@ SECTION("does not crash accessing view") {
     }
     save_as_webp(s,view,config,true);
 }
-
 
 }
 
