@@ -24,11 +24,15 @@ if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; the
     done
 fi
 
-run_substep "Running visual tests..."
-if [ -z "$JOBS" ]; then
-    JOBS=1
+if [ -d "test/data-visual/styles" ]; then
+    run_substep "Running visual tests..."
+    if [ -z "$JOBS" ]; then
+        JOBS=1
+    fi
+    ./test/visual/run -j $JOBS
+    failures=$((failures+$?))
+else
+    echo "Notice: Skipping visual tests, the visual tests data are not present under the standard directory \"test/data-visual\"."
 fi
-./test/visual/run -j $JOBS
-failures=$((failures+$?))
 
 exit $failures
