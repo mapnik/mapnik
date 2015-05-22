@@ -78,9 +78,11 @@ inline int import_image(T2 const& im_in,
                              bool alpha)
 {
     image<typename T2::pixel> const& data = im_in.data();
-    int stride = sizeof(typename T2::pixel_type) * im_in.width();
-    if (data.width() == im_in.width() &&
-        data.height() == im_in.height())
+    std::size_t width = im_in.width();
+    std::size_t height = im_in.height();
+    int stride = sizeof(typename T2::pixel_type) * width;
+    if (data.width() == width &&
+        data.height() == height)
     {
         if (alpha)
         {
@@ -98,12 +100,12 @@ inline int import_image(T2 const& im_in,
     else
     {
         // need to copy: https://github.com/mapnik/mapnik/issues/2024
-        image_rgba8 im(im_in.width(),im_in.height());
-        for (unsigned y = 0; y < im_in.height(); ++y)
+        image_rgba8 im(width,height);
+        for (unsigned y = 0; y < height; ++y)
         {
             typename T2::pixel_type const * row_from = im_in.get_row(y);
             image_rgba8::pixel_type * row_to = im.get_row(y);
-            std::copy(row_from, row_from + stride, row_to);
+            std::copy(row_from, row_from + width, row_to);
         }
         if (alpha)
         {
