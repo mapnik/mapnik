@@ -11,9 +11,9 @@ TEST_CASE("geometry") {
 SECTION("json point") {
     mapnik::util::file input("./test/data/json/point1.json");
     REQUIRE( input.open() );
-    auto json = input.data();
     mapnik::geometry::geometry<double> geom;
-    std::string json_string(json.get());
+    REQUIRE( input.data() );
+    std::string json_string(input.data().get(), input.size());
     REQUIRE( mapnik::json::from_geojson(json_string, geom) );
     REQUIRE( geom.is<mapnik::geometry::point<double> >() );
     auto const& point = mapnik::util::get<mapnik::geometry::point<double> >(geom);
@@ -26,9 +26,9 @@ SECTION("json point") {
 SECTION("json point reversed") {
     mapnik::util::file input("./test/data/json/point2.json");
     REQUIRE( input.open() );
-    auto json = input.data();
     mapnik::geometry::geometry<double> geom;
-    std::string json_string(json.get());
+    REQUIRE( input.data() );
+    std::string json_string(input.data().get(), input.size());
     REQUIRE( mapnik::json::from_geojson(json_string,geom) );
     REQUIRE( geom.is<mapnik::geometry::point<double> >() );
     auto const& point = mapnik::util::get<mapnik::geometry::point<double> >(geom);
