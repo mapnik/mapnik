@@ -24,9 +24,6 @@
 #include <algorithm>
 #include <mapnik/make_unique.hpp>
 
-// icu - for memory cleanup (to make valgrind happy)
-#include "unicode/uclean.h"
-
 TEST_CASE("fontset") {
 
 SECTION("error") {
@@ -80,6 +77,5 @@ SECTION("error") {
     } catch (std::exception const& ex) {
         REQUIRE(std::string(ex.what()) == std::string("Unable to find specified font face 'DejaVu Sans Book' in font set: 'fontset'"));
     }
-    u_cleanup();
 }
 }
