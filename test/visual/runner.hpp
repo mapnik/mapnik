@@ -35,10 +35,14 @@ namespace visual_tests
 
 class runner
 {
-    using renderer_type = mapnik::util::variant<renderer<agg_renderer>,
-                                                renderer<cairo_renderer>,
-                                                renderer<svg_renderer>/*,
-                                                renderer<grid_renderer>*/>;
+    using renderer_type = mapnik::util::variant<renderer<agg_renderer>
+#if defined(HAVE_CAIRO)
+                                                ,renderer<cairo_renderer>
+#endif
+#if defined(SVG_RENDERER)
+                                                ,renderer<svg_renderer>
+#endif
+                                                /*renderer<grid_renderer>*/>;
     using path_type = boost::filesystem::path;
     using files_iterator = std::vector<path_type>::const_iterator;
 
