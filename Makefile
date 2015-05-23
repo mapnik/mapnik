@@ -86,11 +86,13 @@ pep8:
 
 # note: pass --gen-suppressions=yes to create new suppression entries
 grind:
-	@source localize.sh && source mapnik-settings.env && \
+	@source localize.sh && \
+	    valgrind --suppressions=./test/unit/valgrind.supp --leak-check=full --log-fd=1 ./test/visual/run | grep definitely;
+	@source localize.sh && \
 	for FILE in test/standalone/*-bin; do \
 		valgrind --suppressions=./test/unit/valgrind.supp --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
 	done
-	@source localize.sh && source mapnik-settings.env && \
+	@source localize.sh && \
 	    valgrind --suppressions=./test/unit/valgrind.supp --leak-check=full --log-fd=1 ./test/unit/run | grep definitely;
 
 render:
