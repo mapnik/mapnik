@@ -292,7 +292,14 @@ struct evaluate_expression_wrapper<mapnik::color>
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         if (val.is_null()) return mapnik::color(0,0,0,0); // transparent
-        return mapnik::color(val.to_string());
+        try
+        {
+            return mapnik::color(val.to_string());
+        }
+        catch (std::exception const&)
+        {
+            return mapnik::color(0,0,0,0); // transparent
+        }
     }
 };
 
