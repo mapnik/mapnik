@@ -988,6 +988,14 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
                 {
                     filename = marker_cache::instance().known_svg_prefix_ + "arrow";
                 }
+                else if (*marker_type == "arrowhead")
+                {
+                    filename = marker_cache::instance().known_svg_prefix_ + "arrowhead";
+                }
+                else if (*marker_type == "triangle")
+                {
+                    filename = marker_cache::instance().known_svg_prefix_ + "triangle";
+                }
             }
         }
 
