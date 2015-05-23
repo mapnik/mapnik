@@ -23,16 +23,33 @@ function setup_mason() {
     export CC=${CC:-clang}
 }
 
+if [[ $(uname -s) == 'Darwin' ]]; then
+    FIND_PATTERN="\/Users\/travis\/build\/mapbox\/mason"
+else
+    FIND_PATTERN="\/home\/travis\/build\/mapbox\/mason"
+fi
+
+REPLACE="$(pwd)"
+REPLACE=${REPLACE////\\/}
+
 function install() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
     if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/${2} ]]; then
         mason install $1 $2
         mason link $1 $2
+        if [[ $3 ]]; then
+            LA_FILE=$(${MASON_DIR:-~/.mason}/mason prefix $1 $2)/lib/$3.la
+            if [[ -f ${LA_FILE} ]]; then
+               perl -i -p -e "s/${FIND_PATTERN}/${REPLACE}/g;" ${LA_FILE}
+            else
+                echo "$LA_FILE not found"
+            fi
+        fi
     fi
 }
 
 function install_mason_deps() {
-    install gdal 1.11.2 &
+    install gdal 1.11.2 libgdal &
     install boost 1.57.0 &
     install boost_libsystem 1.57.0 &
     install boost_libthread 1.57.0 &
@@ -40,20 +57,20 @@ function install_mason_deps() {
     install boost_libprogram_options 1.57.0 &
     install boost_libregex 1.57.0 &
     install boost_libpython 1.57.0 &
-    install freetype 2.5.5 &
-    install harfbuzz 0.9.40 &
-    install jpeg_turbo 1.4.0 &
-    install libxml2 2.9.2 &
-    install libpng 1.6.16 &
-    install webp 0.4.2 &
+    install freetype 2.5.5 libfreetype &
+    install harfbuzz 0.9.40 libharfbuzz &
+    install jpeg_turbo 1.4.0 libjpeg &
+    install libxml2 2.9.2 libxml2 &
+    install libpng 1.6.16 libpng &
+    install webp 0.4.2 libwebp &
     install icu 54.1 &
-    install proj 4.8.0 &
-    install libtiff 4.0.4beta &
+    install proj 4.8.0 libproj &
+    install libtiff 4.0.4beta libtiff &
     install libpq 9.4.0 &
-    install sqlite 3.8.8.1 &
-    install expat 2.1.0 &
-    install pixman 0.32.6 &
-    install cairo 1.12.18 &
+    install sqlite 3.8.8.1 libsqlite3 &
+    install expat 2.1.0 libexpat &
+    install pixman 0.32.6 libpixman-1 &
+    install cairo 1.12.18 libcairo &
     wait
 }
 
