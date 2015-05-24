@@ -31,6 +31,7 @@
 // boost GIL
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wc++11-narrowing"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/gil/gil_all.hpp>
 #pragma GCC diagnostic pop
