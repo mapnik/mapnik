@@ -87,13 +87,21 @@ int main(int argc, char** argv)
     report_type report = vm.count("verbose") ? report_type((console_report())) : report_type((console_short_report()));
     result_list results;
 
-    if (vm.count("styles"))
+    try
     {
-        results = run.test(vm["styles"].as<std::vector<std::string>>(), report);
+        if (vm.count("styles"))
+        {
+            results = run.test(vm["styles"].as<std::vector<std::string>>(), report);
+        }
+        else
+        {
+            results = run.test_all(report);
+        }
     }
-    else
+    catch (std::exception & e)
     {
-        results = run.test_all(report);
+        std::cerr << "Error runnig tests: " << e.what() << std::endl;
+        return 1;
     }
 
     unsigned failed_count = mapnik::util::apply_visitor(summary_visitor(results), report);
