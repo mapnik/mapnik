@@ -29,7 +29,7 @@ Import('env')
 
 config_env = env.Clone()
 
-config_variables = '''#!/bin/bash
+config_variables = '''#!/usr/bin/env bash
 
 ## variables
 
