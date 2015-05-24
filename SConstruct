@@ -39,13 +39,11 @@ severities = ['debug', 'warn', 'error', 'none']
 ICU_INCLUDES_DEFAULT='/usr/include'
 ICU_LIBS_DEFAULT='/usr/'
 
-DEFAULT_CC = "gcc"
-DEFAULT_CXX = "g++"
+DEFAULT_CC = "cc"
+DEFAULT_CXX = "c++"
 DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
 DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
-    DEFAULT_CC = "clang"
-    DEFAULT_CXX = "clang++"
     # homebrew default
     ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
     ICU_LIBS_DEFAULT='/usr/local/opt/icu4c/'
