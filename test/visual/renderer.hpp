@@ -156,7 +156,7 @@ class renderer
 {
 public:
     renderer(boost::filesystem::path const & output_dir, boost::filesystem::path const & reference_dir, bool overwrite)
-        : output_dir(output_dir), reference_dir(reference_dir), overwrite(overwrite)
+        : ren(), output_dir(output_dir), reference_dir(reference_dir), overwrite(overwrite)
     {
     }
 
@@ -208,7 +208,7 @@ private:
         return s.str();
     }
 
-    Renderer ren;
+    const Renderer ren;
     boost::filesystem::path const & output_dir;
     boost::filesystem::path const & reference_dir;
     const bool overwrite;
