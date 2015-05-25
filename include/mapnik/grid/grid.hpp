@@ -152,8 +152,8 @@ public:
 
     inline mapnik::grid_view get_view(std::size_t x, std::size_t y, std::size_t w, std::size_t h)
     {
-        return mapnik::grid_view(x,y,w,h,
-                                 data_,key_,id_name_,names_,f_keys_,features_);
+        return mapnik::grid_view(x, y, w, h,
+                                 data_, key_, id_name_, names_, f_keys_, features_);
     }
 
 private:
@@ -166,11 +166,11 @@ private:
     hit_grid& operator=(const hit_grid&);
 
 public:
-    inline void setPixel(std::size_t x,std::size_t y,value_type feature_id)
+    inline void setPixel(std::size_t x, std::size_t y, value_type feature_id)
     {
-        if (checkBounds(x,y))
+        if (checkBounds(x, y))
         {
-            data_(x,y) = feature_id;
+            data_(x, y) = feature_id;
         }
     }
     inline std::size_t width() const
@@ -183,10 +183,10 @@ public:
         return height_;
     }
 
-    inline void set_rectangle(value_type id,image_rgba8 const& data,std::size_t x0,std::size_t y0)
+    inline void set_rectangle(value_type id, image_rgba8 const& data, std::size_t x0, std::size_t y0)
     {
-        box2d<int> ext0(0,0,width_,height_);
-        box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());
+        box2d<int> ext0(0, 0, width_, height_);
+        box2d<int> ext1(x0, y0, x0 + data.width(), y0 + data.height());
 
         if (ext0.intersects(ext1))
         {
@@ -194,11 +194,11 @@ public:
             for (std::size_t y = box.miny(); y < box.maxy(); ++y)
             {
                 value_type* row_to =  data_.get_row(y);
-                image_rgba8::pixel_type const * row_from = data.get_row(y-y0);
+                image_rgba8::pixel_type const * row_from = data.get_row(y - y0);
 
                 for (std::size_t x = box.minx(); x < box.maxx(); ++x)
                 {
-                    image_rgba8::pixel_type rgba = row_from[x-x0];
+                    image_rgba8::pixel_type rgba = row_from[x - x0];
                     unsigned a = (rgba >> 24) & 0xff;
                     // if the pixel is more than a tenth
                     // opaque then burn in the feature id
