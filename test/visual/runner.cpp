@@ -67,8 +67,8 @@ runner::runner(runner::path_type const & styles_dir,
 #if defined(SVG_RENDERER)
                   ,renderer<svg_renderer>(output_dir_, reference_dir_, overwrite)
 #endif
-                  /*,renderer<grid_renderer>(output_dir_, reference_dir_, overwrite)*/
-                 }
+                  ,renderer<grid_renderer>(output_dir_, reference_dir_, overwrite)
+                }
 {
 }
 
