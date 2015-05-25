@@ -60,9 +60,15 @@ runner::runner(runner::path_type const & styles_dir,
       output_dir_(output_dir),
       reference_dir_(reference_dir),
       jobs_(jobs),
-      renderers_{ renderer<agg_renderer>(output_dir_, reference_dir_, overwrite),
-                  renderer<cairo_renderer>(output_dir_, reference_dir_, overwrite)/*,
-                  renderer<grid_renderer>(output_dir_, reference_dir_, overwrite)*/ }
+      renderers_{ renderer<agg_renderer>(output_dir_, reference_dir_, overwrite)
+#if defined(HAVE_CAIRO)
+                  ,renderer<cairo_renderer>(output_dir_, reference_dir_, overwrite)
+#endif
+#if defined(SVG_RENDERER)
+                  ,renderer<svg_renderer>(output_dir_, reference_dir_, overwrite)
+#endif
+                  /*,renderer<grid_renderer>(output_dir_, reference_dir_, overwrite)*/
+                 }
 {
 }
 
