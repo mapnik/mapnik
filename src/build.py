@@ -113,6 +113,9 @@ if env['RUNTIME_LINK'] != 'static':
 
 lib_env['LIBS'].append('z')
 
+if env['PLATFORM'] == 'FreeBSD':
+    lib_env['LIBS'].append('pthread')
+
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
     if env['FULL_LIB_PATH']:
