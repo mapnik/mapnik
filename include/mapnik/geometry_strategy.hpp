@@ -155,28 +155,8 @@ struct scale_strategy
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
         double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
-        try {
-            boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
-        }
-        try {
-            boost::geometry::set<1>(p2, boost::numeric_cast<p2_type>(y));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
-        }
+        boost::geometry::set<0>(p2, static_cast<p2_type>(x));
+        boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
     
@@ -205,28 +185,8 @@ struct scale_rounding_strategy
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
         double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
-        try {
-            boost::geometry::set<0>(p2, util::rounding_cast<p2_type>(x));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
-        }
-        try {
-            boost::geometry::set<1>(p2, util::rounding_cast<p2_type>(y));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
-        }
+        boost::geometry::set<0>(p2, static_cast<p2_type>(std::round(x)));
+        boost::geometry::set<1>(p2, static_cast<p2_type>(std::round(y)));
         return true;
     }
     

@@ -59,28 +59,8 @@ struct proj_strategy
         double y = boost::geometry::get<1>(p1);
         double z = 0.0;
         if (!prj_trans_.forward(x, y, z)) return false;
-        try {
-            boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
-        }
-        try {
-            boost::geometry::set<1>(p2, boost::numeric_cast<p2_type>(y));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
-        }
+        boost::geometry::set<0>(p2, static_cast<p2_type>(x));
+        boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
     
@@ -108,28 +88,8 @@ struct proj_backward_strategy
         double y = boost::geometry::get<1>(p1);
         double z = 0.0;
         if (!prj_trans_.backward(x, y, z)) return false;
-        try {
-            boost::geometry::set<0>(p2, boost::numeric_cast<p2_type>(x));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<0>(p2, std::numeric_limits<p2_type>::max());
-        }
-        try {
-            boost::geometry::set<1>(p2, boost::numeric_cast<p2_type>(y));
-        }
-        catch(boost::numeric::negative_overflow&)
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::min());
-        }
-        catch(boost::numeric::positive_overflow&) 
-        {
-            boost::geometry::set<1>(p2, std::numeric_limits<p2_type>::max());
-        }
+        boost::geometry::set<0>(p2, static_cast<p2_type>(x));
+        boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
     

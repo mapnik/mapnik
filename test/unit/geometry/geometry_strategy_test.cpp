@@ -29,7 +29,6 @@ SECTION("proj and view strategy") {
         point<double> p1(-97.553098,35.523105);
         point<double> r1(-1.08596e+07, 4.2352e+06);
         point<double> p3 = transform<double>(p1, ps);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -37,7 +36,6 @@ SECTION("proj and view strategy") {
         point<double> p1(-1.08596e+07, 4.2352e+06);
         point<double> r1(58.6287 , 100.945);
         point<double> p3 = transform<double>(p1, vs);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
 
     }
@@ -48,7 +46,6 @@ SECTION("proj and view strategy") {
         using sg_type = strategy_group<mapnik::view_strategy>;
         sg_type sg(vs);
         point<double> p3 = transform<double>(p1, sg);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
 
     }
@@ -59,7 +56,6 @@ SECTION("proj and view strategy") {
         point<double> p1(-97.553098,35.523105);
         point<double> r1(58.6287 , 100.945);
         point<double> p3 = transform<double>(p1, sg);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -71,7 +67,6 @@ SECTION("proj and view strategy") {
         geometry<double> p2 = transform<double>(p1, sg);
         REQUIRE(p2.is<point<double> >());
         point<double> p3 = mapnik::util::get<point<double> >(p2);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -83,7 +78,6 @@ SECTION("proj and view strategy") {
         geometry<std::int64_t> p2 = transform<std::int64_t>(p1, sg);
         REQUIRE(p2.is<point<std::int64_t> >());
         point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -96,7 +90,6 @@ SECTION("proj and view strategy") {
         geometry<std::int64_t> p2 = transform<std::int64_t>(p1, sg);
         REQUIRE(p2.is<point<std::int64_t> >());
         point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -109,7 +102,6 @@ SECTION("proj and view strategy") {
         geometry<double> p2 = transform<double>(p1, sg);
         REQUIRE(p2.is<point<double> >());
         point<double> p3 = mapnik::util::get<point<double> >(p2);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -122,7 +114,6 @@ SECTION("proj and view strategy") {
         geometry<std::int64_t> p2 = transform<std::int64_t>(p1, sg);
         REQUIRE(p2.is<point<std::int64_t> >());
         point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
     {
@@ -135,7 +126,6 @@ SECTION("proj and view strategy") {
         geometry<double> p2 = transform<double>(p1, sg);
         REQUIRE(p2.is<point<double> >());
         point<double> p3 = mapnik::util::get<point<double> >(p2);
-        //std::cout << p3.x << " , " << p3.y << std::endl;
         assert_g_equal(r1, p3);
     }
 
@@ -159,10 +149,9 @@ SECTION("scaling strategies - double to double") {
         assert_g_equal(r, o);
     }
     {   
-        // Not the rounding doesn't apply because not casting to ints
         scale_rounding_strategy ss(0.5, -2.0);
         point<double> p(-90.3, 35.5);
-        point<double> r(-47.15, 15.75);
+        point<double> r(-47.0, 16.0);
         point<double> o = transform<double>(p, ss);
         assert_g_equal(r, o);
     }
@@ -193,47 +182,6 @@ SECTION("scaling strategies - double to int64") {
         point<std::int64_t> o = transform<std::int64_t>(p, ss);
         assert_g_equal(r, o);
     }
-    {   
-        // Test underflow and overflow
-        std::int64_t min = std::numeric_limits<std::int64_t>::min();
-        std::int64_t max = std::numeric_limits<std::int64_t>::max();
-        scale_strategy ss(1.0E100);
-        point<double> p(-90.3, 35.5);
-        point<std::int64_t> r(min, max);
-        point<std::int64_t> o = transform<std::int64_t>(p, ss);
-        assert_g_equal(r, o);
-    }
-    {   
-        // Test underflow and overflow
-        std::int64_t min = std::numeric_limits<std::int64_t>::min();
-        std::int64_t max = std::numeric_limits<std::int64_t>::max();
-        scale_rounding_strategy ss(1.0E100);
-        point<double> p(-90.3, 35.5);
-        point<std::int64_t> r(min, max);
-        point<std::int64_t> o = transform<std::int64_t>(p, ss);
-        assert_g_equal(r, o);
-    }
-    {   
-        // Test overrflow and underflow
-        std::int64_t min = std::numeric_limits<std::int64_t>::min();
-        std::int64_t max = std::numeric_limits<std::int64_t>::max();
-        scale_strategy ss(1.0E100);
-        point<double> p(90.3, -35.5);
-        point<std::int64_t> r(max, min);
-        point<std::int64_t> o = transform<std::int64_t>(p, ss);
-        assert_g_equal(r, o);
-    }
-    {   
-        // Test overflow and underflow
-        std::int64_t min = std::numeric_limits<std::int64_t>::min();
-        std::int64_t max = std::numeric_limits<std::int64_t>::max();
-        scale_rounding_strategy ss(1.0E100);
-        point<double> p(90.3, -35.5);
-        point<std::int64_t> r(max, min);
-        point<std::int64_t> o = transform<std::int64_t>(p, ss);
-        assert_g_equal(r, o);
-    }
-
 } // END SECTION
 
 } // END TEST CASE
