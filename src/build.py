@@ -253,6 +253,7 @@ source = Split(
     renderer_common/render_pattern.cpp
     renderer_common/process_group_symbolizer.cpp
     math.cpp
+    png_io.cpp
     """
     )
 
