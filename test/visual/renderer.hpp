@@ -33,6 +33,7 @@
 // mapnik
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/grid/grid_renderer.hpp>
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_image_util.hpp>
@@ -139,14 +140,49 @@ struct svg_renderer : renderer_base<std::string>
 };
 #endif
 
-struct grid_renderer : renderer_base<mapnik::image_gray8>
+struct grid_renderer : renderer_base<mapnik::image_rgba8>
 {
     static constexpr const char * name = "grid";
 
+    void convert(mapnik::grid::data_type const & grid, image_type & image) const
+    {
+        for (std::size_t y = 0; y < grid.height(); ++y)
+        {
+            mapnik::grid::value_type const * grid_row = grid.get_row(y);
+            image_type::pixel_type * image_row = image.get_row(y);
+            for (std::size_t x = 0; x < grid.width(); ++x)
+            {
+                mapnik::grid::value_type val = grid_row[x];
+
+                if (val == mapnik::grid::base_mask)
+                {
+                    image_row[x] = 0;
+                    continue;
+                }
+                if (val < 0)
+                {
+                    throw std::runtime_error("grid renderer: feature id is negative.");
+                }
+
+                val *= 100;
+
+                if (val > 0x00ffffff)
+                {
+                    throw std::runtime_error("grid renderer: feature id is too high.");
+                }
+
+                image_row[x] = val | 0xff000000;
+            }
+        }
+    }
+
     image_type render(mapnik::Map const & map, double scale_factor) const
     {
+        mapnik::grid grid(map.width(), map.height(), "__id__");
+        mapnik::grid_renderer<mapnik::grid> ren(map, grid, scale_factor);
+        ren.apply();
         image_type image(map.width(), map.height());
-        // TODO: Render grid here.
+        convert(grid.data(), image);
         return image;
     }
 };
@@ -156,7 +192,7 @@ class renderer
 {
 public:
     renderer(boost::filesystem::path const & output_dir, boost::filesystem::path const & reference_dir, bool overwrite)
-        : output_dir(output_dir), reference_dir(reference_dir), overwrite(overwrite)
+        : ren(), output_dir(output_dir), reference_dir(reference_dir), overwrite(overwrite)
     {
     }
 
@@ -208,7 +244,7 @@ private:
         return s.str();
     }
 
-    Renderer ren;
+    const Renderer ren;
     boost::filesystem::path const & output_dir;
     boost::filesystem::path const & reference_dir;
     const bool overwrite;

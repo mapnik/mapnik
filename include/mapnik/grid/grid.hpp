@@ -57,8 +57,8 @@ public:
     static const value_type base_mask;
 
 private:
-    unsigned width_;
-    unsigned height_;
+    std::size_t width_;
+    std::size_t height_;
     std::string key_;
     data_type data_;
     std::string id_name_;
@@ -70,7 +70,7 @@ private:
 
 public:
 
-    hit_grid(int width, int height, std::string const& key);
+    hit_grid(std::size_t width, std::size_t height, std::string const& key);
 
     hit_grid(hit_grid<T> const& rhs);
 
@@ -145,20 +145,20 @@ public:
         return data_.data();
     }
 
-    inline value_type const * get_row(unsigned row) const
+    inline value_type const * get_row(std::size_t row) const
     {
         return data_.get_row(row);
     }
 
-    inline mapnik::grid_view get_view(unsigned x, unsigned y, unsigned w, unsigned h)
+    inline mapnik::grid_view get_view(std::size_t x, std::size_t y, std::size_t w, std::size_t h)
     {
-        return mapnik::grid_view(x,y,w,h,
-                                 data_,key_,id_name_,names_,f_keys_,features_);
+        return mapnik::grid_view(x, y, w, h,
+                                 data_, key_, id_name_, names_, f_keys_, features_);
     }
 
 private:
 
-    inline bool checkBounds(unsigned x, unsigned y) const
+    inline bool checkBounds(std::size_t x, std::size_t y) const
     {
         return (x < width_ && y < height_);
     }
@@ -166,39 +166,39 @@ private:
     hit_grid& operator=(const hit_grid&);
 
 public:
-    inline void setPixel(int x,int y,value_type feature_id)
+    inline void setPixel(std::size_t x, std::size_t y, value_type feature_id)
     {
-        if (checkBounds(x,y))
+        if (checkBounds(x, y))
         {
-            data_(x,y) = feature_id;
+            data_(x, y) = feature_id;
         }
     }
-    inline unsigned width() const
+    inline std::size_t width() const
     {
         return width_;
     }
 
-    inline unsigned height() const
+    inline std::size_t height() const
     {
         return height_;
     }
 
-    inline void set_rectangle(value_type id,image_rgba8 const& data,int x0,int y0)
+    inline void set_rectangle(value_type id, image_rgba8 const& data, std::size_t x0, std::size_t y0)
     {
-        box2d<int> ext0(0,0,width_,height_);
-        box2d<int> ext1(x0,y0,x0+data.width(),y0+data.height());
+        box2d<int> ext0(0, 0, width_, height_);
+        box2d<int> ext1(x0, y0, x0 + data.width(), y0 + data.height());
 
         if (ext0.intersects(ext1))
         {
             box2d<int> box = ext0.intersect(ext1);
-            for (int y = box.miny(); y < box.maxy(); ++y)
+            for (std::size_t y = box.miny(); y < box.maxy(); ++y)
             {
                 value_type* row_to =  data_.get_row(y);
-                unsigned int const * row_from = data.get_row(y-y0);
+                image_rgba8::pixel_type const * row_from = data.get_row(y - y0);
 
-                for (int x = box.minx(); x < box.maxx(); ++x)
+                for (std::size_t x = box.minx(); x < box.maxx(); ++x)
                 {
-                    unsigned rgba = row_from[x-x0];
+                    image_rgba8::pixel_type rgba = row_from[x - x0];
                     unsigned a = (rgba >> 24) & 0xff;
                     // if the pixel is more than a tenth
                     // opaque then burn in the feature id

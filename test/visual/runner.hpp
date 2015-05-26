@@ -42,7 +42,7 @@ class runner
 #if defined(SVG_RENDERER)
                                                 ,renderer<svg_renderer>
 #endif
-                                                /*renderer<grid_renderer>*/>;
+                                                ,renderer<grid_renderer>>;
     using path_type = boost::filesystem::path;
     using files_iterator = std::vector<path_type>::const_iterator;
 
