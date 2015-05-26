@@ -185,8 +185,8 @@ struct scale_rounding_strategy
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
         double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
-        boost::geometry::set<0>(p2, static_cast<p2_type>(std::floor(x + 0.5)));
-        boost::geometry::set<1>(p2, static_cast<p2_type>(std::floor(y + 0.5)));
+        boost::geometry::set<0>(p2, static_cast<p2_type>(std::round(x)));
+        boost::geometry::set<1>(p2, static_cast<p2_type>(std::round(y)));
         return true;
     }
     
