@@ -24,8 +24,7 @@ from glob import glob
 
 Import('env')
 lib_env = env.Clone()
-if 'g++' in env['CXX']:
-    lib_env.Append(CXXFLAGS='-fPIC')
+lib_env.Append(CXXFLAGS='-fPIC')
 
 name = "mapnik-wkt"
 lib = lib_env.StaticLibrary(name, glob('./' + '*.cpp'), LIBS=[])
