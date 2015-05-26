@@ -36,7 +36,6 @@
 using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
-using mapnik::geometry_type;
 using mapnik::query;
 using mapnik::feature_factory;
 
