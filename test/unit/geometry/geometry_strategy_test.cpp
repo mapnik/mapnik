@@ -9,7 +9,6 @@
 #include <mapnik/geometry_strategy.hpp>
 #include <mapnik/proj_strategy.hpp>
 #include <mapnik/view_strategy.hpp>
-#include <mapnik/vector_tile_strategy.hpp>
 
 TEST_CASE("geometry strategy tests") {
 
@@ -89,16 +88,6 @@ SECTION("proj and view strategy") {
         geometry<double> p1(std::move(point<double>(-97.553098,35.523105)));
         point<std::int64_t> r1(938 , 1615);
         geometry<std::int64_t> p2 = transform<std::int64_t>(p1, sg);
-        REQUIRE(p2.is<point<std::int64_t> >());
-        point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
-        assert_g_equal(r1, p3);
-    }
-    {
-        // Test vector tile strategy
-        mapnik::geometry::vector_tile_strategy vs(proj_trans_rev, vt, 16);
-        geometry<double> p1(std::move(point<double>(-97.553098,35.523105)));
-        point<std::int64_t> r1(938 , 1615);
-        geometry<std::int64_t> p2 = transform<std::int64_t>(p1, vs);
         REQUIRE(p2.is<point<std::int64_t> >());
         point<std::int64_t> p3 = mapnik::util::get<point<std::int64_t> >(p2);
         assert_g_equal(r1, p3);
