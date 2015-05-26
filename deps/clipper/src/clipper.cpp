@@ -1240,7 +1240,7 @@ void ClipperBase::Reset()
 {
   m_CurrentLM = m_MinimaList.begin();
   if (m_CurrentLM == m_MinimaList.end()) return; //ie nothing to process
-  std::sort(m_MinimaList.begin(), m_MinimaList.end(), LocMinSorter());
+  std::stable_sort(m_MinimaList.begin(), m_MinimaList.end(), LocMinSorter());
 
   //reset all edges ...
   for (MinimaList::iterator lm = m_MinimaList.begin(); lm != m_MinimaList.end(); ++lm)
@@ -2894,7 +2894,7 @@ bool Clipper::FixupIntersectionOrder()
   //Now it's crucial that intersections are made only between adjacent edges,
   //so to ensure this the order of intersections may need adjusting ...
   CopyAELToSEL();
-  std::sort(m_IntersectList.begin(), m_IntersectList.end(), IntersectListSort);
+  std::stable_sort(m_IntersectList.begin(), m_IntersectList.end(), IntersectListSort);
   size_t cnt = m_IntersectList.size();
   for (size_t i = 0; i < cnt; ++i) 
   {
