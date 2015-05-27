@@ -762,17 +762,16 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         if ( twkb_encoding_ ) {
             // Start with baseline tolerance of 1/2 a pixel
             double tolerance = std::min(px_gw, px_gh) / 2.0;
-            double exponent = tolerance >= 10 ? 1 / tolerance : tolerance;
-            int i = 0;
             // Figure out number of decimals of rounding that implies
-            while( exponent <= 1 ) {
-                exponent *= 10.0;
-                i++;
+            if ( tolerance > 0 ) {
+                int i = -1 * lround(log10(tolerance));
+                // Write the SQL
+                s << "," << i << ") AS geom";
             }
-            // Flip left-of-decimal values to negative
-            if ( tolerance > 1 ) i *= -1;
-            // Write the SQL
-            s << "," << i << ") AS geom";
+            // Hopefully we're never fed a negative tolerance...
+            else {
+                s << ") AS geom";
+            }
         }
         else {
             s << ") AS geom";
