@@ -23,6 +23,7 @@
 #include "connection_manager.hpp"
 #include "postgis_datasource.hpp"
 #include "postgis_featureset.hpp"
+#include "postgis_utils.hpp"
 #include "asyncresultset.hpp"
 
 
@@ -124,6 +125,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
     estimate_extent_ = estimate_extent && *estimate_extent;
     boost::optional<mapnik::boolean> simplify_opt = params.get<mapnik::boolean>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
+    boost::optional<mapnik::boolean> twkb_opt = params.get<mapnik::boolean>("twkb_encoding", false);
+    twkb_encoding_ = twkb_opt && *twkb_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -735,7 +738,12 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         const double px_gw = 1.0 / boost::get<0>(q.resolution());
         const double px_gh = 1.0 / boost::get<1>(q.resolution());
 
-        s << "SELECT ST_AsBinary(";
+        if (twkb_encoding_) {
+            s << "SELECT ST_AsTWKB(";
+        }
+        else {
+            s << "SELECT ST_AsBinary(";
+        }
 
         if (simplify_geometries_) {
           s << "ST_Simplify(";
@@ -791,7 +799,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), twkb_encoding_);
 
     }
 
@@ -874,7 +882,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), twkb_encoding_);
         }
     }
 
