@@ -85,6 +85,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
+      twkb_encoding_(false),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
