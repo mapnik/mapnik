@@ -759,7 +759,24 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           s << ", " << tolerance << ")";
         }
 
-        s << ") AS geom";
+        if ( twkb_encoding_ ) {
+            // Start with baseline tolerance of 1/2 a pixel
+            double tolerance = std::min(px_gw, px_gh) / 2.0;
+            double exponent = tolerance >= 10 ? 1 / tolerance : tolerance;
+            int i = 0;
+            // Figure out number of decimals of rounding that implies
+            while( exponent <= 1 ) {
+                exponent *= 10.0;
+                i++;
+            }
+            // Flip left-of-decimal values to negative
+            if ( tolerance > 1 ) i *= -1;
+            // Write the SQL
+            s << "," << i << ") AS geom";
+        }
+        else {
+            s << ") AS geom";
+        }
 
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
         std::set<std::string> const& props = q.property_names();
