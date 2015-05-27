@@ -746,7 +746,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         if (simplify_geometries_) {
-          s << "ST_Simplify(";
+          s << "ST_Simplify(ST_SnapToGrid(";
         }
 
         s << "\"" << geometryColumn_ << "\"";
@@ -755,16 +755,19 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           // 1/20 of pixel seems to be a good compromise to avoid
           // drop of collapsed polygons.
           // See https://github.com/mapnik/mapnik/issues/1639
+          // See http://trac.osgeo.org/postgis/ticket/2093
           const double tolerance = std::min(px_gw, px_gh) / 20.0;
+          const double grid_tolerance = std::min(px_gw, px_gh) / 40.0;
+          s << ", " << grid_tolerance << ")";
           s << ", " << tolerance << ")";
         }
 
         if ( twkb_encoding_ ) {
             // Start with baseline tolerance of 1/2 a pixel
-            double tolerance = std::min(px_gw, px_gh) / 2.0;
+            double tolerance = std::min(px_gw, px_gh);
             // Figure out number of decimals of rounding that implies
             if ( tolerance > 0 ) {
-                int i = -1 * lround(log10(tolerance));
+                int i = -1 * lround(log10(tolerance)) + 1;
                 // Write the SQL
                 s << "," << i << ") AS geom";
             }
