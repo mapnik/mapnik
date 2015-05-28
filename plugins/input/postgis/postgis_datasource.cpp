@@ -87,6 +87,12 @@ postgis_datasource::postgis_datasource(parameters const& params)
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
       twkb_encoding_(false),
+      simplify_snap_ratio_(*params_.get<value_double>("simplify_snap_ratio", 1.0/40.0)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
+      // See http://trac.osgeo.org/postgis/ticket/2093
+      simplify_dp_ratio_(*params_.get<value_double>("simplify_dp_ratio", 1.0/20.0)),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
@@ -756,14 +762,14 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           // drop of collapsed polygons.
           // See https://github.com/mapnik/mapnik/issues/1639
           // See http://trac.osgeo.org/postgis/ticket/2093
-          const double tolerance = std::min(px_gw, px_gh) / 20.0;
-          const double grid_tolerance = std::min(px_gw, px_gh) / 40.0;
+          const double tolerance = std::min(px_gw, px_gh) * simplify_dp_ratio_;
+          const double grid_tolerance = std::min(px_gw, px_gh) * simplify_snap_ratio_;
           s << ", " << grid_tolerance << ")";
           s << ", " << tolerance << ")";
         }
 
         if ( twkb_encoding_ ) {
-            // Start with baseline tolerance of 1/2 a pixel
+            // Start with baseline tolerance of ~1/10 a pixel
             double tolerance = std::min(px_gw, px_gh);
             // Figure out number of decimals of rounding that implies
             if ( tolerance > 0 ) {

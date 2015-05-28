@@ -58,6 +58,7 @@ using mapnik::feature_ptr;
 using mapnik::query;
 using mapnik::parameters;
 using mapnik::coord2d;
+using mapnik::value_double;
 
 typedef boost::shared_ptr< ConnectionManager::PoolType> CnxPool_ptr;
 
@@ -114,6 +115,8 @@ private:
     int max_async_connections_;
     bool asynchronous_request_;
     bool twkb_encoding_;
+    mapnik::value_double simplify_snap_ratio_;
+    mapnik::value_double simplify_dp_ratio_;
     int intersect_min_scale_;
     int intersect_max_scale_;
 };
