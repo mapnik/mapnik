@@ -769,11 +769,14 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         if ( twkb_encoding_ ) {
-            // Start with baseline tolerance of ~1/10 a pixel
-            double tolerance = std::min(px_gw, px_gh);
+            // Start with baseline tolerance of 1/5 -> 1/30 of a pixel,
+            // depending on where resolution falls relative to rounding levels.
+            // (When rouding levels jump by factors of 10, hard to choose a "perfect" 
+            // level)
+            const double tolerance = std::min(px_gw, px_gh);
             // Figure out number of decimals of rounding that implies
             if ( tolerance > 0 ) {
-                int i = -1 * lround(log10(tolerance)) + 1;
+                const int i = -1 * lround(log10(tolerance)) + 1;
                 // Write the SQL
                 s << "," << i << ") AS geom";
             }
