@@ -1,0 +1,18 @@
+#!/bin/bash
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+cd ../../
+source ./localize.sh
+
+failures=0
+if [ -n "$(find tests/cpp_tests/ -maxdepth 1 -name '*-bin' -print -quit)" ]; then
+    for FILE in tests/cpp_tests/*-bin; do 
+        ${FILE} -q -d .;
+      failures=$((failures+$?))
+    done
+    echo
+else
+    echo 'warning: no c++ tests found'
+fi
+exit $failures
+

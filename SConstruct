@@ -85,10 +85,11 @@ pretty_dep_names = {
     'm':'Basic math library, part of C++ stlib',
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
     'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
-    'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
-    'libxml2':'libxml2 library | try setting XML2_CONFIG SCons option to point to location of xml2-config program',
+    'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option or avoid the need for xml2-config command by configuring with XML2_LIBS & XML2_INCLUDES',
+    'libxml2':'libxml2 library | try setting XML2_CONFIG SCons option to point to location of xml2-config program or configure with XML2_LIBS & XML2_INCLUDES',
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
-    'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
+    'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option or configure with FREETYPE_LIBS & FREETYPE_INCLUDES',
+    'freetype':'libfreetype library | try setting FREETYPE_CONFIG SCons option or configure with FREETYPE_LIBS & FREETYPE_INCLUDES',
     'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
@@ -346,6 +347,10 @@ opts.AddVariables(
     BoolVariable('PROJ', 'Build Mapnik with proj4 support to enable transformations between many different projections', 'True'),
     PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    ('FREETYPE_INCLUDES', 'Search path for Freetype include files', ''),
+    ('FREETYPE_LIBS', 'Search path for Freetype library files', ''),
+    ('XML2_INCLUDES', 'Search path for libxml2 include files', ''),
+    ('XML2_LIBS', 'Search path for libxml2 library files', ''),
     ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
 
     # Variables affecting rendering back-ends
@@ -438,7 +443,9 @@ pickle_store = [# Scons internal variables
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_CAIRO',
+        'MAPNIK_HAS_DLFCN',
         'HAS_PYCAIRO',
+        'PYCAIRO_PATHS',
         'HAS_LIBXML2',
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
@@ -865,6 +872,24 @@ int main()
         rm_path(item,'CPPPATH',context.env)
     return ret
 
+def CheckHasDlfcn(context, silent=False):
+    if not silent:
+        context.Message('Checking for dlfcn.h support ... ')
+    ret = context.TryCompile("""
+
+#include <dlfcn.h>
+
+int main()
+{
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    context.Result(ret)
+    return ret
+
 def GetBoostLibVersion(context):
     ret = context.TryRun("""
 
@@ -1019,6 +1044,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
+               'CheckHasDlfcn'         : CheckHasDlfcn,
                'GetBoostLibVersion'    : GetBoostLibVersion,
                'GetMapnikLibVersion'   : GetMapnikLibVersion,
                'parse_config'          : parse_config,
@@ -1082,6 +1108,7 @@ if not preconfigured:
     env['CAIRO_ALL_LIBS'] = []
     env['CAIRO_CPPPATHS'] = []
     env['HAS_PYCAIRO'] = False
+    env['PYCAIRO_PATHS'] = []
     env['HAS_LIBXML2'] = False
     env['LIBMAPNIK_LIBS'] = []
     env['LIBMAPNIK_LINKFLAGS'] = []
@@ -1182,12 +1209,26 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
 
-    if conf.parse_config('FREETYPE_CONFIG'):
+    REQUIRED_LIBSHEADERS = [
+        ['z', 'zlib.h', True,'C'],
+        [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
+    ]
+
+    if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
+        REQUIRED_LIBSHEADERS.append(['freetype','ft2build.h',True,'C'])
+        if env.get('FREETYPE_INCLUDES'):
+            inc_path = env['FREETYPE_INCLUDES']
+            env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        if env.get('FREETYPE_LIBS'):
+            lib_path = env['FREETYPE_LIBS']
+            env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+    elif conf.parse_config('FREETYPE_CONFIG'):
         # check if freetype links to bz2
         if env['RUNTIME_LINK'] == 'static':
             temp_env = env.Clone()
             temp_env['LIBS'] = []
             try:
+                # TODO - freetype-config accepts --static as of v2.5.3
                 temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
                 if 'bz2' in temp_env['LIBS']:
                     env['EXTRA_FREETYPE_LIBS'].append('bz2')
@@ -1196,15 +1237,23 @@ if not preconfigured:
 
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
-    if conf.parse_config('XML2_CONFIG',checks='--cflags'):
+    if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
+        REQUIRED_LIBSHEADERS.append(['libxml2','libxml/parser.h',True,'C'])
+        if env.get('XML2_INCLUDES'):
+            inc_path = env['XML2_INCLUDES']
+            env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        if env.get('XML2_LIBS'):
+            lib_path = env['XML2_LIBS']
+            env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+    elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
         env['HAS_LIBXML2'] = True
     else:
         env['MISSING_DEPS'].append('libxml2')
 
-    REQUIRED_LIBSHEADERS = [
-        ['z', 'zlib.h', True,'C'],
-        [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
-    ]
+    if conf.CheckHasDlfcn():
+        env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
+    else:
+        env['SKIPPED_DEPS'].extend(['dlfcn'])
 
     OPTIONAL_LIBSHEADERS = []
 
@@ -1418,7 +1467,7 @@ if not preconfigured:
                         sqlite_backup = env.Clone().Dictionary()
                         # if statically linking, on linux we likely
                         # need to link sqlite to pthreads and dl
-                        if env['RUNTIME_LINK'] == 'static':
+                        if env['RUNTIME_LINK'] == 'static' and not env['PLATFORM'] == 'Darwin':
                             if CHECK_PKG_CONFIG and conf.CheckPKG('sqlite3'):
                                 sqlite_env = env.Clone()
                                 try:
@@ -1428,7 +1477,15 @@ if not preconfigured:
                                             env["SQLITE_LINKFLAGS"].append(lib)
                                             env.Append(LIBS=lib)
                                 except OSError,e:
-                                    pass
+                                    for lib in ["sqlite3","dl","pthread"]:
+                                        if not lib in env['LIBS']:
+                                            env["SQLITE_LINKFLAGS"].append("lib")
+                                            env.Append(LIBS=lib)
+                            else:
+                                for lib in ["sqlite3","dl","pthread"]:
+                                    if not lib in env['LIBS']:
+                                        env["SQLITE_LINKFLAGS"].append("lib")
+                                        env.Append(LIBS=lib)
                         SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         if not SQLITE_HAS_RTREE:
                             env.Replace(**sqlite_backup)
@@ -1609,6 +1666,13 @@ if not preconfigured:
             if env['CAIRO']:
                 if CHECK_PKG_CONFIG and conf.CheckPKG('pycairo'):
                     env['HAS_PYCAIRO'] = True
+                    temp_env = env.Clone()
+                    temp_env['CPPPATH'] = []
+                    temp_env.ParseConfig('pkg-config --cflags pycairo')
+                    if temp_env['CPPPATH']:
+                        env['PYCAIRO_PATHS'] = copy(temp_env['CPPPATH'])
+                    else:
+                        print temp_env['CPPPATH']
                 else:
                     env['SKIPPED_DEPS'].extend(['pycairo'])
             else:
@@ -1685,14 +1749,18 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
-        boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-        if boost_version_from_header > 53 or 'c++11' in env['CUSTOM_CXXFLAGS']:
+        if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+            boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+            if boost_version_from_header > 53 or 'c++11' in env['CUSTOM_CXXFLAGS']:
+                env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
+                #  - workaround boost gil channel_algorithm.hpp narrowing error
+                # TODO - remove when building against >= 1.55
+                # https://github.com/mapnik/mapnik/issues/1970
+                if 'clang++' in env['CXX']:
+                    env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+        else:
             env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
-            #  - workaround boost gil channel_algorithm.hpp narrowing error
-            # TODO - remove when building against >= 1.55
-            # https://github.com/mapnik/mapnik/issues/1970
-            if 'clang++' in env['CXX']:
-                env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+            env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1744,7 +1812,7 @@ if not preconfigured:
         else:
             # TODO - add back -fvisibility-inlines-hidden
             # https://github.com/mapnik/mapnik/issues/1863
-            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 

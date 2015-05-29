@@ -216,6 +216,8 @@ bool proj_transform::backward (box2d<double> & box) const
     return true;
 }
 
+/* Returns points in clockwise order. This allows us to do anti-meridian checks.
+ */
 void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env, int points)
 {
     double width = env.width();
@@ -233,15 +235,32 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     double xstep = width / steps;
     double ystep = height / steps;
 
-    for (int i=0; i<=steps; i++) {
-        coords.push_back(coord<double,2>(env.minx() + i * xstep, env.miny()));
-        coords.push_back(coord<double,2>(env.minx() + i * xstep, env.maxy()));
+    coords.resize(points);
+    for (int i=0; i<steps; i++) {
+        // top: left>right
+        coords[i] = coord<double, 2>(env.minx() + i * xstep, env.maxy());
+        // right: top>bottom
+        coords[i + steps] = coord<double, 2>(env.maxx(), env.maxy() - i * ystep);
+        // bottom: right>left
+        coords[i + steps * 2] = coord<double, 2>(env.maxx() - i * xstep, env.miny());
+        // left: bottom>top
+        coords[i + steps * 3] = coord<double, 2>(env.minx(), env.miny() + i * ystep);
+    }
+}
 
+/* determine if an ordered sequence of coordinates is in clockwise order */
+bool is_clockwise(const std::vector< coord<double,2> > & coords)
+{
+    int n = coords.size();
+    coord<double,2> c1, c2;
+    double a = 0.0;
+
+    for (int i=0; i<n; i++) {
+        c1 = coords[i];
+        c2 = coords[(i + 1) % n];
+        a += (c1.x * c2.y - c2.x * c1.y);
     }
-    for (int i=1; i<steps; i++) {
-        coords.push_back(coord<double,2>(env.minx(), env.miny() + i * ystep));
-        coords.push_back(coord<double,2>(env.maxx(), env.miny() + i * ystep));
-    }
+    return a <= 0.0;
 }
 
 box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
@@ -268,7 +287,7 @@ bool proj_transform::backward(box2d<double>& env, int points) const
         return true;
 
     std::vector<coord<double,2> > coords;
-    envelope_points(coords, env, points);
+    envelope_points(coords, env, points);  // this is always clockwise
 
     double z;
     for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
@@ -279,6 +298,16 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
+    if (is_source_longlat_ && !is_clockwise(coords)) {
+        /* we've gone to a geographic CS, and our clockwise envelope has
+         * changed into an anticlockwise one. This means we've crossed the antimeridian, and
+         * need to expand the X direction to +/-180 to include all the data. Once we can deal
+         * with multiple bboxes in queries we can improve.
+         */
+         double miny = result.miny();
+         result.expand_to_include(-180.0, miny);
+         result.expand_to_include(180.0, miny);
+    }
 
     env.re_center(result.center().x, result.center().y);
     env.height(result.height());
@@ -293,7 +322,7 @@ bool proj_transform::forward(box2d<double>& env, int points) const
         return true;
 
     std::vector<coord<double,2> > coords;
-    envelope_points(coords, env, points);
+    envelope_points(coords, env, points);  // this is always clockwise
 
     double z;
     for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
@@ -304,6 +333,17 @@ bool proj_transform::forward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
+
+    if (is_dest_longlat_ && !is_clockwise(coords)) {
+        /* we've gone to a geographic CS, and our clockwise envelope has
+         * changed into an anticlockwise one. This means we've crossed the antimeridian, and
+         * need to expand the X direction to +/-180 to include all the data. Once we can deal
+         * with multiple bboxes in queries we can improve.
+         */
+         double miny = result.miny();
+         result.expand_to_include(-180.0, miny);
+         result.expand_to_include(180.0, miny);
+    }
 
     env.re_center(result.center().x, result.center().y);
     env.height(result.height());

@@ -38,6 +38,15 @@ libraries = [env['PLUGINS']['rasterlite']['lib']]
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
+if env['RUNTIME_LINK'] == 'static':
+    libraries.append('geotiff')
+    libraries.append('spatialite')
+    libraries.append('sqlite3')
+    libraries.append('geos_c')
+    libraries.append('geos')
+    libraries.append('proj')
+    libraries.append('z')
+
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append(env['MAPNIK_NAME'])
 

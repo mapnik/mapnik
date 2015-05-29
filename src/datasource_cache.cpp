@@ -119,24 +119,6 @@ datasource_ptr datasource_cache::create(parameters const& params)
 
     ds = datasource_ptr(create_datasource(params), datasource_deleter());
 
-#ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(datasource_cache)
-        << "datasource_cache: Datasource="
-        << ds << " type=" << type;
-
-    MAPNIK_LOG_DEBUG(datasource_cache)
-        << "datasource_cache: Size="
-        << params.size();
-
-    parameters::const_iterator i = params.begin();
-    for (; i != params.end(); ++i)
-    {
-        MAPNIK_LOG_DEBUG(datasource_cache)
-            << "datasource_cache: -- "
-            << i->first << "=" << i->second;
-    }
-#endif
-
     return ds;
 }
 

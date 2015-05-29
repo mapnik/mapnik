@@ -30,7 +30,6 @@ def test_render_image_to_string():
     eq_(im.is_solid(),True)
     s = im.tostring()
     eq_(s, 256 * 256 * '\x00\x00\x00\xff')
-    s = im.tostring('png')
 
 def test_non_solid_image():
     im = mapnik.Image(256, 256)
@@ -61,16 +60,18 @@ def test_setting_alpha():
     w,h = 256,256
     im1 = mapnik.Image(w,h)
     # white, half transparent
-    im1.background = mapnik.Color('rgba(255,255,255,.5)')
+    c1 = mapnik.Color('rgba(255,255,255,.5)')
+    im1.background = c1
     eq_(im1.painted(),False)
     eq_(im1.is_solid(),True)
     # pure white
     im2 = mapnik.Image(w,h)
-    im2.background = mapnik.Color('rgba(255,255,255,1)')
-    im2.set_alpha(.5)
+    c2 = mapnik.Color('rgba(255,255,255,1)')
+    im2.background = c2
+    im2.set_alpha(c1.a/255.0)
     eq_(im2.painted(),False)
     eq_(im2.is_solid(),True)
-    eq_(len(im1.tostring()), len(im2.tostring()))
+    eq_(len(im1.tostring('png32')), len(im2.tostring('png32')))
 
 def test_render_image_to_file():
     im = mapnik.Image(256, 256)
@@ -106,10 +107,10 @@ def get_paired_images(w,h,mapfile):
 def test_render_from_serialization():
     try:
         im,im2 = get_paired_images(100,100,'../data/good_maps/building_symbolizer.xml')
-        eq_(im.tostring(),im2.tostring())
+        eq_(im.tostring('png32'),im2.tostring('png32'))
 
         im,im2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
-        eq_(im.tostring(),im2.tostring())
+        eq_(im.tostring('png32'),im2.tostring('png32'))
     except RuntimeError, e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
@@ -199,7 +200,7 @@ def test_render_with_detector():
     im.save(actual_file,'png8')
     actual = mapnik.Image.open(expected_file)
     expected = mapnik.Image.open(expected_file)
-    eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
+    eq_(actual.tostring('png32'),expected.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
     # now render will a collision detector that should
     # block out the placement of this point
     detector = mapnik.LabelCollisionDetector(m)
@@ -229,11 +230,12 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             expected_file = './images/support/marker-text-line-scale-factor-%s.png' % size
             actual_file = '/tmp/' + os.path.basename(expected_file)
             im.save(actual_file,'png32')
-            #im.save(expected_file,'png32')
+            if os.environ.get('UPDATE'):
+                im.save(expected_file,'png32')
             # we save and re-open here so both png8 images are ready as full color png
             actual = mapnik.Image.open(actual_file)
             expected = mapnik.Image.open(expected_file)
-            eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
+            eq_(actual.tostring('png32'),expected.tostring('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
 
 if __name__ == "__main__":
     setup()

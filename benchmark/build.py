@@ -8,7 +8,7 @@ test_env = env.Clone()
 
 test_env['LIBS'] = [env['MAPNIK_NAME']]
 test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
-if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+if env['PLATFORM'] == 'Linux':
     test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(LIBS='rt')
 test_env.AppendUnique(CXXFLAGS='-g')
@@ -17,6 +17,7 @@ test_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 if test_env['HAS_CAIRO']:
     test_env.PrependUnique(CPPPATH=test_env['CAIRO_CPPPATHS'])
     test_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
+test_env['LINKFLAGS'] = copy(test_env['LIBMAPNIK_LINKFLAGS'])
 if env['PLATFORM'] == 'Darwin':
     test_env.Append(LINKFLAGS='-F/ -framework CoreFoundation')
 

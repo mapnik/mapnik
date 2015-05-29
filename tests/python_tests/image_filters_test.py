@@ -50,7 +50,7 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             actual = '/tmp/mapnik-style-image-filter-' + filename + '.png'
             expected = 'images/style-image-filter/' + filename + '.png'
             im.save(actual,"png32")
-            if not os.path.exists(expected):
+            if not os.path.exists(expected) or os.environ.get('UPDATE'):
                 print 'generating expected test image: %s' % expected
                 im.save(expected,'png32')
             expected_im = mapnik.Image.open(expected)

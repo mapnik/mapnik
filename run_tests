@@ -1,20 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
 failures=0
 
+source ./localize.sh
 PYTHON=${PYTHON:-python}
+
+echo "*** Running C++ tests..."
+./tests/cpp_tests/run
+failures=$((failures+$?))
+echo
 
 echo "*** Running visual tests..."
 $PYTHON tests/visual_tests/test.py -q
 failures=$((failures+$?))
-
-echo "*** Running C++ tests..."
-for FILE in tests/cpp_tests/*-bin; do 
-	${FILE} -q -d .;
-  failures=$((failures+$?))
-done
-
-echo
 
 echo "*** Running python tests..."
 $PYTHON tests/run_tests.py -q
