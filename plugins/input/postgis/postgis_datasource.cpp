@@ -93,6 +93,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       // See https://github.com/mapnik/mapnik/issues/1639
       // See http://trac.osgeo.org/postgis/ticket/2093
       simplify_dp_ratio_(*params_.get<value_double>("simplify_dp_ratio", 1.0/20.0)),
+      simplify_dp_preserve_(false),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
@@ -133,6 +134,9 @@ postgis_datasource::postgis_datasource(parameters const& params)
     simplify_geometries_ = simplify_opt && *simplify_opt;
     boost::optional<mapnik::boolean> twkb_opt = params.get<mapnik::boolean>("twkb_encoding", false);
     twkb_encoding_ = twkb_opt && *twkb_opt;
+
+    boost::optional<mapnik::boolean> simplify_preserve_opt = params.get<mapnik::boolean>("simplify_dp_preserve", false);
+    simplify_dp_preserve_ = simplify_preserve_opt && *simplify_preserve_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -765,7 +769,12 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           const double tolerance = std::min(px_gw, px_gh) * simplify_dp_ratio_;
           const double grid_tolerance = std::min(px_gw, px_gh) * simplify_snap_ratio_;
           s << ", " << grid_tolerance << ")";
-          s << ", " << tolerance << ")";
+          s << ", " << tolerance;
+          // Add parameter to ST_Simplify to keep collapsed geometries
+          if (simplify_dp_preserve_) {
+            s << ", true";
+          }
+          s << ")";
         }
 
         if ( twkb_encoding_ ) {

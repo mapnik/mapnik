@@ -304,7 +304,7 @@ private:
         // forward an appropriate number of times
         if ( has_idlist_ )
         {
-            for ( int i = 0; i < num_ids; i++ )
+            for ( unsigned int i = 0; i < num_ids; i++ )
             {
                 read_signed_integer(); // uint64_t id
             }
@@ -313,7 +313,7 @@ private:
     
     void read_coords(CoordinateArray& ar)
     {
-        for ( int i = 0; i < ar.size(); i++ )
+        for ( unsigned int i = 0; i < ar.size(); i++ )
     	{
     		// X
             coord_x_ += read_signed_integer();
@@ -354,7 +354,7 @@ private:
         {
             CoordinateArray ar(num_points);
             read_coords(ar);
-            for (int i = 0; i < ar.size(); ++i)
+            for ( unsigned int i = 0; i < ar.size(); ++i )
             {
                 std::auto_ptr<geometry_type> pt(new geometry_type(Point));
                 pt->move_to(ar[i].x, ar[i].y);
@@ -372,7 +372,7 @@ private:
             read_coords(ar);
             std::auto_ptr<geometry_type> line(new geometry_type(LineString));
             line->move_to(ar[0].x, ar[0].y);
-            for (int i = 1; i < ar.size(); ++i)
+            for ( unsigned int i = 1; i < ar.size(); ++i )
             {
                 line->line_to(ar[i].x, ar[i].y);
             }
@@ -387,7 +387,7 @@ private:
         if ( has_idlist_ )
             read_idlist(num_lines);
         
-        for (int i = 0; i < num_lines; ++i)
+        for ( unsigned int i = 0; i < num_lines; ++i )
         {
             read_linestring(paths);
         }
@@ -399,7 +399,7 @@ private:
         if (num_rings > 0)
         {
             std::auto_ptr<geometry_type> poly(new geometry_type(Polygon));
-            for (int i = 0; i < num_rings; ++i)
+            for ( unsigned int i = 0; i < num_rings; ++i )
             {
                 int num_points = read_unsigned_integer();
                 if (num_points > 0)
@@ -426,7 +426,7 @@ private:
         if ( has_idlist_ )
             read_idlist(num_polys);
         
-        for (int i = 0; i < num_polys; ++i)
+        for ( unsigned int i = 0; i < num_polys; ++i )
         {
             read_polygon(paths);
         }
@@ -439,7 +439,7 @@ private:
         if ( has_idlist_ )
             read_idlist(num_geometries);
         
-        for (int i = 0; i < num_geometries; ++i)
+        for ( unsigned int i = 0; i < num_geometries; ++i )
         {
             read(paths);
         }
