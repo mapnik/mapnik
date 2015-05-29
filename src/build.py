@@ -192,7 +192,6 @@ source = Split(
     layer.cpp
     map.cpp
     load_map.cpp
-    memory.cpp
     palette.cpp
     marker_helpers.cpp
     transform_expression_grammar.cpp
