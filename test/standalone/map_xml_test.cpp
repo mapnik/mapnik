@@ -66,17 +66,34 @@ public:
   }
 };
 
-void compare_map(bfs::path xml) {
-  tmp_dir dir;
-  mapnik::Map m(256, 256);
-  REQUIRE(m.register_fonts("fonts", true));
-  bfs::path abs_base = xml.parent_path();
+bool load_map(mapnik::Map &m, bfs::path const &path, bool strict = false, std::string base_path="") {
+  try {
+    mapnik::load_map(m, path.native(), strict, base_path);
+    return true;
 
-  // first, load the XML into a map object and save it. this
-  // is a normalisation step to ensure that the file is in
-  // whatever the current version of mapnik uses as the
-  // standard indentation, quote style, etc...
-  REQUIRE_NOTHROW(mapnik::load_map(m, xml.native(), false, abs_base.native()));
+  } catch (std::exception const &ex) {
+    // errors which come from the datasource not being loaded or
+    // database not being set up aren't really useful - they're
+    // more likely to be spurious than meaningful, so ignore them.
+    std::string what = ex.what();
+    if ((what.find("Could not create datasource") == std::string::npos) &&
+        (what.find("Postgis Plugin: could not connect to server") == std::string::npos)) {
+      throw;
+    }
+  }
+
+  return false;
+}
+
+// save a map to an XML file, load it again, save it again,
+// then check that it is exactly the same.
+void round_trip_file(mapnik::Map const &m, std::string const &base) {
+  tmp_dir dir;
+
+  // first, save the loaded XML. this is a normalisation step
+  // to ensure that the file is in whatever the current version
+  // of mapnik uses as the standard indentation, quote style,
+  // etc...
   bfs::path test_map1 = dir.path() / "mapnik-temp-map1.xml";
   REQUIRE_NOTHROW(mapnik::save_map(m, test_map1.native()));
 
@@ -84,7 +101,7 @@ void compare_map(bfs::path xml) {
   // step, and write it out again.
   mapnik::Map new_map(256, 256);
   REQUIRE(new_map.register_fonts("fonts", true));
-  REQUIRE_NOTHROW(mapnik::load_map(new_map, test_map1.native(), false, abs_base.native()));
+  REQUIRE_NOTHROW(mapnik::load_map(new_map, test_map1.native(), false, base));
   bfs::path test_map2 = dir.path() / "mapnik-temp-map2.xml";
   REQUIRE_NOTHROW(mapnik::save_map(new_map, test_map2.native()));
 
@@ -98,28 +115,46 @@ void compare_map(bfs::path xml) {
                      std::istream_iterator<char>(in_map2)));
 }
 
+// save a map to an XML string, load it again, save it again,
+// then check that it is exactly the same. this is basically the
+// same as the file-based one above, except it exercises the
+// in-memory string functions instead.
+void round_trip_str(mapnik::Map const &m, std::string const &base) {
+  tmp_dir dir;
+
+  std::string test_map1;
+  REQUIRE_NOTHROW(test_map1 = mapnik::save_map_to_string(m));
+
+  mapnik::Map new_map(256, 256);
+  REQUIRE(new_map.register_fonts("fonts", true));
+  REQUIRE_NOTHROW(mapnik::load_map_string(new_map, test_map1, false, base));
+  std::string test_map2;
+  REQUIRE_NOTHROW(test_map2 = mapnik::save_map_to_string(new_map));
+
+  // strings should be identically equal
+  REQUIRE(test_map1 == test_map2);
+}
+
+void compare_map(bfs::path xml) {
+  mapnik::Map m(256, 256);
+  REQUIRE(m.register_fonts("fonts", true));
+  bfs::path abs_base = xml.parent_path();
+
+  // if the attempt to load the map fails, then skip the test.
+  // the "good/bad" testing covers the case of what to do, so
+  // we don't need to test it again here.
+  if (load_map(m, xml, false, abs_base.native())) {
+    round_trip_str(m, abs_base.native());
+    round_trip_file(m, abs_base.native());
+  }
+}
+
 void add_xml_files(bfs::path dir, std::vector<bfs::path> &xml_files) {
   for (auto const &entry : boost::make_iterator_range(
          bfs::directory_iterator(dir), bfs::directory_iterator())) {
     auto path = entry.path();
     if (path.extension().native() == ".xml") {
       xml_files.emplace_back(path);
-    }
-  }
-}
-
-void load_map(mapnik::Map &m, bfs::path const &path) {
-  try {
-    mapnik::load_map(m, path.native());
-
-  } catch (std::exception const &ex) {
-    // errors which come from the datasource not being loaded or
-    // database not being set up aren't really useful - they're
-    // more likely to be spurious than meaningful, so ignore them.
-    std::string what = ex.what();
-    if ((what.find("Could not create datasource") == std::string::npos) &&
-        (what.find("Postgis Plugin: could not connect to server") == std::string::npos)) {
-      throw;
     }
   }
 }
