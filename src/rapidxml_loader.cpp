@@ -138,7 +138,11 @@ private:
         {
             if (cur_node->value_size() > 0) // Don't add empty text nodes
             {
-                node.add_child(cur_node->value(), 0, true);
+                // parsed text values should have leading and trailing
+                // whitespace trimmed.
+                std::string trimmed = cur_node->value();
+                mapnik::util::trim(trimmed);
+                node.add_child(trimmed.c_str(), 0, true);
             }
         }
         break;
