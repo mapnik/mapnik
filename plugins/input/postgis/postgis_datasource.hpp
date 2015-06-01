@@ -118,6 +118,7 @@ private:
     mapnik::value_double simplify_snap_ratio_;
     mapnik::value_double simplify_dp_ratio_;
     bool simplify_dp_preserve_;
+    mapnik::value_double simplify_clip_resolution_;
     int intersect_min_scale_;
     int intersect_max_scale_;
 };

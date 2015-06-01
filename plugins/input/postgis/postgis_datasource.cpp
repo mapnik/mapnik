@@ -94,6 +94,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       // See http://trac.osgeo.org/postgis/ticket/2093
       simplify_dp_ratio_(*params_.get<value_double>("simplify_dp_ratio", 1.0/20.0)),
       simplify_dp_preserve_(false),
+      simplify_clip_resolution_(*params_.get<value_double>("simplify_clip_resolution", 0.0)),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
@@ -496,20 +497,17 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
 
-    if (srid_ > 0)
-    {
-        b << "ST_SetSRID(";
-    }
-
-    b << "'BOX3D(";
+    b << "ST_MakeEnvelope(";
     b << std::setprecision(16);
-    b << env.minx() << " " << env.miny() << ",";
-    b << env.maxx() << " " << env.maxy() << ")'::box3d";
+    b << env.minx() << "," << env.miny() << ",";
+    b << env.maxx() << "," << env.maxy();
 
     if (srid_ > 0)
     {
-        b << ", " << srid_ << ")";
+        b << "," << srid_;
     }
+
+    b << ")";
 
     return b.str();
 }
@@ -747,6 +745,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         const double px_gw = 1.0 / boost::get<0>(q.resolution());
         const double px_gh = 1.0 / boost::get<1>(q.resolution());
+        const double px_sz = std::min(px_gw, px_gh);
 
         if (twkb_encoding_) {
             s << "SELECT ST_AsTWKB(";
@@ -756,19 +755,38 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         if (simplify_geometries_) {
-          s << "ST_Simplify(ST_SnapToGrid(";
+            s << "ST_Simplify(";
         }
 
+        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ < px_sz) {
+            s << "ST_ClipByBox2D(";
+        }
+
+        if (simplify_geometries_) {
+            s<< "ST_SnapToGrid(";
+        }
+
+        // Geometry column!
         s << "\"" << geometryColumn_ << "\"";
 
+        // ! ST_SnapToGrid()
         if (simplify_geometries_) {
           // 1/20 of pixel seems to be a good compromise to avoid
           // drop of collapsed polygons.
           // See https://github.com/mapnik/mapnik/issues/1639
           // See http://trac.osgeo.org/postgis/ticket/2093
-          const double tolerance = std::min(px_gw, px_gh) * simplify_dp_ratio_;
-          const double grid_tolerance = std::min(px_gw, px_gh) * simplify_snap_ratio_;
+          const double grid_tolerance = px_sz * simplify_snap_ratio_;
           s << ", " << grid_tolerance << ")";
+        }
+
+        // ! ST_ClipByBox2D()
+        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ < px_sz) {
+            s << "," << sql_bbox(box) << ")";
+        }
+
+        // ! ST_Simplify()
+        if (simplify_geometries_) {
+          const double tolerance = px_sz * simplify_dp_ratio_;
           s << ", " << tolerance;
           // Add parameter to ST_Simplify to keep collapsed geometries
           if (simplify_dp_preserve_) {
@@ -777,12 +795,13 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           s << ")";
         }
 
+        // ! ST_TWKB()
         if ( twkb_encoding_ ) {
             // Depending on where resolution falls relative to rounding levels,
             // we get a rounding to either 1 pixel down to 1/10 of a pixel.
             // (When rouding levels jump by factors of 10, hard to choose a "perfect" 
             // rounding level)
-            const double tolerance = std::min(px_gw, px_gh);
+            const double tolerance = px_sz;
             // Figure out number of decimals of rounding that implies
             if ( tolerance > 0 ) {
                 const int i = -1 * lround(log10(tolerance) + 0.5) + 1;
@@ -794,6 +813,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
                 s << ") AS geom";
             }
         }
+        // ! ST_AsBinary()
         else {
             s << ") AS geom";
         }
