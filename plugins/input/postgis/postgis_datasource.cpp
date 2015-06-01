@@ -758,7 +758,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             s << "ST_Simplify(";
         }
 
-        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ < px_sz) {
+        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
             s << "ST_ClipByBox2D(";
         }
 
@@ -780,7 +780,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         // ! ST_ClipByBox2D()
-        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ < px_sz) {
+        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
             s << "," << sql_bbox(box) << ")";
         }
 
