@@ -59,7 +59,7 @@ struct apply_vertex_placement
     {
         double label_x, label_y, z = 0;
         va.rewind(0);
-        for (auto cmd = va.vertex(&label_x, &label_y); cmd != SEG_END;)
+        for (unsigned cmd; (cmd = va.vertex(&label_x, &label_y)) != SEG_END; )
         {
             if (cmd != SEG_CLOSE)
             {
