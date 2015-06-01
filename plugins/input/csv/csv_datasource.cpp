@@ -266,21 +266,21 @@ void csv_datasource::parse_csv(T & stream,
 
     using Tokenizer = boost::tokenizer< escape_type >;
 
-    int line_number(1);
+    int line_number = 1;
     bool has_wkt_field = false;
     bool has_json_field = false;
     bool has_lat_field = false;
     bool has_lon_field = false;
-    unsigned wkt_idx(0);
-    unsigned json_idx(0);
-    unsigned lat_idx(0);
-    unsigned lon_idx(0);
+    unsigned wkt_idx = 0;
+    unsigned json_idx = 0;
+    unsigned lat_idx = 0;
+    unsigned lon_idx = 0;
 
     if (!manual_headers_.empty())
     {
         Tokenizer tok(manual_headers_, grammer);
         Tokenizer::iterator beg = tok.begin();
-        unsigned idx(0);
+        unsigned idx = 0;
         for (; beg != tok.end(); ++beg)
         {
             std::string val = mapnik::util::trim_copy(*beg);
@@ -413,7 +413,7 @@ void csv_datasource::parse_csv(T & stream,
         throw mapnik::datasource_exception("CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data");
     }
 
-    mapnik::value_integer feature_count(0);
+    mapnik::value_integer feature_count = 0;
     bool extent_started = false;
 
     std::size_t num_headers = headers_.size();
@@ -496,8 +496,8 @@ void csv_datasource::parse_csv(T & stream,
 
             // NOTE: we use ++feature_count here because feature id's should start at 1;
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,++feature_count));
-            double x(0);
-            double y(0);
+            double x = 0;
+            double y = 0;
             bool parsed_x = false;
             bool parsed_y = false;
             bool parsed_wkt = false;
