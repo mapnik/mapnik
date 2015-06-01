@@ -418,10 +418,8 @@ void csv_datasource::parse_csv(T & stream,
 
     std::size_t num_headers = headers_.size();
 
-    for (std::size_t i = 0; i < headers_.size(); ++i)
-    {
-        ctx_->push(headers_[i]);
-    }
+    std::for_each(headers_.begin(), headers_.end(),
+                  [ & ](std::string const& header){ ctx_->push(header); });
 
     mapnik::transcoder tr(desc_.get_encoding());
 
