@@ -34,9 +34,9 @@
 
 namespace mapnik
 {
-class xml_tree;
+class MAPNIK_DECL xml_tree;
 
-class xml_attribute
+class MAPNIK_DECL xml_attribute
 {
 public:
     xml_attribute(const char * value_);
@@ -44,7 +44,7 @@ public:
     mutable bool processed;
 };
 
-class node_not_found: public std::exception
+class MAPNIK_DECL node_not_found: public std::exception
 {
 public:
     node_not_found(std::string const& node_name);
@@ -56,7 +56,7 @@ protected:
     mutable std::string msg_;
 };
 
-class attribute_not_found: public std::exception
+class MAPNIK_DECL attribute_not_found: public std::exception
 {
 public:
     attribute_not_found(std::string const& node_name, std::string const& attribute_name);
@@ -69,7 +69,7 @@ protected:
     mutable std::string msg_;
 };
 
-class more_than_one_child: public std::exception
+class MAPNIK_DECL more_than_one_child: public std::exception
 {
 public:
     more_than_one_child(std::string const& node_name);
@@ -81,7 +81,7 @@ protected:
     mutable std::string msg_;
 };
 
-class xml_node
+class MAPNIK_DECL xml_node
 {
 public:
     using const_iterator = std::list<xml_node>::const_iterator;

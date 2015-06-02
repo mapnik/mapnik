@@ -28,9 +28,9 @@
 
 namespace mapnik
 {
-class xml_node;
-void read_xml(std::string const & filename, xml_node &node);
-void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path="");
+class MAPNIK_DECL xml_node;
+MAPNIK_DECL void read_xml(std::string const & filename, xml_node &node);
+MAPNIK_DECL void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path="");
 }
 
 #endif // MAPNIK_LIBXML2_LOADER_HPP

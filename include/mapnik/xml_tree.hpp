@@ -33,7 +33,7 @@
 namespace mapnik
 {
 
-class xml_tree
+class MAPNIK_DECL xml_tree
 {
 public:
     xml_tree(std::string const& encoding="utf8");
