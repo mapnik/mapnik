@@ -45,7 +45,7 @@ SECTION("test_projection_4326_3857 - Empty Geometry in Geometry Variant") {
     mapnik::projection dest("+init=epsg:3857");
     mapnik::proj_transform proj_trans(source, dest);
     {
-        geometry<double> geom(std::move(geometry_empty()));
+        geometry<double> geom = geometry_empty();
         unsigned int err = 0;
         // Test Standard Transform
         geometry<double> new_geom = reproject_copy(geom, proj_trans, err);
@@ -160,7 +160,7 @@ SECTION("test_projection_4326_3857 - Point Geometry Variant Object") {
     }
     {
         geometry<double> geom3(point<double>(-97.552175, 35.522895));
-        // Transform in place 
+        // Transform in place
         REQUIRE(reproject(geom3, proj_trans1));
         assert_g_equal(geom3, geom2);
         // Transform in place reverse - back
@@ -317,7 +317,7 @@ SECTION("test_projection_4326_3857 - Line_String Geometry Variant Object") {
         assert_g_equal(geom3, geom1);
     }
 } // End Section
-    
+
 SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
     using namespace mapnik::geometry;
     mapnik::projection source("+init=epsg:4326");
@@ -787,7 +787,7 @@ SECTION("test_projection_4326_3857 - Multi_Line_String Geometry Variant Object")
         assert_g_equal(geom3, geom1);
     }
 } // End Section
-    
+
 SECTION("test_projection_4326_3857 - Multi_Polygon Geometry Object") {
     using namespace mapnik::geometry;
     mapnik::projection source("+init=epsg:4326");
@@ -969,7 +969,7 @@ SECTION("test_projection_4326_3857 - Multi_Polygon Geometry Variant Object") {
         assert_g_equal(geom3, geom1);
     }
 } // END SECTION
-    
+
 SECTION("test_projection_4326_3857 - Geometry Collection Object") {
     using namespace mapnik::geometry;
     mapnik::projection source("+init=epsg:4326");

@@ -114,7 +114,7 @@ struct geometry_transform
         geometry_collection<V> collection_out;
         for (auto const& geom :  collection)
         {
-            collection_out.push_back(std::move((*this)(geom)));
+            collection_out.push_back((*this)(geom));
         }
         return collection_out;
     }
@@ -128,39 +128,39 @@ struct geometry_transform
     template <typename T>
     geometry<V> operator() (point<T> const& geom) const
     {
-        return std::move(transform_geometry<V>(geom, transformer_));
+        return transform_geometry<V>(geom, transformer_);
     }
-    
+
     template <typename T>
     geometry<V> operator() (line_string<T> const& geom) const
     {
-        return std::move(transform_geometry<V>(geom, transformer_));
+        return transform_geometry<V>(geom, transformer_);
     }
-    
+
     template <typename T>
     geometry<V> operator() (polygon<T> const& geom) const
     {
-        return std::move(transform_geometry<V>(geom, transformer_));
+        return transform_geometry<V>(geom, transformer_);
     }
 
     template <typename T>
     geometry<V> operator() (multi_point<T> const& geom) const
     {
-        return std::move(transform_geometry<V>(geom, transformer_));
+        return transform_geometry<V>(geom, transformer_);
     }
-    
+
     template <typename T>
     geometry<V> operator() (multi_line_string<T> const& geom) const
     {
-        return std::move(transform_geometry<V>(geom, transformer_));
+        return transform_geometry<V>(geom, transformer_);
     }
-    
+
     template <typename T>
     geometry<V> operator() (multi_polygon<T> const& geom) const
     {
-        return std::move(transform_geometry<V>(geom, transformer_));
+        return transform_geometry<V>(geom, transformer_);
     }
-    
+
     Transformer const& transformer_;
 };
 

@@ -136,12 +136,12 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
                 auto range = font_file_mapping.equal_range(name);
                 if (range.first == range.second) // the key was previously absent; insert a pair
                 {
-                    font_file_mapping.emplace_hint(range.first,name,std::move(std::make_pair(i,file_name)));
+                    font_file_mapping.emplace_hint(range.first, name, std::make_pair(i,file_name));
                 }
                 else // the key was present, replace the associated value
                 { /* some action with value range.first->second about to be overwritten here */
                     MAPNIK_LOG_WARN(font_engine_freetype) << "registering new " << name << " at '" << file_name << "'";
-                    range.first->second = std::move(std::make_pair(i,file_name)); // replace value
+                    range.first->second = std::make_pair(i,file_name); // replace value
                 }
                 success = true;
             }
@@ -340,7 +340,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
 #ifdef MAPNIK_THREADSAFE
             std::lock_guard<std::mutex> lock(mutex_);
 #endif
-            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
+            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(file.data(),file.size()));
             FT_Face face;
             FT_Error error = FT_New_Memory_Face(library.get(),
                                                 reinterpret_cast<FT_Byte const*>(result.first->second.first.get()), // data

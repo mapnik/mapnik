@@ -186,12 +186,12 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             marker_path->set_dimensions(svg.width(),svg.height());
             if (update_cache)
             {
-                auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(std::move(mapnik::marker_svg(marker_path))));
+                auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
                 return emplace_result.first->second;
             }
             else
             {
-                return std::make_shared<mapnik::marker const>(std::move(mapnik::marker_svg(marker_path)));
+                return std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path));
             }
         }
         // otherwise assume file-based
@@ -218,12 +218,12 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 marker_path->set_dimensions(svg.width(),svg.height());
                 if (update_cache)
                 {
-                    auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(std::move(mapnik::marker_svg(marker_path))));
+                    auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
                     return emplace_result.first->second;
                 }
                 else
                 {
-                    return std::make_shared<mapnik::marker const>(std::move(mapnik::marker_svg(marker_path)));
+                    return std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path));
                 }
             }
             else
@@ -240,14 +240,14 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     {
                         auto emplace_result = marker_cache_.emplace(uri,
                                 std::make_shared<mapnik::marker const>(
-                                    std::move(util::apply_visitor(detail::visitor_create_marker(), im))
+                                    util::apply_visitor(detail::visitor_create_marker(), im)
                                 ));
                         return emplace_result.first->second;
                     }
                     else
                     {
                         return std::make_shared<mapnik::marker const>(
-                                std::move(util::apply_visitor(detail::visitor_create_marker(), im))
+                            util::apply_visitor(detail::visitor_create_marker(), im)
                         );
                     }
                 }
