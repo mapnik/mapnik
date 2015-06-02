@@ -27,7 +27,7 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/make_unique.hpp>
 
 // boost

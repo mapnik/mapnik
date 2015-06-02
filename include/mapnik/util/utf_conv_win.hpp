@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,42 +20,24 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_UTIL_UTF_CONV_WIN_HPP
+#define MAPNIK_UTIL_UTF_CONV_WIN_HPP
+
 #ifdef _WINDOWS
-// windows specific methods for UTF8 from/to UTF16
-#include <mapnik/utils.hpp>
+// mapnik
+#include <mapnik/config.hpp>
+// stl
 #include <string>
-#include <vector>
-#define NOMINMAX
-#include <windows.h>
 
-namespace mapnik {
-
-std::string utf16_to_utf8(std::wstring const& wstr)
+namespace mapnik
 {
-    std::string str;
-    int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
-    if(size > 0)
-    {
-        std::vector<char> buffer(size);
-        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], size, 0, 0);
-        str.assign(buffer.begin(), buffer.end() - 1);
-    }
-    return str;
+
+// UTF8 <--> UTF16 conversion routines
+
+    MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
+    MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
+
 }
+#endif  // _WINDOWS
 
-std::wstring utf8_to_utf16 (std::string const& str)
-{
-    std::wstring wstr;
-    int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
-    if (size > 0)
-    {
-        std::vector<wchar_t> buffer(size);
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &buffer[0], size);
-        wstr.assign(buffer.begin(), buffer.end() - 1);
-    }
-    return wstr;
-}
-
-} // namespace mapnik
-
-#endif // _WINDOWS
+#endif // MAPNIK_UTIL_UTF_CONV_WIN_HPP

@@ -28,7 +28,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 
 // boost
 #pragma GCC diagnostic push

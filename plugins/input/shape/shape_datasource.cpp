@@ -37,7 +37,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geom_util.hpp>

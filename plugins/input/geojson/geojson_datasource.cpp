@@ -37,7 +37,7 @@
 // mapnik
 #include <mapnik/boolean.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/feature_kv_iterator.hpp>

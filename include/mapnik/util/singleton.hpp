@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_UTILS_HPP
-#define MAPNIK_UTILS_HPP
+#ifndef MAPNIK_UTIL_SINGLETON_HPP
+#define MAPNIK_UTIL_SINGLETON_HPP
 
 #include <mapnik/config.hpp>
 
@@ -128,24 +128,12 @@ template <typename T,
         }
     };
 
-
     template <typename T,
               template <typename U> class CreatePolicy> std::mutex singleton<T,CreatePolicy>::mutex_;
     template <typename T,
               template <typename U> class CreatePolicy> std::atomic<T*> singleton<T,CreatePolicy>::pInstance_;
     template <typename T,
-              template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
-
-
-#ifdef _WINDOWS
-
-// UTF8 <--> UTF16 conversion routines
-
-    MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
-    MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
-
-#endif  // _WINDOWS
-
+              template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_ = false;
 }
 
-#endif // MAPNIK_UTILS_HPP
+#endif // MAPNIK_UTIL_SINGLETON_HPP

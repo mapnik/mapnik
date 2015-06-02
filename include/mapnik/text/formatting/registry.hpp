@@ -23,7 +23,7 @@
 #define FORMATTING_REGISTRY_HPP
 
 // mapnik
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/util/noncopyable.hpp>

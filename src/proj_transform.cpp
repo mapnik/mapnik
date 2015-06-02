@@ -26,7 +26,6 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
-#include <mapnik/utils.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
 // proj4
@@ -233,7 +232,7 @@ unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
 {
     std::size_t size = ls.size();
     if (size == 0) return 0;
-    
+
     if (is_source_equal_dest_)
         return 0;
 
@@ -247,7 +246,7 @@ unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
         lonlat2merc(ls);
         return 0;
     }
-    
+
     geometry::point<double> * ptr = ls.data();
     double * x = reinterpret_cast<double*>(ptr);
     double * y = x + 1;
@@ -270,7 +269,7 @@ bool proj_transform::forward (box2d<double> & box) const
     double lry = box.miny();
     double lrx = box.maxx();
     double urx = box.maxx();
-    double uly = box.maxy(); 
+    double uly = box.maxy();
     double ury = box.maxy();
     double z = 0.0;
     if (!forward(llx,lly,z))
@@ -304,7 +303,7 @@ bool proj_transform::backward (box2d<double> & box) const
     double lry = box.miny();
     double lrx = box.maxx();
     double urx = box.maxx();
-    double uly = box.maxy(); 
+    double uly = box.maxy();
     double ury = box.maxy();
     double z = 0.0;
     if (!backward(llx,lly,z))
@@ -326,8 +325,7 @@ bool proj_transform::backward (box2d<double> & box) const
     return true;
 }
 
-/* Returns points in clockwise order. This allows us to do anti-meridian checks.
- */
+// Returns points in clockwise order. This allows us to do anti-meridian checks.
 void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env, int points)
 {
     double width = env.width();
@@ -358,7 +356,7 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     }
 }
 
-/* determine if an ordered sequence of coordinates is in clockwise order */
+// determine if an ordered sequence of coordinates is in clockwise order
 bool is_clockwise(const std::vector< coord<double,2> > & coords)
 {
     int n = coords.size();
@@ -385,12 +383,12 @@ box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
 }
 
 
-/* More robust, but expensive, bbox transform
- * in the face of proj4 out of bounds conditions.
- * Can result in 20 -> 10 r/s performance hit.
- * Alternative is to provide proper clipping box
- * in the target srs by setting map 'maximum-extent'
- */
+// More robust, but expensive, bbox transform
+// in the face of proj4 out of bounds conditions.
+// Can result in 20 -> 10 r/s performance hit.
+// Alternative is to provide proper clipping box
+// in the target srs by setting map 'maximum-extent'
+
 bool proj_transform::backward(box2d<double>& env, int points) const
 {
     if (is_source_equal_dest_)
@@ -413,15 +411,15 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
-    if (is_source_longlat_ && !is_clockwise(coords)) {
-        /* we've gone to a geographic CS, and our clockwise envelope has
-         * changed into an anticlockwise one. This means we've crossed the antimeridian, and
-         * need to expand the X direction to +/-180 to include all the data. Once we can deal
-         * with multiple bboxes in queries we can improve.
-         */
-         double miny = result.miny();
-         result.expand_to_include(-180.0, miny);
-         result.expand_to_include(180.0, miny);
+    if (is_source_longlat_ && !is_clockwise(coords))
+    {
+        // we've gone to a geographic CS, and our clockwise envelope has
+        // changed into an anticlockwise one. This means we've crossed the antimeridian, and
+        // need to expand the X direction to +/-180 to include all the data. Once we can deal
+        // with multiple bboxes in queries we can improve.
+        double miny = result.miny();
+        result.expand_to_include(-180.0, miny);
+        result.expand_to_include(180.0, miny);
     }
 
     env.re_center(result.center().x, result.center().y);
@@ -454,15 +452,15 @@ bool proj_transform::forward(box2d<double>& env, int points) const
 
     box2d<double> result = calculate_bbox(coords);
 
-    if (is_dest_longlat_ && !is_clockwise(coords)) {
-        /* we've gone to a geographic CS, and our clockwise envelope has
-         * changed into an anticlockwise one. This means we've crossed the antimeridian, and
-         * need to expand the X direction to +/-180 to include all the data. Once we can deal
-         * with multiple bboxes in queries we can improve.
-         */
-         double miny = result.miny();
-         result.expand_to_include(-180.0, miny);
-         result.expand_to_include(180.0, miny);
+    if (is_dest_longlat_ && !is_clockwise(coords))
+    {
+        // we've gone to a geographic CS, and our clockwise envelope has
+        // changed into an anticlockwise one. This means we've crossed the antimeridian, and
+        // need to expand the X direction to +/-180 to include all the data. Once we can deal
+        // with multiple bboxes in queries we can improve.
+        double miny = result.miny();
+        result.expand_to_include(-180.0, miny);
+        result.expand_to_include(180.0, miny);
     }
 
     env.re_center(result.center().x, result.center().y);

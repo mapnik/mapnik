@@ -24,7 +24,7 @@
 #define MAPNIK_FACTORY_HPP
 
 // mapnik
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 
 // stl
 #include <stdexcept>

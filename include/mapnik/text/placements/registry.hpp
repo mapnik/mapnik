@@ -23,7 +23,7 @@
 #define PLACEMENTS_REGISTRY_HPP
 
 // mapnik
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/util/noncopyable.hpp>
 

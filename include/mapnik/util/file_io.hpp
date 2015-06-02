@@ -24,7 +24,7 @@
 #define MAPNIK_FILE_IO_HPP
 
 // mapnik
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/util/noncopyable.hpp>
 //#include <mapnik/config.hpp>

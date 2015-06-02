@@ -25,7 +25,7 @@
 
 // mapnik (should not depend on anything that need to use this)
 #include <mapnik/config.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // std

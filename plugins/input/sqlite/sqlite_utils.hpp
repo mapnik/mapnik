@@ -31,7 +31,6 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/sql_utils.hpp>

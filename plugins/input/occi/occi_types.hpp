@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 
 // occi
 #include <occi.h>

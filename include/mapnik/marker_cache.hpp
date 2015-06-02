@@ -24,7 +24,7 @@
 #define MAPNIK_MARKER_CACHE_HPP
 
 // mapnik
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 

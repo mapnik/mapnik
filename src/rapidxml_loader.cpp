@@ -26,7 +26,6 @@
 
 // mapnik
 #include <mapnik/config_error.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
