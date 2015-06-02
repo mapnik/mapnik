@@ -55,7 +55,6 @@ private:
     datasource_cache();
     ~datasource_cache();
     std::map<std::string,std::shared_ptr<PluginInfo> > plugins_;
-    bool registered_;
     std::set<std::string> plugin_directories_;
 };
 
