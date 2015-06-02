@@ -29,7 +29,7 @@
 #include <stdexcept> // std::runtime_error
 #include <cstdlib> // std::atexit
 #include <new> // operator new
-
+#include <atomic>
 #ifdef MAPNIK_THREADSAFE
 #include <mutex>
 #endif
@@ -88,43 +88,46 @@ template <typename T,
           template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
 {
 #else
-template <typename T,
-          template <typename U> class CreatePolicy=CreateStatic> class singleton
-{
+    template <typename T,
+              template <typename U> class CreatePolicy=CreateStatic> class singleton
+    {
 #endif
-    friend class CreatePolicy<T>;
-    static T* pInstance_;
-    static bool destroyed_;
-    singleton(const singleton &rhs);
-    singleton& operator=(const singleton&);
+        friend class CreatePolicy<T>;
+        static std::atomic<T*> pInstance_;
+        static bool destroyed_;
+        singleton(const singleton &rhs);
+        singleton& operator=(const singleton&);
 
-    static void onDeadReference()
-    {
-        throw std::runtime_error("dead reference!");
-    }
+        static void onDeadReference()
+        {
+            throw std::runtime_error("dead reference!");
+        }
 
-    static void DestroySingleton()
-    {
-        CreatePolicy<T>::destroy(pInstance_);
-        pInstance_ = 0;
-        destroyed_ = true;
-    }
+        static void DestroySingleton()
+        {
+            CreatePolicy<T>::destroy(pInstance_);
+            pInstance_ = 0;
+            destroyed_ = true;
+        }
 
-protected:
+    protected:
 
 #ifdef MAPNIK_THREADSAFE
         static std::mutex mutex_;
 #endif
         singleton() {}
+
     public:
         static T& instance()
         {
-            if (! pInstance_)
+            T * tmp = pInstance_.load(std::memory_order_acquire);
+            if (tmp == nullptr)
             {
 #ifdef MAPNIK_THREADSAFE
                 std::lock_guard<std::mutex> lock(mutex_);
 #endif
-                if (! pInstance_)
+                tmp = pInstance_.load(std::memory_order_relaxed);
+                if (tmp == nullptr)
                 {
                     if (destroyed_)
                     {
@@ -133,16 +136,16 @@ protected:
                     }
                     else
                     {
-                        pInstance_ = CreatePolicy<T>::create();
-
+                        tmp = CreatePolicy<T>::create();
+                        pInstance_.store(tmp, std::memory_order_release);
                         // register destruction
                         std::atexit(&DestroySingleton);
                     }
                 }
             }
-            return *pInstance_;
+            return *tmp;
         }
-};
+    };
 
 #ifdef MAPNIK_THREADSAFE
     template <typename T,
@@ -150,7 +153,7 @@ protected:
 #endif
 
     template <typename T,
-              template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
+              template <typename U> class CreatePolicy> std::atomic<T*> singleton<T,CreatePolicy>::pInstance_;
     template <typename T,
               template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
 
@@ -159,8 +162,8 @@ protected:
 
 // UTF8 <--> UTF16 conversion routines
 
-MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
-MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
+    MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
+    MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
 
 #endif  // _WINDOWS
 
