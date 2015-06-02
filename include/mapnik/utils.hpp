@@ -29,6 +29,7 @@
 #include <stdexcept> // std::runtime_error
 #include <cstdlib> // std::atexit
 #include <new> // operator new
+#include <type_traits>
 #include <atomic>
 #ifdef MAPNIK_THREADSAFE
 #include <mutex>
@@ -55,26 +56,13 @@ template <typename T>
 class CreateStatic
 {
 private:
-    union MaxAlign
-    {
-        char t_[sizeof(T)];
-        short int shortInt_;
-        int int_;
-        long int longInt_;
-        float float_;
-        double double_;
-        long double longDouble_;
-        struct Test;
-        int Test::* pMember_;
-        int (Test::*pMemberFn_)(int);
-    };
-
+    typename std::aligned_storage<sizeof(T), alignof(T)>::type storage_type;
 public:
 
     static T* create()
     {
-        static MaxAlign staticMemory;
-        return new(&staticMemory) T;
+        static storage_type static_memory;
+        return new(&static_memory) T;
     }
     static void destroy(volatile T* obj)
     {
