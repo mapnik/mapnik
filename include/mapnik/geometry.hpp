@@ -52,7 +52,7 @@ struct point
     }
     friend inline bool operator!= (point<T> const& a, point <T> const& b)
     {
-        return a.x != b.x  || a.y != b.y; 
+        return a.x != b.x  || a.y != b.y;
     }
     value_type x;
     value_type y;
@@ -74,7 +74,7 @@ struct line_string : std::vector<point<T> >
 };
 
 template <typename T>
-struct linear_ring : line_string<T> 
+struct linear_ring : line_string<T>
 {
     linear_ring() = default;
     linear_ring(std::size_t size)
@@ -87,7 +87,7 @@ struct linear_ring : line_string<T>
     linear_ring(line_string<T> const& other)
         : line_string<T>(other) {}
     linear_ring& operator=(linear_ring const&) = default;
-            
+
 };
 
 template <typename T>
@@ -96,6 +96,7 @@ struct polygon
     linear_ring<T> exterior_ring;
     std::vector<linear_ring<T>> interior_rings;
 
+    polygon() = default;
     inline void set_exterior_ring(linear_ring<T> && ring)
     {
         exterior_ring = std::move(ring);
