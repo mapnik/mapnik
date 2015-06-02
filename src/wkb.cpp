@@ -124,72 +124,72 @@ public:
         switch (type)
         {
         case wkbPoint:
-            geom = std::move(read_point());
+            geom = read_point();
             break;
         case wkbLineString:
-            geom = std::move(read_linestring());
+            geom = read_linestring();
             break;
         case wkbPolygon:
-            geom = std::move(read_polygon());
+            geom = read_polygon();
             break;
         case wkbMultiPoint:
-            geom = std::move(read_multipoint());
+            geom = read_multipoint();
             break;
         case wkbMultiLineString:
-            geom = std::move(read_multilinestring());
+            geom = read_multilinestring();
             break;
         case wkbMultiPolygon:
-            geom = std::move(read_multipolygon());
+            geom = read_multipolygon();
             break;
         case wkbGeometryCollection:
-            geom = std::move(read_collection());
+            geom = read_collection();
             break;
         case wkbPointZ:
         case wkbPointM:
-            geom = std::move(read_point<true>());
+            geom = read_point<true>();
             break;
         case wkbPointZM:
-            geom = std::move(read_point<true,true>());
+            geom = read_point<true,true>();
             break;
         case wkbLineStringZ:
         case wkbLineStringM:
-            geom = std::move(read_linestring<true>());
+            geom = read_linestring<true>();
             break;
         case wkbLineStringZM:
-            geom = std::move(read_linestring<true,true>());
+            geom = read_linestring<true,true>();
             break;
         case wkbPolygonZ:
         case wkbPolygonM:
-            geom = std::move(read_polygon<true>());
+            geom = read_polygon<true>();
             break;
         case wkbPolygonZM:
-            geom = std::move(read_polygon<true,true>());
+            geom = read_polygon<true,true>();
             break;
         case wkbMultiPointZ:
         case wkbMultiPointM:
-            geom = std::move(read_multipoint<true>());
+            geom = read_multipoint<true>();
             break;
         case wkbMultiPointZM:
-            geom = std::move(read_multipoint<true,true>());
+            geom = read_multipoint<true,true>();
             break;
         case wkbMultiLineStringZ:
         case wkbMultiLineStringM:
-            geom = std::move(read_multilinestring<true>());
+            geom = read_multilinestring<true>();
             break;
         case wkbMultiLineStringZM:
-            geom = std::move(read_multilinestring<true,true>());
+            geom = read_multilinestring<true,true>();
             break;
         case wkbMultiPolygonZ:
         case wkbMultiPolygonM:
-            geom = std::move(read_multipolygon<true>());
+            geom = read_multipolygon<true>();
             break;
         case wkbMultiPolygonZM:
-            geom = std::move(read_multipolygon<true,true>());
+            geom = read_multipolygon<true,true>();
             break;
         case wkbGeometryCollectionZ:
         case wkbGeometryCollectionM:
         case wkbGeometryCollectionZM:
-            geom = std::move(read_collection());
+            geom = read_collection();
             break;
         default:
             break;
@@ -307,7 +307,7 @@ private:
         for (int i = 0; i < num_lines; ++i)
         {
             pos_ += 5;
-            multi_line.push_back(std::move(read_linestring<M, Z>()));
+            multi_line.push_back(read_linestring<M, Z>());
         }
         return multi_line;
     }
@@ -345,7 +345,7 @@ private:
         for (int i = 0; i < num_polys; ++i)
         {
             pos_ += 5;
-            multi_poly.push_back(std::move(read_polygon<M, Z>()));
+            multi_poly.push_back(read_polygon<M, Z>());
         }
         return multi_poly;
     }
@@ -357,7 +357,7 @@ private:
         for (int i = 0; i < num_geometries; ++i)
         {
             pos_ += 1; // skip byte order
-            collection.push_back(std::move(read()));
+            collection.push_back(read());
          }
         return collection;
      }

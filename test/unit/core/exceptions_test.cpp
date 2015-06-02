@@ -54,7 +54,7 @@ SECTION("handling") {
     mapnik::Map map(256,256);
     mapnik::rule r;
     r.set_filter(mapnik::parse_expression("[foo]='bar'"));
-    r.append(std::move(mapnik::markers_symbolizer()));
+    r.append(mapnik::markers_symbolizer());
     mapnik::feature_type_style style;
     style.add_rule(std::move(r));
     map.insert_style("style", std::move(style));

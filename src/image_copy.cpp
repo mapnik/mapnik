@@ -42,8 +42,8 @@ template <typename T0>
 struct visitor_image_copy
 {
     using dst_type = typename T0::pixel_type;
-    
-    T0 operator() (image_null const&) 
+
+    T0 operator() (image_null const&)
     {
         throw std::runtime_error("Can not cast a null image");
     }
@@ -52,7 +52,7 @@ struct visitor_image_copy
     {
         return T0(src);
     }
-    
+
     template <typename T1>
     T0 operator() (T1 const& src)
     {
@@ -69,7 +69,7 @@ struct visitor_image_copy
                 {
                     dst(x,y) = std::numeric_limits<dst_type>::min();
                 }
-                catch(positive_overflow&) 
+                catch(positive_overflow&)
                 {
                     dst(x,y) = std::numeric_limits<dst_type>::max();
                 }
@@ -83,11 +83,11 @@ template <typename T0>
 struct visitor_image_copy_so
 {
     using dst_type = typename T0::pixel_type;
-    
+
     visitor_image_copy_so(double offset, double scaling)
         : offset_(offset), scaling_(scaling) {}
 
-    T0 operator() (image_null const&) 
+    T0 operator() (image_null const&)
     {
         throw std::runtime_error("Can not cast a null image");
     }
@@ -101,12 +101,12 @@ struct visitor_image_copy_so
         else
         {
             T0 dst(src);
-            dst.set_scaling(scaling_); 
-            dst.set_offset(offset_); 
+            dst.set_scaling(scaling_);
+            dst.set_offset(offset_);
             return T0(std::move(dst));
         }
     }
-    
+
     template <typename T1>
     T0 operator() (T1 const& src)
     {
@@ -129,7 +129,7 @@ struct visitor_image_copy_so
                 {
                     dst(x,y) = std::numeric_limits<dst_type>::min();
                 }
-                catch(positive_overflow&) 
+                catch(positive_overflow&)
                 {
                     dst(x,y) = std::numeric_limits<dst_type>::max();
                 }
@@ -327,27 +327,27 @@ MAPNIK_DECL image_any image_copy(image_any const& data, image_dtype type, double
     switch (type)
     {
         case image_dtype_rgba8:
-            return image_any(std::move(image_copy<image_rgba8>(data, offset, scaling)));
+            return image_any(image_copy<image_rgba8>(data, offset, scaling));
         case image_dtype_gray8:
-            return image_any(std::move(image_copy<image_gray8>(data, offset, scaling)));
+            return image_any(image_copy<image_gray8>(data, offset, scaling));
         case image_dtype_gray8s:
-            return image_any(std::move(image_copy<image_gray8s>(data, offset, scaling)));
+            return image_any(image_copy<image_gray8s>(data, offset, scaling));
         case image_dtype_gray16:
-            return image_any(std::move(image_copy<image_gray16>(data, offset, scaling)));
+            return image_any(image_copy<image_gray16>(data, offset, scaling));
         case image_dtype_gray16s:
-            return image_any(std::move(image_copy<image_gray16s>(data, offset, scaling)));
+            return image_any(image_copy<image_gray16s>(data, offset, scaling));
         case image_dtype_gray32:
-            return image_any(std::move(image_copy<image_gray32>(data, offset, scaling)));
+            return image_any(image_copy<image_gray32>(data, offset, scaling));
         case image_dtype_gray32s:
-            return image_any(std::move(image_copy<image_gray32s>(data, offset, scaling)));
+            return image_any(image_copy<image_gray32s>(data, offset, scaling));
         case image_dtype_gray32f:
-            return image_any(std::move(image_copy<image_gray32f>(data, offset, scaling)));
+            return image_any(image_copy<image_gray32f>(data, offset, scaling));
         case image_dtype_gray64:
-            return image_any(std::move(image_copy<image_gray64>(data, offset, scaling)));
+            return image_any(image_copy<image_gray64>(data, offset, scaling));
         case image_dtype_gray64s:
-            return image_any(std::move(image_copy<image_gray64s>(data, offset, scaling)));
+            return image_any(image_copy<image_gray64s>(data, offset, scaling));
         case image_dtype_gray64f:
-            return image_any(std::move(image_copy<image_gray64f>(data, offset, scaling)));
+            return image_any(image_copy<image_gray64f>(data, offset, scaling));
         case image_dtype_null:
             throw std::runtime_error("Can not cast a null image");
         case IMAGE_DTYPE_MAX:

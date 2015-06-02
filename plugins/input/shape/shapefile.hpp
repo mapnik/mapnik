@@ -72,8 +72,8 @@ template <typename Tag>
 struct shape_record
 {
     typename Tag::data_type data;
-    size_t size;
-    mutable size_t pos;
+    std::size_t size;
+    mutable std::size_t pos;
 
     explicit shape_record(size_t size_)
         : data(Tag::alloc(size_)),
@@ -129,6 +129,8 @@ struct shape_record
     {
         return (size - pos);
     }
+
+    std::size_t length() {return size;}
 };
 
 class shape_file : mapnik::util::noncopyable

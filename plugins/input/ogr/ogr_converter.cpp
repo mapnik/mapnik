@@ -107,8 +107,7 @@ mapnik::geometry::multi_line_string<double> ogr_converter::convert_multilinestri
     geom.reserve(num_geometries);
     for (int i = 0; i < num_geometries; ++i)
     {
-        geom.emplace_back(std::move(
-            convert_linestring(static_cast<OGRLineString*>(ogr_geom->getGeometryRef(i)))));
+        geom.emplace_back(convert_linestring(static_cast<OGRLineString*>(ogr_geom->getGeometryRef(i))));
     }
     return geom;
 }
@@ -150,8 +149,7 @@ mapnik::geometry::multi_polygon<double> ogr_converter::convert_multipolygon(OGRM
     geom.reserve(num_geometries);
     for (int i = 0; i < num_geometries; ++i)
     {
-        geom.emplace_back(std::move(
-            convert_polygon(static_cast<OGRPolygon*>(ogr_geom->getGeometryRef(i)))));
+        geom.emplace_back(convert_polygon(static_cast<OGRPolygon*>(ogr_geom->getGeometryRef(i))));
     }
     return geom;
 }
@@ -166,7 +164,7 @@ mapnik::geometry::geometry_collection<double> ogr_converter::convert_collection(
         OGRGeometry* g = ogr_geom->getGeometryRef(i);
         if (g != nullptr)
         {
-            geom.emplace_back(std::move(convert_geometry(g)));
+            geom.emplace_back(convert_geometry(g));
         }
     }
     return geom;

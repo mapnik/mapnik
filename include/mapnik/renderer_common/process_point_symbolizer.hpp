@@ -46,9 +46,9 @@ void render_point_symbolizer(point_symbolizer const &sym,
 {
     std::string filename = get<std::string,keys::file>(sym,feature, common.vars_);
     std::shared_ptr<mapnik::marker const> mark = filename.empty()
-       ? std::make_shared<mapnik::marker const>(std::move(mapnik::marker_rgba8()))
+       ? std::make_shared<mapnik::marker const>(mapnik::marker_rgba8())
        : marker_cache::instance().find(filename, true);
-    
+
     if (!mark->is<mapnik::marker_null>())
     {
         value_double opacity = get<value_double,keys::opacity>(sym, feature, common.vars_);

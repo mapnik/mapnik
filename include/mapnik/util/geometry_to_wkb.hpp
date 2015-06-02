@@ -141,7 +141,7 @@ wkb_buffer_ptr point_wkb( geometry::point<double> const& pt, wkbByteOrder byte_o
     write(ss, pt.x, 8, byte_order);
     write(ss, pt.y, 8, byte_order);
     assert(ss.good());
-    return std::move(wkb);
+    return wkb;
 }
 
 wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByteOrder byte_order)
@@ -161,7 +161,7 @@ wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByt
         write(ss, pt.y, 8, byte_order);
     }
     assert(ss.good());
-    return std::move(wkb);
+    return wkb;
 }
 
 wkb_buffer_ptr polygon_wkb( geometry::polygon<double> const& poly, wkbByteOrder byte_order)
@@ -199,7 +199,7 @@ wkb_buffer_ptr polygon_wkb( geometry::polygon<double> const& poly, wkbByteOrder 
     }
 
     assert(ss.good());
-    return std::move(wkb);
+    return wkb;
 }
 
 wkb_buffer_ptr multi_point_wkb( geometry::multi_point<double> const& multi_pt, wkbByteOrder byte_order)
@@ -218,7 +218,7 @@ wkb_buffer_ptr multi_point_wkb( geometry::multi_point<double> const& multi_pt, w
         write(ss, pt.y, 8, byte_order);
     }
     assert(ss.good());
-    return std::move(wkb);
+    return wkb;
 }
 
 
@@ -296,7 +296,7 @@ wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte
         ss.write(wkb->buffer(), wkb->size());
     }
 
-    return std::move(multi_wkb);
+    return multi_wkb;
 }
 } // ns detail
 
@@ -305,7 +305,7 @@ using wkb_buffer_ptr = detail::wkb_buffer_ptr;
 template<typename GeometryType>
 wkb_buffer_ptr to_wkb(GeometryType const& geom, wkbByteOrder byte_order )
 {
-    return std::move(detail::geometry_to_wkb(byte_order)(geom));
+    return detail::geometry_to_wkb(byte_order)(geom);
 }
 
 }}
