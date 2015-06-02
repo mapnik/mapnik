@@ -109,12 +109,9 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
     }
     else
     {
-        std::vector<int> parts(num_parts);
-        for (int i = 0; i < num_parts; ++i)
-        {
-            parts[i] = record.read_ndr_integer();
-        }
-
+        std::vector<int> parts;
+        parts.resize(num_parts);
+        std::for_each(parts.begin(), parts.end(), [&](int & part) { part = record.read_ndr_integer();});
         int start, end;
         mapnik::geometry::multi_line_string<double> multi_line;
         for (int k = 0; k < num_parts; ++k)
