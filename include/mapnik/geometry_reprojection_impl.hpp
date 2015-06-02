@@ -161,7 +161,7 @@ geometry_collection<T> reproject_internal(geometry_collection<T> const & c, proj
     for (auto const& g : c)
     {
 
-        geometry<T> new_g(std::move(reproject_copy(g, proj_trans, n_err)));
+        geometry<T> new_g(reproject_copy(g, proj_trans, n_err));
         if (!new_g.template is<geometry_empty>())
         {
             new_c.emplace_back(std::move(new_g));
