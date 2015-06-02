@@ -151,21 +151,18 @@ mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_typ
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
 
-    std::vector<int> parts(num_parts);
-
-    for (int i = 0; i < num_parts; ++i)
-    {
-        parts[i] = record.read_ndr_integer();
-    }
-
-    mapnik::geometry::multi_polygon<double> multi_poly;
+    std::vector<int> parts;
+    parts.resize(num_parts);
+    std::for_each(parts.begin(), parts.end(), [&](int & part) { part = record.read_ndr_integer();});
     mapnik::geometry::polygon<double> poly;
+    mapnik::geometry::multi_polygon<double> multi_poly;
     for (int k = 0; k < num_parts; ++k)
     {
         int start = parts[k];
         int end;
         if (k == num_parts - 1) end = num_points;
         else end = parts[k + 1];
+
         mapnik::geometry::linear_ring<double> ring;
         ring.reserve(end - start);
         for (int j = start; j < end; ++j)
@@ -189,11 +186,14 @@ mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_typ
             poly.add_hole(std::move(ring));
         }
     }
+
     if (multi_poly.size() > 0) // multi
     {
         multi_poly.emplace_back(std::move(poly));
         geom = std::move(multi_poly);
-    } else {
+    }
+    else
+    {
         geom = std::move(poly);
     }
     mapnik::geometry::correct(geom);
