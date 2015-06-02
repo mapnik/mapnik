@@ -32,6 +32,7 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 
 // stl
 #include <iostream>
