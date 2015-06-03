@@ -36,9 +36,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/box2d.hpp> // for box2d
-
-// boost
-#include <boost/bind.hpp>
+#include <functional>
 
 #include <cstdint>
 
@@ -229,27 +227,27 @@ mapnik::raster_ptr pgraster_wkb_reader::read_indexed(mapnik::box2d<double> const
       // mapnik does not support signed anyway
     case PT_8BUI:
       return read_data_band(bbox, width_, height_, hasnodata,
-                     boost::bind(read_uint8, &ptr_));
+                     std::bind(read_uint8, &ptr_));
       break;
     case PT_16BSI:
       // mapnik does not support signed anyway
     case PT_16BUI:
       return read_data_band(bbox, width_, height_, hasnodata,
-                     boost::bind(read_uint16, &ptr_, endian_));
+                     std::bind(read_uint16, &ptr_, endian_));
       break;
     case PT_32BSI:
       // mapnik does not support signed anyway
     case PT_32BUI:
       return read_data_band(bbox, width_, height_, hasnodata,
-                     boost::bind(read_uint32, &ptr_, endian_));
+                     std::bind(read_uint32, &ptr_, endian_));
       break;
     case PT_32BF:
       return read_data_band(bbox, width_, height_, hasnodata,
-                     boost::bind(read_float32, &ptr_, endian_));
+                     std::bind(read_float32, &ptr_, endian_));
       break;
     case PT_64BF:
       return read_data_band(bbox, width_, height_, hasnodata,
-                     boost::bind(read_float64, &ptr_, endian_));
+                     std::bind(read_float64, &ptr_, endian_));
       break;
     default:
       std::ostringstream err;
@@ -320,19 +318,19 @@ mapnik::raster_ptr pgraster_wkb_reader::read_grayscale(mapnik::box2d<double> con
       // mapnik does not support signed anyway
     case PT_8BUI:
       return read_grayscale_band(bbox, width_, height_, hasnodata,
-                          boost::bind(read_uint8, &ptr_));
+                          std::bind(read_uint8, &ptr_));
       break;
     case PT_16BSI:
       // mapnik does not support signed anyway
     case PT_16BUI:
       return read_grayscale_band(bbox, width_, height_, hasnodata,
-                          boost::bind(read_uint16, &ptr_, endian_));
+                          std::bind(read_uint16, &ptr_, endian_));
       break;
     case PT_32BSI:
       // mapnik does not support signed anyway
     case PT_32BUI:
       return read_grayscale_band(bbox, width_, height_, hasnodata,
-                          boost::bind(read_uint32, &ptr_, endian_));
+                          std::bind(read_uint32, &ptr_, endian_));
       break;
     default:
       std::ostringstream err;
