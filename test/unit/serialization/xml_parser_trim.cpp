@@ -4,6 +4,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_loader.hpp>
+#include <mapnik/attribute.hpp>
 
 TEST_CASE("xml parser") {
 
