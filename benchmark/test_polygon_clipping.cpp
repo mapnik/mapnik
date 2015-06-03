@@ -19,7 +19,6 @@
 // agg
 #include "agg_conv_clip_polygon.h"
 // clipper
-#include "clipper.hpp"
 #include "agg_path_storage.h"
 // rendering
 #include "agg_basics.h"
@@ -307,6 +306,8 @@ public:
     }
 };
 
+/*
+Commented out section because clipper moved out of mapnik core.
 inline void process_polynode_branch(ClipperLib::PolyNode* polynode,
                              mapnik::geometry::multi_polygon<double> & mp)
 {
@@ -491,6 +492,7 @@ public:
         return valid;
     }
 };
+*/
 
 int main(int argc, char** argv)
 {
@@ -518,9 +520,11 @@ int main(int argc, char** argv)
         test3 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with boost");
     }
+    /*
     {
         test4 test_runner(params,wkt_in,clipping_box);
         run(test_runner,"clipping polygon with clipper_tree");
     }
+    */
     return 0;
 }
