@@ -23,6 +23,9 @@
 #ifndef MAPNIK_XML_NODE_H
 #define MAPNIK_XML_NODE_H
 
+//mapnik
+#include <mapnik/config.hpp> // for MAPNIK_DECL
+
 //boost
 #include <boost/optional.hpp>
 

@@ -23,6 +23,9 @@
 #ifndef MAPNIK_LIBXML2_LOADER_HPP
 #define MAPNIK_LIBXML2_LOADER_HPP
 
+// mapnik
+#include <mapnik/config.hpp> // for MAPNIK_DECL
+
 // stl
 #include <string>
 

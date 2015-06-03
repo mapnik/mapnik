@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <mapnik/debug.hpp>
+#include <mapnik/value.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_loader.hpp>
 
