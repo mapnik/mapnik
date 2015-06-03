@@ -143,7 +143,7 @@ private:
     std::string xml_base_path_;
 };
 
-//#include <mapnik/internal/dump_xml.hpp>
+
 void load_map(Map & map, std::string const& filename, bool strict, std::string base_path)
 {
     // TODO - use xml encoding?
@@ -152,7 +152,6 @@ void load_map(Map & map, std::string const& filename, bool strict, std::string b
     read_xml(filename, tree.root());
     map_parser parser(map, strict, filename);
     parser.parse_map(map, tree.root(), base_path);
-    //dump_xml(tree.root());
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string base_path)
