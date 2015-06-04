@@ -63,7 +63,6 @@ csv_datasource::csv_datasource(parameters const& params)
     extent_(),
     filename_(),
     inline_string_(),
-    file_length_(0),
     row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
     features_(),
     escape_(*params.get<std::string>("escape", "")),
@@ -144,18 +143,29 @@ csv_datasource::csv_datasource(parameters const& params)
 
 csv_datasource::~csv_datasource() { }
 
+namespace detail {
+
+template <typename T>
+std::size_t file_length(T & stream)
+{
+    stream.seekg(0, std::ios::end);
+    return stream.tellg();
+}
+
+} // ns detail
+
 template <typename T>
 void csv_datasource::parse_csv(T & stream,
                                std::string const& escape,
                                std::string const& separator,
                                std::string const& quote)
 {
-    stream.seekg(0, std::ios::end);
-    file_length_ = stream.tellg();
+
+    auto file_length = detail::file_length(stream);
 
     if (filesize_max_ > 0)
     {
-        double file_mb = static_cast<double>(file_length_)/1048576;
+        double file_mb = static_cast<double>(file_length)/1048576;
 
         // throw if this is an unreasonably large file to read into memory
         if (file_mb > filesize_max_)
@@ -173,7 +183,7 @@ void csv_datasource::parse_csv(T & stream,
     // autodetect newlines
     char newline = '\n';
     bool has_newline = false;
-    for (unsigned lidx = 0; lidx < file_length_ && lidx < 4000; lidx++)
+    for (unsigned lidx = 0; lidx < file_length && lidx < 4000; ++lidx)
     {
         char c = static_cast<char>(stream.get());
         if (c == '\r')
@@ -959,7 +969,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
 
 mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 {
-    const std::set<std::string>& attribute_names = q.property_names();
+    std::set<std::string> const& attribute_names = q.property_names();
     std::set<std::string>::const_iterator pos = attribute_names.begin();
     while (pos != attribute_names.end())
     {

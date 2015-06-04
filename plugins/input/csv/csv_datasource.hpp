@@ -64,7 +64,6 @@ private:
     mapnik::box2d<double> extent_;
     std::string filename_;
     std::string inline_string_;
-    unsigned file_length_;
     mapnik::value_integer row_limit_;
     std::deque<mapnik::feature_ptr> features_;
     std::string escape_;
