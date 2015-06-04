@@ -160,9 +160,7 @@ void csv_datasource::parse_csv(T & stream,
                                std::string const& separator,
                                std::string const& quote)
 {
-
     auto file_length = detail::file_length(stream);
-
     if (filesize_max_ > 0)
     {
         double file_mb = static_cast<double>(file_length)/1048576;
@@ -261,11 +259,11 @@ void csv_datasource::parse_csv(T & stream,
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
                           << "' quo: '" << quo << "' esc: '" << esc << "'";
 
-    boost::escaped_list_separator<char> grammer;
+    boost::escaped_list_separator<char> grammar;
     try
     {
-        //  grammer = boost::escaped_list_separator<char>('\\', ',', '\"');
-        grammer = boost::escaped_list_separator<char>(esc, sep, quo);
+        //  grammar = boost::escaped_list_separator<char>('\\', ',', '\"');
+        grammar = boost::escaped_list_separator<char>(esc, sep, quo);
     }
     catch(std::exception const& ex)
     {
@@ -288,7 +286,7 @@ void csv_datasource::parse_csv(T & stream,
 
     if (!manual_headers_.empty())
     {
-        Tokenizer tok(manual_headers_, grammer);
+        Tokenizer tok(manual_headers_, grammar);
         Tokenizer::iterator beg = tok.begin();
         unsigned idx = 0;
         for (; beg != tok.end(); ++beg)
@@ -333,7 +331,7 @@ void csv_datasource::parse_csv(T & stream,
         {
             try
             {
-                Tokenizer tok(csv_line, grammer);
+                Tokenizer tok(csv_line, grammar);
                 Tokenizer::iterator beg = tok.begin();
                 std::string val;
                 if (beg != tok.end())
@@ -476,7 +474,7 @@ void csv_datasource::parse_csv(T & stream,
                 csv_utils::fix_json_quoting(csv_line);
             }
 
-            Tokenizer tok(csv_line, grammer);
+            Tokenizer tok(csv_line, grammar);
             Tokenizer::iterator beg = tok.begin();
 
             unsigned num_fields = std::distance(beg,tok.end());
