@@ -1662,6 +1662,15 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
         {
             if (node.is_text())
             {
+                // suppress warnings about whitespace text nodes, since
+                // whitespace text nodes are now left in the tree. see
+                // https://github.com/mapnik/mapnik/pull/2878#issuecomment-108728845
+                // for the discussion.
+                if (mapnik::util::is_whitespace(node.text()))
+                {
+                    return;
+                }
+
                 error_message += "\n* text '" + node.text();
             }
             else

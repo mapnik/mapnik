@@ -108,6 +108,11 @@ csv_datasource::csv_datasource(parameters const& params)
     if (inline_string)
     {
         inline_string_ = *inline_string;
+        // trim inline strings, primarily to get rid of whitespace at
+        // the beginning left by the XML parser. see
+        // https://github.com/mapnik/mapnik/pull/2878#issuecomment-108728845
+        // for the discussion of this.
+        mapnik::util::trim(inline_string_);
     }
     else
     {
