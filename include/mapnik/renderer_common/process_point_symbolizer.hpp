@@ -69,16 +69,24 @@ void render_point_symbolizer(point_symbolizer const &sym,
 
         mapnik::geometry::geometry<double> const& geometry = feature.get_geometry();
         mapnik::geometry::point<double> pt;
-        if (placement == CENTROID_POINT_PLACEMENT)
+        geometry::geometry_types type = geometry::geometry_type(geometry);
+        if (placement == CENTROID_POINT_PLACEMENT ||
+            type == geometry::geometry_types::Point ||
+            type == geometry::geometry_types::MultiPoint)
         {
             if (!geometry::centroid(geometry, pt)) return;
         }
-        else if (mapnik::geometry::geometry_type(geometry) == mapnik::geometry::geometry_types::Polygon)
+        else if (type == mapnik::geometry::geometry_types::Polygon)
         {
             auto const& poly = mapnik::util::get<geometry::polygon<double> >(geometry);
             geometry::polygon_vertex_adapter<double> va(poly);
             if (!label::interior_position(va ,pt.x, pt.y))
                 return;
+        }
+        else
+        {
+            MAPNIK_LOG_WARN(point_symbolizer) << "TODO: unhandled geometry type for point symbolizer";
+            return;
         }
         double x = pt.x;
         double y = pt.y;
