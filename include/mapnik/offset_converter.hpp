@@ -246,8 +246,8 @@ private:
      */
     void displace(vertex2d & v, double a) const
     {
-        v.x += offset_ * std::sin(a);
-        v.y -= offset_ * std::cos(a);
+        v.x -= offset_ * std::sin(a);
+        v.y += offset_ * std::cos(a);
     }
 
     /**
@@ -255,8 +255,8 @@ private:
      */
     void displace(vertex2d & v, vertex2d const& u, double a) const
     {
-        v.x = u.x + offset_ * std::sin(a);
-        v.y = u.y - offset_ * std::cos(a);
+        v.x = u.x - offset_ * std::sin(a);
+        v.y = u.y + offset_ * std::cos(a);
         v.cmd = u.cmd;
     }
 
@@ -265,8 +265,8 @@ private:
         double sa = offset_ * std::sin(a);
         double ca = offset_ * std::cos(a);
         double h = std::tan(0.5 * (b - a));
-        v.x = v.x + sa + h * ca;
-        v.y = v.y - ca + h * sa;
+        v.x = v.x - sa - h * ca;
+        v.y = v.y + ca - h * sa;
     }
 
     status init_vertices()
@@ -276,12 +276,36 @@ private:
             return status_;
         }
 
+        vertex2d v0(vertex2d::no_init);
         vertex2d v1(vertex2d::no_init);
         vertex2d v2(vertex2d::no_init);
         vertex2d w(vertex2d::no_init);
-
+        vertex2d start_v2(vertex2d::no_init);
+        std::vector<vertex2d> close_points;
+        bool is_polygon = false;
+        int cpt = 0;
+        v0.cmd = geom_.vertex(&v0.x, &v0.y);
+        v1.x = v0.x;
+        v1.y = v0.y;
+        v1.cmd = v0.cmd;
+        while ((v0.cmd = geom_.vertex(&v0.x, &v0.y)) != SEG_END)
+        {
+            if (v0.cmd == SEG_CLOSE)
+            {
+                is_polygon = true;
+                close_points.push_back(vertex2d(v1.x, v1.y, v1.cmd));
+            }       
+            v1.x = v0.x;
+            v1.y = v0.y;
+            v1.cmd = v0.cmd;
+        }
+        geom_.rewind(0);
+        
         v1.cmd = geom_.vertex(&v1.x, &v1.y);
         v2.cmd = geom_.vertex(&v2.x, &v2.y);
+        v0.cmd = v1.cmd;
+        v0.x = v1.x;
+        v0.y = v1.y;
 
         if (v2.cmd == SEG_END) // not enough vertices in source
         {
@@ -289,25 +313,121 @@ private:
         }
 
         double angle_a = 0;
+        if (is_polygon) 
+        {
+            double x = v1.x - close_points[cpt].x;
+            double y = v1.y - close_points[cpt].y;
+            cpt++;
+            x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0 : x; 
+            y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0 : y; 
+            angle_a = std::atan2(y, x);
+        }
         double angle_b = std::atan2((v2.y - v1.y), (v2.x - v1.x));
         double joint_angle;
 
-        // first vertex
-        displace(v1, angle_b);
-        push_vertex(v1);
+        if (!is_polygon)
+        {
+            // first vertex
+            displace(v1, angle_b);
+            push_vertex(v1);
+        }
+        else
+        {
+            joint_angle = explement_reflex_angle(angle_b - angle_a);
+
+            double half_turns = half_turn_segments_ * std::fabs(joint_angle);
+            int bulge_steps = 0;
+
+            if (offset_ > 0.0)
+            {
+                if (joint_angle > 0.0)
+                {
+                    joint_angle = joint_angle - 2 * M_PI;
+                }
+                else
+                {
+                    bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                }
+            }
+            else
+            {
+                if (joint_angle < 0.0)
+                {
+                    joint_angle = joint_angle + 2 * M_PI;
+                }
+                else
+                {
+                    bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                }
+            }
+            if (bulge_steps == 0)
+            {
+                displace2(v1, angle_a, angle_b);
+                push_vertex(v1);
+            }
+            else
+            {
+                displace(v1, angle_b);
+                push_vertex(v1);
+            }
+        }
 
         // Sometimes when the first segment is too short, it causes ugly
         // curls at the beginning of the line. To avoid this, we make up
         // a fake vertex two offset-lengths before the first, and expect
         // intersection detection smoothes it out.
-        pre_first_ = v1;
-        displace(pre_first_, -2 * std::fabs(offset_), 0, angle_b);
-        start_ = pre_first_;
-        while ((v1 = v2, v2.cmd = geom_.vertex(&v2.x, &v2.y)) != SEG_END)
+        if (!is_polygon)
         {
+            pre_first_ = v1;
+            displace(pre_first_, -2 * std::fabs(offset_), 0, angle_b);
+            start_ = pre_first_;
+        }
+        else
+        {
+            pre_first_ = v0;
+            start_ = pre_first_;
+        }
+        start_v2.x = v2.x;
+        start_v2.y = v2.y;
+        bool continue_loop = true;
+        while (continue_loop)
+        {
+            v1.cmd = v2.cmd;
+            v1.x = v2.x;
+            v1.y = v2.y;
+            v2.cmd = geom_.vertex(&v2.x, &v2.y);
+            if (v1.cmd == SEG_MOVETO)
+            {
+                if (is_polygon)
+                {
+                    v1.x = start_.x;
+                    v1.y = start_.y;
+                    if (cpt < close_points.size())
+                    {
+                        double x = v1.x - close_points[cpt].x;
+                        double y = v1.y - close_points[cpt].y;
+                        x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0 : x; 
+                        y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0 : y; 
+                        angle_b = std::atan2(y,x);
+                        cpt++;
+                    }
+                }
+                start_v2.x = v2.x;
+                start_v2.y = v2.y;
+            }
             if (v2.cmd == SEG_MOVETO)
             {
-                start_ = v2;
+                start_.x = v2.x;
+                start_.y = v2.y;
+                v2.x = start_v2.x;
+                v2.y = start_v2.y;
+            }
+            else if (v2.cmd == SEG_END)
+            {
+                if (!is_polygon) break;
+                continue_loop = false;
+                v2.x = start_v2.x;
+                v2.y = start_v2.y;
             }
             else if (v2.cmd == SEG_CLOSE)
             {
@@ -321,7 +441,7 @@ private:
             double half_turns = half_turn_segments_ * std::fabs(joint_angle);
             int bulge_steps = 0;
 
-            if (offset_ < 0.0)
+            if (offset_ > 0.0)
             {
                 if (joint_angle > 0.0)
                 {
@@ -360,24 +480,50 @@ private:
                     << " degrees ((< with " << bulge_steps << " segments";
             }
             #endif
-
-            displace(w, v1, angle_a);
-            push_vertex(w);
-
-            for (int s = 0; ++s < bulge_steps;)
+            if (v1.cmd == SEG_MOVETO)
             {
-                displace(w, v1, angle_a + (joint_angle * s) / bulge_steps);
-                push_vertex(w);
+                if (bulge_steps == 0)
+                {
+                    displace2(v1, angle_a, angle_b);
+                    push_vertex(v1);
+                }
+                else
+                {
+                    displace(v1, angle_b);
+                    push_vertex(v1);
+                }
             }
+            else
+            {
+                if (bulge_steps == 0)
+                {
+                    displace2(v1, angle_a, angle_b);
+                    push_vertex(v1);
+                }
+                else
+                {
+                    displace(w, v1, angle_a);
+                    w.cmd = SEG_LINETO;
+                    push_vertex(w);
 
-            displace(v1, angle_b);
-            push_vertex(v1);
+                    for (int s = 0; ++s < bulge_steps;)
+                    {
+                        displace(w, v1, angle_a + (joint_angle * s) / bulge_steps);
+                        w.cmd = SEG_LINETO;
+                        push_vertex(w);
+                    }
+                    displace(v1, angle_b);
+                    push_vertex(v1);
+                }
+            }
         }
 
         // last vertex
-        displace(v1, angle_b);
-        push_vertex(v1);
-
+        if (!is_polygon)
+        {
+            displace(v1, angle_b);
+            push_vertex(v1);
+        }
         // initialization finished
         return status_ = process;
     }
