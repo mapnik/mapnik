@@ -29,6 +29,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/vertex.hpp>
+#include <mapnik/vertex_cache.hpp>
 
 // stl
 #include <cmath>
@@ -275,12 +276,12 @@ private:
         {
             return status_;
         }
-
         vertex2d v0(vertex2d::no_init);
         vertex2d v1(vertex2d::no_init);
         vertex2d v2(vertex2d::no_init);
         vertex2d w(vertex2d::no_init);
         vertex2d start_v2(vertex2d::no_init);
+        std::vector<vertex2d> points;
         std::vector<vertex2d> close_points;
         bool is_polygon = false;
         int cpt = 0;
@@ -288,21 +289,25 @@ private:
         v1.x = v0.x;
         v1.y = v0.y;
         v1.cmd = v0.cmd;
+        // PUSH INITIAL
+        points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
         while ((v0.cmd = geom_.vertex(&v0.x, &v0.y)) != SEG_END)
         {
+            points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
             if (v0.cmd == SEG_CLOSE)
             {
                 is_polygon = true;
                 close_points.push_back(vertex2d(v1.x, v1.y, v1.cmd));
-            }       
+            }
             v1.x = v0.x;
             v1.y = v0.y;
             v1.cmd = v0.cmd;
         }
-        geom_.rewind(0);
-        
-        v1.cmd = geom_.vertex(&v1.x, &v1.y);
-        v2.cmd = geom_.vertex(&v2.x, &v2.y);
+        // Push SEG_END
+        points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
+        std::size_t i = 0;
+        v1 = points[i++];
+        v2 = points[i++];
         v0.cmd = v1.cmd;
         v0.x = v1.x;
         v0.y = v1.y;
@@ -390,12 +395,10 @@ private:
         start_v2.x = v2.x;
         start_v2.y = v2.y;
         bool continue_loop = true;
-        while (continue_loop)
+        while (i < points.size())
         {
-            v1.cmd = v2.cmd;
-            v1.x = v2.x;
-            v1.y = v2.y;
-            v2.cmd = geom_.vertex(&v2.x, &v2.y);
+            v1 = v2;
+            v2 = points[i++];
             if (v1.cmd == SEG_MOVETO)
             {
                 if (is_polygon)
@@ -406,8 +409,8 @@ private:
                     {
                         double x = v1.x - close_points[cpt].x;
                         double y = v1.y - close_points[cpt].y;
-                        x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0 : x; 
-                        y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0 : y; 
+                        x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0.0 : x; 
+                        y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0.0 : y; 
                         angle_b = std::atan2(y,x);
                         cpt++;
                     }
