@@ -46,7 +46,7 @@ struct MAPNIK_DECL offset_converter
     offset_converter(Geometry & geom)
         : geom_(geom)
         , offset_(0.0)
-        , threshold_(8.0)
+        , threshold_(6.0)
         , half_turn_segments_(16)
         , status_(initial)
         , pre_first_(vertex2d::no_init)
