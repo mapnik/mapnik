@@ -24,12 +24,11 @@
 #define MAPNIK_MARKER_HELPERS_HPP
 
 #include <mapnik/feature.hpp>
-#include <mapnik/color.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/geometry_centroid.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/marker.hpp> // for svg_storage_type
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/attribute.hpp>
@@ -46,8 +45,6 @@
 namespace mapnik {
 
 struct clip_poly_tag;
-
-namespace svg { struct path_attributes; }
 
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
