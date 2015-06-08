@@ -173,7 +173,7 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     // set back to start
-    stream.seekg(0, std::ios::beg);
+    stream.seekg(0);
 
     // autodetect newlines
     char newline = '\n';
@@ -195,7 +195,7 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     // set back to start
-    stream.seekg(0, std::ios::beg);
+    stream.seekg(0);
 
     // get first line
     std::string csv_line;
@@ -243,7 +243,7 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     // set back to start
-    stream.seekg(0, std::ios::beg);
+    stream.seekg(0);
 
     using escape_type = boost::escaped_list_separator<char>;
 
