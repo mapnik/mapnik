@@ -129,6 +129,7 @@ private:
     void find_unused_nodes_recursive(xml_node const& node, std::string & error_text);
     std::string ensure_relative_to_xml(boost::optional<std::string> const& opt_path);
     void ensure_exists(std::string const& file_path);
+    void check_styles(Map const & map) const throw (config_error);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
                                               std::string const& name);
 
@@ -143,7 +144,7 @@ private:
     std::string xml_base_path_;
 };
 
-//#include <mapnik/internal/dump_xml.hpp>
+
 void load_map(Map & map, std::string const& filename, bool strict, std::string base_path)
 {
     // TODO - use xml encoding?
@@ -152,7 +153,6 @@ void load_map(Map & map, std::string const& filename, bool strict, std::string b
     read_xml(filename, tree.root());
     map_parser parser(map, strict, filename);
     parser.parse_map(map, tree.root(), base_path);
-    //dump_xml(tree.root());
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string base_path)
@@ -328,6 +328,10 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
         throw config_error("Not a map file. Node 'Map' not found.");
     }
     find_unused_nodes(node);
+    if (strict_)
+    {
+        check_styles(map);
+    }
 }
 
 void map_parser::parse_map_include(Map & map, xml_node const& node)
@@ -1681,6 +1685,21 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
         for (auto const& child_node : node)
         {
             find_unused_nodes_recursive(child_node, error_message);
+        }
+    }
+}
+
+void map_parser::check_styles(Map const & map) const throw (config_error)
+{
+    for (auto const & layer : map.layers())
+    {
+        for (auto const & style : layer.styles())
+        {
+            if (!map.find_style(style))
+            {
+                throw config_error("Unable to process some data while parsing '" + filename_ +
+                    "': Style '" + style + "' required for layer '" + layer.name() + "'.");
+            }
         }
     }
 }

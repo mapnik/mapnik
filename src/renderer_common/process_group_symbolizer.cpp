@@ -37,6 +37,15 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
       comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
 {}
 
+vector_marker_render_thunk::vector_marker_render_thunk(vector_marker_render_thunk && rhs)
+  : src_(std::move(rhs.src_)),
+    attrs_(std::move(rhs.attrs_)),
+    tr_(std::move(rhs.tr_)),
+    opacity_(std::move(rhs.opacity_)),
+    comp_op_(std::move(rhs.comp_op_)),
+    snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
+
+
 raster_marker_render_thunk::raster_marker_render_thunk(image_rgba8 const& src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
@@ -45,6 +54,14 @@ raster_marker_render_thunk::raster_marker_render_thunk(image_rgba8 const& src,
     : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
       snap_to_pixels_(snap_to_pixels)
 {}
+
+raster_marker_render_thunk::raster_marker_render_thunk(raster_marker_render_thunk && rhs)
+      : src_(rhs.src_),
+        tr_(std::move(rhs.tr_)),
+        opacity_(std::move(rhs.opacity_)),
+        comp_op_(std::move(rhs.comp_op_)),
+        snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
+
 
 text_render_thunk::text_render_thunk(helper_ptr && helper,
                                      double opacity, composite_mode_e comp_op,
@@ -55,6 +72,13 @@ text_render_thunk::text_render_thunk(helper_ptr && helper,
       comp_op_(comp_op),
       halo_rasterizer_(halo_rasterizer)
 {}
+
+text_render_thunk::text_render_thunk(text_render_thunk && rhs)
+      : helper_(std::move(rhs.helper_)),
+        placements_(std::move(rhs.placements_)),
+        opacity_(std::move(rhs.opacity_)),
+        comp_op_(std::move(rhs.comp_op_)),
+        halo_rasterizer_(std::move(rhs.halo_rasterizer_)) {}
 
 namespace detail {
 

@@ -2,7 +2,10 @@
 #include "catch.hpp"
 
 #include <libxml/parser.h> // for xmlInitParser(), xmlCleanupParser()
+
+#if defined(HAVE_CAIRO)
 #include <cairo.h>
+#endif
 #include <unicode/uclean.h>
 
 #ifdef MAPNIK_USE_PROJ4
@@ -17,8 +20,10 @@ int main (int argc, char* const argv[])
     // http://xmlsoft.org/xmlmem.html
     xmlCleanupParser();
 
+#if defined(HAVE_CAIRO)
     // http://cairographics.org/manual/cairo-Error-handling.html#cairo-debug-reset-static-data
     cairo_debug_reset_static_data();
+#endif
 
     // http://icu-project.org/apiref/icu4c/uclean_8h.html#a93f27d0ddc7c196a1da864763f2d8920
     u_cleanup();
