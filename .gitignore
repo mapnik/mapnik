@@ -18,6 +18,7 @@ bindings/python/mapnik/paths.py
 config.cache
 config.log
 config.py
+mapnik-settings.env
 mason_packages/
 .mason/
 .sconf_temp/

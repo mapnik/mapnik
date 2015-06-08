@@ -1,5 +1,8 @@
 
-#if defined(HAVE_TIFF)
+// disabled on windows due to https://github.com/mapnik/mapnik/issues/2838
+// TODO - get to the bottom of why including `tiff_reader.cpp` breaks windows
+// or re-write image_readers to allow `#include tiff_reader.hpp`
+#if !defined(_MSC_VER) && defined(HAVE_TIFF)
 
 #include "catch.hpp"
 

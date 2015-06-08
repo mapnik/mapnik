@@ -7,7 +7,6 @@ subdirs =  {
   'sparsehash':'sparsehash',
   'sparsehash/internal':'sparsehash/internal',
   '../agg/include':'agg',
-  '../clipper/include':'agg'
 }
 
 if 'install' in COMMAND_LINE_TARGETS:
