@@ -43,6 +43,7 @@ benchmarks = [
     "test_font_registration.cpp",
     "test_rendering.cpp",
     "test_rendering_shared_map.cpp",
+    "test_offset_converter.cpp",
 #    "test_numeric_cast_vs_static_cast.cpp",
 ]
 for cpp_test in benchmarks:
