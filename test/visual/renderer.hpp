@@ -33,7 +33,9 @@
 // mapnik
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
+#endif
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_image_util.hpp>
@@ -140,6 +142,7 @@ struct svg_renderer : renderer_base<std::string>
 };
 #endif
 
+#if defined(GRID_RENDERER)
 struct grid_renderer : renderer_base<mapnik::image_rgba8>
 {
     static constexpr const char * name = "grid";
@@ -186,6 +189,7 @@ struct grid_renderer : renderer_base<mapnik::image_rgba8>
         return image;
     }
 };
+#endif
 
 template <typename Renderer>
 class renderer

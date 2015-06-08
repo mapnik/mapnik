@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/marker_helpers.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 
 #include "agg_ellipse.h"
 #include "agg_color_rgba.h"
