@@ -53,7 +53,8 @@ struct image_dispatcher
                           double scale_x, double scale_y,
                           scaling_method_e method, double filter_factor,
                           double opacity, composite_mode_e comp_op,
-                          raster_symbolizer const& sym, feature_impl const& feature, F & composite, boost::optional<double> const& nodata)
+                          raster_symbolizer const& sym, feature_impl const& feature,
+                          F & composite, boost::optional<double> const& nodata, bool scale)
         : start_x_(start_x),
           start_y_(start_y),
           width_(width),
@@ -67,25 +68,40 @@ struct image_dispatcher
         sym_(sym),
         feature_(feature),
         composite_(composite),
-        nodata_(nodata) {}
+        nodata_(nodata),
+        scale_(scale) {}
 
     void operator() (image_null const& data_in) const {}  //no-op
     void operator() (image_rgba8 const& data_in) const
     {
-        image_rgba8 data_out(width_, height_, true, true);
-        scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
-        composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
+        if (scale_)
+        {
+            image_rgba8 data_out(width_, height_, true, true);
+            scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
+            composite_(data_out, comp_op_, opacity_, start_x_, start_y_);
+        }
+        else
+        {
+            composite_(data_in, comp_op_, opacity_, start_x_, start_y_);
+        }
     }
 
     template <typename T>
     void operator() (T const& data_in) const
     {
         using image_type = T;
-        image_type data_out(width_, height_);
-        scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
         image_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
-        if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        if (scale_)
+        {
+            image_type data_out(width_, height_);
+            scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
+            if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        }
+        else
+        {
+            if (colorizer) colorizer->colorize(dst, data_in, nodata_, feature_);
+        }
         premultiply_alpha(dst);
         composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
@@ -104,6 +120,7 @@ private:
     feature_impl const& feature_;
     composite_function & composite_;
     boost::optional<double> const& nodata_;
+    bool scale_;
 };
 
 template <typename F>
@@ -231,24 +248,15 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
                 double image_ratio_x = ext.width() / source->data_.width();
                 double image_ratio_y = ext.height() / source->data_.height();
                 double eps = 1e-5;
-                if ( (std::fabs(image_ratio_x - 1.0) <= eps) &&
-                     (std::fabs(image_ratio_y - 1.0) <= eps) &&
-                     (std::abs(start_x) <= eps) &&
-                     (std::abs(start_y) <= eps) )
-                {
-                    if (source->data_.is<image_rgba8>())
-                    {
-                        composite(util::get<image_rgba8>(source->data_), comp_op, opacity, start_x, start_y);
-                    }
-                }
-                else
-                {
-                    detail::image_dispatcher<F> dispatcher(start_x, start_y, raster_width, raster_height,
-                                                                image_ratio_x, image_ratio_y,
-                                                                scaling_method, source->get_filter_factor(),
-                                                                opacity, comp_op, sym, feature, composite, source->nodata());
-                    util::apply_visitor(dispatcher, source->data_);
-                }
+                bool scale = (std::fabs(image_ratio_x - 1.0) > eps) ||
+                     (std::fabs(image_ratio_y - 1.0) > eps) ||
+                     (std::abs(start_x) > eps) ||
+                     (std::abs(start_y) > eps);
+                detail::image_dispatcher<F> dispatcher(start_x, start_y, raster_width, raster_height,
+                                                            image_ratio_x, image_ratio_y,
+                                                            scaling_method, source->get_filter_factor(),
+                                                            opacity, comp_op, sym, feature, composite, source->nodata(), scale);
+                util::apply_visitor(dispatcher, source->data_);
             }
         }
     }
