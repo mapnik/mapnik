@@ -74,7 +74,7 @@ void test_simple_segment(double const &offset)
 {
     fake_path path = {0, 0, 1, 0}, off_path = {0, offset, 1, offset};
     mapnik::offset_converter<fake_path> off_path_new(path);
-    off_path_new.set_offset(-offset);
+    off_path_new.set_offset(offset);
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
@@ -116,7 +116,7 @@ void test_straight_line(double const &offset) {
     fake_path path = {0, 0, 1, 0, 9, 0, 10, 0},
         off_path = {0, offset, 1, offset, 9, offset, 10, offset};
     mapnik::offset_converter<fake_path> off_path_new(path);
-    off_path_new.set_offset(-offset);
+    off_path_new.set_offset(offset);
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
@@ -166,7 +166,7 @@ void test_offset_curve(double const &offset) {
 
     fake_path path(pos), off_path(off_pos);
     mapnik::offset_converter<fake_path> off_path_new(path);
-    off_path_new.set_offset(-offset);
+    off_path_new.set_offset(offset);
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
@@ -222,7 +222,7 @@ void test_s_shaped_curve(double const &offset) {
 
     fake_path path(pos), off_path(off_pos);
     mapnik::offset_converter<fake_path> off_path_new(path);
-    off_path_new.set_offset(-offset);
+    off_path_new.set_offset(offset);
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
