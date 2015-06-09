@@ -90,8 +90,10 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
         clipping_extent.pad(padding);
     }
     using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
-                                                   offset_transform_tag, affine_transform_tag,
-                                                   simplify_tag, smooth_tag, dash_tag, stroke_tag>;
+                                                   affine_transform_tag,
+                                                   simplify_tag, smooth_tag,
+                                                   offset_transform_tag,
+                                                   dash_tag, stroke_tag>;
 
     vertex_converter_type converter(clipping_extent,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
