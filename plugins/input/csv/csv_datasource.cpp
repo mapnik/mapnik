@@ -152,7 +152,46 @@ std::size_t file_length(T & stream)
     return stream.tellg();
 }
 
+std::string detect_separator(std::string const& str)
+{
+    std::string separator = ","; // default
+    int num_commas = std::count(str.begin(), str.end(), ',');
+    // detect tabs
+    int num_tabs = std::count(str.begin(), str.end(), '\t');
+    if (num_tabs > 0)
+    {
+        if (num_tabs > num_commas)
+        {
+            separator = "\t";
+
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
+        }
+    }
+    else // pipes
+    {
+        int num_pipes = std::count(str.begin(), str.end(), '|');
+        if (num_pipes > num_commas)
+        {
+            separator = "|";
+
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
+        }
+        else // semicolons
+        {
+            int num_semicolons = std::count(str.begin(), str.end(), ';');
+            if (num_semicolons > num_commas)
+            {
+                separator = ";";
+                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
+            }
+        }
+    }
+    return separator;
+}
+
 } // ns detail
+
+
 
 template <typename T>
 void csv_datasource::parse_csv(T & stream,
@@ -209,40 +248,7 @@ void csv_datasource::parse_csv(T & stream,
     std::string sep = mapnik::util::trim_copy(separator);
     if (sep.empty())
     {
-        // default to ','
-        sep = ",";
-        int num_commas = std::count(csv_line.begin(), csv_line.end(), ',');
-        // detect tabs
-        int num_tabs = std::count(csv_line.begin(), csv_line.end(), '\t');
-        if (num_tabs > 0)
-        {
-            if (num_tabs > num_commas)
-            {
-                sep = "\t";
-
-                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
-            }
-        }
-        else // pipes
-        {
-            int num_pipes = std::count(csv_line.begin(), csv_line.end(), '|');
-            if (num_pipes > num_commas)
-            {
-                sep = "|";
-
-                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
-            }
-            else // semicolons
-            {
-                int num_semicolons = std::count(csv_line.begin(), csv_line.end(), ';');
-                if (num_semicolons > num_commas)
-                {
-                    sep = ";";
-
-                    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
-                }
-            }
-        }
+        sep = detail::detect_separator(csv_line);
     }
 
     // set back to start
