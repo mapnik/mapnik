@@ -47,7 +47,7 @@ struct MAPNIK_DECL offset_converter
     offset_converter(Geometry & geom)
         : geom_(geom)
         , offset_(0.0)
-        , threshold_(6.0)
+        , threshold_(5.0)
         , half_turn_segments_(16)
         , status_(initial)
         , pre_first_(vertex2d::no_init)
@@ -238,8 +238,8 @@ private:
      */
     static void displace(vertex2d & v, double dx, double dy, double a)
     {
-        v.x += dx * std::cos(a) - dy * std::sin(a);
-        v.y += dx * std::sin(a) + dy * std::cos(a);
+        v.x += dx * std::cos(a) + dy * std::sin(a);
+        v.y += dx * std::sin(a) - dy * std::cos(a);
     }
 
     /**
@@ -247,8 +247,8 @@ private:
      */
     void displace(vertex2d & v, double a) const
     {
-        v.x -= offset_ * std::sin(a);
-        v.y += offset_ * std::cos(a);
+        v.x += offset_ * std::sin(a);
+        v.y -= offset_ * std::cos(a);
     }
 
     /**
@@ -256,8 +256,8 @@ private:
      */
     void displace(vertex2d & v, vertex2d const& u, double a) const
     {
-        v.x = u.x - offset_ * std::sin(a);
-        v.y = u.y + offset_ * std::cos(a);
+        v.x = u.x + offset_ * std::sin(a);
+        v.y = u.y - offset_ * std::cos(a);
         v.cmd = u.cmd;
     }
 
@@ -266,8 +266,8 @@ private:
         double sa = offset_ * std::sin(a);
         double ca = offset_ * std::cos(a);
         double h = std::tan(0.5 * (b - a));
-        v.x = v.x - sa - h * ca;
-        v.y = v.y + ca - h * sa;
+        v.x = v.x + sa + h * ca;
+        v.y = v.y - ca + h * sa;
     }
 
     status init_vertices()
@@ -343,7 +343,7 @@ private:
             double half_turns = half_turn_segments_ * std::fabs(joint_angle);
             int bulge_steps = 0;
 
-            if (offset_ > 0.0)
+            if (offset_ < 0.0)
             {
                 if (joint_angle > 0.0)
                 {
@@ -444,7 +444,7 @@ private:
             double half_turns = half_turn_segments_ * std::fabs(joint_angle);
             int bulge_steps = 0;
 
-            if (offset_ > 0.0)
+            if (offset_ < 0.0)
             {
                 if (joint_angle > 0.0)
                 {
