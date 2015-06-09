@@ -47,7 +47,7 @@ struct MAPNIK_DECL offset_converter
     offset_converter(Geometry & geom)
         : geom_(geom)
         , offset_(0.0)
-        , threshold_(8.0)
+        , threshold_(5.0)
         , half_turn_segments_(16)
         , status_(initial)
         , pre_first_(vertex2d::no_init)
@@ -266,13 +266,13 @@ private:
         double sa = offset_ * std::sin(a);
         double ca = offset_ * std::cos(a);
         double h = std::tan(0.5 * (b - a));
-        if (h > 3.0)
+        if (h > 1.5)
         {
-            h = 3.0;
+            h = 1.5;
         }
-        else if (h < -3.0)
+        else if (h < -1.5)
         {
-            h = -3.0;
+            h = -1.5;
         }
         v.x = v.x + sa + h * ca;
         v.y = v.y - ca + h * sa;
