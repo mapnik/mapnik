@@ -24,8 +24,8 @@
 #include "csv_utils.hpp"
 
 // boost
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -43,7 +43,7 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value_types.hpp>
-
+#include <mapnik/csv/csv_grammar.hpp>
 // stl
 #include <sstream>
 #include <fstream>
@@ -56,6 +56,25 @@ using mapnik::datasource;
 using mapnik::parameters;
 
 DATASOURCE_PLUGIN(csv_datasource)
+
+namespace mapnik {
+
+//static const csv_file_grammar<char const*> g;
+static const csv_line_grammar<char const*> line_g;
+
+csv_line parse_line(std::string & line_str, std::string const& separator)
+{
+    csv_line values;
+    auto start = line_str.c_str();
+    auto end   = start + line_str.length();
+    boost::spirit::standard::blank_type blank;
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank, values))
+    {
+        throw std::runtime_error("Failed to parse CSV line:\n" + line_str);
+    }
+    return values;
+}
+}
 
 csv_datasource::csv_datasource(parameters const& params)
   : datasource(params),
@@ -241,7 +260,7 @@ void csv_datasource::parse_csv(T & stream,
 
     // get first line
     std::string csv_line;
-    std::getline(stream,csv_line,newline);
+    std::getline(stream,csv_line,stream.widen(newline));
 
     // if user has not passed a separator manually
     // then attempt to detect by reading first line
@@ -265,21 +284,6 @@ void csv_datasource::parse_csv(T & stream,
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
                           << "' quo: '" << quo << "' esc: '" << esc << "'";
 
-    boost::escaped_list_separator<char> grammar;
-    try
-    {
-        //  grammar = boost::escaped_list_separator<char>('\\', ',', '\"');
-        grammar = boost::escaped_list_separator<char>(esc, sep, quo);
-    }
-    catch(std::exception const& ex)
-    {
-        std::string s("CSV Plugin: ");
-        s += ex.what();
-        throw mapnik::datasource_exception(s);
-    }
-
-    using Tokenizer = boost::tokenizer< escape_type >;
-
     int line_number = 1;
     bool has_wkt_field = false;
     bool has_json_field = false;
@@ -292,12 +296,11 @@ void csv_datasource::parse_csv(T & stream,
 
     if (!manual_headers_.empty())
     {
-        Tokenizer tok(manual_headers_, grammar);
-        Tokenizer::iterator beg = tok.begin();
         unsigned idx = 0;
-        for (; beg != tok.end(); ++beg)
+        auto headers =  mapnik::parse_line(manual_headers_, sep);
+        for (auto const& header : headers)
         {
-            std::string val = mapnik::util::trim_copy(*beg);
+            std::string val = mapnik::util::trim_copy(header);
             std::string lower_val = val;
             std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
             if (lower_val == "wkt"
@@ -333,18 +336,14 @@ void csv_datasource::parse_csv(T & stream,
     }
     else // parse first line as headers
     {
-        while (std::getline(stream,csv_line,newline))
+        while (std::getline(stream,csv_line,stream.widen(newline)))
         {
             try
             {
-                Tokenizer tok(csv_line, grammar);
-                Tokenizer::iterator beg = tok.begin();
-                std::string val;
-                if (beg != tok.end())
-                    val = mapnik::util::trim_copy(*beg);
-
+                auto headers = mapnik::parse_line(csv_line, sep);
                 // skip blank lines
-                if (val.empty())
+                std::string val;
+                if (headers.size() > 0 && headers[0].empty())
                 {
                     // do nothing
                     ++line_number;
@@ -352,10 +351,10 @@ void csv_datasource::parse_csv(T & stream,
                 else
                 {
                     int idx = -1;
-                    for (; beg != tok.end(); ++beg)
+                    for (auto const& header : headers)
                     {
                         ++idx;
-                        val = mapnik::util::trim_copy(*beg);
+                        val = mapnik::util::trim_copy(header);
                         if (val.empty())
                         {
                             if (strict_)
@@ -448,7 +447,7 @@ void csv_datasource::parse_csv(T & stream,
             is_first_row = true;
         }
     }
-    while (std::getline(stream,csv_line,newline) || is_first_row)
+    while (std::getline(stream,csv_line, stream.widen(newline)) || is_first_row)
     {
         is_first_row = false;
         if ((row_limit_ > 0) && (line_number > row_limit_))
@@ -480,10 +479,9 @@ void csv_datasource::parse_csv(T & stream,
                 csv_utils::fix_json_quoting(csv_line);
             }
 
-            Tokenizer tok(csv_line, grammar);
-            Tokenizer::iterator beg = tok.begin();
+            auto values =  mapnik::parse_line(csv_line, sep);
 
-            unsigned num_fields = std::distance(beg,tok.end());
+            unsigned num_fields = values.size();
             if (num_fields > num_headers)
             {
                 std::ostringstream s;
@@ -498,6 +496,11 @@ void csv_datasource::parse_csv(T & stream,
                 s << "CSV Plugin: # of headers("
                   << num_headers << ") > # of columns("
                   << num_fields << ") parsed for row " << line_number << "\n";
+                s << "[" << csv_line + "] sep=" << sep << "\n";
+                for (auto const& v : values)
+                {
+                    std::cerr << v << std::endl;
+                }
                 if (strict_)
                 {
                     throw mapnik::datasource_exception(s.str());
@@ -508,8 +511,10 @@ void csv_datasource::parse_csv(T & stream,
                 }
             }
 
+            auto beg = values.begin();
+            auto end = values.end();
             // NOTE: we use ++feature_count here because feature id's should start at 1;
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,++feature_count));
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, ++feature_count));
             double x = 0;
             double y = 0;
             bool parsed_x = false;
@@ -522,7 +527,7 @@ void csv_datasource::parse_csv(T & stream,
                 std::string fld_name(headers_.at(i));
                 collected.push_back(fld_name);
                 std::string value;
-                if (beg == tok.end()) // there are more headers than column values for this row
+                if (beg == end) // there are more headers than column values for this row
                 {
                     // add an empty string here to represent a missing value
                     // not using null type here since nulls are not a csv thing
