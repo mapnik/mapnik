@@ -472,16 +472,7 @@ void csv_datasource::parse_csv(T & stream,
 
         try
         {
-            // special handling for varieties of quoting that we will enounter with json
-            // TODO - test with custom "quo" option
-#if 0 // TODO - remove
-            if (has_json_field && (quo == "\"") && (std::count(csv_line.begin(), csv_line.end(), '"') >= 6))
-            {
-                csv_utils::fix_json_quoting(csv_line);
-            }
-#endif
             auto values =  mapnik::parse_line(csv_line, sep);
-
             unsigned num_fields = values.size();
             if (num_fields > num_headers)
             {
