@@ -129,15 +129,29 @@ struct geometry_collection;
 
 struct geometry_empty {};
 
+
 template <typename T>
-using geometry = mapnik::util::variant<geometry_empty,
-                                       point<T>,
-                                       line_string<T>,
-                                       polygon<T>,
-                                       multi_point<T>,
-                                       multi_line_string<T>,
-                                       multi_polygon<T>,
-                                       mapnik::util::recursive_wrapper<geometry_collection<T> > >;
+using geometry_base = mapnik::util::variant<geometry_empty,
+                                            point<T>,
+                                            line_string<T>,
+                                            polygon<T>,
+                                            multi_point<T>,
+                                            multi_line_string<T>,
+                                            multi_polygon<T>,
+                                            mapnik::util::recursive_wrapper<geometry_collection<T> > >;
+template <typename T>
+struct geometry : geometry_base<T>
+{
+    using value_type = T;
+
+    geometry()
+        : geometry_base<T>() {} // empty
+
+    template <typename G>
+    geometry(G && geom)
+        : geometry_base<T>(std::forward<G>(geom)) {}
+
+};
 
 template <typename T>
 struct geometry_collection : std::vector<geometry<T>> {};
