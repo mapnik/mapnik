@@ -298,6 +298,10 @@ void read_grayscale_band(mapnik::raster_ptr raster,
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
       val = reader();
+      // Apply harse type clipping rules ala GDAL
+      if ( val < 0 ) val = 0;
+      if ( val > 255 ) val = 255;
+      // Calculate pixel offset
       off = y * width * ps + x * ps;
       // Pixel space is RGBA, fill all w/ same value for Grey
       data[off+0] = val;
