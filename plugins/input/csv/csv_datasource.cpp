@@ -154,7 +154,7 @@ csv_datasource::csv_datasource(parameters const& params)
         {
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
         }
-        parse_csv(in,escape_, separator_, quote_);
+        parse_csv(in, escape_, separator_, quote_);
         in.close();
     }
 }
