@@ -141,7 +141,7 @@ csv_datasource::csv_datasource(parameters const& params)
     if (!inline_string_.empty())
     {
         std::istringstream in(inline_string_);
-        parse_csv(in,escape_, separator_, quote_);
+        parse_csv(in, escape_, separator_, quote_);
     }
     else
     {
@@ -474,11 +474,12 @@ void csv_datasource::parse_csv(T & stream,
         {
             // special handling for varieties of quoting that we will enounter with json
             // TODO - test with custom "quo" option
+#if 0 // TODO - remove
             if (has_json_field && (quo == "\"") && (std::count(csv_line.begin(), csv_line.end(), '"') >= 6))
             {
                 csv_utils::fix_json_quoting(csv_line);
             }
-
+#endif
             auto values =  mapnik::parse_line(csv_line, sep);
 
             unsigned num_fields = values.size();

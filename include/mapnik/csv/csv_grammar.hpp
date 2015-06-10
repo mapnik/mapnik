@@ -41,11 +41,15 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi
     csv_line_grammar() : csv_line_grammar::base_type(line)
     {
         using namespace qi;
+        qi::_a_type _a;
         qi::_r1_type _r1;
         qi::lit_type lit;
-        qi::eol_type eol;
+        //qi::eol_type eol;
+        qi::_val_type _val;
+        qi::_1_type _1;
         qi::char_type char_;
-
+        qi::eps_type eps;
+        qi::omit_type omit;
         unesc_char.add
             ("\\a", '\a')
             ("\\b", '\b')
@@ -55,24 +59,26 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi
             ("\\t", '\t')
             ("\\v", '\v')
             ("\\\\",'\\')
-            //("\\\'", '\')
+            ("\\\'", '\'')
             ("\\\"", '\"')
+            ("\"\"", '\"') // double quote
             ;
 
-        line   = column(_r1) % char_(_r1)
+        line = column(_r1) % char_(_r1)
             ;
         column = quoted | *(char_ - (lit(_r1) /*| eol*/))
             ;
-        quoted = '"' >> *("\"\"" | unesc_char |  ~char_('"')) >> '"'
+        text = *(unesc_char |  (char_ - char_(_r1)))
             ;
-
-        //http://stackoverflow.com/questions/7436481/how-to-make-my-split-work-only-on-one-real-line-and-be-capable-to-skeep-quoted-p/7462539#7462539
+        quoted = omit[char_("\"'")[_a = _1]] >> text(_a)[_val = _1] >> lit(_a)
+            ;
         BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
     }
   private:
     qi::rule<Iterator, csv_line(std::string const&), qi::blank_type> line;
     qi::rule<Iterator, column(std::string const&)> column; // no-skip
-    qi::rule<Iterator, std::string()> quoted;
+    qi::rule<Iterator, std::string(char)> text;
+    qi::rule<Iterator, qi::locals<char>, std::string()> quoted;
     qi::symbols<char const, char const> unesc_char;
 };
 
