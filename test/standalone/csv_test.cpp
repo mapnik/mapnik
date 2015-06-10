@@ -47,7 +47,7 @@ mapnik::datasource_ptr get_csv_ds(std::string const &file_name, bool strict = tr
   params["strict"] = mapnik::value_bool(strict);
   auto ds = mapnik::datasource_cache::instance().create(params);
   // require a non-null pointer returned
-  REQUIRE(bool(ds));
+  REQUIRE(ds != nullptr);
   return ds;
 }
 
@@ -298,7 +298,7 @@ TEST_CASE("csv") {
     require_field_names(fields, {"x", "y", "name"});
     // NOTE: y column is integer, even though a double value is used below in the test?
     require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
-    
+
     auto featureset = all_features(ds);
     require_attributes(featureset->next(), {
           attr{"x", 0}
@@ -321,7 +321,7 @@ TEST_CASE("csv") {
     auto fields = ds->get_descriptor().get_descriptors();
     require_field_names(fields, {"type"});
     require_field_types(fields, {mapnik::String});
-    
+
     auto featureset = all_features(ds);
     require_geometry(featureset->next(), 1, geometry_types::Point);
     require_geometry(featureset->next(), 1, geometry_types::LineString);
@@ -536,7 +536,7 @@ TEST_CASE("csv") {
       auto fields = ds->get_descriptor().get_descriptors();
       require_field_names(fields, {"type"});
       require_field_types(fields, {mapnik::String});
-    
+
       auto featureset = all_features(ds);
       require_geometry(featureset->next(), 1, geometry_types::Point);
       require_geometry(featureset->next(), 1, geometry_types::LineString);
