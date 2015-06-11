@@ -26,6 +26,21 @@ SECTION("readers") {
         type = mapnik::type_from_filename(should_throw);
         REQUIRE( type );
         REQUIRE_THROWS(std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type)));
+
+        // actually a png so jpeg reader should throw
+        should_throw = "./test/data/images/landusepattern.jpg";
+        REQUIRE( mapnik::util::exists( should_throw ) );
+        type = mapnik::type_from_filename(should_throw);
+        REQUIRE( type );
+        try
+        {
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            REQUIRE(false);
+        }
+        catch (std::exception const& ex)
+        {
+            REQUIRE( std::string(ex.what()) == std::string("JPEG Reader: libjpeg could not read image: Not a JPEG file: starts with 0x89 0x50") );
+        }
 #endif
 
         REQUIRE_THROWS(mapnik::image_rgba8 im(-10,-10)); // should throw rather than overflow
