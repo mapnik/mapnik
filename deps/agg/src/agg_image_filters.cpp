@@ -63,7 +63,7 @@ void image_filter_lut::normalize()
 
             if(sum == image_filter_scale) break;
 
-            double k = double(image_filter_scale) / double(sum);
+            double k = (sum > 0) ? double(image_filter_scale) / double(sum) : 1;
             sum = 0;
             for(j = 0; j < m_diameter; j++)
             {
