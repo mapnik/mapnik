@@ -35,6 +35,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/pixel_cast.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
 
@@ -51,15 +52,8 @@
 #include <sstream>
 #include <algorithm>
 
-// boost
-#include <boost/numeric/conversion/cast.hpp>
-
 namespace mapnik
 {
-
-using boost::numeric_cast;
-using boost::numeric::positive_overflow;
-using boost::numeric::negative_overflow;
 
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
@@ -936,20 +930,7 @@ struct visitor_fill
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val;
-        try
-        {
-            val = numeric_cast<pixel_type>(val_);
-        }
-        catch(negative_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::min();
-        }
-        catch(positive_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::max();
-        }
-        data.set(val);
+        data.set(pixel_cast<pixel_type>(val_));
     }
 
 private:
@@ -1392,22 +1373,9 @@ struct visitor_set_pixel
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val;
-        try
-        {
-            val = numeric_cast<pixel_type>(val_);
-        }
-        catch(negative_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::min();
-        }
-        catch(positive_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::max();
-        }
         if (check_bounds(data, x_, y_))
         {
-            data(x_, y_) = val;
+            data(x_, y_) = pixel_cast<pixel_type>(val_);
         }
     }
 
@@ -1699,20 +1667,7 @@ struct visitor_get_pixel
         using pixel_type = T1;
         if (check_bounds(data, x_, y_))
         {
-            T1 val;
-            try
-            {
-                val = numeric_cast<T1>(data(x_,y_));
-            }
-            catch(negative_overflow&)
-            {
-                val = std::numeric_limits<T1>::min();
-            }
-            catch(positive_overflow&)
-            {
-                val = std::numeric_limits<T1>::max();
-            }
-            return val;
+            return pixel_cast<T1>(data(x_, y_));
         }
         else
         {
