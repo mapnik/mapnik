@@ -163,6 +163,13 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         return false;
     }
 
+    for(int j=0; j<point_count; j++) {
+        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
+        {
+            return false;
+        }
+    }
+
     if (is_dest_longlat_)
     {
         int i;
@@ -203,6 +210,13 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
                       offset, x,y,z) != 0)
     {
         return false;
+    }
+
+    for(int j=0; j<point_count; j++) {
+        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
+        {
+            return false;
+        }
     }
 
     if (is_source_longlat_)
