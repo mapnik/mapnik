@@ -59,7 +59,11 @@ placement_finder::placement_finder(feature_impl const& feature,
       placements_(),
       has_marker_(false),
       marker_(),
-      marker_box_() {}
+      marker_box_(),
+      marker_unlocked_(false),
+      marker_displacement_(),
+      move_dx_(0.0),
+      horizontal_alignment_(H_LEFT) {}
 
 bool placement_finder::next_position()
 {

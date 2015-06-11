@@ -99,8 +99,8 @@ private:
     box2d<double> marker_box_;
     bool marker_unlocked_;
     pixel_position marker_displacement_;
-    double move_dx_ = 0.0;
-    horizontal_alignment_e horizontal_alignment_ = H_LEFT;
+    double move_dx_;
+    horizontal_alignment_e horizontal_alignment_;
 };
 
 }//ns mapnik
