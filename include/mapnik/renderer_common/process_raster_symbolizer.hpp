@@ -54,7 +54,7 @@ struct image_dispatcher
                           scaling_method_e method, double filter_factor,
                           double opacity, composite_mode_e comp_op,
                           raster_symbolizer const& sym, feature_impl const& feature,
-                          F & composite, boost::optional<double> const& nodata, bool scale)
+                          F & composite, boost::optional<double> const& nodata, bool need_scaling)
         : start_x_(start_x),
           start_y_(start_y),
           width_(width),
@@ -69,12 +69,12 @@ struct image_dispatcher
         feature_(feature),
         composite_(composite),
         nodata_(nodata),
-        scale_(scale) {}
+        need_scaling_(need_scaling) {}
 
     void operator() (image_null const& data_in) const {}  //no-op
     void operator() (image_rgba8 const& data_in) const
     {
-        if (scale_)
+        if (need_scaling_)
         {
             image_rgba8 data_out(width_, height_, true, true);
             scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
@@ -92,7 +92,7 @@ struct image_dispatcher
         using image_type = T;
         image_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
-        if (scale_)
+        if (need_scaling_)
         {
             image_type data_out(width_, height_);
             scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
@@ -120,7 +120,7 @@ private:
     feature_impl const& feature_;
     composite_function & composite_;
     boost::optional<double> const& nodata_;
-    bool scale_;
+    bool need_scaling_;
 };
 
 template <typename F>
