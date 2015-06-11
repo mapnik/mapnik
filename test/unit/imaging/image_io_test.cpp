@@ -39,7 +39,7 @@ SECTION("readers") {
         }
         catch (std::exception const& ex)
         {
-            REQUIRE( std::string(ex.what()) == std::string("JPEG Reader: libjpeg could not read image: Not a JPEG file: starts with 0x89") );
+            REQUIRE( std::string(ex.what()) == std::string("JPEG Reader: libjpeg could not read image: Not a JPEG file: starts with 0x89 0x50") );
         }
 #endif
 
