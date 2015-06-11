@@ -47,7 +47,6 @@
 // stl
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -59,7 +58,6 @@ DATASOURCE_PLUGIN(csv_datasource)
 
 namespace mapnik {
 
-//static const csv_file_grammar<char const*> g;
 static const csv_line_grammar<char const*> line_g;
 
 csv_line parse_line(std::string & line_str, std::string const& separator)
@@ -488,11 +486,6 @@ void csv_datasource::parse_csv(T & stream,
                 s << "CSV Plugin: # of headers("
                   << num_headers << ") > # of columns("
                   << num_fields << ") parsed for row " << line_number << "\n";
-                s << "[" << csv_line + "] sep=" << sep << "\n";
-                for (auto const& v : values)
-                {
-                    std::cerr << v << std::endl;
-                }
                 if (strict_)
                 {
                     throw mapnik::datasource_exception(s.str());
