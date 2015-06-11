@@ -40,7 +40,7 @@ namespace mapnik
 {
 
 template <typename Geometry>
-struct MAPNIK_DECL offset_converter
+struct offset_converter
 {
     using size_type = std::size_t;
 
