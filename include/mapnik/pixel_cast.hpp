@@ -99,11 +99,11 @@ struct numeric_compare<T,S,typename std::enable_if<
         (std::is_integral<T>::value && std::is_floating_point<S>::value)>::type>
 {
     static inline bool less(T t, S s) {
-        return less(static_cast<double>(t),static_cast<double>(s));
+        return numeric_compare<double,double>::less(static_cast<double>(t),static_cast<double>(s));
     }
 
     static inline bool greater(T t, S s) {
-        return greater(static_cast<double>(t),static_cast<double>(s));
+        return numeric_compare<double,double>::greater(static_cast<double>(t),static_cast<double>(s));
     }
 };
 
