@@ -24,6 +24,7 @@
 #define MAPNIK_PIXEL_CAST_HPP
 
 #include <type_traits>
+#include <limits>
 
 namespace mapnik {
 
