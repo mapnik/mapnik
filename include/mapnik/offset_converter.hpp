@@ -292,7 +292,7 @@ private:
         std::vector<vertex2d> points;
         std::vector<vertex2d> close_points;
         bool is_polygon = false;
-        int cpt = 0;
+        std::size_t cpt = 0;
         v0.cmd = geom_.vertex(&v0.x, &v0.y);
         v1.x = v0.x;
         v1.y = v0.y;

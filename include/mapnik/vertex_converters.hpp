@@ -351,17 +351,17 @@ struct dispatcher : util::noncopyable
 
 struct arguments : util::noncopyable
 {
-    arguments(box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
-              proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
-              attributes const& vars, double scale_factor)
-        : bbox(bbox),
-          sym(sym),
-          tr(tr),
-          prj_trans(prj_trans),
-          affine_trans(affine_trans),
-          feature(feature),
-          vars(vars),
-          scale_factor(scale_factor) {}
+    arguments(box2d<double> const& _bbox, symbolizer_base const& _sym, view_transform const& _tr,
+              proj_transform const& _prj_trans, agg::trans_affine const& _affine_trans, feature_impl const& _feature,
+              attributes const& _vars, double _scale_factor)
+        : bbox(_bbox),
+          sym(_sym),
+          tr(_tr),
+          prj_trans(_prj_trans),
+          affine_trans(_affine_trans),
+          feature(_feature),
+          vars(_vars),
+          scale_factor(_scale_factor) {}
 
     box2d<double> const& bbox;
     symbolizer_base const& sym;

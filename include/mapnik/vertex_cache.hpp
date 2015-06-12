@@ -47,7 +47,7 @@ class MAPNIK_DECL vertex_cache : util::noncopyable
 {
     struct segment
     {
-        segment(double x, double y, double length) : pos(x, y), length(length) {}
+        segment(double x, double y, double _length) : pos(x, y), length(_length) {}
         pixel_position pos; //Last point of this segment, first point is implicitly defined by the previous segement in this vector
         double length;
     };

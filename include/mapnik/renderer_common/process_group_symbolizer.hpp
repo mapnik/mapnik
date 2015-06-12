@@ -341,10 +341,10 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 render_thunk_extractor extractor(bounds, thunks, *sub_feature, common.vars_, prj_trans,
                                                  virtual_renderer, clipping_extent);
 
-                for (auto const& sym : *rule)
+                for (auto const& _sym : *rule)
                 {
                     // TODO: construct layout and obtain bounding box
-                    util::apply_visitor(extractor, sym);
+                    util::apply_visitor(extractor, _sym);
                 }
 
                 // add the bounding box to the layout manager

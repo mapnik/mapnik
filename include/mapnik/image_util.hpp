@@ -30,6 +30,7 @@
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
 #pragma GCC diagnostic pop

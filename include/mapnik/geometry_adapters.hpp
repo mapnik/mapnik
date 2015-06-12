@@ -28,6 +28,7 @@
 // undef B0 to workaround https://svn.boost.org/trac/boost/ticket/10467
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
 #undef B0
 #include <boost/geometry/geometries/register/linestring.hpp>
 #include <boost/geometry/geometries/register/point.hpp>

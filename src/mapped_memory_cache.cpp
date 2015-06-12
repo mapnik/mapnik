@@ -29,8 +29,11 @@
 
 // boost
 #include <boost/assert.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/file_mapping.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

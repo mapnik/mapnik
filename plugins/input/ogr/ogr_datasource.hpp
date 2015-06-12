@@ -41,7 +41,10 @@
 #include <string>
 
 // ogr
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <ogrsf_frmts.h>
+#pragma GCC diagnostic pop
 #include "ogr_layer_ptr.hpp"
 
 class ogr_datasource : public mapnik::datasource

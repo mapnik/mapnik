@@ -461,8 +461,8 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                     auto result = pre_evaluate_expression<value>(*val);
                     if (std::get<1>(result))
                     {
-                        boost::optional<value_type> enum_val = detail::enum_traits<value_type>::from_string(std::get<0>(result).to_string());
-                        if (enum_val)
+                        boost::optional<value_type> enum_val2 = detail::enum_traits<value_type>::from_string(std::get<0>(result).to_string());
+                        if (enum_val2)
                         {
                             put(sym, key, *enum_val);
                         }

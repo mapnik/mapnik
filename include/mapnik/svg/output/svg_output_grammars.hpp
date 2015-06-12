@@ -40,6 +40,7 @@ namespace mapnik { namespace svg {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/spirit/include/karma_nonterminal.hpp>
 #include <boost/spirit/include/karma_rule.hpp>
 #include <boost/fusion/adapted/struct.hpp>

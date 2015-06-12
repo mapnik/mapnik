@@ -33,6 +33,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/spirit/include/qi.hpp>
 #ifdef MAPNIK_KARMA_TO_STRING
   #include <boost/spirit/include/karma.hpp>

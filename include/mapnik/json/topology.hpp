@@ -26,9 +26,12 @@
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/util/variant.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 #include <tuple>
 #include <vector>

@@ -28,6 +28,10 @@
 #include <mapnik/feature_kv_iterator.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -37,6 +41,7 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/cons.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 

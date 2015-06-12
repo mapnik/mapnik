@@ -86,8 +86,8 @@ public:
 private:
     template<typename T> struct run : util::noncopyable
     {
-        run(T const& data, unsigned start, unsigned end)
-            :  start(start), end(end), data(data) {}
+        run(T const& _data, unsigned _start, unsigned _end)
+            :  start(_start), end(_end), data(_data) {}
         unsigned start;
         unsigned end;
         T data;

@@ -29,11 +29,11 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/geom_util.hpp>
 
-// boost
-
-
 // ogr
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <ogrsf_frmts.h>
+#pragma GCC diagnostic pop
 
 class ogr_featureset : public mapnik::Featureset
 {
