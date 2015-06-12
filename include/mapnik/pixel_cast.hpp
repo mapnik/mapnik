@@ -94,7 +94,9 @@ struct numeric_compare<T,S,typename std::enable_if<std::is_floating_point<T>::va
 };
 
 template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<std::is_floating_point<T>::value && std::is_integral<S>::value>::type>
+struct numeric_compare<T,S,typename std::enable_if<
+        (std::is_floating_point<T>::value && std::is_integral<S>::value) ||
+        (std::is_integral<T>::value && std::is_floating_point<S>::value)>::type>
 {
     static inline bool less(T t, S s) {
         return less(static_cast<double>(t),static_cast<double>(s));
@@ -104,29 +106,6 @@ struct numeric_compare<T,S,typename std::enable_if<std::is_floating_point<T>::va
         return greater(static_cast<double>(t),static_cast<double>(s));
     }
 };
-
-
-template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<std::is_integral<T>::value && std::is_floating_point<S>::value>::type>
-{
-    static inline bool less(T t, S s) {
-        return less(static_cast<double>(t),static_cast<double>(s));
-    }
-
-    static inline bool greater(T t, S s) {
-        return greater(static_cast<double>(t),static_cast<double>(s));
-    }
-};
-
-template<typename T, typename S>
-inline bool less(T t, S s) {
-    return numeric_compare<T,S>::less(t,s);
-}
-
-template<typename T, typename S>
-inline bool greater(T t, S s) {
-    return numeric_compare<T,S>::greater(t,s);
-}
 
 // floats
 template <typename T, typename Enable = void>
@@ -153,11 +132,11 @@ inline T pixel_cast(S s)
     static const auto max_val = detail::bounds<T>::highest();
     static const auto min_val = detail::bounds<T>::lowest();
 
-    if (detail::greater(s,max_val))
+    if (detail::numeric_compare<S,T>::greater(s,max_val))
     {
         return max_val;
     }
-    else if (detail::less(s,min_val))
+    else if (detail::numeric_compare<S,T>::less(s,min_val))
     {
         return min_val;
     }
