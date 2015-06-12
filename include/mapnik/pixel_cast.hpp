@@ -132,16 +132,16 @@ inline bool greater(T t, S s) {
 template <typename T, typename Enable = void>
 struct bounds
 {
-    static constexpr T lowest() { return static_cast<T>(-std::numeric_limits<T>::max());}
-    static constexpr T highest() { return std::numeric_limits<T>::max();}
+    static const T lowest() { return static_cast<T>(-std::numeric_limits<T>::max());}
+    static const T highest() { return std::numeric_limits<T>::max();}
 };
 
 // integers
 template <typename T>
 struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::type >
 {
-    static constexpr T lowest() { return std::numeric_limits<T>::min();}
-    static constexpr T highest() { return std::numeric_limits<T>::max();}
+    static const T lowest() { return std::numeric_limits<T>::min();}
+    static const T highest() { return std::numeric_limits<T>::max();}
 };
 
 } // ns detail
@@ -150,8 +150,8 @@ struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::ty
 template <typename T, typename S>
 inline T pixel_cast(S s)
 {
-    static constexpr auto max_val = detail::bounds<T>::highest();
-    static constexpr auto min_val = detail::bounds<T>::lowest();
+    static const auto max_val = detail::bounds<T>::highest();
+    static const auto min_val = detail::bounds<T>::lowest();
 
     if (detail::greater(s,max_val))
     {
