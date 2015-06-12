@@ -23,6 +23,7 @@
 #ifndef MAPNIK_PIXEL_CAST_HPP
 #define MAPNIK_PIXEL_CAST_HPP
 
+#include <limits>
 #include <type_traits>
 
 namespace mapnik {
