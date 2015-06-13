@@ -278,7 +278,7 @@ template <typename Dispatcher, typename Current, typename... ConverterTypes>
 struct converters_helper<Dispatcher,Current,ConverterTypes...>
 {
     template <typename Converter>
-    static void set(Dispatcher & disp, int state)
+    static void set(Dispatcher & disp, std::size_t state)
     {
         if (std::is_same<Converter,Current>::value)
         {
@@ -323,7 +323,7 @@ template <typename Dispatcher>
 struct converters_helper<Dispatcher>
 {
     template <typename Converter>
-    static void set(Dispatcher &, int) {}
+    static void set(Dispatcher &, std::size_t) {}
     template <typename Geometry, typename Processor>
     static void forward(Dispatcher & disp, Geometry & geom, Processor & proc)
     {
@@ -331,7 +331,7 @@ struct converters_helper<Dispatcher>
     }
 };
 
-template <typename Args, int NUM_CONV>
+template <typename Args, std::size_t NUM_CONV>
 struct dispatcher : util::noncopyable
 {
     using this_type = dispatcher;
@@ -345,7 +345,7 @@ struct dispatcher : util::noncopyable
         std::fill(vec_.begin(), vec_.end(), 0);
     }
 
-    std::array<unsigned, NUM_CONV> vec_;
+    std::array<std::size_t, NUM_CONV> vec_;
     args_type args_;
 };
 
