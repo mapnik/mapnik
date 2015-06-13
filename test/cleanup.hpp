@@ -2,6 +2,9 @@
 #define TEST_MEMORY_CLEANUP
 
 #include <libxml/parser.h>
+#include <libxml/entities.h>
+#include <libxml/globals.h>
+
 #if defined(HAVE_CAIRO)
 #include <cairo.h>
 #endif
@@ -13,13 +16,19 @@
 
 namespace testing {
 
-void run_cleanup()
+inline void run_cleanup()
 {
     // only call this once, on exit
     // to make sure valgrind output is clean
     // http://xmlsoft.org/xmlmem.html
     xmlCleanupCharEncodingHandlers();
+    xmlCleanupEncodingAliases();
+    xmlCleanupGlobals();
     xmlCleanupParser();
+    xmlCleanupThreads();
+    xmlCleanupInputCallbacks();
+    xmlCleanupOutputCallbacks();
+    xmlCleanupMemory();
 
 #if defined(HAVE_CAIRO)
     // http://cairographics.org/manual/cairo-Error-handling.html#cairo-debug-reset-static-data
