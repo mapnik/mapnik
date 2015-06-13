@@ -67,14 +67,16 @@ void handle_args(int argc, char** argv, mapnik::parameters & params)
             mapnik::parameters params;                  \
             benchmark::handle_args(argc,argv,params);   \
             test_class test_runner(params);             \
-            return run(test_runner,name);               \
+            auto result = run(test_runner,name);        \
+            testing::run_cleanup();                     \
+            return result;                              \
         }                                               \
         catch (std::exception const& ex)                \
         {                                               \
             std::clog << ex.what() << "\n";             \
+            testing::run_cleanup();                     \
             return -1;                                  \
         }                                               \
-        testing::run_cleanup();                         \
     }                                                   \
 
 template <typename T>
