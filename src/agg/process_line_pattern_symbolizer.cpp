@@ -237,6 +237,13 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
 
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
+    ras_ptr->reset();
+    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    {
+        ras_ptr->gamma(agg::gamma_power());
+        gamma_method_ = GAMMA_POWER;
+        gamma_ = 1.0;
+    }
     std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
     agg_renderer_process_visitor_l<buffer_type> visitor(common_,
                                          pixmap_,
