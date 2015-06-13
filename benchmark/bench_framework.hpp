@@ -4,6 +4,7 @@
 // mapnik
 #include <mapnik/params.hpp>
 #include <mapnik/value_types.hpp>
+#include "../test/cleanup.hpp"
 
 // stl
 #include <chrono>
@@ -73,6 +74,7 @@ void handle_args(int argc, char** argv, mapnik::parameters & params)
             std::clog << ex.what() << "\n";             \
             return -1;                                  \
         }                                               \
+        testing::run_cleanup();                         \
     }                                                   \
 
 template <typename T>
