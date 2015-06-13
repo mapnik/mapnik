@@ -24,11 +24,14 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #else
 #include <boost/regex.hpp>
 #endif
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
