@@ -35,7 +35,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/pixel_cast.hpp>
+#include <mapnik/safe_cast.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
 
@@ -930,7 +930,7 @@ struct visitor_fill
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        data.set(pixel_cast<pixel_type>(val_));
+        data.set(safe_cast<pixel_type>(val_));
     }
 
 private:
@@ -1375,7 +1375,7 @@ struct visitor_set_pixel
         using pixel_type = typename T2::pixel_type;
         if (check_bounds(data, x_, y_))
         {
-            data(x_, y_) = pixel_cast<pixel_type>(val_);
+            data(x_, y_) = safe_cast<pixel_type>(val_);
         }
     }
 
@@ -1667,7 +1667,7 @@ struct visitor_get_pixel
         using pixel_type = T1;
         if (check_bounds(data, x_, y_))
         {
-            return pixel_cast<T1>(data(x_, y_));
+            return safe_cast<T1>(data(x_, y_));
         }
         else
         {

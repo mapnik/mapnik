@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PIXEL_CAST_HPP
-#define MAPNIK_PIXEL_CAST_HPP
+#ifndef MAPNIK_SAFE_CAST_HPP
+#define MAPNIK_SAFE_CAST_HPP
 
 #include <limits>
 #include <type_traits>
@@ -127,7 +127,7 @@ struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::ty
 
 
 template <typename T, typename S>
-inline T pixel_cast(S s)
+inline T safe_cast(S s)
 {
     static const auto max_val = detail::bounds<T>::highest();
     static const auto min_val = detail::bounds<T>::lowest();
@@ -150,4 +150,4 @@ inline T pixel_cast(S s)
 
 
 
-#endif // MAPNIK_PIXEL_CAST_HPP
+#endif // MAPNIK_SAFE_CAST_HPP

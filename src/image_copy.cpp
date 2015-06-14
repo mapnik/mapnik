@@ -24,7 +24,7 @@
 #include <mapnik/image_copy.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
-#include <mapnik/pixel_cast.hpp>
+#include <mapnik/safe_cast.hpp>
 
 namespace mapnik
 {
@@ -55,7 +55,7 @@ struct visitor_image_copy
         {
             for (unsigned x = 0; x < dst.width(); ++x)
             {
-                dst(x,y) = pixel_cast<dst_type>(src(x,y));
+                dst(x,y) = safe_cast<dst_type>(src(x,y));
             }
         }
         return T0(std::move(dst));
@@ -102,9 +102,9 @@ struct visitor_image_copy_so
         {
             for (unsigned x = 0; x < dst.width(); ++x)
             {
-                double scaled_src_val = (pixel_cast<double>(src(x,y)) * src_scaling) + src_offset;
+                double scaled_src_val = (safe_cast<double>(src(x,y)) * src_scaling) + src_offset;
                 double dst_val = (scaled_src_val - offset_) / scaling_;
-                dst(x,y) = pixel_cast<dst_type>(dst_val);
+                dst(x,y) = safe_cast<dst_type>(dst_val);
             }
         }
         return T0(std::move(dst));
