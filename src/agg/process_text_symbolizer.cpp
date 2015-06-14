@@ -58,14 +58,12 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
                               common_.scale_factor_,
                               common_.font_manager_.get_stroker());
 
-    { // halo transform
-        agg::trans_affine halo_transform;
-        auto transform = get_optional<transform_type>(sym, keys::halo_transform);
-        if (transform)
-        {
-            evaluate_transform(halo_transform, feature, common_.vars_, *transform);
-            ren.set_halo_transform(halo_transform);
-        }
+    auto halo_transform = get_optional<transform_type>(sym, keys::halo_transform);
+    if (halo_transform)
+    {
+        agg::trans_affine halo_affine_transform;
+        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform);
+        ren.set_halo_transform(halo_affine_transform);
     }
 
     placements_list const& placements = helper.get();
