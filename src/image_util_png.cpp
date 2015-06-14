@@ -216,8 +216,6 @@ void process_rgba8_png_pal(T const& image,
     handle_png_options(t, opts);
     if (pal.valid())
     {
-        png_options opts;
-        handle_png_options(t,opts);
         save_as_png8_pal(stream, image, pal, opts);
     }
     else if (opts.paletted)
