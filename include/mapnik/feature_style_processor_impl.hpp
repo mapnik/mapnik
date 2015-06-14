@@ -224,7 +224,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
 
     std::vector<std::string> const& style_names = lay.styles();
 
-    unsigned int num_styles = style_names.size();
+    std::size_t num_styles = style_names.size();
     if (num_styles == 0)
     {
         MAPNIK_LOG_DEBUG(feature_style_processor)
