@@ -23,15 +23,16 @@
 #ifndef RENDERER_HPP
 #define RENDERER_HPP
 
-#include "compare_images.hpp"
-
 // stl
 #include <sstream>
 #include <iomanip>
 #include <fstream>
+#include <memory>
 
 // mapnik
 #include <mapnik/map.hpp>
+#include <mapnik/image_util.hpp>
+#include <mapnik/image_reader.hpp>
 #include <mapnik/agg_renderer.hpp>
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
@@ -59,7 +60,16 @@ struct renderer_base
 
     unsigned compare(image_type const & actual, boost::filesystem::path const& reference) const
     {
-        return compare_images(actual, reference.string());
+        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(reference.string(), "png"));
+        if (!reader.get())
+        {
+            throw mapnik::image_reader_exception("Failed to load: " + reference.string());
+        }
+
+        mapnik::image_any ref_image_any = reader->read(0, 0, reader->width(), reader->height());
+        ImageType const & reference_image = mapnik::util::get<ImageType>(ref_image_any);
+
+        return mapnik::compare(actual, reference_image, 0, true);
     }
 
     void save(image_type const & image, boost::filesystem::path const& path) const
