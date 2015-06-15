@@ -230,7 +230,7 @@ void cairo_context::set_dash(dash_array const& dashes, double scale_factor)
     std::valarray<double> d(dashes.size() * 2);
     dash_array::const_iterator itr = dashes.begin();
     dash_array::const_iterator end = dashes.end();
-    int index = 0;
+    std::size_t index = 0;
 
     for (; itr != end; ++itr)
     {
@@ -465,8 +465,8 @@ void cairo_context::add_text(glyph_positions const& pos,
         matrix.y0 = 0;
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
-        pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
-        glyph_path(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
+        pixel_position new_pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
+        glyph_path(glyph.glyph_index, pixel_position(sx + new_pos.x, sy - new_pos.y));
         set_line_width(2.0 * halo_radius);
         set_line_join(ROUND_JOIN);
         set_color(glyph.format->halo_fill, glyph.format->halo_opacity);
