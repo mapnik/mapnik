@@ -35,10 +35,10 @@ namespace visual_tests
 
 struct map_size
 {
-    map_size(int _width, int _height) : width(_width), height(_height) { }
+    map_size(std::size_t _width, std::size_t _height) : width(_width), height(_height) { }
     map_size() { }
-    unsigned width = 0;
-    unsigned height = 0;
+    std::size_t width = 0;
+    std::size_t height = 0;
 };
 
 struct config
