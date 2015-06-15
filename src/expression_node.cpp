@@ -23,6 +23,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -94,7 +95,7 @@ std::string regex_match_node::to_string() const
     auto const& pattern = impl_.get()->pattern_;
 #if defined(BOOST_REGEX_HAS_ICU)
     std::string utf8;
-    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], pattern.str().length());
+    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], safe_cast<int>(pattern.str().length()));
     to_utf8(ustr,utf8);
     str_ += utf8;
 #else
@@ -141,7 +142,7 @@ std::string regex_replace_node::to_string() const
     auto const& format = impl_.get()->format_;
 #if defined(BOOST_REGEX_HAS_ICU)
     std::string utf8;
-    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], pattern.str().length());
+    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], safe_cast<int>(pattern.str().length()));
     to_utf8(ustr,utf8);
     str_ += utf8;
     str_ +="','";
