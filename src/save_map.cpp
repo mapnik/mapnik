@@ -52,11 +52,12 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #pragma GCC diagnostic pop
 #include <boost/optional.hpp>
 #include <boost/version.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
 // stl
 #include <iostream>
@@ -87,12 +88,12 @@ void serialize_text_placements(ptree & node, text_placements_ptr const& p, bool 
     {
         set_attr(node, "placement-type", "list");
         //dfl = last properties passed as default so only attributes that change are actually written
-        text_symbolizer_properties *dfl = &(list->defaults);
+        text_symbolizer_properties *dfl2 = &(list->defaults);
         for (unsigned i=0; i < list->size(); ++i)
         {
             ptree & placement_node = node.push_back(ptree::value_type("Placement", ptree()))->second;
-            list->get(i).to_xml(placement_node, explicit_defaults, *dfl);
-            dfl = &(list->get(i));
+            list->get(i).to_xml(placement_node, explicit_defaults, *dfl2);
+            dfl2 = &(list->get(i));
         }
     }
 }
