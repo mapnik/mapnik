@@ -27,6 +27,7 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/safe_cast.hpp>
 
 // agg
 #include "agg_color_rgba.h"
@@ -80,7 +81,10 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
         && (std::fabs(0.0 - tr.shx) < agg::affine_epsilon)
         && (std::fabs(1.0 - tr.sy) < agg::affine_epsilon))
     {
-        agg::rendering_buffer src_buffer((unsigned char *)src.bytes(),src.width(),src.height(),src.row_size());
+        agg::rendering_buffer src_buffer(const_cast<unsigned char *>(src.bytes()),
+                                         safe_cast<int>(src.width()),
+                                         safe_cast<int>(src.height()),
+                                         src.row_size());
         pixfmt_pre pixf_mask(src_buffer);
         if (snap_to_pixels)
         {
