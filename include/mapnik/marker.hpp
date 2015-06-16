@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,7 @@ using image_ptr = std::shared_ptr<image_any>;
 struct marker_rgba8
 {
 public:
-    marker_rgba8() 
+    marker_rgba8()
         : bitmap_data_(4,4,true,true)
     {
         // create default OGC 4x4 black pixel
@@ -58,7 +58,7 @@ public:
 
     marker_rgba8(image_rgba8 const & data)
         : bitmap_data_(data) {}
-    
+
     marker_rgba8(image_rgba8 && data)
         : bitmap_data_(std::move(data)) {}
 
@@ -132,7 +132,7 @@ private:
 
 };
 
-struct marker_null 
+struct marker_null
 {
     marker_null() = default;
 public:
@@ -150,7 +150,7 @@ public:
     }
 };
 
-using marker_base = util::variant<marker_null, 
+using marker_base = util::variant<marker_null,
                                   marker_rgba8,
                                   marker_svg>;
 namespace detail {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -66,7 +66,7 @@ struct proj_strategy
         boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
-    
+
     template <typename P1, typename P2>
     inline P2 execute(P1 const& p1, bool & status) const
     {
@@ -95,7 +95,7 @@ struct proj_backward_strategy
         boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
-    
+
     template <typename P1, typename P2>
     inline P2 execute(P1 const& p1, bool & status) const
     {

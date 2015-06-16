@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -74,7 +74,7 @@ struct extract_value<value_bool>
             return boost::optional<value_bool>(result);
         return boost::optional<value_bool>();
     }
-    
+
     static inline boost::optional<value_bool> do_extract_from_bool(value_bool const& source)
     {
         return boost::optional<value_bool>(source);
@@ -153,7 +153,7 @@ struct extract_value<std::string>
     {
         return boost::optional<std::string>(source);
     }
-    
+
     static inline boost::optional<std::string> do_extract_from_bool(value_bool const& source)
     {
         if (source) {
@@ -191,7 +191,7 @@ struct value_extractor_visitor
         var_ = detail::param_cast<T>(val);
 
     }
-    
+
     void operator() (value_bool const& val) const
     {
         var_ = detail::param_cast<T>(val);

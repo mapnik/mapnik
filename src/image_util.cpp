@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -753,7 +753,7 @@ struct visitor_set_grayscale_to_alpha_c
                 pixel_type a = static_cast<pixel_type>(std::ceil((r * .3) + (g * .59) + (b * .11)));
 
                 row_from[x] = static_cast<unsigned>(a << 24u) |
-                              static_cast<unsigned>(c_.blue() << 16u) | 
+                              static_cast<unsigned>(c_.blue() << 16u) |
                               static_cast<unsigned>(c_.green() << 8u) |
                               static_cast<unsigned>(c_.red() );
             }
