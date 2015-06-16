@@ -330,7 +330,6 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
             const std::string fld_name = fld->GetNameRef();
             const OGRFieldType type_oid = fld->GetType();
-
             switch (type_oid)
             {
             case OFTInteger:

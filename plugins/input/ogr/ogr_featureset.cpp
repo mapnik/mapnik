@@ -125,6 +125,9 @@ feature_ptr ogr_featureset::next()
             switch (type_oid)
             {
             case OFTInteger:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64:
+#endif
             {
                 feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger(i));
                 break;
@@ -144,6 +147,9 @@ feature_ptr ogr_featureset::next()
             }
 
             case OFTIntegerList:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64List:
+#endif
             case OFTRealList:
             case OFTStringList:
             case OFTWideStringList: // deprecated !
