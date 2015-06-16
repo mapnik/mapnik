@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/projection.hpp>
-#include <mapnik/util/singleton.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/well_known_srs.hpp>
 
