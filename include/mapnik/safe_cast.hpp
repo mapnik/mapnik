@@ -25,6 +25,7 @@
 
 #include <limits>
 #include <type_traits>
+#include <cstdint>
 
 namespace mapnik {
 
@@ -60,11 +61,11 @@ struct numeric_compare<T,S,typename std::enable_if<!std::is_floating_point<T>::v
                                                    std::is_integral<T>::value && std::is_signed<T>::value && std::is_unsigned<S>::value>::type>
 {
     static inline bool less(T t, S s) {
-        return (t < static_cast<T>(0)) ? true : static_cast<uint64_t>(t) < static_cast<uint64_t>(s);
+        return (t < static_cast<T>(0)) ? true : static_cast<std::uint64_t>(t) < static_cast<std::uint64_t>(s);
     }
 
     static inline bool greater(T t, S s) {
-        return (t < static_cast<T>(0)) ? false : static_cast<uint64_t>(t) > static_cast<uint64_t>(s);
+        return (t < static_cast<T>(0)) ? false : static_cast<std::uint64_t>(t) > static_cast<std::uint64_t>(s);
     }
 };
 
@@ -73,11 +74,11 @@ struct numeric_compare<T,S,typename std::enable_if<!std::is_floating_point<T>::v
                                                    std::is_integral<T>::value && std::is_unsigned<T>::value && std::is_signed<S>::value>::type>
 {
     static inline bool less(T t, S s) {
-        return (s < static_cast<S>(0)) ? false : static_cast<uint64_t>(t) < static_cast<uint64_t>(s);
+        return (s < static_cast<S>(0)) ? false : static_cast<std::uint64_t>(t) < static_cast<std::uint64_t>(s);
     }
 
     static inline bool greater(T t, S s) {
-        return (s < static_cast<S>(0)) ? true : static_cast<uint64_t>(t) > static_cast<uint64_t>(s);
+        return (s < static_cast<S>(0)) ? true : static_cast<std::uint64_t>(t) > static_cast<std::uint64_t>(s);
     }
 };
 
