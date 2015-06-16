@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,7 +47,7 @@ class MAPNIK_DECL vertex_cache : util::noncopyable
 {
     struct segment
     {
-        segment(double x, double y, double length) : pos(x, y), length(length) {}
+        segment(double x, double y, double _length) : pos(x, y), length(_length) {}
         pixel_position pos; //Last point of this segment, first point is implicitly defined by the previous segement in this vector
         double length;
     };

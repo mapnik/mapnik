@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,10 @@
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 
 #if defined(SHAPE_MEMORY_MAPPED_FILE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/interprocess/mapped_region.hpp>
+#pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 
@@ -210,12 +213,11 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             extent_ = box;
             // parse first feature to extract attributes schema.
             // NOTE: this doesn't yield correct answer for geoJSON in general, just an indication
-            Iterator itr = start + geometry_index.first;
-            Iterator end = itr + geometry_index.second;
+            Iterator itr2 = start + geometry_index.first;
+            Iterator end2 = itr + geometry_index.second;
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            boost::spirit::standard::space_type space;
-            if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
+            if (!boost::spirit::qi::phrase_parse(itr2, end2, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
@@ -351,13 +353,13 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             std::fread(json.data(), size, 1, file.get());
 
             using chr_iterator_type = char const*;
-            chr_iterator_type start = json.data();
-            chr_iterator_type end = start + json.size();
+            chr_iterator_type start2 = json.data();
+            chr_iterator_type end2 = start2 + json.size();
 
             using namespace boost::spirit;
             standard::space_type space;
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            if (!qi::phrase_parse(start, end, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
+            if (!qi::phrase_parse(start2, end2, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }

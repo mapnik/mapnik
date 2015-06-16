@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -124,12 +124,12 @@ class cairo_pattern : private util::noncopyable
 public:
     explicit cairo_pattern(image_rgba8 const& data, double opacity = 1.0)
     {
-        int pixels = data.width() * data.height();
+        std::size_t pixels = data.width() * data.height();
         const unsigned int *in_ptr = data.data();
         const unsigned int *in_end = in_ptr + pixels;
         unsigned int *out_ptr;
 
-        surface_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, data.width(), data.height());
+        surface_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, static_cast<int>(data.width()), static_cast<int>(data.height()));
 
         out_ptr = reinterpret_cast<unsigned int *>(cairo_image_surface_get_data(surface_));
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ void text_line::add_glyph(glyph_info && glyph, double scale_factor_)
         glyphs_width_ = advance;
         space_count_ = 0;
     }
-    else if (advance)
+    else if (advance > 0)
     {
         // Only add character spacing if the character is not a zero-width part of a cluster.
         width_ += advance + glyphs_.back().format->character_spacing  * scale_factor_;

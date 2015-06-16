@@ -116,16 +116,16 @@ void test_offset_curve(double const &offset) {
     off_vc.reset(); off_vc.next_subpath();
 
     while (vc.move(dx)) {
-        double pos = vc.linear_position();
-        double off_pos = off_vc.position_closest_to(vc.current_position());
+        double mpos = vc.linear_position();
+        double moff_pos = off_vc.position_closest_to(vc.current_position());
         {
             mapnik::vertex_cache::scoped_state s(off_vc);
-            off_vc.move(off_pos);
+            off_vc.move(moff_pos);
             auto eps = (1.001 * offset);
             auto actual = dist(vc.current_position(), off_vc.current_position());
             REQUIRE(actual < eps);
         }
-        REQUIRE(std::abs((pos / vc.length()) - (off_pos / off_vc.length())) < 1.0e-3);
+        REQUIRE(std::abs((mpos / vc.length()) - (moff_pos / off_vc.length())) < 1.0e-3);
     }
 }
 
@@ -154,10 +154,10 @@ void test_s_shaped_curve(double const &offset) {
     off_vc.reset(); off_vc.next_subpath();
 
     while (vc.move(dx)) {
-        double off_pos = off_vc.position_closest_to(vc.current_position());
+        double moff_pos = off_vc.position_closest_to(vc.current_position());
         {
             mapnik::vertex_cache::scoped_state s(off_vc);
-            off_vc.move(off_pos);
+            off_vc.move(moff_pos);
             REQUIRE(dist(vc.current_position(), off_vc.current_position()) < (1.002 * offset));
         }
     }

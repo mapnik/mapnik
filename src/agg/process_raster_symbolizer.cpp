@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,7 +51,7 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
 {
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](image_rgba8 & target, composite_mode_e comp_op, double opacity,
+        [&](image_rgba8 const & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
             composite(*current_buffer_, target,
                       comp_op, opacity, start_x, start_y);

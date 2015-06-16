@@ -51,7 +51,7 @@ struct apply_local_alignment
     }
 
     template <typename Adapter>
-    void operator() (Adapter & va)
+    void operator() (Adapter &)
     {
         // no-op
     }

@@ -24,11 +24,9 @@ function mason_compile {
         done;
     fi;
     python -c "data=open('$MASON_PREFIX/bin/mapnik-config','r').read();open('$MASON_PREFIX/bin/mapnik-config','w').write(data.replace('$HERE','.'))"
-    mkdir -p ${MASON_PREFIX}/share/gdal
-    mkdir -p ${MASON_PREFIX}/share/proj
     mkdir -p ${MASON_PREFIX}/share/icu
-    cp -r $GDAL_DATA/ ${MASON_PREFIX}/share/gdal/
-    cp -r $PROJ_LIB/ ${MASON_PREFIX}/share/proj/
+    cp -r $GDAL_DATA ${MASON_PREFIX}/share/
+    cp -r $PROJ_LIB ${MASON_PREFIX}/share/
     cp -r $ICU_DATA/*dat ${MASON_PREFIX}/share/icu/
     find ${MASON_PREFIX} -name "*.pyc" -exec rm {} \;
 }

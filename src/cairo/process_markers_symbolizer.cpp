@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ struct vector_markers_dispatch_cairo  : public vector_markers_dispatch<Detector>
                                   double scale_factor,
                                   feature_impl & feature,
                                   mapnik::attributes const& vars,
-                                  bool snap_to_pixels,
+                                  bool /* snap_to_pixels */, // only used in agg renderer currently
                                   RendererContext const& renderer_context)
     : vector_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
         path_(path),

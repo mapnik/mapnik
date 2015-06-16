@@ -5,6 +5,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #pragma GCC diagnostic ignored "-Wredeclared-class-member"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/assign/list_of.hpp>
 #include <boost/bimap.hpp>
 #pragma GCC diagnostic pop

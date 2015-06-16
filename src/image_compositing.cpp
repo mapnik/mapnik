@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,11 +24,15 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
+#include <mapnik/safe_cast.hpp>
+#include <mapnik/util/const_rendering_buffer.hpp>
 
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #pragma GCC diagnostic ignored "-Wredeclared-class-member"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/assign/list_of.hpp>
 #include <boost/bimap.hpp>
 #pragma GCC diagnostic pop
@@ -123,31 +127,6 @@ For example, if you generate some pattern with AGG (premultiplied) and would lik
 
 */
 
-namespace detail {
-
-// non-mutable rendering_buffer implementation
-template <typename T>
-struct rendering_buffer
-{
-    using image_type = T;
-    using pixel_type = typename image_type::pixel_type;
-    using row_data = agg::const_row_info<uint8_t>;
-
-    rendering_buffer(T const& data)
-        : data_(data) {}
-
-    uint8_t const* buf() const { return data_.bytes(); }
-    unsigned width() const { return data_.width();}
-    unsigned height() const { return data_.height();}
-    int stride() const { return data_.row_size();}
-    uint8_t const* row_ptr(int, int y, unsigned) {return row_ptr(y);}
-    uint8_t const* row_ptr(int y) const { return reinterpret_cast<uint8_t const*>(data_.get_row(y)); }
-    row_data row (int y) const { return row_data(0, data_.width() - 1, row_ptr(y)); }
-    image_type const& data_;
-};
-
-} // end detail ns
-
 template <>
 MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_mode_e mode,
                float opacity,
@@ -156,16 +135,16 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
 {
     using color = agg::rgba8;
     using order = agg::order_rgba;
-    using const_rendering_buffer = detail::rendering_buffer<image_rgba8>;
+    using const_rendering_buffer = util::rendering_buffer<image_rgba8>;
     using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_type = agg::renderer_base<pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.bytes(),dst.width(),dst.height(),dst.row_size());
+    agg::rendering_buffer dst_buffer(dst.bytes(),safe_cast<unsigned>(dst.width()),safe_cast<unsigned>(dst.height()),safe_cast<int>(dst.row_size()));
     const_rendering_buffer src_buffer(src);
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
-    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32, const_rendering_buffer, agg::pixel32_type> pixf_mask(src_buffer);
+    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_pre, const_rendering_buffer, agg::pixel32_type> pixf_mask(src_buffer);
 #ifdef MAPNIK_DEBUG
     if (!src.get_premultiplied())
     {
@@ -177,21 +156,21 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
     }
 #endif
     renderer_type ren(pixf);
-    ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
+    ren.blend_from(pixf_mask,0,dx,dy,safe_cast<agg::cover_type>(255*opacity));
 }
 
 template <>
-MAPNIK_DECL void composite(image_gray32f & dst, image_gray32f const& src, composite_mode_e mode,
-               float opacity,
+MAPNIK_DECL void composite(image_gray32f & dst, image_gray32f const& src, composite_mode_e /*mode*/,
+               float /*opacity*/,
                int dx,
                int dy)
 {
-    using const_rendering_buffer = detail::rendering_buffer<image_gray32f>;
+    using const_rendering_buffer = util::rendering_buffer<image_gray32f>;
     using src_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, const_rendering_buffer, 1, 0>;
     using dst_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, agg::rendering_buffer, 1, 0>;
     using renderer_type = agg::renderer_base<dst_pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.bytes(),dst.width(),dst.height(),dst.width());
+    agg::rendering_buffer dst_buffer(dst.bytes(),safe_cast<unsigned>(dst.width()),safe_cast<unsigned>(dst.height()),safe_cast<int>(dst.width()));
     const_rendering_buffer src_buffer(src);
     dst_pixfmt_type pixf(dst_buffer);
     src_pixfmt_type pixf_mask(src_buffer);

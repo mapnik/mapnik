@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -84,8 +84,8 @@ template <typename T>
 struct get_id
 {
     using feature_type = T;
-    using result_type = int;
-    int operator() (feature_type const& f) const
+    using result_type = mapnik::value_integer;
+    result_type operator() (feature_type const& f) const
     {
         return f.id();
     }

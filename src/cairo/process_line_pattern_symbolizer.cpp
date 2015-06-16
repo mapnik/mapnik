@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,8 +43,8 @@ struct cairo_renderer_process_visitor_l
     cairo_renderer_process_visitor_l(renderer_common const& common,
                                    line_pattern_symbolizer const& sym,
                                    mapnik::feature_impl & feature,
-                                   unsigned & width,
-                                   unsigned & height)
+                                   std::size_t & width,
+                                   std::size_t & height)
         : common_(common),
           sym_(sym),
           feature_(feature),
@@ -81,8 +81,8 @@ struct cairo_renderer_process_visitor_l
     renderer_common const& common_;
     line_pattern_symbolizer const& sym_;
     mapnik::feature_impl & feature_;
-    unsigned & width_;
-    unsigned & height_;
+    std::size_t & width_;
+    std::size_t & height_;
 };
 
 template <typename T>
@@ -106,8 +106,8 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (marker->is<mapnik::marker_null>()) return;
 
-    unsigned width = marker->width();
-    unsigned height = marker->height();
+    std::size_t width = marker->width();
+    std::size_t height = marker->height();
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);

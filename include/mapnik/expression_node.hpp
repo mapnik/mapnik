@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,8 +86,8 @@ struct unary_function_call
 {
     using argument_type = expr_node;
     unary_function_call() = default;
-    unary_function_call(unary_function_impl fun, argument_type const& arg)
-        : fun(fun), arg(arg) {}
+    unary_function_call(unary_function_impl _fun, argument_type const& _arg)
+        : fun(_fun), arg(_arg) {}
 
     unary_function_impl fun;
     argument_type arg;
@@ -97,8 +97,8 @@ struct binary_function_call
 {
     using argument_type = expr_node;
     binary_function_call() = default;
-    binary_function_call(binary_function_impl fun, argument_type const& arg1, argument_type const& arg2)
-        : fun(fun), arg1(arg1), arg2(arg2) {}
+    binary_function_call(binary_function_impl _fun, argument_type const& _arg1, argument_type const& _arg2)
+        : fun(_fun), arg1(_arg1), arg2(_arg2) {}
     binary_function_impl fun;
     argument_type arg1;
     argument_type arg2;

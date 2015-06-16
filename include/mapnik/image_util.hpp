@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,9 @@
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
 #pragma GCC diagnostic pop
@@ -194,12 +197,6 @@ MAPNIK_DECL void fill (image<gray64s_t>  & data, T const&);
 
 template <typename T>
 MAPNIK_DECL void fill (image<gray64f_t> & data, T const&);
-
-// SET RECTANGLE
-MAPNIK_DECL void set_rectangle (image_any & dst, image_any const& src, int x = 0, int y = 0);
-
-template <typename T>
-MAPNIK_DECL void set_rectangle (T & dst, T const& src, int x = 0, int y = 0);
 
 // CHECK BOUNDS
 template <typename T>

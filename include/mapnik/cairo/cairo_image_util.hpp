@@ -41,8 +41,8 @@ static inline void cairo_image_to_rgba8(mapnik::image_rgba8 & data,
         throw std::runtime_error("Unable to convert this Cairo format to rgba8 image");
     }
 
-    if (cairo_image_surface_get_width(&*surface) != data.width() ||
-        cairo_image_surface_get_height(&*surface) != data.height())
+    if (cairo_image_surface_get_width(&*surface) != static_cast<int>(data.width()) ||
+        cairo_image_surface_get_height(&*surface) != static_cast<int>(data.height()))
     {
         throw std::runtime_error("Mismatch in dimensions: size of image must match side of cairo surface");
     }

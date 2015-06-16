@@ -40,7 +40,7 @@ public:
     {
     }
 
-    console_report(std::ostream & s) : s(s)
+    console_report(std::ostream & _s) : s(_s)
     {
     }
 
@@ -68,7 +68,7 @@ public:
 class html_report
 {
 public:
-    html_report(std::ostream & s) : s(s)
+    html_report(std::ostream & _s) : s(_s)
     {
     }
 

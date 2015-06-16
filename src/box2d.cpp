@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/safe_cast.hpp>
 
 // stl
 #include <stdexcept>
@@ -32,6 +33,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/fusion/include/adapt_adt.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_adapt_adt_attributes.hpp>
@@ -43,10 +46,10 @@
 BOOST_FUSION_ADAPT_TPL_ADT(
     (T),
     (mapnik::box2d)(T),
-    (T, T, obj.minx(), obj.set_minx(val))
-    (T, T, obj.miny(), obj.set_miny(val))
-    (T, T, obj.maxx(), obj.set_maxx(val))
-    (T, T, obj.maxy(), obj.set_maxy(val)))
+    (T, T, obj.minx(), obj.set_minx(mapnik::safe_cast<T>(val)))
+    (T, T, obj.miny(), obj.set_miny(mapnik::safe_cast<T>(val)))
+    (T, T, obj.maxx(), obj.set_maxx(mapnik::safe_cast<T>(val)))
+    (T, T, obj.maxy(), obj.set_maxy(mapnik::safe_cast<T>(val))))
 
 namespace mapnik
 {

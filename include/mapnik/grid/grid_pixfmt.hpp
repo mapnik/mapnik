@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,9 +24,15 @@
 #define MAPNIK_GRID_PIXFMT_HPP
 
 #include <string>
+#include <mapnik/grid/grid_rendering_buffer.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include "agg_basics.h"
 #include <mapnik/grid/grid_pixel.hpp>
-#include <mapnik/grid/grid_rendering_buffer.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

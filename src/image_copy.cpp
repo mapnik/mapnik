@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,13 +24,7 @@
 #include <mapnik/image_copy.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
-
-// boost
-#include <boost/numeric/conversion/cast.hpp>
-
-using boost::numeric_cast;
-using boost::numeric::positive_overflow;
-using boost::numeric::negative_overflow;
+#include <mapnik/safe_cast.hpp>
 
 namespace mapnik
 {
@@ -56,23 +50,12 @@ struct visitor_image_copy
     template <typename T1>
     T0 operator() (T1 const& src)
     {
-        T0 dst(src.width(), src.height(), false);
-        for (unsigned y = 0; y < dst.height(); ++y)
+        T0 dst(safe_cast<int>(src.width()), safe_cast<int>(src.height()), false);
+        for (std::size_t y = 0; y < dst.height(); ++y)
         {
-            for (unsigned x = 0; x < dst.width(); ++x)
+            for (std::size_t x = 0; x < dst.width(); ++x)
             {
-                try
-                {
-                    dst(x,y) = numeric_cast<dst_type>(src(x,y));
-                }
-                catch(negative_overflow&)
-                {
-                    dst(x,y) = std::numeric_limits<dst_type>::min();
-                }
-                catch(positive_overflow&)
-                {
-                    dst(x,y) = std::numeric_limits<dst_type>::max();
-                }
+                dst(x,y) = safe_cast<dst_type>(src(x,y));
             }
         }
         return T0(std::move(dst));
@@ -112,27 +95,16 @@ struct visitor_image_copy_so
     {
         double src_offset = src.get_offset();
         double src_scaling = src.get_scaling();
-        T0 dst(src.width(), src.height(), false);
+        T0 dst(safe_cast<int>(src.width()), safe_cast<int>(src.height()), false);
         dst.set_scaling(scaling_);
         dst.set_offset(offset_);
-        for (unsigned y = 0; y < dst.height(); ++y)
+        for (std::size_t y = 0; y < dst.height(); ++y)
         {
-            for (unsigned x = 0; x < dst.width(); ++x)
+            for (std::size_t x = 0; x < dst.width(); ++x)
             {
-                double scaled_src_val = (numeric_cast<double>(src(x,y)) * src_scaling) + src_offset;
+                double scaled_src_val = (safe_cast<double>(src(x,y)) * src_scaling) + src_offset;
                 double dst_val = (scaled_src_val - offset_) / scaling_;
-                try
-                {
-                    dst(x,y) = numeric_cast<dst_type>(dst_val);
-                }
-                catch(negative_overflow&)
-                {
-                    dst(x,y) = std::numeric_limits<dst_type>::min();
-                }
-                catch(positive_overflow&)
-                {
-                    dst(x,y) = std::numeric_limits<dst_type>::max();
-                }
+                dst(x,y) = safe_cast<dst_type>(dst_val);
             }
         }
         return T0(std::move(dst));

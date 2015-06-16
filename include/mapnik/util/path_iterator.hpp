@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -111,7 +111,7 @@ private:
 
     void increment()
     {
-        std::get<0>(v_) = vertices_->cont_.get_vertex(pos_++, &std::get<1>(v_), &std::get<2>(v_));
+        std::get<0>(v_) = vertices_->cont_.get_vertex(static_cast<unsigned>(pos_++), &std::get<1>(v_), &std::get<2>(v_));
     }
 
     bool equal( path_iterator const& other) const

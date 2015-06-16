@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -131,9 +131,9 @@ struct grid_render_marker_visitor
     grid_render_marker_visitor(buffer_type & pixmap,
                                std::unique_ptr<grid_rasterizer> const& ras_ptr,
                                renderer_common const& common,
-                               mapnik::feature_impl const& feature, 
-                               pixel_position const& pos, 
-                               agg::trans_affine const& tr, 
+                               mapnik::feature_impl const& feature,
+                               pixel_position const& pos,
+                               agg::trans_affine const& tr,
                                double opacity)
         : pixmap_(pixmap),
           ras_ptr_(ras_ptr),
@@ -208,23 +208,23 @@ struct grid_render_marker_visitor
                                   boost::math::iround(pos_.y - cy));
         }
     }
-           
+
   private:
     buffer_type & pixmap_;
     std::unique_ptr<grid_rasterizer> const& ras_ptr_;
     renderer_common const& common_;
-    mapnik::feature_impl const& feature_; 
+    mapnik::feature_impl const& feature_;
     pixel_position const& pos_;
     agg::trans_affine const& tr_;
     double opacity_;
 };
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature, 
-                                     pixel_position const& pos, 
-                                     marker const& marker, 
-                                     agg::trans_affine const& tr, 
-                                     double opacity, 
+void grid_renderer<T>::render_marker(mapnik::feature_impl const& feature,
+                                     pixel_position const& pos,
+                                     marker const& marker,
+                                     agg::trans_affine const& tr,
+                                     double opacity,
                                      composite_mode_e /*comp_op*/)
 {
     grid_render_marker_visitor<buffer_type> visitor(pixmap_,

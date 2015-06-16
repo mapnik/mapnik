@@ -90,7 +90,7 @@ struct sleeve
 };
 
 template <typename Geometry>
-struct MAPNIK_DECL simplify_converter
+struct simplify_converter
 {
 public:
     simplify_converter(Geometry & geom)

@@ -50,7 +50,7 @@ struct geometry_centroid
         return false;
     }
 
-    result_type operator() (geometry_collection<T> const& collection) const
+    result_type operator() (geometry_collection<T> const&) const
     {
         return false;
     }

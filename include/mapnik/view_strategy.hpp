@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,11 @@
 
 // mapnik
 #include <mapnik/view_transform.hpp>
-
+#include <mapnik/safe_cast.hpp>
 // boost
 #include <boost/geometry/core/coordinate_type.hpp>
 #include <boost/geometry/core/access.hpp>
-#include <boost/numeric/conversion/cast.hpp>
+
 
 namespace mapnik
 {
@@ -46,8 +46,8 @@ struct view_strategy
         double x = boost::geometry::get<0>(p1);
         double y = boost::geometry::get<1>(p1);
         tr_.forward(&x,&y);
-        boost::geometry::set<0>(p2, boost::numeric_cast<coordinate_type>(x));
-        boost::geometry::set<1>(p2, boost::numeric_cast<coordinate_type>(y));
+        boost::geometry::set<0>(p2, safe_cast<coordinate_type>(x));
+        boost::geometry::set<1>(p2, safe_cast<coordinate_type>(y));
         return true;
     }
 

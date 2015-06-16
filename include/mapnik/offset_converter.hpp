@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@ namespace mapnik
 {
 
 template <typename Geometry>
-struct MAPNIK_DECL offset_converter
+struct offset_converter
 {
     using size_type = std::size_t;
 
@@ -303,7 +303,7 @@ private:
         std::vector<vertex2d> points;
         std::vector<vertex2d> close_points;
         bool is_polygon = false;
-        int cpt = 0;
+        std::size_t cpt = 0;
         v0.cmd = geom_.vertex(&v0.x, &v0.y);
         v1.x = v0.x;
         v1.y = v0.y;
@@ -344,7 +344,7 @@ private:
         double v_x1x2 = v2.x - v1.x;
         double v_y1y2 = v2.y - v1.y;
 
-        if (is_polygon) 
+        if (is_polygon)
         {
             v_x1x0 = close_points[cpt].x - v1.x;
             v_y1y0 = close_points[cpt].y - v1.y;

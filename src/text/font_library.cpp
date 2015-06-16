@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/text/font_library.hpp>
+#include <mapnik/safe_cast.hpp>
 
 // stl
 #include <cstdlib>
@@ -37,19 +38,19 @@ extern "C"
 
 namespace {
 
-void* _Alloc_Func(FT_Memory memory, long size)
+void* _Alloc_Func(FT_Memory, long size)
 {
-    return std::malloc(size);
+    return std::malloc(mapnik::safe_cast<std::size_t>(size));
 }
 
-void _Free_Func(FT_Memory memory, void *block)
+void _Free_Func(FT_Memory, void *block)
 {
     std::free(block);
 }
 
-void* _Realloc_Func(FT_Memory memory, long cur_size, long new_size, void* block)
+void* _Realloc_Func(FT_Memory, long /*cur_size*/, long new_size, void* block)
 {
-    return std::realloc(block, new_size);
+    return std::realloc(block, mapnik::safe_cast<std::size_t>(new_size));
 }
 
 }

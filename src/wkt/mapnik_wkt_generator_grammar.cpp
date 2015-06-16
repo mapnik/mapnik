@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 namespace mapnik { namespace wkt {
 
 using sink_type = std::back_insert_iterator<std::string>;
-template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double>, double >;
-template struct wkt_generator_grammar_int<sink_type, mapnik::geometry::geometry<std::int64_t>, std::int64_t >;
+template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double>>;
+template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<std::int64_t>>;
 
 }}

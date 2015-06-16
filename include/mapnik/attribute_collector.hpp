@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,6 +42,9 @@
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/algorithm/string/replace.hpp>
 #pragma GCC diagnostic pop
 
@@ -274,8 +277,8 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
     }
 
     // get indexed column names
-    int start = get<value_integer>(sym, keys::start_column);
-    int end = start + get<value_integer>(sym, keys::num_columns);
+    value_integer start = get<value_integer>(sym, keys::start_column);
+    value_integer end = start + get<value_integer>(sym, keys::num_columns);
     for (auto const& col_name : group_columns)
     {
         if (expand_index_columns_ && col_name.find('%') != std::string::npos)
@@ -286,7 +289,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
             if (col_name.size() > 1)
             {
                 // Indexed column name. add column name for each index value.
-                for (int col_idx = start; col_idx < end; ++col_idx)
+                for (value_integer col_idx = start; col_idx < end; ++col_idx)
                 {
                     std::string col_idx_str;
                     if (mapnik::util::to_string(col_idx_str,col_idx))

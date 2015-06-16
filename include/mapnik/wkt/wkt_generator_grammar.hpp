@@ -33,6 +33,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
@@ -86,66 +89,52 @@ struct wkt_coordinate_policy : karma::real_policies<T>
     }
 };
 
+template <typename T>
+struct coordinate_generator;
+
+template <>
+struct coordinate_generator<double>
+{
+    using generator = karma::real_generator<double, detail::wkt_coordinate_policy<double> >;
+};
+
+template <>
+struct coordinate_generator<std::int64_t>
+{
+    using generator = karma::int_generator<std::int64_t>;
+};
+
 }
 
-template <typename OutputIterator, typename Geometry, typename T>
+template <typename OutputIterator, typename Geometry>
 struct wkt_generator_grammar :
     karma::grammar<OutputIterator, Geometry const& ()>
 {
+    using coord_type = typename Geometry::value_type;
     wkt_generator_grammar();
     // rules
     karma::rule<OutputIterator, Geometry const&()> geometry;
     karma::rule<OutputIterator, karma::locals<mapnik::geometry::geometry_types>, Geometry const&() > geometry_dispatch;
-    karma::rule<OutputIterator, geometry::geometry<T> const&()> point;
-    karma::rule<OutputIterator, geometry::point<T> const&()> point_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const&()> linestring;
-    karma::rule<OutputIterator, geometry::line_string<T> const&()> linestring_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const&()> polygon;
-    karma::rule<OutputIterator, geometry::polygon<T> const&()> polygon_coord;
-    karma::rule<OutputIterator, geometry::linear_ring<T> const&()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<T> > const&()> interior_ring_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> multi_point;
-    karma::rule<OutputIterator, geometry::multi_point<T> const& ()> multi_point_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> multi_linestring;
-    karma::rule<OutputIterator, geometry::multi_line_string<T> const& ()> multi_linestring_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> multi_polygon;
-    karma::rule<OutputIterator, geometry::multi_polygon<T> const& ()> multi_polygon_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> geometry_collection;
-    karma::rule<OutputIterator, geometry::geometry_collection<T> const& ()> geometries;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const&()> point;
+    karma::rule<OutputIterator, geometry::point<coord_type> const&()> point_coord;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const&()> linestring;
+    karma::rule<OutputIterator, geometry::line_string<coord_type> const&()> linestring_coord;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const&()> polygon;
+    karma::rule<OutputIterator, geometry::polygon<coord_type> const&()> polygon_coord;
+    karma::rule<OutputIterator, geometry::linear_ring<coord_type> const&()> exterior_ring_coord;
+    karma::rule<OutputIterator, std::vector<geometry::linear_ring<coord_type> > const&()> interior_ring_coord;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const& ()> multi_point;
+    karma::rule<OutputIterator, geometry::multi_point<coord_type> const& ()> multi_point_coord;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const& ()> multi_linestring;
+    karma::rule<OutputIterator, geometry::multi_line_string<coord_type> const& ()> multi_linestring_coord;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const& ()> multi_polygon;
+    karma::rule<OutputIterator, geometry::multi_polygon<coord_type> const& ()> multi_polygon_coord;
+    karma::rule<OutputIterator, geometry::geometry<coord_type> const& ()> geometry_collection;
+    karma::rule<OutputIterator, geometry::geometry_collection<coord_type> const& ()> geometries;
     boost::phoenix::function<detail::get_type<Geometry> > geometry_type;
     karma::symbols<mapnik::geometry::geometry_types, char const*> empty;
     //
-    karma::real_generator<T, detail::wkt_coordinate_policy<T> > coordinate;
-};
-
-template <typename OutputIterator, typename Geometry, typename T>
-struct wkt_generator_grammar_int :
-    karma::grammar<OutputIterator, Geometry const& ()>
-{
-    wkt_generator_grammar_int();
-    // rules
-    karma::rule<OutputIterator, Geometry const&()> geometry;
-    karma::rule<OutputIterator, karma::locals<mapnik::geometry::geometry_types>, Geometry const&() > geometry_dispatch;
-    karma::rule<OutputIterator, geometry::geometry<T> const&()> point;
-    karma::rule<OutputIterator, geometry::point<T> const&()> point_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const&()> linestring;
-    karma::rule<OutputIterator, geometry::line_string<T> const&()> linestring_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const&()> polygon;
-    karma::rule<OutputIterator, geometry::polygon<T> const&()> polygon_coord;
-    karma::rule<OutputIterator, geometry::linear_ring<T> const&()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<T> > const&()> interior_ring_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> multi_point;
-    karma::rule<OutputIterator, geometry::multi_point<T> const& ()> multi_point_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> multi_linestring;
-    karma::rule<OutputIterator, geometry::multi_line_string<T> const& ()> multi_linestring_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> multi_polygon;
-    karma::rule<OutputIterator, geometry::multi_polygon<T> const& ()> multi_polygon_coord;
-    karma::rule<OutputIterator, geometry::geometry<T> const& ()> geometry_collection;
-    karma::rule<OutputIterator, geometry::geometry_collection<T> const& ()> geometries;
-    boost::phoenix::function<detail::get_type<Geometry> > geometry_type;
-    karma::symbols<mapnik::geometry::geometry_types, char const*> empty;
-    //
-    karma::int_generator<T> coordinate;
+    typename detail::coordinate_generator<coord_type>::generator coordinate;
 };
 
 }}

@@ -246,10 +246,10 @@ public:
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
         mapnik::geometry::multi_polygon<double> mp;
-        for (auto const& geom: result)
+        for (auto const& _geom: result)
         {
             //std::clog << boost::geometry::dsv(geom) << "\n";
-            mp.emplace_back(geom);
+            mp.emplace_back(_geom);
         }
         mapnik::geometry::geometry<double> geom2(mp);
         auto env = mapnik::geometry::envelope(geom2);
@@ -287,9 +287,9 @@ public:
             std::deque<mapnik::geometry::polygon<double> > result;
             boost::geometry::intersection(extent_,poly,result);
             unsigned count = 0;
-            for (auto const& geom : result)
+            for (auto const& _geom : result)
             {
-                mapnik::geometry::polygon_vertex_adapter<double> va(geom);
+                mapnik::geometry::polygon_vertex_adapter<double> va(_geom);
                 unsigned cmd;
                 double x,y;
                 while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END) {

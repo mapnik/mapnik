@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@
 #include <mapnik/geometry_transform.hpp>
 #include <mapnik/geometry_to_path.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-
+#include <mapnik/safe_cast.hpp>
 // boost
 #include <boost/spirit/include/karma.hpp>
 
@@ -59,8 +59,8 @@ struct coord_transformer
         calc_type z = 0.0;
         if (!prj_trans_.backward(x, y, z)) return false;
         tr_.forward(&x,&y);
-        boost::geometry::set<0>(p2, boost::numeric_cast<coordinate_type>(x));
-        boost::geometry::set<1>(p2, boost::numeric_cast<coordinate_type>(y));
+        boost::geometry::set<0>(p2, safe_cast<coordinate_type>(x));
+        boost::geometry::set<1>(p2, safe_cast<coordinate_type>(y));
         return true;
     }
 

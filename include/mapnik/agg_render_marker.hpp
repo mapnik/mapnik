@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,8 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/safe_cast.hpp>
+#include <mapnik/util/const_rendering_buffer.hpp>
 
 // agg
 #include "agg_color_rgba.h"
@@ -70,7 +72,9 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
                           float scale_factor, bool snap_to_pixels)
 {
     using color_type = agg::rgba8;
-    using pixfmt_pre = agg::pixfmt_rgba32_pre;
+    using const_rendering_buffer = util::rendering_buffer<image_rgba8>;
+    using pixfmt_pre = agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_pre, const_rendering_buffer, agg::pixel32_type>;
+
     agg::scanline_u8 sl;
     double width  = src.width();
     double height = src.height();
@@ -80,22 +84,22 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
         && (std::fabs(0.0 - tr.shx) < agg::affine_epsilon)
         && (std::fabs(1.0 - tr.sy) < agg::affine_epsilon))
     {
-        agg::rendering_buffer src_buffer((unsigned char *)src.bytes(),src.width(),src.height(),src.row_size());
+        const_rendering_buffer src_buffer(src);
         pixfmt_pre pixf_mask(src_buffer);
         if (snap_to_pixels)
         {
             renb.blend_from(pixf_mask,
                             0,
-                            std::floor(tr.tx + .5),
-                            std::floor(tr.ty + .5),
+                            static_cast<int>(std::floor(tr.tx + .5)),
+                            static_cast<int>(std::floor(tr.ty + .5)),
                             unsigned(255*opacity));
         }
         else
         {
             renb.blend_from(pixf_mask,
                             0,
-                            tr.tx,
-                            tr.ty,
+                            static_cast<int>(tr.tx),
+                            static_cast<int>(tr.ty),
                             unsigned(255*opacity));
         }
     }
@@ -121,11 +125,8 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
         agg::span_allocator<color_type> sa;
         agg::image_filter_lut filter;
         filter.calculate(agg::image_filter_bilinear(), true);
-        agg::rendering_buffer marker_buf((unsigned char *)src.bytes(),
-                                         src.width(),
-                                         src.height(),
-                                         src.row_size());
-        pixfmt_pre pixf(marker_buf);
+        const_rendering_buffer src_buffer(src);
+        pixfmt_pre pixf(src_buffer);
         img_accessor_type ia(pixf);
         agg::trans_affine final_tr(p, 0, 0, width, height);
         if (snap_to_pixels)

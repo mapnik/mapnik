@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2013 Artem Pavlenko
+# Copyright (C) 2015 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# 
+#
 
 import os
 import glob
@@ -33,7 +33,7 @@ source = Split(
     """
     )
 
-headers = ['#plugins/input/shape'] + env['CPPPATH'] 
+headers = ['#plugins/input/shape'] + env['CPPPATH']
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
