@@ -53,9 +53,6 @@ struct matrix_node
     expr_node e_;
     expr_node f_;
 
-    explicit matrix_node(double const* m)
-        : a_(m[0]), b_(m[1]), c_(m[2]), d_(m[3]), e_(m[4]), f_(m[5]) {}
-
     template <typename T>
     explicit matrix_node(T const& m)
         : a_(m.sx), b_(m.shy), c_(m.shx), d_(m.sy), e_(m.tx), f_(m.ty) {}
