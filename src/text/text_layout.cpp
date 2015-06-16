@@ -214,12 +214,12 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
     shape_text(line);
 
     double scaled_wrap_width = wrap_width_ * scale_factor_;
-    if (!scaled_wrap_width || line.width() < scaled_wrap_width)
+    if (scaled_wrap_width <= 0 || line.width() < scaled_wrap_width)
     {
         add_line(std::move(line));
         return;
     }
-    if (text_ratio_)
+    if (text_ratio_ > 0)
     {
         double wrap_at;
         double string_width = line.width();

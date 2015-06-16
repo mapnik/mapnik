@@ -30,9 +30,14 @@
 #define MINIZ_NO_ARCHIVE_APIS
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 extern "C" {
 #include "miniz.c"
 }
+#pragma GCC diagnostic pop
+
 // zlib
 #include <zlib.h>
 
