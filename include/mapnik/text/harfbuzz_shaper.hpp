@@ -121,7 +121,7 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                auto const& pos = positions[i];
+                auto const& gpos = positions[i];
                 auto const& glyph = glyphs[i];
                 unsigned char_index = glyph.cluster;
                 glyph_info g(glyph.codepoint,char_index,text_item.format_);
@@ -130,8 +130,8 @@ static void shape_text(text_line & line,
                     g.face = face;
                     g.scale_multiplier = size / face->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
-                    g.unscaled_advance = pos.x_advance;
-                    g.offset.set(pos.x_offset * g.scale_multiplier, pos.y_offset * g.scale_multiplier);
+                    g.unscaled_advance = gpos.x_advance;
+                    g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
                     double tmp_height = g.height();
                     if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
                     width_map[char_index] += g.advance();
