@@ -70,19 +70,19 @@ public:
 
     box2d<double> bounding_box() const
     {
-        double width = bitmap_data_.width();
-        double height = bitmap_data_.height();
-        return box2d<double>(0, 0, width, height);
+        std::size_t width = bitmap_data_.width();
+        std::size_t height = bitmap_data_.height();
+        return box2d<double>(static_cast<double>(0), static_cast<double>(0), static_cast<double>(width), static_cast<double>(height));
     }
 
-    inline std::size_t width() const
+    inline double width() const
     {
-        return bitmap_data_.width();
+        return static_cast<double>(bitmap_data_.width());
     }
 
-    inline std::size_t height() const
+    inline double height() const
     {
-        return bitmap_data_.height();
+        return static_cast<double>(bitmap_data_.height());
     }
 
     image_rgba8 const& get_data() const
@@ -169,7 +169,7 @@ struct get_marker_width_visitor
     template <typename T>
     double operator()(T const& data) const
     {
-        return static_cast<double>(data.width());
+        return data.width();
     }
 };
 
@@ -178,7 +178,7 @@ struct get_marker_height_visitor
     template <typename T>
     double operator()(T const& data) const
     {
-        return static_cast<double>(data.height());
+        return data.height();
     }
 };
 

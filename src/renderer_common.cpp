@@ -25,6 +25,7 @@
 #include <mapnik/map.hpp>
 #include <mapnik/request.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/safe_cast.hpp>
 
 namespace mapnik {
 

@@ -30,6 +30,8 @@
 
 #define USE_DENSE_HASH_MAP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #ifdef USE_DENSE_HASH_MAP
     #include <mapnik/sparsehash/dense_hash_map>
     using rgba_hash_table = google::dense_hash_map<unsigned int, unsigned char>;
@@ -37,6 +39,7 @@
     #include <boost/unordered_map.hpp>
     using rgba_hash_table = boost::unordered_map<unsigned int, unsigned char>;
 #endif
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

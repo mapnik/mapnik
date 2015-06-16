@@ -49,10 +49,10 @@
 
 BOOST_FUSION_ADAPT_ADT(
     mapnik::color,
-    (unsigned, unsigned, obj.red(), obj.set_red(val))
-    (unsigned, unsigned, obj.green(), obj.set_green(val))
-    (unsigned, unsigned, obj.blue(), obj.set_blue(val))
-    (unsigned, unsigned, obj.alpha(), obj.set_alpha(val))
+    (unsigned, unsigned, obj.red(), obj.set_red(mapnik::safe_cast<uint8_t>(val)))
+    (unsigned, unsigned, obj.green(), obj.set_green(mapnik::safe_cast<uint8_t>(val)))
+    (unsigned, unsigned, obj.blue(), obj.set_blue(mapnik::safe_cast<uint8_t>(val)))
+    (unsigned, unsigned, obj.alpha(), obj.set_alpha(mapnik::safe_cast<uint8_t>(val)))
     )
 
 namespace mapnik

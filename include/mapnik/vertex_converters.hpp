@@ -325,7 +325,7 @@ struct converters_helper<Dispatcher>
     template <typename Converter>
     static void set(Dispatcher &, std::size_t) {}
     template <typename Geometry, typename Processor>
-    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc)
+    static void forward(Dispatcher &, Geometry & geom, Processor & proc)
     {
         proc.add_path(geom);
     }

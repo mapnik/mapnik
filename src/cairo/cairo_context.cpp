@@ -486,9 +486,9 @@ void cairo_context::add_text(glyph_positions const& pos,
         matrix.y0 = 0;
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
-        pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
+        pixel_position new_pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
         set_color(glyph.format->fill, glyph.format->text_opacity);
-        show_glyph(glyph.glyph_index, pixel_position(sx + pos.x, sy - pos.y));
+        show_glyph(glyph.glyph_index, pixel_position(sx + new_pos.x, sy - new_pos.y));
     }
 
 }

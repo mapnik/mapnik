@@ -280,9 +280,9 @@ void render_group_symbolizer(group_symbolizer const& sym,
 
     // run feature or sub feature through the group rules & symbolizers
     // for each index value in the range
-    int start = get<value_integer>(sym, keys::start_column);
-    int end = start + get<value_integer>(sym, keys::num_columns);
-    for (int col_idx = start; col_idx < end; ++col_idx)
+    value_integer start = get<value_integer>(sym, keys::start_column);
+    value_integer end = start + get<value_integer>(sym, keys::num_columns);
+    for (value_integer col_idx = start; col_idx < end; ++col_idx)
     {
         // create sub feature with indexed column values
         feature_ptr sub_feature = feature_factory::create(sub_feature_ctx, col_idx);
@@ -295,7 +295,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 if (col_name.size() == 1)
                 {
                     // column name is '%' by itself, so give the index as the value
-                    sub_feature->put(col_name, (value_integer)col_idx);
+                    sub_feature->put(col_name, col_idx);
                 }
                 else
                 {

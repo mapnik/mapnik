@@ -84,8 +84,8 @@ template <typename T>
 struct get_id
 {
     using feature_type = T;
-    using result_type = int;
-    int operator() (feature_type const& f) const
+    using result_type = mapnik::value_integer;
+    result_type operator() (feature_type const& f) const
     {
         return f.id();
     }

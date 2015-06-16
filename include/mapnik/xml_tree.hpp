@@ -36,7 +36,7 @@ namespace mapnik
 class MAPNIK_DECL xml_tree
 {
 public:
-    xml_tree(std::string const& encoding="utf8");
+    xml_tree();
     void set_filename(std::string const& fn);
     std::string const& filename() const;
     xml_node &root();

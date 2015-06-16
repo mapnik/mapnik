@@ -37,7 +37,10 @@
 #include <mapnik/text/font_feature_settings.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>
@@ -166,7 +169,7 @@ struct do_xml_attribute_cast<mapnik::enumeration<T,MAX> >
 template <>
 struct do_xml_attribute_cast<mapnik::color>
 {
-    static inline boost::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
+    static inline boost::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
     {
         return parse_color(source);
     }
@@ -176,7 +179,7 @@ struct do_xml_attribute_cast<mapnik::color>
 template <>
 struct do_xml_attribute_cast<std::string>
 {
-    static inline boost::optional<std::string> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<std::string> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
     {
         return boost::optional<std::string>(source);
     }
@@ -206,7 +209,7 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
 template <>
 struct do_xml_attribute_cast<mapnik::font_feature_settings>
 {
-    static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
+    static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
     {
         return mapnik::font_feature_settings(source);
     }

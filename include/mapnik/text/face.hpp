@@ -87,7 +87,7 @@ public:
     void set_character_sizes(double size);
     void set_unscaled_character_sizes();
 
-    unsigned size() const { return faces_.size(); }
+    std::size_t size() const { return faces_.size(); }
     iterator begin() { return faces_.begin(); }
     iterator end() { return faces_.end(); }
 private:

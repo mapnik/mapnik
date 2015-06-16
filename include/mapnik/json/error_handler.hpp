@@ -25,7 +25,10 @@
 
 #include <string>
 #include <sstream>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/home/support/info.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 

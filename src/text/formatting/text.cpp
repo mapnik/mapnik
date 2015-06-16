@@ -46,7 +46,7 @@ void text_node::to_xml(ptree & xml) const
     new_node.put_value(to_expression_string(*text_));
 }
 
-node_ptr text_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
+node_ptr text_node::from_xml(xml_node const& xml, fontset_map const&)
 {
     return std::make_shared<text_node>(xml.get_value<expression_ptr>());
 }

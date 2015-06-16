@@ -34,9 +34,12 @@
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/box2d.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/interprocess/mapped_region.hpp>
-#include <mapnik/mapped_memory_cache.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
+#include <mapnik/mapped_memory_cache.hpp>
 #endif
 #include <mapnik/util/noncopyable.hpp>
 

@@ -80,7 +80,7 @@ using boost::optional;
 
 constexpr unsigned name2int(const char *str, int off = 0)
 {
-    return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ str[off];
+    return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ static_cast<unsigned>(str[off]);
 }
 
 class map_parser : util::noncopyable
@@ -147,8 +147,7 @@ private:
 
 void load_map(Map & map, std::string const& filename, bool strict, std::string base_path)
 {
-    // TODO - use xml encoding?
-    xml_tree tree("utf8");
+    xml_tree tree;
     tree.set_filename(filename);
     read_xml(filename, tree.root());
     map_parser parser(map, strict, filename);
@@ -157,8 +156,7 @@ void load_map(Map & map, std::string const& filename, bool strict, std::string b
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string base_path)
 {
-    // TODO - use xml encoding?
-    xml_tree tree("utf8");
+    xml_tree tree;
     if (!base_path.empty())
     {
         read_xml_string(str, tree.root(), base_path); // accept base_path passed into function
@@ -237,7 +235,7 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
             }
             map.set_srs(srs);
 
-            optional<unsigned> buffer_size = map_node.get_opt_attr<unsigned>("buffer-size");
+            optional<int> buffer_size = map_node.get_opt_attr<int>("buffer-size");
             if (buffer_size)
             {
                 map.set_buffer_size(*buffer_size);
@@ -648,7 +646,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             lyr.set_group_by(* group_by);
         }
 
-        optional<unsigned> buffer_size = node.get_opt_attr<unsigned>("buffer-size");
+        optional<int> buffer_size = node.get_opt_attr<int>("buffer-size");
         if (buffer_size)
         {
             lyr.set_buffer_size(*buffer_size);

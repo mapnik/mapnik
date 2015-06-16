@@ -25,7 +25,10 @@
 #include <mapnik/image_filter_grammar.hpp>
 
 // spirit
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/include/phoenix.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

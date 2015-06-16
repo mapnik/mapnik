@@ -47,7 +47,7 @@ struct get_view_height_visitor
 struct get_view_size_visitor
 {
     template <typename T>
-    unsigned operator()(T const& data) const
+    std::size_t operator()(T const& data) const
     {
         return data.size();
     }
@@ -65,7 +65,7 @@ struct get_view_dtype_visitor
 struct get_view_row_size_visitor
 {
     template <typename T>
-    unsigned operator()(T const& data) const
+    std::size_t operator()(T const& data) const
     {
         return data.row_size();
     }

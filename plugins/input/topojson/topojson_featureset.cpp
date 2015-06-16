@@ -132,7 +132,7 @@ struct feature_generator
         {
             index_type index = line.ring;
             index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-            if (arc_index < num_arcs_)
+            if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
             {            
                 auto const& arcs = topo_.arcs[arc_index];
                 double px = 0, py = 0;
@@ -168,7 +168,7 @@ struct feature_generator
             for (auto const& index : multi_line.rings)
             {
                 index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-                if (arc_index < num_arcs_)
+                if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                 {
                     hit = true;
                     double px = 0, py = 0;
@@ -216,7 +216,7 @@ struct feature_generator
                     double px = 0, py = 0;
                     bool reverse = index < 0;
                     index_type arc_index = reverse ? std::abs(index) - 1 : index;
-                    if (arc_index < num_arcs_)
+                    if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                     {
                         hit = true;
                         auto const& arcs = topo_.arcs[arc_index];
@@ -296,7 +296,7 @@ struct feature_generator
                         double px = 0, py = 0;
                         bool reverse = index < 0;
                         index_type arc_index = reverse ? std::abs(index) - 1 : index;
-                        if (arc_index < num_arcs_)
+                        if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                         {
                             hit = true;
                             auto const& arcs = topo_.arcs[arc_index];

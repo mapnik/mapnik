@@ -38,7 +38,7 @@ public:
     virtual void add_expressions(expression_set & output) const;
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);
-    unsigned size() const;
+    std::size_t size() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
 private:
     std::vector<text_symbolizer_properties> list_;

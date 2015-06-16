@@ -29,6 +29,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #undef B0
 #include <boost/geometry/geometries/register/linestring.hpp>
 #include <boost/geometry/geometries/register/point.hpp>

@@ -23,9 +23,14 @@
 #ifndef MAPNIK_GRID_RENDERER_BASE_HPP
 #define MAPNIK_GRID_RENDERER_BASE_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include "agg_renderer_base.h"
-#include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
+#pragma GCC diagnostic pop
+#include <mapnik/grid/grid_pixfmt.hpp>
 
 namespace mapnik {
 

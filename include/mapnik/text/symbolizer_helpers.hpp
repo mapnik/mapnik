@@ -90,7 +90,7 @@ protected:
     view_transform const& t_;
     box2d<double> dims_;
     box2d<double> const& query_extent_;
-    float scale_factor_;
+    double scale_factor_;
 
     //Processing
     // Remaining geometries to be processed.

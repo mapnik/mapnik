@@ -50,10 +50,10 @@ struct visitor_image_copy
     template <typename T1>
     T0 operator() (T1 const& src)
     {
-        T0 dst(src.width(), src.height(), false);
-        for (unsigned y = 0; y < dst.height(); ++y)
+        T0 dst(safe_cast<int>(src.width()), safe_cast<int>(src.height()), false);
+        for (std::size_t y = 0; y < dst.height(); ++y)
         {
-            for (unsigned x = 0; x < dst.width(); ++x)
+            for (std::size_t x = 0; x < dst.width(); ++x)
             {
                 dst(x,y) = safe_cast<dst_type>(src(x,y));
             }
@@ -95,12 +95,12 @@ struct visitor_image_copy_so
     {
         double src_offset = src.get_offset();
         double src_scaling = src.get_scaling();
-        T0 dst(src.width(), src.height(), false);
+        T0 dst(safe_cast<int>(src.width()), safe_cast<int>(src.height()), false);
         dst.set_scaling(scaling_);
         dst.set_offset(offset_);
-        for (unsigned y = 0; y < dst.height(); ++y)
+        for (std::size_t y = 0; y < dst.height(); ++y)
         {
-            for (unsigned x = 0; x < dst.width(); ++x)
+            for (std::size_t x = 0; x < dst.width(); ++x)
             {
                 double scaled_src_val = (safe_cast<double>(src(x,y)) * src_scaling) + src_offset;
                 double dst_val = (scaled_src_val - offset_) / scaling_;

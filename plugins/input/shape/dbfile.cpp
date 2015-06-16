@@ -32,6 +32,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
 #include <boost/spirit/include/qi.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/mapped_region.hpp>

@@ -342,7 +342,7 @@ public:
     }
 
     template <typename T>
-    bool operator()(T const & geo) const
+    bool operator()(T const&) const
     {
         return false;
     }

@@ -126,13 +126,13 @@ struct visitor_create_marker
         return mapnik::marker(mapnik::marker_rgba8(data));
     }
 
-    marker operator() (image_null & data)
+    marker operator() (image_null &)
     {
         throw std::runtime_error("Can not make marker from null image data type");
     }
 
     template <typename T>
-    marker operator() (T & data)
+    marker operator() (T &)
     {
         throw std::runtime_error("Can not make marker from this data type");
     }
