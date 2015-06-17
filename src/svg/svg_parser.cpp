@@ -41,6 +41,9 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/stream.hpp>
 #pragma GCC diagnostic pop
 
 #include <string>
@@ -1086,6 +1089,41 @@ void svg_parser::parse_from_string(std::string const& svg)
     else if (!parse_reader(*this,reader))
     {
         MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+    }
+}
+
+template <typename T>
+int	xmlInputReadCallback(boost::iostreams::stream<T> * stream, char * buffer, int len) {
+    stream->read(buffer,len);
+    return stream->gcount();
+}
+
+template <typename T>
+int	xmlInputCloseCallback(boost::iostreams::stream<T> * stream)
+{
+    if(stream->close())
+    {
+      return 0;
+    }
+    return -1;
+}
+
+template <typename T>
+void svg_parser::parse_from_stream(boost::iostreams::stream<T> const& svg_stream)
+{
+    xmlTextReaderPtr reader = xmlReaderForIO(xmlInputReadCallback<T>,
+                                             xmlInputCloseCallback<T>
+                                             &svg_stream,
+                                             nullptr,
+                                             nullptr,
+                                             (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
+    if (reader == nullptr)
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse SVG";
+    }
+    else if (!parse_reader(*this,reader))
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse SVG";
     }
 }
 
