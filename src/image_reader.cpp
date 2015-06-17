@@ -25,6 +25,8 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/factory.hpp>
 
+#include <iostream>
+
 namespace mapnik
 {
 
@@ -60,6 +62,24 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
             return result_type("webp");
         }
     }
+    
+    // NOTE: Limit search to first 300 bytes.  Totally arbitrary, but don't
+    //       want to search through whole buffer
+    std::cout << "Starting svg test" << std::endl;
+    const size_t max_svg_search = std::min(static_cast<size_t>(300), size);
+    std::cout << "Searching max " << max_svg_search << " bytes " << std::endl;
+    for(int i=0; i < static_cast<signed>(max_svg_search)-4; i++)
+    {
+        if (data[i] == '<' &&
+            (data[i+1] == 's' || data[i+1] == 'S') && 
+            (data[i+2] == 'v' || data[i+2] == 'V') && 
+            (data[i+3] == 'g' || data[i+3] == 'G'))
+        {
+            return result_type("svg");
+        }
+    }
+    std::cout << "Did not find <svg" << std::endl;
+    
     return result_type();
 }
 

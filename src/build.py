@@ -84,6 +84,8 @@ if '-DHAVE_WEBP' in env['CPPDEFINES']:
    lib_env['LIBS'].append('webp')
    enabled_imaging_libraries.append('webp_reader.cpp')
 
+enabled_imaging_libraries.append('svg_reader.cpp')
+
 lib_env['LIBS'].append('xml2')
 
 if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:

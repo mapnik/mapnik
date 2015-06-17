@@ -30,6 +30,9 @@
 #include <mapnik/gradient.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
+// boost
+#include <boost/iostreams/stream.hpp>
+
 // stl
 #include <map>
 
@@ -42,6 +45,7 @@ namespace  mapnik { namespace svg {
         ~svg_parser();
         void parse(std::string const& filename);
         void parse_from_string(std::string const& svg);
+        template <typename T> void parse_from_stream(boost::iostreams::stream<T> const& svg_stream);
         svg_converter_type & path_;
         bool is_defs_;
         std::map<std::string, gradient> gradient_map_;
