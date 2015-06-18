@@ -178,7 +178,7 @@ boost::optional<box2d<double> > svg_reader<T>::bounding_box() const
 }
 
 template <typename T>
-void svg_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
+void svg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
 {
     using pixfmt = agg::pixfmt_rgba32_pre;
     using renderer_base = agg::renderer_base<pixfmt>;
@@ -187,12 +187,11 @@ void svg_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
     agg::scanline_u8 sl;
 
     double opacity = 1;
-    int w = width_;
-    int h = height_;
+    unsigned w = std::min(unsigned(image.width()),width_ - x0);
+    unsigned h = std::min(unsigned(image.height()),height_ - y0);
 
     // 10 pixel buffer to avoid edge clipping of 100% svg's
-    mapnik::image_rgba8 im(w+0,h+0);
-    agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
+    agg::rendering_buffer buf(image.bytes(), image.width(), image.height(), image.row_size());
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
@@ -200,8 +199,10 @@ void svg_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
     mapnik::coord<double,2> c = bbox.center();
     // center the svg marker on '0,0'
     agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+    // Scale if necessary
+    mtx.scale((double)w / width_, (double)h / height_);
     // render the marker at the center of the marker box
-    mtx.translate(0.5 * im.width(), 0.5 * im.height());
+    mtx.translate(0.5 * image.width(), 0.5 * image.height());
 
     mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker->get_data()->source());
     mapnik::svg::svg_path_adapter svg_path(stl_storage);
@@ -213,9 +214,7 @@ void svg_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
 
     svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 
-    demultiply_alpha(im);
-
-    image = im;
+    demultiply_alpha(image);
 }
 
 
