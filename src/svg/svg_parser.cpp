@@ -57,6 +57,7 @@
 
 namespace mapnik { namespace svg {
 
+bool parse_reader(svg_parser & parser,xmlTextReaderPtr reader);
 void process_node(svg_parser & parser,xmlTextReaderPtr reader);
 void start_element(svg_parser & parser,xmlTextReaderPtr reader);
 void end_element(svg_parser & parser,xmlTextReaderPtr reader);
@@ -1091,34 +1092,37 @@ void svg_parser::parse_from_string(std::string const& svg)
     }
 }
 
-template <typename T>
-int	_xmlInputReadCallback(boost::iostreams::stream<T> * stream, char * buffer, int len) {
-    stream->read(buffer,len);
-    return stream->gcount();
+int _xmlInputReadCallback(void * stream, char * buffer, int len) {
+    std::istream *s = reinterpret_cast<std::istream *>(stream);
+    s->read(buffer,len);
+    return s->gcount();
 }
 
 template <typename T>
-int	_xmlInputCloseCallback(boost::iostreams::stream<T> * stream)
+int _xmlInputCloseCallback(void * stream)
 {
-    if(stream->close())
-    {
-      return 0;
+    boost::iostreams::stream<T> *s = reinterpret_cast<boost::iostreams::stream<T> *>(stream);
+    try {
+        s->close();
+        return 0;
     }
-    return -1;
+    catch (...) {
+        return -1;
+    }
 }
 
 template <typename T>
-void svg_parser::parse_from_stream(boost::iostreams::stream<T> const& svg_stream)
+void svg_parser::parse_from_stream(boost::iostreams::stream<T> &svg_stream)
 {
-    xmlTextReaderPtr reader = xmlReaderForIO(_xmlInputReadCallback<T>,
+    xmlTextReaderPtr reader = xmlReaderForIO(_xmlInputReadCallback,
                                              _xmlInputCloseCallback<T>,
-                                             reinterpret_cast<const void *>(&svg_stream),
+                                             reinterpret_cast<void *>(&svg_stream),
                                              nullptr,
                                              nullptr,
                                              (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
     if (reader == nullptr)
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse SVG";
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse SVG XML";
     }
     else if (!parse_reader(*this,reader))
     {
@@ -1126,9 +1130,7 @@ void svg_parser::parse_from_stream(boost::iostreams::stream<T> const& svg_stream
     }
 }
 
-template void svg_parser::parse_from_stream(boost::iostreams::stream<boost::iostreams::file_source> const& svg_stream);
-template void svg_parser::parse_from_stream(boost::iostreams::stream<boost::iostreams::array_source> const& svg_stream);
-
-
+template void svg_parser::parse_from_stream(boost::iostreams::stream<boost::iostreams::file_source> & svg_stream);
+template void svg_parser::parse_from_stream(boost::iostreams::stream<boost::iostreams::array_source> & svg_stream);
 
 }}
