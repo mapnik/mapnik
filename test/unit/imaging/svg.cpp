@@ -12,10 +12,6 @@
 
 TEST_CASE("image class svg features") {
 
-SECTION("test magic number search") {
-    
-} // END SECTION
-
 SECTION("svg_blank")
 {
     std::string imagedata = "";
@@ -29,7 +25,7 @@ SECTION("svg_invalid")
     CHECK(reader.get());
     unsigned width = reader->width();
     unsigned height = reader->height();
-  
+
     CHECK(width == 0);
     CHECK(height == 0);
 }
@@ -41,7 +37,7 @@ SECTION("svg_empty")
     CHECK(reader.get());
     unsigned width = reader->width();
     unsigned height = reader->height();
-  
+
     CHECK(width == 0);
     CHECK(height == 0);
 }
@@ -53,17 +49,17 @@ SECTION("svg_blank")
     CHECK(reader.get());
     unsigned width = reader->width();
     unsigned height = reader->height();
-  
+
     CHECK(width == 100);
     CHECK(height == 100);
-  
+
     mapnik::image_any im = reader->read(0,0,width,height);
-  
+
     mapnik::image_rgba8 raw = im.get<mapnik::image_rgba8>();
 
     std::string pngdata = mapnik::save_to_string<mapnik::image_rgba8>(raw,"png");
-    CHECK(pngdata.length() == 1270 );
-  
+    CHECK(pngdata.length() == 1270);
+
 } // END SECTION
 
 } // END TEST CASE

@@ -147,14 +147,13 @@ void svg_reader<T>::init()
     svg_converter_type svg(svg_path, marker_path->attributes());
     svg_parser p(svg);
     p.parse_from_stream(stream_);
-    //svg.arrange_orientations();
     double lox,loy,hix,hiy;
     svg.bounding_rect(&lox, &loy, &hix, &hiy);
     marker_path->set_bounding_box(lox,loy,hix,hiy);
     marker_path->set_dimensions(svg.width(),svg.height());
-    
+
     marker = std::make_shared<mapnik::marker_svg>(marker_path);
-  
+
     width_=svg.width();
     height_=svg.height();
 }
@@ -174,7 +173,7 @@ unsigned svg_reader<T>::height() const
 template <typename T>
 boost::optional<box2d<double> > svg_reader<T>::bounding_box() const
 {
-    // TODO: return bbox
+    // TODO: does this need to be implemented?
     return boost::optional<box2d<double> >();
 }
 
@@ -190,7 +189,7 @@ void svg_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
     double opacity = 1;
     int w = width_;
     int h = height_;
-    
+
     // 10 pixel buffer to avoid edge clipping of 100% svg's
     mapnik::image_rgba8 im(w+0,h+0);
     agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
@@ -215,9 +214,8 @@ void svg_reader<T>::read(unsigned x0, unsigned y0,image_rgba8& image)
     svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 
     demultiply_alpha(im);
-    
+
     image = im;
-    
 }
 
 
