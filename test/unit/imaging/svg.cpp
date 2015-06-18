@@ -62,7 +62,7 @@ SECTION("svg_blank")
     mapnik::image_rgba8 raw = im.get<mapnik::image_rgba8>();
 
     std::string pngdata = mapnik::save_to_string<mapnik::image_rgba8>(raw,"png");
-    CHECK(pngdata.length() == 1270 )
+    CHECK(pngdata.length() == 1270 );
   
 } // END SECTION
 

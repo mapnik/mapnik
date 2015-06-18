@@ -65,9 +65,7 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
     
     // NOTE: Limit search to first 300 bytes.  Totally arbitrary, but don't
     //       want to search through whole buffer
-    std::cout << "Starting svg test" << std::endl;
     const size_t max_svg_search = std::min(static_cast<size_t>(300), size);
-    std::cout << "Searching max " << max_svg_search << " bytes " << std::endl;
     for(int i=0; i < static_cast<signed>(max_svg_search)-4; i++)
     {
         if (data[i] == '<' &&
@@ -78,7 +76,6 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
             return result_type("svg");
         }
     }
-    std::cout << "Did not find <svg" << std::endl;
     
     return result_type();
 }

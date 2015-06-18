@@ -140,9 +140,6 @@ svg_reader<T>::~svg_reader() {}
 template <typename T>
 void svg_reader<T>::init()
 {
-  
-    std::cout << "******* initing svg reader" << std::endl;
-  
     using namespace mapnik::svg;
     svg_path_ptr marker_path(std::make_shared<svg_storage_type>());
     vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
@@ -160,8 +157,6 @@ void svg_reader<T>::init()
   
     width_=svg.width();
     height_=svg.height();
-    
-    std::cout << "******* done svg reader" << std::endl;
 }
 
 template <typename T>
