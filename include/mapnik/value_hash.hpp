@@ -76,4 +76,17 @@ std::size_t mapnik_hash_value(T const& val)
 
 } // namespace mapnik
 
+// support for std::unordered containers
+namespace std
+{
+template <>
+struct hash<mapnik::value>
+{
+    size_t operator()(const mapnik::value& val) const
+    {
+        return mapnik::mapnik_hash_value(val);
+    }
+};
+
+
 #endif // MAPNIK_VALUE_HASH_HPP
