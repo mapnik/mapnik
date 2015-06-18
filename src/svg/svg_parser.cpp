@@ -57,7 +57,6 @@
 
 namespace mapnik { namespace svg {
 
-bool parse_reader(svg_parser & parser,xmlTextReaderPtr reader);
 void process_node(svg_parser & parser,xmlTextReaderPtr reader);
 void start_element(svg_parser & parser,xmlTextReaderPtr reader);
 void end_element(svg_parser & parser,xmlTextReaderPtr reader);
@@ -1093,13 +1092,13 @@ void svg_parser::parse_from_string(std::string const& svg)
 }
 
 template <typename T>
-int	xmlInputReadCallback(boost::iostreams::stream<T> * stream, char * buffer, int len) {
+int	_xmlInputReadCallback(boost::iostreams::stream<T> * stream, char * buffer, int len) {
     stream->read(buffer,len);
     return stream->gcount();
 }
 
 template <typename T>
-int	xmlInputCloseCallback(boost::iostreams::stream<T> * stream)
+int	_xmlInputCloseCallback(boost::iostreams::stream<T> * stream)
 {
     if(stream->close())
     {
@@ -1111,9 +1110,9 @@ int	xmlInputCloseCallback(boost::iostreams::stream<T> * stream)
 template <typename T>
 void svg_parser::parse_from_stream(boost::iostreams::stream<T> const& svg_stream)
 {
-    xmlTextReaderPtr reader = xmlReaderForIO(xmlInputReadCallback<T>,
-                                             xmlInputCloseCallback<T>
-                                             &svg_stream,
+    xmlTextReaderPtr reader = xmlReaderForIO(_xmlInputReadCallback<T>,
+                                             _xmlInputCloseCallback<T>,
+                                             reinterpret_cast<const void *>(&svg_stream),
                                              nullptr,
                                              nullptr,
                                              (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
@@ -1126,6 +1125,10 @@ void svg_parser::parse_from_stream(boost::iostreams::stream<T> const& svg_stream
         MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse SVG";
     }
 }
+
+template void svg_parser::parse_from_stream(boost::iostreams::stream<boost::iostreams::file_source> const& svg_stream);
+template void svg_parser::parse_from_stream(boost::iostreams::stream<boost::iostreams::array_source> const& svg_stream);
+
 
 
 }}
