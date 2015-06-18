@@ -28,12 +28,12 @@
 #include <mapnik/params.hpp>
 
 // boost
-#include <boost/unordered_map.hpp>
 #include <boost/assign/list_of.hpp>
 #endif
 
 // stl
 #include <stdexcept>
+#include <unordered_map>
 
 // static plugin linkage
 #ifdef MAPNIK_STATIC_PLUGINS
@@ -88,7 +88,7 @@ datasource_ptr ds_generator(parameters const& params)
 }
 
 typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
-using datasource_map = boost::unordered_map<std::string, ds_generator_ptr>;
+using datasource_map = std::unordered_map<std::string, ds_generator_ptr>;
 
 static datasource_map ds_map = boost::assign::map_list_of
     #if defined(MAPNIK_STATIC_PLUGIN_CSV)
