@@ -81,8 +81,7 @@ SECTION("svg_scaled")
     CHECK(im.height() == 50);
 
     std::string pngdata = mapnik::save_to_string<mapnik::image_rgba8>(raw,"png");
-    mapnik::save_to_file<mapnik::image_rgba8>(raw,"test.png","png");
-    CHECK(pngdata.length() == 1270);
+    CHECK(pngdata.length() == 616);
 
 } // END SECTION
 
