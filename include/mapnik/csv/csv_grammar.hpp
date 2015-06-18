@@ -70,7 +70,7 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi
             ;
         text = *(unesc_char |  (char_ - char_(_r1)))
             ;
-        quoted = omit[char_("\"'")[_a = _1]] >> text(_a)[_val = _1] >> lit(_a)
+        quoted = omit[char_("\"'")[_a = _1]] >> text(_a)[_val = _1] >> -lit(_a)
             ;
         BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
     }
