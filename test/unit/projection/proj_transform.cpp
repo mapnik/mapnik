@@ -4,6 +4,12 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/box2d.hpp>
 
+#ifdef MAPNIK_USE_PROJ4
+// proj4
+#include <proj_api.h>
+#endif
+
+
 TEST_CASE("projection transform")
 {
 
@@ -33,6 +39,84 @@ SECTION("Test bounding box transforms - 4326 to 3857")
     CHECK(bbox.maxx() == Approx(maxx));
     CHECK(bbox.maxy() == Approx(maxy));
 
-} // END SECTION
+}
 
-} // END TEST CASE
+
+#if defined(MAPNIK_USE_PROJ4) && PJ_VERSION >= 480
+SECTION("test pj_transform failure behavior")
+{
+    mapnik::projection proj_4269("+init=epsg:4269");
+    mapnik::projection proj_3857("+init=epsg:3857");
+    mapnik::proj_transform prj_trans(proj_4269, proj_3857);
+    mapnik::proj_transform prj_trans2(proj_3857, proj_4269);
+
+    auto proj_ctx0 = pj_ctx_alloc();
+    REQUIRE( proj_ctx0 != nullptr );
+    auto proj0 = pj_init_plus_ctx(proj_ctx0, proj_4269.params().c_str());
+    REQUIRE( proj0 != nullptr );
+
+    auto proj_ctx1 = pj_ctx_alloc();
+    REQUIRE( proj_ctx1 != nullptr );
+    auto proj1 = pj_init_plus_ctx(proj_ctx1, proj_3857.params().c_str());
+    REQUIRE( proj1 != nullptr );
+
+    // first test valid values directly against proj
+    double x = -180.0;
+    double y = -60.0;
+    x *= DEG_TO_RAD;
+    y *= DEG_TO_RAD;
+    CHECK( x == Approx(-3.1415926536) );
+    CHECK( y == Approx(-1.0471975512) );
+    CHECK( 0 == pj_transform(proj0, proj1, 1, 0, &x, &y, nullptr) );
+    CHECK( x == Approx(-20037508.3427892439) );
+    CHECK( y == Approx(-8399737.8896366451) );
+
+    // now test mapnik class
+    double x0 = -180.0;
+    double y0 = -60.0;
+    CHECK( prj_trans.forward(&x0,&y0,nullptr,1,1) );
+    CHECK( x0 == Approx(-20037508.3427892439) );
+    CHECK( y0 == Approx(-8399737.8896366451) );
+    double x1 = -180.0;
+    double y1 = -60.0;
+    CHECK( prj_trans2.backward(&x1,&y1,nullptr,1,1) );
+    CHECK( x1 == Approx(-20037508.3427892439) );
+    CHECK( y1 == Approx(-8399737.8896366451) );
+
+    // longitude value outside the value range for mercator
+    x = -181.0;
+    y = -91.0;
+    x *= DEG_TO_RAD;
+    y *= DEG_TO_RAD;
+    CHECK( x == Approx(-3.1590459461) );
+    CHECK( y == Approx(-1.5882496193) );
+    CHECK( 0 == pj_transform(proj0, proj1, 1, 0, &x, &y, nullptr) );
+    CHECK( std::isinf(x) );
+    CHECK( std::isinf(y) );
+
+    // now test mapnik class
+    double x2 = -181.0;
+    double y2 = -91.0;
+    CHECK( false == prj_trans.forward(&x2,&y2,nullptr,1,1) );
+    CHECK( std::isinf(x2) );
+    CHECK( std::isinf(y2) );
+    double x3 = -181.0;
+    double y3 = -91.0;
+    CHECK( false == prj_trans2.backward(&x3,&y3,nullptr,1,1) );
+    CHECK( std::isinf(x3) );
+    CHECK( std::isinf(y3) );
+
+    // cleanup
+    pj_ctx_free(proj_ctx0);
+    proj_ctx0 = nullptr;
+    pj_free(proj0);
+    proj0 = nullptr;
+    pj_ctx_free(proj_ctx1);
+    proj_ctx1 = nullptr;
+    pj_free(proj1);
+    proj1 = nullptr;
+}
+
+#endif
+
+}

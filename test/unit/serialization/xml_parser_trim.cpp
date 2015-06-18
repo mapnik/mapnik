@@ -21,7 +21,7 @@ TEST_CASE("xml parser") {
                           "  </Layer>"
                           "</Map>");
 
-    mapnik::xml_tree tree("utf8");
+    mapnik::xml_tree tree;
     tree.set_filename("xml_datasource_parameter_trim.cpp");
     REQUIRE_NOTHROW(read_xml_string(xml, tree.root(), ""));
 

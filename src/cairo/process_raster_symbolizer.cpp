@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ void cairo_renderer<T>::process(raster_symbolizer const& sym,
     cairo_save_restore guard(context_);
     render_raster_symbolizer(
         sym, feature, prj_trans, common_,
-        [&](image_rgba8 &target, composite_mode_e comp_op, double opacity,
+        [&](image_rgba8 const & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
             context_.set_operator(comp_op);
             context_.add_image(start_x, start_y, target, opacity);

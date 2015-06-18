@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -989,5 +989,19 @@ inline bool value::is_null() const
 }
 
 } // namespace mapnik
+
+// support for std::unordered_xxx
+namespace std
+{
+template <>
+struct hash<mapnik::value>
+{
+    size_t operator()(mapnik::value const& val) const
+    {
+        return mapnik::mapnik_hash_value(val);
+    }
+};
+
+}
 
 #endif // MAPNIK_VALUE_HPP

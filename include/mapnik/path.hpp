@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -124,7 +124,7 @@ struct vertex_adapter : private util::noncopyable
 
     unsigned vertex(double* x, double* y) const
     {
-        return path_.cont_.get_vertex(itr_++,x,y);
+        return path_.cont_.get_vertex(static_cast<unsigned>(itr_++),x,y);
     }
 
     unsigned vertex(std::size_t index, double* x, double* y) const

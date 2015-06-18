@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@ namespace mapnik
 {
 
 template <typename Geometry>
-struct MAPNIK_DECL offset_converter
+struct offset_converter
 {
     using size_type = std::size_t;
 
@@ -292,7 +292,7 @@ private:
         std::vector<vertex2d> points;
         std::vector<vertex2d> close_points;
         bool is_polygon = false;
-        int cpt = 0;
+        std::size_t cpt = 0;
         v0.cmd = geom_.vertex(&v0.x, &v0.y);
         v1.x = v0.x;
         v1.y = v0.y;
@@ -326,13 +326,13 @@ private:
         }
 
         double angle_a = 0;
-        if (is_polygon) 
+        if (is_polygon)
         {
             double x = v1.x - close_points[cpt].x;
             double y = v1.y - close_points[cpt].y;
             cpt++;
-            x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0 : x; 
-            y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0 : y; 
+            x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0 : x;
+            y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0 : y;
             angle_a = std::atan2(y, x);
         }
         double angle_b = std::atan2((v2.y - v1.y), (v2.x - v1.x));
@@ -417,8 +417,8 @@ private:
                     {
                         double x = v1.x - close_points[cpt].x;
                         double y = v1.y - close_points[cpt].y;
-                        x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0.0 : x; 
-                        y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0.0 : y; 
+                        x = std::abs(x) < std::numeric_limits<double>::epsilon() ? 0.0 : x;
+                        y = std::abs(y) < std::numeric_limits<double>::epsilon() ? 0.0 : y;
                         angle_b = std::atan2(y,x);
                         cpt++;
                     }

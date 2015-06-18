@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,9 +28,9 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// boost
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <memory>
+#include <string>
 
 namespace mapnik
 {
@@ -46,9 +46,9 @@ private:
     marker_cache();
     ~marker_cache();
     bool insert_marker(std::string const& key, marker && path);
-    boost::unordered_map<std::string, std::shared_ptr<mapnik::marker const> > marker_cache_;
+    std::unordered_map<std::string, std::shared_ptr<mapnik::marker const> > marker_cache_;
     bool insert_svg(std::string const& name, std::string const& svg_string);
-    boost::unordered_map<std::string,std::string> svg_cache_;
+    std::unordered_map<std::string,std::string> svg_cache_;
 public:
     std::string known_svg_prefix_;
     std::string known_image_prefix_;

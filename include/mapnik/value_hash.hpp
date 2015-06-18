@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,7 @@
 
 // stl
 #include <functional>
+#include <cassert>
 
 // icu
 #include <unicode/unistr.h>
@@ -51,7 +52,8 @@ struct value_hasher
 
     std::size_t operator() (value_unicode_string const& val) const
     {
-        return val.hashCode();
+        assert(val.hashCode() > 0);
+        return static_cast<std::size_t>(val.hashCode());
     }
 
     template <class T>

@@ -195,8 +195,8 @@ template <typename Renderer>
 class renderer
 {
 public:
-    renderer(boost::filesystem::path const & output_dir, boost::filesystem::path const & reference_dir, bool overwrite)
-        : ren(), output_dir(output_dir), reference_dir(reference_dir), overwrite(overwrite)
+    renderer(boost::filesystem::path const & _output_dir, boost::filesystem::path const & _reference_dir, bool _overwrite)
+        : ren(), output_dir(_output_dir), reference_dir(_reference_dir), overwrite(_overwrite)
     {
     }
 

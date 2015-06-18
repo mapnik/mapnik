@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/util/singleton.hpp>
 
 // boost
 #pragma GCC diagnostic push

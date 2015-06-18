@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -99,8 +99,8 @@ private:
     box2d<double> marker_box_;
     bool marker_unlocked_;
     pixel_position marker_displacement_;
-    double move_dx_ = 0.0;
-    horizontal_alignment_e horizontal_alignment_ = H_LEFT;
+    double move_dx_;
+    horizontal_alignment_e horizontal_alignment_;
 };
 
 }//ns mapnik

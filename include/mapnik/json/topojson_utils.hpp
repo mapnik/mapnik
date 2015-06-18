@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -83,7 +83,7 @@ struct bounding_box_visitor
         {
             index_type index = line.ring;
             index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-            if (arc_index < num_arcs_)
+            if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
             {
                 bool first = true;
                 double px = 0, py = 0;
@@ -121,7 +121,7 @@ struct bounding_box_visitor
             for (auto index : multi_line.rings)
             {
                 index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-                if (arc_index < num_arcs_)
+                if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                 {
                     double px = 0, py = 0;
                     auto const& arcs = topo_.arcs[arc_index];
@@ -161,7 +161,7 @@ struct bounding_box_visitor
                 for (auto index : ring)
                 {
                     index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-                    if (arc_index < num_arcs_)
+                    if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                     {
                         double px = 0, py = 0;
                         auto const& arcs = topo_.arcs[arc_index];
@@ -206,7 +206,7 @@ struct bounding_box_visitor
                     for (auto index : ring)
                     {
                         index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-                        if (arc_index < num_arcs_)
+                        if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                         {
                             double px = 0, py = 0;
                             auto const& arcs = topo_.arcs[arc_index];

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -206,8 +206,11 @@ void jpeg_reader<T>::attach_stream (j_decompress_ptr cinfo, input_stream* in)
 }
 
 template <typename T>
-void jpeg_reader<T>::on_error(j_common_ptr /*cinfo*/)
+void jpeg_reader<T>::on_error(j_common_ptr cinfo)
 {
+    char buffer[JMSG_LENGTH_MAX];
+    (*cinfo->err->format_message)(cinfo, buffer);
+    throw image_reader_exception(std::string("JPEG Reader: libjpeg could not read image: ") + buffer);
 }
 
 template <typename T>

@@ -23,15 +23,15 @@
 
 struct ScriptRecord
 {
-    UChar32 startChar;
-    UChar32 endChar;
-    UScriptCode scriptCode;
+    UChar32 startChar = 0;
+    UChar32 endChar = 0;
+    UScriptCode scriptCode = USCRIPT_INVALID_CODE;
 };
 
 struct ParenStackEntry
 {
-    int32_t pairIndex;
-    UScriptCode scriptCode;
+    int32_t pairIndex = 0;
+    UScriptCode scriptCode = USCRIPT_INVALID_CODE;
 };
 
 class ScriptRun : public UObject {

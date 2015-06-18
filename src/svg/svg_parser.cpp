@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
@@ -34,6 +35,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -1075,7 +1077,7 @@ void svg_parser::parse(std::string const& filename)
 
 void svg_parser::parse_from_string(std::string const& svg)
 {
-    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),nullptr,nullptr,
+    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),safe_cast<int>(svg.size()),nullptr,nullptr,
         (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
     if (reader == nullptr)
     {

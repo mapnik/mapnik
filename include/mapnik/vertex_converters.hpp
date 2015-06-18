@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -278,7 +278,7 @@ template <typename Dispatcher, typename Current, typename... ConverterTypes>
 struct converters_helper<Dispatcher,Current,ConverterTypes...>
 {
     template <typename Converter>
-    static void set(Dispatcher & disp, int state)
+    static void set(Dispatcher & disp, std::size_t state)
     {
         if (std::is_same<Converter,Current>::value)
         {
@@ -323,15 +323,15 @@ template <typename Dispatcher>
 struct converters_helper<Dispatcher>
 {
     template <typename Converter>
-    static void set(Dispatcher &, int) {}
+    static void set(Dispatcher &, std::size_t) {}
     template <typename Geometry, typename Processor>
-    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc)
+    static void forward(Dispatcher &, Geometry & geom, Processor & proc)
     {
         proc.add_path(geom);
     }
 };
 
-template <typename Args, int NUM_CONV>
+template <typename Args, std::size_t NUM_CONV>
 struct dispatcher : util::noncopyable
 {
     using this_type = dispatcher;
@@ -345,23 +345,23 @@ struct dispatcher : util::noncopyable
         std::fill(vec_.begin(), vec_.end(), 0);
     }
 
-    std::array<unsigned, NUM_CONV> vec_;
+    std::array<std::size_t, NUM_CONV> vec_;
     args_type args_;
 };
 
 struct arguments : util::noncopyable
 {
-    arguments(box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
-              proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
-              attributes const& vars, double scale_factor)
-        : bbox(bbox),
-          sym(sym),
-          tr(tr),
-          prj_trans(prj_trans),
-          affine_trans(affine_trans),
-          feature(feature),
-          vars(vars),
-          scale_factor(scale_factor) {}
+    arguments(box2d<double> const& _bbox, symbolizer_base const& _sym, view_transform const& _tr,
+              proj_transform const& _prj_trans, agg::trans_affine const& _affine_trans, feature_impl const& _feature,
+              attributes const& _vars, double _scale_factor)
+        : bbox(_bbox),
+          sym(_sym),
+          tr(_tr),
+          prj_trans(_prj_trans),
+          affine_trans(_affine_trans),
+          feature(_feature),
+          vars(_vars),
+          scale_factor(_scale_factor) {}
 
     box2d<double> const& bbox;
     symbolizer_base const& sym;

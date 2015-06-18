@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ inline double hue_to_rgb(double m1, double m2, double h)
 
 inline void hsl2rgb(double h, double s, double l,
                     double & r, double & g, double & b) {
-    if (!s) {
+    if (s == 0.0) {
         r = g = b = l;
     }
     else

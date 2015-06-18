@@ -38,15 +38,16 @@ public:
     }
     bool operator()() const
     {
-        for (std::size_t i=0;i<iterations_;++i) {
-            for (int i=-180;i<180;i=i+5)
+        for (std::size_t i=0;i<iterations_;++i)
+        {
+            for (int j=-180;j<180;j=j+5)
             {
-                for (int j=-85;j<85;j=j+5)
+                for (int k=-85;k<85;k=k+5)
                 {
                     mapnik::projection src(src_,defer_proj4_init_);
                     mapnik::projection dest(dest_,defer_proj4_init_);
                     mapnik::proj_transform tr(src,dest);
-                    mapnik::box2d<double> box(i,j,i,j);
+                    mapnik::box2d<double> box(j,k,j,k);
                     if (!tr.forward(box)) throw std::runtime_error("could not transform coords");
                 }
             }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/safe_cast.hpp>
 
 // stl
 #include <map>
@@ -191,12 +192,16 @@ public:
         if (ext0.intersects(ext1))
         {
             box2d<int> box = ext0.intersect(ext1);
-            for (std::size_t y = box.miny(); y < box.maxy(); ++y)
+            std::size_t miny = safe_cast<std::size_t>(box.miny());
+            std::size_t maxy = safe_cast<std::size_t>(box.maxy());
+            std::size_t minx = safe_cast<std::size_t>(box.minx());
+            std::size_t maxx = safe_cast<std::size_t>(box.maxx());
+            for (std::size_t y = miny; y < maxy; ++y)
             {
                 value_type* row_to =  data_.get_row(y);
                 image_rgba8::pixel_type const * row_from = data.get_row(y - y0);
 
-                for (std::size_t x = box.minx(); x < box.maxx(); ++x)
+                for (std::size_t x = minx; x < maxx; ++x)
                 {
                     image_rgba8::pixel_type rgba = row_from[x - x0];
                     unsigned a = (rgba >> 24) & 0xff;

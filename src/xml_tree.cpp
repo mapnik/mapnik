@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -68,6 +68,7 @@ struct name_trait
 DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
+DEFINE_NAME_TRAIT( int, "int")
 DEFINE_NAME_TRAIT( boolean_type, "boolean_type")
 #ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
@@ -98,7 +99,7 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
     }
 };
 
-xml_tree::xml_tree(std::string const& encoding)
+xml_tree::xml_tree()
     : node_(*this, "<root>"),
       file_()
 {
@@ -413,6 +414,7 @@ std::string xml_node::line_to_string() const
 
 compile_get_opt_attr(boolean_type);
 compile_get_opt_attr(std::string);
+compile_get_opt_attr(int);
 compile_get_opt_attr(unsigned);
 compile_get_opt_attr(mapnik::value_integer);
 compile_get_opt_attr(float);

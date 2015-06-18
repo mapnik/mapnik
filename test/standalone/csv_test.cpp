@@ -31,15 +31,6 @@ void add_csv_files(bfs::path dir, std::vector<bfs::path> &csv_files) {
   }
 }
 
-bool operator==(mapnik::attribute_descriptor const &a,
-                mapnik::attribute_descriptor const &b) {
-  return ((a.get_name() == b.get_name()) &&
-          (a.get_type() == b.get_type()) &&
-          (a.is_primary_key() == b.is_primary_key()) &
-          (a.get_size() == b.get_size()) &&
-          (a.get_precision() == b.get_precision()));
-}
-
 mapnik::datasource_ptr get_csv_ds(std::string const &file_name, bool strict = true) {
   mapnik::parameters params;
   params["type"] = std::string("csv");

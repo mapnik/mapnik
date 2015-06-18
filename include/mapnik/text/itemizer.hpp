@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,8 +86,8 @@ public:
 private:
     template<typename T> struct run : util::noncopyable
     {
-        run(T const& data, unsigned start, unsigned end)
-            :  start(start), end(end), data(data) {}
+        run(T const& _data, unsigned _start, unsigned _end)
+            :  start(_start), end(_end), data(_data) {}
         unsigned start;
         unsigned end;
         T data;

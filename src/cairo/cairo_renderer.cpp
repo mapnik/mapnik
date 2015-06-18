@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -110,16 +110,16 @@ struct setup_marker_visitor
     void operator() (marker_rgba8 const& marker)
     {
         mapnik::image_rgba8 const& bg_image = marker.get_data();
-        int w = bg_image.width();
-        int h = bg_image.height();
+        std::size_t w = bg_image.width();
+        std::size_t h = bg_image.height();
         if ( w > 0 && h > 0)
         {
             // repeat background-image both vertically and horizontally
-            unsigned x_steps = unsigned(std::ceil(common_.width_/double(w)));
-            unsigned y_steps = unsigned(std::ceil(common_.height_/double(h)));
-            for (unsigned x=0;x<x_steps;++x)
+            std::size_t x_steps = std::size_t(std::ceil(common_.width_/double(w)));
+            std::size_t y_steps = std::size_t(std::ceil(common_.height_/double(h)));
+            for (std::size_t x=0;x<x_steps;++x)
             {
-                for (unsigned y=0;y<y_steps;++y)
+                for (std::size_t y=0;y<y_steps;++y)
                 {
                     agg::trans_affine matrix = agg::trans_affine_translation(
                                                    x*w,
@@ -191,13 +191,13 @@ void cairo_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void cairo_renderer<T>::start_style_processing(feature_type_style const& st)
+void cairo_renderer<T>::start_style_processing(feature_type_style const&)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:start style processing";
 }
 
 template <typename T>
-void cairo_renderer<T>::end_style_processing(feature_type_style const& st)
+void cairo_renderer<T>::end_style_processing(feature_type_style const&)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:end style processing";
 }

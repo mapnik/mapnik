@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,6 +35,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/safe_cast.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
 
@@ -51,15 +52,8 @@
 #include <sstream>
 #include <algorithm>
 
-// boost
-#include <boost/numeric/conversion/cast.hpp>
-
 namespace mapnik
 {
-
-using boost::numeric_cast;
-using boost::numeric::positive_overflow;
-using boost::numeric::negative_overflow;
 
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
@@ -495,7 +489,7 @@ struct premultiply_visitor
     {
         if (!data.get_premultiplied())
         {
-            agg::rendering_buffer buffer(data.bytes(),data.width(),data.height(),data.row_size());
+            agg::rendering_buffer buffer(data.bytes(),safe_cast<unsigned>(data.width()),safe_cast<unsigned>(data.height()),safe_cast<int>(data.row_size()));
             agg::pixfmt_rgba32 pixf(buffer);
             pixf.premultiply();
             data.set_premultiplied(true);
@@ -517,7 +511,7 @@ struct demultiply_visitor
     {
         if (data.get_premultiplied())
         {
-            agg::rendering_buffer buffer(data.bytes(),data.width(),data.height(),data.row_size());
+            agg::rendering_buffer buffer(data.bytes(),safe_cast<unsigned>(data.width()),safe_cast<unsigned>(data.height()),safe_cast<int>(data.row_size()));
             agg::pixfmt_rgba32_pre pixf(buffer);
             pixf.demultiply();
             data.set_premultiplied(false);
@@ -647,12 +641,12 @@ struct visitor_apply_opacity
             for (std::size_t x = 0; x < data.width(); ++x)
             {
                 pixel_type rgba = row_to[x];
-                pixel_type a = static_cast<pixel_type>(((rgba >> 24) & 0xff) * opacity_);
+                pixel_type a = static_cast<pixel_type>(((rgba >> 24u) & 0xff) * opacity_);
                 pixel_type r = rgba & 0xff;
-                pixel_type g = (rgba >> 8 ) & 0xff;
-                pixel_type b = (rgba >> 16) & 0xff;
+                pixel_type g = (rgba >> 8u ) & 0xff;
+                pixel_type b = (rgba >> 16u) & 0xff;
 
-                row_to[x] = (a << 24)| (b << 16) |  (g << 8) | (r) ;
+                row_to[x] = (a << 24u) | (b << 16u) |  (g << 8u) | (r) ;
             }
         }
     }
@@ -719,13 +713,13 @@ struct visitor_set_grayscale_to_alpha
             {
                 pixel_type rgba = row_from[x];
                 pixel_type r = rgba & 0xff;
-                pixel_type g = (rgba >> 8 ) & 0xff;
-                pixel_type b = (rgba >> 16) & 0xff;
+                pixel_type g = (rgba >> 8u) & 0xff;
+                pixel_type b = (rgba >> 16u) & 0xff;
 
                 // magic numbers for grayscale
                 pixel_type a = static_cast<pixel_type>(std::ceil((r * .3) + (g * .59) + (b * .11)));
 
-                row_from[x] = (a << 24)| (255 << 16) |  (255 << 8) | (255) ;
+                row_from[x] = (a << 24u) | (255 << 16u) |  (255 << 8u) | (255u) ;
             }
         }
     }
@@ -758,7 +752,10 @@ struct visitor_set_grayscale_to_alpha_c
                 // magic numbers for grayscale
                 pixel_type a = static_cast<pixel_type>(std::ceil((r * .3) + (g * .59) + (b * .11)));
 
-                row_from[x] = (a << 24)| (c_.blue() << 16) |  (c_.green() << 8) | (c_.red()) ;
+                row_from[x] = static_cast<unsigned>(a << 24u) |
+                              static_cast<unsigned>(c_.blue() << 16u) |
+                              static_cast<unsigned>(c_.green() << 8u) |
+                              static_cast<unsigned>(c_.red() );
             }
         }
     }
@@ -936,20 +933,7 @@ struct visitor_fill
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val;
-        try
-        {
-            val = numeric_cast<pixel_type>(val_);
-        }
-        catch(negative_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::min();
-        }
-        catch(positive_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::max();
-        }
-        data.set(val);
+        data.set(safe_cast<pixel_type>(val_));
     }
 
 private:
@@ -1211,99 +1195,6 @@ template MAPNIK_DECL void fill(image_gray64f &, int8_t const&);
 template MAPNIK_DECL void fill(image_gray64f &, float const&);
 template MAPNIK_DECL void fill(image_gray64f &, double const&);
 
-namespace detail {
-
-struct visitor_set_rectangle
-{
-    visitor_set_rectangle(image_any const & src, std::size_t x0, std::size_t y0)
-        : src_(src), x0_(x0), y0_(y0) {}
-
-    void operator()(image_rgba8 & dst) const
-    {
-        using pixel_type = image_rgba8::pixel_type;
-        image_rgba8 src = util::get<image_rgba8>(src_);
-        box2d<int> ext0(0,0,dst.width(),dst.height());
-        box2d<int> ext1(x0_,y0_,x0_+src.width(),y0_+src.height());
-
-        if (ext0.intersects(ext1))
-        {
-            box2d<int> box = ext0.intersect(ext1);
-            for (std::size_t y = box.miny(); y < box.maxy(); ++y)
-            {
-                pixel_type* row_to =  dst.get_row(y);
-                pixel_type const * row_from = src.get_row(y-y0_);
-
-                for (std::size_t x = box.minx(); x < box.maxx(); ++x)
-                {
-                    if (row_from[x-x0_] & 0xff000000) // Don't change if alpha == 0
-                    {
-                        row_to[x] = row_from[x-x0_];
-                    }
-                }
-            }
-        }
-    }
-
-    void operator() (image_null &) const
-    {
-        throw std::runtime_error("Set rectangle not support for null images");
-    }
-
-    template <typename T>
-    void operator() (T & dst) const
-    {
-        using pixel_type = typename T::pixel_type;
-        T src = util::get<T>(src_);
-        box2d<int> ext0(0,0,dst.width(),dst.height());
-        box2d<int> ext1(x0_,y0_,x0_+src.width(),y0_+src.height());
-
-        if (ext0.intersects(ext1))
-        {
-            box2d<int> box = ext0.intersect(ext1);
-            for (std::size_t y = box.miny(); y < box.maxy(); ++y)
-            {
-                pixel_type* row_to =  dst.get_row(y);
-                pixel_type const * row_from = src.get_row(y-y0_);
-
-                for (std::size_t x = box.minx(); x < box.maxx(); ++x)
-                {
-                    row_to[x] = row_from[x-x0_];
-                }
-            }
-        }
-    }
-private:
-    image_any const& src_;
-    std::size_t x0_;
-    std::size_t y0_;
-};
-
-} // end detail ns
-
-MAPNIK_DECL void set_rectangle(image_any & dst, image_any const& src, std::size_t x, std::size_t y)
-{
-    util::apply_visitor(detail::visitor_set_rectangle(src, x, y), dst);
-}
-
-template <typename T>
-MAPNIK_DECL void set_rectangle (T & dst, T const& src, std::size_t x, std::size_t y)
-{
-    detail::visitor_set_rectangle visit(src, x, y);
-    visit(dst);
-}
-
-template MAPNIK_DECL void set_rectangle(image_rgba8 &, image_rgba8 const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray8 &, image_gray8 const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray8s &, image_gray8s const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray16 &, image_gray16 const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray16s &, image_gray16s const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray32 &, image_gray32 const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray32s &, image_gray32s const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray32f &, image_gray32f const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray64 &, image_gray64 const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray64s &, image_gray64s const&, std::size_t, std::size_t);
-template MAPNIK_DECL void set_rectangle(image_gray64f &, image_gray64f const&, std::size_t, std::size_t);
-
 namespace detail
 {
 
@@ -1329,9 +1220,10 @@ struct visitor_composite_pixel
         if (mapnik::check_bounds(data, x_, y_))
         {
             image_rgba8::pixel_type rgba = data(x_,y_);
-            value_type ca = static_cast<unsigned>(((c_ >> 24) & 0xff) * opacity_);
-            value_type cb = (c_ >> 16 ) & 0xff;
-            value_type cg = (c_ >> 8) & 0xff;
+            // TODO use std::round for consistent rounding
+            value_type ca = safe_cast<value_type>(((c_ >> 24u) & 0xff) * opacity_);
+            value_type cb = (c_ >> 16u) & 0xff;
+            value_type cg = (c_ >> 8u) & 0xff;
             value_type cr = (c_ & 0xff);
             blender_type::blend_pix(comp_op_, reinterpret_cast<value_type*>(&rgba), cr, cg, cb, ca, cover_);
             data(x_,y_) = rgba;
@@ -1339,7 +1231,7 @@ struct visitor_composite_pixel
     }
 
     template <typename T>
-    void operator() (T & data) const
+    void operator() (T &) const
     {
         throw std::runtime_error("Composite pixel is not supported for this data type");
     }
@@ -1349,7 +1241,7 @@ private:
     composite_mode_e comp_op_;
     std::size_t const x_;
     std::size_t const y_;
-    int const c_;
+    unsigned const c_;
     unsigned const cover_;
 
 };
@@ -1392,22 +1284,9 @@ struct visitor_set_pixel
     void operator() (T2 & data) const
     {
         using pixel_type = typename T2::pixel_type;
-        pixel_type val;
-        try
-        {
-            val = numeric_cast<pixel_type>(val_);
-        }
-        catch(negative_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::min();
-        }
-        catch(positive_overflow&)
-        {
-            val = std::numeric_limits<pixel_type>::max();
-        }
         if (check_bounds(data, x_, y_))
         {
-            data(x_, y_) = val;
+            data(x_, y_) = safe_cast<pixel_type>(val_);
         }
     }
 
@@ -1699,20 +1578,7 @@ struct visitor_get_pixel
         using pixel_type = T1;
         if (check_bounds(data, x_, y_))
         {
-            T1 val;
-            try
-            {
-                val = numeric_cast<T1>(data(x_,y_));
-            }
-            catch(negative_overflow&)
-            {
-                val = std::numeric_limits<T1>::min();
-            }
-            catch(positive_overflow&)
-            {
-                val = std::numeric_limits<T1>::max();
-            }
-            return val;
+            return safe_cast<T1>(data(x_, y_));
         }
         else
         {
@@ -2220,7 +2086,7 @@ struct visitor_view_to_stream
         for (std::size_t i=0;i<view.height();i++)
         {
             os_.write(reinterpret_cast<const char*>(view.get_row(i)),
-                      view.row_size());
+                      safe_cast<std::streamsize>(view.row_size()));
         }
     }
 
@@ -2389,11 +2255,11 @@ MAPNIK_DECL std::size_t compare<image_rgba8>(image_rgba8 const& im1, image_rgba8
                 unsigned rgba = row_from[x];
                 unsigned rgba2 = row_from2[x];
                 unsigned r = rgba & 0xff;
-                unsigned g = (rgba >> 8 ) & 0xff;
-                unsigned b = (rgba >> 16) & 0xff;
+                unsigned g = (rgba >> 8u) & 0xff;
+                unsigned b = (rgba >> 16u) & 0xff;
                 unsigned r2 = rgba2 & 0xff;
-                unsigned g2 = (rgba2 >> 8 ) & 0xff;
-                unsigned b2 = (rgba2 >> 16) & 0xff;
+                unsigned g2 = (rgba2 >> 8u) & 0xff;
+                unsigned b2 = (rgba2 >> 16u) & 0xff;
                 if (std::abs(static_cast<int>(r - r2)) > static_cast<int>(threshold) ||
                     std::abs(static_cast<int>(g - g2)) > static_cast<int>(threshold) ||
                     std::abs(static_cast<int>(b - b2)) > static_cast<int>(threshold)) {
@@ -2401,8 +2267,8 @@ MAPNIK_DECL std::size_t compare<image_rgba8>(image_rgba8 const& im1, image_rgba8
                     continue;
                 }
                 if (alpha) {
-                    unsigned a = (rgba >> 24) & 0xff;
-                    unsigned a2 = (rgba2 >> 24) & 0xff;
+                    unsigned a = (rgba >> 24u) & 0xff;
+                    unsigned a2 = (rgba2 >> 24u) & 0xff;
                     if (std::abs(static_cast<int>(a - a2)) > static_cast<int>(threshold)) {
                         ++difference;
                         continue;
@@ -2427,11 +2293,11 @@ MAPNIK_DECL std::size_t compare<image_rgba8>(image_rgba8 const& im1, image_rgba8
             unsigned rgba = row_from[x];
             unsigned rgba2 = row_from2[x];
             unsigned r = rgba & 0xff;
-            unsigned g = (rgba >> 8 ) & 0xff;
-            unsigned b = (rgba >> 16) & 0xff;
+            unsigned g = (rgba >> 8u) & 0xff;
+            unsigned b = (rgba >> 16u) & 0xff;
             unsigned r2 = rgba2 & 0xff;
-            unsigned g2 = (rgba2 >> 8 ) & 0xff;
-            unsigned b2 = (rgba2 >> 16) & 0xff;
+            unsigned g2 = (rgba2 >> 8u) & 0xff;
+            unsigned b2 = (rgba2 >> 16u) & 0xff;
             if (std::abs(static_cast<int>(r - r2)) > static_cast<int>(threshold) ||
                 std::abs(static_cast<int>(g - g2)) > static_cast<int>(threshold) ||
                 std::abs(static_cast<int>(b - b2)) > static_cast<int>(threshold)) {
@@ -2439,8 +2305,8 @@ MAPNIK_DECL std::size_t compare<image_rgba8>(image_rgba8 const& im1, image_rgba8
                 continue;
             }
             if (alpha) {
-                unsigned a = (rgba >> 24) & 0xff;
-                unsigned a2 = (rgba2 >> 24) & 0xff;
+                unsigned a = (rgba >> 24u) & 0xff;
+                unsigned a2 = (rgba2 >> 24u) & 0xff;
                 if (std::abs(static_cast<int>(a - a2)) > static_cast<int>(threshold)) {
                     ++difference;
                     continue;

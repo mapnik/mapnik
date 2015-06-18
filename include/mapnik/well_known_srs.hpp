@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -92,7 +92,7 @@ static inline bool merc2lonlat(double * x, double * y , int point_count)
 
 static inline bool lonlat2merc(geometry::line_string<double> & ls)
 {
-    for(auto & p : ls) 
+    for(auto & p : ls)
     {
         if (p.x > 180) p.x = 180;
         else if (p.x < -180) p.x = -180;

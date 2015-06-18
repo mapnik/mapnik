@@ -67,7 +67,7 @@ script:
      export MASON_VERSION=latest;
      export MASON_LIB_FILE=lib/libmapnik-wkt.a;
      source ./.mason/mason.sh;
-     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True;
+     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
    else
      ./configure;
    fi
@@ -79,8 +79,6 @@ script:
  - if [[ ${COVERAGE} != true ]]; then
      make bench;
    fi
-
-after_success:
  - if [[ ${MASON_PUBLISH} == true ]]; then
      ./mason_latest.sh build;
      ./mason_latest.sh link;

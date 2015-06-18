@@ -31,6 +31,9 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/geometry/algorithms/correct.hpp>
 #pragma GCC diagnostic pop
 
@@ -72,7 +75,7 @@ struct geometry_correct
     }
 
     template <typename T>
-    result_type operator() (T & geom) const
+    result_type operator() (T &) const
     {
         //no-op
     }

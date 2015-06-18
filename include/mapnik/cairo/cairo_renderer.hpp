@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -165,7 +165,7 @@ public:
     {
         return common_.vars_;
     }
-    
+
     void render_marker(pixel_position const& pos,
                        marker const& marker,
                        agg::trans_affine const& mtx,

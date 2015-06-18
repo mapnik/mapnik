@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,15 @@
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/util/hsl.hpp>
+#include <mapnik/safe_cast.hpp>
 
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_action.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -45,10 +49,10 @@
 
 BOOST_FUSION_ADAPT_ADT(
     mapnik::color,
-    (unsigned, unsigned, obj.red(), obj.set_red(val))
-    (unsigned, unsigned, obj.green(), obj.set_green(val))
-    (unsigned, unsigned, obj.blue(), obj.set_blue(val))
-    (unsigned, unsigned, obj.alpha(), obj.set_alpha(val))
+    (unsigned, unsigned, obj.red(), obj.set_red(mapnik::safe_cast<uint8_t>(val)))
+    (unsigned, unsigned, obj.green(), obj.set_green(mapnik::safe_cast<uint8_t>(val)))
+    (unsigned, unsigned, obj.blue(), obj.set_blue(mapnik::safe_cast<uint8_t>(val)))
+    (unsigned, unsigned, obj.alpha(), obj.set_alpha(mapnik::safe_cast<uint8_t>(val)))
     )
 
 namespace mapnik
@@ -216,15 +220,6 @@ struct named_colors_ : qi::symbols<char,color>
     }
 } ;
 
-// clipper helper
-template <int MIN,int MAX>
-inline int clip_int(int val)
-{
-    if (val < MIN ) return MIN;
-    if (val > MAX ) return MAX;
-    return val;
-}
-
 struct percent_conv_impl
 {
     template <typename T>
@@ -235,7 +230,7 @@ struct percent_conv_impl
 
     unsigned operator() (double val) const
     {
-        return clip_int<0,255>(int((255.0 * val)/100.0 + 0.5));
+        return safe_cast<uint8_t>(std::lround((255.0 * val)/100.0));
     }
 };
 
@@ -249,7 +244,7 @@ struct alpha_conv_impl
 
     unsigned operator() (double val) const
     {
-        return clip_int<0,255>(int((255.0 * val) + 0.5));
+        return safe_cast<uint8_t>(std::lround((255.0 * val)));
     }
 };
 
@@ -284,9 +279,9 @@ struct hsl_conv_impl
         double g = hue_to_rgb(m1, m2, h);
         double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
 
-        c.set_red(clip_int<0,255>(int((255.0 * r) + 0.5)));
-        c.set_green(clip_int<0,255>(int((255.0 * g) + 0.5)));
-        c.set_blue(clip_int<0,255>(int((255.0 * b) + 0.5)));
+        c.set_red(safe_cast<uint8_t>(std::lround(255.0 * r)));
+        c.set_green(safe_cast<uint8_t>(std::lround(255.0 * g)));
+        c.set_blue(safe_cast<uint8_t>(std::lround(255.0 * b)));
     }
 };
 

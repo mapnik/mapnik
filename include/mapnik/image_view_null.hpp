@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,20 +40,20 @@ public:
     image_view() {}
     ~image_view() {};
 
-    image_view(image_view<image_null> const& rhs) {}
-    image_view<image_null> & operator=(image_view<image_null> const& rhs) { return *this; }
-    bool operator==(image_view<image_null> const& rhs) const { return true; }
-    bool operator<(image_view<image_null> const& rhs) const { return false; }
+    image_view(image_view<image_null> const&) {}
+    image_view<image_null> & operator=(image_view<image_null> const&) { return *this; }
+    bool operator==(image_view<image_null> const&) const { return true; }
+    bool operator<(image_view<image_null> const&) const { return false; }
 
     std::size_t x() const { return 0; }
     std::size_t y() const { return 0; }
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
-    pixel_type operator() (std::size_t i, std::size_t j) const { throw std::runtime_error("Can not get from a null image view"); }
+    pixel_type operator() (std::size_t, std::size_t) const { throw std::runtime_error("Can not get from a null image view"); }
     std::size_t size() const { return 0; }
     std::size_t row_size() const { return 0; }
-    const pixel_type* get_row(std::size_t row) const { return nullptr; }
-    const pixel_type* get_row(std::size_t row, std::size_t x0) const { return nullptr; }
+    const pixel_type* get_row(std::size_t) const { return nullptr; }
+    const pixel_type* get_row(std::size_t, std::size_t) const { return nullptr; }
     bool get_premultiplied() const { return false; }
     double get_offset() const { return 0.0; }
     double get_scaling() const { return 1.0; }

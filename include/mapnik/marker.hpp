@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,7 @@ using image_ptr = std::shared_ptr<image_any>;
 struct marker_rgba8
 {
 public:
-    marker_rgba8() 
+    marker_rgba8()
         : bitmap_data_(4,4,true,true)
     {
         // create default OGC 4x4 black pixel
@@ -58,7 +58,7 @@ public:
 
     marker_rgba8(image_rgba8 const & data)
         : bitmap_data_(data) {}
-    
+
     marker_rgba8(image_rgba8 && data)
         : bitmap_data_(std::move(data)) {}
 
@@ -70,19 +70,19 @@ public:
 
     box2d<double> bounding_box() const
     {
-        double width = bitmap_data_.width();
-        double height = bitmap_data_.height();
-        return box2d<double>(0, 0, width, height);
+        std::size_t width = bitmap_data_.width();
+        std::size_t height = bitmap_data_.height();
+        return box2d<double>(static_cast<double>(0), static_cast<double>(0), static_cast<double>(width), static_cast<double>(height));
     }
 
-    inline std::size_t width() const
+    inline double width() const
     {
-        return bitmap_data_.width();
+        return static_cast<double>(bitmap_data_.width());
     }
 
-    inline std::size_t height() const
+    inline double height() const
     {
-        return bitmap_data_.height();
+        return static_cast<double>(bitmap_data_.height());
     }
 
     image_rgba8 const& get_data() const
@@ -132,7 +132,7 @@ private:
 
 };
 
-struct marker_null 
+struct marker_null
 {
     marker_null() = default;
 public:
@@ -150,7 +150,7 @@ public:
     }
 };
 
-using marker_base = util::variant<marker_null, 
+using marker_base = util::variant<marker_null,
                                   marker_rgba8,
                                   marker_svg>;
 namespace detail {
@@ -169,7 +169,7 @@ struct get_marker_width_visitor
     template <typename T>
     double operator()(T const& data) const
     {
-        return static_cast<double>(data.width());
+        return data.width();
     }
 };
 
@@ -178,7 +178,7 @@ struct get_marker_height_visitor
     template <typename T>
     double operator()(T const& data) const
     {
-        return static_cast<double>(data.height());
+        return data.height();
     }
 };
 

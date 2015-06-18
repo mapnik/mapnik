@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2013 Artem Pavlenko
+# Copyright (C) 2015 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -67,12 +67,12 @@ cxxflags = ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
 
 defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
-dep_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
+dep_includes = ''.join([' -I${NODE_CONFIG_PREFIX:-""}%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
 
 dep_includes += ' '
 
 if config_env['HAS_CAIRO']:
-    dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
+    dep_includes += ''.join([' -I${NODE_CONFIG_PREFIX:-""}%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
 
 ldflags = ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 ldflags += config_env['LIBMAPNIK_LINKFLAGS']

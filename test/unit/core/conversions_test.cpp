@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #include <cstdio>
@@ -283,7 +283,7 @@ SECTION("to string") {
         REQUIRE( val == true );
 
         // mapnik::value hashability
-        using values_container = boost::unordered_map<mapnik::value, unsigned>;
+        using values_container = std::unordered_map<mapnik::value, unsigned>;
         values_container vc;
         mapnik::value val2(1);
         vc[val2] = 1;
