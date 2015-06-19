@@ -65,7 +65,7 @@ font_library::font_library()
     memory_->free = _Free_Func;
     memory_->realloc = _Realloc_Func;
     FT_Error error = FT_New_Library(&*memory_, &library_);
-    if (error) throw std::runtime_error("can not initalize FreeType2 library");
+    if (error) throw std::runtime_error("can not initialize FreeType2 library");
     FT_Add_Default_Modules(library_);
 }
 
