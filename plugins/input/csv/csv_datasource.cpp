@@ -206,6 +206,30 @@ std::string detect_separator(std::string const& str)
     return separator;
 }
 
+template <typename T>
+std::tuple<char,bool> autodect_newline(T & stream, std::size_t file_length)
+{
+    // autodetect newlines
+    char newline = '\n';
+    bool has_newline = false;
+    for (std::size_t lidx = 0; lidx < file_length && lidx < 4000; ++lidx)
+    {
+        char c = static_cast<char>(stream.get());
+        if (c == '\r')
+        {
+            newline = '\r';
+            has_newline = true;
+            break;
+        }
+        if (c == '\n')
+        {
+            has_newline = true;
+            break;
+        }
+    }
+    return std::make_tuple(newline,has_newline);
+}
+
 } // ns detail
 
 
@@ -233,26 +257,9 @@ void csv_datasource::parse_csv(T & stream,
 
     // set back to start
     stream.seekg(0, std::ios::beg);
-
-    // autodetect newlines
-    char newline = '\n';
-    bool has_newline = false;
-    for (unsigned lidx = 0; lidx < file_length && lidx < 4000; ++lidx)
-    {
-        char c = static_cast<char>(stream.get());
-        if (c == '\r')
-        {
-            newline = '\r';
-            has_newline = true;
-            break;
-        }
-        if (c == '\n')
-        {
-            has_newline = true;
-            break;
-        }
-    }
-
+    char newline;
+    bool has_newline;
+    std::tie(newline, has_newline) = detail::autodect_newline(stream, file_length);
     // set back to start
     stream.seekg(0, std::ios::beg);
 
@@ -270,8 +277,6 @@ void csv_datasource::parse_csv(T & stream,
 
     // set back to start
     stream.seekg(0, std::ios::beg);
-
-    using escape_type = boost::escaped_list_separator<char>;
 
     std::string esc = mapnik::util::trim_copy(escape);
     if (esc.empty()) esc = "\\";
