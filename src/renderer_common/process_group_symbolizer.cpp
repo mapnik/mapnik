@@ -219,11 +219,11 @@ void render_thunk_extractor::update_box() const
     {
         if (box_.width() > 0 && box_.height() > 0)
         {
-            box_.expand_to_include(label.box);
+            box_.expand_to_include(label.get().box);
         }
         else
         {
-            box_ = label.box;
+            box_ = label.get().box;
         }
     }
 
