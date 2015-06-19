@@ -49,3 +49,11 @@ run test_offset_converter 10 1000
   --height 600 \
   --iterations 20 \
   --threads 10
+
+./benchmark/out/test_quad_tree \
+  --iterations 10000 \
+  --threads 1
+
+./benchmark/out/test_quad_tree \
+  --iterations 10000 \
+  --threads 10
