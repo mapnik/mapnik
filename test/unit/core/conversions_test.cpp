@@ -2,11 +2,14 @@
 
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
+#include <sstream>
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #include <cstdio>
@@ -288,6 +291,14 @@ SECTION("to string") {
         mapnik::value val2(1);
         vc[val2] = 1;
         REQUIRE( vc[1] == static_cast<int>(1) );
+
+        // mapnik::value << to ostream
+        std::stringstream s;
+        mapnik::transcoder tr("utf-8");
+        mapnik::value_unicode_string ustr = tr.transcode("hello world!");
+        mapnik::value streamable(ustr);
+        s << streamable;
+        CHECK( s.str() == std::string("hello world!") );
 
     }
     catch (std::exception const & ex)
