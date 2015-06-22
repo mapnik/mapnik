@@ -112,8 +112,8 @@ struct do_xml_attribute_cast<unsigned>
     static inline boost::optional<unsigned> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         int result;
-        if (mapnik::util::string2int(source, result))
-            return boost::optional<unsigned>(result);
+        if (mapnik::util::string2int(source, result) && result >= 0)
+            return boost::optional<unsigned>(static_cast<unsigned>(result));
         return boost::optional<unsigned>();
     }
 };

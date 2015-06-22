@@ -230,11 +230,9 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     }
     else if (mode == DEBUG_SYM_MODE_COLLISION)
     {
-        typename detector_type::query_iterator itr = common_.detector_->begin();
-        typename detector_type::query_iterator end = common_.detector_->end();
-        for ( ;itr!=end; ++itr)
+        for (auto const& n : *common_.detector_)
         {
-            draw_rect(pixmap_, itr->box);
+            draw_rect(pixmap_, n.get().box);
         }
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)

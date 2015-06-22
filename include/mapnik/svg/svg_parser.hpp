@@ -24,6 +24,7 @@
 #define MAPNIK_SVG_PARSER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -35,7 +36,7 @@
 
 namespace  mapnik { namespace svg {
 
-    class svg_parser : private util::noncopyable
+    class MAPNIK_DECL svg_parser : private util::noncopyable
     {
     public:
         explicit svg_parser(svg_converter_type & path);

@@ -79,8 +79,6 @@ script:
  - if [[ ${COVERAGE} != true ]]; then
      make bench;
    fi
-
-after_success:
  - if [[ ${MASON_PUBLISH} == true ]]; then
      ./mason_latest.sh build;
      ./mason_latest.sh link;
