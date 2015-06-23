@@ -958,7 +958,6 @@ inline std::size_t hash_value(value const& val)
 } // namespace value_adl_barrier
 
 using value_adl_barrier::value;
-using value_adl_barrier::operator<<;
 
 namespace detail {
 
