@@ -35,7 +35,7 @@ namespace mapnik
 template <typename T>
 void svg_renderer<T>::process(polygon_symbolizer const& sym,
                               mapnik::feature_impl &,
-                              proj_transform const& prj_trans)
+                              proj_transform const&)
 {
     path_attributes_.set_fill_color(get<mapnik::color>(sym, keys::fill, mapnik::color(128,128,128)));
     path_attributes_.set_fill_opacity(get<value_double>(sym,keys::fill_opacity, 1.0));
