@@ -26,12 +26,35 @@
 // stl
 #include <vector>
 #include <string>
+#include <exception>
 
 // boost
 #include <boost/filesystem.hpp>
 
 namespace visual_tests
 {
+
+class early_exit_error : public std::exception
+{
+public:
+    early_exit_error() :
+        what_() {}
+
+    early_exit_error( std::string const& what ) :
+        what_( what )
+    {
+    }
+
+    virtual ~early_exit_error() throw() {}
+
+    virtual const char * what() const throw()
+    {
+        return what_.c_str();
+    }
+
+protected:
+    mutable std::string what_;
+};
 
 struct map_size
 {

@@ -22,6 +22,8 @@
 
 #include "runner.hpp"
 #include "config.hpp"
+#include <cstdio>
+#include <csignal>
 
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -30,6 +32,12 @@
 #include <boost/program_options.hpp>
 
 #include "cleanup.hpp" // run_cleanup()
+
+void signal_handler(int /*signal*/)
+{
+  throw visual_tests::early_exit_error("SIGINT");
+}
+
 
 int main(int argc, char** argv)
 {
@@ -81,6 +89,10 @@ int main(int argc, char** argv)
     report_type report = vm.count("verbose") ? report_type((console_report())) : report_type((console_short_report()));
     result_list results;
 
+    std::signal(SIGINT,signal_handler);
+
+    unsigned failed_count = 0;
+
     try
     {
         if (vm.count("styles"))
@@ -91,18 +103,18 @@ int main(int argc, char** argv)
         {
             results = run.test_all(report);
         }
+
+        failed_count = mapnik::util::apply_visitor(summary_visitor(results), report);
+
+        if (failed_count)
+        {
+            html_summary(results, output_dir);
+        }
     }
-    catch (std::exception & e)
+    catch (std::exception const& e)
     {
-        std::cerr << "Error runnig tests: " << e.what() << std::endl;
+        std::cerr << "Error running tests: " << e.what() << std::endl;
         return 1;
-    }
-
-    unsigned failed_count = mapnik::util::apply_visitor(summary_visitor(results), report);
-
-    if (failed_count)
-    {
-        html_summary(results, output_dir);
     }
 
     testing::run_cleanup();
