@@ -156,10 +156,6 @@ result_list runner::test_range(files_iterator begin, files_iterator end, std::re
                 result_list r = test_one(file, defaults, report);
                 std::move(r.begin(), r.end(), std::back_inserter(results));
             }
-            catch (visual_tests::early_exit_error const&)
-            {
-                break;
-            }
             catch (std::exception const& ex)
             {
                 result r;
