@@ -82,7 +82,7 @@ void draw_rotated_rect(T & pixmap, R & ras,  box2d<double> const& box, double an
     pixf.comp_op(agg::comp_op_src_over);
     renderer_base renb(pixf);
     renderer_type ren(renb);
-    ren.color(agg::rgba8_pre(0, 255, 0, 64));
+    ren.color(agg::rgba8_pre(255, 0, 0, 255));
     agg::scanline_u8 sl;
     ras.filling_rule(agg::fill_non_zero);
     auto rotated_box = rotate(box, angle);
@@ -93,7 +93,9 @@ void draw_rotated_rect(T & pixmap, R & ras,  box2d<double> const& box, double an
     p.line_to(rotated_box[3].x, rotated_box[3].y);
     p.line_to(rotated_box[0].x, rotated_box[0].y);
     vertex_adapter va(p);
-    ras.add_path(va);
+    agg::conv_stroke<vertex_adapter> stroke(va);
+    stroke.width(1.0);
+    ras.add_path(stroke);
     agg::render_scanlines(ras, sl, ren);
     ras.reset();
 
