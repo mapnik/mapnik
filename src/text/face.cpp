@@ -69,6 +69,7 @@ bool font_face::glyph_dimensions(glyph_info & glyph) const
     glyph.unscaled_ymax = glyph_bbox.yMax;
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
+    // https://github.com/mapnik/mapnik/issues/2928
     return true;
 }
 
