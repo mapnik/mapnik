@@ -145,7 +145,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         // For point placements it is faster to just check the bounding box. */
         //if (collision(bbox, layouts_.text(), false)) return false;
 
-        if (!detector_.has_placement(bbox, 0, angle)) return false;
+        if (!text_props_->allow_overlap && !detector_.has_placement(bbox, 0, angle)) return false;
         if (layout.num_lines()) labels.push_back(std::make_tuple(bbox,angle));
 
         pixel_position layout_offset = layout_center - glyphs->get_base_point();
