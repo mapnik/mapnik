@@ -184,7 +184,7 @@ private:
                         nodes_.push_back(std::make_unique<node>(ext[i]));
                         n->children_[i]=nodes_.back().get();
                     }
-                    do_insert_data(data,box,n->children_[i],depth);
+                    do_insert_data(data,box, n->children_[i],depth);
                     return;
                 }
             }

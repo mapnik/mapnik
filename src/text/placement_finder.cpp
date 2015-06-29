@@ -119,17 +119,17 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
 bool placement_finder::find_point_placement(pixel_position const& pos)
 {
     glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
-    std::vector<box2d<double> > bboxes;
+    std::vector<std::tuple<box2d<double>,double> > labels;
 
     glyphs->reserve(layouts_.glyphs_count());
-    bboxes.reserve(layouts_.size());
+    labels.reserve(layouts_.size());
 
     bool base_point_set = false;
     for (auto const& layout_ptr : layouts_)
     {
         text_layout const& layout = *layout_ptr;
         rotation const& orientation = layout.orientation();
-
+        double angle = -asin(orientation.sin);
         // Find text origin.
         pixel_position layout_center = pos + layout.displacement();
 
@@ -142,10 +142,11 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         box2d<double> bbox = layout.bounds();
         bbox.re_center(layout_center.x, layout_center.y);
 
-        /* For point placements it is faster to just check the bounding box. */
-        if (collision(bbox, layouts_.text(), false)) return false;
+        // For point placements it is faster to just check the bounding box. */
+        //if (collision(bbox, layouts_.text(), false)) return false;
 
-        if (layout.num_lines()) bboxes.push_back(std::move(bbox));
+        if (!detector_.has_placement(bbox, 0, angle)) return false;
+        if (layout.num_lines()) labels.push_back(std::make_tuple(bbox,angle));
 
         pixel_position layout_offset = layout_center - glyphs->get_base_point();
         layout_offset.y = -layout_offset.y;
@@ -182,9 +183,9 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     // add_marker first checks for collision and then updates the detector.
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
 
-    for (box2d<double> const& bbox : bboxes)
+    for (auto const& label : labels)
     {
-        detector_.insert(bbox, layouts_.text());
+        detector_.insert(std::get<0>(label), layouts_.text(), std::get<1>(label));
     }
     placements_.push_back(glyphs);
 
@@ -355,7 +356,7 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
     return path_length / num_labels;
 }
 
-bool placement_finder::collision(const box2d<double> &box, const value_unicode_string &repeat_key, bool line_placement) const
+bool placement_finder::collision(box2d<double> const& box, value_unicode_string const& repeat_key, bool line_placement) const
 {
     double margin, repeat_distance;
     if (line_placement)
@@ -380,6 +381,7 @@ bool placement_finder::collision(const box2d<double> &box, const value_unicode_s
           ||
           (repeat_key.length() > 0 && !detector_.has_placement(box, margin, repeat_key, repeat_distance))));
 }
+
 
 void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement)
 {

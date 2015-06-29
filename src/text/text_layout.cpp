@@ -40,7 +40,7 @@ namespace mapnik
 static void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_position const& center, double width, double height)
 {
     double half_width, half_height;
-    if (rot.sin == 0 && rot.cos == 1.)
+    if (true)//rot.sin == 0 && rot.cos == 1.)
     {
         half_width  = width / 2.;
         half_height = height / 2.;

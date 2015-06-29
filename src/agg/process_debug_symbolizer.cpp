@@ -32,7 +32,8 @@
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/util/is_clockwise.hpp>
-
+#include <mapnik/rotated_rectangle_collision.hpp>
+#include <mapnik/path.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -52,6 +53,7 @@ void draw_rect(T &pixmap, box2d<double> const& box)
     int x1 = static_cast<int>(box.maxx());
     int y0 = static_cast<int>(box.miny());
     int y1 = static_cast<int>(box.maxy());
+
     unsigned color1 = 0xff0000ff;
     for (int x=x0; x<x1; x++)
     {
@@ -65,6 +67,37 @@ void draw_rect(T &pixmap, box2d<double> const& box)
     }
 }
 
+template <typename T, typename R>
+void draw_rotated_rect(T & pixmap, R & ras,  box2d<double> const& box, double angle)
+{
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+    using renderer_base = agg::renderer_base<pixfmt_comp_type>;
+    using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
+
+    agg::rendering_buffer buf(pixmap.bytes(),pixmap.width(),pixmap.height(), pixmap.row_size());
+    pixfmt_comp_type pixf(buf);
+    pixf.comp_op(agg::comp_op_src_over);
+    renderer_base renb(pixf);
+    renderer_type ren(renb);
+    ren.color(agg::rgba8_pre(0, 255, 0, 64));
+    agg::scanline_u8 sl;
+    ras.filling_rule(agg::fill_non_zero);
+    auto rotated_box = rotate(box, angle);
+    path_type p(path_type::LineString);
+    p.move_to(rotated_box[0].x, rotated_box[0].y);
+    p.line_to(rotated_box[1].x, rotated_box[1].y);
+    p.line_to(rotated_box[2].x, rotated_box[2].y);
+    p.line_to(rotated_box[3].x, rotated_box[3].y);
+    p.line_to(rotated_box[0].x, rotated_box[0].y);
+    vertex_adapter va(p);
+    ras.add_path(va);
+    agg::render_scanlines(ras, sl, ren);
+    ras.reset();
+
+}
 template <typename Pixmap>
 struct apply_vertex_mode
 {
@@ -208,8 +241,8 @@ struct render_ring_visitor {
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+                                  mapnik::feature_impl & feature,
+                                  proj_transform const& prj_trans)
 {
 
     debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
@@ -232,7 +265,8 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     {
         for (auto const& n : *common_.detector_)
         {
-            draw_rect(pixmap_, n.get().box);
+            auto const& label = n.get();
+            draw_rotated_rect(pixmap_, *ras_ptr, label.box, label.angle);
         }
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)

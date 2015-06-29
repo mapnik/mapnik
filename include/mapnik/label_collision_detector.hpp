@@ -27,7 +27,7 @@
 #include <mapnik/quad_tree.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
-
+#include <mapnik/rotated_rectangle_collision.hpp>
 // icu
 #include <unicode/unistr.h>
 
@@ -131,11 +131,18 @@ class label_collision_detector4 : util::noncopyable
 public:
     struct label
     {
-        label(box2d<double> const& b) : box(b), text() {}
-        label(box2d<double> const& b, mapnik::value_unicode_string const& t) : box(b), text(t) {}
+        label(box2d<double> const& b, double a)
+            : box(b),
+              text(),
+              angle(a)
+        {}
+
+        label(box2d<double> const& b, mapnik::value_unicode_string const& t, double a)
+            : box(b), text(t), angle(a) {}
 
         box2d<double> box;
         mapnik::value_unicode_string text;
+        double angle = 0.0;
     };
 
 private:
@@ -181,10 +188,30 @@ public:
         return true;
     }
 
+    bool has_placement(box2d<double> const& box, double margin, double angle)
+    {
+        tree_t::query_iterator itr = tree_.query_in_box(box);
+        tree_t::query_iterator end = tree_.query_end();
+
+        auto rect_a = rotate(box, angle);
+
+        for (;itr != end; ++itr)
+        {
+            auto const& lab = itr->get();
+            auto rect_b = rotate(lab.box, lab.angle);
+            if (intersects(rect_a, rect_b))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     bool has_placement(box2d<double> const& box, double margin, mapnik::value_unicode_string const& text, double repeat_distance)
     {
         // Don't bother with any of the repeat checking unless the repeat distance is greater than the margin
-        if (repeat_distance <= margin) {
+        if (repeat_distance <= margin)
+        {
             return has_placement(box, margin);
         }
 
@@ -210,14 +237,14 @@ public:
         return true;
     }
 
-    void insert(box2d<double> const& box)
+    void insert(box2d<double> const& box, double angle = 0.0)
     {
-        tree_.insert(label(box), box);
+        tree_.insert(label(box, angle), box);
     }
 
-    void insert(box2d<double> const& box, mapnik::value_unicode_string const& text)
+    void insert(box2d<double> const& box, mapnik::value_unicode_string const& text, double angle = 0.0)
     {
-        tree_.insert(label(box, text), box);
+        tree_.insert(label(box, text, angle), box);
     }
 
     void clear()
