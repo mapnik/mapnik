@@ -93,11 +93,27 @@ struct split_multi_geometries
             cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(pt)));
         }
     }
+    void operator() (geometry::line_string<double> const& line) const
+    {
+        if (minimum_path_length_ > 0)
+        {
+            box2d<double> bbox = t_.forward(geometry::envelope(line), prj_trans_);
+            if (bbox.width() >= minimum_path_length_)
+            {
+                cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
+            }
+        }
+        else
+        {
+            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
+        }
+    }
+
     void operator() (geometry::multi_line_string<double> const& multi_line) const
     {
         for ( auto const& line : multi_line )
         {
-            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
+            (*this)(line);
         }
     }
 
@@ -182,6 +198,7 @@ struct largest_bbox_first
     bool operator() (base_symbolizer_helper::geometry_cref const& g0,
                      base_symbolizer_helper::geometry_cref const& g1) const
     {
+        // TODO - this has got to be expensive! Can we cache bbox's if there are repeated calls to same geom?
         box2d<double> b0 = geometry::envelope(g0);
         box2d<double> b1 = geometry::envelope(g1);
         return b0.width() * b0.height() > b1.width() * b1.height();
@@ -190,18 +207,26 @@ struct largest_bbox_first
 
 void base_symbolizer_helper::initialize_geometries() const
 {
-    bool largest_box_only = text_props_->largest_bbox_only;
     double minimum_path_length = text_props_->minimum_path_length;
+    auto const& geom = feature_.get_geometry();
     util::apply_visitor(detail::split_multi_geometries<geometry_container_type>
-                        (geometries_to_process_, t_, prj_trans_, minimum_path_length ), feature_.get_geometry());
-    // FIXME: return early if geometries_to_process_.empty() ?
-    if (largest_box_only)
+                        (geometries_to_process_, t_, prj_trans_, minimum_path_length ), geom);
+    if (!geometries_to_process_.empty())
     {
-        geometries_to_process_.sort(largest_bbox_first());
+        auto type = geometry::geometry_type(geom);
+        if (type == geometry::geometry_types::Polygon ||
+            type == geometry::geometry_types::MultiPolygon)
+        {
+            bool largest_box_only = text_props_->largest_bbox_only;
+            if (largest_box_only)
+            {
+                geometries_to_process_.sort(largest_bbox_first());
+                geo_itr_ = geometries_to_process_.begin();
+                geometries_to_process_.erase(++geo_itr_, geometries_to_process_.end());
+            }
+        }
         geo_itr_ = geometries_to_process_.begin();
-        geometries_to_process_.erase(++geo_itr_, geometries_to_process_.end());
     }
-    geo_itr_ = geometries_to_process_.begin();
 }
 
 void base_symbolizer_helper::initialize_points() const
@@ -236,29 +261,29 @@ void base_symbolizer_helper::initialize_points() const
             // https://github.com/mapnik/mapnik/issues/1350
             auto type = geometry::geometry_type(geom);
 
-            // FIXME: how to handle MultiLineString?
+            // note: split_multi_geometries is called above so the only likely types are:
+            // Point, LineString, and Polygon.
             if (type == geometry::geometry_types::LineString)
             {
                 auto const& line = mapnik::util::get<geometry::line_string<double> >(geom);
                 geometry::line_string_vertex_adapter<double> va(line);
                 success = label::middle_point(va, label_x,label_y);
             }
-            else if (how_placed == POINT_PLACEMENT)
+            else if (how_placed == POINT_PLACEMENT || type == geometry::geometry_types::Point)
             {
                 geometry::point<double> pt;
-                geometry::centroid(geom, pt);
-                label_x = pt.x;
-                label_y = pt.y;
-                success = true;
-            }
-            else if (how_placed == INTERIOR_PLACEMENT) // polygon
-            {
-                if (type == geometry::geometry_types::Polygon)
+                if (geometry::centroid(geom, pt))
                 {
-                    auto const& poly = mapnik::util::get<geometry::polygon<double> >(geom);
-                    geometry::polygon_vertex_adapter<double> va(poly);
-                    success = label::interior_position(va, label_x, label_y);
+                    label_x = pt.x;
+                    label_y = pt.y;
+                    success = true;
                 }
+            }
+            else if (how_placed == INTERIOR_PLACEMENT && type == geometry::geometry_types::Polygon)
+            {
+                auto const& poly = mapnik::util::get<geometry::polygon<double> >(geom);
+                geometry::polygon_vertex_adapter<double> va(poly);
+                success = label::interior_position(va, label_x, label_y);
             }
             else
             {
