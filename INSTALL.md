@@ -178,4 +178,4 @@ tutorials on how to programmatically use Mapnik.
 
 ### Contributers
 
-Read docs/contributing.markdown for resources for getting involved with Mapnik development.
+Read docs/contributing.md for resources for getting involved with Mapnik development.
