@@ -77,11 +77,11 @@ struct glyph_info : util::noncopyable
     double scale_multiplier;
     pixel_position offset;
 
-    double ymin() const { return unscaled_ymin * 64.0 * scale_multiplier; }
-    double ymax() const { return unscaled_ymax * 64.0 * scale_multiplier; }
-    double height() const { return ymax() - ymin(); };
-    double advance() const { return unscaled_advance * scale_multiplier; };
-    double line_height() const { return unscaled_line_height * scale_multiplier; };
+    inline double ymin() const { return unscaled_ymin * 64.0 * scale_multiplier; }
+    inline double ymax() const { return unscaled_ymax * 64.0 * scale_multiplier; }
+    inline double height() const { return ymax() - ymin(); };
+    inline double advance() const { return unscaled_advance * scale_multiplier; };
+    inline double line_height() const { return unscaled_line_height * scale_multiplier; };
 };
 
 } //ns mapnik
