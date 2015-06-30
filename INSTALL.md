@@ -5,17 +5,23 @@ Mapnik runs on Linux, OS X, Windows, and BSD systems.
 To configure and build Mapnik do:
 
 ```bash
-    $ ./configure
-    $ make
+./configure
+make
 ```
 
 To trigger parallel compilation you can pass a JOBS value to make:
 
 ```bash
-    $ JOBS=4 make
+JOBS=4 make
 ```
 
-(Note that compiling Mapnik needs several GBytes of RAM. If you use parallel compilation it needs more.)
+Mapnik needs > 2 GB of RAM to build. If you use parallel compilation it needs more.
+
+If you are on a system with less memory make sure you only build with one JOB:
+
+```bash
+JOBS=1 make
+```
 
 To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
