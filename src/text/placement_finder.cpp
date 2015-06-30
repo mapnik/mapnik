@@ -213,7 +213,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position align_offset = layout.alignment_offset();
         pixel_position const& layout_displacement = layout.displacement();
         double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-        double offset = layout_displacement.y + 0.5 * sign * layout.height();
+        //double offset = 0 - (layout_displacement.y + 0.5 * sign * layout.height());
+        double offset = layout_displacement.y - 0.5 * sign * layout.height();
         double adjust_character_spacing = .0;
         double layout_width = layout.width();
         bool adjust = layout.horizontal_alignment() == H_ADJUST;
@@ -232,7 +233,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         {
             // Only subtract half the line height here and half at the end because text is automatically
             // centered on the line
-            offset -= sign * line.height()/2;
+            offset += sign * line.height()/2;
             vertex_cache & off_pp = pp.get_offseted(offset, sign * layout_width);
             vertex_cache::scoped_state off_state(off_pp); // TODO: Remove this when a clean implementation in vertex_cache::get_offseted is done
             double line_width = adjust ? (line.glyphs_width() + line.space_count() * adjust_character_spacing) : line.width();
@@ -300,7 +301,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                 glyphs->emplace_back(glyph, pos, rot);
             }
             // See comment above
-            offset -= sign * line.height()/2;
+            offset += sign * line.height()/2;
         }
     }
 
