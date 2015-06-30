@@ -25,11 +25,11 @@ geometry.
 - `ShieldSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
 - New GroupSymbolizer for applying multiple symbolizers in a single layout
 
-Released ...
+Released: June 30th, 2015
 
 (Packaged from ...)
 
-Summary: TODO
+Summary: The 3.0 release is a major milestone for mapnik and includes many changes in a very large number of areas. As we there has not been an official release of mapnik since 2.2 on June 3rd, 2013. This version includes a very large number of internal changes to the way rasters and geometry are processed. It also includes a large number of performance improvements in almost every area of the processing. The python bindings that were bundled with mapnik have now been moved to their own repository and are versioned independently of the mapnik library.
 
 - PostGIS: Added support for rendering 3D and 4D geometries (previously silently skipped) (#44)
 
