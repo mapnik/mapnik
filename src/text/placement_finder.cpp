@@ -288,7 +288,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
                 pixel_position pos = off_pp.current_position() + cluster_offset;
                 // Center the text on the line
-                double char_height = line.max_char_height();
+                double char_height = line.ymax() - line.ymin();//line.max_char_height();
                 pos.y = -pos.y - char_height/2.0*rot.cos;
                 pos.x =  pos.x + char_height/2.0*rot.sin;
 

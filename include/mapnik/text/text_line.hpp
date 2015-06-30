@@ -62,12 +62,15 @@ public:
     // Real line height. For first line: max_char_height(), for all others: line_height().
     double height() const;
 
-    // Height of the tallest glyph in this line.
-    double max_char_height() const { return max_char_height_; }
+    inline double ymin() const { return ymin_; }
+    inline double ymax() const { return ymax_; }
 
-    // Called for each font/style to update the maximum height of this line.
-    void update_max_char_height(double max_char_height);
-
+    // Called for each font/style to update the max/min y of this line.
+    inline void set_y_minmax(double ymin, double ymax)
+    {
+        ymin_ = ymin;
+        ymax_ = ymax;
+    }
     // Line height including line spacing.
     double line_height() const { return line_height_; }
 
@@ -83,12 +86,13 @@ public:
     // Number of glyphs.
     unsigned size() const;
 
-    unsigned space_count() const { return space_count_; }
+    inline unsigned space_count() const { return space_count_; }
 
 private:
     glyph_vector glyphs_;
     double line_height_; // Includes line spacing (returned by freetype)
-    double max_char_height_; // Max height of any glyphs in line - calculated by shaper
+    double ymin_;
+    double ymax_;
     double width_;
     double glyphs_width_;
     unsigned first_char_;

@@ -92,7 +92,8 @@ static void shape_text(text_line & line,
         {
             ++pos;
             hb_buffer_clear_contents(buffer.get());
-            hb_buffer_add_utf16(buffer.get(), uchar_to_utf16(text.getBuffer()), text.length(), text_item.start, static_cast<int>(text_item.end - text_item.start));
+            hb_buffer_add_utf16(buffer.get(), uchar_to_utf16(text.getBuffer()), text.length(), text_item.start,
+                                static_cast<int>(text_item.end - text_item.start));
             hb_buffer_set_direction(buffer.get(), (text_item.dir == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
@@ -120,13 +121,15 @@ static void shape_text(text_line & line,
                 continue;
             }
 
-            double max_glyph_height = 0;
-            for (unsigned i=0; i<num_glyphs; ++i)
+            double ymin = 0.0;
+            double ymax = 0.0;
+            for (unsigned i = 0; i < num_glyphs; ++i)
             {
                 auto const& gpos = positions[i];
                 auto const& glyph = glyphs[i];
                 unsigned char_index = glyph.cluster;
                 glyph_info g(glyph.codepoint,char_index,text_item.format_);
+
                 if (face->glyph_dimensions(g))
                 {
                     g.face = face;
@@ -134,13 +137,14 @@ static void shape_text(text_line & line,
                     //Overwrite default advance with better value provided by HarfBuzz
                     g.unscaled_advance = gpos.x_advance;
                     g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
-                    double tmp_height = g.height();
-                    if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
                     width_map[char_index] += g.advance();
                     line.add_glyph(std::move(g), scale_factor);
+                    ymin = std::min(g.ymin(), ymin);
+                    ymax = std::max(g.ymax(), ymax);
                 }
             }
-            line.update_max_char_height(max_glyph_height);
+            std::cerr << "update y min/max " << ymin << "," << ymax << std::endl;
+            line.set_y_minmax(ymin, ymax);
             break; //When we reach this point the current font had all glyphs.
         }
     }

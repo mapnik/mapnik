@@ -64,12 +64,14 @@ bool font_face::glyph_dimensions(glyph_info & glyph) const
     }
     FT_BBox glyph_bbox;
     FT_Glyph_Get_CBox(image, FT_GLYPH_BBOX_TRUNCATE, &glyph_bbox);
-    FT_Done_Glyph(image);
+
     glyph.unscaled_ymin = glyph_bbox.yMin;
     glyph.unscaled_ymax = glyph_bbox.yMax;
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
     // https://github.com/mapnik/mapnik/issues/2928
+    std::cerr << "yMin=" << glyph_bbox.yMin << " yMax=" << glyph_bbox.yMax << std::endl;
+    FT_Done_Glyph(image);
     return true;
 }
 

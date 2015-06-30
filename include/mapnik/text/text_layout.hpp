@@ -88,7 +88,8 @@ public:
     inline double height() const { return height_; }
     // Width of the longest line (in pixels).
     inline double width() const { return width_ ; }
-
+    inline double ymin() const { return ymin_; }
+    inline double ymax() const { return ymax_; }
     // Line iterator.
     inline const_iterator begin() const { return lines_.begin(); }
     inline const_iterator end() const { return lines_.end(); }
@@ -145,6 +146,8 @@ private:
     std::map<unsigned, double> width_map_;
     double width_;
     double height_;
+    double ymin_;
+    double ymax_;
     unsigned glyphs_count_;
 
     // output

@@ -37,20 +37,12 @@ namespace mapnik
 {
 
 // Output is centered around (0,0)
-static void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_position const& center, double width, double height)
+static void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_position const& center, double width, double ymin, double ymax)
 {
     double half_width, half_height;
-    if (true)//rot.sin == 0 && rot.cos == 1.)
-    {
-        half_width  = width / 2.;
-        half_height = height / 2.;
-    }
-    else
-    {
-        half_width  = (width * rot.cos + height * rot.sin) /2.;
-        half_height = (width * rot.sin + height * rot.cos) /2.;
-    }
-    box.init(center.x - half_width, center.y - half_height, center.x + half_width, center.y + half_height);
+    half_width  = width / 2.;
+    half_height = (ymax - ymin) / 2.;
+    box.init(center.x - half_width, center.y - half_height + ymin, center.x + half_width, center.y + half_height + ymin);
 }
 
 pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
@@ -107,6 +99,8 @@ text_layout::text_layout(face_manager_freetype & font_manager,
       width_map_(),
       width_(0.0),
       height_(0.0),
+      ymin_(0.0),
+      ymax_(0.0),
       glyphs_count_(0),
       lines_(),
       layout_properties_(layout_defaults),
@@ -198,10 +192,11 @@ void text_layout::layout()
     init_auto_alignment();
 
     // Find text origin.
+    std::cerr << "ymin=" << ymin_ << " ymax=" << ymax_ << std::endl;
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
     // Find layout bounds, expanded for rotation
-    rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
+    rotated_box2d(bounds_, orientation_, displacement_, width_, ymin_, ymax_);
 }
 
 // In the Unicode string characters are always stored in logical order.
@@ -414,6 +409,8 @@ void text_layout::add_line(text_line && line)
         line.set_first_line(true);
     }
     height_ += line.height();
+    ymin_ += line.ymin();
+    ymax_ += line.ymax();
     glyphs_count_ += line.size();
     width_ = std::max(width_, line.width());
     lines_.emplace_back(std::move(line));
