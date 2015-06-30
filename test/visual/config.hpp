@@ -45,11 +45,13 @@ struct config
 {
     config() : status(true),
                scales({ 1.0, 2.0 }),
-               sizes({ { 500, 100 } }) { }
+               sizes({ { 500, 100 } }),
+               tiles({ { 1, 1 } }) { }
 
     bool status;
     std::vector<double> scales;
     std::vector<map_size> sizes;
+    std::vector<map_size> tiles;
 };
 
 enum result_state : std::uint8_t
@@ -66,6 +68,7 @@ struct result
     result_state state;
     std::string renderer_name;
     map_size size;
+    map_size tiles;
     double scale_factor;
     boost::filesystem::path actual_image_path;
     boost::filesystem::path reference_image_path;
