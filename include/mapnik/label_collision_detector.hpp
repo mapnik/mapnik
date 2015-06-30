@@ -33,6 +33,8 @@
 
 // stl
 #include <vector>
+// boost
+#include <boost/optional.hpp>
 
 namespace mapnik
 {
@@ -133,16 +135,16 @@ public:
     {
         label(box2d<double> const& b, double a)
             : box(b),
-              text(),
-              angle(a)
+              angle(a),
+              text()
         {}
 
-        label(box2d<double> const& b, mapnik::value_unicode_string const& t, double a)
-            : box(b), text(t), angle(a) {}
+        label(box2d<double> const& b, double a, mapnik::value_unicode_string const& t)
+            : box(b), angle(a), text(t)  {}
 
         box2d<double> box;
-        mapnik::value_unicode_string text;
         double angle = 0.0;
+        boost::optional<mapnik::value_unicode_string const&> text;
     };
 
 private:
@@ -228,7 +230,7 @@ public:
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->get().box.intersects(margin_box) || (text == itr->get().text && itr->get().box.intersects(repeat_box)))
+            if (itr->get().box.intersects(margin_box) || (itr->get().text && text == *itr->get().text && itr->get().box.intersects(repeat_box)))
             {
                 return false;
             }
@@ -244,7 +246,7 @@ public:
 
     void insert(box2d<double> const& box, mapnik::value_unicode_string const& text, double angle = 0.0)
     {
-        tree_.insert(label(box, text, angle), box);
+        tree_.insert(label(box, angle, text), box);
     }
 
     void clear()
