@@ -27,14 +27,22 @@ struct fake_path
         : fake_path(l.begin(), l.size()) {
     }
 
-    fake_path(std::vector<double> const &v)
-        : fake_path(v.begin(), v.size()) {
+    fake_path(std::vector<double> const &v, bool make_invalid = false)
+        : fake_path(v.begin(), v.size(), make_invalid) {
     }
 
     template <typename Itr>
-    fake_path(Itr itr, size_t sz) {
+    fake_path(Itr itr, size_t sz, bool make_invalid = false) {
         size_t num_coords = sz >> 1;
+        if (make_invalid)
+        {
+            num_coords++;
+        }
         vertices_.reserve(num_coords);
+        if (make_invalid)
+        {
+            vertices_.push_back(std::make_tuple(0,0,mapnik::SEG_END));
+        }
 
         for (size_t i = 0; i < num_coords; ++i) {
             double x = *itr++;
@@ -69,6 +77,32 @@ double dist(double x0, double y0, double x1, double y1)
     double dy = y0 - y1;
     return std::sqrt(dx*dx + dy*dy);
 }
+
+void test_null_segment(double const &offset)
+{
+    fake_path path = {};
+    mapnik::offset_converter<fake_path> off_path_new(path);
+    off_path_new.set_offset(offset);
+    double x0 = 0;
+    double y0 = 0;
+    REQUIRE(off_path_new.vertex(&x0, &y0) == mapnik::SEG_END);
+    REQUIRE(off_path_new.vertex(&x0, &y0) == mapnik::SEG_END);
+    REQUIRE(off_path_new.vertex(&x0, &y0) == mapnik::SEG_END);
+}
+
+void test_invalid_segment(double const &offset)
+{
+    std::vector<double> v_path = {1, 1, 1, 2};
+    fake_path path(v_path, true);
+    mapnik::offset_converter<fake_path> off_path_new(path);
+    off_path_new.set_offset(offset);
+    double x0 = 0;
+    double y0 = 0;
+    REQUIRE(off_path_new.vertex(&x0, &y0) == mapnik::SEG_END);
+    REQUIRE(off_path_new.vertex(&x0, &y0) == mapnik::SEG_END);
+    REQUIRE(off_path_new.vertex(&x0, &y0) == mapnik::SEG_END);
+}
+
 
 void test_simple_segment(double const &offset)
 {
@@ -262,6 +296,41 @@ void test_s_shaped_curve(double const &offset) {
 } // END NS
 
 TEST_CASE("offset converter") {
+
+SECTION("null segment") {
+    try {
+
+        std::vector<double> offsets = { 1, -1 };
+        for (double offset : offsets) {
+            // test simple straight line segment - should be easy to
+            // find the correspondance here.
+            offset_test::test_null_segment(offset);
+        }
+    }
+    catch (std::exception const& ex)
+    {
+        std::cerr << ex.what() << "\n";
+        REQUIRE(false);
+    }
+}
+
+SECTION("invalid segment") {
+    try {
+
+        std::vector<double> offsets = { 1, -1 };
+        for (double offset : offsets) {
+            // test simple straight line segment - should be easy to
+            // find the correspondance here.
+            offset_test::test_invalid_segment(offset);
+        }
+    }
+    catch (std::exception const& ex)
+    {
+        std::cerr << ex.what() << "\n";
+        REQUIRE(false);
+    }
+}
+
 
 SECTION("simple segment") {
     try {
