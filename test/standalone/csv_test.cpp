@@ -157,13 +157,14 @@ void require_geometry(mapnik::feature_ptr feature,
 }
 } // anonymous namespace
 
+static const std::string csv_plugin("./plugins/input/csv.input");
+
+const bool registered = mapnik::datasource_cache::instance().register_datasources(csv_plugin);
+
 TEST_CASE("csv") {
 
-  std::string csv_plugin("./plugins/input/csv.input");
   if (mapnik::util::exists(csv_plugin))
   {
-
-      const bool registered = mapnik::datasource_cache::instance().register_datasources(csv_plugin);
 
       REQUIRE(registered);
 
