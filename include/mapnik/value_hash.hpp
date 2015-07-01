@@ -29,7 +29,6 @@
 
 // stl
 #include <functional>
-#include <cassert>
 
 // icu
 #include <unicode/unistr.h>
