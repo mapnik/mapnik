@@ -125,7 +125,7 @@ struct svg_renderer : renderer_base<std::string>
         }
         std::string expected(std::istreambuf_iterator<char>(stream.rdbuf()),(std::istreambuf_iterator<char>()));
         stream.close();
-        return std::fabs(actual.size() - expected.size());
+        return std::max(actual.size(), expected.size()) - std::min(actual.size(), expected.size());
     }
 
     void save(image_type const & image, boost::filesystem::path const& path) const
