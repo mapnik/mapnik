@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,8 +47,6 @@ namespace mapnik
                                 (((std::uint64_t) ((std::uint8_t) (A)[2])) << 40) | \
                                 (((std::uint64_t) ((std::uint8_t) (A)[1])) << 48) | \
                                 (((std::uint64_t) ((std::uint8_t) (A)[0])) << 56))
-
-using byte = std::uint8_t;
 
 #define float8net(V,M)   do { double def_temp;  \
         ((std::uint8_t*) &def_temp)[0]=(M)[7];          \

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,14 +23,17 @@
 #ifndef MAPNIK_LIBXML2_LOADER_HPP
 #define MAPNIK_LIBXML2_LOADER_HPP
 
+// mapnik
+#include <mapnik/config.hpp> // for MAPNIK_DECL
+
 // stl
 #include <string>
 
 namespace mapnik
 {
-class xml_node;
-void read_xml(std::string const & filename, xml_node &node);
-void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path="");
+class MAPNIK_DECL xml_node;
+MAPNIK_DECL void read_xml(std::string const & filename, xml_node &node);
+MAPNIK_DECL void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path="");
 }
 
 #endif // MAPNIK_LIBXML2_LOADER_HPP

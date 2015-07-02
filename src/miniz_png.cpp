@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,16 +23,21 @@
 // mapnik
 #include <mapnik/palette.hpp>
 #include <mapnik/miniz_png.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_view.hpp>
 
 // miniz
 #define MINIZ_NO_ARCHIVE_APIS
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 extern "C" {
 #include "miniz.c"
 }
+#pragma GCC diagnostic pop
+
 // zlib
 #include <zlib.h>
 
@@ -253,7 +258,7 @@ void PNGWriter::writeIDAT(T const& image)
         }
 
         // Write scanline
-        status = tdefl_compress_buffer(compressor, (mz_uint8 *)image.getRow(y), stride, TDEFL_NO_FLUSH);
+        status = tdefl_compress_buffer(compressor, (mz_uint8 *)image.get_row(y), stride, TDEFL_NO_FLUSH);
         if (status != TDEFL_STATUS_OKAY)
         {
             throw std::runtime_error("failed to compress image");
@@ -290,7 +295,7 @@ void PNGWriter::writeIDATStripAlpha(T const& image) {
         }
 
         // Strip alpha bytes from scanline
-        mz_uint8 *row = (mz_uint8 *)image.getRow(y);
+        mz_uint8 *row = (mz_uint8 *)image.get_row(y);
         for (i = 0, j = 0; j < stride; i += 4, j += 3) {
             scanline[j] = row[i];
             scanline[j+1] = row[i+1];
@@ -361,11 +366,11 @@ const mz_uint8 PNGWriter::IEND_tpl[] = {
     'I', 'E', 'N', 'D'      // "IEND"
 };
 
-template void PNGWriter::writeIDAT<image_data_gray8>(image_data_gray8 const& image);
-template void PNGWriter::writeIDAT<image_view<image_data_gray8> >(image_view<image_data_gray8> const& image);
-template void PNGWriter::writeIDAT<image_data_rgba8>(image_data_rgba8 const& image);
-template void PNGWriter::writeIDAT<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
-template void PNGWriter::writeIDATStripAlpha<image_data_rgba8>(image_data_rgba8 const& image);
-template void PNGWriter::writeIDATStripAlpha<image_view<image_data_rgba8> >(image_view<image_data_rgba8> const& image);
+template void PNGWriter::writeIDAT<image_gray8>(image_gray8 const& image);
+template void PNGWriter::writeIDAT<image_view_gray8>(image_view_gray8 const& image);
+template void PNGWriter::writeIDAT<image_rgba8>(image_rgba8 const& image);
+template void PNGWriter::writeIDAT<image_view_rgba8>(image_view_rgba8 const& image);
+template void PNGWriter::writeIDATStripAlpha<image_rgba8>(image_rgba8 const& image);
+template void PNGWriter::writeIDATStripAlpha<image_view_rgba8>(image_view_rgba8 const& image);
 
 }}

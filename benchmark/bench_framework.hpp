@@ -4,6 +4,8 @@
 // mapnik
 #include <mapnik/params.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/safe_cast.hpp>
+#include "../test/cleanup.hpp"
 
 // stl
 #include <chrono>
@@ -25,8 +27,8 @@ protected:
 public:
     test_case(mapnik::parameters const& params)
        : params_(params),
-         threads_(*params.get<mapnik::value_integer>("threads",0)),
-         iterations_(*params.get<mapnik::value_integer>("iterations",0))
+         threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads",0))),
+         iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations",0)))
          {}
     std::size_t threads() const
     {
@@ -66,11 +68,14 @@ void handle_args(int argc, char** argv, mapnik::parameters & params)
             mapnik::parameters params;                  \
             benchmark::handle_args(argc,argv,params);   \
             test_class test_runner(params);             \
-            return run(test_runner,name);               \
+            auto result = run(test_runner,name);        \
+            testing::run_cleanup();                     \
+            return result;                              \
         }                                               \
         catch (std::exception const& ex)                \
         {                                               \
             std::clog << ex.what() << "\n";             \
+            testing::run_cleanup();                     \
             return -1;                                  \
         }                                               \
     }                                                   \

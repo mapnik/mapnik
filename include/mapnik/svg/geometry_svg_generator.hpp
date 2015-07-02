@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,8 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp> // for container stuff
+// for container stuff
+#include <mapnik/geometry.hpp>
 #include <mapnik/view_transform.hpp> // for container stuff
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/util/path_iterator.hpp>
@@ -36,6 +37,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -54,7 +58,7 @@
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type
-using path_type = mapnik::transform_path_adapter<mapnik::view_transform, mapnik::geometry_type>;
+using path_type = mapnik::transform_path_adapter<mapnik::view_transform, mapnik::vertex_adapter>;
 
 template <>
 struct is_container<path_type const> : mpl::true_ {} ;
@@ -90,69 +94,82 @@ struct end_container<path_type const>
 
 namespace mapnik { namespace svg {
 
-    namespace karma = boost::spirit::karma;
-    namespace phoenix = boost::phoenix;
+namespace karma = boost::spirit::karma;
+namespace phoenix = boost::phoenix;
 
-    namespace svg_detail {
+namespace svg_detail {
 
-    template <typename Geometry>
-    struct get_type
+template <typename Geometry>
+struct get_type
+{
+    using result_type = int;
+    result_type operator() (Geometry const& geom) const
     {
-        using result_type = int;
-        result_type operator() (Geometry const& geom) const
-        {
-            return static_cast<int>(geom.type());
-        }
-    };
-
-    template <typename T>
-    struct get_first
-    {
-        using geometry_type = T;
-        using result_type = typename geometry_type::value_type const;
-        result_type operator() (geometry_type const& geom) const
-        {
-            typename geometry_type::value_type coord;
-            geom.rewind(0);
-            std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
-            return coord;
-        }
-    };
-
-    template <typename T>
-    struct coordinate_policy : karma::real_policies<T>
-    {
-        using base_type = boost::spirit::karma::real_policies<T>;
-        static int floatfield(T) { return base_type::fmtflags::fixed; }
-        static unsigned precision(T) { return 4u ;}
-    };
+        return static_cast<int>(geom.type());
     }
+};
 
-    template <typename OutputIterator, typename Geometry>
-    struct svg_path_generator :
-        karma::grammar<OutputIterator, Geometry const& ()>
+template <typename T>
+struct get_first
+{
+    using path_type = T;
+    using result_type = typename path_type::value_type const;
+    result_type operator() (path_type const& geom) const
     {
+        typename path_type::value_type coord;
+        geom.rewind(0);
+        std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
+        return coord;
+    }
+};
 
-        using geometry_type = Geometry;
-        using coord_type = typename boost::remove_pointer<typename geometry_type::value_type>::type;
+template <>
+struct get_first<mapnik::path_type>
+{
+    using path_type = mapnik::path_type;
+    using result_type = path_type::value_type const;
+    result_type operator() (path_type const& geom) const
+    {
+        path_type::value_type coord;
+        std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
+        return coord;
+    }
+};
 
-        svg_path_generator();
-        // rules
-        karma::rule<OutputIterator, geometry_type const& ()> svg;
-        karma::rule<OutputIterator, geometry_type const& ()> point;
-        karma::rule<OutputIterator, geometry_type const& ()> linestring;
-        karma::rule<OutputIterator, geometry_type const& ()> polygon;
 
-        karma::rule<OutputIterator, coord_type ()> svg_point;
-        karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> svg_path;
+template <typename T>
+struct coordinate_policy : karma::real_policies<T>
+{
+    using base_type = boost::spirit::karma::real_policies<T>;
+    static int floatfield(T) { return base_type::fmtflags::fixed; }
+    static unsigned precision(T) { return 4u ;}
+};
+}
 
-        // phoenix functions
-        phoenix::function<svg_detail::get_type<geometry_type> > _type;
-        phoenix::function<svg_detail::get_first<geometry_type> > _first;
-        //
-        karma::real_generator<double, svg_detail::coordinate_policy<double> > coordinate;
+template <typename OutputIterator, typename Path>
+struct svg_path_generator :
+        karma::grammar<OutputIterator, Path const& ()>
+{
 
-    };
+    using path_type = Path;
+    using coord_type = typename boost::remove_pointer<typename path_type::value_type>::type;
+
+    svg_path_generator();
+    // rules
+    karma::rule<OutputIterator, path_type const& ()> svg;
+    karma::rule<OutputIterator, path_type const& ()> point;
+    karma::rule<OutputIterator, path_type const& ()> linestring;
+    karma::rule<OutputIterator, path_type const& ()> polygon;
+    karma::rule<OutputIterator, coord_type ()> svg_point;
+    karma::rule<OutputIterator, path_type const& ()> svg_path;
+
+    // phoenix functions
+    phoenix::function<svg_detail::get_type<path_type> > _type;
+    phoenix::function<svg_detail::get_first<path_type> > _first;
+    //
+    karma::real_generator<double, svg_detail::coordinate_policy<double> > coordinate;
+
+};
 
 }}
 

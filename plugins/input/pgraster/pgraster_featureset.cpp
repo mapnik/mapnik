@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/global.hpp> // for int2net
@@ -47,8 +47,6 @@
 #include <sstream>
 #include <string>
 
-using mapnik::geometry_type;
-using mapnik::byte;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 

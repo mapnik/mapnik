@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -54,14 +54,13 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
     grid_text_renderer<T> ren(pixmap_,
                               comp_op,
                               common_.scale_factor_);
-    { // halo transform
-        agg::trans_affine halo_transform;
-        auto transform = get_optional<transform_type>(sym, keys::halo_transform);
-        if (transform)
-        {
-            evaluate_transform(halo_transform, feature, common_.vars_, *transform);
-            ren.set_halo_transform(halo_transform);
-        }
+
+    auto halo_transform = get_optional<transform_type>(sym, keys::halo_transform);
+    if (halo_transform)
+    {
+        agg::trans_affine halo_affine_transform;
+        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform);
+        ren.set_halo_transform(halo_affine_transform);
     }
 
     placements_list const& placements = helper.get();

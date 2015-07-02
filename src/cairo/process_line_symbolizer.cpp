@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,8 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 namespace mapnik
 {
@@ -79,14 +81,13 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
         padding *= common_.scale_factor_;
         clipping_extent.pad(padding);
     }
-    vertex_converter<cairo_context,
-                     clip_line_tag,
-                     transform_tag,
-                     affine_transform_tag,
-                     simplify_tag, smooth_tag,
-                     offset_transform_tag,
-                     dash_tag, stroke_tag>
-        converter(clipping_extent,context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+    using vertex_converter_type =  vertex_converter<clip_line_tag,
+                                                    transform_tag,
+                                                    affine_transform_tag,
+                                                    simplify_tag, smooth_tag,
+                                                    offset_transform_tag>;
+
+    vertex_converter_type converter(clipping_extent,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
@@ -94,14 +95,10 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
     converter.set<affine_transform_tag>(); // optional affine transform
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
-    for (geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 1)
-        {
-            converter.apply(geom);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, cairo_context>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter, context_);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
     // stroke
     context_.set_fill_rule(CAIRO_FILL_RULE_WINDING);
     context_.stroke();

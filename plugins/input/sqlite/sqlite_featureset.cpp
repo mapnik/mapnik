@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,13 +24,14 @@
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry_envelope.hpp>
 
 // ogr
 #include "sqlite_featureset.hpp"
@@ -80,15 +81,20 @@ feature_ptr sqlite_featureset::next()
         }
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
-        if (!geometry_utils::from_wkb(feature->paths(), data, size, format_))
+        mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(data, size, format_);
+        if (mapnik::geometry::is_empty(geom))
+        {
             continue;
+        }
 
         if (!spatial_index_)
         {
             // we are not using r-tree index, check if feature intersects bounding box
-            if (!bbox_.intersects(feature->envelope()))
+            box2d<double> bbox = mapnik::geometry::envelope(geom);
+            if (!bbox_.intersects(bbox))
                 continue;
         }
+        feature->set_geometry(std::move(geom));
 
         for (int i = 2; i < rs_->column_count(); ++i)
         {

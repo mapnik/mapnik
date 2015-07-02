@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,8 @@
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/vertex_converters.hpp>
-
+#include <mapnik/vertex_processor.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
@@ -88,11 +89,13 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
         padding *= common_.scale_factor_;
         clipping_extent.pad(padding);
     }
+    using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
+                                                   affine_transform_tag,
+                                                   simplify_tag, smooth_tag,
+                                                   offset_transform_tag,
+                                                   dash_tag, stroke_tag>;
 
-    vertex_converter<grid_rasterizer, clip_line_tag, transform_tag,
-                     offset_transform_tag, affine_transform_tag,
-                     simplify_tag, smooth_tag, dash_tag, stroke_tag>
-        converter(clipping_extent,*ras_ptr,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+    vertex_converter_type converter(clipping_extent,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -102,13 +105,10 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     if (has_dash) converter.set<dash_tag>();
     converter.set<stroke_tag>(); //always stroke
 
-    for ( geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 1)
-        {
-            converter.apply(geom);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, grid_rasterizer>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter, *ras_ptr);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 
     // render id
     ren.color(color_type(feature.id()));

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -66,12 +66,13 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
     for (glyph_positions_ptr glyphs : placements)
     {
-        if (glyphs->marker())
+        marker_info_ptr mark = glyphs->get_marker();
+        if (mark)
         {
             render_marker(feature,
                           glyphs->marker_pos(),
-                          *(glyphs->marker()->marker),
-                          glyphs->marker()->transform,
+                          *mark->marker_,
+                          mark->transform_,
                           opacity, comp_op);
         }
         ren.render(*glyphs, feature_id);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
 #include <mapnik/miniz_png.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
@@ -140,7 +140,7 @@ void save_as_png(T1 & file,
     const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
-        row_pointers[i] = (png_bytep)image.getRow(i);
+        row_pointers[i] = (png_bytep)image.get_row(i);
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
     png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
@@ -149,7 +149,7 @@ void save_as_png(T1 & file,
 
 template <typename T>
 void reduce_8(T const& in,
-              image_data_gray8 & out,
+              image_gray8 & out,
               octree<rgb> trees[],
               unsigned limits[],
               unsigned levels,
@@ -166,12 +166,12 @@ void reduce_8(T const& in,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        mapnik::image_data_rgba8::pixel_type const * row = in.getRow(y);
-        mapnik::image_data_gray8::pixel_type  * row_out = out.getRow(y);
+        mapnik::image_rgba8::pixel_type const * row = in.get_row(y);
+        mapnik::image_gray8::pixel_type  * row_out = out.get_row(y);
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            byte index = 0;
+            std::uint8_t index = 0;
             int idx = -1;
             for(int j=levels-1; j>0; j--)
             {
@@ -200,7 +200,7 @@ void reduce_8(T const& in,
 
 template <typename T>
 void reduce_4(T const& in,
-               image_data_gray8 & out,
+               image_gray8 & out,
                octree<rgb> trees[],
                unsigned limits[],
                unsigned levels,
@@ -217,12 +217,12 @@ void reduce_4(T const& in,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        mapnik::image_data_rgba8::pixel_type const * row = in.getRow(y);
-        mapnik::image_data_gray8::pixel_type  * row_out = out.getRow(y);
+        mapnik::image_rgba8::pixel_type const * row = in.get_row(y);
+        mapnik::image_gray8::pixel_type  * row_out = out.get_row(y);
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            byte index = 0;
+            std::uint8_t index = 0;
             int idx=-1;
             for(int j=levels-1; j>0; j--)
             {
@@ -256,7 +256,7 @@ void reduce_4(T const& in,
 // 1-bit but only one color.
 template <typename T>
 void reduce_1(T const&,
-              image_data_gray8 & out,
+              image_gray8 & out,
               octree<rgb> /*trees*/[],
               unsigned /*limits*/[],
               std::vector<unsigned> & /*alpha*/)
@@ -266,7 +266,7 @@ void reduce_1(T const&,
 
 template <typename T>
 void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
-                 mapnik::image_data_gray8 const& image,
+                 mapnik::image_gray8 const& image,
                  unsigned width,
                  unsigned height,
                  unsigned color_depth,
@@ -350,7 +350,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     png_write_info(png_ptr, info_ptr);
     for (unsigned i=0;i<height;i++)
     {
-        png_write_row(png_ptr,(png_bytep)image.getRow(i));
+        png_write_row(png_ptr,(png_bytep)image.get_row(i));
     }
 
     png_write_end(png_ptr, info_ptr);
@@ -385,7 +385,7 @@ void save_as_png8_oct(T1 & file,
         {
             for (unsigned x = 0; x < width; ++x)
             {
-                unsigned val = U2ALPHA((unsigned)image.getRow(y)[x]);
+                unsigned val = U2ALPHA((unsigned)image.get_row(y)[x]);
                 alphaHist[val]++;
                 meanAlpha += val;
                 if (val>0 && val<255)
@@ -503,7 +503,7 @@ void save_as_png8_oct(T1 & file,
     }
     for (unsigned y = 0; y < height; ++y)
     {
-        typename T2::pixel_type const * row = image.getRow(y);
+        typename T2::pixel_type const * row = image.get_row(y);
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
@@ -556,7 +556,7 @@ void save_as_png8_oct(T1 & file,
     if (palette.size() > 16 )
     {
         // >16 && <=256 colors -> write 8-bit color depth
-        image_data_gray8 reduced_image(width,height);
+        image_gray8 reduced_image(width,height);
         reduce_8(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
         save_as_png(file,palette,reduced_image,width,height,8,alphaTable,opts);
     }
@@ -565,7 +565,7 @@ void save_as_png8_oct(T1 & file,
         // 1 color image ->  write 1-bit color depth PNG
         unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
-        image_data_gray8 reduced_image(image_width,image_height);
+        image_gray8 reduced_image(image_width,image_height);
         reduce_1(image,reduced_image,trees, limits, alphaTable);
         if (meanAlpha<255 && cols[0]==0)
         {
@@ -579,7 +579,7 @@ void save_as_png8_oct(T1 & file,
         // <=16 colors -> write 4-bit color depth PNG
         unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
-        image_data_gray8 reduced_image(image_width,image_height);
+        image_gray8 reduced_image(image_width,image_height);
         reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
         save_as_png(file,palette,reduced_image,width,height,4,alphaTable,opts);
     }
@@ -600,11 +600,11 @@ void save_as_png8(T1 & file,
     if (palette.size() > 16 )
     {
         // >16 && <=256 colors -> write 8-bit color depth
-        image_data_gray8 reduced_image(width, height);
+        image_gray8 reduced_image(width, height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_data_rgba8::pixel_type const * row = image.getRow(y);
-            mapnik::image_data_gray8::pixel_type  * row_out = reduced_image.getRow(y);
+            mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
+            mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
             for (unsigned x = 0; x < width; ++x)
             {
                 row_out[x] = tree.quantize(row[x]);
@@ -617,7 +617,7 @@ void save_as_png8(T1 & file,
         // 1 color image ->  write 1-bit color depth PNG
         unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
-        image_data_gray8 reduced_image(image_width, image_height);
+        image_gray8 reduced_image(image_width, image_height);
         reduced_image.set(0);
         save_as_png(file, palette, reduced_image, width, height, 1, alphaTable, opts);
     }
@@ -626,12 +626,12 @@ void save_as_png8(T1 & file,
         // <=16 colors -> write 4-bit color depth PNG
         unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
-        image_data_gray8 reduced_image(image_width, image_height);
+        image_gray8 reduced_image(image_width, image_height);
         for (unsigned y = 0; y < height; ++y)
         {
-            mapnik::image_data_rgba8::pixel_type const * row = image.getRow(y);
-            mapnik::image_data_gray8::pixel_type  * row_out = reduced_image.getRow(y);
-            byte index = 0;
+            mapnik::image_rgba8::pixel_type const * row = image.get_row(y);
+            mapnik::image_gray8::pixel_type  * row_out = reduced_image.get_row(y);
+            std::uint8_t index = 0;
             for (unsigned x = 0; x < width; ++x)
             {
 
@@ -669,7 +669,7 @@ void save_as_png8_hex(T1 & file,
 
         for (unsigned y = 0; y < height; ++y)
         {
-            typename T2::pixel_type const * row = image.getRow(y);
+            typename T2::pixel_type const * row = image.get_row(y);
             for (unsigned x = 0; x < width; ++x)
             {
                 unsigned val = row[x];

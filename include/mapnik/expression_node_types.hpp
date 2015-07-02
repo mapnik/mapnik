@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -175,21 +175,21 @@ value_unicode_string,
 attribute,
 global_attribute,
 geometry_type_attribute,
-util::recursive_wrapper<unary_node<tags::negate> >,
-util::recursive_wrapper<binary_node<tags::plus> >,
-util::recursive_wrapper<binary_node<tags::minus> >,
-util::recursive_wrapper<binary_node<tags::mult> >,
-util::recursive_wrapper<binary_node<tags::div> >,
-util::recursive_wrapper<binary_node<tags::mod> >,
-util::recursive_wrapper<binary_node<tags::less> >,
-util::recursive_wrapper<binary_node<tags::less_equal> >,
-util::recursive_wrapper<binary_node<tags::greater> >,
-util::recursive_wrapper<binary_node<tags::greater_equal> >,
-util::recursive_wrapper<binary_node<tags::equal_to> >,
-util::recursive_wrapper<binary_node<tags::not_equal_to> >,
-util::recursive_wrapper<unary_node<tags::logical_not> >,
-util::recursive_wrapper<binary_node<tags::logical_and> >,
-util::recursive_wrapper<binary_node<tags::logical_or> >,
+util::recursive_wrapper<unary_node<mapnik::tags::negate> >,
+util::recursive_wrapper<binary_node<mapnik::tags::plus> >,
+util::recursive_wrapper<binary_node<mapnik::tags::minus> >,
+util::recursive_wrapper<binary_node<mapnik::tags::mult> >,
+util::recursive_wrapper<binary_node<mapnik::tags::div> >,
+util::recursive_wrapper<binary_node<mapnik::tags::mod> >,
+util::recursive_wrapper<binary_node<mapnik::tags::less> >,
+util::recursive_wrapper<binary_node<mapnik::tags::less_equal> >,
+util::recursive_wrapper<binary_node<mapnik::tags::greater> >,
+util::recursive_wrapper<binary_node<mapnik::tags::greater_equal> >,
+util::recursive_wrapper<binary_node<mapnik::tags::equal_to> >,
+util::recursive_wrapper<binary_node<mapnik::tags::not_equal_to> >,
+util::recursive_wrapper<unary_node<mapnik::tags::logical_not> >,
+util::recursive_wrapper<binary_node<mapnik::tags::logical_and> >,
+util::recursive_wrapper<binary_node<mapnik::tags::logical_or> >,
 util::recursive_wrapper<regex_match_node>,
 util::recursive_wrapper<regex_replace_node>,
 util::recursive_wrapper<unary_function_call>,

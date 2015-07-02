@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,9 @@ template boost::optional<std::string> parameters::get(std::string const& key, st
 
 template boost::optional<value_double> parameters::get(std::string const& key) const;
 template boost::optional<value_double> parameters::get(std::string const& key, value_double const& default_opt_value) const;
+
+template boost::optional<value_bool> parameters::get(std::string const& key) const;
+template boost::optional<value_bool> parameters::get(std::string const& key, value_bool const& default_opt_value) const;
 
 template boost::optional<boolean_type> parameters::get(std::string const& key) const;
 template boost::optional<boolean_type> parameters::get(std::string const& key, boolean_type const& default_opt_value) const;

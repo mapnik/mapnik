@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -111,7 +111,7 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     JSAMPLE* row=reinterpret_cast<JSAMPLE*>( ::operator new (sizeof(JSAMPLE) * width*3));
     while (cinfo.next_scanline < cinfo.image_height)
     {
-        const unsigned* imageRow=image.getRow(cinfo.next_scanline);
+        const unsigned* imageRow=image.get_row(cinfo.next_scanline);
         int index=0;
         for (int i=0;i<width;++i)
         {

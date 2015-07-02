@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -79,7 +79,7 @@ occi_datasource::occi_datasource(parameters const& params)
       desc_(occi_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
       use_wkb_(*params.get<mapnik::boolean_type>("use_wkb", false)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
-      row_prefetch_(*params.get<int>("row_prefetch", 100)),
+      row_prefetch_(*params.get<mapnik::value_integer>("row_prefetch", 100)),
       pool_(0),
       conn_(0)
 {
@@ -107,7 +107,7 @@ occi_datasource::occi_datasource(parameters const& params)
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
-    boost::optional<int> srid = params.get<int>("srid");
+    boost::optional<mapnik::value_integer> srid = params.get<mapnik::value_integer>("srid");
     if (srid)
     {
         srid_ = *srid;
@@ -123,8 +123,8 @@ occi_datasource::occi_datasource(parameters const& params)
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"),
-                *params.get<int>("max_size", 5),
-                *params.get<int>("initial_size", 1),
+                *params.get<mapnik::value_integer>("max_size", 5),
+                *params.get<mapnik::value_integer>("initial_size", 1),
                 1);
         }
         catch (SQLException& ex)
@@ -443,9 +443,9 @@ box2d<double> occi_datasource::envelope() const
 }
 
 
-boost::optional<mapnik::datasource::geometry_t> occi_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> occi_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource::geometry_t>();
+    return boost::optional<mapnik::datasource_geometry_t>();
 }
 
 layer_descriptor occi_datasource::get_descriptor() const

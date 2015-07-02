@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,13 +26,13 @@
 
 // mapnik
 #include <mapnik/config_error.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 
 // stl
 #include <iostream>
@@ -138,7 +138,11 @@ private:
         {
             if (cur_node->value_size() > 0) // Don't add empty text nodes
             {
-                node.add_child(cur_node->value(), 0, true);
+                // parsed text values should have leading and trailing
+                // whitespace trimmed.
+                std::string trimmed = cur_node->value();
+                mapnik::util::trim(trimmed);
+                node.add_child(trimmed.c_str(), 0, true);
             }
         }
         break;

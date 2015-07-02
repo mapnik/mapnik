@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,9 +52,6 @@ struct matrix_node
     expr_node d_;
     expr_node e_;
     expr_node f_;
-
-    explicit matrix_node(double const* m)
-        : a_(m[0]), b_(m[1]), c_(m[2]), d_(m[3]), e_(m[4]), f_(m[5]) {}
 
     template <typename T>
     explicit matrix_node(T const& m)

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,7 @@
 
 // mapnik (should not depend on anything that need to use this)
 #include <mapnik/config.hpp>
-#include <mapnik/unique_lock.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // std
@@ -70,7 +69,7 @@ namespace mapnik {
         static void set_severity(severity_type const& severity_level)
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(severity_mutex_);
+            std::lock_guard<std::mutex> lock(severity_mutex_);
 #endif
 
             severity_level_ = severity_level;
@@ -94,7 +93,7 @@ namespace mapnik {
                                         severity_type const& security_level)
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(severity_mutex_);
+            std::lock_guard<std::mutex> lock(severity_mutex_);
 #endif
             if (! object_name.empty())
             {
@@ -105,7 +104,7 @@ namespace mapnik {
         static void clear_object_severity()
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(severity_mutex_);
+            std::lock_guard<std::mutex> lock(severity_mutex_);
 #endif
 
             object_severity_level_.clear();
@@ -120,7 +119,7 @@ namespace mapnik {
         static void set_format(std::string const& format)
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(format_mutex_);
+            std::lock_guard<std::mutex> lock(format_mutex_);
 #endif
             format_ = format;
         }
@@ -166,7 +165,7 @@ namespace mapnik {
             {
 #ifdef MAPNIK_THREADSAFE
                 static std::mutex mutex;
-                mapnik::scoped_lock lock(mutex);
+                std::lock_guard<std::mutex> lock(mutex);
 #endif
                 std::clog << logger::str() << " " << s.str() << std::endl;
             }

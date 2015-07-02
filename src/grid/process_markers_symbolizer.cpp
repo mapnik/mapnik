@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,6 @@ porting notes -->
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -146,7 +145,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using RasterizerType = typename std::tuple_element<1,RendererContext>::type;
     using PixMapType = typename std::tuple_element<2,RendererContext>::type;
 
-    raster_markers_rasterizer_dispatch(image_data_rgba8 & src,
+    raster_markers_rasterizer_dispatch(image_rgba8 const& src,
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
@@ -165,6 +164,8 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
+        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts
+        // the destination pixel type required.
         render_raster_marker(RendererType(renb_), ras_, this->src_, this->feature_, marker_tr, opacity);
         if (!placed_)
         {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -84,7 +84,10 @@ image_reader* get_image_reader(std::string const& filename)
     {
         return factory<image_reader,std::string,std::string const&>::instance().create_object(*type,filename);
     }
-    return 0;
+    else
+    {
+        throw image_reader_exception("image_reader: can't determine type from input data");
+    }
 }
 
 }

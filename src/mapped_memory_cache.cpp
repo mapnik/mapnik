@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,12 @@
 
 // boost
 #include <boost/assert.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/file_mapping.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -38,7 +42,7 @@ namespace mapnik
 void mapped_memory_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     return cache_.clear();
 }
@@ -46,7 +50,7 @@ void mapped_memory_cache::clear()
 bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     return cache_.emplace(uri,mem).second;
 }
@@ -54,7 +58,7 @@ bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& uri, bool update_cache)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     using iterator_type = std::unordered_map<std::string, mapped_region_ptr>::const_iterator;
     boost::optional<mapped_region_ptr> result;

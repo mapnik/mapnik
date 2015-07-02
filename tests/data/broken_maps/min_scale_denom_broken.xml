@@ -1,8 +1,0 @@
-<!DOCTYPE Map>
-<Map minimum-version="0.7.2">
-    <Style name="some_style">
-      <Rule>
-        <MinScaleDenominator>foobar</MinScaleDenominator>
-      </Rule>
-    </Style>
-</Map>

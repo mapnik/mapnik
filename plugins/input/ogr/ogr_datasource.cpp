@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,8 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #pragma GCC diagnostic push
@@ -329,10 +330,12 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
             const std::string fld_name = fld->GetNameRef();
             const OGRFieldType type_oid = fld->GetType();
-
             switch (type_oid)
             {
             case OFTInteger:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64:
+#endif
                 desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
                 break;
 
@@ -350,6 +353,9 @@ void ogr_datasource::init(mapnik::parameters const& params)
                 break;
 
             case OFTIntegerList:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64List:
+#endif
             case OFTRealList:
             case OFTStringList:
             case OFTWideStringList: // deprecated !
@@ -365,6 +371,13 @@ void ogr_datasource::init(mapnik::parameters const& params)
             }
         }
     }
+    mapnik::parameters & extra_params = desc_.get_extra_parameters();
+    OGRSpatialReference * srs_ref = layer->GetSpatialRef();
+    char * srs_output = NULL;
+    if (srs_ref && srs_ref->exportToProj4( &srs_output ) == OGRERR_NONE ) {
+        extra_params["proj4"] = mapnik::util::trim_copy(srs_output);
+    }
+    CPLFree(srs_output);
 }
 
 const char * ogr_datasource::name()
@@ -382,9 +395,9 @@ box2d<double> ogr_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
     if (dataset_ && layer_.is_valid())
     {
         OGRLayer* layer = layer_.layer();
@@ -397,19 +410,19 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
             {
             case wkbPoint:
             case wkbMultiPoint:
-                result.reset(mapnik::datasource::Point);
+                result.reset(mapnik::datasource_geometry_t::Point);
                 break;
             case wkbLinearRing:
             case wkbLineString:
             case wkbMultiLineString:
-                result.reset(mapnik::datasource::LineString);
+                result.reset(mapnik::datasource_geometry_t::LineString);
                 break;
             case wkbPolygon:
             case wkbMultiPolygon:
-                result.reset(mapnik::datasource::Polygon);
+                result.reset(mapnik::datasource_geometry_t::Polygon);
                 break;
             case wkbGeometryCollection:
-                result.reset(mapnik::datasource::Collection);
+                result.reset(mapnik::datasource_geometry_t::Collection);
                 break;
             case wkbNone:
             case wkbUnknown:
@@ -432,19 +445,19 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                             {
                             case wkbPoint:
                             case wkbMultiPoint:
-                                result.reset(mapnik::datasource::Point);
+                                result.reset(mapnik::datasource_geometry_t::Point);
                                 break;
                             case wkbLinearRing:
                             case wkbLineString:
                             case wkbMultiLineString:
-                                result.reset(mapnik::datasource::LineString);
+                                result.reset(mapnik::datasource_geometry_t::LineString);
                                 break;
                             case wkbPolygon:
                             case wkbMultiPolygon:
-                                result.reset(mapnik::datasource::Polygon);
+                                result.reset(mapnik::datasource_geometry_t::Polygon);
                                 break;
                             case wkbGeometryCollection:
-                                result.reset(mapnik::datasource::Collection);
+                                result.reset(mapnik::datasource_geometry_t::Collection);
                                 break;
                             default:
                                 break;

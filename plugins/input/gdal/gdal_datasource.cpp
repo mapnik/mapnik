@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,37 +45,9 @@ using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
 
-/*
- * Opens a GDALDataset and returns a pointer to it.
- * Caller is responsible for calling GDALClose on it
- */
-inline GDALDataset* gdal_datasource::open_dataset() const
-{
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Opening " << dataset_name_;
-
-    GDALDataset *dataset;
-#if GDAL_VERSION_NUM >= 1600
-    if (shared_dataset_)
-    {
-        dataset = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(), GA_ReadOnly));
-    }
-    else
-#endif
-    {
-        dataset = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(), GA_ReadOnly));
-    }
-
-    if (! dataset)
-    {
-        throw datasource_exception(CPLGetLastErrorMsg());
-    }
-
-    return dataset;
-}
-
-
 gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
+      dataset_(nullptr),
       desc_(gdal_datasource::name(), "utf-8"),
       nodata_value_(params.get<double>("nodata")),
       nodata_tolerance_(*params.get<double>("nodata_tolerance",1e-12))
@@ -104,11 +76,27 @@ gdal_datasource::gdal_datasource(parameters const& params)
     shared_dataset_ = *params.get<mapnik::boolean_type>("shared", false);
     band_ = *params.get<mapnik::value_integer>("band", -1);
 
-    GDALDataset *dataset = open_dataset();
+#if GDAL_VERSION_NUM >= 1600
+    if (shared_dataset_)
+    {
+        dataset_ = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(), GA_ReadOnly));
+    }
+    else
+#endif
+    {
+        dataset_ = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(), GA_ReadOnly));
+    }
 
-    nbands_ = dataset->GetRasterCount();
-    width_ = dataset->GetRasterXSize();
-    height_ = dataset->GetRasterYSize();
+    if (! dataset_)
+    {
+        throw datasource_exception(CPLGetLastErrorMsg());
+    }
+
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: opened Dataset=" << dataset_;
+
+    nbands_ = dataset_->GetRasterCount();
+    width_ = dataset_->GetRasterXSize();
+    height_ = dataset_->GetRasterYSize();
     desc_.add_descriptor(mapnik::attribute_descriptor("nodata", mapnik::Double));
 
     double tr[6];
@@ -140,7 +128,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
     }
     else
     {
-        if (dataset->GetGeoTransform(tr) != CPLE_None)
+        if (dataset_->GetGeoTransform(tr) != CPLE_None)
         {
             MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource GetGeotransform failure gives="
                                    << tr[0] << "," << tr[1] << ","
@@ -187,8 +175,6 @@ gdal_datasource::gdal_datasource(parameters const& params)
         extent_.init(x0, y0, x1, y1);
     }
 
-    GDALClose(dataset);
-
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
 
@@ -196,6 +182,8 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
 gdal_datasource::~gdal_datasource()
 {
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << dataset_;
+    GDALClose(dataset_);
 }
 
 datasource::datasource_t gdal_datasource::type() const
@@ -213,9 +201,9 @@ box2d<double> gdal_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> gdal_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> gdal_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource::geometry_t>();
+    return boost::optional<mapnik::datasource_geometry_t>();
 }
 
 layer_descriptor gdal_datasource::get_descriptor() const
@@ -232,7 +220,7 @@ featureset_ptr gdal_datasource::features(query const& q) const
     gdal_query gq = q;
 
     // TODO - move to std::make_shared, but must reduce # of args to <= 9
-    return featureset_ptr(new gdal_featureset(*open_dataset(),
+    return featureset_ptr(new gdal_featureset(*dataset_,
                                               band_,
                                               gq,
                                               extent_,
@@ -254,7 +242,7 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
     gdal_query gq = pt;
 
     // TODO - move to std::make_shared, but must reduce # of args to <= 9
-    return featureset_ptr(new gdal_featureset(*open_dataset(),
+    return featureset_ptr(new gdal_featureset(*dataset_,
                                               band_,
                                               gq,
                                               extent_,

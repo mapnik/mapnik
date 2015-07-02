@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
 
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/geom_util.hpp>
+#include <mapnik/geometry_types.hpp>
 
 namespace mapnik {
 
@@ -48,12 +49,12 @@ public:
             return false;
         }
 
-        if (this->locator_.type() == mapnik::geometry_type::types::Point)
+        if (this->locator_.type() == geometry::geometry_types::Point)
         {
             return markers_point_placement<Locator, Detector>::get_point(x, y, angle, ignore_placement);
         }
 
-        if (this->locator_.type() == mapnik::geometry_type::types::LineString)
+        if (this->locator_.type() == geometry::geometry_types::LineString)
         {
             if (!label::middle_point(this->locator_, x, y))
             {

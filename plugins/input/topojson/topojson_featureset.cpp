@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,9 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry_correct.hpp>
+
 // stl
 #include <string>
 #include <vector>
@@ -36,17 +39,9 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/range/adaptor/reversed.hpp>
-#include <boost/range/adaptor/sliced.hpp>
-#include <boost/geometry.hpp>
-#include <boost/geometry/algorithms/simplify.hpp>
-#include <boost/geometry/geometries/register/point.hpp>
-#include <boost/geometry/geometries/register/linestring.hpp>
 #pragma GCC diagnostic pop
 
 #include "topojson_featureset.hpp"
-
-BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::topojson::coordinate, double, boost::geometry::cs::cartesian, x, y)
-BOOST_GEOMETRY_REGISTER_LINESTRING(std::vector<mapnik::topojson::coordinate>)
 
 namespace mapnik { namespace topojson {
 
@@ -90,13 +85,12 @@ struct feature_generator
         : ctx_(ctx),
           tr_(tr),
           topo_(topo),
+          num_arcs_(topo.arcs.size()),
           feature_id_(feature_id) {}
 
     feature_ptr operator() (point const& pt) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::unique_ptr<geometry_type> point_ptr(new geometry_type(geometry_type::types::Point));
-
         double x = pt.coord.x;
         double y = pt.coord.y;
         if (topo_.tr)
@@ -104,9 +98,8 @@ struct feature_generator
             x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
             y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
         }
-
-        point_ptr->move_to(x,y);
-        feature->paths().push_back(point_ptr.release());
+        mapnik::geometry::point<double> point(x, y);
+        feature->set_geometry(std::move(point));
         assign_properties(*feature, pt, tr_);
         return feature;
     }
@@ -114,11 +107,10 @@ struct feature_generator
     feature_ptr operator() (multi_point const& multi_pt) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-
+        mapnik::geometry::multi_point<double> multi_point;
+        multi_point.reserve(multi_pt.points.size());
         for (auto const& pt : multi_pt.points)
         {
-            std::unique_ptr<geometry_type> point_ptr(new geometry_type(geometry_type::types::Point));
-
             double x = pt.x;
             double y = pt.y;
             if (topo_.tr)
@@ -126,10 +118,9 @@ struct feature_generator
                 x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                 y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
             }
-
-            point_ptr->move_to(x,y);
-            feature->paths().push_back(point_ptr.release());
+            multi_point.add_coord(x, y);
         }
+        feature->set_geometry(std::move(multi_point));
         assign_properties(*feature, multi_pt, tr_);
         return feature;
     }
@@ -137,207 +128,231 @@ struct feature_generator
     feature_ptr operator() (linestring const& line) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::unique_ptr<geometry_type> line_ptr(new geometry_type(geometry_type::types::LineString));
-
-        double px = 0, py = 0;
-        index_type arc_index = line.ring;
-        bool first = true;
-        for (auto pt : topo_.arcs[arc_index].coordinates)
+        if (num_arcs_ > 0)
         {
-            double x = pt.x;
-            double y = pt.y;
-            if (topo_.tr)
+            index_type index = line.ring;
+            index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
+            if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
             {
-                x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
-            }
-            if (first)
-            {
-                first = false;
-                line_ptr->move_to(x,y);
-            }
-            else
-            {
-                line_ptr->line_to(x,y);
+                auto const& arcs = topo_.arcs[arc_index];
+                double px = 0, py = 0;
+                mapnik::geometry::line_string<double> line_string;
+                line_string.reserve(arcs.coordinates.size());
+
+                for (auto pt : arcs.coordinates)
+                {
+                    double x = pt.x;
+                    double y = pt.y;
+                    if (topo_.tr)
+                    {
+                        x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                        y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                    }
+                    line_string.add_coord(x,y);
+                }
+                feature->set_geometry(std::move(line_string));
+                assign_properties(*feature, line, tr_);
             }
         }
-
-        feature->paths().push_back(line_ptr.release());
-        assign_properties(*feature, line, tr_);
         return feature;
     }
 
     feature_ptr operator() (multi_linestring const& multi_line) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-
-        for (auto const& index : multi_line.rings)
+        if (num_arcs_ > 0)
         {
-            std::unique_ptr<geometry_type> line_ptr(new geometry_type(geometry_type::types::LineString));
-
-            double px = 0, py = 0;
-            bool first = true;
-            bool reverse = index < 0;
-            index_type arc_index = reverse ? std::abs(index) - 1 : index;
-            for (auto pt : topo_.arcs[arc_index].coordinates)
+            mapnik::geometry::multi_line_string<double> multi_line_string;
+            bool hit = false;
+            multi_line_string.reserve(multi_line.rings.size());
+            for (auto const& index : multi_line.rings)
             {
-                double x = pt.x;
-                double y = pt.y;
-                if (topo_.tr)
+                index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
+                if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                 {
-                    x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                    y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
-                }
-                if (first)
-                {
-                    first = false;
-                    line_ptr->move_to(x,y);
-                }
-                else
-                {
-                    line_ptr->line_to(x,y);
+                    hit = true;
+                    double px = 0, py = 0;
+                    mapnik::geometry::line_string<double> line_string;
+                    auto const& arcs = topo_.arcs[arc_index];
+                    line_string.reserve(arcs.coordinates.size());
+                    for (auto pt : arcs.coordinates)
+                    {
+                        double x = pt.x;
+                        double y = pt.y;
+                        if (topo_.tr)
+                        {
+                            x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                            y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                        }
+                        line_string.add_coord(x, y);
+                    }
+                    multi_line_string.push_back(std::move(line_string));
                 }
             }
-            feature->paths().push_back(line_ptr.release());
+            if (hit)
+            {
+                feature->set_geometry(std::move(multi_line_string));
+                assign_properties(*feature, multi_line, tr_);
+            }
         }
-        assign_properties(*feature, multi_line, tr_);
         return feature;
     }
 
     feature_ptr operator() (polygon const& poly) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
-        std::vector<mapnik::topojson::coordinate> processed_coords;
-
-        for (auto const& ring : poly.rings)
+        if (num_arcs_ > 0)
         {
+            std::vector<mapnik::topojson::coordinate> processed_coords;
+            mapnik::geometry::polygon<double> polygon;
+            if (poly.rings.size() > 1) polygon.interior_rings.reserve(poly.rings.size() - 1);
             bool first = true;
-            for (auto const& index : ring)
+            bool hit = false;
+            for (auto const& ring : poly.rings)
             {
-                double px = 0, py = 0;
-                bool reverse = index < 0;
-                index_type arc_index = reverse ? std::abs(index) - 1 : index;
-                auto const& coords = topo_.arcs[arc_index].coordinates;
-                processed_coords.clear();
-                processed_coords.reserve(coords.size());
-                for (auto const& pt : coords )
+                mapnik::geometry::linear_ring<double> linear_ring;
+                for (auto const& index : ring)
                 {
-                    double x = pt.x;
-                    double y = pt.y;
-
-                    if (topo_.tr)
+                    double px = 0, py = 0;
+                    bool reverse = index < 0;
+                    index_type arc_index = reverse ? std::abs(index) - 1 : index;
+                    if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                     {
-                        transform const& tr = *topo_.tr;
-                        x =  (px += x) * tr.scale_x + tr.translate_x;
-                        y =  (py += y) * tr.scale_y + tr.translate_y;
-                    }
-                    processed_coords.emplace_back(coordinate{x,y});
-                }
-
-
-                // simplify
-                std::vector<mapnik::topojson::coordinate> simplified(processed_coords.size());
-                boost::geometry::simplify(processed_coords, simplified, 2);
-
-                using namespace boost::adaptors;
-
-                if (reverse)
-                {
-                    for (auto const& c : simplified | reversed | sliced(0, simplified.size()-1))
-                    {
-                        if (first)
+                        hit = true;
+                        auto const& arcs = topo_.arcs[arc_index];
+                        auto const& coords = arcs.coordinates;
+                        processed_coords.clear();
+                        processed_coords.reserve(coords.size());
+                        for (auto const& pt : coords )
                         {
-                            first = false;
-                            poly_ptr->move_to(c.x,c.y);
+                            double x = pt.x;
+                            double y = pt.y;
+
+                            if (topo_.tr)
+                            {
+                                transform const& tr = *topo_.tr;
+                                x =  (px += x) * tr.scale_x + tr.translate_x;
+                                y =  (py += y) * tr.scale_y + tr.translate_y;
+                            }
+                            processed_coords.emplace_back(coordinate{x,y});
                         }
-                        else poly_ptr->line_to(c.x,c.y);
+
+                        if (reverse)
+                        {
+                            for (auto const& c : processed_coords | boost::adaptors::reversed)
+                            {
+                                linear_ring.emplace_back(c.x, c.y);
+                            }
+                        }
+                        else
+                        {
+                            for (auto const& c : processed_coords)
+                            {
+                                linear_ring.emplace_back(c.x, c.y);
+                            }
+                        }
                     }
+                }
+                if (first)
+                {
+                    first = false;
+                    polygon.set_exterior_ring(std::move(linear_ring));
                 }
                 else
                 {
-                    for (auto const& c : simplified | sliced(0, simplified.size()-1))
-                    {
-                        if (first)
-                        {
-                            first = false;
-                            poly_ptr->move_to(c.x,c.y);
-                        }
-                        else poly_ptr->line_to(c.x,c.y);
-                    }
+                    polygon.add_hole(std::move(linear_ring));
                 }
             }
-            poly_ptr->close_path();
+            if (hit)
+            {
+                mapnik::geometry::correct(polygon);
+                feature->set_geometry(std::move(polygon));
+                assign_properties(*feature, poly, tr_);
+            }
         }
-
-        feature->paths().push_back(poly_ptr.release());
-        assign_properties(*feature, poly, tr_);
         return feature;
     }
 
     feature_ptr operator() (multi_polygon const& multi_poly) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-        std::vector<mapnik::topojson::coordinate> processed_coords;
-        for (auto const& poly : multi_poly.polygons)
+        if (num_arcs_ > 0)
         {
-            std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
-            for (auto const& ring : poly)
+            std::vector<mapnik::topojson::coordinate> processed_coords;
+            mapnik::geometry::multi_polygon<double> multi_polygon;
+            multi_polygon.reserve(multi_poly.polygons.size());
+            bool hit = false;
+            for (auto const& poly : multi_poly.polygons)
             {
                 bool first = true;
-                for (auto const& index : ring)
+                mapnik::geometry::polygon<double> polygon;
+                if (poly.size() > 1) polygon.interior_rings.reserve(poly.size() - 1);
+
+                for (auto const& ring : poly)
                 {
-                    double px = 0, py = 0;
-                    bool reverse = index < 0;
-                    index_type arc_index = reverse ? std::abs(index) - 1 : index;
-                    auto const& coords = topo_.arcs[arc_index].coordinates;
-                    processed_coords.clear();
-                    processed_coords.reserve(coords.size());
-                    for (auto const& pt : coords )
+                    mapnik::geometry::linear_ring<double> linear_ring;
+                    for (auto const& index : ring)
                     {
-                        double x = pt.x;
-                        double y = pt.y;
-
-                        if (topo_.tr)
+                        double px = 0, py = 0;
+                        bool reverse = index < 0;
+                        index_type arc_index = reverse ? std::abs(index) - 1 : index;
+                        if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                         {
-                            x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                            y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
-                        }
-                        processed_coords.emplace_back(coordinate{x,y});
-                    }
-
-                    using namespace boost::adaptors;
-
-                    if (reverse)
-                    {
-                        for (auto const& c : (processed_coords | reversed | sliced(0,processed_coords.size() - 1)))
-                        {
-                            if (first)
+                            hit = true;
+                            auto const& arcs = topo_.arcs[arc_index];
+                            auto const& coords = arcs.coordinates;
+                            processed_coords.clear();
+                            processed_coords.reserve(coords.size());
+                            for (auto const& pt : coords )
                             {
-                                first = false;
-                                poly_ptr->move_to(c.x,c.y);
+                                double x = pt.x;
+                                double y = pt.y;
+
+                                if (topo_.tr)
+                                {
+                                    x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                                    y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                                }
+                                processed_coords.emplace_back(coordinate{x,y});
                             }
-                            else poly_ptr->line_to(c.x,c.y);
+
+                            using namespace boost::adaptors;
+
+                            if (reverse)
+                            {
+                                for (auto const& c : (processed_coords | reversed))
+                                {
+                                    linear_ring.add_coord(c.x, c.y);
+                                }
+                            }
+                            else
+                            {
+                                for (auto const& c : processed_coords)
+                                {
+                                    linear_ring.add_coord(c.x, c.y);
+                                }
+                            }
                         }
+                    }
+                    if (first)
+                    {
+                        first = false;
+                        polygon.set_exterior_ring(std::move(linear_ring));
                     }
                     else
                     {
-                        for (auto const& c : processed_coords | sliced(0,processed_coords.size() - 1))
-                        {
-                            if (first)
-                            {
-                                first = false;
-                                poly_ptr->move_to(c.x,c.y);
-                            }
-                            else poly_ptr->line_to(c.x,c.y);
-                        }
+                        polygon.add_hole(std::move(linear_ring));
                     }
                 }
-                poly_ptr->close_path();
+                multi_polygon.push_back(std::move(polygon));
             }
-            feature->paths().push_back(poly_ptr.release());
+            if (hit)
+            {
+                mapnik::geometry::correct(multi_polygon);
+                feature->set_geometry(std::move(multi_polygon));
+                assign_properties(*feature, multi_poly, tr_);
+            }
         }
-        assign_properties(*feature, multi_poly, tr_);
         return feature;
     }
 
@@ -350,6 +365,7 @@ struct feature_generator
     Context & ctx_;
     mapnik::transcoder const& tr_;
     topology const& topo_;
+    std::size_t num_arcs_;
     std::size_t feature_id_;
 };
 
@@ -364,7 +380,7 @@ topojson_featureset::topojson_featureset(mapnik::topojson::topology const& topo,
       index_array_(std::move(index_array)),
       index_itr_(index_array_.begin()),
       index_end_(index_array_.end()),
-      feature_id_ (0) {}
+      feature_id_(1) {}
 
 topojson_featureset::~topojson_featureset() {}
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/trim.hpp>
 
@@ -32,6 +32,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/include/qi.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/mapped_region.hpp>
@@ -190,7 +193,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 ascii::space_type space;
-                qi::double_type double_;
+                static qi::double_type double_;
                 if (qi::phrase_parse(itr,end,double_,space,val))
                 {
                     f.put(name,val);
@@ -202,8 +205,8 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 ascii::space_type space;
-                qi::int_type int_;
-                if (qi::phrase_parse(itr,end,int_,space,val))
+                static qi::int_parser<mapnik::value_integer,10,1,-1> numeric_parser;
+                if (qi::phrase_parse(itr, end, numeric_parser, space, val))
                 {
                     f.put(name,val);
                 }

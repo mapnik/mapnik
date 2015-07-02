@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
+#include <mapnik/image_any.hpp>
 
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
@@ -44,17 +44,17 @@ namespace mapnik
 {
 
 #if defined(HAVE_CAIRO)
-template class feature_style_processor<cairo_renderer<cairo_ptr> >;
+template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr> >;
 #endif
 
 #if defined(SVG_RENDERER)
-template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
+template class MAPNIK_DECL feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
 #endif
 
 #if defined(GRID_RENDERER)
-template class feature_style_processor<grid_renderer<grid> >;
+template class MAPNIK_DECL feature_style_processor<grid_renderer<grid> >;
 #endif
 
-template class feature_style_processor<agg_renderer<image_32> >;
+template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8> >;
 
 }

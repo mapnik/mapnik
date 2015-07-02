@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/marker.hpp>
@@ -59,7 +60,7 @@ void agg_renderer<T0,T1>::process(point_symbolizer const& sym,
         });
 }
 
-template void agg_renderer<image_32>::process(point_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(point_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

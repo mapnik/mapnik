@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@ public:
     virtual void add_expressions(expression_set & output) const;
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);
-    unsigned size() const;
+    std::size_t size() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
 private:
     std::vector<text_symbolizer_properties> list_;

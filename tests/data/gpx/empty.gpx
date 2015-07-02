@@ -1,9 +1,0 @@
-<?xml version="1.0" standalone="yes"?>
-<gpx version="1.0">
-<name>Empty GPX</name>
-<desc></desc>
-<wpt lat="48" lon="-122">
- <ele>0</ele>
- <time>2001-11-28T21:06:52Z</time>
-</wpt>
-</gpx>

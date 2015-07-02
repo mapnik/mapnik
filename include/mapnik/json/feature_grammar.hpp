@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,15 +27,17 @@
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/geometry_container.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/value_converters.hpp>
-// spirit::qi
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 
@@ -77,13 +79,13 @@ struct put_property
     mapnik::transcoder const& tr_;
 };
 
-struct extract_geometry
+struct set_geometry_impl
 {
-    using result_type =  mapnik::geometry_container&;
-    template <typename T>
-    result_type operator() (T & feature) const
+    using result_type =  void;
+    template <typename T0, typename T1>
+    result_type operator() (T0 & feature, T1 && geom) const
     {
-        return feature.paths();
+        return feature.set_geometry(std::move(geom));
     }
 };
 
@@ -108,7 +110,7 @@ struct feature_grammar :
     qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_array;
     // functions
     phoenix::function<put_property> put_property_;
-    phoenix::function<extract_geometry> extract_geometry_;
+    phoenix::function<set_geometry_impl> set_geometry;
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
     // geometry

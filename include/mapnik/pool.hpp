@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,7 @@
 #define MAPNIK_POOL_HPP
 
 // mapnik
-#include <mapnik/unique_lock.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // boost
@@ -71,7 +70,7 @@ public:
     HolderType borrowObject()
     {
 #ifdef MAPNIK_THREADSAFE
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 #endif
 
         typename ContType::iterator itr=pool_.begin();
@@ -106,7 +105,7 @@ public:
     unsigned size() const
     {
 #ifdef MAPNIK_THREADSAFE
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 #endif
         return pool_.size();
     }
@@ -114,7 +113,7 @@ public:
     unsigned max_size() const
     {
 #ifdef MAPNIK_THREADSAFE
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 #endif
         return maxSize_;
     }
@@ -122,7 +121,7 @@ public:
     void set_max_size(unsigned size)
     {
 #ifdef MAPNIK_THREADSAFE
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 #endif
         maxSize_ = std::max(maxSize_,size);
     }
@@ -130,7 +129,7 @@ public:
     unsigned initial_size() const
     {
 #ifdef MAPNIK_THREADSAFE
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 #endif
         return initialSize_;
     }
@@ -138,7 +137,7 @@ public:
     void set_initial_size(unsigned size)
     {
 #ifdef MAPNIK_THREADSAFE
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 #endif
         if (size > initialSize_)
         {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geom_util.hpp>
@@ -301,13 +301,13 @@ box2d<double> shape_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> shape_datasource::get_geometry_type() const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::get_geometry_type");
 #endif
 
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
     switch (shape_type_)
     {
     case shape_io::shape_point:
@@ -317,21 +317,21 @@ boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_t
     case shape_io::shape_multipointm:
     case shape_io::shape_multipointz:
     {
-        result.reset(mapnik::datasource::Point);
+        result.reset(mapnik::datasource_geometry_t::Point);
         break;
     }
     case shape_io::shape_polyline:
     case shape_io::shape_polylinem:
     case shape_io::shape_polylinez:
     {
-        result.reset(mapnik::datasource::LineString);
+        result.reset(mapnik::datasource_geometry_t::LineString);
         break;
     }
     case shape_io::shape_polygon:
     case shape_io::shape_polygonm:
     case shape_io::shape_polygonz:
     {
-        result.reset(mapnik::datasource::Polygon);
+        result.reset(mapnik::datasource_geometry_t::Polygon);
         break;
     }
     default:

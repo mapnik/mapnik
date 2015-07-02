@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,14 +32,12 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
-
-// boost
-#include <memory>
-#include <boost/optional.hpp>
+#include <mapnik/datasource_geometry_type.hpp>
 
 // stl
 #include <map>
 #include <string>
+#include <memory>
 
 namespace mapnik {
 
@@ -71,13 +69,6 @@ public:
         Raster
     };
 
-    enum geometry_t : std::uint8_t {
-        Point = 1,
-        LineString = 2,
-        Polygon = 3,
-        Collection = 4
-    };
-
     datasource (parameters const& params)
        : params_(params) {}
 
@@ -103,22 +94,26 @@ public:
         return params_ == rhs.params();
     }
 
+    bool operator!=(datasource const& rhs) const
+    {
+        return !(*this == rhs);
+    }
+
     /*!
      * @brief Get the type of the datasource
      * @return The type of the datasource (Vector or Raster)
      */
     virtual datasource_t type() const = 0;
-
     virtual processor_context_ptr get_context(feature_style_context_map&) const { return processor_context_ptr(); }
-    virtual featureset_ptr features_with_context(query const& q,processor_context_ptr /*ctx*/) const
+    virtual featureset_ptr features_with_context(query const& q, processor_context_ptr /*ctx*/) const
     {
         // default implementation without context use features method
         return features(q);
     }
+    virtual boost::optional<datasource_geometry_t> get_geometry_type() const = 0;
     virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
     virtual box2d<double> envelope() const = 0;
-    virtual boost::optional<geometry_t> get_geometry_type() const = 0;
     virtual layer_descriptor get_descriptor() const = 0;
     virtual ~datasource() {}
 protected:

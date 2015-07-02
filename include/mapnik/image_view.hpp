@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,100 +23,64 @@
 #ifndef MAPNIK_IMAGE_VIEW_HPP
 #define MAPNIK_IMAGE_VIEW_HPP
 
+#include <mapnik/image.hpp>
+
 namespace mapnik {
 
 template <typename T>
 class image_view
 {
 public:
+    using pixel = typename T::pixel;
     using pixel_type = typename T::pixel_type;
+    static constexpr image_dtype dtype = T::dtype;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-    
-    image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data)
-        : x_(x),
-          y_(y),
-          width_(width),
-          height_(height),
-          data_(data)
-    {
-        if (x_ >= data_.width()) x_=data_.width()-1;
-        if (y_ >= data_.height()) y_=data_.height()-1;
-        if (x_ + width_ > data_.width()) width_= data_.width() - x_;
-        if (y_ + height_ > data_.height()) height_= data_.height() - y_;
-    }
 
-    ~image_view() {}
+    image_view(std::size_t x, std::size_t y, std::size_t width, std::size_t height, T const& data);
+    ~image_view();
 
-    image_view(image_view<T> const& rhs)
-        : x_(rhs.x_),
-          y_(rhs.y_),
-          width_(rhs.width_),
-          height_(rhs.height_),
-          data_(rhs.data_) {}
+    image_view(image_view<T> const& rhs);
+    image_view(image_view<T> && other) noexcept;
+    image_view<T>& operator=(image_view<T> rhs) = delete;
+    bool operator==(image_view<T> const& rhs) const;
+    bool operator<(image_view<T> const& rhs) const;
 
-    image_view<T> & operator=(image_view<T> const& rhs)
-    {
-        if (&rhs==this) return *this;
-        x_ = rhs.x_;
-        y_ = rhs.y_;
-        width_ = rhs.width_;
-        height_ = rhs.height_;
-        data_ = rhs.data_;
-        return *this;
-    }
-
-    inline unsigned x() const
-    {
-        return x_;
-    }
-
-    inline unsigned y() const
-    {
-        return y_;
-    }
-
-    inline unsigned width() const
-    {
-        return width_;
-    }
-
-    inline unsigned height() const
-    {
-        return height_;
-    }
-
-    inline unsigned getSize() const
-    {
-        return height_ * width_ * pixel_size;
-    }
-
-    inline unsigned getRowSize() const
-    {
-        return width_ * pixel_size;
-    }
-
-    inline const pixel_type* getRow(unsigned row) const
-    {
-        return data_.getRow(row + y_) + x_;
-    }
-    
-    inline const pixel_type* getRow(unsigned row, std::size_t x0) const
-    {
-        return data_.getRow(row + y_, x0) + x_;
-    }
-
-    inline T const& data() const
-    {
-        return data_;
-    }
+    std::size_t x() const;
+    std::size_t y() const;
+    std::size_t width() const;
+    std::size_t height() const;
+    pixel_type const& operator() (std::size_t i, std::size_t j) const;
+    std::size_t size() const;
+    std::size_t row_size() const;
+    pixel_type const* get_row(std::size_t row) const;
+    pixel_type const* get_row(std::size_t row, std::size_t x0) const;
+    T const& data() const;
+    bool get_premultiplied() const;
+    double get_offset() const;
+    double get_scaling() const;
+    image_dtype get_dtype() const;
 
 private:
-    unsigned x_;
-    unsigned y_;
-    unsigned width_;
-    unsigned height_;
+    std::size_t x_;
+    std::size_t y_;
+    std::size_t width_;
+    std::size_t height_;
     T const& data_;
 };
-}
+
+using image_view_null = image_view<image_null>;
+using image_view_rgba8 = image_view<image_rgba8>;
+using image_view_gray8 = image_view<image_gray8>;
+using image_view_gray8s = image_view<image_gray8s>;
+using image_view_gray16 = image_view<image_gray16>;
+using image_view_gray16s = image_view<image_gray16s>;
+using image_view_gray32 = image_view<image_gray32>;
+using image_view_gray32s = image_view<image_gray32s>;
+using image_view_gray32f = image_view<image_gray32f>;
+using image_view_gray64 = image_view<image_gray64>;
+using image_view_gray64s = image_view<image_gray64s>;
+using image_view_gray64f = image_view<image_gray64f>;
+
+} // end ns
 
 #endif // MAPNIK_IMAGE_VIEW_HPP

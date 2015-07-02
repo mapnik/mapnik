@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,12 +31,16 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/box2d.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/interprocess/mapped_region.hpp>
-#include <mapnik/mapped_memory_cache.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
+#include <mapnik/mapped_memory_cache.hpp>
 #endif
 #include <mapnik/util/noncopyable.hpp>
 
@@ -72,8 +76,8 @@ template <typename Tag>
 struct shape_record
 {
     typename Tag::data_type data;
-    size_t size;
-    mutable size_t pos;
+    std::size_t size;
+    mutable std::size_t pos;
 
     explicit shape_record(size_t size_)
         : data(Tag::alloc(size_)),
@@ -129,6 +133,8 @@ struct shape_record
     {
         return (size - pos);
     }
+
+    std::size_t length() {return size;}
 };
 
 class shape_file : mapnik::util::noncopyable
@@ -220,30 +226,13 @@ public:
     inline double read_double()
     {
         double val;
-#ifndef MAPNIK_BIG_ENDIAN
         file_.read(reinterpret_cast<char*>(&val), 8);
-#else
-        char b[8];
-        file_.read(b, 8);
-        read_double_ndr(b, val);
-#endif
         return val;
     }
 
     inline void read_envelope(box2d<double>& envelope)
     {
-#ifndef MAPNIK_BIG_ENDIAN
         file_.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
-#else
-        char data[4 * 8];
-        file_.read(data,4 * 8);
-        double minx, miny, maxx, maxy;
-        read_double_ndr(data + 0 * 8, minx);
-        read_double_ndr(data + 1 * 8, miny);
-        read_double_ndr(data + 2 * 8, maxx);
-        read_double_ndr(data + 3 * 8, maxy);
-        envelope.init(minx, miny, maxx, maxy);
-#endif
     }
 
     inline void skip(std::streampos bytes)

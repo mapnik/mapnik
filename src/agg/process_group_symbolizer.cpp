@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_render_marker.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/geom_util.hpp>
@@ -48,9 +49,14 @@ namespace mapnik {
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.
  */
-struct thunk_renderer
+
+template <typename T>
+struct thunk_renderer;
+
+template <>
+struct thunk_renderer<image_rgba8>
 {
-    using renderer_type = agg_renderer<image_32>;
+    using renderer_type = agg_renderer<image_rgba8>;
     using buffer_type = renderer_type::buffer_type;
     using text_renderer_type = agg_text_renderer<buffer_type>;
 
@@ -75,7 +81,7 @@ struct thunk_renderer
                                                         renderer_type,
                                                         pixfmt_comp_type>;
         ras_ptr_->reset();
-        buf_type render_buffer(buf_->raw_data(), buf_->width(), buf_->height(), buf_->width() * 4);
+        buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -96,7 +102,7 @@ struct thunk_renderer
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
         ras_ptr_->reset();
-        buf_type render_buffer(buf_->raw_data(), buf_->width(), buf_->height(), buf_->width() * 4);
+        buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -116,11 +122,12 @@ struct thunk_renderer
             offset_,
             [&] (glyph_positions_ptr glyphs)
             {
-                if (glyphs->marker())
+                marker_info_ptr mark = glyphs->get_marker();
+                if (mark)
                 {
                     ren_.render_marker(glyphs->marker_pos(),
-                                       *(glyphs->marker()->marker),
-                                       glyphs->marker()->transform,
+                                       *mark->marker_,
+                                       mark->transform_,
                                        thunk.opacity_, thunk.comp_op_);
                 }
                 ren.render(*glyphs);
@@ -130,7 +137,7 @@ struct thunk_renderer
     template <typename T>
     void operator()(T const &) const
     {
-        // TODO: warning if unimplemented?
+        throw std::runtime_error("Rendering of this data type is not supported currently by the renderer");
     }
 
 private:
@@ -150,7 +157,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
         sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_,
         [&](render_thunk_list const& thunks, pixel_position const& render_offset)
         {
-            thunk_renderer ren(*this, ras_ptr, current_buffer_, common_, render_offset);
+            thunk_renderer<buffer_type> ren(*this, ras_ptr, current_buffer_, common_, render_offset);
             for (render_thunk_ptr const& thunk : thunks)
             {
                 util::apply_visitor(ren, *thunk);
@@ -158,7 +165,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
         });
 }
 
-template void agg_renderer<image_32>::process(group_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(group_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

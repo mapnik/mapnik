@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,7 @@
 
 // mapnik
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/marker_helpers.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/renderer_common.hpp>
@@ -42,15 +41,12 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/graphics.hpp>
 
 // agg
 #include <agg_trans_affine.h>
 
 namespace mapnik {
 
-class proj_transform;
-struct glyph_info;
 class text_symbolizer_helper;
 
 using svg::svg_path_adapter;
@@ -97,7 +93,7 @@ struct virtual_renderer_common : private util::noncopyable
 // This should allow us to re-use as much as possible of the
 // existing symbolizer layout and rendering code while still
 // being able to interpose our own decisions about whether
-// a collision has occured or not.
+// a collision has occurred or not.
 
 // Thunk for rendering a particular instance of a point - this
 // stores all the arguments necessary to re-render this point
@@ -119,35 +115,24 @@ struct vector_marker_render_thunk  : util::noncopyable
                                composite_mode_e comp_op,
                                bool snap_to_pixels);
 
-    vector_marker_render_thunk(vector_marker_render_thunk && rhs)
-      : src_(std::move(rhs.src_)),
-        attrs_(std::move(rhs.attrs_)),
-        tr_(std::move(rhs.tr_)),
-        opacity_(std::move(rhs.opacity_)),
-        comp_op_(std::move(rhs.comp_op_)),
-        snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
+    vector_marker_render_thunk(vector_marker_render_thunk && rhs);
 };
 
 struct raster_marker_render_thunk  : util::noncopyable
 {
-    image_data_rgba8 & src_;
+    image_rgba8 const& src_;
     agg::trans_affine tr_;
     double opacity_;
     composite_mode_e comp_op_;
     bool snap_to_pixels_;
 
-    raster_marker_render_thunk(image_data_rgba8 & src,
+    raster_marker_render_thunk(image_rgba8 const& src,
                                agg::trans_affine const& marker_trans,
                                double opacity,
                                composite_mode_e comp_op,
                                bool snap_to_pixels);
 
-    raster_marker_render_thunk(raster_marker_render_thunk && rhs)
-      : src_(rhs.src_),
-        tr_(std::move(rhs.tr_)),
-        opacity_(std::move(rhs.opacity_)),
-        comp_op_(std::move(rhs.comp_op_)),
-        snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
+    raster_marker_render_thunk(raster_marker_render_thunk && rhs);
 };
 
 using helper_ptr = std::unique_ptr<text_symbolizer_helper>;
@@ -166,12 +151,7 @@ struct text_render_thunk : util::noncopyable
                       double opacity, composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer);
 
-    text_render_thunk(text_render_thunk && rhs)
-      : helper_(std::move(rhs.helper_)),
-        placements_(std::move(rhs.placements_)),
-        opacity_(std::move(rhs.opacity_)),
-        comp_op_(std::move(rhs.comp_op_)),
-        halo_rasterizer_(std::move(rhs.halo_rasterizer_)) {}
+    text_render_thunk(text_render_thunk && rhs);
 
 };
 
@@ -226,9 +206,6 @@ private:
     void update_box() const;
 };
 
-geometry_type *origin_point(proj_transform const& prj_trans,
-                            renderer_common const& common);
-
 template <typename F>
 void render_offset_placements(placements_list const& placements,
                               pixel_position const& offset,
@@ -241,7 +218,7 @@ void render_offset_placements(placements_list const& placements,
         glyphs->set_base_point(base_point + offset);
 
         // update the position of any marker
-        marker_info_ptr marker_info = glyphs->marker();
+        marker_info_ptr marker_info = glyphs->get_marker();
         pixel_position marker_pos = glyphs->marker_pos();
         if (marker_info)
         {
@@ -303,9 +280,9 @@ void render_group_symbolizer(group_symbolizer const& sym,
 
     // run feature or sub feature through the group rules & symbolizers
     // for each index value in the range
-    int start = get<value_integer>(sym, keys::start_column);
-    int end = start + get<value_integer>(sym, keys::num_columns);
-    for (int col_idx = start; col_idx < end; ++col_idx)
+    value_integer start = get<value_integer>(sym, keys::start_column);
+    value_integer end = start + get<value_integer>(sym, keys::num_columns);
+    for (value_integer col_idx = start; col_idx < end; ++col_idx)
     {
         // create sub feature with indexed column values
         feature_ptr sub_feature = feature_factory::create(sub_feature_ctx, col_idx);
@@ -318,7 +295,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 if (col_name.size() == 1)
                 {
                     // column name is '%' by itself, so give the index as the value
-                    sub_feature->put(col_name, (value_integer)col_idx);
+                    sub_feature->put(col_name, col_idx);
                 }
                 else
                 {
@@ -340,8 +317,15 @@ void render_group_symbolizer(group_symbolizer const& sym,
         }
 
         // add a single point geometry at pixel origin
-        sub_feature->add_geometry(origin_point(prj_trans, common));
-
+        double x = common.width_ / 2.0, y = common.height_ / 2.0, z = 0.0;
+        common.t_.backward(&x, &y);
+        prj_trans.forward(x, y, z);
+        // note that we choose a point in the middle of the screen to
+        // try to ensure that we don't get edge artefacts due to any
+        // symbolizers with avoid-edges set: only the avoid-edges of
+        // the group symbolizer itself should matter.
+        geometry::point<double> origin_pt(x,y);
+        sub_feature->set_geometry(origin_pt);
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())
         {
@@ -357,10 +341,10 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 render_thunk_extractor extractor(bounds, thunks, *sub_feature, common.vars_, prj_trans,
                                                  virtual_renderer, clipping_extent);
 
-                for (auto const& sym : *rule)
+                for (auto const& _sym : *rule)
                 {
                     // TODO: construct layout and obtain bounding box
-                    util::apply_visitor(extractor, sym);
+                    util::apply_visitor(extractor, _sym);
                 }
 
                 // add the bounding box to the layout manager
@@ -393,7 +377,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
             rpt_key_expr = get<expression_ptr>(sym, keys::repeat_key);
         }
 
-        // evalute the repeat key with the matched sub feature if we have one
+        // evaluate the repeat key with the matched sub feature if we have one
         if (rpt_key_expr)
         {
             rpt_key_value = util::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),

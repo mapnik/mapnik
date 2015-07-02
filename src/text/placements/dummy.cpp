@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@ bool text_placement_info_dummy::next() const
 }
 
 text_placement_info_ptr text_placements_dummy::get_placement_info(
-    double scale_factor, feature_impl const& feature, attributes const& vars) const
+    double scale_factor, feature_impl const&, attributes const&) const
 {
     return std::make_shared<text_placement_info_dummy>(this, scale_factor);
 }

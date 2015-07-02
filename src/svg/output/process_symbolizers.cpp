@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,11 +31,44 @@
 #include <mapnik/svg/output/svg_output_grammars.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/symbolizer_dispatch.hpp>
-
+#include <mapnik/vertex_processor.hpp>
+#include <mapnik/geometry_transform.hpp>
+#include <mapnik/geometry_to_path.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
+#include <mapnik/safe_cast.hpp>
 // boost
 #include <boost/spirit/include/karma.hpp>
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
+
+template <typename CalculationType>
+struct coord_transformer
+{
+    using calc_type = CalculationType;
+
+    coord_transformer(view_transform const& tr, proj_transform const& prj_trans)
+        : tr_(tr), prj_trans_(prj_trans) {}
+
+
+    template <typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2 & p2) const
+    {
+        using coordinate_type = typename boost::geometry::coordinate_type<P2>::type;
+        calc_type x = boost::geometry::get<0>(p1);
+        calc_type y = boost::geometry::get<1>(p1);
+        calc_type z = 0.0;
+        if (!prj_trans_.backward(x, y, z)) return false;
+        tr_.forward(&x,&y);
+        boost::geometry::set<0>(p2, safe_cast<coordinate_type>(x));
+        boost::geometry::set<1>(p2, safe_cast<coordinate_type>(y));
+        return true;
+    }
+
+    view_transform const& tr_;
+    proj_transform const& prj_trans_;
+};
+
+} // ns geometry
 
 struct symbol_type_dispatch
 {
@@ -60,7 +93,7 @@ bool is_path_based(symbolizer const& sym)
 }
 
 template <typename OutputIterator, typename PathType>
-void generate_path(OutputIterator & output_iterator, PathType const& path, svg::path_output_attributes const& path_attributes)
+void generate_path_impl(OutputIterator & output_iterator, PathType const& path, svg::path_output_attributes const& path_attributes)
 {
     using path_dash_array_grammar = svg::svg_path_dash_array_grammar<OutputIterator>;
     using path_attributes_grammar = svg::svg_path_attributes_grammar<OutputIterator>;
@@ -79,7 +112,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-    using path_type = transform_path_adapter<view_transform, geometry_type>;
+    using trans_path_type = transform_path_adapter<view_transform, vertex_adapter>;
 
     bool process_path = false;
     // process each symbolizer to collect its (path) information.
@@ -97,14 +130,13 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     if (process_path)
     {
         // generate path output for each geometry of the current feature.
-        for (auto & geom : feature.paths())
-        {
-            if(geom.size() > 0)
-            {
-                path_type path(common_.t_, geom, prj_trans);
-                generate_path(generator_.output_iterator_, path, path_attributes_);
-            }
-        }
+        auto const& geom = feature.get_geometry();
+        path_type path;
+        path.set_type(static_cast<path_type::types>(mapnik::util::to_ds_type(geom)));
+        geometry::to_path(geom, path);
+        vertex_adapter va(path);
+        trans_path_type trans_path(common_.t_, va, prj_trans);
+        generate_path_impl(generator_.output_iterator_, trans_path, path_attributes_);
         // set the previously collected values back to their defaults
         // for the feature that will be processed next.
         path_attributes_.reset();

@@ -1,13 +1,21 @@
 #!/bin/bash
-UNAME=$(uname -s)
+# TODO - use rpath to avoid needing this to run tests locally
 export CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-if [ ${UNAME} = 'Darwin' ]; then
+if [ $(uname -s) = 'Darwin' ]; then
     export DYLD_LIBRARY_PATH="${CURRENT_DIR}/src/":${DYLD_LIBRARY_PATH}
 else
     export LD_LIBRARY_PATH="${CURRENT_DIR}/src/":${LD_LIBRARY_PATH}
 fi
-export PYTHONPATH="${CURRENT_DIR}/bindings/python/":$PYTHONPATH
-export MAPNIK_FONT_DIRECTORY="${CURRENT_DIR}/fonts/dejavu-fonts-ttf-2.34/ttf/"
-export MAPNIK_INPUT_PLUGINS_DIRECTORY="${CURRENT_DIR}/plugins/input/"
-export PATH="${CURRENT_DIR}/utils/mapnik-config":${PATH}
-export PATH="${CURRENT_DIR}/utils/nik2img":${PATH}
+
+export PATH=$(pwd)/utils/nik2img/:${PATH}
+
+# mapnik-settings.env is an optional file to store
+# environment variables that should be used before
+# running tests like PROJ_LIB, GDAL_DATA, and ICU_DATA
+# These do not normally need to be set except when
+# building against binary versions of dependencies like
+# done via bootstrap.sh
+if [[ -f mapnik-settings.env ]]; then
+    echo "Inheriting from mapnik-settings.env"
+    source mapnik-settings.env
+fi

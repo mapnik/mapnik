@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/singleton.hpp>
 #include <mapnik/make_unique.hpp>
 
 // boost
@@ -84,7 +84,7 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     font_library library;
     return register_font_impl(file_name, library, global_font_file_mapping_);
@@ -136,12 +136,12 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
                 auto range = font_file_mapping.equal_range(name);
                 if (range.first == range.second) // the key was previously absent; insert a pair
                 {
-                    font_file_mapping.emplace_hint(range.first,name,std::move(std::make_pair(i,file_name)));
+                    font_file_mapping.emplace_hint(range.first, name, std::make_pair(i,file_name));
                 }
                 else // the key was present, replace the associated value
                 { /* some action with value range.first->second about to be overwritten here */
                     MAPNIK_LOG_WARN(font_engine_freetype) << "registering new " << name << " at '" << file_name << "'";
-                    range.first->second = std::move(std::make_pair(i,file_name)); // replace value
+                    range.first->second = std::make_pair(i,file_name); // replace value
                 }
                 success = true;
             }
@@ -166,7 +166,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
 #ifdef MAPNIK_THREADSAFE
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 #endif
     font_library library;
     return register_fonts_impl(dir, library, global_font_file_mapping_, recurse);
@@ -338,9 +338,9 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
         if (file.open())
         {
 #ifdef MAPNIK_THREADSAFE
-            mapnik::scoped_lock lock(mutex_);
+            std::lock_guard<std::mutex> lock(mutex_);
 #endif
-            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(std::move(file.data()),file.size()));
+            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(file.data(),file.size()));
             FT_Face face;
             FT_Error error = FT_New_Memory_Face(library.get(),
                                                 reinterpret_cast<FT_Byte const*>(result.first->second.first.get()), // data

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
 #include <mapnik/svg/geometry_svg_generator.hpp>
 
 // boost
@@ -40,7 +38,8 @@ inline bool to_svg(std::string & svg, mapnik::geometry_type const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(svg);
-    static const svg::svg_path_generator<sink_type, mapnik::geometry_type> generator;
+    mapnik::vertex_adapter va(geom);
+    static const svg::svg_path_generator<sink_type, mapnik::vertex_adapter> generator;
     bool result = karma::generate(sink, generator, geom);
     return result;
 }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,10 +33,10 @@
 namespace mapnik
 {
 
-class xml_tree
+class MAPNIK_DECL xml_tree
 {
 public:
-    xml_tree(std::string const& encoding="utf8");
+    xml_tree();
     void set_filename(std::string const& fn);
     std::string const& filename() const;
     xml_node &root();

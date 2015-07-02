@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -57,16 +57,16 @@ struct transform_path_adapter
     using value_type = typename select_value_type<Geometry, void>::type;
 
     transform_path_adapter(Transform const& t,
-                     Geometry & geom,
-                     proj_transform const& prj_trans)
+                           Geometry & geom,
+                           proj_transform const& prj_trans)
         : t_(&t),
-        geom_(geom),
-        prj_trans_(&prj_trans)  {}
+          geom_(geom),
+          prj_trans_(&prj_trans)  {}
 
     explicit transform_path_adapter(Geometry & geom)
         : t_(0),
-        geom_(geom),
-        prj_trans_(0)  {}
+          geom_(geom),
+          prj_trans_(0)  {}
 
     void set_proj_trans(proj_transform const& prj_trans)
     {

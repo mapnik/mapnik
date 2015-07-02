@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 #ifndef MAPNIK_RENDER_PATTERN_HPP
 #define MAPNIK_RENDER_PATTERN_HPP
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <memory>
 
 // fwd decl
@@ -35,12 +35,14 @@ namespace mapnik {
 
 // fwd decl
 struct rasterizer;
-class marker;
+struct marker_svg;
 
-std::shared_ptr<image_data_rgba8> render_pattern(rasterizer & ras,
-                                              marker const& marker,
-                                              agg::trans_affine const& tr,
-                                              double opacity);
+template <typename T>
+void render_pattern(rasterizer & ras,
+                    marker_svg const& marker,
+                    agg::trans_affine const& tr,
+                    double opacity,
+                    T & image);
 
 } // namespace mapnik
 

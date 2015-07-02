@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +28,12 @@
 #include <mapnik/params.hpp>
 
 // boost
-#include <boost/unordered_map.hpp>
 #include <boost/assign/list_of.hpp>
 #endif
 
 // stl
 #include <stdexcept>
+#include <unordered_map>
 
 // static plugin linkage
 #ifdef MAPNIK_STATIC_PLUGINS
@@ -64,9 +64,6 @@
     #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
         #include "input/postgis/postgis_datasource.hpp"
     #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_PYTHON)
-        #include "input/python/python_datasource.hpp"
-    #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
         #include "input/raster/raster_datasource.hpp"
     #endif
@@ -91,7 +88,7 @@ datasource_ptr ds_generator(parameters const& params)
 }
 
 typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
-using datasource_map = boost::unordered_map<std::string, ds_generator_ptr>;
+using datasource_map = std::unordered_map<std::string, ds_generator_ptr>;
 
 static datasource_map ds_map = boost::assign::map_list_of
     #if defined(MAPNIK_STATIC_PLUGIN_CSV)
@@ -114,9 +111,6 @@ static datasource_map ds_map = boost::assign::map_list_of
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
         (std::string("postgis"), &ds_generator<postgis_datasource>)
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_PYTHON)
-        (std::string("python"), &ds_generator<python_datasource>)
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
         (std::string("raster"), &ds_generator<raster_datasource>)

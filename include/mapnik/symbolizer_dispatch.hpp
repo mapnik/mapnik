@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -100,9 +100,7 @@ template<typename T0,typename T1>
 struct has_process
 {
     using processor_impl_type = typename T0::processor_impl_type;
-    BOOST_STATIC_CONSTANT(bool
-                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag)
-        );
+    constexpr static bool value = (sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag));
 };
 
 }

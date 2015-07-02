@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,10 +27,16 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 #if defined(GRID_RENDERER)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <mapnik/grid/grid_pixel.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 // agg
@@ -341,7 +347,7 @@ public:
     void render_id(Rasterizer& ras,
                    Scanline& sl,
                    Renderer& ren,
-                   int feature_id,
+                   mapnik::value_integer feature_id,
                    agg::trans_affine const& mtx,
                    double /*opacity*/,
                    box2d<double> const& /*symbol_bbox*/)

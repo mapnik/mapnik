@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,11 +29,14 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
-
+//#include <mapnik/datasource.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_locals.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -109,12 +112,12 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
-struct geometry_types : qi::symbols<char,mapnik::value_integer>
+struct geometry_types : qi::symbols<char, mapnik::value_integer>
 {
     geometry_types()
     {
         add
-            ("point",1)
+            ("point", 1)
             ("linestring", 2)
             ("polygon",3)
             ("collection",4)

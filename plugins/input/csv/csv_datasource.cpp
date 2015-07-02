@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,18 +29,19 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_correct.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
-#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value_types.hpp>
 
 // stl
@@ -265,21 +266,21 @@ void csv_datasource::parse_csv(T & stream,
 
     using Tokenizer = boost::tokenizer< escape_type >;
 
-    int line_number(1);
+    int line_number = 1;
     bool has_wkt_field = false;
     bool has_json_field = false;
     bool has_lat_field = false;
     bool has_lon_field = false;
-    unsigned wkt_idx(0);
-    unsigned json_idx(0);
-    unsigned lat_idx(0);
-    unsigned lon_idx(0);
+    unsigned wkt_idx = 0;
+    unsigned json_idx = 0;
+    unsigned lat_idx = 0;
+    unsigned lon_idx = 0;
 
     if (!manual_headers_.empty())
     {
         Tokenizer tok(manual_headers_, grammer);
         Tokenizer::iterator beg = tok.begin();
-        unsigned idx(0);
+        unsigned idx = 0;
         for (; beg != tok.end(); ++beg)
         {
             std::string val = mapnik::util::trim_copy(*beg);
@@ -412,15 +413,13 @@ void csv_datasource::parse_csv(T & stream,
         throw mapnik::datasource_exception("CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data");
     }
 
-    mapnik::value_integer feature_count(0);
+    mapnik::value_integer feature_count = 0;
     bool extent_started = false;
 
     std::size_t num_headers = headers_.size();
 
-    for (std::size_t i = 0; i < headers_.size(); ++i)
-    {
-        ctx_->push(headers_[i]);
-    }
+    std::for_each(headers_.begin(), headers_.end(),
+                  [ & ](std::string const& header){ ctx_->push(header); });
 
     mapnik::transcoder tr(desc_.get_encoding());
 
@@ -497,8 +496,8 @@ void csv_datasource::parse_csv(T & stream,
 
             // NOTE: we use ++feature_count here because feature id's should start at 1;
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,++feature_count));
-            double x(0);
-            double y(0);
+            double x = 0;
+            double y = 0;
             bool parsed_x = false;
             bool parsed_y = false;
             bool parsed_wkt = false;
@@ -540,9 +539,13 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-
-                        if (mapnik::from_wkt(value, feature->paths()))
+                        mapnik::geometry::geometry<double> geom;
+                        if (mapnik::from_wkt(value, geom))
                         {
+                            // correct orientations etc
+                            mapnik::geometry::correct(geom);
+                            // set geometry
+                            feature->set_geometry(std::move(geom));
                             parsed_wkt = true;
                         }
                         else
@@ -576,8 +579,10 @@ void csv_datasource::parse_csv(T & stream,
                         {
                             break;
                         }
-                        if (mapnik::json::from_geojson(value, feature->paths()))
+                        mapnik::geometry::geometry<double> geom;
+                        if (mapnik::json::from_geojson(value, geom))
                         {
+                            feature->set_geometry(std::move(geom));
                             parsed_json = true;
                         }
                         else
@@ -809,9 +814,8 @@ void csv_datasource::parse_csv(T & stream,
             {
                 if (parsed_x && parsed_y)
                 {
-                    mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::geometry_type::types::Point);
-                    pt->move_to(x,y);
-                    feature->add_geometry(pt);
+                    mapnik::geometry::point<double> pt(x,y);
+                    feature->set_geometry(std::move(pt));
                     features_.push_back(feature);
                     null_geom = false;
                     if (!extent_initialized_)
@@ -926,31 +930,31 @@ mapnik::box2d<double> csv_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
+mapnik::layer_descriptor csv_datasource::get_descriptor() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    return desc_;
+}
+
+boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     unsigned num_features = features_.size();
     for (unsigned i = 0; i < num_features && i < 5; ++i)
     {
-        mapnik::util::to_ds_type(features_[i]->paths(),result);
+        result = mapnik::util::to_ds_type(features_[i]->get_geometry());
         if (result)
         {
             int type = static_cast<int>(*result);
             if (multi_type > 0 && multi_type != type)
             {
-                result.reset(mapnik::datasource::Collection);
+                result.reset(mapnik::datasource_geometry_t::Collection);
                 return result;
             }
             multi_type = type;
         }
     }
     return result;
-}
-
-mapnik::layer_descriptor csv_datasource::get_descriptor() const
-{
-    return desc_;
 }
 
 mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const

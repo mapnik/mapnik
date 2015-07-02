@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,6 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
-#include <mapnik/utils.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
 // proj4
@@ -87,12 +86,53 @@ bool proj_transform::equal() const
     return is_source_equal_dest_;
 }
 
+bool proj_transform::is_known() const
+{
+    return merc_to_wgs84_ || wgs84_to_merc_;
+}
+
 bool proj_transform::forward (double & x, double & y , double & z) const
 {
     return forward(&x, &y, &z, 1);
 }
 
-bool proj_transform::forward (double * x, double * y , double * z, int point_count) const
+bool proj_transform::forward (geometry::point<double> & p) const
+{
+    double z = 0;
+    return forward(&(p.x), &(p.y), &z, 1);
+}
+
+unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
+{
+    std::size_t size = ls.size();
+    if (size == 0) return 0;
+
+    if (is_source_equal_dest_)
+        return 0;
+
+    if (wgs84_to_merc_)
+    {
+        lonlat2merc(ls);
+        return 0;
+    }
+    else if (merc_to_wgs84_)
+    {
+        merc2lonlat(ls);
+        return 0;
+    }
+
+    geometry::point<double> * ptr = ls.data();
+    double * x = reinterpret_cast<double*>(ptr);
+    double * y = x + 1;
+    double * z = NULL;
+    if(!forward(x, y, z, size, 2))
+    {
+        return size;
+    }
+    return 0;
+}
+
+bool proj_transform::forward (double * x, double * y , double * z, int point_count, int offset) const
 {
 
     if (is_source_equal_dest_)
@@ -112,30 +152,37 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= DEG_TO_RAD;
-            y[i] *= DEG_TO_RAD;
+            x[i*offset] *= DEG_TO_RAD;
+            y[i*offset] *= DEG_TO_RAD;
         }
     }
 
     if (pj_transform( source_.proj_, dest_.proj_, point_count,
-                      0, x,y,z) != 0)
+                      offset, x,y,z) != 0)
     {
         return false;
+    }
+
+    for(int j=0; j<point_count; j++) {
+        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
+        {
+            return false;
+        }
     }
 
     if (is_dest_longlat_)
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= RAD_TO_DEG;
-            y[i] *= RAD_TO_DEG;
+            x[i*offset] *= RAD_TO_DEG;
+            y[i*offset] *= RAD_TO_DEG;
         }
     }
 #endif
     return true;
 }
 
-bool proj_transform::backward (double * x, double * y , double * z, int point_count) const
+bool proj_transform::backward (double * x, double * y , double * z, int point_count, int offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -154,23 +201,30 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= DEG_TO_RAD;
-            y[i] *= DEG_TO_RAD;
+            x[i*offset] *= DEG_TO_RAD;
+            y[i*offset] *= DEG_TO_RAD;
         }
     }
 
     if (pj_transform( dest_.proj_, source_.proj_, point_count,
-                      0, x,y,z) != 0)
+                      offset, x,y,z) != 0)
     {
         return false;
+    }
+
+    for(int j=0; j<point_count; j++) {
+        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
+        {
+            return false;
+        }
     }
 
     if (is_source_longlat_)
     {
         int i;
         for(i=0; i<point_count; i++) {
-            x[i] *= RAD_TO_DEG;
-            y[i] *= RAD_TO_DEG;
+            x[i*offset] *= RAD_TO_DEG;
+            y[i*offset] *= RAD_TO_DEG;
         }
     }
 #endif
@@ -182,22 +236,73 @@ bool proj_transform::backward (double & x, double & y , double & z) const
     return backward(&x, &y, &z, 1);
 }
 
+bool proj_transform::backward (geometry::point<double> & p) const
+{
+    double z = 0;
+    return backward(&(p.x), &(p.y), &z, 1);
+}
+
+unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
+{
+    std::size_t size = ls.size();
+    if (size == 0) return 0;
+
+    if (is_source_equal_dest_)
+        return 0;
+
+    if (wgs84_to_merc_)
+    {
+        merc2lonlat(ls);
+        return 0;
+    }
+    else if (merc_to_wgs84_)
+    {
+        lonlat2merc(ls);
+        return 0;
+    }
+
+    geometry::point<double> * ptr = ls.data();
+    double * x = reinterpret_cast<double*>(ptr);
+    double * y = x + 1;
+    double * z = NULL;
+    if(!backward(x, y, z, size, 2))
+    {
+        return size;
+    }
+    return 0;
+}
 
 bool proj_transform::forward (box2d<double> & box) const
 {
     if (is_source_equal_dest_)
         return true;
 
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
+    double llx = box.minx();
+    double ulx = box.minx();
+    double lly = box.miny();
+    double lry = box.miny();
+    double lrx = box.maxx();
+    double urx = box.maxx();
+    double uly = box.maxy();
+    double ury = box.maxy();
     double z = 0.0;
-    if (!forward(minx,miny,z))
+    if (!forward(llx,lly,z))
         return false;
-    if (!forward(maxx,maxy,z))
+    if (!forward(lrx,lry,z))
         return false;
-    box.init(minx,miny,maxx,maxy);
+    if (!forward(ulx,uly,z))
+        return false;
+    if (!forward(urx,ury,z))
+        return false;
+
+    double minx = std::min(ulx, llx);
+    double miny = std::min(lly, lry);
+    double maxx = std::max(urx, lrx);
+    double maxy = std::max(ury, uly);
+    box.init(minx,
+             miny,
+             maxx,
+             maxy);
     return true;
 }
 
@@ -206,21 +311,35 @@ bool proj_transform::backward (box2d<double> & box) const
     if (is_source_equal_dest_)
         return true;
 
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
+    double llx = box.minx();
+    double ulx = box.minx();
+    double lly = box.miny();
+    double lry = box.miny();
+    double lrx = box.maxx();
+    double urx = box.maxx();
+    double uly = box.maxy();
+    double ury = box.maxy();
     double z = 0.0;
-    if (!backward(minx,miny,z))
+    if (!backward(llx,lly,z))
         return false;
-    if (!backward(maxx,maxy,z))
+    if (!backward(lrx,lry,z))
         return false;
-    box.init(minx,miny,maxx,maxy);
+    if (!backward(ulx,uly,z))
+        return false;
+    if (!backward(urx,ury,z))
+        return false;
+    double minx = std::min(ulx, llx);
+    double miny = std::min(lly, lry);
+    double maxx = std::max(urx, lrx);
+    double maxy = std::max(ury, uly);
+    box.init(minx,
+             miny,
+             maxx,
+             maxy);
     return true;
 }
 
-/* Returns points in clockwise order. This allows us to do anti-meridian checks.
- */
+// Returns points in clockwise order. This allows us to do anti-meridian checks.
 void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env, int points)
 {
     double width = env.width();
@@ -251,7 +370,7 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     }
 }
 
-/* determine if an ordered sequence of coordinates is in clockwise order */
+// determine if an ordered sequence of coordinates is in clockwise order
 bool is_clockwise(const std::vector< coord<double,2> > & coords)
 {
     int n = coords.size();
@@ -278,12 +397,12 @@ box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
 }
 
 
-/* More robust, but expensive, bbox transform
- * in the face of proj4 out of bounds conditions.
- * Can result in 20 -> 10 r/s performance hit.
- * Alternative is to provide proper clipping box
- * in the target srs by setting map 'maximum-extent'
- */
+// More robust, but expensive, bbox transform
+// in the face of proj4 out of bounds conditions.
+// Can result in 20 -> 10 r/s performance hit.
+// Alternative is to provide proper clipping box
+// in the target srs by setting map 'maximum-extent'
+
 bool proj_transform::backward(box2d<double>& env, int points) const
 {
     if (is_source_equal_dest_)
@@ -306,15 +425,15 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
-    if (is_source_longlat_ && !is_clockwise(coords)) {
-        /* we've gone to a geographic CS, and our clockwise envelope has
-         * changed into an anticlockwise one. This means we've crossed the antimeridian, and
-         * need to expand the X direction to +/-180 to include all the data. Once we can deal
-         * with multiple bboxes in queries we can improve.
-         */
-         double miny = result.miny();
-         result.expand_to_include(-180.0, miny);
-         result.expand_to_include(180.0, miny);
+    if (is_source_longlat_ && !is_clockwise(coords))
+    {
+        // we've gone to a geographic CS, and our clockwise envelope has
+        // changed into an anticlockwise one. This means we've crossed the antimeridian, and
+        // need to expand the X direction to +/-180 to include all the data. Once we can deal
+        // with multiple bboxes in queries we can improve.
+        double miny = result.miny();
+        result.expand_to_include(-180.0, miny);
+        result.expand_to_include(180.0, miny);
     }
 
     env.re_center(result.center().x, result.center().y);
@@ -347,15 +466,15 @@ bool proj_transform::forward(box2d<double>& env, int points) const
 
     box2d<double> result = calculate_bbox(coords);
 
-    if (is_dest_longlat_ && !is_clockwise(coords)) {
-        /* we've gone to a geographic CS, and our clockwise envelope has
-         * changed into an anticlockwise one. This means we've crossed the antimeridian, and
-         * need to expand the X direction to +/-180 to include all the data. Once we can deal
-         * with multiple bboxes in queries we can improve.
-         */
-         double miny = result.miny();
-         result.expand_to_include(-180.0, miny);
-         result.expand_to_include(180.0, miny);
+    if (is_dest_longlat_ && !is_clockwise(coords))
+    {
+        // we've gone to a geographic CS, and our clockwise envelope has
+        // changed into an anticlockwise one. This means we've crossed the antimeridian, and
+        // need to expand the X direction to +/-180 to include all the data. Once we can deal
+        // with multiple bboxes in queries we can improve.
+        double miny = result.miny();
+        result.expand_to_include(-180.0, miny);
+        result.expand_to_include(180.0, miny);
     }
 
     env.re_center(result.center().x, result.center().y);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -224,7 +224,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
 
     std::vector<std::string> const& style_names = lay.styles();
 
-    unsigned int num_styles = style_names.size();
+    std::size_t num_styles = style_names.size();
     if (num_styles == 0)
     {
         MAPNIK_LOG_DEBUG(feature_style_processor)
@@ -361,7 +361,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         boost::optional<feature_type_style const&> style=m_.find_style(style_name);
         if (!style)
         {
-            MAPNIK_LOG_DEBUG(feature_style_processor)
+            MAPNIK_LOG_ERROR(feature_style_processor)
                 << "feature_style_processor: Style=" << style_name
                 << " required for layer=" << lay.name() << " does not exist.";
 

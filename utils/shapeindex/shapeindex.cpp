@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
@@ -110,18 +109,18 @@ int main (int argc,char** argv)
     clog << "max tree depth:" << depth << endl;
     clog << "split ratio:" << ratio << endl;
 
-    vector<string>::const_iterator itr = shape_files.begin();
-    if (itr == shape_files.end())
+    //vector<string>::const_iterator itr = shape_files.begin();
+    if (shape_files.size() == 0)
     {
         clog << "no shape files to index" << endl;
         return 0;
     }
-    while (itr != shape_files.end())
+    for (auto const& filename : shape_files)
     {
-        clog << "processing " << *itr << endl;
-        std::string shapename (*itr++);
+        clog << "processing " << filename << endl;
+        std::string shapename (filename);
         boost::algorithm::ireplace_last(shapename,".shp","");
-        std::string shapename_full (shapename+".shp");
+        std::string shapename_full (shapename + ".shp");
 
         if (! mapnik::util::exists (shapename_full))
         {
@@ -165,17 +164,23 @@ int main (int argc,char** argv)
             box2d<double> item_ext;
             if (shape_type==shape_io::shape_null)
             {
-                // still need to increment pos, or the pos counter
-                // won't indicate EOF until too late.
-                pos+=4+content_length;
-                continue;
+                if (pos >= file_length)
+                {
+                    break;
+                }
+                else
+                {
+                    // still need to increment pos, or the pos counter
+                    // won't indicate EOF until too late.
+                    pos+=4+content_length;
+                    continue;
+                }
             }
             else if (shape_type==shape_io::shape_point)
             {
                 double x=shp.read_double();
                 double y=shp.read_double();
                 item_ext=box2d<double>(x,y,x,y);
-
             }
             else if (shape_type==shape_io::shape_pointm)
             {
@@ -184,7 +189,6 @@ int main (int argc,char** argv)
                 // skip m
                 shp.read_double();
                 item_ext=box2d<double>(x,y,x,y);
-
             }
             else if (shape_type==shape_io::shape_pointz)
             {
@@ -192,31 +196,39 @@ int main (int argc,char** argv)
                 double y=shp.read_double();
                 // skip z
                 shp.read_double();
-                //skip m if exists
-                if ( content_length == 8 + 36)
+                // According to ESRI shapefile doc
+                // A PointZ consists of a triplet of double-precision coordinates in the order X, Y, Z plus a
+                // measure.
+                // PointZ
+                // {
+                //     Double X // X coordinate
+                //     Double Y // Y coordinate
+                //     Double Z // Z coordinate
+                //     Double M // Measure
+                // }
+                // But OGR creates shapefiles with M missing so we need to skip M only if present
+                // NOTE: content_length is in 16-bit words
+                if ( content_length == 18)
                 {
                     shp.read_double();
                 }
                 item_ext=box2d<double>(x,y,x,y);
             }
-
             else
             {
                 shp.read_envelope(item_ext);
                 shp.skip(2*content_length-4*8-4);
             }
-
             tree.insert(offset,item_ext);
-            if (verbose) {
+            if (verbose)
+            {
                 clog << "record number " << record_number << " box=" << item_ext << endl;
             }
 
             pos+=4+content_length;
             ++count;
 
-            if (pos>=file_length) {
-                break;
-            }
+            if (pos >= file_length) break;
         }
 
         clog << " number shapes=" << count << endl;

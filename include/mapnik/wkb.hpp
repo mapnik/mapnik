@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik
@@ -42,6 +41,7 @@ namespace mapnik
  * the Open Geospatial Consortium (OGC) and described in their Simple Feature
  * Access and Coordinate Transformation Service specifications.
  */
+
 enum wkbFormat : std::uint8_t
 {
     wkbAuto=1,
@@ -49,15 +49,21 @@ enum wkbFormat : std::uint8_t
     wkbSpatiaLite=3
 };
 
+enum wkbByteOrder : std::uint8_t
+{
+    wkbXDR=0,
+    wkbNDR=1
+};
+
 class MAPNIK_DECL geometry_utils : private util::noncopyable
 {
 public:
 
-    static bool from_wkb(mapnik::geometry_container& paths,
-                          const char* wkb,
-                          unsigned size,
-                          wkbFormat format = wkbGeneric);
+    static mapnik::geometry::geometry<double> from_wkb(const char* wkb,
+                                                       std::size_t size,
+                                                       wkbFormat format = wkbGeneric);
 };
+
 }
 
 #endif // MAPNIK_WKB_HPP

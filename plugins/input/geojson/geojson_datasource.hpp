@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,10 +39,9 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/box.hpp>
-#include <boost/geometry/geometries/geometries.hpp>
-#include <boost/geometry.hpp>
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/version.hpp>
 #include <boost/geometry/index/rtree.hpp>
 #pragma GCC diagnostic pop
@@ -94,8 +93,7 @@ public:
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
-    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
-    //
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     template <typename Iterator>
     void parse_geojson(Iterator start, Iterator end);
     template <typename Iterator>

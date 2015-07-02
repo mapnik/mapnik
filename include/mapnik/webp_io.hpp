@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define MAPNIK_WEBP_IO_HPP
 
 // mapnik
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 
 // webp
@@ -73,69 +73,71 @@ std::string webp_encoding_error(WebPEncodingError error)
 }
 
 template <typename T2>
-inline int import_image_data(T2 const& image,
+inline int import_image(T2 const& im_in,
                              WebPPicture & pic,
                              bool alpha)
 {
-    image_data<typename T2::pixel_type> const& data = image.data();
-    int stride = sizeof(typename T2::pixel_type) * image.width();
-    if (data.width() == image.width() &&
-        data.height() == image.height())
+    image<typename T2::pixel> const& data = im_in.data();
+    std::size_t width = im_in.width();
+    std::size_t height = im_in.height();
+    int stride = sizeof(typename T2::pixel_type) * width;
+    if (data.width() == width &&
+        data.height() == height)
     {
         if (alpha)
         {
-            return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, data.bytes(), stride);
         }
         else
         {
     #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, data.getBytes(), stride);
+            return WebPPictureImportRGBX(&pic, data.bytes(), stride);
     #else
-            return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, data.bytes(), stride);
     #endif
         }
     }
     else
     {
         // need to copy: https://github.com/mapnik/mapnik/issues/2024
-        image_data_rgba8 im(image.width(),image.height());
-        for (unsigned y = 0; y < image.height(); ++y)
+        image_rgba8 im(width,height);
+        for (unsigned y = 0; y < height; ++y)
         {
-            typename T2::pixel_type const * row_from = image.getRow(y);
-            image_data_rgba8::pixel_type * row_to = im.getRow(y);
-            std::copy(row_from, row_from + stride, row_to);
+            typename T2::pixel_type const * row_from = im_in.get_row(y);
+            image_rgba8::pixel_type * row_to = im.get_row(y);
+            std::copy(row_from, row_from + width, row_to);
         }
         if (alpha)
         {
-            return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, im.bytes(), stride);
         }
         else
         {
     #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+            return WebPPictureImportRGBX(&pic, im.bytes(), stride);
     #else
-            return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+            return WebPPictureImportRGBA(&pic, im.bytes(), stride);
     #endif
         }
     }
 }
 
 template <>
-inline int import_image_data(image_data_rgba8 const& im,
+inline int import_image(image_rgba8 const& im,
                              WebPPicture & pic,
                              bool alpha)
 {
-    int stride = sizeof(image_data_rgba8::pixel_type) * im.width();
+    int stride = sizeof(image_rgba8::pixel_type) * im.width();
     if (alpha)
     {
-        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+        return WebPPictureImportRGBA(&pic, im.bytes(), stride);
     }
     else
     {
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+        return WebPPictureImportRGBX(&pic, im.bytes(), stride);
 #else
-        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+        return WebPPictureImportRGBA(&pic, im.bytes(), stride);
 #endif
     }
 }
@@ -170,7 +172,7 @@ void save_as_webp(T1& file,
             const int width = pic.width;
             const int height = pic.height;
             for (int y = 0; y < height; ++y) {
-                typename T2::pixel_type const * row = image.getRow(y);
+                typename T2::pixel_type const * row = image.get_row(y);
                 for (int x = 0; x < width; ++x) {
                     const unsigned rgba = row[x];
                     unsigned a = (rgba >> 24) & 0xff;
@@ -187,10 +189,10 @@ void save_as_webp(T1& file,
     {
         // different approach for lossy since ImportYUVAFromRGBA is needed
         // to prepare WebPPicture and working with view pixels is not viable
-        ok = import_image_data(image,pic,alpha);
+        ok = import_image(image,pic,alpha);
     }
 #else
-    ok = import_image_data(image,pic,alpha);
+    ok = import_image(image,pic,alpha);
 #endif
     if (!ok)
     {

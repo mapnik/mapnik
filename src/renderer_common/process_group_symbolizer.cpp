@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,7 @@
 
 // mapnik
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
-#include <mapnik/renderer_common/process_point_symbolizer.hpp>
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/make_unique.hpp>
 
 namespace mapnik {
@@ -39,7 +37,16 @@ vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
       comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
 {}
 
-raster_marker_render_thunk::raster_marker_render_thunk(image_data_rgba8 & src,
+vector_marker_render_thunk::vector_marker_render_thunk(vector_marker_render_thunk && rhs)
+  : src_(std::move(rhs.src_)),
+    attrs_(std::move(rhs.attrs_)),
+    tr_(std::move(rhs.tr_)),
+    opacity_(std::move(rhs.opacity_)),
+    comp_op_(std::move(rhs.comp_op_)),
+    snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
+
+
+raster_marker_render_thunk::raster_marker_render_thunk(image_rgba8 const& src,
                                                        agg::trans_affine const& marker_trans,
                                                        double opacity,
                                                        composite_mode_e comp_op,
@@ -47,6 +54,14 @@ raster_marker_render_thunk::raster_marker_render_thunk(image_data_rgba8 & src,
     : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
       snap_to_pixels_(snap_to_pixels)
 {}
+
+raster_marker_render_thunk::raster_marker_render_thunk(raster_marker_render_thunk && rhs)
+      : src_(rhs.src_),
+        tr_(std::move(rhs.tr_)),
+        opacity_(std::move(rhs.opacity_)),
+        comp_op_(std::move(rhs.comp_op_)),
+        snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
+
 
 text_render_thunk::text_render_thunk(helper_ptr && helper,
                                      double opacity, composite_mode_e comp_op,
@@ -57,6 +72,13 @@ text_render_thunk::text_render_thunk(helper_ptr && helper,
       comp_op_(comp_op),
       halo_rasterizer_(halo_rasterizer)
 {}
+
+text_render_thunk::text_render_thunk(text_render_thunk && rhs)
+      : helper_(std::move(rhs.helper_)),
+        placements_(std::move(rhs.placements_)),
+        opacity_(std::move(rhs.opacity_)),
+        comp_op_(std::move(rhs.comp_op_)),
+        halo_rasterizer_(std::move(rhs.halo_rasterizer_)) {}
 
 namespace detail {
 
@@ -97,7 +119,7 @@ private:
 template <typename Detector, typename RendererContext>
 struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
 {
-    raster_marker_thunk_dispatch(image_data_rgba8 & src,
+    raster_marker_thunk_dispatch(image_rgba8 const& src,
                                  agg::trans_affine const& marker_trans,
                                  symbolizer_base const& sym,
                                  Detector & detector,
@@ -125,7 +147,7 @@ private:
     render_thunk_list & thunks_;
 };
 
-}
+} // end detail ns
 
 render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
                                                render_thunk_list & thunks,
@@ -197,30 +219,15 @@ void render_thunk_extractor::update_box() const
     {
         if (box_.width() > 0 && box_.height() > 0)
         {
-            box_.expand_to_include(label.box);
+            box_.expand_to_include(label.get().box);
         }
         else
         {
-            box_ = label.box;
+            box_ = label.get().box;
         }
     }
 
     detector.clear();
-}
-
-geometry_type *origin_point(proj_transform const& prj_trans,
-                            renderer_common const& common)
-{
-    // note that we choose a point in the middle of the screen to
-    // try to ensure that we don't get edge artefacts due to any
-    // symbolizers with avoid-edges set: only the avoid-edges of
-    // the group symbolizer itself should matter.
-    double x = common.width_ / 2.0, y = common.height_ / 2.0, z = 0.0;
-    common.t_.backward(&x, &y);
-    prj_trans.forward(x, y, z);
-    geometry_type *geom = new geometry_type(geometry_type::Point);
-    geom->move_to(x, y);
-    return geom;
 }
 
 } // namespace mapnik

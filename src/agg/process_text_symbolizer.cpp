@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
@@ -58,14 +58,12 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
                               common_.scale_factor_,
                               common_.font_manager_.get_stroker());
 
-    { // halo transform
-        agg::trans_affine halo_transform;
-        auto transform = get_optional<transform_type>(sym, keys::halo_transform);
-        if (transform)
-        {
-            evaluate_transform(halo_transform, feature, common_.vars_, *transform);
-            ren.set_halo_transform(halo_transform);
-        }
+    auto halo_transform = get_optional<transform_type>(sym, keys::halo_transform);
+    if (halo_transform)
+    {
+        agg::trans_affine halo_affine_transform;
+        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform);
+        ren.set_halo_transform(halo_affine_transform);
     }
 
     placements_list const& placements = helper.get();
@@ -75,7 +73,7 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
     }
 }
 
-template void agg_renderer<image_32>::process(text_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(text_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 

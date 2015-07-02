@@ -1,8 +1,0 @@
-<!DOCTYPE Map>
-<Map background-color="red" minimum-version="0.7.2">
-    <Style name="some_style">
-      <Rule name="some_rule">
-        <LineSymbolizer stroke-linejoin="meta"/>
-      </Rule>
-    </Style>
-</Map>

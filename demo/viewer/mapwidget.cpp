@@ -1,6 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,7 +22,6 @@
 
 #include <boost/bind.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -42,7 +41,7 @@
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
-using mapnik::image_32;
+using mapnik::image_rgba8;
 using mapnik::Map;
 using mapnik::layer;
 using mapnik::box2d;
@@ -178,47 +177,51 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
 
                if (fs)
                {
-                  feature_ptr feat  = fs->next();
-                  if (feat)
-                  {
+                   feature_ptr feat  = fs->next();
+                   if (feat)
+                   {
 
-                      feature_kv_iterator itr(*feat,true);
-                      feature_kv_iterator end(*feat);
+// FIXME
+#if 0
+                       feature_kv_iterator itr(*feat,true);
+                       feature_kv_iterator end(*feat);
 
-                      for ( ;itr!=end; ++itr)
-                      {
-                          info.push_back(QPair<QString,QString>(QString(std::get<0>(*itr).c_str()),
-                                                                std::get<1>(*itr).to_string().c_str()));
-                      }
+                       for ( ;itr!=end; ++itr)
+                       {
+                           info.push_back(QPair<QString,QString>(QString(std::get<0>(*itr).c_str()),
+                                                                 std::get<1>(*itr).to_string().c_str()));
+                       }
 
-                      using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::geometry_type>;
+                       using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
 
-                     for  (unsigned i=0; i<feat->num_geometries();++i)
-                     {
-                        mapnik::geometry_type & geom = feat->get_geometry(i);
-                        path_type path(t,geom,prj_trans);
-                        if (geom.size() > 0)
-                        {
-                           QPainterPath qpath;
-                           double x,y;
-                           path.vertex(&x,&y);
-                           qpath.moveTo(x,y);
-                           for (unsigned j = 1; j < geom.size(); ++j)
+                       for  (unsigned i=0; i<feat->num_geometries();++i)
+                       {
+                           mapnik::geometry_type const& geom = feat->get_geometry(i);
+                           mapnik::vertex_adapter va(geom);
+                           path_type path(t,va,prj_trans);
+                           if (va.size() > 0)
                            {
-                              path.vertex(&x,&y);
-                              qpath.lineTo(x,y);
+                               QPainterPath qpath;
+                               double x,y;
+                               va.vertex(&x,&y);
+                               qpath.moveTo(x,y);
+                               for (unsigned j = 1; j < geom.size(); ++j)
+                               {
+                                   va.vertex(&x,&y);
+                                   qpath.lineTo(x,y);
+                               }
+                               QPainter painter(&pix_);
+                               QPen pen(QColor(255,0,0,96));
+                               pen.setWidth(3);
+                               pen.setCapStyle(Qt::RoundCap);
+                               pen.setJoinStyle(Qt::RoundJoin);
+                               painter.setPen(pen);
+                               painter.drawPath(qpath);
+                               update();
                            }
-                           QPainter painter(&pix_);
-                           QPen pen(QColor(255,0,0,96));
-                           pen.setWidth(3);
-                           pen.setCapStyle(Qt::RoundCap);
-                           pen.setJoinStyle(Qt::RoundJoin);
-                           painter.setPen(pen);
-                           painter.drawPath(qpath);
-                           update();
-                        }
-                     }
-                  }
+               }
+#endif
+               }
                }
 
                if (info.size() > 0)
@@ -479,7 +482,7 @@ void MapWidget::zoomToLevel(int level)
 
 void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::string const&)
 {
-   //image_32 image(width,height);
+   //image_rgba8 image(width,height);
    //agg_renderer renderer(map,image);
    //renderer.apply();
    //image.saveToFile(filename,type);
@@ -496,14 +499,14 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     unsigned width=map.width();
     unsigned height=map.height();
 
-    image_32 buf(width,height);
-    mapnik::agg_renderer<image_32> ren(map,buf,scaling_factor);
+    image_rgba8 buf(width,height);
+    mapnik::agg_renderer<image_rgba8> ren(map,buf,scaling_factor);
 
     try
     {
         mapnik::auto_cpu_timer t(std::clog, "rendering took: ");
         ren.apply();
-        QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+        QImage image((uchar*)buf.data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
     //catch (mapnik::config_error & ex)
@@ -529,7 +532,7 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
-
+// FIXME
 #ifdef HAVE_CAIRO
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
@@ -540,10 +543,9 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
         mapnik::cairo_renderer<mapnik::cairo_ptr> renderer(map, cairo, scaling_factor);
         renderer.apply();
     }
-    mapnik::image_data_rgba8 data(map.width(), map.height());
+    mapnik::image_rgba8 data(map.width(), map.height());
     mapnik::cairo_image_to_rgba8(data, image_surface);
-    image_32 buf(std::move(data));
-    QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
+    QImage image((uchar*)data.bytes(),data.width(),data.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());
 #endif
 }

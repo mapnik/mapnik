@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/marker_helpers.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 
 #include "agg_ellipse.h"
 #include "agg_color_rgba.h"

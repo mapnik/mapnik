@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define SVG_PATH_ITERATOR_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/view_transform.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 // boost

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/geometry_envelope.hpp>
 #include <mapnik/featureset.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/memory_datasource.hpp>
@@ -77,13 +78,10 @@ public:
                 }
                 else
                 {
-                    for (std::size_t i=0; i<(*pos_)->num_geometries();++i)
+                    geometry::geometry<double> const& geom = (*pos_)->get_geometry();
+                    if (bbox_.intersects(geometry::envelope(geom)))
                     {
-                        geometry_type & geom = (*pos_)->get_geometry(i);
-                        if (bbox_.intersects(geom.envelope()))
-                        {
-                            return *pos_++;
-                        }
+                        return *pos_++;
                     }
                 }
                 ++pos_;

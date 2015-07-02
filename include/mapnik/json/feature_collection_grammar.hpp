@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -75,7 +75,7 @@ struct feature_collection_grammar :
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature_from_geometry;
     // phoenix functions
-    phoenix::function<json::extract_geometry> extract_geometry;
+    phoenix::function<json::set_geometry_impl> set_geometry;
     phoenix::function<apply_feature_callback> on_feature;
 };
 

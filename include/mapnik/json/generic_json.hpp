@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #pragma GCC diagnostic pop
@@ -37,9 +40,9 @@
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
+namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
-using space_type = ascii::space_type;
+using space_type = standard::space_type;
 using json_value = mapnik::util::variant<value_null,value_bool, value_integer, value_double, std::string>;
 using uchar = std::uint32_t; // a unicode code point
 
@@ -57,8 +60,7 @@ struct unicode_string : qi::grammar<Iterator, std::string()>
 
 struct push_utf8
 {
-    template <typename S, typename C>
-    struct result { typedef void type; };
+    using result_type = void;
 
     void operator()(std::string& utf8, uchar code_point) const
     {
@@ -71,8 +73,7 @@ struct push_utf8
 
 struct push_esc
 {
-    template <typename S, typename C>
-    struct result { typedef void type; };
+    using result_type = void;
 
     void operator()(std::string& utf8, uchar c) const
     {
@@ -154,8 +155,8 @@ struct generic_json
     qi::rule<Iterator,space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
     // conversions
-    boost::phoenix::function<detail::value_converter<mapnik::value_integer> > integer_converter;
-    boost::phoenix::function<detail::value_converter<mapnik::value_double> > double_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer> > integer_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double> > double_converter;
 };
 
 }}

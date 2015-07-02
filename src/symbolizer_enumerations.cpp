@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@ IMPLEMENT_ENUM( line_cap_e, line_cap_strings )
 
 static const char * line_join_strings[] = {
     "miter",
-    "miter_revert",
+    "miter-revert",
     "round",
     "bevel",
     ""
@@ -85,6 +85,7 @@ IMPLEMENT_ENUM( marker_multi_policy_e, marker_multi_policy_strings )
 static const char * debug_symbolizer_mode_strings[] = {
     "collision",
     "vertex",
+    "rings",
     ""
 };
 
@@ -171,11 +172,24 @@ static const char * text_upright_strings[] = {
     "auto-down",
     "left",
     "right",
-    "left_only",
-    "right_only",
+    "left-only",
+    "right-only",
     ""
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
+
+static const char * direction_strings[] = {
+    "left",
+    "right",
+    "left-only",
+    "right-only",
+    "auto",
+    "auto-down",
+    "up",
+    "down",
+    ""
+};
+IMPLEMENT_ENUM(direction_e, direction_strings)
 
 static const char * gamma_method_strings[] = {
     "power", //agg::gamma_power

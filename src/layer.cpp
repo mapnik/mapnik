@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,8 +34,8 @@ namespace mapnik
 layer::layer(std::string const& name, std::string const& srs)
     : name_(name),
       srs_(srs),
-      min_zoom_(0),
-      max_zoom_(std::numeric_limits<double>::max()),
+      minimum_scale_denom_(0),
+      maximum_scale_denom_(std::numeric_limits<double>::max()),
       active_(true),
       queryable_(false),
       clear_label_cache_(false),
@@ -49,8 +49,8 @@ layer::layer(std::string const& name, std::string const& srs)
 layer::layer(layer const& rhs)
     : name_(rhs.name_),
       srs_(rhs.srs_),
-      min_zoom_(rhs.min_zoom_),
-      max_zoom_(rhs.max_zoom_),
+      minimum_scale_denom_(rhs.minimum_scale_denom_),
+      maximum_scale_denom_(rhs.maximum_scale_denom_),
       active_(rhs.active_),
       queryable_(rhs.queryable_),
       clear_label_cache_(rhs.clear_label_cache_),
@@ -64,8 +64,8 @@ layer::layer(layer const& rhs)
 layer::layer(layer && rhs)
     : name_(std::move(rhs.name_)),
       srs_(std::move(rhs.srs_)),
-      min_zoom_(std::move(rhs.min_zoom_)),
-      max_zoom_(std::move(rhs.max_zoom_)),
+      minimum_scale_denom_(std::move(rhs.minimum_scale_denom_)),
+      maximum_scale_denom_(std::move(rhs.maximum_scale_denom_)),
       active_(std::move(rhs.active_)),
       queryable_(std::move(rhs.queryable_)),
       clear_label_cache_(std::move(rhs.clear_label_cache_)),
@@ -81,8 +81,8 @@ layer& layer::operator=(layer rhs)
     using std::swap;
     std::swap(this->name_,rhs.name_);
     std::swap(this->srs_, rhs.srs_);
-    std::swap(this->min_zoom_, rhs.min_zoom_);
-    std::swap(this->max_zoom_,rhs.max_zoom_);
+    std::swap(this->minimum_scale_denom_, rhs.minimum_scale_denom_);
+    std::swap(this->maximum_scale_denom_,rhs.maximum_scale_denom_);
     std::swap(this->active_, rhs.active_);
     std::swap(this->queryable_, rhs.queryable_);
     std::swap(this->clear_label_cache_, rhs.clear_label_cache_);
@@ -99,8 +99,8 @@ bool layer::operator==(layer const& rhs) const
 {
     return (name_ == rhs.name_) &&
         (srs_ == rhs.srs_) &&
-        (min_zoom_ == rhs.min_zoom_) &&
-        (max_zoom_ == rhs.max_zoom_) &&
+        (minimum_scale_denom_ == rhs.minimum_scale_denom_) &&
+        (maximum_scale_denom_ == rhs.maximum_scale_denom_) &&
         (active_ == rhs.active_) &&
         (queryable_ == rhs.queryable_) &&
         (clear_label_cache_ == rhs.clear_label_cache_) &&
@@ -149,24 +149,24 @@ std::vector<std::string> & layer::styles()
     return styles_;
 }
 
-void layer::set_min_zoom(double min_zoom)
+void layer::set_minimum_scale_denominator(double minimum_scale_denom)
 {
-    min_zoom_=min_zoom;
+    minimum_scale_denom_=minimum_scale_denom;
 }
 
-void layer::set_max_zoom(double max_zoom)
+void layer::set_maximum_scale_denominator(double maximum_scale_denom)
 {
-    max_zoom_=max_zoom;
+    maximum_scale_denom_=maximum_scale_denom;
 }
 
-double layer::min_zoom() const
+double layer::minimum_scale_denominator() const
 {
-    return min_zoom_;
+    return minimum_scale_denom_;
 }
 
-double layer::max_zoom() const
+double layer::maximum_scale_denominator() const
 {
-    return max_zoom_;
+    return maximum_scale_denom_;
 }
 
 void layer::set_active(bool active)
@@ -179,9 +179,9 @@ bool layer::active() const
     return active_;
 }
 
-bool layer::visible(double scale) const
+bool layer::visible(double scale_denom) const
 {
-    return active() && scale >= min_zoom_ - 1e-6 && scale < max_zoom_ + 1e-6;
+    return active() && scale_denom >= minimum_scale_denom_ - 1e-6 && scale_denom < maximum_scale_denom_ + 1e-6;
 }
 
 void layer::set_queryable(bool queryable)

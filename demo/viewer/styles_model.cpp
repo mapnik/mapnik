@@ -1,6 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -201,10 +201,10 @@ struct symbolizer_icon
     {
         // FIXME!
         /*
-          std::shared_ptr<mapnik::image_data_rgba8> symbol = sym.get_image();
+          std::shared_ptr<mapnik::image_rgba8> symbol = sym.get_image();
           if (symbol)
           {
-          QImage image(symbol->getBytes(),
+          QImage image(symbol->bytes(),
           symbol->width(),symbol->height(),QImage::Format_ARGB32);
           QPixmap pix = QPixmap::fromImage(image.rgbSwapped());
           return QIcon(pix);

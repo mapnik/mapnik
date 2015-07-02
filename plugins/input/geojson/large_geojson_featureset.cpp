@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,9 +23,9 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/geometry_grammar_impl.hpp>
-#include <mapnik/json/feature_grammar_impl.hpp>
-#include <mapnik/utils.hpp>
+#include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/json/feature_grammar.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -62,14 +62,15 @@ mapnik::feature_ptr large_geojson_featureset::next()
         std::vector<char> json;
         json.resize(size);
         std::fread(json.data(), size, 1, file_.get());
-        using chr_iterator_type = std::vector<char>::const_iterator;
-        chr_iterator_type start = json.begin();
-        chr_iterator_type end = json.end();
+
+        using chr_iterator_type = char const*;
+        chr_iterator_type start = json.data();
+        chr_iterator_type end = start + json.size();
 
         static const mapnik::transcoder tr("utf8");
         static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
         using namespace boost::spirit;
-        ascii::space_type space;
+        standard::space_type space;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,1));
         if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space))
         {

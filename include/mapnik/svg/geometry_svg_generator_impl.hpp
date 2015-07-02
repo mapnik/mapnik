@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-
+#include <mapnik/geometry_types.hpp>
 #include <mapnik/svg/geometry_svg_generator.hpp>
 
 namespace mapnik { namespace svg {
@@ -29,21 +29,19 @@ namespace mapnik { namespace svg {
     namespace karma = boost::spirit::karma;
     namespace phoenix = boost::phoenix;
 
-    template <typename OutputIterator, typename Geometry>
-    svg_path_generator<OutputIterator,Geometry>::svg_path_generator()
+    template <typename OutputIterator, typename Path>
+    svg_path_generator<OutputIterator,Path>::svg_path_generator()
         : svg_path_generator::base_type(svg)
     {
         boost::spirit::karma::uint_type uint_;
         boost::spirit::karma::_val_type _val;
         boost::spirit::karma::_1_type _1;
         boost::spirit::karma::lit_type lit;
-        boost::spirit::karma::_a_type _a;
-        boost::spirit::karma::string_type kstring;
 
         svg = point | linestring | polygon
             ;
 
-        point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
+        point = &uint_(mapnik::geometry::geometry_types::Point)[_1 = _type(_val)]
             << svg_point [_1 = _first(_val)]
             ;
 
@@ -53,18 +51,18 @@ namespace mapnik { namespace svg {
             << lit('\"')
             ;
 
-        linestring = &uint_(mapnik::geometry_type::types::LineString)[_1 = _type(_val)]
+        linestring = &uint_(mapnik::geometry::geometry_types::LineString)[_1 = _type(_val)]
             << lit("d=\"") << svg_path << lit("\"")
             ;
 
-        polygon = &uint_(mapnik::geometry_type::types::Polygon)[_1 = _type(_val)]
+        polygon = &uint_(mapnik::geometry::geometry_types::Polygon)[_1 = _type(_val)]
             << lit("d=\"") << svg_path << lit("\"")
             ;
 
         svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
-                      | &uint_(mapnik::SEG_LINETO) [_a +=1] << kstring [if_(_a == 1u) [_1 = "L" ].else_[_1 =""]])
-                     << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
-            ;
+                      | &uint_(mapnik::SEG_LINETO) << lit('L'))
+                     << coordinate << lit(' ') << coordinate) % lit(' ')
+                     ;
 
     }
 

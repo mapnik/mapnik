@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,7 +47,7 @@ public:
             return false;
         }
 
-        if (this->locator_.type() == mapnik::geometry_type::types::Point)
+        if (this->locator_.type() == mapnik::geometry::geometry_types::Point)
         {
             return markers_point_placement<Locator, Detector>::get_point(x, y, angle, ignore_placement);
         }
@@ -69,6 +69,10 @@ public:
         if (agg::is_line_to(this->locator_.vertex(&x1, &y1)))
         {
             angle = std::atan2(y1 - y0, x1 - x0);
+            if (!this->set_direction(angle))
+            {
+                return false;
+            }
         }
 
         box2d<double> box = this->perform_transform(angle, x, y);

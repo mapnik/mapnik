@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,8 @@
 #include <mapnik/color.hpp>
 #include <mapnik/simplify.hpp>
 
-// boost
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/algorithm/string/replace.hpp>  // for replace
-#pragma GCC diagnostic pop
+// stl
+#include <algorithm>
 
 namespace mapnik {
 
@@ -157,6 +153,9 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "upright",  [](enumeration_wrapper e)
                         {return enumeration<text_upright_enum,text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();},
                         property_types::target_upright},
+    property_meta_type{ "direction",  [](enumeration_wrapper e)
+                        {return enumeration<direction_enum,direction_enum_MAX>(direction_enum(e.value)).as_string();},
+                        property_types::target_direction},
     property_meta_type{ "avoid-edges",nullptr, property_types::target_bool },
     property_meta_type{ "font-feature-settings", nullptr, property_types::target_font_feature_settings },
 
@@ -170,7 +169,7 @@ property_meta_type const& get_meta(mapnik::keys key)
 mapnik::keys get_key(std::string const& name)
 {
     std::string name_copy(name);
-    boost::algorithm::replace_all(name_copy,"_","-");
+    std::replace(name_copy.begin(), name_copy.end(), '_', '-');
     for (unsigned i=0; i< const_max_key ; ++i)
     {
         property_meta_type const& item = key_meta[i];

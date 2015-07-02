@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/raster.hpp>
@@ -36,7 +36,6 @@
 using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
-using mapnik::geometry_type;
 using mapnik::query;
 using mapnik::feature_factory;
 
@@ -114,10 +113,9 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         {
             if (size > 0)
             {
-                mapnik::image_data_rgba8 image(width,height);
+                mapnik::image_rgba8 image(width,height);
                 unsigned char* raster_data = static_cast<unsigned char*>(raster);
-                unsigned char* image_data = image.getBytes();
-                std::memcpy(image_data, raster_data, size);
+                std::memcpy(image.bytes(), raster_data, size);
                 feature->set_raster(std::make_shared<mapnik::raster>(intersect, std::move(image), 1.0));
                 MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Done";
             }

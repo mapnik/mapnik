@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,9 @@
 // mapnik
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/geom_util.hpp>
+//#include <mapnik/geom_util.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/value_types.hpp>
@@ -35,7 +37,30 @@
 //agg
 #include "agg_conv_clip_polyline.h"
 
-namespace mapnik {
+namespace mapnik { namespace detail {
+
+template <typename Helper>
+struct apply_find_line_placements : util::noncopyable
+{
+    apply_find_line_placements(view_transform const& t, proj_transform const& prj_trans, Helper & helper)
+        : t_(t),
+          prj_trans_(prj_trans),
+          helper_(helper) {}
+
+    template <typename Adapter>
+    void operator() (Adapter & va) const
+    {
+        using vertex_adapter_type = Adapter;
+        using path_type = transform_path_adapter<view_transform, vertex_adapter_type>;
+        path_type path(t_, va, prj_trans_);
+        helper_.find_line_placements(path);
+    }
+    view_transform const& t_;
+    proj_transform const& prj_trans_;
+    Helper & helper_;
+};
+
+} // ns detail
 
 group_symbolizer_helper::group_symbolizer_helper(
         group_symbolizer const& sym, feature_impl const& feature,
@@ -61,13 +86,13 @@ pixel_position_list const& group_symbolizer_helper::get()
     }
     else
     {
+        using apply_find_line_placements = detail::apply_find_line_placements<group_symbolizer_helper>;
         for (auto const& geom : geometries_to_process_)
         {
             // TODO to support clipped geometries this needs to use
             // vertex_converters
-            using path_type = transform_path_adapter<view_transform,geometry_type>;
-            path_type path(t_, *geom, prj_trans_);
-            find_line_placements(path);
+            apply_find_line_placements apply(t_, prj_trans_, *this);
+            mapnik::util::apply_visitor(geometry::vertex_processor<apply_find_line_placements>(apply), geom);
         }
     }
 
@@ -146,10 +171,10 @@ bool group_symbolizer_helper::collision(box2d<double> const& box, value_unicode_
 {
     if (!detector_.extent().intersects(box)
             ||
-        (text_props_->avoid_edges && !query_extent_.contains(box))
+        (text_props_->avoid_edges && !dims_.contains(box))
             ||
         (text_props_->minimum_padding > 0 &&
-         !query_extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
+         !dims_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
             ||
         (!text_props_->allow_overlap &&
             ((repeat_key.length() == 0 && !detector_.has_placement(box, text_props_->margin * scale_factor_))

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,208 +23,218 @@
 #ifndef MAPNIK_JSON_GEOMETRY_UTIL_HPP
 #define MAPNIK_JSON_GEOMETRY_UTIL_HPP
 
-#include <mapnik/geometry.hpp>  // for geometry_type
-#include <mapnik/vertex.hpp>  // for CommandType
-#include <mapnik/make_unique.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 namespace mapnik { namespace json {
 
 // geometries
-template <typename Path>
+template <typename Geometry>
 struct create_point
 {
-    explicit create_point(Path & path)
-        : path_(path) {}
+    explicit create_point(Geometry & geom)
+        : geom_(geom) {}
 
-    void operator()(position const& pos) const
+    void operator() (position const& pos) const
     {
-        auto pt = std::make_unique<geometry_type>(geometry_type::types::Point);
-        pt->move_to(std::get<0>(pos), std::get<1>(pos));
-        path_.push_back(pt.release());
+        mapnik::geometry::point<double> point(pos.x, pos.y);
+        geom_ = std::move(point);
     }
 
     template <typename T>
     void operator()(T const&) const {} // no-op - shouldn't get here
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_linestring
 {
-    explicit create_linestring(Path & path)
-        : path_(path) {}
+    explicit create_linestring(Geometry & geom)
+        : geom_(geom) {}
 
-    void operator()(positions const& ring) const
+    void operator() (positions const& ring) const
     {
         std::size_t size = ring.size();
         if (size > 1)
         {
-            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
-            line->move_to(std::get<0>(ring.front()), std::get<1>(ring.front()));
-
-            for (std::size_t index = 1; index < size; ++index)
+            mapnik::geometry::line_string<double> line;
+            line.reserve(size);
+            for (auto && pt : ring)
             {
-                line->line_to(std::get<0>(ring[index]), std::get<1>(ring[index]));
+                line.emplace_back(std::move(pt));
             }
-            path_.push_back(line.release());
+            geom_ = std::move(line);
         }
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_polygon
 {
-    explicit create_polygon(Path & path)
-        : path_(path) {}
+    explicit create_polygon(Geometry & geom)
+        : geom_(geom) {}
 
-    void operator()(std::vector<positions> const& rings) const
+    void operator() (std::vector<positions> const& rings) const
     {
-        auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
-
-        for (auto const& ring : rings)
+        mapnik::geometry::polygon<double> poly;
+        std::size_t num_rings = rings.size();
+        if (num_rings > 1)
         {
-            std::size_t size = ring.size();
-            if (size > 2) // at least 3 vertices to form a ring
-            {
-                poly->move_to(std::get<0>(ring.front()), std::get<1>(ring.front()));
-                for (std::size_t index = 1; index < size; ++index)
-                {
-                    poly->line_to(std::get<0>(ring[index]), std::get<1>(ring[index]));
-                }
-                poly->close_path();
-            }
+            poly.interior_rings.reserve(num_rings - 1);
         }
-        path_.push_back(poly.release());
+
+        for ( std::size_t i = 0; i < num_rings; ++i)
+        {
+            std::size_t size = rings[i].size();
+            mapnik::geometry::linear_ring<double> ring;
+            ring.reserve(size);
+            for ( auto && pt : rings[i])
+            {
+                ring.emplace_back(std::move(pt));
+            }
+            if (i == 0) poly.set_exterior_ring(std::move(ring));
+            else poly.add_hole(std::move(ring));
+        }
+        geom_ = std::move(poly);
+        mapnik::geometry::correct(geom_);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
 // multi-geometries
-
-template <typename Path>
+template <typename Geometry>
 struct create_multipoint
 {
-    explicit create_multipoint(Path & path)
-        : path_(path) {}
+    explicit create_multipoint(Geometry & geom)
+        : geom_(geom) {}
 
-    void operator()(positions const& points) const
+    void operator() (positions const& points) const
     {
-        for (auto const& pos : points)
+        mapnik::geometry::multi_point<double> multi_point;
+        multi_point.reserve(points.size());
+        for (auto && pos : points)
         {
-            auto point = std::make_unique<geometry_type>(geometry_type::types::Point);
-            point->move_to(std::get<0>(pos), std::get<1>(pos));
-            path_.push_back(point.release());
+            multi_point.emplace_back(std::move(pos));
         }
+        geom_ = std::move(multi_point);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_multilinestring
 {
-    explicit create_multilinestring(Path & path)
-        : path_(path) {}
+    explicit create_multilinestring(Geometry & geom)
+        : geom_(geom) {}
 
-    void operator()(std::vector<positions> const& rings) const
+    void operator() (std::vector<positions> const& rings) const
     {
+        mapnik::geometry::multi_line_string<double> multi_line;
+        multi_line.reserve(rings.size());
+
         for (auto const& ring : rings)
         {
-            auto line = std::make_unique<geometry_type>(geometry_type::types::LineString);
-            std::size_t size = ring.size();
-            if (size > 1) // at least 2 vertices to form a linestring
+            mapnik::geometry::line_string<double> line;
+            line.reserve(ring.size());
+            for (auto && pt : ring)
             {
-                line->move_to(std::get<0>(ring.front()), std::get<1>(ring.front()));
-                for (std::size_t index = 1; index < size; ++index)
-                {
-                    line->line_to(std::get<0>(ring[index]), std::get<1>(ring[index]));
-                }
+                line.emplace_back(std::move(pt));
             }
-            path_.push_back(line.release());
+            multi_line.emplace_back(std::move(line));
         }
+        geom_ = std::move(multi_line);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
-template <typename Path>
+template <typename Geometry>
 struct create_multipolygon
 {
-    explicit create_multipolygon(Path & path)
-        : path_(path) {}
+    explicit create_multipolygon(Geometry & geom)
+        : geom_(geom) {}
 
     void operator()(std::vector<std::vector<positions> > const& rings_array) const
     {
+        mapnik::geometry::multi_polygon<double> multi_poly;
+        multi_poly.reserve(rings_array.size());
         for (auto const& rings : rings_array)
         {
-            auto poly = std::make_unique<geometry_type>(geometry_type::types::Polygon);
-            for (auto const& ring : rings)
+            mapnik::geometry::polygon<double> poly;
+            std::size_t num_rings = rings.size();
+            if ( num_rings > 1)
+                poly.interior_rings.reserve(num_rings - 1);
+
+            for ( std::size_t i = 0; i < num_rings; ++i)
             {
-                std::size_t size = ring.size();
-                if (size > 2) // at least 3 vertices to form a ring
+                std::size_t size = rings[i].size();
+                mapnik::geometry::linear_ring<double> ring;
+                ring.reserve(size);
+                for ( auto && pt : rings[i])
                 {
-                    poly->move_to(std::get<0>(ring.front()), std::get<1>(ring.front()));
-                    for (std::size_t index = 1; index < size; ++index)
-                    {
-                        poly->line_to(std::get<0>(ring[index]), std::get<1>(ring[index]));
-                    }
-                    poly->close_path();
+                    ring.emplace_back(std::move(pt));
                 }
+                if (i == 0) poly.set_exterior_ring(std::move(ring));
+                else poly.add_hole(std::move(ring));
             }
-            path_.push_back(poly.release());
+            multi_poly.emplace_back(std::move(poly));
         }
+        geom_ = std::move(multi_poly);
+        mapnik::geometry::correct(geom_);
     }
 
     template <typename T>
     void operator()(T const&) const {}  // no-op - shouldn't get here
 
-    Path & path_;
+    Geometry & geom_;
 };
 
 struct create_geometry_impl
 {
     using result_type = void;
-    template <typename T0>
-    void operator() (T0 & path, int type, mapnik::json::coordinates const& coords) const
+    template <typename Geometry>
+    void operator() (Geometry & geom, int type, mapnik::json::coordinates const& coords) const
     {
         switch (type)
         {
         case 1 ://Point
-            util::apply_visitor(create_point<T0>(path), coords);
+            util::apply_visitor(create_point<Geometry>(geom), coords);
             break;
         case 2 ://LineString
-            util::apply_visitor(create_linestring<T0>(path), coords);
-            break;
+           util::apply_visitor(create_linestring<Geometry>(geom), coords);
+           break;
         case 3 ://Polygon
-            util::apply_visitor(create_polygon<T0>(path), coords);
+            util::apply_visitor(create_polygon<Geometry>(geom), coords);
             break;
         case 4 ://MultiPoint
-            util::apply_visitor(create_multipoint<T0>(path), coords);
+            util::apply_visitor(create_multipoint<Geometry>(geom), coords);
             break;
         case 5 ://MultiLineString
-            util::apply_visitor(create_multilinestring<T0>(path), coords);
+            util::apply_visitor(create_multilinestring<Geometry>(geom), coords);
             break;
         case 6 ://MultiPolygon
-            util::apply_visitor(create_multipolygon<T0>(path), coords);
+            util::apply_visitor(create_multipolygon<Geometry>(geom), coords);
             break;
         default:
             break;
         }
+
     }
 };
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
-    using vertex_converter_type = vertex_converter<grid_rasterizer,clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type = vertex_converter<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
 
     ras_ptr->reset();
 

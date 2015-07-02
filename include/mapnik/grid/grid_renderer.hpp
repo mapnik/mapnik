@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,7 @@ namespace mapnik {
   class feature_type_style;
   class label_collision_detector4;
   class layer;
-  class marker;
+  struct marker;
   class proj_transform;
   struct grid_rasterizer;
   class request;

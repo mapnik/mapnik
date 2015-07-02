@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +26,14 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/topology.hpp>
-#include <mapnik/util/variant.hpp>
 
 namespace mapnik { namespace topojson {
 
 struct bounding_box_visitor
 {
     bounding_box_visitor(topology const& topo)
-        : topo_(topo) {}
+        : topo_(topo),
+          num_arcs_(topo_.arcs.size()) {}
 
     box2d<double> operator() (mapnik::topojson::point const& pt) const
     {
@@ -50,24 +50,27 @@ struct bounding_box_visitor
     box2d<double> operator() (mapnik::topojson::multi_point const& multi_pt) const
     {
         box2d<double> bbox;
-        bool first = true;
-        for (auto const& pt : multi_pt.points)
+        if (num_arcs_ > 0)
         {
-            double x = pt.x;
-            double y = pt.y;
-            if (topo_.tr)
+            bool first = true;
+            for (auto const& pt : multi_pt.points)
             {
-                x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y; // TODO : delta encoded ?
-            }
-            if (first)
-            {
-                first = false;
-                bbox.init(x,y,x,y);
-            }
-            else
-            {
-                bbox.expand_to_include(x,y);
+                double x = pt.x;
+                double y = pt.y;
+                if (topo_.tr)
+                {
+                    x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                    y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y; // TODO : delta encoded ?
+                }
+                if (first)
+                {
+                    first = false;
+                    bbox.init(x,y,x,y);
+                }
+                else
+                {
+                    bbox.expand_to_include(x,y);
+                }
             }
         }
         return bbox;
@@ -76,87 +79,28 @@ struct bounding_box_visitor
     box2d<double> operator() (mapnik::topojson::linestring const& line) const
     {
         box2d<double> bbox;
-        bool first = true;
-        double px = 0, py = 0;
-        index_type arc_index = line.ring;
-        for (auto pt : topo_.arcs[arc_index].coordinates)
+        if (num_arcs_ > 0)
         {
-            double x = pt.x;
-            double y = pt.y;
-            if (topo_.tr)
-            {
-                x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
-            }
-            if (first)
-            {
-                first = false;
-                bbox.init(x, y, x, y);
-            }
-            else
-            {
-                bbox.expand_to_include(x, y);
-            }
-        }
-        return bbox;
-    }
-
-    box2d<double> operator() (mapnik::topojson::multi_linestring const& multi_line) const
-    {
-        box2d<double> bbox;
-        bool first = true;
-        for (auto index : multi_line.rings)
-        {
-            double px = 0, py = 0;
+            index_type index = line.ring;
             index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-            for (auto pt : topo_.arcs[arc_index].coordinates)
+            if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
             {
-                double x = pt.x;
-                double y = pt.y;
-                if (topo_.tr)
-                {
-                    x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                    y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
-                }
-                if (first)
-                {
-                    first = false;
-                    bbox.init(x, y, x, y);
-                }
-                else
-                {
-                    bbox.expand_to_include(x, y);
-                }
-            }
-        }
-        return bbox;
-    }
-
-    box2d<double> operator() (mapnik::topojson::polygon const& poly) const
-    {
-        box2d<double> bbox;
-        bool first = true;
-        for (auto const& ring : poly.rings)
-        {
-            for (auto index : ring)
-            {
+                bool first = true;
                 double px = 0, py = 0;
-                index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-                for (auto const& pt : topo_.arcs[arc_index].coordinates)
+                auto const& arcs = topo_.arcs[arc_index];
+                for (auto pt : arcs.coordinates)
                 {
                     double x = pt.x;
                     double y = pt.y;
-
                     if (topo_.tr)
                     {
                         x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                         y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                     }
-
                     if (first)
                     {
                         first = false;
-                        bbox.init( x, y, x, y);
+                        bbox.init(x, y, x, y);
                     }
                     else
                     {
@@ -168,33 +112,32 @@ struct bounding_box_visitor
         return bbox;
     }
 
-    box2d<double> operator() (mapnik::topojson::multi_polygon const& multi_poly) const
+    box2d<double> operator() (mapnik::topojson::multi_linestring const& multi_line) const
     {
         box2d<double> bbox;
-        bool first = true;
-        for (auto const& poly : multi_poly.polygons)
+        if (num_arcs_ > 0)
         {
-            for (auto const& ring : poly)
+            bool first = true;
+            for (auto index : multi_line.rings)
             {
-                for (auto index : ring)
+                index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
+                if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
                 {
                     double px = 0, py = 0;
-                    index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
-                    for (auto const& pt : topo_.arcs[arc_index].coordinates)
+                    auto const& arcs = topo_.arcs[arc_index];
+                    for (auto pt : arcs.coordinates)
                     {
                         double x = pt.x;
                         double y = pt.y;
-
                         if (topo_.tr)
                         {
                             x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                             y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                         }
-
                         if (first)
                         {
                             first = false;
-                            bbox.init( x, y, x, y);
+                            bbox.init(x, y, x, y);
                         }
                         else
                         {
@@ -207,14 +150,103 @@ struct bounding_box_visitor
         return bbox;
     }
 
-    template<typename T>
-    box2d<double> operator() (T const& ) const
+    box2d<double> operator() (mapnik::topojson::polygon const& poly) const
+    {
+        box2d<double> bbox;
+        if (num_arcs_ > 0)
+        {
+            bool first = true;
+            for (auto const& ring : poly.rings)
+            {
+                for (auto index : ring)
+                {
+                    index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
+                    if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
+                    {
+                        double px = 0, py = 0;
+                        auto const& arcs = topo_.arcs[arc_index];
+                        for (auto const& pt : arcs.coordinates)
+                        {
+                            double x = pt.x;
+                            double y = pt.y;
+
+                            if (topo_.tr)
+                            {
+                                x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                                y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                            }
+
+                            if (first)
+                            {
+                                first = false;
+                                bbox.init( x, y, x, y);
+                            }
+                            else
+                            {
+                                bbox.expand_to_include(x, y);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bbox;
+    }
+
+    box2d<double> operator() (mapnik::topojson::multi_polygon const& multi_poly) const
+    {
+        box2d<double> bbox;
+        if (num_arcs_ > 0)
+        {
+            bool first = true;
+            for (auto const& poly : multi_poly.polygons)
+            {
+                for (auto const& ring : poly)
+                {
+                    for (auto index : ring)
+                    {
+                        index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
+                        if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
+                        {
+                            double px = 0, py = 0;
+                            auto const& arcs = topo_.arcs[arc_index];
+                            for (auto const& pt : arcs.coordinates)
+                            {
+                                double x = pt.x;
+                                double y = pt.y;
+
+                                if (topo_.tr)
+                                {
+                                    x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                                    y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                                }
+
+                                if (first)
+                                {
+                                    first = false;
+                                    bbox.init( x, y, x, y);
+                                }
+                                else
+                                {
+                                    bbox.expand_to_include(x, y);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bbox;
+    }
+
+    box2d<double> operator() (mapnik::topojson::invalid const&) const
     {
         return box2d<double>();
     }
 
 private:
     topology const& topo_;
+    std::size_t num_arcs_;
 };
 
 }}

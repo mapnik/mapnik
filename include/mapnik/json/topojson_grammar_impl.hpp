@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -113,13 +113,15 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         ;
 
     geometry_collection =  lit('{')
-               >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"") >> lit(',')
-               >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
+               >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
+               >> -(lit(',') >> omit[bbox])
+               >> lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
                >> lit(']')
                >> lit('}')
         ;
     point = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"Point\"")
+        >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate)
             ^ (lit(',') >> properties) /*^ (lit(',') >> omit[id])*/)
         >> lit('}')
@@ -127,6 +129,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     multi_point = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiPoint\"")
+        >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"coordinates\"") >> lit(':')
              >> lit('[') >> -(coordinate % lit(',')) >> lit(']'))
             ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
@@ -142,6 +145,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     multi_linestring = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiLineString\"")
+        >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[')
              >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']'))
             ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
@@ -150,6 +154,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     polygon = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"Polygon\"")
+        >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
              >> lit('[') >> -(ring % lit(',')) >> lit(']'))
             ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
@@ -158,6 +163,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     multi_polygon = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiPolygon\"")
+        >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
              >> lit('[')
              >> -((lit('[') >> -(ring % lit(',')) >> lit(']')) % lit(','))

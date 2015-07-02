@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,24 +25,30 @@
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/geometry_correct.hpp>
 
 // boost
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <mapnik/mapped_memory_cache.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 // ogr
 #include "ogr_index_featureset.hpp"
 #include "ogr_converter.hpp"
 #include "ogr_index.hpp"
+
+#include <gdal_version.h>
 
 using mapnik::query;
 using mapnik::box2d;
@@ -120,7 +126,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
             geom->getEnvelope(&feature_envelope_);
             if (!filter_.pass(mapnik::box2d<double>(feature_envelope_.MinX,feature_envelope_.MinY,
                                             feature_envelope_.MaxX,feature_envelope_.MaxY))) continue;
-            ogr_converter::convert_geometry (geom, feature);
+            auto geom_corrected = ogr_converter::convert_geometry(geom);
+            mapnik::geometry::correct(geom_corrected);
+            feature->set_geometry(std::move(geom_corrected));
         }
         else
         {
@@ -140,6 +148,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
             switch (type_oid)
             {
             case OFTInteger:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64:
+#endif
             {
                 feature->put<mapnik::value_integer>(fld_name,poFeature->GetFieldAsInteger (i));
                 break;
@@ -159,6 +170,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
             }
 
             case OFTIntegerList:
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64List:
+#endif
             case OFTRealList:
             case OFTStringList:
             case OFTWideStringList: // deprecated !

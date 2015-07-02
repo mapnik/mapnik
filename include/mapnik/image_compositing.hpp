@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define MAPNIK_IMAGE_COMPOSITING_HPP
 
 #include <mapnik/config.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -87,8 +87,7 @@ MAPNIK_DECL void composite(T & dst, T const& src,
                            composite_mode_e mode,
                            float opacity=1,
                            int dx=0,
-                           int dy=0,
-                           bool premultiply_src=false);
+                           int dy=0);
 
 }
 #endif // MAPNIK_IMAGE_COMPOSITING_HPP

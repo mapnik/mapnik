@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +26,7 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
-
-// boost
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#include <boost/ptr_container/ptr_vector.hpp>
-#pragma GCC diagnostic pop
-
+#include <mapnik/make_unique.hpp>
 // stl
 #include <algorithm>
 #include <vector>
@@ -86,16 +79,15 @@ class quad_tree : util::noncopyable
         ~node () {}
     };
 
-    using nodes_t = boost::ptr_vector<node>;
+    using nodes_t = std::vector<std::unique_ptr<node> >;
     using cont_t = typename node::cont_t;
     using node_data_iterator = typename cont_t::iterator;
 
 public:
     using iterator = typename nodes_t::iterator;
     using const_iterator = typename nodes_t::const_iterator;
-    using result_t = typename boost::ptr_vector<T,boost::view_clone_allocator>;
+    using result_t = typename std::vector<std::reference_wrapper<T> >;
     using query_iterator = typename result_t::iterator;
-
 
     explicit quad_tree(box2d<double> const& ext,
                        unsigned int max_depth = 8,
@@ -105,8 +97,8 @@ public:
           query_result_(),
           nodes_()
     {
-        nodes_.push_back(new node(ext));
-        root_ = &nodes_[0];
+        nodes_.push_back(std::make_unique<node>(ext));
+        root_ = nodes_[0].get();
     }
 
     void insert(T data, box2d<double> const& box)
@@ -118,7 +110,7 @@ public:
     query_iterator query_in_box(box2d<double> const& box)
     {
         query_result_.clear();
-        query_node(box,query_result_,root_);
+        query_node(box, query_result_, root_);
         return query_result_.begin();
     }
 
@@ -142,8 +134,8 @@ public:
     {
         box2d<double> ext = root_->extent_;
         nodes_.clear();
-        nodes_.push_back(new node(ext));
-        root_ = &nodes_[0];
+        nodes_.push_back(std::make_unique<node>(ext));
+        root_ = nodes_[0].get();
     }
 
     box2d<double> const& extent() const
@@ -160,12 +152,9 @@ private:
             box2d<double> const& node_extent = node_->extent();
             if (box.intersects(node_extent))
             {
-                node_data_iterator i=node_->begin();
-                node_data_iterator end=node_->end();
-                while ( i!=end)
+                for (auto & n : *node_)
                 {
-                    result.push_back(&(*i));
-                    ++i;
+                    result.push_back(std::ref(n));
                 }
                 for (int k = 0; k < 4; ++k)
                 {
@@ -186,14 +175,14 @@ private:
             box2d<double> const& node_extent = n->extent();
             box2d<double> ext[4];
             split_box(node_extent,ext);
-            for (int i=0;i<4;++i)
+            for (int i = 0; i < 4; ++i)
             {
                 if (ext[i].contains(box))
                 {
                     if (!n->children_[i])
                     {
-                        nodes_.push_back(new node(ext[i]));
-                        n->children_[i]=&nodes_.back();
+                        nodes_.push_back(std::make_unique<node>(ext[i]));
+                        n->children_[i]=nodes_.back().get();
                     }
                     do_insert_data(data,box,n->children_[i],depth);
                     return;
@@ -205,8 +194,6 @@ private:
 
     void split_box(box2d<double> const& node_extent,box2d<double> * ext)
     {
-        //coord2d c=node_extent.center();
-
         double width=node_extent.width();
         double height=node_extent.height();
 

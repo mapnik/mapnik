@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,7 @@ namespace mapnik {
 template <typename RendererType, typename RasterizerType>
 void render_raster_marker(RendererType ren,
                           RasterizerType & ras,
-                          image_data_rgba8 & src,
+                          image_rgba8 const& src,
                           mapnik::feature_impl const& feature,
                           agg::trans_affine const& marker_tr,
                           double opacity)

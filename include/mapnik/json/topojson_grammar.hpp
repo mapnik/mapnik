@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
@@ -44,7 +47,7 @@ namespace mapnik { namespace topojson {
 
 namespace qi = boost::spirit::qi;
 namespace fusion = boost::fusion;
-using space_type = boost::spirit::ascii::space_type;
+using space_type = mapnik::json::space_type;
 
 template <typename Iterator, typename ErrorHandler = json::error_handler<Iterator> >
 struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>

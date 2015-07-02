@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,15 +34,14 @@ namespace mapnik
 {
 
 template <typename T>
-const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_limits<T>::min();
+const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_limits<typename T::type>::min();
 
 template <typename T>
-hit_grid<T>::hit_grid(int width, int height, std::string const& key, unsigned int resolution)
+hit_grid<T>::hit_grid(std::size_t width, std::size_t height, std::string const& key)
     : width_(width),
       height_(height),
       key_(key),
       data_(width,height),
-      resolution_(resolution),
       id_name_("__id__"),
       painted_(false),
       names_(),
@@ -60,7 +59,6 @@ hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
       height_(rhs.height_),
       key_(rhs.key_),
       data_(rhs.data_),
-      resolution_(rhs.resolution_),
       id_name_("__id__"),
       painted_(rhs.painted_),
       names_(rhs.names_),
@@ -146,7 +144,7 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
 }
 
 
-template class hit_grid<mapnik::value_integer>;
+template class MAPNIK_DECL hit_grid<mapnik::value_integer_pixel>;
 
 }
 

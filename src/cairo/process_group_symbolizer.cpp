@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -77,7 +77,7 @@ struct thunk_renderer
                                      thunk.opacity_);
     }
 
-    void operator()(raster_marker_render_thunk const &thunk) const
+    void operator()(raster_marker_render_thunk const& thunk) const
     {
         cairo_save_restore guard(context_);
         context_.set_operator(thunk.comp_op_);
@@ -97,11 +97,12 @@ struct thunk_renderer
             offset_,
             [&] (glyph_positions_ptr glyphs)
             {
-                if (glyphs->marker())
+                marker_info_ptr mark = glyphs->get_marker();
+                if (mark)
                 {
                     ren_.render_marker(glyphs->marker_pos(),
-                                       *(glyphs->marker()->marker),
-                                       glyphs->marker()->transform,
+                                       *mark->marker_,
+                                       mark->transform_,
                                        thunk.opacity_, thunk.comp_op_);
                 }
                 context_.add_text(*glyphs, face_manager_, src_over, src_over, common_.scale_factor_);
@@ -111,7 +112,7 @@ struct thunk_renderer
     template <typename T0>
     void operator()(T0 const &) const
     {
-        // TODO: warning if unimplemented?
+        throw std::runtime_error("Rendering of this type is not supported by the cairo renderer.");
     }
 
 private:

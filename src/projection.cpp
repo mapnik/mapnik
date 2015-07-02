@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/projection.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/well_known_srs.hpp>
 
@@ -82,8 +81,8 @@ projection& projection::operator=(projection const& rhs)
 {
     projection tmp(rhs);
     swap(tmp);
-    proj_ctx_ = 0;
-    proj_ = 0;
+    proj_ctx_ = nullptr;
+    proj_ = nullptr;
     if (!defer_proj_init_) init_proj4();
     return *this;
 }
@@ -106,17 +105,21 @@ void projection::init_proj4() const
 #if PJ_VERSION >= 480
         proj_ctx_ = pj_ctx_alloc();
         proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
-        if (!proj_)
+        if (!proj_ || !proj_ctx_)
         {
             if (proj_ctx_) {
                 pj_ctx_free(proj_ctx_);
-                proj_ctx_ = 0;
+                proj_ctx_ = nullptr;
+            }
+            if (proj_) {
+                pj_free(proj_);
+                proj_ = nullptr;
             }
             throw proj_init_error(params_);
         }
 #else
         #if defined(MAPNIK_THREADSAFE)
-        mapnik::scoped_lock lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         #endif
         proj_ = pj_init_plus(params_.c_str());
         if (!proj_) throw proj_init_error(params_);
@@ -154,7 +157,7 @@ void projection::forward(double & x, double &y ) const
         throw std::runtime_error("projection::forward not supported unless proj4 is initialized");
     }
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     #endif
     projUV p;
     p.u = x * DEG_TO_RAD;
@@ -181,7 +184,7 @@ void projection::inverse(double & x,double & y) const
     }
 
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mapnik::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     #endif
     if (is_geographic_)
     {
@@ -202,13 +205,21 @@ void projection::inverse(double & x,double & y) const
 projection::~projection()
 {
 #ifdef MAPNIK_USE_PROJ4
-    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mapnik::scoped_lock lock(mutex_);
-    #endif
-        if (proj_) pj_free(proj_);
-    #if PJ_VERSION >= 480
-        if (proj_ctx_) pj_ctx_free(proj_ctx_);
-    #endif
+ #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+    std::lock_guard<std::mutex> lock(mutex_);
+ #endif
+    if (proj_)
+    {
+        pj_free(proj_);
+        proj_ = nullptr;
+    }
+ #if PJ_VERSION >= 480
+    if (proj_ctx_)
+    {
+        pj_ctx_free(proj_ctx_);
+        proj_ctx_ = nullptr;
+    }
+ #endif
 #endif
 }
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -98,7 +98,7 @@ class hextree : private util::noncopyable
         // penalty of using this node as color
         double reduce_cost;
         // number of !=0 positions in children_ array
-        byte children_count;
+        std::uint8_t children_count;
     };
 
     // highest reduce_cost first
@@ -184,7 +184,7 @@ public:
     }
 
     // process alpha value based on trans_mode_
-    byte preprocessAlpha(byte a) const
+    std::uint8_t preprocessAlpha(std::uint8_t a) const
     {
         switch(trans_mode_)
         {
@@ -199,7 +199,7 @@ public:
 
     void insert(T const& data)
     {
-        byte a = preprocessAlpha(data.a);
+        std::uint8_t a = preprocessAlpha(data.a);
         unsigned level = 0;
         node * cur_node = root_.get();
         if (a < InsertPolicy::MIN_ALPHA)
@@ -238,7 +238,7 @@ public:
     // return color index in returned earlier palette
     int quantize(unsigned val) const
     {
-        byte a = preprocessAlpha(U2ALPHA(val));
+        std::uint8_t a = preprocessAlpha(U2ALPHA(val));
         unsigned ind=0;
         if (a < InsertPolicy::MIN_ALPHA || colors_ == 0)
         {
@@ -396,12 +396,12 @@ private:
         if (itr->count != 0)
         {
             unsigned count = itr->count;
-            byte a = byte(itr->alphas/float(count));
+            std::uint8_t a = std::uint8_t(itr->alphas/float(count));
             if (a > InsertPolicy::MAX_ALPHA) a = 255;
             if (a < InsertPolicy::MIN_ALPHA) a = 0;
-            palette.push_back(rgba((byte)round(gamma(itr->reds   / count, gamma_)),
-                                   (byte)round(gamma(itr->greens / count, gamma_)),
-                                   (byte)round(gamma(itr->blues  / count, gamma_)), a));
+            palette.push_back(rgba((std::uint8_t)round(gamma(itr->reds   / count, gamma_)),
+                                   (std::uint8_t)round(gamma(itr->greens / count, gamma_)),
+                                   (std::uint8_t)round(gamma(itr->blues  / count, gamma_)), a));
         }
         for (unsigned idx=0; idx < 16; ++idx)
         {

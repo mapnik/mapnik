@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,13 +29,59 @@
 #include <mapnik/cairo/cairo_render_vector.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/renderer_common/pattern_alignment.hpp>
 
 namespace mapnik
 {
+
+struct cairo_renderer_process_visitor_p
+{
+    cairo_renderer_process_visitor_p(cairo_context & context,
+                                   agg::trans_affine & image_tr,
+                                   unsigned offset_x,
+                                   unsigned offset_y,
+                                   float opacity)
+        : context_(context),
+          image_tr_(image_tr),
+          offset_x_(offset_x),
+          offset_y_(offset_y),
+          opacity_(opacity) {}
+
+    void operator() (marker_null const&) {}
+
+    void operator() (marker_svg const& marker)
+    {
+        mapnik::rasterizer ras;
+        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr_;
+        mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
+        render_pattern<image_rgba8>(ras, marker, image_tr_, 1.0, image);
+        cairo_pattern pattern(image, opacity_);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(offset_x_, offset_y_);
+        context_.set_pattern(pattern);
+    }
+
+    void operator() (marker_rgba8 const& marker)
+    {
+        cairo_pattern pattern(marker.get_data(), opacity_);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(offset_x_, offset_y_);
+        context_.set_pattern(pattern);
+    }
+
+  private:
+    cairo_context & context_;
+    agg::trans_affine & image_tr_;
+    unsigned offset_x_;
+    unsigned offset_y_;
+    float opacity_;
+};
 
 template <typename T>
 void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
@@ -55,8 +101,8 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
 
-    boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
-    if (!marker || !(*marker)) return;
+    std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename,true);
+    if (marker->is<mapnik::marker_null>()) return;
 
     unsigned offset_x=0;
     unsigned offset_y=0;
@@ -66,58 +112,36 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     {
         double x0 = 0.0;
         double y0 = 0.0;
-
-        if (feature.num_geometries() > 0)
-        {
-            using clipped_geometry_type = agg::conv_clip_polygon<geometry_type>;
-            using path_type = transform_path_adapter<view_transform,clipped_geometry_type>;
-            clipped_geometry_type clipped(feature.get_geometry(0));
-            clipped.clip_box(clip_box.minx(), clip_box.miny(),
-                             clip_box.maxx(), clip_box.maxy());
-            path_type path(common_.t_, clipped, prj_trans);
-            path.vertex(&x0, &y0);
-        }
+        using apply_local_alignment = detail::apply_local_alignment;
+        apply_local_alignment apply(common_.t_, prj_trans, clip_box, x0, y0);
+        util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature.get_geometry());
         offset_x = std::abs(clip_box.width() - x0);
         offset_y = std::abs(clip_box.height() - y0);
     }
 
-    if ((*marker)->is_bitmap())
-    {
-        cairo_pattern pattern(**((*marker)->get_bitmap_data()), opacity);
-        pattern.set_extend(CAIRO_EXTEND_REPEAT);
-        pattern.set_origin(offset_x, offset_y);
-        context_.set_pattern(pattern);
-    }
-    else
-    {
-        mapnik::rasterizer ras;
-        image_ptr image = render_pattern(ras, **marker, image_tr, 1.0); //
-        cairo_pattern pattern(*image, opacity);
-        pattern.set_extend(CAIRO_EXTEND_REPEAT);
-        pattern.set_origin(offset_x, offset_y);
-        context_.set_pattern(pattern);
-    }
+    util::apply_visitor(cairo_renderer_process_visitor_p(context_, image_tr, offset_x, offset_y, opacity), *marker);
 
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
+    using vertex_converter_type = vertex_converter<
+                                                   clip_poly_tag,
+                                                   transform_tag,
+                                                   affine_transform_tag,
+                                                   simplify_tag,
+                                                   smooth_tag>;
 
-    vertex_converter<cairo_context,clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>
-        converter(clip_box, context_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
-
+    vertex_converter_type converter(clip_box,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    for ( geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            converter.apply(geom);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, cairo_context>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter, context_);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
     // fill polygon
     context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
     context_.fill();

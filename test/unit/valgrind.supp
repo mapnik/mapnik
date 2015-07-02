@@ -1,0 +1,77 @@
+{
+   catch1
+   Memcheck:Addr1
+   fun:strlen
+   fun:_ZL29____C_A_T_C_H____T_E_S_T____9v
+   fun:_ZN5Catch10RunContext20invokeActiveTestCaseEv
+   fun:_ZN5Catch10RunContext14runCurrentTestERNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES8_
+   fun:_ZN5Catch10RunContext7runTestERKNS_8TestCaseE
+   fun:_ZN5Catch6Runner8runTestsEv
+   fun:_ZN5Catch7Session3runEv
+   fun:main
+}
+{
+   catch2
+   Memcheck:Cond
+   fun:_platform_memchr$VARIANT$Haswell
+   fun:__sfvwrite
+   fun:fwrite
+   fun:_ZNSt3__111__stdoutbufIcE8overflowEi
+   fun:_ZNSt3__115basic_streambufIcNS_11char_traitsIcEEE6xsputnEPKcl
+   fun:_ZNSt3__116__pad_and_outputIcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+   fun:_ZNSt3__124__put_character_sequenceIcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+   fun:_ZN5Catch15ConsoleReporter11printTotalsERKNS_6TotalsE
+   fun:_ZN5Catch15ConsoleReporter12testRunEndedERKNS_12TestRunStatsE
+   fun:_ZN5Catch10RunContextD2Ev
+   fun:_ZN5Catch6Runner8runTestsEv
+   fun:_ZN5Catch7Session3runEv
+}
+{
+   catch3
+   Memcheck:Cond
+   fun:_platform_memchr$VARIANT$Haswell
+   fun:__sfvwrite
+   fun:fwrite
+   fun:_ZNSt3__111__stdoutbufIcE8overflowEi
+   fun:_ZNSt3__115basic_streambufIcNS_11char_traitsIcEEE6xsputnEPKcl
+   fun:_ZNSt3__116__pad_and_outputIcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+   fun:_ZNSt3__124__put_character_sequenceIcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+   fun:_ZN5Catch12_GLOBAL__N_115PosixColourImpl3useENS_6Colour4CodeE
+   fun:_ZN5Catch6Colour3useENS0_4CodeE
+   fun:_ZN5Catch15ConsoleReporter18printTotalsDividerERKNS_6TotalsE
+   fun:_ZN5Catch15ConsoleReporter12testRunEndedERKNS_12TestRunStatsE
+   fun:_ZN5Catch10RunContextD2Ev
+}
+{
+   catch4
+   Memcheck:Cond
+   fun:_platform_memchr$VARIANT$Haswell
+   fun:__sfvwrite
+   fun:fwrite
+   fun:_ZNSt3__111__stdoutbufIcE8overflowEi
+   fun:_ZNSt3__115basic_streambufIcNS_11char_traitsIcEEE6xsputnEPKcl
+   fun:_ZNSt3__116__pad_and_outputIcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+   fun:_ZNSt3__124__put_character_sequenceIcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+   fun:_ZN5Catch15ConsoleReporter18printTotalsDividerERKNS_6TotalsE
+   fun:_ZN5Catch15ConsoleReporter12testRunEndedERKNS_12TestRunStatsE
+   fun:_ZN5Catch10RunContextD2Ev
+   fun:_ZN5Catch6Runner8runTestsEv
+   fun:_ZN5Catch7Session3runEv
+}
+{
+   pixman
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_pixman_implementation_create
+   fun:_pixman_implementation_create_general
+   fun:_pixman_choose_implementation
+   fun:pixman_constructor
+   fun:_ZN16ImageLoaderMachO18doModInitFunctionsERKN11ImageLoader11LinkContextE
+   fun:_ZN16ImageLoaderMachO16doInitializationERKN11ImageLoader11LinkContextE
+   fun:_ZN11ImageLoader23recursiveInitializationERKNS_11LinkContextEjRNS_21InitializerTimingListERNS_15UninitedUpwardsE
+   fun:_ZN11ImageLoader23recursiveInitializationERKNS_11LinkContextEjRNS_21InitializerTimingListERNS_15UninitedUpwardsE
+   fun:_ZN11ImageLoader19processInitializersERKNS_11LinkContextEjRNS_21InitializerTimingListERNS_15UninitedUpwardsE
+   fun:_ZN11ImageLoader15runInitializersERKNS_11LinkContextERNS_21InitializerTimingListE
+   fun:_ZN4dyld24initializeMainExecutableEv
+}

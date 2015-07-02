@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ public:
     virtual featureset_ptr features(query const& q) const;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     virtual box2d<double> envelope() const;
-    virtual boost::optional<geometry_t> get_geometry_type() const;
+    virtual boost::optional<datasource_geometry_t> get_geometry_type() const;
     virtual layer_descriptor get_descriptor() const;
     //
     void push(feature_ptr feature);

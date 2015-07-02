@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -309,7 +309,7 @@ bool Map::load_fonts()
         mapnik::util::file file(file_path);
         if (file.open())
         {
-            auto item = font_memory_cache_.emplace(file_path, std::make_pair(std::move(file.data()),file.size()));
+            auto item = font_memory_cache_.emplace(file_path, std::make_pair(file.data(),file.size()));
             if (item.second) result = true;
         }
     }

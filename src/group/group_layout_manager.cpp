@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/group/group_layout_manager.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/safe_cast.hpp>
 
 // std
 #include <cmath>
@@ -85,7 +86,7 @@ struct process_layout
         }
 
         bound_box layout_box;
-        size_t middle_ifirst = (member_boxes_.size() - 1) >> 1;
+        int middle_ifirst = safe_cast<int>((member_boxes_.size() - 1) >> 1);
         int top_i = 0;
         int bottom_i = 0;
         if (middle_ifirst % 2 == 0)
@@ -102,8 +103,8 @@ struct process_layout
 
         while (bottom_i >= 0 && top_i >= 0 && top_i < static_cast<int>(member_offsets_.size()))
         {
-            layout_box.expand_to_include(make_horiz_pair(top_i, layout_box.miny() - y_margin, -1, x_margin, layout.get_max_difference()));
-            layout_box.expand_to_include(make_horiz_pair(bottom_i, layout_box.maxy() + y_margin, 1, x_margin, layout.get_max_difference()));
+            layout_box.expand_to_include(make_horiz_pair(static_cast<std::size_t>(top_i), layout_box.miny() - y_margin, -1, x_margin, layout.get_max_difference()));
+            layout_box.expand_to_include(make_horiz_pair(static_cast<std::size_t>(bottom_i), layout_box.maxy() + y_margin, 1, x_margin, layout.get_max_difference()));
             top_i -= 2;
             bottom_i += 2;
         }

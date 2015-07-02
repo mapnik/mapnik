@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2013 Artem Pavlenko
+# Copyright (C) 2015 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ Import('env')
 
 config_env = env.Clone()
 
-config_variables = '''#!/bin/bash
+config_variables = '''#!/usr/bin/env bash
 
 ## variables
 
@@ -50,6 +50,9 @@ CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapni
 CONFIG_DEP_INCLUDES="%(dep_includes)s"
 CONFIG_CXXFLAGS="%(cxxflags)s"
 CONFIG_CXX='%(cxx)s'
+CONFIG_MAPNIK_GDAL_DATA='%(mapnik_bundled_gdal_data)s'
+CONFIG_MAPNIK_PROJ_LIB='%(mapnik_bundled_proj_data)s'
+CONFIG_MAPNIK_ICU_DATA='%(mapnik_bundled_icu_data)s'
 
 '''
 
@@ -64,12 +67,12 @@ cxxflags = ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
 
 defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
-dep_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
+dep_includes = ''.join([' -I${NODE_CONFIG_PREFIX:-""}%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
 
 dep_includes += ' '
 
 if config_env['HAS_CAIRO']:
-    dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
+    dep_includes += ''.join([' -I${NODE_CONFIG_PREFIX:-""}%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
 
 ldflags = ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 ldflags += config_env['LIBMAPNIK_LINKFLAGS']
@@ -107,6 +110,15 @@ if lib_root in inputpluginspath:
 
 lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 
+mapnik_bundled_gdal_data = ''
+mapnik_bundled_proj_data = ''
+mapnik_bundled_icu_data = ''
+
+if config_env.get('MAPNIK_BUNDLED_SHARE_DIRECTORY'):
+    mapnik_bundled_gdal_data = 'lib/mapnik/share/gdal'
+    mapnik_bundled_proj_data = 'lib/mapnik/share/proj'
+    mapnik_bundled_icu_data = 'lib/mapnik/share/icu'
+
 configuration = {
     "git_revision": git_revision,
     "git_describe": git_describe,
@@ -121,7 +133,10 @@ configuration = {
     "input_plugins": inputpluginspath,
     "defines":defines,
     "cxxflags":cxxflags,
-    "cxx":env['CXX']
+    "cxx":env['CXX'],
+    "mapnik_bundled_gdal_data":mapnik_bundled_gdal_data,
+    "mapnik_bundled_proj_data":mapnik_bundled_proj_data,
+    "mapnik_bundled_icu_data":mapnik_bundled_icu_data,
 }
 
 ## if we are statically linking depedencies

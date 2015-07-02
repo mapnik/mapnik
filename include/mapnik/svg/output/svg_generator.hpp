@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/view_transform.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/svg/geometry_svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/util/noncopyable.hpp>

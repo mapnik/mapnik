@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,8 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/gradient.hpp>
@@ -121,14 +122,14 @@ private:
 class cairo_pattern : private util::noncopyable
 {
 public:
-    explicit cairo_pattern(image_data_rgba8 const& data, double opacity = 1.0)
+    explicit cairo_pattern(image_rgba8 const& data, double opacity = 1.0)
     {
-        int pixels = data.width() * data.height();
-        const unsigned int *in_ptr = data.getData();
+        std::size_t pixels = data.width() * data.height();
+        const unsigned int *in_ptr = data.data();
         const unsigned int *in_end = in_ptr + pixels;
         unsigned int *out_ptr;
 
-        surface_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, data.width(), data.height());
+        surface_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, static_cast<int>(data.width()), static_cast<int>(data.height()));
 
         out_ptr = reinterpret_cast<unsigned int *>(cairo_image_surface_get_data(surface_));
 
@@ -279,7 +280,6 @@ inline cairo_ptr create_context(cairo_surface_ptr const& surface)
 class cairo_context : private util::noncopyable
 {
 public:
-
     cairo_context(cairo_ptr const& cairo);
 
     inline ErrorStatus get_status() const
@@ -308,8 +308,8 @@ public:
     void paint();
     void set_pattern(cairo_pattern const& pattern);
     void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
-    void add_image(double x, double y, image_data_rgba8 & data, double opacity = 1.0);
-    void add_image(agg::trans_affine const& tr, image_data_rgba8 & data, double opacity = 1.0);
+    void add_image(double x, double y, image_rgba8 const& data, double opacity = 1.0);
+    void add_image(agg::trans_affine const& tr, image_rgba8 const& data, double opacity = 1.0);
     void set_font_face(cairo_face_manager & manager, face_ptr face);
     void set_font_matrix(cairo_matrix_t const& matrix);
     void set_matrix(cairo_matrix_t const& matrix);

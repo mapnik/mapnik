@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2013 Artem Pavlenko
+# Copyright (C) 2015 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -113,6 +113,9 @@ if env['RUNTIME_LINK'] != 'static':
 
 lib_env['LIBS'].append('z')
 
+if env['PLATFORM'] == 'FreeBSD':
+    lib_env['LIBS'].append('pthread')
+
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
     if env['FULL_LIB_PATH']:
@@ -132,7 +135,8 @@ else: # unix, non-macos
         else:
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
     else: # Linux and others
-        lib_env['LIBS'].append('dl')
+        if env['PLATFORM'] != 'FreeBSD':
+            lib_env['LIBS'].append('dl')
         mapnik_lib_link_flag += ' -Wl,-rpath-link,.'
         if env['ENABLE_SONAME']:
             mapnik_lib_link_flag += ' -Wl,-soname,%s' % mapnik_libname
@@ -152,12 +156,14 @@ source = Split(
     miniz_png.cpp
     color.cpp
     conversions.cpp
+    image_copy.cpp
     image_compositing.cpp
     image_scaling.cpp
     box2d.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
+    geometry_reprojection.cpp
     expression_node.cpp
     expression_string.cpp
     expression.cpp
@@ -170,17 +176,26 @@ source = Split(
     font_set.cpp
     function_call.cpp
     gradient.cpp
-    graphics.cpp
     parse_path.cpp
     image_reader.cpp
+    cairo_io.cpp
+    image.cpp
+    image_view.cpp
+    image_view_any.cpp
+    image_any.cpp
+    image_options.cpp
     image_util.cpp
+    image_util_jpeg.cpp
+    image_util_png.cpp
+    image_util_tiff.cpp
+    image_util_webp.cpp
     layer.cpp
     map.cpp
     load_map.cpp
-    memory.cpp
     palette.cpp
     marker_helpers.cpp
     transform_expression_grammar.cpp
+    geometry_envelope.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
@@ -238,6 +253,7 @@ source = Split(
     renderer_common.cpp
     renderer_common/render_pattern.cpp
     renderer_common/process_group_symbolizer.cpp
+    math.cpp
     """
     )
 
@@ -246,7 +262,7 @@ if env['PLUGIN_LINKING'] == 'static':
     lib_env.AppendUnique(CPPPATH='../plugins/')
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
-        if details['lib'] in env['LIBS'] or not details['lib']:
+        if not details['lib'] or details['lib'] in env['LIBS']:
             plugin_env = SConscript('../plugins/input/%s/build.py' % plugin)
             if not plugin_env:
                 print("Notice: no 'plugin_env' variable found for plugin: '%s'" % plugin)
@@ -323,12 +339,6 @@ source += Split(
     agg/process_debug_symbolizer.cpp
     """
     )
-
-# clipper
-source += Split(
-    """
-     ../deps/clipper/src/clipper.cpp
-    """)
 
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')

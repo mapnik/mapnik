@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,8 +32,9 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/parse_path.hpp>
-
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
@@ -53,17 +54,14 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> mark = marker_cache::instance().find(filename, true);
-    if (!mark) return;
+    std::shared_ptr<mapnik::marker const> mark = marker_cache::instance().find(filename, true);
+    if (mark->is<mapnik::marker_null>()) return;
 
-    if (!(*mark)->is_bitmap())
+    if (!mark->is<mapnik::marker_rgba8>())
     {
         MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
         return;
     }
-
-    boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
-    if (!pat) return;
 
     value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
     value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
@@ -84,7 +82,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    int stroke_width = (*pat)->width();
+    std::size_t stroke_width = mark->width();
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
@@ -117,11 +115,11 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     put<value_double>(line, keys::simplify_tolerance, value_double(simplify_tolerance));
     put<value_double>(line, keys::smooth, value_double(smooth));
 
-    vertex_converter<grid_rasterizer,
-                     clip_line_tag, transform_tag,
-                     offset_transform_tag, affine_transform_tag,
-                     simplify_tag, smooth_tag, stroke_tag>
-        converter(clipping_extent,*ras_ptr,line,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+    using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
+                                                   affine_transform_tag,
+                                                   simplify_tag,smooth_tag,
+                                                   offset_transform_tag,stroke_tag>;
+    vertex_converter_type converter(clipping_extent,line,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
     if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -129,14 +127,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     converter.set<stroke_tag>(); //always stroke
-
-    for (geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 1)
-        {
-            converter.apply(geom);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type,grid_rasterizer>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter, *ras_ptr);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 
     // render id
     ren.color(color_type(feature.id()));

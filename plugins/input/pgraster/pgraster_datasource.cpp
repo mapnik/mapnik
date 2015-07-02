@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -357,7 +357,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 {
                   pgraster_overview ov = pgraster_overview();
 
-                  ov.schema = rs->getValue("sch"); 
+                  ov.schema = rs->getValue("sch");
                   ov.table = rs->getValue("tab");
                   ov.column = rs->getValue("col");
                   ov.scale = atof(rs->getValue("scl"));
@@ -1201,7 +1201,7 @@ box2d<double> pgraster_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::geometry_t> pgraster_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> pgraster_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource::geometry_t>();
+    return boost::optional<mapnik::datasource_geometry_t>();
 }

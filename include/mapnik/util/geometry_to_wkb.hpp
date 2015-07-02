@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,9 +26,9 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/make_unique.hpp>
+#include <mapnik/wkb.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_container.hpp>
-#include <mapnik/vertex.hpp>
+#include <mapnik/geometry_type.hpp>
 
 // stl
 #include <sstream>
@@ -38,29 +38,23 @@
 #include <memory>
 #include <cassert>
 
-namespace mapnik { namespace util {
+namespace mapnik { namespace util { namespace detail {
 
-std::string to_hex(const char* blob, unsigned size)
+std::string to_hex(const char* blob, std::size_t size)
 {
     std::string buf;
-    buf.reserve(size*2);
+    buf.reserve(size * 2);
     std::ostringstream s(buf);
     s.seekp(0);
     char hex[3];
-    std::memset(hex,0,3);
-    for ( unsigned pos=0; pos < size; ++pos)
+    std::memset(hex, 0, 3);
+    for (std::size_t pos = 0; pos < size; ++pos)
     {
         std::sprintf (hex, "%02x", int(blob[pos]) & 0xff);
         s << hex;
     }
     return s.str();
 }
-
-enum wkbByteOrder : std::uint8_t {
-    wkbXDR=0,
-    wkbNDR=1
-};
-
 
 inline void reverse_bytes(char size, char *address)
 {
@@ -113,7 +107,7 @@ struct wkb_buffer
 {
     wkb_buffer(std::size_t size)
         : size_(size),
-          data_( (size_!=0) ? static_cast<char*>(::operator new (size_)):0)
+          data_( (size_ != 0) ? static_cast<char*>(::operator new (size_)) : 0)
     {}
 
     ~wkb_buffer()
@@ -137,168 +131,183 @@ struct wkb_buffer
 
 using wkb_buffer_ptr = std::unique_ptr<wkb_buffer>;
 
-template<typename GeometryType>
-wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
+wkb_buffer_ptr point_wkb( geometry::point<double> const& pt, wkbByteOrder byte_order)
 {
-    assert(g.size() == 1);
-    std::size_t size = 1 + 4 + 8*2 ; // byteOrder + wkbType + Point
+    std::size_t size = 1 + 4 + 8 * 2 ; // byteOrder + wkbType + Point
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::geometry_type::types::Point);
-    write(ss,type,4,byte_order);
-    double x = 0;
-    double y = 0;
-    g.vertex(0,&x,&y);
-    write(ss,x,8,byte_order);
-    write(ss,y,8,byte_order);
+    write(ss, static_cast<int>(geometry::geometry_types::Point), 4 , byte_order);
+    write(ss, pt.x, 8, byte_order);
+    write(ss, pt.y, 8, byte_order);
     assert(ss.good());
-    return std::move(wkb);
-}
-
-template<typename GeometryType>
-wkb_buffer_ptr to_line_string_wkb( GeometryType const& g, wkbByteOrder byte_order)
-{
-    unsigned num_points = g.size();
-    assert(num_points > 1);
-    std::size_t size = 1 + 4 + 4 + 8*2*num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
-    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
-    wkb_stream ss(wkb->buffer(), wkb->size());
-    ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::geometry_type::types::LineString);
-    write(ss,type,4,byte_order);
-    write(ss,num_points,4,byte_order);
-    double x = 0;
-    double y = 0;
-    for (unsigned i=0; i< num_points; ++i)
-    {
-        g.vertex(i,&x,&y);
-        write(ss,x,8,byte_order);
-        write(ss,y,8,byte_order);
-    }
-    assert(ss.good());
-    return std::move(wkb);
-}
-
-template<typename GeometryType>
-wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
-{
-    unsigned num_points = g.size();
-    assert(num_points > 1);
-
-    using point_type = std::pair<double,double>;
-    using linear_ring = std::vector<point_type>;
-    std::vector<linear_ring> rings;
-
-    double x = 0;
-    double y = 0;
-    std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
-    for (unsigned i=0; i< num_points; ++i)
-    {
-        unsigned command = g.vertex(i,&x,&y);
-        if (command == SEG_MOVETO)
-        {
-            linear_ring ring;
-            ring.reserve(1);
-            ring.emplace_back(x,y);
-            rings.push_back(std::move(ring)); // start new loop
-            size += 4; // num_points
-            size += 2 * 8; // point
-        }
-        else if (command == SEG_LINETO)
-        {
-            rings.back().emplace_back(x,y);
-            size += 2 * 8; // point
-        }
-    }
-    unsigned num_rings = rings.size();
-    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
-    wkb_stream ss(wkb->buffer(), wkb->size());
-    ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::geometry_type::types::Polygon);
-    write(ss,type,4,byte_order);
-    write(ss,num_rings,4,byte_order);
-
-    for ( linear_ring const& ring : rings)
-    {
-        unsigned num_ring_points = ring.size();
-        write(ss,num_ring_points,4,byte_order);
-        for ( point_type const& pt : ring)
-        {
-            write(ss,pt.first,8,byte_order);
-            write(ss,pt.second,8,byte_order);
-        }
-    }
-
-    assert(ss.good());
-    return std::move(wkb);
-}
-
-template<typename GeometryType>
-wkb_buffer_ptr to_wkb(GeometryType const& g, wkbByteOrder byte_order )
-{
-    wkb_buffer_ptr wkb;
-
-    switch (g.type())
-    {
-    case mapnik::geometry_type::types::Point:
-        wkb = to_point_wkb(g, byte_order);
-        break;
-    case mapnik::geometry_type::types::LineString:
-        wkb = to_line_string_wkb(g, byte_order);
-        break;
-    case mapnik::geometry_type::types::Polygon:
-        wkb = to_polygon_wkb(g, byte_order);
-        break;
-    default:
-        break;
-    }
     return wkb;
 }
 
-wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
+wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByteOrder byte_order)
 {
-    if (paths.size() == 1)
+    std::size_t num_points = line.size();
+    assert(num_points > 1);
+    std::size_t size = 1 + 4 + 4 + 8 * 2 * num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
+    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
+    wkb_stream ss(wkb->buffer(), wkb->size());
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
+    write(ss, static_cast<int>(mapnik::geometry::geometry_types::LineString) , 4, byte_order);
+    write(ss, num_points, 4, byte_order);
+    for (std::size_t i=0; i< num_points; ++i)
     {
-        // single geometry
-        return to_wkb(paths.front(), byte_order);
+        geometry::point<double> const& pt = line[i];
+        write(ss, pt.x, 8, byte_order);
+        write(ss, pt.y, 8, byte_order);
     }
-
-    if (paths.size() > 1)
-    {
-        // multi geometry or geometry collection
-        std::vector<wkb_buffer_ptr> wkb_cont;
-        bool collection = false;
-        int multi_type = 0;
-        size_t multi_size = 1 + 4 + 4;
-
-        for (auto const& geom : paths)
-        {
-            wkb_buffer_ptr wkb = to_wkb(geom,byte_order);
-            multi_size += wkb->size();
-            int type = static_cast<int>(geom.type());
-            if (multi_type > 0 && multi_type != geom.type())
-                collection = true;
-            multi_type = type;
-            wkb_cont.push_back(std::move(wkb));
-        }
-
-        wkb_buffer_ptr multi_wkb = std::make_unique<wkb_buffer>(multi_size);
-        wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
-        ss.write(reinterpret_cast<char*>(&byte_order),1);
-        multi_type = collection ? 7 : multi_type + 3;
-        write(ss,multi_type, 4, byte_order);
-        write(ss,paths.size(),4,byte_order);
-
-        for ( wkb_buffer_ptr const& wkb : wkb_cont)
-        {
-            ss.write(wkb->buffer(),wkb->size());
-        }
-        return std::move(multi_wkb);
-    }
-
-    return wkb_buffer_ptr();
+    assert(ss.good());
+    return wkb;
 }
+
+wkb_buffer_ptr polygon_wkb( geometry::polygon<double> const& poly, wkbByteOrder byte_order)
+{
+    std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
+    size += 4 + 2 * 8 * poly.exterior_ring.size();
+    for ( auto const& ring : poly.interior_rings)
+    {
+
+        size += 4 + 2 * 8 * ring.size();
+    }
+
+    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
+    wkb_stream ss(wkb->buffer(), wkb->size());
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
+    write(ss, static_cast<int>(mapnik::geometry::geometry_types::Polygon), 4, byte_order);
+    write(ss, poly.num_rings(), 4, byte_order);
+
+    // exterior
+    write(ss, poly.exterior_ring.size(), 4, byte_order);
+    for (auto const& pt : poly.exterior_ring)
+    {
+        write(ss, pt.x, 8, byte_order);
+        write(ss, pt.y, 8, byte_order);
+    }
+    // interiors
+    for (auto const& ring : poly.interior_rings)
+    {
+        write(ss, ring.size(), 4, byte_order);
+        for ( auto const& pt : ring)
+        {
+            write(ss, pt.x, 8, byte_order);
+            write(ss, pt.y, 8, byte_order);
+        }
+    }
+
+    assert(ss.good());
+    return wkb;
+}
+
+wkb_buffer_ptr multi_point_wkb( geometry::multi_point<double> const& multi_pt, wkbByteOrder byte_order)
+{
+    std::size_t size = 1 + 4 + 4 + (1 + 4 + 8 * 2) * multi_pt.size() ; // byteOrder + wkbType + num_point + Point.size * num_points
+    wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
+    wkb_stream ss(wkb->buffer(), wkb->size());
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
+    write(ss, static_cast<int>(geometry::geometry_types::MultiPoint), 4, byte_order);
+    write(ss, multi_pt.size(), 4 ,byte_order);
+    for (auto const& pt : multi_pt)
+    {
+        ss.write(reinterpret_cast<char*>(&byte_order),1);
+        write(ss, static_cast<int>(geometry::geometry_types::Point), 4, byte_order);
+        write(ss, pt.x, 8, byte_order);
+        write(ss, pt.y, 8, byte_order);
+    }
+    assert(ss.good());
+    return wkb;
+}
+
+
+template <typename MultiGeometry>
+    wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte_order);
+
+struct geometry_to_wkb
+{
+
+    using result_type = wkb_buffer_ptr;
+
+    geometry_to_wkb(wkbByteOrder byte_order)
+        : byte_order_(byte_order) {}
+
+    result_type operator() (geometry::geometry<double> const& geom) const
+    {
+        return util::apply_visitor(*this, geom);
+    }
+
+    result_type operator() (geometry::geometry_empty const&) const
+    {
+        return result_type();
+    }
+
+    result_type operator() (geometry::point<double> const& pt) const
+    {
+        return point_wkb(pt, byte_order_);
+    }
+
+    result_type operator() (geometry::line_string<double> const& line) const
+    {
+        return line_string_wkb(line, byte_order_);
+    }
+
+    result_type operator() (geometry::polygon<double> const& poly) const
+    {
+        return polygon_wkb(poly, byte_order_);
+    }
+
+    // multi/collection
+
+    result_type operator() (geometry::multi_point<double> const& multi_pt) const
+    {
+        return multi_point_wkb(multi_pt, byte_order_);
+    }
+
+    template <typename Geometry>
+    result_type operator() (Geometry const& geom) const
+    {
+        return multi_geom_wkb(geom, byte_order_);
+    }
+
+    wkbByteOrder byte_order_;
+};
+
+template <typename MultiGeometry>
+wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte_order)
+{
+    size_t multi_size = 1 + 4 + 4;
+    std::vector<wkb_buffer_ptr> wkb_cont;
+    for (auto const& geom : multi_geom)
+    {
+        wkb_buffer_ptr wkb = geometry_to_wkb(byte_order)(geom);
+        multi_size += wkb->size();
+        wkb_cont.push_back(std::move(wkb));
+    }
+    wkb_buffer_ptr multi_wkb = std::make_unique<wkb_buffer>(multi_size);
+    wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
+    write(ss, static_cast<int>(geometry::detail::geometry_type()(multi_geom)) , 4, byte_order);
+    write(ss, multi_geom.size(), 4 ,byte_order);
+
+    for ( wkb_buffer_ptr const& wkb : wkb_cont)
+    {
+        ss.write(wkb->buffer(), wkb->size());
+    }
+
+    return multi_wkb;
+}
+} // ns detail
+
+using wkb_buffer_ptr = detail::wkb_buffer_ptr;
+
+template<typename GeometryType>
+wkb_buffer_ptr to_wkb(GeometryType const& geom, wkbByteOrder byte_order )
+{
+    return detail::geometry_to_wkb(byte_order)(geom);
+}
+
 }}
 
 #endif // MAPNIK_GEOMETRY_TO_WKB_HPP

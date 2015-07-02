@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,11 @@
 
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/geometry.hpp>
+
 #include <mapnik/feature.hpp>
+#include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 namespace mapnik {
 
@@ -49,7 +51,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     value_double smooth = get<value_double,keys::smooth>(sym, feature, common.vars_);
     value_double opacity = get<value_double,keys::fill_opacity>(sym, feature, common.vars_);
 
-    vertex_converter_type converter(clip_box, ras, sym, common.t_, prj_trans, tr,
+    vertex_converter_type converter(clip_box, sym, common.t_, prj_trans, tr,
                                     feature,common.vars_,common.scale_factor_);
 
     if (prj_trans.equal() && clip) converter.template set<clip_poly_tag>(); //optional clip (default: true)
@@ -58,13 +60,10 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
-    for (geometry_type & geom : feature.paths())
-    {
-        if (geom.size() > 2)
-        {
-            converter.apply(geom);
-        }
-    }
+    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
+    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+    apply_vertex_converter_type apply(converter, ras);
+    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
 
     color const& fill = get<mapnik::color, keys::fill>(sym, feature, common.vars_);
     fill_func(fill, opacity);
@@ -72,4 +71,4 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
 
 } // namespace mapnik
 
-#endif /* MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP */
+#endif // MAPNIK_RENDERER_COMMON_PROCESS_POLYGON_SYMBOLIZER_HPP

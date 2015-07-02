@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,29 +44,39 @@ private:
     std::uint8_t green_;
     std::uint8_t blue_;
     std::uint8_t alpha_;
-
+    bool premultiplied_;
 public:
     // default ctor
     color()
       : red_(0xff),
         green_(0xff),
         blue_(0xff),
-        alpha_(0xff)
+        alpha_(0xff),
+        premultiplied_(false)
         {}
 
-    color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 0xff)
+    color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 0xff, bool premultiplied = false)
       : red_(red),
         green_(green),
         blue_(blue),
-        alpha_(alpha)
+        alpha_(alpha),
+        premultiplied_(premultiplied)
         {}
+
+    color(std::uint32_t rgba, bool premultiplied = false)
+      : red_(rgba & 0xff),
+        green_((rgba >> 8) & 0xff),
+        blue_((rgba >> 16) & 0xff),
+        alpha_((rgba >> 24) & 0xff),
+        premultiplied_(premultiplied) {}
 
     // copy ctor
     color(const color& rhs)
       : red_(rhs.red_),
         green_(rhs.green_),
         blue_(rhs.blue_),
-        alpha_(rhs.alpha_)
+        alpha_(rhs.alpha_),
+        premultiplied_(rhs.premultiplied_)
         {}
 
     // move ctor
@@ -74,14 +84,15 @@ public:
         : red_(std::move(rhs.red_)),
         green_(std::move(rhs.green_)),
         blue_(std::move(rhs.blue_)),
-        alpha_(std::move(rhs.alpha_)) {}
+        alpha_(std::move(rhs.alpha_)),
+        premultiplied_(std::move(rhs.premultiplied_)) {}
 
-    color( std::string const& str);
+    color( std::string const& str, bool premultiplied = false);
 
     std::string to_string() const;
     std::string to_hex_string() const;
-    void premultiply();
-    void demultiply();
+    bool premultiply();
+    bool demultiply();
 
     color& operator=(color rhs)
     {
@@ -135,14 +146,18 @@ public:
     {
         alpha_ = alpha;
     }
+    inline bool get_premultiplied() const
+    {
+        return premultiplied_;
+    }
+    inline void set_premultiplied(bool status)
+    {
+        premultiplied_ = status;
+    }
 
     inline unsigned rgba() const
     {
-#ifdef MAPNIK_BIG_ENDIAN
-        return static_cast<unsigned>((alpha_) | (blue_ << 8) | (green_ << 16) | (red_ << 24)) ;
-#else
         return static_cast<unsigned>((alpha_ << 24) | (blue_ << 16) | (green_ << 8) | (red_)) ;
-#endif
     }
 private:
     void swap(color & rhs)

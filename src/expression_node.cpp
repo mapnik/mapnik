@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,12 +23,16 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/safe_cast.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #else
 #include <boost/regex.hpp>
 #endif
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -91,7 +95,7 @@ std::string regex_match_node::to_string() const
     auto const& pattern = impl_.get()->pattern_;
 #if defined(BOOST_REGEX_HAS_ICU)
     std::string utf8;
-    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], pattern.str().length());
+    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], safe_cast<int>(pattern.str().length()));
     to_utf8(ustr,utf8);
     str_ += utf8;
 #else
@@ -138,7 +142,7 @@ std::string regex_replace_node::to_string() const
     auto const& format = impl_.get()->format_;
 #if defined(BOOST_REGEX_HAS_ICU)
     std::string utf8;
-    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], pattern.str().length());
+    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], safe_cast<int>(pattern.str().length()));
     to_utf8(ustr,utf8);
     str_ += utf8;
     str_ +="','";

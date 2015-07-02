@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,17 @@
 
 // mapnik
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
+#include <mapnik/image_any.hpp>
+#include <mapnik/safe_cast.hpp>
+#include <mapnik/util/const_rendering_buffer.hpp>
 
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #pragma GCC diagnostic ignored "-Wredeclared-class-member"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/assign/list_of.hpp>
 #include <boost/bimap.hpp>
 #pragma GCC diagnostic pop
@@ -122,73 +127,110 @@ For example, if you generate some pattern with AGG (premultiplied) and would lik
 
 */
 
-namespace detail {
-
-// non-mutable rendering_buffer implementation
-template <typename T>
-struct rendering_buffer
-{
-    using image_data_type = T;
-    using pixel_type = typename image_data_type::pixel_type;
-    using row_data = agg::const_row_info<uint8_t>;
-
-    rendering_buffer(T const& data)
-        : data_(data) {}
-
-    uint8_t const* buf() const { return data_.getBytes(); }
-    unsigned width() const { return data_.width();}
-    unsigned height() const { return data_.height();}
-    int stride() const { return data_.width() * sizeof(pixel_type);}
-    uint8_t const* row_ptr(int, int y, unsigned) {return row_ptr(y);}
-    uint8_t const* row_ptr(int y) const { return reinterpret_cast<uint8_t const*>(data_.getRow(y)); }
-    row_data row (int y) const { return row_data(0, data_.width() - 1, row_ptr(y)); }
-    image_data_type const& data_;
-};
-
-}
-
 template <>
-MAPNIK_DECL void composite(image_data_rgba8 & dst, image_data_rgba8 const& src, composite_mode_e mode,
+MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_mode_e mode,
                float opacity,
                int dx,
-               int dy,
-               bool premultiply_src)
+               int dy)
 {
     using color = agg::rgba8;
     using order = agg::order_rgba;
-    using const_rendering_buffer = detail::rendering_buffer<image_data_rgba8>;
+    using const_rendering_buffer = util::rendering_buffer<image_rgba8>;
     using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_type = agg::renderer_base<pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width() * 4);
+    agg::rendering_buffer dst_buffer(dst.bytes(),safe_cast<unsigned>(dst.width()),safe_cast<unsigned>(dst.height()),safe_cast<int>(dst.row_size()));
     const_rendering_buffer src_buffer(src);
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
-    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32, const_rendering_buffer, agg::pixel32_type> pixf_mask(src_buffer);
-    if (premultiply_src)  pixf_mask.premultiply();
+    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_pre, const_rendering_buffer, agg::pixel32_type> pixf_mask(src_buffer);
+#ifdef MAPNIK_DEBUG
+    if (!src.get_premultiplied())
+    {
+        throw std::runtime_error("SOURCE MUST BE PREMULTIPLIED FOR COMPOSITING!");
+    }
+    if (!dst.get_premultiplied())
+    {
+        throw std::runtime_error("DESTINATION MUST BE PREMULTIPLIED FOR COMPOSITING!");
+    }
+#endif
     renderer_type ren(pixf);
-    ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
+    ren.blend_from(pixf_mask,0,dx,dy,safe_cast<agg::cover_type>(255*opacity));
 }
 
 template <>
-MAPNIK_DECL void composite(image_data_gray32f & dst, image_data_gray32f const& src, composite_mode_e mode,
-               float opacity,
+MAPNIK_DECL void composite(image_gray32f & dst, image_gray32f const& src, composite_mode_e /*mode*/,
+               float /*opacity*/,
                int dx,
-               int dy,
-               bool premultiply_src)
+               int dy)
 {
-    using const_rendering_buffer = detail::rendering_buffer<image_data_gray32f>;
+    using const_rendering_buffer = util::rendering_buffer<image_gray32f>;
     using src_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, const_rendering_buffer, 1, 0>;
     using dst_pixfmt_type = agg::pixfmt_alpha_blend_gray<agg::blender_gray<agg::gray32>, agg::rendering_buffer, 1, 0>;
     using renderer_type = agg::renderer_base<dst_pixfmt_type>;
 
-    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width());
+    agg::rendering_buffer dst_buffer(dst.bytes(),safe_cast<unsigned>(dst.width()),safe_cast<unsigned>(dst.height()),safe_cast<int>(dst.width()));
     const_rendering_buffer src_buffer(src);
     dst_pixfmt_type pixf(dst_buffer);
     src_pixfmt_type pixf_mask(src_buffer);
     renderer_type ren(pixf);
     ren.copy_from(pixf_mask,0,dx,dy);
+}
+
+namespace detail {
+
+struct composite_visitor
+{
+    composite_visitor(image_any const& src,
+                      composite_mode_e mode,
+                      float opacity,
+                      int dx,
+                      int dy)
+        : src_(src),
+          mode_(mode),
+          opacity_(opacity),
+          dx_(dx),
+          dy_(dy) {}
+
+    template <typename T>
+    void operator() (T & dst);
+
+  private:
+    image_any const& src_;
+    composite_mode_e mode_;
+    float opacity_;
+    int dx_;
+    int dy_;
+};
+
+template <typename T>
+void composite_visitor::operator() (T & dst)
+{
+    throw std::runtime_error("Error: Composite with " + std::string(typeid(dst).name()) + " is not supported");
+}
+
+template <>
+void composite_visitor::operator()<image_rgba8> (image_rgba8 & dst)
+{
+    composite(dst, util::get<image_rgba8>(src_), mode_, opacity_, dx_, dy_);
+}
+
+template <>
+void composite_visitor::operator()<image_gray32f> (image_gray32f & dst)
+{
+    composite(dst, util::get<image_gray32f>(src_), mode_, opacity_, dx_, dy_);
+}
+
+} // end ns
+
+template <>
+MAPNIK_DECL void composite(image_any & dst, image_any const& src, composite_mode_e mode,
+               float opacity,
+               int dx,
+               int dy)
+{
+    util::apply_visitor(detail::composite_visitor(src, mode, opacity, dx, dy), dst);
 }
 
 }

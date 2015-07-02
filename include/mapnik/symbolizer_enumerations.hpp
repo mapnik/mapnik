@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,6 +89,7 @@ enum debug_symbolizer_mode_enum : std::uint8_t
 {
     DEBUG_SYM_MODE_COLLISION,
     DEBUG_SYM_MODE_VERTEX,
+    DEBUG_SYM_MODE_RINGS,
     debug_symbolizer_mode_enum_MAX
 };
 
@@ -188,6 +189,21 @@ enum text_upright_enum : std::uint8_t
 };
 
 DEFINE_ENUM(text_upright_e, text_upright_enum);
+
+enum direction_enum : std::uint8_t
+{
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT,
+    DIRECTION_LEFT_ONLY,
+    DIRECTION_RIGHT_ONLY,
+    DIRECTION_AUTO,
+    DIRECTION_AUTO_DOWN,
+    DIRECTION_UP,
+    DIRECTION_DOWN,
+    direction_enum_MAX
+};
+
+DEFINE_ENUM(direction_e, direction_enum);
 
 enum gamma_method_enum : std::uint8_t
 {

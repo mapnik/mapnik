@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GRID_VIEW_HPP
 #define MAPNIK_GRID_VIEW_HPP
 
-#include <mapnik/image_data.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
@@ -55,7 +55,6 @@ public:
                   T const& data,
                   std::string const& key,
                   std::string const& id_name,
-                  unsigned resolution,
                   std::set<std::string> const& names,
                   feature_key_type const& f_keys,
                   feature_type const& features
@@ -66,7 +65,6 @@ public:
           height_(height),
           data_(data),
           key_(key),
-          resolution_(resolution),
           id_name_(id_name),
           names_(names),
           f_keys_(f_keys),
@@ -88,7 +86,6 @@ public:
           height_(rhs.height_),
           data_(rhs.data_),
           key_(rhs.key_),
-          resolution_(rhs.resolution_),
           id_name_(rhs.id_name_),
           names_(rhs.names_),
           f_keys_(rhs.f_keys_),
@@ -104,7 +101,6 @@ public:
         height_ = rhs.height_;
         data_ = rhs.data_;
         key_ = rhs.key_;
-        resolution_ = rhs.resolution_;
         id_name_ = rhs.id_name_;
         names_ = rhs.names_;
         f_keys_ = rhs.f_keys_;
@@ -137,9 +133,9 @@ public:
         return id_name_;
     }
 
-    inline value_type const * getRow(unsigned row) const
+    inline value_type const * get_row(unsigned row) const
     {
-        return data_.getRow(row + y_) + x_;
+        return data_.get_row(row + y_) + x_;
     }
 
     inline T& data()
@@ -154,10 +150,10 @@ public:
 
     inline const unsigned char* raw_data() const
     {
-        return data_.getBytes();
+        return data_.bytes();
     }
 
-    inline std::set<std::string> const& property_names() const
+    inline std::set<std::string> const& get_fields() const
     {
         return names_;
     }
@@ -177,11 +173,6 @@ public:
         return key_;
     }
 
-    inline unsigned int get_resolution() const
-    {
-        return resolution_;
-    }
-
 private:
     unsigned x_;
     unsigned y_;
@@ -189,14 +180,13 @@ private:
     unsigned height_;
     T const& data_;
     std::string const& key_;
-    unsigned int resolution_;
     std::string const& id_name_;
     std::set<std::string> const& names_;
     feature_key_type const& f_keys_;
     feature_type const& features_;
 };
 
-using grid_view = hit_grid_view<mapnik::image_data<mapnik::value_integer> >;
+using grid_view = hit_grid_view<mapnik::image<mapnik::value_integer_pixel> >;
 
 }
 

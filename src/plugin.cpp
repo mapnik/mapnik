@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -80,7 +80,21 @@ PluginInfo::~PluginInfo()
     if (module_)
     {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-        if (module_->dl) dlclose(module_->dl),module_->dl=0;
+        /*
+          We do not call dlclose for plugins that link libgdal.
+          This is a terrible hack, but necessary to prevent crashes
+          at exit when gdal attempts to shutdown. The problem arises
+          when Mapnik is used with another library that uses thread-local
+          storage (like libuv). In this case GDAL also tries to cleanup thread
+          local storage and leaves things in a state that causes libuv to crash.
+          This is partially fixed by http://trac.osgeo.org/gdal/ticket/5509 but only
+          in the case that gdal is linked as a shared library. This workaround therefore
+          prevents crashes with gdal 1.11.x and gdal 2.x when using a static libgdal.
+        */
+        if (module_->dl && name_ != "gdal" && name_ != "ogr")
+        {
+            dlclose(module_->dl),module_->dl=0;
+        }
 #endif
         delete module_;
     }

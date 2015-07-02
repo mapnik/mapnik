@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry_centroid.hpp>
+#include <mapnik/vertex_processor.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/debug.hpp>
@@ -40,7 +44,124 @@
 //agg
 #include "agg_conv_clip_polyline.h"
 
-namespace mapnik {
+namespace mapnik { namespace detail {
+
+template <typename Points>
+struct apply_vertex_placement
+{
+    apply_vertex_placement(Points & points, view_transform const& tr, proj_transform const& prj_trans)
+        : points_(points),
+          tr_(tr),
+          prj_trans_(prj_trans) {}
+
+    template <typename Adapter>
+    void operator() (Adapter const& va) const
+    {
+        double label_x, label_y, z = 0;
+        va.rewind(0);
+        for (unsigned cmd; (cmd = va.vertex(&label_x, &label_y)) != SEG_END; )
+        {
+            if (cmd != SEG_CLOSE)
+            {
+                prj_trans_.backward(label_x, label_y, z);
+                tr_.forward(&label_x, &label_y);
+                points_.emplace_back(label_x, label_y);
+            }
+        }
+    }
+    Points & points_;
+    view_transform const& tr_;
+    proj_transform const& prj_trans_;
+};
+
+template <typename T>
+struct split_multi_geometries
+{
+    using container_type = T;
+    split_multi_geometries(container_type & cont, view_transform const& t,
+                           proj_transform const& prj_trans, double minimum_path_length)
+        : cont_(cont),
+          t_(t),
+          prj_trans_(prj_trans),
+          minimum_path_length_(minimum_path_length) {}
+
+    void operator() (geometry::geometry_empty const&) const {}
+    void operator() (geometry::multi_point<double> const& multi_pt) const
+    {
+        for ( auto const& pt : multi_pt )
+        {
+            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(pt)));
+        }
+    }
+    void operator() (geometry::line_string<double> const& line) const
+    {
+        if (minimum_path_length_ > 0)
+        {
+            box2d<double> bbox = t_.forward(geometry::envelope(line), prj_trans_);
+            if (bbox.width() >= minimum_path_length_)
+            {
+                cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
+            }
+        }
+        else
+        {
+            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
+        }
+    }
+
+    void operator() (geometry::multi_line_string<double> const& multi_line) const
+    {
+        for ( auto const& line : multi_line )
+        {
+            (*this)(line);
+        }
+    }
+
+    void operator() (geometry::polygon<double> const& poly) const
+    {
+        if (minimum_path_length_ > 0)
+        {
+            box2d<double> bbox = t_.forward(geometry::envelope(poly), prj_trans_);
+            if (bbox.width() >= minimum_path_length_)
+            {
+                cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(poly)));
+            }
+        }
+        else
+        {
+            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(poly)));
+        }
+    }
+
+    void operator() (geometry::multi_polygon<double> const& multi_poly) const
+    {
+        for ( auto const& poly : multi_poly )
+        {
+            (*this)(poly);
+        }
+    }
+
+    void operator() (geometry::geometry_collection<double> const& collection) const
+    {
+        for ( auto const& geom : collection)
+        {
+            util::apply_visitor(*this, geom);
+        }
+    }
+
+    template <typename Geometry>
+    void operator() (Geometry const& geom) const
+    {
+        cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(geom)));
+    }
+
+    container_type & cont_;
+    view_transform const& t_;
+    proj_transform const& prj_trans_;
+    double minimum_path_length_;
+};
+
+} // ns detail
 
 base_symbolizer_helper::base_symbolizer_helper(
         symbolizer_base const& sym,
@@ -68,45 +189,44 @@ base_symbolizer_helper::base_symbolizer_helper(
 
 struct largest_bbox_first
 {
-    bool operator() (geometry_type const* g0, geometry_type const* g1) const
+    bool operator() (geometry::geometry<double> const* g0, geometry::geometry<double> const* g1) const
     {
-        box2d<double> b0 = g0->envelope();
-        box2d<double> b1 = g1->envelope();
-        return b0.width()*b0.height() > b1.width()*b1.height();
+        box2d<double> b0 = geometry::envelope(*g0);
+        box2d<double> b1 = geometry::envelope(*g1);
+        return b0.width() * b0.height() > b1.width() * b1.height();
+    }
+    bool operator() (base_symbolizer_helper::geometry_cref const& g0,
+                     base_symbolizer_helper::geometry_cref const& g1) const
+    {
+        // TODO - this has got to be expensive! Can we cache bbox's if there are repeated calls to same geom?
+        box2d<double> b0 = geometry::envelope(g0);
+        box2d<double> b1 = geometry::envelope(g1);
+        return b0.width() * b0.height() > b1.width() * b1.height();
     }
 };
 
 void base_symbolizer_helper::initialize_geometries() const
 {
-    bool largest_box_only = text_props_->largest_bbox_only;
     double minimum_path_length = text_props_->minimum_path_length;
-    for ( auto const& geom :  feature_.paths())
+    auto const& geom = feature_.get_geometry();
+    util::apply_visitor(detail::split_multi_geometries<geometry_container_type>
+                        (geometries_to_process_, t_, prj_trans_, minimum_path_length ), geom);
+    if (!geometries_to_process_.empty())
     {
-        // don't bother with empty geometries
-        if (geom.size() == 0) continue;
-        mapnik::geometry_type::types type = geom.type();
-        if (type == geometry_type::types::Polygon)
+        auto type = geometry::geometry_type(geom);
+        if (type == geometry::geometry_types::Polygon ||
+            type == geometry::geometry_types::MultiPolygon)
         {
-            if (minimum_path_length > 0)
+            bool largest_box_only = text_props_->largest_bbox_only;
+            if (largest_box_only)
             {
-                box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
-                if (gbox.width() < minimum_path_length)
-                {
-                    continue;
-                }
+                geometries_to_process_.sort(largest_bbox_first());
+                geo_itr_ = geometries_to_process_.begin();
+                geometries_to_process_.erase(++geo_itr_, geometries_to_process_.end());
             }
         }
-        // TODO - calculate length here as well
-        geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
-    }
-
-    if (largest_box_only)
-    {
-        geometries_to_process_.sort(largest_bbox_first());
         geo_itr_ = geometries_to_process_.begin();
-        geometries_to_process_.erase(++geo_itr_,geometries_to_process_.end());
     }
-    geo_itr_ = geometries_to_process_.begin();
 }
 
 void base_symbolizer_helper::initialize_points() const
@@ -126,36 +246,44 @@ void base_symbolizer_helper::initialize_points() const
     double label_y=0.0;
     double z=0.0;
 
-    for (auto * geom_ptr : geometries_to_process_)
+    for (auto const& geom : geometries_to_process_)
     {
-        geometry_type const& geom = *geom_ptr;
         if (how_placed == VERTEX_PLACEMENT)
         {
-            geom.rewind(0);
-            for(unsigned i = 0; i < geom.size(); ++i)
-            {
-                geom.vertex(&label_x, &label_y);
-                prj_trans_.backward(label_x, label_y, z);
-                t_.forward(&label_x, &label_y);
-                points_.emplace_back(label_x, label_y);
-            }
+            using apply_vertex_placement = detail::apply_vertex_placement<std::list<pixel_position> >;
+            apply_vertex_placement apply(points_, t_, prj_trans_);
+            util::apply_visitor(geometry::vertex_processor<apply_vertex_placement>(apply), geom);
         }
         else
         {
             // https://github.com/mapnik/mapnik/issues/1423
             bool success = false;
             // https://github.com/mapnik/mapnik/issues/1350
-            if (geom.type() == geometry_type::types::LineString)
+            auto type = geometry::geometry_type(geom);
+
+            // note: split_multi_geometries is called above so the only likely types are:
+            // Point, LineString, and Polygon.
+            if (type == geometry::geometry_types::LineString)
             {
-                success = label::middle_point(geom, label_x,label_y);
+                auto const& line = mapnik::util::get<geometry::line_string<double> >(geom);
+                geometry::line_string_vertex_adapter<double> va(line);
+                success = label::middle_point(va, label_x,label_y);
             }
-            else if (how_placed == POINT_PLACEMENT)
+            else if (how_placed == POINT_PLACEMENT || type == geometry::geometry_types::Point)
             {
-                success = label::centroid(geom, label_x, label_y);
+                geometry::point<double> pt;
+                if (geometry::centroid(geom, pt))
+                {
+                    label_x = pt.x;
+                    label_y = pt.y;
+                    success = true;
+                }
             }
-            else if (how_placed == INTERIOR_PLACEMENT)
+            else if (how_placed == INTERIOR_PLACEMENT && type == geometry::geometry_types::Polygon)
             {
-                success = label::interior_position(geom, label_x, label_y);
+                auto const& poly = mapnik::util::get<geometry::polygon<double> >(geom);
+                geometry::polygon_vertex_adapter<double> va(poly);
+                success = label::interior_position(va, label_x, label_y);
             }
             else
             {
@@ -185,7 +313,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
     adapter_(finder_,false),
-    converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
+    converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
 
     // setup vertex converter
@@ -215,6 +343,40 @@ placements_list const& text_symbolizer_helper::get() const
     return finder_.placements();
 }
 
+class apply_line_placement_visitor
+{
+public:
+    apply_line_placement_visitor(vertex_converter_type & converter,
+                                 placement_finder_adapter<placement_finder> const & adapter)
+        : converter_(converter), adapter_(adapter)
+    {
+    }
+
+    bool operator()(geometry::line_string<double> const & geo) const
+    {
+        geometry::line_string_vertex_adapter<double> va(geo);
+        converter_.apply(va, adapter_);
+        return adapter_.status();
+    }
+
+    bool operator()(geometry::polygon<double> const & geo) const
+    {
+        geometry::polygon_vertex_adapter<double> va(geo);
+        converter_.apply(va, adapter_);
+        return adapter_.status();
+    }
+
+    template <typename T>
+    bool operator()(T const&) const
+    {
+        return false;
+    }
+
+private:
+    vertex_converter_type & converter_;
+    placement_finder_adapter<placement_finder> const & adapter_;
+};
+
 bool text_symbolizer_helper::next_line_placement() const
 {
     while (!geometries_to_process_.empty())
@@ -228,13 +390,13 @@ bool text_symbolizer_helper::next_line_placement() const
             continue; //Reexecute size check
         }
 
-        converter_.apply(**geo_itr_);
-        if (adapter_.status())
+        if (mapnik::util::apply_visitor(apply_line_placement_visitor(converter_, adapter_), *geo_itr_))
         {
             //Found a placement
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             return true;
         }
+
         // No placement for this geometry. Keep it in geometries_to_process_ for next try.
         ++geo_itr_;
     }
@@ -277,7 +439,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
       finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
       adapter_(finder_,true),
-      converter_(query_extent_, adapter_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
+      converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
    // setup vertex converter
     value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
@@ -301,13 +463,13 @@ void text_symbolizer_helper::init_marker() const
 {
     std::string filename = mapnik::get<std::string,keys::file>(sym_, feature_, vars_);
     if (filename.empty()) return;
-    boost::optional<mapnik::marker_ptr> marker = marker_cache::instance().find(filename, true);
-    if (!marker) return;
+    std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
+    if (marker->is<marker_null>()) return;
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
     if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
-    double width = (*marker)->width();
-    double height = (*marker)->height();
+    double width = marker->width();
+    double height = marker->height();
     double px0 = - 0.5 * width;
     double py0 = - 0.5 * height;
     double px1 = 0.5 * width;
@@ -328,7 +490,7 @@ void text_symbolizer_helper::init_marker() const
     value_double shield_dy = mapnik::get<value_double, keys::shield_dy>(sym_, feature_, vars_);
     pixel_position marker_displacement;
     marker_displacement.set(shield_dx,shield_dy);
-    finder_.set_marker(std::make_shared<marker_info>(*marker, trans), bbox, unlock_image, marker_displacement);
+    finder_.set_marker(std::make_shared<marker_info>(marker, trans), bbox, unlock_image, marker_displacement);
 }
 
 

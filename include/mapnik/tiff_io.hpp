@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 #include <mapnik/global.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_data_any.hpp>
+#include <mapnik/image_any.hpp>
 #include <mapnik/util/variant.hpp>
 
 extern "C"
@@ -35,11 +35,12 @@ extern "C"
 #define RealTIFFClose TIFFClose
 }
 
+//std
+#include <memory>
+
 #define TIFF_WRITE_SCANLINE 0
 #define TIFF_WRITE_STRIPPED 1
 #define TIFF_WRITE_TILED 2
-
-#include <iostream>
 
 namespace mapnik {
 
@@ -181,7 +182,7 @@ struct tiff_config
 
 struct tag_setter
 {
-    tag_setter(TIFF * output, tiff_config & config)
+    tag_setter(TIFF * output, tiff_config const& config)
         : output_(output),
           config_(config) {}
 
@@ -189,18 +190,25 @@ struct tag_setter
     void operator() (T const&) const
     {
         // Assume this would be null type
-        throw ImageWriterException("Could not write TIFF - unknown image type provided");
+        throw image_writer_exception("Could not write TIFF - unknown image type provided");
     }
 
-    inline void operator() (image_data_rgba8 const&) const
+    inline void operator() (image_rgba8 const& data) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
         TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
-        //uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
-        uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
-        TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        if (data.get_premultiplied())
+        {
+            uint16 extras[] = { EXTRASAMPLE_ASSOCALPHA };
+            TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        }
+        else
+        {
+            uint16 extras[] = { EXTRASAMPLE_UNASSALPHA };
+            TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
+        }
         if (config_.compression == COMPRESSION_DEFLATE
                 || config_.compression == COMPRESSION_ADOBE_DEFLATE
                 || config_.compression == COMPRESSION_LZW)
@@ -209,7 +217,76 @@ struct tag_setter
 
         }
     }
-    inline void operator() (image_data_gray32f const&) const
+    inline void operator() (image_gray64 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 64);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray64s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 64);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray64f const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 64);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+        }
+    }
+    inline void operator() (image_gray32 const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray32s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray32f const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
@@ -222,7 +299,7 @@ struct tag_setter
             TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
         }
     }
-    inline void operator() (image_data_gray16 const&) const
+    inline void operator() (image_gray16 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
@@ -236,7 +313,21 @@ struct tag_setter
 
         }
     }
-    inline void operator() (image_data_gray8 const&) const
+    inline void operator() (image_gray16s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 16);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_gray8 const&) const
     {
         TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
         TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
@@ -250,18 +341,32 @@ struct tag_setter
 
         }
     }
-    inline void operator() (image_data_null const&) const
+    inline void operator() (image_gray8s const&) const
+    {
+        TIFFSetField(output_, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(output_, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+        TIFFSetField(output_, TIFFTAG_BITSPERSAMPLE, 8);
+        TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 1);
+        if (config_.compression == COMPRESSION_DEFLATE
+                || config_.compression == COMPRESSION_ADOBE_DEFLATE
+                || config_.compression == COMPRESSION_LZW)
+        {
+            TIFFSetField(output_, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+
+        }
+    }
+    inline void operator() (image_null const&) const
     {
         // Assume this would be null type
-        throw ImageWriterException("Could not write TIFF - Null image provided");
+        throw image_writer_exception("Could not write TIFF - Null image provided");
     }
 
     private:
         TIFF * output_;
-        tiff_config config_;
+        tiff_config const& config_;
 };
 
-void set_tiff_config(TIFF* output, tiff_config & config)
+inline void set_tiff_config(TIFF* output, tiff_config const& config)
 {
     // Set some constant tiff information that doesn't vary based on type of data
     // or image size
@@ -282,7 +387,7 @@ void set_tiff_config(TIFF* output, tiff_config & config)
 }
 
 template <typename T1, typename T2>
-void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
+void save_as_tiff(T1 & file, T2 const& image, tiff_config const& config)
 {
     using pixel_type = typename T2::pixel_type;
 
@@ -301,7 +406,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
                                 tiff_dummy_unmap_proc);
     if (! output)
     {
-        throw ImageWriterException("Could not write TIFF");
+        throw image_writer_exception("Could not write TIFF");
     }
 
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);
@@ -312,7 +417,6 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
     // Set tags that vary based on the type of data being provided.
     tag_setter set(output, config);
     set(image);
-    //util::apply_visitor(set, image);
 
     // Use specific types of writing methods.
     if (TIFF_WRITE_SCANLINE == config.method)
@@ -324,7 +428,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         std::unique_ptr<pixel_type[]> row (new pixel_type[width]);
         while (next_scanline < height)
         {
-            std::copy(image.getRow(next_scanline), image.getRow(next_scanline) + width, row.get());
+            std::copy(image.get_row(next_scanline), image.get_row(next_scanline) + width, row.get());
             TIFFWriteScanline(output, row.get(), next_scanline, 0);
             ++next_scanline;
         }
@@ -339,19 +443,17 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, rows_per_strip);
         std::size_t strip_size = width * rows_per_strip;
         std::unique_ptr<pixel_type[]> strip_buffer(new pixel_type[strip_size]);
-        int end_y=(height/rows_per_strip+1)*rows_per_strip;
-
-        for (int y=0; y < end_y; y+=rows_per_strip)
+        for (int y=0; y < height; y+=rows_per_strip)
         {
             int ty1 = std::min(height, static_cast<int>(y + rows_per_strip)) - y;
             int row = y;
             for (int ty = 0; ty < ty1; ++ty, ++row)
             {
-                std::copy(image.getRow(row), image.getRow(row) + width, strip_buffer.get() + ty * width);
+                std::copy(image.get_row(row), image.get_row(row) + width, strip_buffer.get() + ty * width);
             }
             if (TIFFWriteEncodedStrip(output, TIFFComputeStrip(output, y, 0), strip_buffer.get(), strip_size * sizeof(pixel_type)) == -1)
             {
-                throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
+                throw image_writer_exception("Could not write TIFF - TIFF Tile Write failed");
             }
         }
     }
@@ -380,7 +482,7 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
         TIFFSetField(output, TIFFTAG_TILELENGTH, tile_height);
         TIFFSetField(output, TIFFTAG_TILEDEPTH, 1);
         std::size_t tile_size = tile_width * tile_height;
-        std::unique_ptr<pixel_type[]> image_data_out (new pixel_type[tile_size]);
+        std::unique_ptr<pixel_type[]> image_out (new pixel_type[tile_size]);
         int end_y = (height / tile_height + 1) * tile_height;
         int end_x = (width / tile_width + 1) * tile_width;
         end_y = std::min(end_y, height);
@@ -393,16 +495,16 @@ void save_as_tiff(T1 & file, T2 const& image, tiff_config & config)
             for (int x = 0; x < end_x; x += tile_width)
             {
                 // Prefill the entire array with zeros.
-                std::fill(image_data_out.get(), image_data_out.get() + tile_size, 0);
+                std::fill(image_out.get(), image_out.get() + tile_size, 0);
                 int tx1 = std::min(width, x + tile_width);
                 int row = y;
                 for (int ty = 0; ty < ty1; ++ty, ++row)
                 {
-                    std::copy(image.getRow(row, x), image.getRow(row, tx1), image_data_out.get() + ty * tile_width);
+                    std::copy(image.get_row(row, x), image.get_row(row, tx1), image_out.get() + ty * tile_width);
                 }
-                if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_data_out.get(), tile_size * sizeof(pixel_type)) == -1)
+                if (TIFFWriteEncodedTile(output, TIFFComputeTile(output, x, y, 0, 0), image_out.get(), tile_size * sizeof(pixel_type)) == -1)
                 {
-                    throw ImageWriterException("Could not write TIFF - TIFF Tile Write failed");
+                    throw image_writer_exception("Could not write TIFF - TIFF Tile Write failed");
                 }
             }
         }

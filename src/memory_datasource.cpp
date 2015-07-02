@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/boolean.hpp>
-// boost
+#include <mapnik/geometry_envelope.hpp>
 
 // stl
 #include <algorithm>
@@ -44,20 +44,18 @@ struct accumulate_extent
     accumulate_extent(box2d<double> & ext)
         : ext_(ext),first_(true) {}
 
-    void operator() (feature_ptr feat)
+    void operator() (feature_ptr const& feat)
     {
-        for (std::size_t i=0;i<feat->num_geometries();++i)
+        auto const& geom = feat->get_geometry();
+        auto bbox = geometry::envelope(geom);
+        if ( first_ )
         {
-            geometry_type & geom = feat->get_geometry(i);
-            if ( first_ )
-            {
-                first_ = false;
-                ext_ = geom.envelope();
-            }
-            else
-            {
-                ext_.expand_to_include(geom.envelope());
-            }
+            first_ = false;
+            ext_ = bbox;
+        }
+        else
+        {
+            ext_.expand_to_include(bbox);
         }
     }
 
@@ -120,10 +118,10 @@ box2d<double> memory_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const
+boost::optional<datasource_geometry_t> memory_datasource::get_geometry_type() const
 {
     // TODO - detect this?
-    return datasource::Collection;
+    return datasource_geometry_t::Collection;
 }
 
 layer_descriptor memory_datasource::get_descriptor() const

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/graphics.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -125,7 +124,7 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, BufferType>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
-    raster_markers_rasterizer_dispatch(image_data_rgba8 & src,
+    raster_markers_rasterizer_dispatch(image_rgba8 const& src,
                                        agg::trans_affine const& marker_trans,
                                        symbolizer_base const& sym,
                                        Detector & detector,
@@ -148,6 +147,8 @@ struct raster_markers_rasterizer_dispatch : public raster_markers_dispatch<Detec
 
     void render_marker(agg::trans_affine const& marker_tr, double opacity)
     {
+        // In the long term this should be a visitor pattern based on the type of render this->src_ provided that converts
+        // the destination pixel type required.
         render_raster_marker(renb_, ras_, this->src_, marker_tr, opacity, this->scale_factor_, snap_to_pixels_);
     }
 
@@ -191,7 +192,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+    buf_type render_buffer(current_buffer_->bytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->row_size());
     box2d<double> clip_box = clipping_extent(common_);
 
     auto renderer_context = std::tie(render_buffer,*ras_ptr,pixmap_);
@@ -203,7 +204,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
-template void agg_renderer<image_32>::process(markers_symbolizer const&,
+template void agg_renderer<image_rgba8>::process(markers_symbolizer const&,
                                               mapnik::feature_impl &,
                                               proj_transform const&);
 }

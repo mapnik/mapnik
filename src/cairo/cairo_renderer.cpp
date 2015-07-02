@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -99,6 +99,42 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
 template <typename T>
 cairo_renderer<T>::~cairo_renderer() {}
 
+struct setup_marker_visitor
+{
+    setup_marker_visitor(cairo_context & context, renderer_common const& common)
+        : context_(context), common_(common) {}
+
+    void operator() (marker_null const &) {}
+    void operator() (marker_svg const &) {}
+
+    void operator() (marker_rgba8 const& marker)
+    {
+        mapnik::image_rgba8 const& bg_image = marker.get_data();
+        std::size_t w = bg_image.width();
+        std::size_t h = bg_image.height();
+        if ( w > 0 && h > 0)
+        {
+            // repeat background-image both vertically and horizontally
+            std::size_t x_steps = std::size_t(std::ceil(common_.width_/double(w)));
+            std::size_t y_steps = std::size_t(std::ceil(common_.height_/double(h)));
+            for (std::size_t x=0;x<x_steps;++x)
+            {
+                for (std::size_t y=0;y<y_steps;++y)
+                {
+                    agg::trans_affine matrix = agg::trans_affine_translation(
+                                                   x*w,
+                                                   y*h);
+                    context_.add_image(matrix, bg_image, 1.0f);
+                }
+            }
+        }
+    }
+
+  private:
+    cairo_context & context_;
+    renderer_common const& common_;
+};
+
 template <typename T>
 void cairo_renderer<T>::setup(Map const& map)
 {
@@ -113,29 +149,8 @@ void cairo_renderer<T>::setup(Map const& map)
     if (image_filename)
     {
         // NOTE: marker_cache returns premultiplied image, if needed
-        boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
-        if (bg_marker && (*bg_marker)->is_bitmap())
-        {
-            mapnik::image_ptr bg_image = *(*bg_marker)->get_bitmap_data();
-            int w = bg_image->width();
-            int h = bg_image->height();
-            if ( w > 0 && h > 0)
-            {
-                // repeat background-image both vertically and horizontally
-                unsigned x_steps = unsigned(std::ceil(common_.width_/double(w)));
-                unsigned y_steps = unsigned(std::ceil(common_.height_/double(h)));
-                for (unsigned x=0;x<x_steps;++x)
-                {
-                    for (unsigned y=0;y<y_steps;++y)
-                    {
-                        agg::trans_affine matrix = agg::trans_affine_translation(
-                                                       x*w,
-                                                       y*h);
-                        context_.add_image(matrix, *bg_image, 1.0f);
-                    }
-                }
-            }
-        }
+        std::shared_ptr<mapnik::marker const> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
+        util::apply_visitor(setup_marker_visitor(context_, common_), *bg_marker);
     }
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer: Scale=" << map.scale();
 }
@@ -176,16 +191,78 @@ void cairo_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void cairo_renderer<T>::start_style_processing(feature_type_style const& st)
+void cairo_renderer<T>::start_style_processing(feature_type_style const&)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:start style processing";
 }
 
 template <typename T>
-void cairo_renderer<T>::end_style_processing(feature_type_style const& st)
+void cairo_renderer<T>::end_style_processing(feature_type_style const&)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:end style processing";
 }
+
+struct cairo_render_marker_visitor
+{
+    cairo_render_marker_visitor(cairo_context & context,
+                                renderer_common const& common,
+                                pixel_position const& pos,
+                                agg::trans_affine const& tr,
+                                double opacity,
+                                bool recenter)
+        : context_(context),
+          common_(common),
+          pos_(pos),
+          tr_(tr),
+          opacity_(opacity),
+          recenter_(recenter) {}
+
+    void operator() (marker_null const&) {}
+
+    void operator() (marker_svg const& marker)
+    {
+        mapnik::svg_path_ptr vmarker = marker.get_data();
+        if (vmarker)
+        {
+            box2d<double> bbox = vmarker->bounding_box();
+            agg::trans_affine marker_tr = tr_;
+            if (recenter_)
+            {
+                coord<double,2> c = bbox.center();
+                marker_tr = agg::trans_affine_translation(-c.x,-c.y);
+                marker_tr *= tr_;
+            }
+            marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
+            agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
+            svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(vmarker->source());
+            svg::svg_path_adapter svg_path(stl_storage);
+            marker_tr.translate(pos_.x, pos_.y);
+            render_vector_marker(context_, svg_path, attributes, bbox, marker_tr, opacity_);
+        }
+    }
+
+    void operator() (marker_rgba8 const& marker)
+    {
+        double width = marker.get_data().width();
+        double height = marker.get_data().height();
+        double cx = 0.5 * width;
+        double cy = 0.5 * height;
+        agg::trans_affine marker_tr;
+        marker_tr *= agg::trans_affine_translation(-cx,-cy);
+        marker_tr *= tr_;
+        marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
+        marker_tr *= agg::trans_affine_translation(pos_.x,pos_.y);
+        context_.add_image(marker_tr, marker.get_data(), opacity_);
+    }
+
+  private:
+    cairo_context & context_;
+    renderer_common const& common_;
+    pixel_position const& pos_;
+    agg::trans_affine const& tr_;
+    double opacity_;
+    bool recenter_;
+};
 
 template <typename T>
 void cairo_renderer<T>::render_marker(pixel_position const& pos,
@@ -196,40 +273,13 @@ void cairo_renderer<T>::render_marker(pixel_position const& pos,
 
 {
     cairo_save_restore guard(context_);
-    if (marker.is_vector())
-    {
-        mapnik::svg_path_ptr vmarker = *marker.get_vector_data();
-        if (vmarker)
-        {
-            box2d<double> bbox = vmarker->bounding_box();
-            agg::trans_affine marker_tr = tr;
-            if (recenter)
-            {
-                coord<double,2> c = bbox.center();
-                marker_tr = agg::trans_affine_translation(-c.x,-c.y);
-                marker_tr *= tr;
-            }
-            marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
-            agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
-            svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(vmarker->source());
-            svg::svg_path_adapter svg_path(stl_storage);
-            marker_tr.translate(pos.x, pos.y);
-            render_vector_marker(context_, svg_path, attributes, bbox, marker_tr, opacity);
-        }
-    }
-    else if (marker.is_bitmap())
-    {
-        double width = (*marker.get_bitmap_data())->width();
-        double height = (*marker.get_bitmap_data())->height();
-        double cx = 0.5 * width;
-        double cy = 0.5 * height;
-        agg::trans_affine marker_tr;
-        marker_tr *= agg::trans_affine_translation(-cx,-cy);
-        marker_tr *= tr;
-        marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
-        marker_tr *= agg::trans_affine_translation(pos.x,pos.y);
-        context_.add_image(marker_tr, **marker.get_bitmap_data(), opacity);
-    }
+    cairo_render_marker_visitor visitor(context_,
+                                        common_,
+                                        pos,
+                                        tr,
+                                        opacity,
+                                        recenter);
+    util::apply_visitor(visitor, marker);
 }
 
 template class cairo_renderer<cairo_ptr>;

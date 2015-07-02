@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,10 +28,7 @@
 
 // std
 #include <iosfwd>
-#include <algorithm>
 #include <string>
-//#include <istream>
-//#include <ostream>
 
 namespace mapnik
 {

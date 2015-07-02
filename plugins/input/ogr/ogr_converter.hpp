@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,24 +24,29 @@
 #define OGR_CONVERTER_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/params.hpp>
+#include <mapnik/geometry.hpp>
 
-// ogr
-#include <ogrsf_frmts.h>
+class OGRGeometry;
+class OGRGeometryCollection;
+class OGRLineString;
+class OGRMultiLineString;
+class OGRMultiPoint;
+class OGRMultiPolygon;
+class OGRPoint;
+class OGRPolygon;
 
 class ogr_converter
 {
 public:
 
-    static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
-    static void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
-    static void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
-    static void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
-    static void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
-    static void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
-    static void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
+    static mapnik::geometry::geometry<double> convert_geometry (OGRGeometry* ogr_geom);
+    static mapnik::geometry::point<double> convert_point (OGRPoint* ogr_geom);
+    static mapnik::geometry::multi_point<double> convert_multipoint (OGRMultiPoint* ogr_geom);
+    static mapnik::geometry::line_string<double> convert_linestring (OGRLineString* ogr_geom);
+    static mapnik::geometry::multi_line_string<double> convert_multilinestring (OGRMultiLineString* ogr_geom);
+    static mapnik::geometry::polygon<double> convert_polygon (OGRPolygon* ogr_geom);
+    static mapnik::geometry::multi_polygon<double> convert_multipolygon (OGRMultiPolygon* ogr_geom);
+    static mapnik::geometry::geometry_collection<double> convert_collection (OGRGeometryCollection* ogr_geom);
 };
 
 #endif // OGR_CONVERTER_HPP

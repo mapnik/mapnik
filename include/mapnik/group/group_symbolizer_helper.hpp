@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -80,22 +80,23 @@ public:
 
     pixel_position_list const& get();
 
-private:
-
-    /** Iterate over the given path, placing line-following labels or point labels with respect to label_spacing. */
+    // Iterate over the given path, placing line-following labels or point labels with respect to label_spacing.
     template <typename T>
     bool find_line_placements(T & path);
-    /** Check if a point placement fits at given position */
+private:
+
+
+    // Check if a point placement fits at given position
     bool check_point_placement(pixel_position const& pos);
-    /** Checks for collision. */
+    // Checks for collision.
     bool collision(box2d<double> const& box, value_unicode_string const& repeat_key = "") const;
     double get_spacing(double path_length) const;
 
     DetectorType & detector_;
 
-    /** Boxes and repeat keys to take into account when finding placement.
-     *  Boxes are relative to starting point of current placement.
-     */
+    // Boxes and repeat keys to take into account when finding placement.
+    //  Boxes are relative to starting point of current placement.
+    //
     std::list<box_element> box_elements_;
 
     pixel_position_list results_;
