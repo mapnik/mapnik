@@ -29,19 +29,7 @@ namespace benchmark {
         image_rgba8 const& dest = util::get<image_rgba8>(desc_any);
         image_rgba8 const& src = util::get<image_rgba8>(src_any);
 
-        unsigned int width = src.width();
-        unsigned int height = src.height();
-        if ((width != dest.width()) || height != dest.height()) return false;
-        for (unsigned int y = 0; y < height; ++y)
-        {
-            const unsigned int* row_from = src.get_row(y);
-            const unsigned int* row_to = dest.get_row(y);
-            for (unsigned int x = 0; x < width; ++x)
-            {
-               if (row_from[x] != row_to[x]) return false;
-            }
-        }
-        return true;
+        return compare(dest, src, 0, true) == 0;
     }
 
 }
