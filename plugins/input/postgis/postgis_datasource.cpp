@@ -177,7 +177,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             if (geometryColumn_.empty() || srid_ == 0)
             {
 #ifdef MAPNIK_STATS
-                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column)");
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column) <start>");
 #endif
                 std::ostringstream s;
 
@@ -250,13 +250,16 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     }
                     rs->close();
                 }
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column) <end>");
+#endif
             }
 
             // detect primary key
             if (*autodetect_key_field && key_field_.empty())
             {
 #ifdef MAPNIK_STATS
-                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_primary_key)");
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_primary_key) <start>");
 #endif
 
                 std::ostringstream s;
@@ -320,6 +323,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     }
                 }
                 rs_key->close();
+
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_primary_key) <end>");
+#endif
             }
 
             // if a globally unique key field/primary key is required
@@ -345,7 +352,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
             // collect attribute desc
 #ifdef MAPNIK_STATS
-            mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_column_description)");
+            mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_column_description) <start>");
 #endif
 
             std::ostringstream s;
@@ -442,6 +449,9 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     }
                 }
             }
+#ifdef MAPNIK_STATS
+            mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_column_description) <end>");
+#endif
 
             rs->close();
 
@@ -685,7 +695,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 {
 
 #ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context");
+    mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context<start>");
 #endif
 
 
@@ -856,9 +866,17 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
+
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context<end>");
+#endif
         return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), twkb_encoding_);
 
     }
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context<end>");
+#endif
 
     return featureset_ptr();
 }
