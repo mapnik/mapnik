@@ -61,7 +61,7 @@ function install_mason_deps() {
     install harfbuzz 0.9.40 libharfbuzz &
     install jpeg_turbo 1.4.0 libjpeg &
     install libxml2 2.9.2 libxml2 &
-    install libpng 1.6.16 libpng &
+    install libpng 1.6.17 libpng &
     install webp 0.4.2 libwebp &
     install icu 54.1 &
     install proj 4.8.0 libproj &
