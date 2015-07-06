@@ -436,11 +436,11 @@ private:
                         v_y1y2 = v1.y - close_points[cpt].y;
                         cpt++;
                     }
+                    start_v2.x = v2.x;
+                    start_v2.y = v2.y;
                 }
-                start_v2.x = v2.x;
-                start_v2.y = v2.y;
             }
-            if (v2.cmd == SEG_MOVETO)
+            if (is_polygon && v2.cmd == SEG_MOVETO)
             {
                 start_.x = v2.x;
                 start_.y = v2.y;
