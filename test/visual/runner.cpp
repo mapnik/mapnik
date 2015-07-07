@@ -34,21 +34,55 @@ namespace visual_tests
 class renderer_visitor
 {
 public:
-    renderer_visitor(std::string const & name, mapnik::Map const & map, double scale_factor)
-        : name_(name), map_(map), scale_factor_(scale_factor)
+    renderer_visitor(std::string const & name,
+                     mapnik::Map & map,
+                     map_size const & tiles,
+                     double scale_factor,
+                     result_list & results,
+                     report_type & report)
+        : name_(name),
+          map_(map),
+          tiles_(tiles),
+          scale_factor_(scale_factor),
+          results_(results),
+          report_(report)
     {
     }
 
-    template <typename T>
-    result operator()(T const & renderer) const
+    template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
+    void operator()(T const & renderer)
     {
-        return renderer.test(name_, map_, scale_factor_);
+        result r;
+        if (tiles_.width == 1 && tiles_.height == 1)
+        {
+            r = renderer.test(name_, map_, scale_factor_);
+        }
+        else
+        {
+            r = renderer.test_tiles(name_, map_, tiles_, scale_factor_);
+        }
+        mapnik::util::apply_visitor(report_visitor(r), report_);
+        results_.push_back(std::move(r));
+    }
+
+    template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
+    void operator()(T const & renderer)
+    {
+        if (tiles_.width == 1 && tiles_.height == 1)
+        {
+            result r = renderer.test(name_, map_, scale_factor_);
+            mapnik::util::apply_visitor(report_visitor(r), report_);
+            results_.push_back(std::move(r));
+        }
     }
 
 private:
     std::string const & name_;
-    mapnik::Map const & map_;
+    mapnik::Map & map_;
+    map_size const & tiles_;
     double scale_factor_;
+    result_list & results_;
+    report_type & report_;
 };
 
 runner::runner(runner::path_type const & styles_dir,
@@ -173,12 +207,12 @@ result_list runner::test_range(files_iterator begin, files_iterator end, std::re
 
 result_list runner::test_one(runner::path_type const& style_path, config cfg, report_type & report) const
 {
-    mapnik::Map m(cfg.sizes.front().width, cfg.sizes.front().height);
+    mapnik::Map map(cfg.sizes.front().width, cfg.sizes.front().height);
     result_list results;
 
     try
     {
-        mapnik::load_map(m, style_path.string(), true);
+        mapnik::load_map(map, style_path.string(), true);
     }
     catch (std::exception const& ex)
     {
@@ -191,7 +225,7 @@ result_list runner::test_one(runner::path_type const& style_path, config cfg, re
         throw;
     }
 
-    mapnik::parameters const & params = m.get_extra_parameters();
+    mapnik::parameters const & params = map.get_extra_parameters();
 
     boost::optional<mapnik::value_integer> status = params.get<mapnik::value_integer>("status", cfg.status);
 
@@ -208,32 +242,52 @@ result_list runner::test_one(runner::path_type const& style_path, config cfg, re
         parse_map_sizes(*sizes, cfg.sizes);
     }
 
+    boost::optional<std::string> tiles = params.get<std::string>("tiles");
+
+    if (tiles)
+    {
+        cfg.tiles.clear();
+        parse_map_sizes(*tiles, cfg.tiles);
+    }
+
+    boost::optional<std::string> bbox_string = params.get<std::string>("bbox");
+    mapnik::box2d<double> box;
+
+    if (bbox_string)
+    {
+        box.from_string(*bbox_string);
+    }
+
     std::string name(style_path.stem().string());
 
-    for (map_size const & size : cfg.sizes)
+    for (auto const & size : cfg.sizes)
     {
-        m.resize(size.width, size.height);
-
-        boost::optional<std::string> bbox_string = params.get<std::string>("bbox");
-
-        if (bbox_string)
+        for (auto const & scale_factor : cfg.scales)
         {
-            mapnik::box2d<double> bbox;
-            bbox.from_string(*bbox_string);
-            m.zoom_to_box(bbox);
-        }
-        else
-        {
-            m.zoom_all();
-        }
-
-        for (double const & scale_factor : cfg.scales)
-        {
-            for(auto const& ren : renderers_)
+            for (auto const & tiles_count : cfg.tiles)
             {
-                result r = mapnik::util::apply_visitor(renderer_visitor(name, m, scale_factor), ren);
-                results.emplace_back(r);
-                mapnik::util::apply_visitor(report_visitor(r), report);
+                if (!tiles_count.width || !tiles_count.height)
+                {
+                    throw std::runtime_error("Cannot render zero tiles.");
+                }
+                if (size.width % tiles_count.width || size.height % tiles_count.height)
+                {
+                    throw std::runtime_error("Tile size is not an integer.");
+                }
+
+                for (auto const & ren : renderers_)
+                {
+                    map.resize(size.width, size.height);
+                    if (box.valid())
+                    {
+                        map.zoom_to_box(box);
+                    }
+                    else
+                    {
+                        map.zoom_all();
+                    }
+                    mapnik::util::apply_visitor(renderer_visitor(name, map, tiles_count, scale_factor, results, report), ren);
+                }
             }
         }
     }

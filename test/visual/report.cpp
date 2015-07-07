@@ -32,8 +32,12 @@ namespace visual_tests
 
 void console_report::report(result const & r)
 {
-    s << '"' << r.name << '-' << r.size.width << '-' << r.size.height << '-' << std::fixed <<
-        std::setprecision(1) << r.scale_factor << "\" with " << r.renderer_name << "... ";
+    s << '"' << r.name << '-' << r.size.width << '-' << r.size.height;
+    if (r.tiles.width > 1 || r.tiles.height > 1)
+    {
+        s << '-' << r.tiles.width << 'x' << r.tiles.height;
+    }
+    s << '-' << std::fixed << std::setprecision(1) << r.scale_factor << "\" with " << r.renderer_name << "... ";
 
     switch (r.state)
     {
