@@ -26,6 +26,7 @@
 // stl
 #include <vector>
 #include <string>
+#include <chrono>
 
 // boost
 #include <boost/filesystem.hpp>
@@ -74,6 +75,7 @@ struct result
     boost::filesystem::path reference_image_path;
     std::string error_message;
     unsigned diff;
+    std::chrono::high_resolution_clock::duration duration;
 };
 
 using result_list = std::vector<result>;

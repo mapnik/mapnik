@@ -39,30 +39,22 @@ public:
                      map_size const & tiles,
                      double scale_factor,
                      result_list & results,
-                     report_type & report)
+                     report_type & report,
+                     std::size_t iterations)
         : name_(name),
           map_(map),
           tiles_(tiles),
           scale_factor_(scale_factor),
           results_(results),
-          report_(report)
+          report_(report),
+          iterations_(iterations)
     {
     }
 
     template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
     void operator()(T const & renderer)
     {
-        result r;
-        if (tiles_.width == 1 && tiles_.height == 1)
-        {
-            r = renderer.test(name_, map_, scale_factor_);
-        }
-        else
-        {
-            r = renderer.test_tiles(name_, map_, tiles_, scale_factor_);
-        }
-        mapnik::util::apply_visitor(report_visitor(r), report_);
-        results_.push_back(std::move(r));
+        test(renderer);
     }
 
     template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
@@ -70,30 +62,69 @@ public:
     {
         if (tiles_.width == 1 && tiles_.height == 1)
         {
-            result r = renderer.test(name_, map_, scale_factor_);
-            mapnik::util::apply_visitor(report_visitor(r), report_);
-            results_.push_back(std::move(r));
+            test(renderer);
         }
     }
 
 private:
+    template <typename T>
+    void test(T const & renderer)
+    {
+        map_size size { map_.width(), map_.height() };
+        std::chrono::high_resolution_clock::time_point start(std::chrono::high_resolution_clock::now());
+        for (std::size_t i = iterations_ ; i > 0; i--)
+        {
+            typename T::image_type image(render(renderer));
+            if (i == 1)
+            {
+                std::chrono::high_resolution_clock::time_point end(std::chrono::high_resolution_clock::now());
+                result r(renderer.report(image, name_, size, tiles_, scale_factor_));
+                r.duration = end - start;
+                mapnik::util::apply_visitor(report_visitor(r), report_);
+                results_.push_back(std::move(r));
+            }
+        }
+    }
+
+    template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
+    typename T::image_type render(T const & renderer)
+    {
+        if (tiles_.width == 1 && tiles_.height == 1)
+        {
+            return renderer.render(map_, scale_factor_);
+        }
+        else
+        {
+            return renderer.render(map_, scale_factor_, tiles_);
+        }
+    }
+
+    template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
+    typename T::image_type render(T const & renderer)
+    {
+        return renderer.render(map_, scale_factor_);
+    }
+
     std::string const & name_;
     mapnik::Map & map_;
     map_size const & tiles_;
     double scale_factor_;
     result_list & results_;
     report_type & report_;
+    std::size_t iterations_;
 };
 
 runner::runner(runner::path_type const & styles_dir,
                runner::path_type const & output_dir,
                runner::path_type const & reference_dir,
                bool overwrite,
+               std::size_t iterations,
                std::size_t jobs)
     : styles_dir_(styles_dir),
       output_dir_(output_dir),
       reference_dir_(reference_dir),
       jobs_(jobs),
+      iterations_(iterations),
       renderers_{ renderer<agg_renderer>(output_dir_, reference_dir_, overwrite)
 #if defined(HAVE_CAIRO)
                   ,renderer<cairo_renderer>(output_dir_, reference_dir_, overwrite)
@@ -286,7 +317,7 @@ result_list runner::test_one(runner::path_type const& style_path, config cfg, re
                     {
                         map.zoom_all();
                     }
-                    mapnik::util::apply_visitor(renderer_visitor(name, map, tiles_count, scale_factor, results, report), ren);
+                    mapnik::util::apply_visitor(renderer_visitor(name, map, tiles_count, scale_factor, results, report, iterations_), ren);
                 }
             }
         }

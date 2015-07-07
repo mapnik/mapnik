@@ -55,6 +55,11 @@ void console_report::report(result const & r)
             break;
     }
 
+    if (show_duration)
+    {
+        s << " (" << std::chrono::duration_cast<std::chrono::milliseconds>(r.duration).count() << " milliseconds)";
+    }
+
     s << std::endl;
 }
 

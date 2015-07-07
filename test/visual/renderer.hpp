@@ -237,20 +237,18 @@ public:
     {
     }
 
-    result test(std::string const & name, mapnik::Map const & map, double scale_factor) const
+    image_type render(mapnik::Map const & map, double scale_factor) const
     {
-        image_type image(ren.render(map, scale_factor));
-        return report(image, name, { map.width(), map.height() }, { 1, 1 }, scale_factor);
+        return ren.render(map, scale_factor);
     }
 
-    result test_tiles(std::string const & name, mapnik::Map & map, map_size const & tiles, double scale_factor) const
+    image_type render(mapnik::Map & map, double scale_factor, map_size const & tiles) const
     {
-        image_type image(map.width(), map.height());
         mapnik::box2d<double> box = map.get_current_extent();
+        image_type image(map.width(), map.height());
         map.resize(image.width() / tiles.width, image.height() / tiles.height);
         double tile_box_width = box.width() / tiles.width;
         double tile_box_height = box.height() / tiles.height;
-
         for (std::size_t tile_y = 0; tile_y < tiles.height; tile_y++)
         {
             for (std::size_t tile_x = 0; tile_x < tiles.width; tile_x++)
@@ -265,7 +263,7 @@ public:
                 set_rectangle(tile, image, tile_x * tile.width(), (tiles.height - 1 - tile_y) * tile.height());
             }
         }
-        return report(image, name, { image.width(), image.height() }, tiles, scale_factor);
+        return image;
     }
 
     result report(image_type const & image,
