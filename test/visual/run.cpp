@@ -53,6 +53,8 @@ int main(int argc, char** argv)
         ("help,h", "produce usage message")
         ("verbose,v", "verbose output")
         ("overwrite,o", "overwrite reference image")
+        ("duration,d", "output rendering duration")
+        ("iterations,i", po::value<std::size_t>()->default_value(1), "number of iterations for benchmarking")
         ("jobs,j", po::value<std::size_t>()->default_value(1), "number of parallel threads")
         ("styles-dir", po::value<std::string>()->default_value("test/data-visual/styles"), "directory with styles")
         ("images-dir", po::value<std::string>()->default_value("test/data-visual/images"), "directory with reference images")
@@ -108,8 +110,11 @@ int main(int argc, char** argv)
                output_dir,
                vm["images-dir"].as<std::string>(),
                vm.count("overwrite"),
+               vm["iterations"].as<std::size_t>(),
                vm["jobs"].as<std::size_t>());
-    report_type report = vm.count("verbose") ? report_type((console_report())) : report_type((console_short_report()));
+    bool show_duration = vm.count("duration");
+    bool verbose = vm.count("verbose") | show_duration;
+    report_type report(verbose ? report_type((console_report(show_duration))) : report_type((console_short_report())));
     result_list results;
 
     try
