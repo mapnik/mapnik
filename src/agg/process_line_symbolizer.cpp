@@ -31,6 +31,7 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/geometry_type.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -164,12 +165,19 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         set_join_caps_aa(sym, ras, feature, common_.vars_);
 
-        using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
+        using vertex_converter_type = vertex_converter<clip_line_tag, clip_poly_tag, transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag, smooth_tag,
                                                        offset_transform_tag>;
         vertex_converter_type converter(clip_box,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
-        if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
+        if (clip)
+        {
+            geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
+            if (type == geometry::geometry_types::Polygon)
+                converter.template set<clip_poly_tag>();
+            else if (type == geometry::geometry_types::LineString)
+                converter.template set<clip_line_tag>();
+        }
         converter.set<transform_tag>(); // always transform
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
         converter.set<affine_transform_tag>(); // optional affine transform
@@ -183,14 +191,20 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     }
     else
     {
-        using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
+        using vertex_converter_type = vertex_converter<clip_line_tag, clip_poly_tag, transform_tag,
                                                        affine_transform_tag,
                                                        simplify_tag, smooth_tag,
                                                        offset_transform_tag,
                                                        dash_tag, stroke_tag>;
         vertex_converter_type converter(clip_box, sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
-
-        if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
+        if (clip)
+        {
+            geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
+            if (type == geometry::geometry_types::Polygon)
+                converter.template set<clip_poly_tag>();
+            else if (type == geometry::geometry_types::LineString)
+                converter.template set<clip_line_tag>();
+        }
         converter.set<transform_tag>(); // always transform
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
         converter.set<affine_transform_tag>(); // optional affine transform
