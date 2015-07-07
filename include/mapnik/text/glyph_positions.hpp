@@ -82,7 +82,6 @@ public:
     void set_marker(marker_info_ptr marker, pixel_position const& marker_pos);
     marker_info_ptr get_marker() const;
     pixel_position const& marker_pos() const;
-    box2d<double> const & bbox() const;
 private:
     std::vector<glyph_position> data_;
     pixel_position base_point_;
