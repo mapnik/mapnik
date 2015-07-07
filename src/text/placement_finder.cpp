@@ -182,11 +182,26 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     // add_marker first checks for collision and then updates the detector.
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
 
-    for (box2d<double> const& bbox : bboxes)
+    box2d<double> label_box;
+    bool first = true;
+    for (box2d<double> const& box : bboxes)
     {
-        detector_.insert(bbox, layouts_.text());
+        if (first)
+        {
+            label_box = box;
+            first = false;
+        }
+        else
+        {
+            label_box.expand_to_include(box);
+        }
+        detector_.insert(box, layouts_.text());
     }
-    placements_.push_back(glyphs);
+    // do not render text off the canvas
+    if (extent_.intersects(label_box))
+    {
+        placements_.push_back(glyphs);
+    }
 
     return true;
 }
@@ -326,11 +341,26 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
     }
 
+    box2d<double> label_box;
+    bool first = true;
     for (box2d<double> const& box : bboxes)
     {
+        if (first)
+        {
+            label_box = box;
+            first = false;
+        }
+        else
+        {
+            label_box.expand_to_include(box);
+        }
         detector_.insert(box, layouts_.text());
     }
-    placements_.push_back(glyphs);
+    // do not render text off the canvas
+    if (extent_.intersects(label_box))
+    {
+        placements_.push_back(glyphs);
+    }
 
     return true;
 }
