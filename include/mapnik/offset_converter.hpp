@@ -306,41 +306,44 @@ private:
         bool is_polygon = false;
         std::size_t cpt = 0;
         v0.cmd = geom_.vertex(&v0.x, &v0.y);
-        v1.x = v0.x;
-        v1.y = v0.y;
-        v1.cmd = v0.cmd;
+        v1 = v0;
         // PUSH INITIAL
-        points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
+        points.push_back(v0);
         if (v0.cmd == SEG_END) // not enough vertices in source
         {
             return status_ = process;
         }
-
+        start = v0;
         while ((v0.cmd = geom_.vertex(&v0.x, &v0.y)) != SEG_END)
         {
             if (v0.cmd == SEG_CLOSE)
             {
                 is_polygon = true;
-                close_points.push_back(vertex2d(v1.x, v1.y, v1.cmd));
                 auto & prev = points.back();
                 if (prev.x == start.x && prev.y == start.y)
                 {
+                    prev.x = v0.x; // hack
+                    prev.y = v0.y;
                     prev.cmd = SEG_CLOSE; // account for dupes (line_to(move_to) + close_path) in agg poly clipper
+                    std::size_t size = points.size();
+                    if (size > 1) close_points.push_back(points[size - 2]);
+                    else close_points.push_back(prev);
                     continue;
+                }
+                else
+                {
+                    close_points.push_back(v1);
                 }
             }
             else if (v0.cmd == SEG_MOVETO)
             {
                 start = v0;
             }
-            v1.x = v0.x;
-            v1.y = v0.y;
-            v1.cmd = v0.cmd;
-            points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
+            v1 = v0;
+            points.push_back(v0);
         }
         // Push SEG_END
-        points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
-
+        points.push_back(vertex2d(v0.x,v0.y,SEG_END));
         std::size_t i = 0;
         v1 = points[i++];
         v2 = points[i++];
