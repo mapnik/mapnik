@@ -173,9 +173,9 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (clip)
         {
             geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
-            if (type == geometry::geometry_types::Polygon)
+            if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
                 converter.template set<clip_poly_tag>();
-            else if (type == geometry::geometry_types::LineString)
+            else if (type == geometry::geometry_types::LineString || type == geometry::geometry_types::MultiLineString)
                 converter.template set<clip_line_tag>();
         }
         converter.set<transform_tag>(); // always transform
@@ -200,9 +200,9 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         if (clip)
         {
             geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
-            if (type == geometry::geometry_types::Polygon)
+            if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
                 converter.template set<clip_poly_tag>();
-            else if (type == geometry::geometry_types::LineString)
+            else if (type == geometry::geometry_types::LineString || type == geometry::geometry_types::MultiLineString)
                 converter.template set<clip_line_tag>();
         }
         converter.set<transform_tag>(); // always transform
