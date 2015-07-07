@@ -8,7 +8,7 @@ For a complete change history, see the git log.
 
 ## 3.0.0
 
-Released: June 30th, 2015
+Released: July 7th, 2015
 
 (Packaged from ...)
 
