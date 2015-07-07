@@ -310,6 +310,11 @@ private:
         v1.cmd = v0.cmd;
         // PUSH INITIAL
         points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
+        if (v0.cmd == SEG_END) // not enough vertices in source
+        {
+            return status_ = process;
+        }
+        
         while ((v0.cmd = geom_.vertex(&v0.x, &v0.y)) != SEG_END)
         {
             points.push_back(vertex2d(v0.x, v0.y, v0.cmd));
