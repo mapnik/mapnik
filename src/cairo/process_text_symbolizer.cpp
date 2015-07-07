@@ -55,7 +55,7 @@ void cairo_renderer<T>::process(shield_symbolizer const& sym,
     double opacity = get<double>(sym,keys::opacity,feature, common_.vars_, 1.0);
 
     placements_list const &placements = helper.get();
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         marker_info_ptr mark = glyphs->get_marker();
         if (mark) {
@@ -93,7 +93,7 @@ void cairo_renderer<T>::process(text_symbolizer const& sym,
     composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_,  src_over);
 
     placements_list const& placements = helper.get();
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         context_.add_text(*glyphs, face_manager_, comp_op, halo_comp_op, common_.scale_factor_);
     }

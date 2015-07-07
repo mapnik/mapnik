@@ -120,7 +120,7 @@ struct thunk_renderer<image_rgba8>
         render_offset_placements(
             thunk.placements_,
             offset_,
-            [&] (glyph_positions_ptr glyphs)
+            [&] (glyph_positions_ptr const& glyphs)
             {
                 marker_info_ptr mark = glyphs->get_marker();
                 if (mark)

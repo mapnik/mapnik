@@ -64,7 +64,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
     placements_list const& placements = helper.get();
     value_integer feature_id = feature.id();
 
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         marker_info_ptr mark = glyphs->get_marker();
         if (mark)

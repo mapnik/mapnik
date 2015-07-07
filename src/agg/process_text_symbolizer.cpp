@@ -67,7 +67,7 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
     }
 
     placements_list const& placements = helper.get();
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         ren.render(*glyphs);
     }

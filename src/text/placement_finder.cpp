@@ -118,7 +118,7 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
 
 bool placement_finder::find_point_placement(pixel_position const& pos)
 {
-    glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
+    glyph_positions_ptr glyphs = std::make_unique<glyph_positions>();
     std::vector<box2d<double> > bboxes;
 
     glyphs->reserve(layouts_.glyphs_count());
@@ -200,7 +200,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     // do not render text off the canvas
     if (extent_.intersects(label_box))
     {
-        placements_.push_back(glyphs);
+        placements_.push_back(std::move(glyphs));
     }
 
     return true;
@@ -215,7 +215,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     vertex_cache::scoped_state begin(pp);
     text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
 
-    glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
+    glyph_positions_ptr glyphs = std::make_unique<glyph_positions>();
     std::vector<box2d<double> > bboxes;
     glyphs->reserve(layouts_.glyphs_count());
     bboxes.reserve(layouts_.glyphs_count());
@@ -359,7 +359,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     // do not render text off the canvas
     if (extent_.intersects(label_box))
     {
-        placements_.push_back(glyphs);
+        placements_.push_back(std::move(glyphs));
     }
 
     return true;
@@ -420,7 +420,7 @@ void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool mar
 }
 
 
-bool placement_finder::add_marker(glyph_positions_ptr glyphs, pixel_position const& pos) const
+bool placement_finder::add_marker(glyph_positions_ptr & glyphs, pixel_position const& pos) const
 {
     pixel_position real_pos = (marker_unlocked_ ? pos : glyphs->get_base_point()) + marker_displacement_;
     box2d<double> bbox = marker_box_;

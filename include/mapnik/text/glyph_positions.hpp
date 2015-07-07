@@ -89,7 +89,7 @@ private:
     pixel_position marker_pos_;
     box2d<double> bbox_;
 };
-using glyph_positions_ptr = std::shared_ptr<glyph_positions>;
+using glyph_positions_ptr = std::unique_ptr<glyph_positions>;
 
 using placements_list = std::list<glyph_positions_ptr>;
 }
