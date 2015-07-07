@@ -322,14 +322,11 @@ private:
             {
                 is_polygon = true;
                 close_points.push_back(vertex2d(v1.x, v1.y, v1.cmd));
-                if (points.size() > 0)
+                auto & prev = points.back();
+                if (prev.x == start.x && prev.y == start.y)
                 {
-                    auto & prev = points.back();
-                    if (prev.x == start.x && prev.y == start.y)
-                    {
-                        prev.cmd = SEG_CLOSE; // account for dupes (line_to(move_to) + close_path) in agg poly clipper
-                        continue;
-                    }
+                    prev.cmd = SEG_CLOSE; // account for dupes (line_to(move_to) + close_path) in agg poly clipper
+                    continue;
                 }
             }
             else if (v0.cmd == SEG_MOVETO)
