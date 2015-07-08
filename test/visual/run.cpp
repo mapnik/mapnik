@@ -113,8 +113,7 @@ int main(int argc, char** argv)
                vm["iterations"].as<std::size_t>(),
                vm["jobs"].as<std::size_t>());
     bool show_duration = vm.count("duration");
-    bool verbose = vm.count("verbose") | show_duration;
-    report_type report(verbose ? report_type((console_report(show_duration))) : report_type((console_short_report())));
+    report_type report(vm.count("verbose") ? report_type((console_report(show_duration))) : report_type((console_short_report(show_duration))));
     result_list results;
 
     try
