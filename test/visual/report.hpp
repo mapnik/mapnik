@@ -55,7 +55,7 @@ protected:
 class console_short_report : public console_report
 {
 public:
-    console_short_report() : console_report(false)
+    console_short_report(bool _show_duration) : console_report(_show_duration)
     {
     }
 
