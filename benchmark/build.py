@@ -8,7 +8,7 @@ test_env = env.Clone()
 
 test_env['LIBS'] = [env['MAPNIK_NAME']]
 test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
-test_env.AppendUnique(LIBS='mapnik-wkt')
+test_env.AppendUnique(LIBS=('%s-wkt' % env['MAPNIK_NAME']))
 if env['PLATFORM'] == 'Linux':
     test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(LIBS='rt')

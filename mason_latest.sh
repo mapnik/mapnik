@@ -2,7 +2,7 @@
 
 MASON_NAME=mapnik
 MASON_VERSION=latest
-MASON_LIB_FILE=lib/libmapnik-wkt.a
+MASON_LIB_FILE=lib/libmapnik-wkt.so
 
 . ${MASON_DIR:-~/.mason}/mason.sh
 

@@ -431,6 +431,8 @@ pickle_store = [# Scons internal variables
         'CUSTOM_CXXFLAGS', # user submitted
         'CUSTOM_CFLAGS', # user submitted
         'MAPNIK_LIB_NAME',
+        'MAPNIK_JSON_LIB_NAME',
+        'MAPNIK_WKT_LIB_NAME',
         'LINK',
         'RUNTIME_LINK',
         # Mapnik's SConstruct build variables
@@ -1186,6 +1188,16 @@ if not preconfigured:
        env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}${MAPNIK_NAME}${LIBSUFFIX}'
     else:
        env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}${MAPNIK_NAME}${SHLIBSUFFIX}'
+
+    if env['LINKING'] == 'static':
+       env['MAPNIK_JSON_LIB_NAME'] = '${LIBPREFIX}${MAPNIK_NAME}-json${LIBSUFFIX}'
+    else:
+       env['MAPNIK_JSON_LIB_NAME'] = '${SHLIBPREFIX}${MAPNIK_NAME}-json${SHLIBSUFFIX}'
+
+    if env['LINKING'] == 'static':
+       env['MAPNIK_WKT_LIB_NAME'] = '${LIBPREFIX}${MAPNIK_NAME}-wkt${LIBSUFFIX}'
+    else:
+       env['MAPNIK_WKT_LIB_NAME'] = '${SHLIBPREFIX}${MAPNIK_NAME}-wkt${SHLIBSUFFIX}'
 
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = fix_path(env['PKG_CONFIG_PATH'])
