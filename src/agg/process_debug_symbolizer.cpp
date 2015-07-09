@@ -268,6 +268,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
         for (auto const& n : *common_.detector_)
         {
             auto const& label = n.get();
+            std::cerr << "label.box=>" << label.box << std::endl;
             draw_rotated_rect(pixmap_, *ras_ptr, label.box, label.angle);
         }
     }

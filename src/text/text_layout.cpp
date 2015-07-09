@@ -37,12 +37,15 @@ namespace mapnik
 {
 
 // Output is centered around (0,0)
-static void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_position const& center, double width, double ymin, double ymax)
+void rotated_box2d(box2d<double> & box, rotation const& rot, pixel_position const& center, double width, double height, double vertical_displacement)
 {
     double half_width, half_height;
-    half_width  = width / 2.;
-    half_height = (ymax - ymin) / 2.;
-    box.init(center.x - half_width, center.y - half_height + ymin, center.x + half_width, center.y + half_height + ymin);
+    half_width  = 0.5 * width ;
+    half_height = 0.5 * height;
+    box.init(center.x - half_width,
+             center.y - half_height - vertical_displacement,
+             center.x + half_width,
+             center.y + half_height - vertical_displacement);
 }
 
 pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
@@ -192,11 +195,10 @@ void text_layout::layout()
     init_auto_alignment();
 
     // Find text origin.
-    std::cerr << "ymin=" << ymin_ << " ymax=" << ymax_ << std::endl;
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_) displacement_ = displacement_.rotate(!orientation_);
     // Find layout bounds, expanded for rotation
-    rotated_box2d(bounds_, orientation_, displacement_, width_, ymin_, ymax_);
+    rotated_box2d(bounds_, orientation_, displacement_, width_, height_, ymin_);
 }
 
 // In the Unicode string characters are always stored in logical order.
@@ -409,8 +411,8 @@ void text_layout::add_line(text_line && line)
         line.set_first_line(true);
     }
     height_ += line.height();
-    ymin_ += line.ymin();
-    ymax_ += line.ymax();
+    ymin_ = std::min(ymin_, line.ymin());
+    ymax_ = std::max(ymax_, line.ymax());
     glyphs_count_ += line.size();
     width_ = std::max(width_, line.width());
     lines_.emplace_back(std::move(line));

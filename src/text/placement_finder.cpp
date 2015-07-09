@@ -118,7 +118,7 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
 
 bool placement_finder::find_point_placement(pixel_position const& pos)
 {
-    glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
+    glyph_positions_ptr glyphs = std::make_unique<glyph_positions>();
     std::vector<std::tuple<box2d<double>,double> > labels;
 
     glyphs->reserve(layouts_.glyphs_count());
@@ -140,7 +140,9 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         }
 
         box2d<double> bbox = layout.bounds();
-        bbox.re_center(layout_center.x, layout_center.y);
+        std::cerr << "before recenter -->" << bbox << std::endl;
+        auto box_center_y = bbox.center().y;
+        bbox.re_center(layout_center.x, layout_center.y + box_center_y);
 
         // TODO
         double margin = (text_props_->margin != 0 ? text_props_->margin : text_props_->minimum_distance) * scale_factor_;
@@ -197,6 +199,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         {
             label_box.expand_to_include(box);
         }
+        std::cerr << box << std::endl;
         detector_.insert(box, layouts_.text(), std::get<1>(label));
     }
     // do not render text off the canvas
@@ -305,7 +308,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
                 pixel_position pos = off_pp.current_position() + cluster_offset;
                 // Center the text on the line
-                double char_height = line.ymax() - line.ymin();//line.max_char_height();
+                double char_height = line.ymax() - line.ymin(); //line.max_char_height();
                 pos.y = -pos.y - char_height/2.0*rot.cos;
                 pos.x =  pos.x + char_height/2.0*rot.sin;
 

@@ -90,7 +90,9 @@ static void shape_text(text_line & line,
             std::size_t num_chars = static_cast<std::size_t>(num_char);
             shaped.releaseBuffer(length);
             bool shaped_status = true;
-            double max_glyph_height = 0;
+            double ymin = 0.0;
+            double ymax = 0.0;
+            double scale_multiplier = size / face->get_face()->units_per_EM;
             if (U_SUCCESS(err) && (num_chars == length))
             {
                 unsigned char_index = 0;
@@ -109,16 +111,17 @@ static void shape_text(text_line & line,
                     if (face->glyph_dimensions(g))
                     {
                         g.face = face;
-                        g.scale_multiplier = size / face->get_face()->units_per_EM;
-                        double tmp_height = g.height();
-                        if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
+                        g.scale_multiplier = scale_multiplier;
                         width_map[char_index++] += g.advance();
                         line.add_glyph(std::move(g), scale_factor);
+                        ymin = std::min(g.ymin(), ymin);
+                        ymax = std::max(g.ymax(), ymax);
                     }
                 }
             }
             if (!shaped_status) continue;
-            line.update_max_char_height(max_glyph_height);
+            std::cerr << "ICU shaper: update y min/max " << ymin << "," << ymax << std::endl;
+            line.set_y_minmax(ymin, ymax);
             return;
         }
     }

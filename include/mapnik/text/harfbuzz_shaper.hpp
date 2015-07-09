@@ -128,6 +128,9 @@ static void shape_text(text_line & line,
 
             double ymin = 0.0;
             double ymax = 0.0;
+            double units_per_EM = face->get_face()->units_per_EM;
+            double scale_multiplier = (units_per_EM > 0) ? (size / units_per_EM) : 1.0 ;
+
             for (unsigned i = 0; i < num_glyphs; ++i)
             {
                 auto const& gpos = positions[i];
@@ -138,7 +141,7 @@ static void shape_text(text_line & line,
                 if (face->glyph_dimensions(g))
                 {
                     g.face = face;
-                    g.scale_multiplier = size / face->get_face()->units_per_EM;
+                    g.scale_multiplier = scale_multiplier;//size / face->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
                     g.unscaled_advance = gpos.x_advance;
                     g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
@@ -148,7 +151,7 @@ static void shape_text(text_line & line,
                     ymax = std::max(g.ymax(), ymax);
                 }
             }
-            std::cerr << "update y min/max " << ymin << "," << ymax << std::endl;
+            std::cerr << "Harfbuzz shaper: update y min/max " << ymin << "," << ymax << std::endl;
             line.set_y_minmax(ymin, ymax);
             break; //When we reach this point the current font had all glyphs.
         }
