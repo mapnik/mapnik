@@ -92,13 +92,12 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
 template <typename T>
 void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
 {
-    int x_max=x+bitmap->width;
-    int y_max=y+bitmap->rows;
-    int i,p,j,q;
+    int x_max = x + bitmap->width;
+    int y_max = y + bitmap->rows;
 
-    for (i=x,p=0;i<x_max;++i,++p)
+    for (int i = x, p = 0; i < x_max; ++i, ++p)
     {
-        for (j=y,q=0;j<y_max;++j,++q)
+        for (int j = y, q = 0; j < y_max; ++j, ++q)
         {
             unsigned gray=bitmap->buffer[q*bitmap->width+p];
             if (gray)

@@ -29,7 +29,6 @@
 
 // stl
 #include <functional>
-#include <cassert>
 
 // icu
 #include <unicode/unistr.h>
@@ -52,7 +51,6 @@ struct value_hasher
 
     std::size_t operator() (value_unicode_string const& val) const
     {
-        assert(val.hashCode() > 0);
         return static_cast<std::size_t>(val.hashCode());
     }
 

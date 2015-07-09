@@ -211,7 +211,7 @@ void render_offset_placements(placements_list const& placements,
                               pixel_position const& offset,
                               F render_text) {
 
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         // move the glyphs to the correct offset
         pixel_position base_point = glyphs->get_base_point();

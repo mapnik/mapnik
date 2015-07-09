@@ -82,7 +82,6 @@ public:
     void set_marker(marker_info_ptr marker, pixel_position const& marker_pos);
     marker_info_ptr get_marker() const;
     pixel_position const& marker_pos() const;
-    box2d<double> const & bbox() const;
 private:
     std::vector<glyph_position> data_;
     pixel_position base_point_;
@@ -90,7 +89,7 @@ private:
     pixel_position marker_pos_;
     box2d<double> bbox_;
 };
-using glyph_positions_ptr = std::shared_ptr<glyph_positions>;
+using glyph_positions_ptr = std::unique_ptr<glyph_positions>;
 
 using placements_list = std::list<glyph_positions_ptr>;
 }

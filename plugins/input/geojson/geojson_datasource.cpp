@@ -218,7 +218,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             // parse first feature to extract attributes schema.
             // NOTE: this doesn't yield correct answer for geoJSON in general, just an indication
             Iterator itr2 = start + geometry_index.first;
-            Iterator end2 = itr + geometry_index.second;
+            Iterator end2 = itr2 + geometry_index.second;
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
             if (!boost::spirit::qi::phrase_parse(itr2, end2, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))

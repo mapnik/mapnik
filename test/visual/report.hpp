@@ -36,7 +36,7 @@ namespace visual_tests
 class console_report
 {
 public:
-    console_report() : s(std::clog)
+    console_report(bool _show_duration) : s(std::clog), show_duration(_show_duration)
     {
     }
 
@@ -49,12 +49,13 @@ public:
 
 protected:
     std::ostream & s;
+    bool show_duration;
 };
 
 class console_short_report : public console_report
 {
 public:
-    console_short_report() : console_report()
+    console_short_report(bool _show_duration) : console_report(_show_duration)
     {
     }
 

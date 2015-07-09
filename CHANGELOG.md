@@ -8,42 +8,112 @@ For a complete change history, see the git log.
 
 ## 3.0.0
 
-- Added new and experimental `dot` symbolizer for fast rendering of points
+Released: July 7th, 2015
+
+(Packaged from e6891a0)
+
+#### Summary
+
+The 3.0 release is a major milestone for Mapnik and includes many performance and design improvements. The is the first release to provide text shaping using the harfbuzz library. This harfbuzz support unlocks improved rendering and layer for many new languages, particularly SE Asian scripts. The internal storage for working with images and geometries has been made more flexible, faster, and strongly typed. The python bindings that were previously bundled with Mapnik have now been moved to <https://github.com/mapnik/python-mapnik> and are versioned independently.
+
+#### Notice
+
+ - Mapnik 3.0.0 requires a compiler capable of `std=c++11`.
+ - It is highly recommended you use the `clang++` compiler on both OS X and Linux since it has robust c++11 support lower memory requirements.
+
+##### Major Changes
+
 - Improved support for International Text (now uses harfbuzz library for text shaping)
-- Uses latest c++11 features for better performance (especially map loading)
+
+- Uses latest C++11 features for better performance (especially map loading)
+
 - Expressions everywhere: all symbolizer properties can now be data driven expressions (with the exception of `face-name` and `fontset-name` on the `TextSymbolizer`).
+
+- Rewritten geometry storage based on `std::vector` (#2739)
+  - Separate storage of polygon exterior rings and interior rings to allow for more robust clipping of parts.
+  - Enforces consistent winding order per OGC spec (exterior rings are CCW, interior CW)
+  - Reduced memory consumption for layers with many points
+  - Ability to adapt Mapnik geometries to boost::geometry operations (in a zero-copy way)
+  - Ability to have i/o grammars for json/wkt work on geometries rather than paths for better efficiency and simpler code
+
+- Added new and experimental `dot` symbolizer for fast rendering of points
+
 - New functions supported in expressions: `exp`, `sin`, `cos`, `tan`, `atan`, `abs`.
+
 - New constants supported in expressions: `PI`, `DEG_TO_RAD`, `RAD_TO_DEG`
+
+- Added support for a variety of different grayscale images:
+  - `mapnik.imageType.null`
+  - `mapnik.imageType.rgba8`
+  - `mapnik.imageType.gray8`
+  - `mapnik.imageType.gray8s`
+  - `mapnik.imageType.gray16`
+  - `mapnik.imageType.gray16s`
+  - `mapnik.imageType.gray32`
+  - `mapnik.imageType.gray32s`
+  - `mapnik.imageType.gray32f`
+  - `mapnik.imageType.gray64`
+  - `mapnik.imageType.gray64s`
+  - `mapnik.imageType.gray64f`
+
 - Pattern symbolizers now support SVG input and applying transformations on them dynamically
+
 - Experimental / interface may change: `@variables` can be passed to renderer and evaluated in expressions
+
 - Supports being built with clang++ using `-fvisibility=hidden -flto` for smaller binaries
+
 - Supports being built with Visual Studio 2014 CTP #3
+
 - Shield icons are now pixel snapped for crisp rendering
+
 - `MarkersSymbolizer` now supports `avoid-edges`, `offset`, `geometry-transform`, `simplify` for `line` placement and two new `placement` options called `vertex-last` and `vertex-first` to place a single marker at the end or beginning of a path. Also `clip` is now respected when rendering markers on a LineString 
 geometry.
+
 - `TextSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
+
 - `ShieldSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
+
+- The `text-transform` property of `TextSymbolizer` now supports `reverse` value to flip direction of text.
+
+- The `TextSymbolizer` now supports `font-feature-settings` for advanced control over Opentype font rendering (https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings)
+
 - New GroupSymbolizer for applying multiple symbolizers in a single layout
-
-Released ...
-
-(Packaged from ...)
-
-Summary: TODO
-
-- PostGIS: Added support for rendering 3D and 4D geometries (previously silently skipped) (#44)
 
 - AGG renderer: fixed geometry offsetting to work after smoothing to produce more consistent results (#2202)
 
 - AGG renderer: increased `vertex_dist_epsilon` to ensure nearly coincident points are discarded more readily (#2196)
 
-- GDAL plugin: Added back support for user driven `nodata` on rgb(a) images (#2023)
+- GDAL plugin
+  - Now keeps datasets open for the lifetime of the datasource (rather than per featureset)
+  - Added back support for user driven `nodata` on rgb(a) images (#2023)
+  - Allowed nodata to override alpha band if set on rgba images (#2023)
+  - Added `nodata_tolerance` option to set nearby pixels transparent (has similar effect to the `nearblack` program) (#2023)
+  - At process exit Mapnik core no longer calls `dlclose` on gdal.input (#2716)
 
-- GDAL plugin: Allowed nodata to override alpha band if set on rgba images (#2023)
+- TopoJSON plugin
+  - Now supporting optional `bbox` property on layer
+  - Fixed support for reporting correct `feature.id()`
+  - Now supports `inline` string for passing data from memory
+  - Faster parsing via static initialization of grammars
+  - Fix crash on invalid arc index
 
-- GDAL plugin: Added `nodata_tolerance` option to set nearby pixels transparent (has similar effect to the `nearblack` program) (#2023)
+- GeoJSON plugin
+  - Now supporting optional `bbox` property on layer
+  - Fixed support for reporting correct `feature.id()`
+  - Now supports `inline` string for passing data from memory
+  - Faster parsing via static initialization of grammars
 
-- Added support for web fonts: .woff format (#2113)
+- SQLite plugin
+  - Fixed support for handling all column types
+
+- CSV Plugin
+  - Added the ability to pass an `extent` in options
+
+- PostGIS plugin
+  - Added Async support to  - https://github.com/mapnik/mapnik/wiki/PostGIS-Async
+  - Added support for rendering 3D and 4D geometries (previously silently skipped) (#44)
+
+- Added support for web fonts: `.woff` format (#2113)
 
 - Added missing support for `geometry-transform` in `line-pattern` and `polygon-pattern` symbolizers (#2065)
 
@@ -51,11 +121,9 @@ Summary: TODO
 
 - Upgraded unifont to `unifont-6.3.20131020`
 
-- CSV Plugin: added the ability to pass an `extent` in options
-
 - Fixed crash when rendering to cairo context from python (#2031)
 
-- Moved `label-position-tolerance` from unsigned type to double
+- Moved `label-position-tolerance` from `unsigned` type to `double`
 
 - Added support for more seamless blurring by rendering to a larger internal image to avoid edge effects (#1478)
 
@@ -66,8 +134,6 @@ Summary: TODO
 - Added single color argument support to `colorize-alpha` to allow colorizing alpha with one color.
 
 - Added `color-to-alpha` `image-filter` to allow for applying alpha in proportion to color similiarity (#2023)
-
-- Added Async support to PostGIS plugin - https://github.com/mapnik/mapnik/wiki/PostGIS-Async
 
 - Fixed alpha handling bug with `comp-op:dst-over` (#1995)
 
@@ -132,6 +198,9 @@ are not set. (#1966)
 - Added `webp` image encoding and decoding support (#1955)
 
 - Added `scale-hsla` image-filter that allows scaling colors in HSL color space. RGB is converted to HSL (hue-saturation-lightness) and then each value (and the original alpha value) is stretched based on the specified scaling values. An example syntax is `scale-hsla(0,1,0,1,0,1,0,1)` which means no change because the full range will be kept (0 for lowest, 1 for highest). Other examples are: 1) `scale-hsla(0,0,0,1,0,1,0,1)` which would force all colors to be red in hue in the same way `scale-hsla(1,1,0,1,0,1,0,1)` would, 2) `scale-hsla(0,1,1,1,0,1,0,1)` which would cause all colors to become fully saturated, 3) `scale-hsla(0,1,1,1,0,1,.5,1)` which would force no colors to be any more transparent than half, and 4) `scale-hsla(0,1,1,1,0,1,0,.5)` which would force all colors to be at least half transparent. (#1954)
+
+- The `shapeindex` tool now works correctly with point 3d geometry types
+
 
 ## 2.2.0
 

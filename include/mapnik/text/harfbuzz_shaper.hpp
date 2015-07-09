@@ -28,7 +28,9 @@
 #include <mapnik/text/text_line.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
+#include <mapnik/text/itemizer.hpp>
 #include <mapnik/safe_cast.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // stl
 #include <list>
@@ -37,6 +39,9 @@
 // harfbuzz
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
+
+// icu
+#include <unicode/uscript.h>
 
 namespace mapnik
 {
