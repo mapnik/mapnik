@@ -129,7 +129,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     {
         text_layout const& layout = *layout_ptr;
         rotation const& orientation = layout.orientation();
-        double angle = -asin(orientation.sin);
+        double angle = (orientation.sin > 0 )? -acos(orientation.cos) : acos(orientation.cos);
         // Find text origin.
         pixel_position layout_center = pos + layout.displacement();
 
