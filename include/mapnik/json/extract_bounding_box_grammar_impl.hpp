@@ -78,6 +78,8 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
                                        |
                                        coords[_b = _1]
                                        |
+                                       json.string_
+                                       |
                                        char_))][push_box(_r1, _r2, _b, _1)]
         ;
 
