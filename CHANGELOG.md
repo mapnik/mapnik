@@ -6,6 +6,10 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Future
+
+- Fixed parsing of GeoJSON when properties contained `{}` (#2964)
+
 ## 3.0.0
 
 Released: July 7th, 2015
