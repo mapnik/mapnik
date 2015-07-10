@@ -35,16 +35,11 @@ TEST_CASE("geojson") {
 
 SECTION("json feature cache-feature=\"true\"")
 {
-    // check the GeoJSON datasource can be loaded
-    const std::vector<std::string> plugin_names =
-        mapnik::datasource_cache::instance().plugin_names();
-    const bool have_csv_plugin =
-        std::find(plugin_names.begin(), plugin_names.end(), "geojson") != plugin_names.end();
     // Create datasource
     mapnik::parameters params;
     params["type"] = "geojson";
     params["file"] = "./test/data/json/feature.json";
-    params["cache-features"] = false;
+    params["cache-features"] = true;
     auto ds = mapnik::datasource_cache::instance().create(params);
     REQUIRE(bool(ds));
     auto fields = ds->get_descriptor().get_descriptors();
