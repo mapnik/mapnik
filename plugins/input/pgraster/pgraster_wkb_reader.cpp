@@ -192,10 +192,14 @@ void read_data_band(mapnik::raster_ptr raster,
   raster->premultiplied_alpha_ = true;
 
   float* data = (float*)image.getBytes();
-  double val;
   double nodataval;
-  nodataval = reader(); // nodata value, need to read anyway
-  if ( hasnodata ) raster->set_nodata(nodataval);
+  double val = reader(); // read nodata value, whether we use it or not (here, we don't)
+  
+  if ( hasnodata ) {
+    raster->set_nodata(nodataval);
+    nodataval = val;
+  }
+
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
       val = reader();
